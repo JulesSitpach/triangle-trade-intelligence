@@ -1,0 +1,758 @@
+{
+  "nav": {
+    "brandName": "Triangle Intelligence",
+    "version": "PRO v2.1",
+    "dashboard": "Tablero",
+    "pages": "Páginas",
+    "apiTest": "Prueba API",
+    "startAnalysis": "Iniciar Análisis",
+    "commandCenter": "Centro de Comando",
+    "systemOverview": "Resumen del Sistema",
+    "businessFoundation": "Fundación Empresarial",
+    "companyIntelligence": "Inteligencia Empresarial",
+    "productClassification": "Clasificación de Productos",
+    "hsCodeMapping": "Mapeo de Códigos HS",
+    "triangleRouting": "Enrutamiento Triangular",
+    "optimizationEngine": "Motor de Optimización",
+    "hindsightAnalysis": "Análisis Retrospectivo",
+    "patternIntelligence": "Inteligencia de Patrones",
+    "marketAlerts": "Alertas del Mercado",
+    "liveMonitoring": "Monitoreo en Vivo",
+    "home": "Inicio",
+    "about": "Acerca de"
+  },
+  "actions": {
+    "next": "Siguiente",
+    "back": "Atrás",
+    "save": "Guardar",
+    "continue": "Continuar",
+    "calculate": "Calcular",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "send": "Enviar",
+    "reset": "Restablecer",
+    "getStarted": "Comenzar"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "error": "Error ocurrido",
+    "success": "Éxito",
+    "connected": "Conectado",
+    "processing": "Procesando...",
+    "searching": "Buscando...",
+    "operational": "Operacional",
+    "active": "Activo",
+    "ready": "Listo"
+  },
+  "platform": {
+    "name": "Triangle Intelligence",
+    "tagline": "Inteligencia Comercial USMCA Canadá-México"
+  },
+  "brand": {
+    "title": "Triangle Intelligence",
+    "subtitle": "Plataforma Profesional"
+  },
+  "systemStatus": {
+    "title": "Estado del Sistema",
+    "databaseConnected": "Base de Datos Conectada",
+    "apisOperational": "APIs Operacionales",
+    "intelligenceActive": "Inteligencia: Activa"
+  },
+  "foundation": {
+    "title": "Inteligencia Fundamental Empresarial",
+    "subtitle": "Complete su perfil para desbloquear optimización de $100K-$300K+",
+    "businessProfile": "Perfil de Inteligencia Empresarial",
+    "businessProfileDesc": "Clasificación empresarial y análisis de mercado empresarial",
+    "companyName": "Nombre de la Empresa",
+    "companyPlaceholder": "Nombre de su empresa u organización",
+    "industry": "Clasificación Industrial",
+    "loadingIndustries": "Cargando base de datos de industrias...",
+    "selectIndustry": "Seleccione su industria principal",
+    "otherIndustry": "Otro (especificar abajo)",
+    "specifyIndustry": "Especifique su clasificación industrial",
+    "businessLocation": "Ubicación Empresarial",
+    "zipCodePlaceholder": "Código Postal (ej., 90210, M6H 1A1)",
+    "zipCodeHelp": "Usado para proximidad portuaria y análisis comercial regional",
+    "primarySupplierCountry": "País Proveedor Principal",
+    "loadingCountries": "Cargando inteligencia de países...",
+    "selectSupplierCountry": "Seleccione país proveedor principal",
+    "annualImportVolume": "Volumen Anual de Importación",
+    "selectImportVolume": "Seleccione volumen anual de importación",
+    "optimizationPriority": "Prioridad de Optimización",
+    "selectOptimizationFocus": "Seleccione enfoque de optimización",
+    "getStarted": "Comenzar",
+    "continue": "Continuar",
+    "processingIntelligence": "Procesando Inteligencia...",
+    "supplyChainConfig": "Configuración de Cadena de Suministro",
+    "supplyChainDesc": "Sourcing geográfico y optimización de flujos comerciales"
+  },
+  "product": {
+    "title": "Inteligencia de Clasificación de Productos",
+    "subtitle": "Mapeo de códigos HS con inteligencia de 597K+ flujos comerciales",
+    "item": "Artículo",
+    "remove": "Eliminar",
+    "productDescription": "Descripción del Producto",
+    "hsCode": "Código HS",
+    "confidence": "% confianza",
+    "addProduct": "+ Agregar Otro Producto",
+    "maxProducts": "Máximo de 10 productos por análisis",
+    "runAnalysis": "🧠 Ejecutar Análisis de Inteligencia",
+    "analyzing": "Analizando...",
+    "continueToRouting": "Continuar al Análisis Triangular → ¡Calcular Ahorros!",
+    "continueToRouteAnalysis": "Continuar al Análisis de Rutas →"
+  },
+  "routing": {
+    "title": "Inteligencia de Análisis de Rutas",
+    "subtitle": "Optimización de enrutamiento triangular USMCA • 597K+ flujos comerciales • Análisis de ahorros en tiempo real",
+    "routeAnalysis": "Análisis de Rutas y Recomendaciones",
+    "databaseIntelligence": "Inteligencia de Base de Datos",
+    "intelligentRouteOptimization": "Optimización inteligente de rutas basada en su perfil empresarial",
+    "annualImpact": "Impacto Anual",
+    "tariffRate": "Tasa Arancelaria",
+    "transitTime": "Tiempo de Tránsito",
+    "complexity": "Complejidad",
+    "continueToImplementation": "Continuar a Implementación →"
+  },
+  "partnership": {
+    "title": "Ecosistema de Socios",
+    "subtitle": "Conéctese con socios estratégicos para enrutamiento triangular",
+    "loading": {
+      "analyzingOpportunities": "Analizando Oportunidades de Alianza USMCA...",
+      "calculating": "Calculando ventajas estratégicas Canadá vs México"
+    },
+    "error": {
+      "completePrevious": "Complete las Páginas Anteriores Primero",
+      "completePreviousDesc": "Por favor complete su análisis de negocio antes de la evaluación de alianzas USMCA.",
+      "startBusinessAnalysis": "Comenzar Análisis de Negocio →"
+    },
+    "crisis": {
+      "urgentAlert": "🚨 URGENTE: AMENAZA COMERCIAL DE TRUMP ACTIVA 🚨",
+      "header": "Comercio con Canadá Bajo Ataque - Obtenga Alternativas Mexicanas AHORA",
+      "subtitle": "⚡ Trump amenaza acuerdos comerciales canadienses • 🇲🇽 Alternativas mexicanas disponibles • 👥 Equipo familiar canadiense-mexicano listo para conectarlo",
+      "partnerConnectionTime": "Tiempo de Conexión con Socios",
+      "revenuePerConnection": "Ingresos por Conexión",
+      "mexicoManufacturingPartners": "Socios Manufactureros Mexicanos"
+    },
+    "metrics": {
+      "dualMarket": "Mercado Dual",
+      "treatyBenefits": "Beneficios del Tratado",
+      "tariffRate": "Tasa Arancelaria"
+    },
+    "expertise": {
+      "crossBorderExpertise": "Experiencia Transfronteriza",
+      "canadianRegulatory": "Excelencia regulatoria canadiense + eficiencia manufacturera mexicana",
+      "dualMarketAdvantage": "Ventaja del Mercado Dual"
+    },
+    "businessProfile": {
+      "title": "Su Perfil de Alianza Empresarial",
+      "analysisConfidence": "confianza de análisis",
+      "companyProfile": "Perfil de Empresa",
+      "industry": "industria",
+      "importVolume": "Volumen de Importación",
+      "annualImportCapacity": "Capacidad anual de importación",
+      "productPortfolio": "Cartera de Productos",
+      "productsAnalyzed": "Productos analizados",
+      "optimizationFocus": "Enfoque de Optimización",
+      "businessPriority": "Prioridad empresarial"
+    },
+    "partnershipOverview": {
+      "title": "Análisis de Valor de Alianza",
+      "crossBorderStrategy": "Estrategia Transfronteriza",
+      "canadaOpportunities": "Oportunidades en Canadá",
+      "mexicoOpportunities": "Oportunidades en México",
+      "combinedStrategy": "Estrategia Combinada",
+      "totalPartnershipValue": "Valor total de alianza"
+    },
+    "routeComparison": {
+      "title": "Análisis Estratégico Canadá vs México",
+      "partnershipIntelligence": "Inteligencia de Alianzas",
+      "canadaPartnershipRoute": "Ruta de Alianza con Canadá",
+      "mexicoPartnershipRoute": "Ruta de Alianza con México",
+      "setupTimeline": "Cronograma de Configuración",
+      "complexity": "Complejidad",
+      "annualSavings": "Ahorros Anuales",
+      "complianceRate": "Tasa de Cumplimiento",
+      "canadaAdvantages": "🇨🇦 Ventajas de Canadá",
+      "mexicoAdvantages": "🇲🇽 Ventajas de México",
+      "partnershipBenefits": "Beneficios de Alianza",
+      "marketAccess": "Acceso al Mercado:",
+      "recommendedForBusiness": "🏆 RECOMENDADO PARA SU NEGOCIO",
+      "dualMarketStrategy": "Estrategia de Mercado Dual",
+      "combinedAdvantage": "Ventaja combinada Canadá + México",
+      "crossBorderSynergies": "Sinergias Transfronterizas",
+      "combinedValue": "Valor Combinado",
+      "optimalForHighVolume": "🌟 ÓPTIMO PARA OPERACIONES DE ALTO VOLUMEN"
+    },
+    "selectionSummary": {
+      "selectedStrategy": "Estrategia Seleccionada:",
+      "canadaRoute": " Ruta de alianza con Canadá para excelencia regulatoria y acceso a mercados premium",
+      "mexicoRoute": " Ruta de alianza con México para eficiencia de costos e implementación rápida",
+      "dualRoute": " Estrategia de mercado dual aprovechando ventajas canadienses y mexicanas"
+    },
+    "implementation": {
+      "title": "Estrategia de Implementación de Alianza",
+      "readyForLaunch": "Listo para Lanzamiento",
+      "annualPartnershipValue": "Valor Anual de Alianza",
+      "implementationTimeline": "Cronograma de Implementación",
+      "usmcaTariffRate": "Tasa Arancelaria USMCA",
+      "successRate": "Tasa de Éxito",
+      "strategyConfirmed": "¡Estrategia de Alianza Confirmada!",
+      "optimizedFor": "estrategia de alianza está optimizada para",
+      "businessesProvenSuccess": "empresas con éxito probado en nuestra red."
+    },
+    "leadGeneration": {
+      "urgent": "🚨 URGENTE: Conéctese con Socios Manufactureros Mexicanos AHORA",
+      "crisisTimer": "⏰ Amenazas comerciales de Trump escalando diariamente",
+      "emergencyMatching": "Emparejamiento de Socios de Emergencia (GRATIS)",
+      "partnerConnections": "Conexiones de socios en 24-48hrs",
+      "verifiedManufacturers": "100+ manufactureros mexicanos verificados",
+      "annualSavings": "$100K-$300K+ ahorros anuales"
+    },
+    "form": {
+      "companyNameRequired": "Nombre de la Empresa *",
+      "yourNameRequired": "Su Nombre *",
+      "emailRequired": "Dirección de Correo *",
+      "phoneRequired": "Número de Teléfono *",
+      "selectIndustry": "Seleccione Su Industria *",
+      "annualImportVolume": "Volumen Anual de Importación *",
+      "submitButton": "🚨 OBTENER SOCIOS MEXICANOS AHORA (GRATIS) 🚨",
+      "industries": {
+        "energySolar": "🔋 Energía y Solar (ALTA DEMANDA)",
+        "automotive": "🚗 Partes Automotrices",
+        "electronics": "💻 Electrónicos",
+        "construction": "🏗️ Materiales de Construcción",
+        "medical": "🏥 Dispositivos Médicos",
+        "textiles": "🧵 Textiles y Ropa",
+        "other": "📦 Otro (especificar en llamada)"
+      },
+      "volumes": {
+        "1to5M": "$1M-$5M",
+        "5to10M": "$5M-$10M",
+        "10MPlus": "$10M+ (PRIORIDAD)"
+      }
+    },
+    "familyTeam": {
+      "title": "🇨🇦+🇲🇽 Su Equipo Familiar Canadiense-Mexicano",
+      "description": "Somos una familia canadiense-mexicana viviendo en México con 15+ años conectando empresas norteamericanas con socios manufactureros mexicanos. Cuando Trump amenaza el comercio, entregamos alternativas.",
+      "canadianRegulatory": "Experiencia Regulatoria Canadiense",
+      "canadianDesc": "Conocimiento profundo de regulaciones de importación/exportación canadienses, cumplimiento CBSA y beneficios del tratado USMCA",
+      "mexicanNetworks": "Redes Manufactureras Mexicanas",
+      "mexicanDesc": "15+ años construyendo relaciones con instalaciones certificadas IMMEX, proveedores logísticos y especialistas fronterizos",
+      "usmcaSpecialists": "Especialistas en Enrutamiento Triangular USMCA",
+      "usmcaDesc": "Ayudamos a 100+ empresas a evitar aranceles de China/India mediante alianzas manufactureras mexicanas",
+      "crisisResponse": "Experiencia en Respuesta a Crisis",
+      "crisisDesc": "Ayudamos exitosamente a empresas durante aranceles Sección 232 del acero, disrupciones COVID y guerras comerciales con China",
+      "recentSuccessStories": "Historias de Éxito Recientes:",
+      "detroitAuto": "Detroit Auto Parts Inc.",
+      "detroitDetails": "Ahorró $2.4M anualmente | Transición China → México en 45 días",
+      "phoenixSolar": "Phoenix Solar Systems",
+      "phoenixDetails": "Evitó bancarrota | $9M ahorros arancelarios mediante ensamble mexicano",
+      "vancouverElectronics": "Vancouver Electronics Ltd.",
+      "vancouverDetails": "$1.8M ahorrado | Mantuvo acceso mercado canadiense vía USMCA",
+      "successRate": "Tasa de Éxito",
+      "averageSetupTime": "Tiempo Promedio de Configuración",
+      "averageAnnualSavings": "Ahorros Anuales Promedio",
+      "accessPartnershipHub": "🔗 Acceder Panel de Alianzas →"
+    },
+    "navigation": {
+      "backToRouteAnalysis": "← Volver a Análisis de Rutas",
+      "continueToHindsight": "Continuar a Análisis Retrospectivo →",
+      "skipPartnershipHub": "Saltar Centro de Alianzas"
+    },
+    "messages": {
+      "dataStored": "¡Datos guardados! Te conectaremos con socios mexicanos en 24-48 horas.",
+      "selectRouteFirst": "o seleccione una ruta de alianza arriba"
+    }
+  },
+  "hindsight": {
+    "title": "Análisis de Inteligencia Retrospectiva",
+    "subtitle": "Reevaluación completa del viaje de Marcus Sterling • Extracción de patrones • Configuración de alertas inteligentes",
+    "patternsExtracted": "Patrones Extraídos",
+    "optimizations": "Optimizaciones",
+    "alertsConfigured": "Alertas Configuradas",
+    "confidence": "Confianza"
+  },
+  "alerts": {
+    "title": "Alertas Inteligentes y Monitoreo de Patrones",
+    "subtitle": "Alertas basadas en patrones • Aprendizaje institucional • Inteligencia comunitaria • Optimización en tiempo real",
+    "addAlert": "+ Agregar Alerta",
+    "configureAlert": "Configurar Nueva Alerta",
+    "alertType": "Tipo de Alerta",
+    "priorityLevel": "Nivel de Prioridad",
+    "monitoringFrequency": "Frecuencia de Monitoreo",
+    "triggerCondition": "Condición de Activación",
+    "describeTrigger": "Describe qué debería activar esta alerta...",
+    "notificationMethod": "Método de Notificación"
+  },
+  "common": {
+    "next": "Siguiente",
+    "back": "Atrás",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "send": "Enviar",
+    "searching": "Buscando...",
+    "processing": "Procesando...",
+    "getStarted": "Comenzar"
+  },
+  "chat": {
+    "introMessage": "¡Hola! Soy Marcus Sterling, tu asistente de Triangle Intelligence. Puedo ayudar con códigos HS, tasas arancelarias, enrutamiento triangular y optimización de la cadena de suministro.",
+    "introMessageGlobal": "¡Hola! Soy Marcus Sterling, tu asistente de Triangle Intelligence. Puedo ayudar con códigos HS, tasas arancelarias, enrutamiento triangular, optimización de la cadena de suministro e inteligencia de mercado.",
+    "errorProcessing": "No pude procesar esa solicitud. Por favor intente de nuevo.",
+    "errorTrouble": "Lo siento, estoy teniendo problemas ahora mismo. Por favor intente de nuevo.",
+    "errorNotFound": "No pude encontrar información sobre eso. Intenta preguntar sobre códigos HS, tasas arancelarias o enrutamiento triangular.",
+    "needHelp": "🧠 ¿Necesita ayuda de Triangle Intelligence?",
+    "services": "códigos HS, aranceles, enrutamiento, optimización",
+    "askMarcus": "¡Pregúntale a Marcus Sterling!",
+    "header": "Marcus Sterling • Triangle Intelligence",
+    "headerGlobal": "🧠 Marcus Sterling • Triangle Intelligence",
+    "sourceInfo": "Fuente: {{dataSource}} • {{confidence}}% confianza",
+    "followupIndicator": "💡 Marcus quiere ayudarte más",
+    "useCode": "Usar Este Código",
+    "copyCode": "📋 Copiar Código",
+    "copied": "✅ ¡Copiado {{code}} al portapapeles!",
+    "placeholder": "Pregúntale a Marcus sobre códigos HS, aranceles, enrutamiento...",
+    "placeholderGlobal": "ej., código HS para auriculares, tasas arancelarias de China, enrutamiento triangular...",
+    "intelligenceInsights": "📊 Perspectivas de Inteligencia de Marcus",
+    "searchingDatabase": "🔍 Buscando en base de datos...",
+    "searching": "Buscando...",
+    "send": "Enviar",
+    "close": "×",
+    "floating": {
+      "tooltip": "Marcus Sterling - Triangle Intelligence"
+    },
+    "trendingQuestions": "{{totalQuestions}} preguntas esta semana • Tendencias principales: {{trends}}"
+  },
+  "executive": {
+    "annualSavingsOpportunity": "Oportunidad de Ahorro Anual",
+    "tariffReduction": "Reducción Arancelaria",
+    "paybackMonths": "Meses de Recuperación",
+    "firstYearRoi": "ROI del Primer Año",
+    "recommendedStrategy": "ESTRATEGIA RECOMENDADA",
+    "optimalBalance": "Balance óptimo de ahorros, riesgo y complejidad de implementación",
+    "overview": "Resumen Ejecutivo",
+    "financialAnalysis": "Análisis Financiero",
+    "executionPlan": "Plan de Ejecución",
+    "riskAssessment": "Evaluación de Riesgos",
+    "strategicRouteAnalysis": "Análisis de Ruta Estratégica",
+    "optimalStrategy": "ESTRATEGIA ÓPTIMA",
+    "strategicAdvantages": "Ventajas Estratégicas:"
+  },
+  "form": {
+    "label": {
+      "companyName": "Nombre de la Empresa",
+      "businessType": "Tipo de Negocio",
+      "importVolume": "Volumen Anual de Importación",
+      "zipCode": "Ubicación Empresarial",
+      "email": "Dirección de Correo",
+      "phone": "Número de Teléfono",
+      "jobTitle": "Título del Trabajo",
+      "fullName": "Nombre Completo"
+    },
+    "placeholder": {
+      "companyName": "Nombre de su empresa u organización",
+      "zipCode": "Código Postal (ej., 90210, M6H 1A1)",
+      "email": "tu@empresa.com",
+      "phone": "+1 (555) 123-4567",
+      "jobTitle": "VP de Operaciones",
+      "fullName": "Juan Pérez"
+    },
+    "error": {
+      "companyName": "Por favor ingrese un nombre de empresa válido",
+      "email": "Por favor ingrese una dirección de correo válida",
+      "phone": "Por favor ingrese un número de teléfono válido",
+      "zipCode": "Por favor ingrese un código postal válido"
+    }
+  },
+  "api": {
+    "errors": {
+      "methodNotAllowed": "Método no permitido",
+      "validation": {
+        "missingRequiredFields": "Faltan campos requeridos",
+        "missingUserData": "Faltan datos del usuario",
+        "missingCountryOrProduct": "Falta parámetro de país o producto",
+        "missingOriginDestination": "Falta origen o destino",
+        "missingRequiredParameters": "Faltan parámetros requeridos",
+        "productDescriptionRequired": "Se requiere descripción del producto"
+      },
+      "service": {
+        "classificationUnavailable": "Servicio de clasificación temporalmente no disponible",
+        "databaseIntelligenceUnavailable": "Inteligencia de base de datos temporalmente no disponible"
+      },
+      "processing": {
+        "failedToSaveLead": "Error al guardar información de prospecto",
+        "failedToProcessContact": "Error al procesar solicitud de contacto",
+        "failedToGetRoutingOptions": "Error al obtener opciones de enrutamiento"
+      },
+      "database": {
+        "queryFailed": "Consulta de base de datos falló",
+        "connectionFailed": "Conexión de base de datos falló"
+      },
+      "chat": {
+        "generalError": "Lo siento, encontré un error. Por favor intente de nuevo."
+      },
+      "status": {
+        "onlyGetSupported": "Solo se admiten solicitudes GET",
+        "unableToRetrieveStatus": "No se puede recuperar el estado del sistema"
+      }
+    },
+    "success": {
+      "demoRequestReceived": "Solicitud de demostración recibida exitosamente",
+      "leadClaimed": "Prospecto reclamado exitosamente",
+      "alertsIntelligenceGenerated": "Inteligencia de alertas generada exitosamente",
+      "specialistMatchingCompleted": "Emparejamiento de especialistas completado",
+      "partnershipInitiated": "Iniciación de sociedad exitosa",
+      "hsCodeLearningRecorded": "Selección de código HS registrada para aprendizaje institucional",
+      "canadaMexicoAdvantageCalculated": "Ventaja USMCA Canadá-México calculada con experiencia familiar",
+      "goldmineFoundationProcessed": "Fundación procesada con inteligencia GOLDMINE",
+      "institutionalIntelligenceAchieved": "INTELIGENCIA INSTITUCIONAL ALCANZADA - Calidad Máxima"
+    },
+    "guidance": {
+      "completeFoundationAndProduct": "Complete las páginas de Fundación y Producto primero",
+      "tryAgainOrContactSupport": "Por favor intente de nuevo o contacte soporte para clasificación manual",
+      "contactEnterpriseSupport": "Por favor intente de nuevo o contáctenos directamente en enterprise@triangleintelligence.com",
+      "unableToLoadDropdownOptions": "No se pueden cargar opciones desplegables. Por favor intente más tarde."
+    },
+    "test": {
+      "claudeApiWorking": "API de Claude está funcionando correctamente",
+      "integrationTestCompleted": "Prueba de integración API completada",
+      "pageFlowTestCompleted": "Prueba de flujo de páginas completada"
+    }
+  },
+  "lib": {
+    "security": {
+      "error": {
+        "rate_limit": "Demasiadas solicitudes",
+        "invalid_input": "Entrada inválida",
+        "internal": "Error interno de seguridad"
+      },
+      "message": {
+        "rate_limit_exceeded": "Límite de velocidad excedido. Por favor intente más tarde.",
+        "validation_failed": "Validación de solicitud falló",
+        "validation_error": "La solicitud no pudo ser validada"
+      }
+    },
+    "environment": {
+      "error": {
+        "missing_server_vars": "Faltan variables de entorno del servidor requeridas: {{missing}}",
+        "missing_var": "Falta variable de entorno requerida: {{key}}",
+        "security_violation": "VIOLACIÓN DE SEGURIDAD: Claves sensibles expuestas al cliente: {{exposedKeys}}"
+      }
+    },
+    "classifier": {
+      "error": {
+        "no_description": "No se proporcionó descripción del producto",
+        "description_required": "Se requiere descripción del producto para clasificación"
+      },
+      "message": {
+        "default_fallback": "No hay coincidencia clara de industria - usando la categoría más grande por defecto",
+        "high_confidence": "Clasificado como {{bestMatch}} con alta confianza",
+        "fallback_improve": "Clasificado como {{bestMatch}} (alternativa - puede mejorar esto)",
+        "help_improve": "Clasificado como {{industry}} (alternativa) - por favor ayúdanos a mejorar",
+        "thank_you": "¡Gracias por mejorar nuestra precisión de clasificación!",
+        "manual_review": "La clasificación requiere revisión manual",
+        "manual_review_detailed": "La clasificación requiere revisión manual - producto no en categorías estándar"
+      }
+    },
+    "alerts": {
+      "title": {
+        "india_doubled": "¡Aranceles de India Se Duplicaron de la Noche a la Mañana!",
+        "china_pause": "Aranceles de China en Pausa de 90 Días",
+        "semiconductor_threat": "Aranceles de Semiconductores Pueden Llegar al 100%"
+      },
+      "message": {
+        "india_tariff_jump": "¡Los aranceles India→USA saltaron del 25% al 50%. El enrutamiento triangular ahora ahorra 50%!",
+        "china_uncertainty": "La tasa actual del 30% podría cambiar dramáticamente cuando termine la pausa",
+        "semiconductor_deadline": "A menos que haya compromiso de producción en EE.UU. para {{deadline}}"
+      },
+      "action": {
+        "switch_usmca": "Cambiar al enrutamiento triangular USMCA inmediatamente",
+        "lock_usmca": "Asegurar enrutamiento triangular USMCA ahora",
+        "mexico_assembly": "Establecer operación de ensamblaje en México"
+      },
+      "benefit": {
+        "save_percentage": "Ahorrar 50% vs nuevas tasas",
+        "insulate": "Aislar de futuros cambios",
+        "usmca_zero": "Calificación USMCA = arancel 0%"
+      }
+    },
+    "intelligence": {
+      "message": {
+        "pattern_improvement": "Este usuario hizo la plataforma {{patternImprovement}}% más inteligente para reconocimiento de patrones",
+        "accuracy_improvement": "Todos los usuarios futuros ahora obtienen {{accuracyImprovement}}% más predicciones precisas"
+      },
+      "status": {
+        "foundation_building": "Construyendo red de fundación",
+        "effects_emerging": "Efectos de red emergentes",
+        "strong_effects": "Efectos de red fuertes activos",
+        "powerful_effects": "Efectos de red poderosos",
+        "dominant_effects": "Efectos de red dominantes"
+      }
+    },
+    "progress": {
+      "foundation": {
+        "profile_established": "Perfil de empresa {{businessType}} establecido",
+        "risk_detected": "Tolerancia al riesgo: prioridad {{timelinePriority}} detectada",
+        "supplier_analyzed": "País proveedor: {{primarySupplierCountry}} analizado",
+        "similar_companies": "{{similarCompanies}} empresas similares encontradas en base de datos"
+      },
+      "product": {
+        "building_profile": "Construyendo sobre perfil {{businessType}} de Fundación",
+        "enhanced_classification": "Clasificación de productos mejorada con tolerancia al riesgo: {{riskTolerance}}"
+      },
+      "routing": {
+        "complete_analysis": "Perfil completo de empresa + producto permite análisis óptimo de enrutamiento",
+        "routing_viability": "Viabilidad de enrutamiento triangular: {{viability}}"
+      },
+      "hindsight": {
+        "journey_complete": "Análisis completo de viaje permite calidad de inteligencia 9.2/10.0",
+        "pattern_ready": "Extracción de patrones lista para memoria institucional"
+      },
+      "alerts": {
+        "maximum_achieved": "INTELIGENCIA MÁXIMA ALCANZADA: calidad 10.0/10.0",
+        "pattern_contribution": "Listo para contribución de patrones institucionales"
+      }
+    },
+    "shipping": {
+      "route": {
+        "mexico_description": "Enviar bienes a México para procesamiento/ensamblaje final, luego a EE.UU. bajo USMCA",
+        "canada_description": "Enrutar a través de Canadá para procesamiento de valor agregado bajo calificación USMCA"
+      },
+      "modifier": {
+        "specialized_handling": "con manejo especializado",
+        "heavy_freight": "vía transportistas de carga pesada"
+      },
+      "complexity": {
+        "special_handling": "Requisitos de manejo especial",
+        "oversized": "Carga sobredimensionada",
+        "hazardous": "Materiales peligrosos",
+        "heavy_weight": "Envío de peso pesado",
+        "standard": "Requisitos de envío estándar"
+      }
+    },
+    "ml": {
+      "message": {
+        "thank_you_improvement": "¡Gracias por mejorar nuestra precisión de clasificación!"
+      }
+    }
+  },
+  "page": {
+    "foundation": {
+      "meta": {
+        "title": "Fundación de Inteligencia Empresarial - Plataforma Triangle Intelligence",
+        "description": "Fundación de inteligencia comercial de grado empresarial con 597K+ registros de flujos comerciales"
+      }
+    },
+    "product": {
+      "meta": {
+        "title": "Inteligencia de Clasificación de Productos - Plataforma Triangle Intelligence",
+        "description": "Mapeo de códigos HS de grado empresarial con inteligencia de 597K+ flujos comerciales"
+      },
+      "error": {
+        "missingFoundation": "Complete Primero el Análisis de Fundación",
+        "missingFoundationDesc": "Por favor complete su perfil de inteligencia empresarial antes de proceder a la clasificación de productos.",
+        "goToFoundation": "Ir al Análisis de Fundación →"
+      }
+    },
+    "routing": {
+      "meta": {
+        "title": "Inteligencia de Análisis de Rutas - Plataforma Triangle Intelligence",
+        "description": "Optimización de rutas empresarial con análisis de 597K+ flujos comerciales e inteligencia USMCA"
+      },
+      "error": {
+        "missingPages": "Complete Primero las Páginas Anteriores",
+        "missingPagesDesc": "El análisis de rutas requiere completar las páginas de Fundación y Clasificación de Productos",
+        "startFoundation": "Iniciar Análisis de Fundación →"
+      }
+    },
+    "hindsight": {
+      "meta": {
+        "title": "Inteligencia Retrospectiva - Plataforma Triangle Intelligence",
+        "description": "Reevaluación completa del viaje de Marcus Sterling y configuración de alertas inteligentes"
+      },
+      "error": {
+        "incompleteJourney": "Se Requiere Viaje Completo",
+        "incompleteJourneyDesc": "El análisis retrospectivo requiere datos completos de viaje de todas las páginas anteriores.",
+        "startJourney": "Iniciar Viaje Completo →"
+      }
+    },
+    "alerts": {
+      "meta": {
+        "title": "Alertas Inteligentes y Monitoreo de Patrones - Plataforma Triangle Intelligence",
+        "description": "Alertas inteligentes basadas en patrones con aprendizaje institucional e inteligencia comunitaria"
+      }
+    },
+    "partnership": {
+      "meta": {
+        "title": "Ecosistema de Socios - Plataforma Triangle Intelligence",
+        "description": "Conéctese con socios estratégicos para enrutamiento triangular USMCA y manufactura"
+      }
+    },
+    "index": {
+      "meta": {
+        "title": "Triangle Intelligence | Reduzca Aranceles de Importación 15-25%",
+        "description": "Enrute importaciones a través de México y Canadá. Evite aranceles chinos. Ahorros reales de datos comerciales reales."
+      },
+      "hero": {
+        "title": "Reduzca Aranceles de Importación 15-25%",
+        "description": "Enrute sus importaciones a través de México y Canadá en lugar de directamente desde Asia. Use el tratado USMCA para aranceles del 0%. Deje de pagar 25%+ en productos chinos.",
+        "averageSavings": "Ahorros Anuales Promedio",
+        "successRate": "Tasa de Éxito",
+        "usmcaTariff": "Tasa Arancelaria USMCA",
+        "daysToImplement": "Días para Implementar",
+        "startFreeAnalysis": "Iniciar Análisis Gratuito",
+        "seePricing": "Ver Precios"
+      },
+      "crisis": {
+        "urgent": "🚨 URGENTE",
+        "trumpThreat": "Trump amenaza acuerdos comerciales de Canadá - Obtenga alternativas mexicanas antes de que sea demasiado tarde",
+        "emergencyPartners": "Socios de Emergencia →"
+      }
+    },
+    "dashboard": {
+      "meta": {
+        "title": "Tablero - Triangle Intelligence"
+      },
+      "header": {
+        "title": "Su Centro de Comando de Inteligencia",
+        "subtitle": "Seguimiento de ahorros en vivo • Monitoreo de mercado • Inteligencia de red"
+      },
+      "cards": {
+        "businessSetup": {
+          "title": "💼 Configuración Empresarial",
+          "description": "Configure su perfil de empresa y características de importación"
+        },
+        "productOptimization": {
+          "title": "📦 Optimización de Productos",
+          "description": "Mapeo inteligente de productos para máximos ahorros arancelarios"
+        },
+        "triangleAnalysis": {
+          "title": "🔺 Análisis Triangular",
+          "description": "Descubra su estrategia óptima de enrutamiento USMCA"
+        }
+      }
+    },
+    "about": {
+      "meta": {
+        "title": "Acerca de | Triangle Intelligence",
+        "description": "Aprenda sobre Triangle Intelligence - ayudando a las empresas a ahorrar dinero en importaciones a través del enrutamiento triangular México-Canadá."
+      },
+      "sections": {
+        "whoWeAre": {
+          "title": "Quiénes Somos",
+          "description": "Ayudamos a las empresas a ahorrar dinero en importaciones enrutando a través de México y Canadá en lugar de pagar altos aranceles desde Asia."
+        },
+        "whatWeDo": "Lo Que Hacemos",
+        "whyItWorks": "Por Qué Funciona el Enrutamiento Triangular",
+        "ourBackground": "Nuestro Antecedente",
+        "ourValues": "Nuestros Valores"
+      },
+      "values": {
+        "transparency": "Transparencia",
+        "realResults": "Resultados Reales",
+        "simpleSolutions": "Soluciones Simples",
+        "longTermPartnerships": "Asociaciones a Largo Plazo"
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Contacto Empresarial - Triangle Intelligence",
+        "description": "Contacte Triangle Intelligence para soluciones de optimización USMCA empresarial"
+      },
+      "form": {
+        "submitting": "Enviando Solicitud...",
+        "submitButton": "Solicitar Consulta Empresarial"
+      }
+    },
+    "pricing": {
+      "meta": {
+        "title": "Precios | Triangle Intelligence",
+        "description": "Precios simples y transparentes para análisis de enrutamiento triangular. Comience gratis o elija un plan que se adapte a su volumen de importación."
+      },
+      "header": {
+        "title": "Precios Simples y Transparentes",
+        "subtitle": "Elija el plan que se adapte a su volumen de importación. Comience gratis, actualice cuando necesite más."
+      },
+      "billing": {
+        "monthly": "Mensual",
+        "annual": "Anual",
+        "save": "(Ahorre 17%)"
+      },
+      "faq": {
+        "title": "Preguntas Comunes",
+        "quickSavings": "¿Qué tan rápido veré ahorros?",
+        "legalRouting": "¿Es legal el enrutamiento triangular?",
+        "cancelAnytime": "¿Puedo cancelar en cualquier momento?",
+        "implementationHelp": "¿Ayudan con la implementación?"
+      }
+    },
+    "platform": {
+      "meta": {
+        "title": "Cómo Funciona | Plataforma Triangle Intelligence",
+        "description": "Vea cómo Triangle Intelligence ayuda a las empresas a ahorrar 15-25% en importaciones a través del enrutamiento triangular México-Canadá."
+      },
+      "header": {
+        "title": "Cómo Funciona el Enrutamiento Triangular",
+        "subtitle": "Nuestra plataforma le ayuda a ahorrar dinero enrutando importaciones a través de México y Canadá en lugar de directamente desde Asia."
+      },
+      "steps": {
+        "title": "Tres Pasos Simples"
+      }
+    },
+    "signup": {
+      "meta": {
+        "title": "Únase a Triangle Intelligence - Plataforma de Optimización USMCA",
+        "description": "Comience a ahorrar $200K+ anualmente con la optimización de rutas USMCA de Triangle Intelligence"
+      },
+      "header": {
+        "title": "Únase a 240+ Empresas Usando Triangle Intelligence",
+        "subtitle": "Comience a optimizar sus rutas USMCA y ahorre $200K+ anualmente con inteligencia institucional"
+      },
+      "form": {
+        "businessEmail": "Correo Empresarial",
+        "selectIndustry": "Seleccionar Industria",
+        "selectVolume": "Seleccionar Volumen"
+      }
+    },
+    "apiTest": {
+      "meta": {
+        "title": "Tablero de Pruebas API - Triangle Intelligence"
+      },
+      "header": {
+        "title": "🧪 Tablero de Pruebas API",
+        "subtitle": "Pruebe las APIs de Triangle Intelligence y vea si están haciendo llamadas externas reales"
+      },
+      "sections": {
+        "systemStatus": "1. Estado del Sistema",
+        "hsCodeTest": "2. Prueba de API de Código HS",
+        "routingTest": "3. Prueba de API de Enrutamiento"
+      },
+      "buttons": {
+        "checkApiConfig": "Verificar Configuración de API",
+        "testHsCodeLookup": "Probar Búsqueda de Código HS (API Comtrade)",
+        "testTriangleRouting": "Probar Enrutamiento Triangular (API Shippo)"
+      }
+    }
+  },
+  "metrics": {
+    "tradeRecords": "Registros Comerciales",
+    "tradeValue": "Valor Comercial",
+    "successRate": "Tasa de Éxito",
+    "liveIntelligence": "Inteligencia en Vivo"
+  },
+  "message": {
+    "success": {
+      "foundation_saved": "¡Perfil de empresa guardado exitosamente!",
+      "products_classified": "Productos clasificados con 95% de confianza",
+      "routes_identified": "Rutas triangulares identificadas con ahorros potenciales",
+      "signup_welcome": "¡Bienvenido a Triangle Intelligence!",
+      "marcus_generated": "Reporte de Marcus generado exitosamente"
+    },
+    "error": {
+      "service_unavailable": "Servicio temporalmente no disponible. Por favor intente de nuevo.",
+      "validation_generic": "Por favor verifique su entrada e intente de nuevo.",
+      "network": "Error de red. Por favor verifique su conexión.",
+      "auth_required": "Se requiere autenticación. Por favor inicie sesión."
+    }
+  }
+}

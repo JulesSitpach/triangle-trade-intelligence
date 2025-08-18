@@ -1,0 +1,933 @@
+{
+  "nav": {
+    "brandName": "Triangle Intelligence",
+    "version": "PRO v2.1",
+    "dashboard": "Dashboard",
+    "pages": "Pages",
+    "apiTest": "API Test",
+    "startAnalysis": "Start Analysis",
+    "commandCenter": "Command Center",
+    "systemOverview": "System Overview",
+    "businessFoundation": "Business Foundation",
+    "companyIntelligence": "Company Intelligence",
+    "productClassification": "Product Classification",
+    "hsCodeMapping": "HS Code Mapping",
+    "triangleRouting": "Triangle Routing",
+    "optimizationEngine": "Optimization Engine",
+    "hindsightAnalysis": "Hindsight Analysis",
+    "patternIntelligence": "Pattern Intelligence",
+    "marketAlerts": "Market Alerts",
+    "liveMonitoring": "Live Monitoring",
+    "home": "Home",
+    "about": "About"
+  },
+  "actions": {
+    "next": "Next",
+    "back": "Back",
+    "save": "Save",
+    "continue": "Continue",
+    "calculate": "Calculate",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "send": "Send",
+    "reset": "Reset",
+    "getStarted": "Get Started"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error occurred",
+    "success": "Success",
+    "connected": "Connected",
+    "processing": "Processing...",
+    "searching": "Searching...",
+    "operational": "Operational",
+    "active": "Active",
+    "ready": "Ready"
+  },
+  "platform": {
+    "name": "Triangle Intelligence",
+    "tagline": "Canada-Mexico USMCA Trade Intelligence"
+  },
+  "brand": {
+    "title": "Triangle Intelligence",
+    "subtitle": "Professional Platform"
+  },
+  "systemStatus": {
+    "title": "System Status",
+    "databaseConnected": "Database Connected",
+    "apisOperational": "APIs Operational",
+    "intelligenceActive": "Intelligence: Active"
+  },
+  "foundation": {
+    "title": "Business Intelligence Foundation",
+    "subtitle": "Complete your profile to unlock $100K-$300K+ savings optimization",
+    "businessProfile": "Business Intelligence Profile",
+    "businessProfileDesc": "Enterprise business classification and market analysis",
+    "companyName": "Company Name",
+    "companyPlaceholder": "Your company or organization name",
+    "industry": "Industry Classification",
+    "loadingIndustries": "Loading industry database...",
+    "selectIndustry": "Select your primary industry",
+    "otherIndustry": "Other (specify below)",
+    "specifyIndustry": "Specify your industry classification",
+    "businessLocation": "Business Location",
+    "zipCodePlaceholder": "ZIP/Postal Code (e.g., 90210, M6H 1A1)",
+    "zipCodeHelp": "Used for port proximity and regional trade analysis",
+    "primarySupplierCountry": "Primary Supplier Country",
+    "loadingCountries": "Loading country intelligence...",
+    "selectSupplierCountry": "Select primary supplier country",
+    "annualImportVolume": "Annual Import Volume",
+    "selectImportVolume": "Select annual import volume",
+    "optimizationPriority": "Optimization Priority",
+    "selectOptimizationFocus": "Select optimization focus",
+    "getStarted": "Get Started",
+    "continue": "Continue",
+    "processingIntelligence": "Processing Intelligence...",
+    "supplyChainConfig": "Supply Chain Configuration",
+    "supplyChainDesc": "Geographic sourcing and trade flow optimization",
+    "priority": {
+      "speed": "⚡ Speed - Minimize transit time",
+      "cost": "💰 Cost - Minimize total expenses",
+      "balanced": "⚖️ Balanced - Optimize both factors",
+      "reliability": "🛡️ Reliability - Minimize disruption risk"
+    },
+    "liveIntelligenceAnalysis": "Live Intelligence Analysis",
+    "intelligenceLevel": "Intelligence Level",
+    "annualSavings": "Annual Savings",
+    "geographicIntelligence": "Geographic Intelligence",
+    "routeConfidence": "Route Confidence",
+    "database": "Database",
+    "analysis": "Analysis",
+    "enterpriseIntelligenceAnalytics": "📊 Enterprise Intelligence Analytics",
+    "liveBusinessIntelligence": "Live Business Intelligence"
+  },
+  "product": {
+    "title": "Product Classification Intelligence",
+    "subtitle": "HS code mapping with 597K+ trade flow intelligence",
+    "item": "Item",
+    "remove": "Remove",
+    "productDescription": "Product Description",
+    "hsCode": "HS Code",
+    "confidence": "% confidence",
+    "addProduct": "+ Add Another Product",
+    "maxProducts": "Maximum of 10 products per analysis",
+    "runAnalysis": "🧠 Run Intelligence Analysis",
+    "analyzing": "Analyzing...",
+    "continueToRouting": "Continue to Triangle Analysis → Calculate Savings!",
+    "continueToRouteAnalysis": "Continue to Route Analysis →",
+    "automatedMapping": "Automated HS code mapping using trade intelligence database",
+    "aiSuggestedFor": "AI Suggested for",
+    "removeSuggestion": "Remove suggestion",
+    "placeholder": {
+      "smartphoneAccessories": "Smartphone accessories",
+      "cottonTshirts": "Cotton t-shirts",
+      "medicalDevices": "Medical devices",
+      "industrialComponents": "Industrial components"
+    },
+    "intelligentSuggestions": "Intelligent HS Code Suggestions",
+    "source": {
+      "learned": "🧠 LEARNED DATA",
+      "liveApi": "🌐 LIVE API",
+      "database": "📊 DATABASE"
+    },
+    "loading": {
+      "searchingDatabase": "Searching UN Comtrade Database...",
+      "mappingInProgress": "Real-time HS code mapping in progress"
+    },
+    "suggestion": {
+      "learnedFrom": "Learned from",
+      "similarSelections": "similar selections",
+      "recentlyUsed": "recently used",
+      "topCodes": "Top",
+      "codes": "codes",
+      "databaseMatch": "Database match"
+    },
+    "noSuggestions": "No suggestions found. Try a more specific description.",
+    "enhancedAnalysis": "Enhanced API Analysis",
+    "availableInProduction": "Available in production",
+    "intelligenceComplete": "Product Intelligence Complete!",
+    "productsMapped": "Products Mapped",
+    "readyForAnalysis": "Ready for Triangle Analysis!",
+    "productsMappedDesc": "Your products are now mapped to precise HS codes.",
+    "nextCalculateSavings": "Next, we'll calculate your potential USMCA savings through strategic triangle routing.",
+    "intelligenceTitle": "Product Intelligence",
+    "classificationSource": "Classification Source",
+    "status": {
+      "classification": "Classification"
+    },
+    "unComtrade": "UN Comtrade",
+    "calculateSavingsFor": "Calculate USMCA savings for",
+    "mappedProducts": "mapped products"
+  },
+  "routing": {
+    "title": "Route Analysis Intelligence",
+    "subtitle": "USMCA triangle routing optimization • 597K+ trade flows • Real-time savings analysis",
+    "routeAnalysis": "Route Analysis & Recommendations",
+    "databaseIntelligence": "Database Intelligence",
+    "intelligentRouteOptimization": "Intelligent route optimization based on your business profile",
+    "annualImpact": "Annual Impact",
+    "tariffRate": "Tariff Rate",
+    "transitTime": "Transit Time",
+    "complexity": "Complexity",
+    "continueToImplementation": "Continue to Implementation →"
+  },
+  "partnership": {
+    "title": "Partnership Ecosystem",
+    "subtitle": "Connect with strategic partners for triangle routing",
+    "loading": {
+      "analyzingOpportunities": "Analyzing USMCA Partnership Opportunities...",
+      "calculating": "Calculating Canada vs Mexico strategic advantages"
+    },
+    "error": {
+      "completePrevious": "Complete Previous Pages First",
+      "completePreviousDesc": "Please complete your business analysis before USMCA partnership evaluation.",
+      "startBusinessAnalysis": "Start Business Analysis →"
+    },
+    "crisis": {
+      "urgentAlert": "🚨 URGENT: TRUMP TRADE THREAT ACTIVE 🚨",
+      "header": "Canada Trade Under Attack - Get Mexico Alternatives NOW",
+      "subtitle": "⚡ Trump threatens Canada trade deals • 🇲🇽 Mexico alternatives available • 👥 Canadian-Mexican family team ready to connect you",
+      "partnerConnectionTime": "Partner Connection Time", 
+      "revenuePerConnection": "Revenue Per Connection",
+      "mexicoManufacturingPartners": "Mexico Manufacturing Partners"
+    },
+    "metrics": {
+      "dualMarket": "Dual Market",
+      "treatyBenefits": "Treaty Benefits",
+      "tariffRate": "Tariff Rate"
+    },
+    "expertise": {
+      "crossBorderExpertise": "Cross-Border Expertise",
+      "canadianRegulatory": "Canadian regulatory excellence + Mexican manufacturing efficiency",
+      "dualMarketAdvantage": "Dual-Market Advantage"
+    },
+    "businessProfile": {
+      "title": "Your Business Partnership Profile",
+      "analysisConfidence": "analysis confidence",
+      "companyProfile": "Company Profile",
+      "industry": "industry",
+      "importVolume": "Import Volume",
+      "annualImportCapacity": "Annual import capacity",
+      "productPortfolio": "Product Portfolio",
+      "productsAnalyzed": "Products analyzed",
+      "optimizationFocus": "Optimization Focus",
+      "businessPriority": "Business priority"
+    },
+    "partnershipOverview": {
+      "title": "Partnership Value Analysis",
+      "crossBorderStrategy": "Cross-Border Strategy",
+      "canadaOpportunities": "Canada Opportunities",
+      "mexicoOpportunities": "Mexico Opportunities", 
+      "combinedStrategy": "Combined Strategy",
+      "totalPartnershipValue": "Total partnership value"
+    },
+    "routeComparison": {
+      "title": "Canada vs Mexico Strategic Analysis",
+      "partnershipIntelligence": "Partnership Intelligence",
+      "canadaPartnershipRoute": "Canada Partnership Route",
+      "mexicoPartnershipRoute": "Mexico Partnership Route",
+      "setupTimeline": "Setup Timeline",
+      "complexity": "Complexity",
+      "annualSavings": "Annual Savings",
+      "complianceRate": "Compliance Rate",
+      "canadaAdvantages": "🇨🇦 Canada Advantages",
+      "mexicoAdvantages": "🇲🇽 Mexico Advantages",
+      "partnershipBenefits": "Partnership Benefits",
+      "marketAccess": "Market Access:",
+      "recommendedForBusiness": "🏆 RECOMMENDED FOR YOUR BUSINESS",
+      "dualMarketStrategy": "Dual-Market Strategy",
+      "combinedAdvantage": "Combined Canada + Mexico advantage",
+      "crossBorderSynergies": "Cross-Border Synergies",
+      "combinedValue": "Combined Value",
+      "optimalForHighVolume": "🌟 OPTIMAL FOR HIGH-VOLUME OPERATIONS"
+    },
+    "selectionSummary": {
+      "selectedStrategy": "Selected Strategy:",
+      "canadaRoute": " Canada partnership route for regulatory excellence and premium market access",
+      "mexicoRoute": " Mexico partnership route for cost efficiency and rapid implementation",
+      "dualRoute": " Dual-market strategy leveraging both Canadian and Mexican advantages"
+    },
+    "implementation": {
+      "title": "Partnership Implementation Strategy",
+      "readyForLaunch": "Ready for Launch",
+      "annualPartnershipValue": "Annual Partnership Value",
+      "implementationTimeline": "Implementation Timeline",
+      "usmcaTariffRate": "USMCA Tariff Rate",
+      "successRate": "Success Rate",
+      "strategyConfirmed": "Partnership Strategy Confirmed!",
+      "optimizedFor": "partnership strategy is optimized for",
+      "businessesProvenSuccess": "businesses with proven success in our network."
+    },
+    "leadGeneration": {
+      "urgent": "🚨 URGENT: Connect with Mexico Manufacturing Partners NOW",
+      "crisisTimer": "⏰ Trump trade threats escalating daily",
+      "emergencyMatching": "Emergency Partner Matching (FREE)",
+      "partnerConnections": "24-48hr partner connections",
+      "verifiedManufacturers": "100+ verified Mexican manufacturers",
+      "annualSavings": "$100K-$300K+ annual savings"
+    },
+    "form": {
+      "companyNameRequired": "Company Name *",
+      "yourNameRequired": "Your Name *", 
+      "emailRequired": "Email Address *",
+      "phoneRequired": "Phone Number *",
+      "selectIndustry": "Select Your Industry *",
+      "annualImportVolume": "Annual Import Volume *",
+      "submitButton": "🚨 GET MEXICO PARTNERS NOW (FREE) 🚨",
+      "industries": {
+        "energySolar": "🔋 Energy & Solar (HIGH DEMAND)",
+        "automotive": "🚗 Automotive Parts",
+        "electronics": "💻 Electronics",
+        "construction": "🏗️ Construction Materials",
+        "medical": "🏥 Medical Devices",
+        "textiles": "🧵 Textiles & Apparel",
+        "other": "📦 Other (specify in call)"
+      },
+      "volumes": {
+        "1to5M": "$1M-$5M",
+        "5to10M": "$5M-$10M", 
+        "10MPlus": "$10M+ (PRIORITY)"
+      }
+    },
+    "familyTeam": {
+      "title": "🇨🇦+🇲🇽 Your Canadian-Mexican Family Team",
+      "description": "We're a Canadian-Mexican family living in Mexico with 15+ years connecting North American businesses with Mexican manufacturing partners. When Trump threatens trade, we deliver alternatives.",
+      "canadianRegulatory": "Canadian Regulatory Expertise",
+      "canadianDesc": "Deep knowledge of Canadian import/export regulations, CBSA compliance, and USMCA treaty benefits",
+      "mexicanNetworks": "Mexican Manufacturing Networks", 
+      "mexicanDesc": "15+ years building relationships with IMMEX certified facilities, logistics providers, and border specialists",
+      "usmcaSpecialists": "USMCA Triangle Routing Specialists",
+      "usmcaDesc": "Helped 100+ companies avoid China/India tariffs through Mexico manufacturing partnerships",
+      "crisisResponse": "Crisis Response Experience",
+      "crisisDesc": "Successfully helped companies pivot during Section 232 steel tariffs, COVID supply disruptions, and China trade wars",
+      "recentSuccessStories": "Recent Success Stories:",
+      "detroitAuto": "Detroit Auto Parts Inc.",
+      "detroitDetails": "Saved $2.4M annually | China → Mexico transition in 45 days",
+      "phoenixSolar": "Phoenix Solar Systems",
+      "phoenixDetails": "Avoided bankruptcy | $9M tariff savings through Mexican assembly", 
+      "vancouverElectronics": "Vancouver Electronics Ltd.",
+      "vancouverDetails": "$1.8M saved | Maintained Canadian market access via USMCA",
+      "successRate": "Success Rate",
+      "averageSetupTime": "Average Setup Time",
+      "averageAnnualSavings": "Average Annual Savings",
+      "accessPartnershipHub": "🔗 Access Partnership Hub Dashboard →"
+    },
+    "navigation": {
+      "backToRouteAnalysis": "← Back to Route Analysis",
+      "continueToHindsight": "Continue to Hindsight Analysis →",
+      "skipPartnershipHub": "Skip Partnership Hub"
+    },
+    "messages": {
+      "dataStored": "¡Datos guardados! Te conectaremos con partners mexicanos en 24-48 horas.",
+      "selectRouteFirst": "or select a partnership route above"
+    }
+  },
+  "hindsight": {
+    "title": "Hindsight Intelligence Analysis",
+    "subtitle": "Marcus Sterling complete journey reassessment • Pattern extraction • Intelligent alert configuration",
+    "patternsExtracted": "Patterns Extracted",
+    "optimizations": "Optimizations", 
+    "alertsConfigured": "Alerts Configured",
+    "confidence": "Confidence",
+    "analysis": {
+      "marcusAnalysis": "Marcus Sterling: Complete Journey Analysis",
+      "analyzingComplete": "Analyzing complete journey with full hindsight knowledge...",
+      "progressStatus": "Marcus Sterling: Beginning complete journey reassessment..."
+    },
+    "journey": {
+      "completeAnalysis": "Complete Journey Analysis",
+      "pagesCompleted": "Pages",
+      "dataQuality": "Data Quality",
+      "foundation": "Foundation",
+      "products": "Products",
+      "routing": "Routing",
+      "partnership": "Partnership",
+      "hindsight": "Hindsight",
+      "completeAnalysisDetails": "Complete analysis",
+      "productCount": "products",
+      "confidenceLevel": "confidence"
+    },
+    "timeMachine": {
+      "title": "TIME MACHINE: What Marcus Would Have Told You From Day 1",
+      "badge": "INSTITUTIONAL LEARNING ACTIVE",
+      "wisdomTitle": "If I Had Known Your Complete Journey...",
+      "dayWisdom": "Day 1 Wisdom",
+      "couldHaveSaved": "Could have saved",
+      "weeks": "weeks",
+      "whatIfTitle": "What If Scenarios (From 240+ User Journeys)"
+    },
+    "reassessment": {
+      "title": "Marcus Sterling: Journey Reassessment",
+      "optimizationScore": "Optimization Score",
+      "foundationTitle": "Foundation Reassessment",
+      "productTitle": "Product Journey Review", 
+      "routeTitle": "Route Strategy Validation",
+      "optimizationsTitle": "Journey Optimizations Identified"
+    },
+    "insights": {
+      "title": "Real Insights Extracted",
+      "badge": "Pattern Recognition",
+      "confidence": "confidence",
+      "impact": "Impact",
+      "criticalFactorsTitle": "Critical Success Factors"
+    },
+    "alerts": {
+      "title": "Intelligent Alerts Configuration",
+      "alertTypesConfigured": "Alert Types Configured",
+      "trigger": "Trigger",
+      "frequency": "Frequency",
+      "custom": "Custom",
+      "alertIntelligence": "Alert Intelligence"
+    },
+    "institutional": {
+      "title": "INSTITUTIONAL MEMORY EXTRACTION",
+      "badge": "YOUR JOURNEY IMPROVES 240+ FUTURE USERS",
+      "yourJourney": "YOUR JOURNEY",
+      "patternExtraction": "PATTERN EXTRACTION",
+      "patterns": "patterns",
+      "institutionalLearning": "INSTITUTIONAL LEARNING",
+      "usersBenefit": "users benefit",
+      "knowledgeTitle": "Knowledge Being Extracted:",
+      "successPatterns": "Success Patterns",
+      "riskMitigations": "Risk Mitigations",
+      "riskPatternsIdentified": "risk patterns identified",
+      "optimizationOpportunities": "Optimization Opportunities",
+      "validatedSavings": "validated savings",
+      "networkEffectTitle": "NETWORK EFFECT MULTIPLICATION",
+      "yourPattern": "Your Pattern",
+      "usersLearn": "Users Learn",
+      "compoundIntelligence": "Compound Intelligence"
+    },
+    "marcus": {
+      "title": "Marcus Sterling: Hindsight Report",
+      "analysisConfidence": "Analysis Confidence",
+      "executiveSummary": "Executive Summary",
+      "journeyOptimization": "Journey Optimization:",
+      "keyInsights": "Key Insights:",
+      "nextPhase": "Next Phase:",
+      "recommendationTitle": "Marcus Sterling Recommendation"
+    },
+    "completion": {
+      "title": "Hindsight Intelligence Complete!",
+      "journeyOptimization": "Journey Optimization",
+      "patternsExtracted": "Patterns Extracted",
+      "alertsConfigured": "Alerts Configured",
+      "message": "Marcus Sterling Analysis Complete! Your complete journey has been reassessed with full hindsight knowledge. Critical patterns have been extracted and intelligent alerts configured for optimal ongoing monitoring.",
+      "proceedButton": "Proceed to Live Monitoring & Alerts"
+    },
+    "navigation": {
+      "backToPartnership": "Back to Partnership",
+      "continueToLiveMonitoring": "Continue to Live Monitoring"
+    },
+    "errors": {
+      "completeJourneyRequired": "Complete Journey Required",
+      "completeJourneyDesc": "Hindsight analysis requires complete journey data from all previous pages.",
+      "startCompleteJourney": "Start Complete Journey",
+      "completeAnalysisRequired": "Complete Journey Analysis Required",
+      "completeAnalysisDesc": "Hindsight Intelligence requires completing Foundation, Product, and Routing pages for executive summary generation",
+      "startFoundationAnalysis": "Start Foundation Analysis"
+    }
+  },
+  "alerts": {
+    "title": "Intelligent Alerts & Pattern Monitoring",
+    "subtitle": "Pattern-based alerting • Institutional learning • Community intelligence • Real-time optimization",
+    "addAlert": "+ Add Alert",
+    "configureAlert": "Configure New Alert",
+    "alertType": "Alert Type",
+    "priorityLevel": "Priority Level",
+    "monitoringFrequency": "Monitoring Frequency",
+    "triggerCondition": "Trigger Condition",
+    "describeTrigger": "Describe what should trigger this alert...",
+    "notificationMethod": "Notification Method"
+  },
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "send": "Send",
+    "searching": "Searching...",
+    "processing": "Processing...",
+    "getStarted": "Get Started",
+    "classifications": "Classifications",
+    "avgConfidence": "Avg Confidence",
+    "activeUsers": "Active Users",
+    "businessIntelligence": "Business Intelligence",
+    "experience": "Experience",
+    "risk": "Risk",
+    "companyProfile": "Company Profile",
+    "geographicIntelligence": "Geographic Intelligence",
+    "route": "Route",
+    "triangleOpportunity": "Triangle Opportunity",
+    "implementation": "Implementation",
+    "intelligenceStatus": "Intelligence Status",
+    "patternsLearned": "patterns learned",
+    "specialRequirementsIdentified": "Special Requirements Identified",
+    "complianceLevel": "Compliance Level",
+    "intelligenceLevel": "Intelligence Level",
+    "averageConfidence": "Average Confidence",
+    "backToFoundation": "Back to Foundation",
+    "api": "API"
+  },
+  "chat": {
+    "introMessage": "Hi! I'm Marcus Sterling, your Triangle Intelligence assistant. I can help with HS codes, tariff rates, triangle routing, and supply chain optimization.",
+    "introMessageGlobal": "Hi! I'm Marcus Sterling, your Triangle Intelligence assistant. I can help with HS codes, tariff rates, triangle routing, supply chain optimization, and market intelligence.",
+    "errorProcessing": "I couldn't process that request. Please try again.",
+    "errorTrouble": "Sorry, I'm having trouble right now. Please try again.",
+    "errorNotFound": "I couldn't find information about that. Try asking about HS codes, tariff rates, or triangle routing.",
+    "needHelp": "🧠 Need Triangle Intelligence help?",
+    "services": "HS codes, tariffs, routing, optimization",
+    "askMarcus": "Ask Marcus Sterling!",
+    "header": "Marcus Sterling • Triangle Intelligence",
+    "headerGlobal": "🧠 Marcus Sterling • Triangle Intelligence",
+    "sourceInfo": "Source: {{dataSource}} • {{confidence}}% confidence",
+    "followupIndicator": "💡 Marcus wants to help you further",
+    "useCode": "Use This Code",
+    "copyCode": "📋 Copy Code",
+    "copied": "✅ Copied {{code}} to clipboard!",
+    "placeholder": "Ask Marcus about HS codes, tariffs, routing...",
+    "placeholderGlobal": "e.g., HS code for headphones, China tariff rates, triangle routing...",
+    "intelligenceInsights": "📊 Marcus Intelligence Insights",
+    "searchingDatabase": "🔍 Searching database...",
+    "searching": "Searching...",
+    "send": "Send",
+    "close": "×",
+    "floating": {
+      "tooltip": "Marcus Sterling - Triangle Intelligence"
+    },
+    "trendingQuestions": "{{totalQuestions}} questions this week • Top trends: {{trends}}"
+  },
+  "executive": {
+    "annualSavingsOpportunity": "Annual Savings Opportunity",
+    "tariffReduction": "Tariff Reduction",
+    "paybackMonths": "Payback Months",
+    "firstYearRoi": "First Year ROI",
+    "recommendedStrategy": "RECOMMENDED STRATEGY",
+    "optimalBalance": "Optimal balance of savings, risk, and implementation complexity",
+    "overview": "Executive Overview",
+    "financialAnalysis": "Financial Analysis",
+    "executionPlan": "Execution Plan",
+    "riskAssessment": "Risk Assessment",
+    "strategicRouteAnalysis": "Strategic Route Analysis",
+    "optimalStrategy": "OPTIMAL STRATEGY",
+    "strategicAdvantages": "Strategic Advantages:"
+  },
+  "form": {
+    "label": {
+      "companyName": "Company Name",
+      "businessType": "Business Type",
+      "importVolume": "Annual Import Volume",
+      "zipCode": "Business Location",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "jobTitle": "Job Title",
+      "fullName": "Full Name"
+    },
+    "placeholder": {
+      "companyName": "Your company or organization name",
+      "zipCode": "ZIP/Postal Code (e.g., 90210, M6H 1A1)",
+      "email": "your@company.com",
+      "phone": "+1 (555) 123-4567",
+      "jobTitle": "VP of Operations",
+      "fullName": "John Smith"
+    },
+    "error": {
+      "companyName": "Please enter a valid company name",
+      "email": "Please enter a valid email address",
+      "phone": "Please enter a valid phone number",
+      "zipCode": "Please enter a valid ZIP code"
+    }
+  },
+  "api": {
+    "errors": {
+      "methodNotAllowed": "Method not allowed",
+      "validation": {
+        "missingRequiredFields": "Missing required fields",
+        "missingUserData": "Missing user data",
+        "missingCountryOrProduct": "Missing country or product parameter",
+        "missingOriginDestination": "Missing origin or destination",
+        "missingRequiredParameters": "Missing required parameters",
+        "productDescriptionRequired": "Product description is required"
+      },
+      "service": {
+        "classificationUnavailable": "Classification service temporarily unavailable",
+        "databaseIntelligenceUnavailable": "Database intelligence temporarily unavailable"
+      },
+      "processing": {
+        "failedToSaveLead": "Failed to save lead information",
+        "failedToProcessContact": "Failed to process contact request",
+        "failedToGetRoutingOptions": "Failed to get routing options"
+      },
+      "database": {
+        "queryFailed": "Database query failed",
+        "connectionFailed": "Database connection failed"
+      },
+      "chat": {
+        "generalError": "Sorry, I encountered an error. Please try again."
+      },
+      "status": {
+        "onlyGetSupported": "Only GET requests are supported",
+        "unableToRetrieveStatus": "Unable to retrieve system status"
+      }
+    },
+    "success": {
+      "demoRequestReceived": "Demo request received successfully",
+      "leadClaimed": "Lead claimed successfully",
+      "alertsIntelligenceGenerated": "Alerts intelligence generated successfully",
+      "specialistMatchingCompleted": "Specialist matching completed",
+      "partnershipInitiated": "Partnership initiation successful",
+      "hsCodeLearningRecorded": "HS code selection recorded for institutional learning",
+      "canadaMexicoAdvantageCalculated": "Canada-Mexico USMCA advantage calculated with family expertise",
+      "goldmineFoundationProcessed": "Foundation processed with GOLDMINE intelligence",
+      "institutionalIntelligenceAchieved": "INSTITUTIONAL INTELLIGENCE ACHIEVED - Maximum Quality"
+    },
+    "guidance": {
+      "completeFoundationAndProduct": "Complete Foundation and Product pages first",
+      "tryAgainOrContactSupport": "Please try again or contact support for manual classification",
+      "contactEnterpriseSupport": "Please try again or contact us directly at enterprise@triangleintelligence.com",
+      "unableToLoadDropdownOptions": "Unable to load dropdown options. Please try again later."
+    },
+    "test": {
+      "claudeApiWorking": "Claude API is working correctly",
+      "integrationTestCompleted": "API integration test completed",
+      "pageFlowTestCompleted": "Page flow API test completed"
+    }
+  },
+  "lib": {
+    "security": {
+      "error": {
+        "rate_limit": "Too many requests",
+        "invalid_input": "Invalid input",
+        "internal": "Internal security error"
+      },
+      "message": {
+        "rate_limit_exceeded": "Rate limit exceeded. Please try again later.",
+        "validation_failed": "Request validation failed",
+        "validation_error": "Request could not be validated"
+      }
+    },
+    "environment": {
+      "error": {
+        "missing_server_vars": "Missing required server-side environment variables: {{missing}}",
+        "missing_var": "Missing required environment variable: {{key}}",
+        "security_violation": "SECURITY VIOLATION: Sensitive keys exposed to client: {{exposedKeys}}"
+      }
+    },
+    "classifier": {
+      "error": {
+        "no_description": "No product description provided",
+        "description_required": "Product description required for classification"
+      },
+      "message": {
+        "default_fallback": "No clear industry match - defaulting to largest category",
+        "high_confidence": "Classified as {{bestMatch}} with high confidence",
+        "fallback_improve": "Classified as {{bestMatch}} (fallback - you can improve this)",
+        "help_improve": "Classified as {{industry}} (fallback) - please help us improve",
+        "thank_you": "Thank you for improving our classification accuracy!",
+        "manual_review": "Classification requires manual review",
+        "manual_review_detailed": "Classification requires manual review - product not in standard categories"
+      }
+    },
+    "alerts": {
+      "title": {
+        "india_doubled": "India Tariffs Doubled Overnight!",
+        "china_pause": "China Tariffs in 90-Day Pause",
+        "semiconductor_threat": "Semiconductor Tariffs May Hit 100%"
+      },
+      "message": {
+        "india_tariff_jump": "India→USA tariffs jumped from 25% to 50%. Triangle routing now saves 50%!",
+        "china_uncertainty": "Current 30% rate could change dramatically when pause ends",
+        "semiconductor_deadline": "Unless US production commitment by {{deadline}}"
+      },
+      "action": {
+        "switch_usmca": "Switch to USMCA triangle routing immediately",
+        "lock_usmca": "Lock in USMCA triangle routing now",
+        "mexico_assembly": "Establish Mexico assembly operation"
+      },
+      "benefit": {
+        "save_percentage": "Save 50% vs new rates",
+        "insulate": "Insulate from future changes",
+        "usmca_zero": "USMCA qualification = 0% tariff"
+      }
+    },
+    "intelligence": {
+      "message": {
+        "pattern_improvement": "This user made the platform {{patternImprovement}}% smarter for pattern recognition",
+        "accuracy_improvement": "All future users now get {{accuracyImprovement}}% more accurate predictions"
+      },
+      "status": {
+        "foundation_building": "Foundation network building",
+        "effects_emerging": "Network effects emerging",
+        "strong_effects": "Strong network effects active",
+        "powerful_effects": "Powerful network effects",
+        "dominant_effects": "Dominant network effects"
+      }
+    },
+    "progress": {
+      "foundation": {
+        "profile_established": "{{businessType}} company profile established",
+        "risk_detected": "Risk tolerance: {{timelinePriority}} priority detected",
+        "supplier_analyzed": "Supplier country: {{primarySupplierCountry}} analyzed",
+        "similar_companies": "{{similarCompanies}} similar companies found in database"
+      },
+      "product": {
+        "building_profile": "Building on {{businessType}} profile from Foundation",
+        "enhanced_classification": "Product classification enhanced with risk tolerance: {{riskTolerance}}"
+      },
+      "routing": {
+        "complete_analysis": "Complete company + product profile enables optimal routing analysis",
+        "routing_viability": "Triangle routing viability: {{viability}}"
+      },
+      "hindsight": {
+        "journey_complete": "Complete journey analysis enables 9.2/10.0 intelligence quality",
+        "pattern_ready": "Pattern extraction ready for institutional memory"
+      },
+      "alerts": {
+        "maximum_achieved": "MAXIMUM INTELLIGENCE ACHIEVED: 10.0/10.0 quality",
+        "pattern_contribution": "Ready for institutional pattern contribution"
+      }
+    },
+    "shipping": {
+      "route": {
+        "mexico_description": "Ship goods to Mexico for final processing/assembly, then to USA under USMCA",
+        "canada_description": "Route through Canada for value-add processing under USMCA qualification"
+      },
+      "modifier": {
+        "specialized_handling": "with specialized handling",
+        "heavy_freight": "via heavy freight carriers"
+      },
+      "complexity": {
+        "special_handling": "Special handling requirements",
+        "oversized": "Oversized freight",
+        "hazardous": "Hazardous materials",
+        "heavy_weight": "Heavy weight shipment",
+        "standard": "Standard shipping requirements"
+      }
+    },
+    "ml": {
+      "message": {
+        "thank_you_improvement": "Thank you for improving our classification accuracy!"
+      }
+    }
+  },
+  "page": {
+    "foundation": {
+      "meta": {
+        "title": "Enterprise Intelligence Foundation - Triangle Intelligence Platform",
+        "description": "Enterprise-grade trade intelligence foundation with 597K+ trade flow records"
+      }
+    },
+    "product": {
+      "meta": {
+        "title": "Product Classification Intelligence - Triangle Intelligence Platform",
+        "description": "Enterprise-grade HS code mapping with 597K+ trade flow intelligence"
+      },
+      "error": {
+        "missingFoundation": "Complete Foundation Analysis First",
+        "missingFoundationDesc": "Please complete your business intelligence profile before proceeding to product classification.",
+        "goToFoundation": "Go to Foundation Analysis →"
+      }
+    },
+    "routing": {
+      "meta": {
+        "title": "Route Analysis Intelligence - Triangle Intelligence Platform",
+        "description": "Enterprise route optimization with 597K+ trade flow analysis and USMCA intelligence"
+      },
+      "error": {
+        "missingPages": "Complete Previous Pages First",
+        "missingPagesDesc": "Route analysis requires completing Foundation and Product Classification pages",
+        "startFoundation": "Start Foundation Analysis →"
+      }
+    },
+    "hindsight": {
+      "meta": {
+        "title": "Hindsight Intelligence - Triangle Intelligence Platform",
+        "description": "Marcus Sterling complete journey reassessment and intelligent alert configuration"
+      },
+      "error": {
+        "incompleteJourney": "Complete Journey Required",
+        "incompleteJourneyDesc": "Hindsight analysis requires complete journey data from all previous pages.",
+        "startJourney": "Start Complete Journey →"
+      }
+    },
+    "alerts": {
+      "meta": {
+        "title": "Intelligent Alerts & Pattern Monitoring - Triangle Intelligence Platform",
+        "description": "Pattern-based intelligent alerting with institutional learning and community intelligence"
+      }
+    },
+    "partnership": {
+      "meta": {
+        "title": "Partnership Ecosystem - Triangle Intelligence Platform",
+        "description": "Connect with strategic partners for USMCA triangle routing and manufacturing"
+      }
+    },
+    "index": {
+      "meta": {
+        "title": "Triangle Intelligence | Reduce Import Tariffs 15-25%",
+        "description": "Route imports through Mexico and Canada. Avoid China tariffs. Real savings from real trade data."
+      },
+      "hero": {
+        "title": "Reduce Import Tariffs 15-25%",
+        "description": "Route your imports through Mexico and Canada instead of direct from Asia. Use USMCA treaty for 0% tariffs. Stop paying 25%+ on Chinese goods.",
+        "averageSavings": "Average Annual Savings",
+        "successRate": "Success Rate",
+        "usmcaTariff": "USMCA Tariff Rate",
+        "daysToImplement": "Days to Implement",
+        "startFreeAnalysis": "Start Free Analysis",
+        "seePricing": "See Pricing"
+      },
+      "crisis": {
+        "urgent": "🚨 URGENT",
+        "trumpThreat": "Trump threatens Canada trade deals - Get Mexico alternatives before it's too late",
+        "emergencyPartners": "Emergency Partners →"
+      }
+    },
+    "dashboard": {
+      "meta": {
+        "title": "Dashboard - Triangle Intelligence"
+      },
+      "header": {
+        "title": "Your Intelligence Command Center",
+        "subtitle": "Live savings tracking • Market monitoring • Network intelligence"
+      },
+      "cards": {
+        "businessSetup": {
+          "title": "💼 Business Setup",
+          "description": "Configure your company profile and import characteristics"
+        },
+        "productOptimization": {
+          "title": "📦 Product Optimization",
+          "description": "Smart product mapping for maximum tariff savings"
+        },
+        "triangleAnalysis": {
+          "title": "🔺 Triangle Analysis",
+          "description": "Discover your optimal USMCA routing strategy"
+        }
+      }
+    },
+    "about": {
+      "meta": {
+        "title": "About | Triangle Intelligence",
+        "description": "Learn about Triangle Intelligence - helping companies save money on imports through Mexico and Canada triangle routing."
+      },
+      "sections": {
+        "whoWeAre": {
+          "title": "Who We Are",
+          "description": "We help companies save money on imports by routing through Mexico and Canada instead of paying high tariffs from Asia."
+        },
+        "whatWeDo": "What We Do",
+        "whyItWorks": "Why Triangle Routing Works",
+        "ourBackground": "Our Background",
+        "ourValues": "Our Values"
+      },
+      "values": {
+        "transparency": "Transparency",
+        "realResults": "Real Results",
+        "simpleSolutions": "Simple Solutions",
+        "longTermPartnerships": "Long-term Partnerships"
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Enterprise Contact - Triangle Intelligence",
+        "description": "Contact Triangle Intelligence for enterprise USMCA optimization solutions"
+      },
+      "form": {
+        "submitting": "Submitting Request...",
+        "submitButton": "Request Enterprise Consultation"
+      }
+    },
+    "pricing": {
+      "meta": {
+        "title": "Pricing | Triangle Intelligence",
+        "description": "Simple, transparent pricing for triangle routing analysis. Start free or choose a plan that fits your import volume."
+      },
+      "header": {
+        "title": "Simple, Transparent Pricing",
+        "subtitle": "Choose the plan that fits your import volume. Start free, upgrade when you need more."
+      },
+      "billing": {
+        "monthly": "Monthly",
+        "annual": "Annual",
+        "save": "(Save 17%)"
+      },
+      "faq": {
+        "title": "Common Questions",
+        "quickSavings": "How quickly will I see savings?",
+        "legalRouting": "Is triangle routing legal?",
+        "cancelAnytime": "Can I cancel anytime?",
+        "implementationHelp": "Do you help with implementation?"
+      }
+    },
+    "platform": {
+      "meta": {
+        "title": "How It Works | Triangle Intelligence Platform",
+        "description": "See how Triangle Intelligence helps companies save 15-25% on imports through Mexico and Canada triangle routing."
+      },
+      "header": {
+        "title": "How Triangle Routing Works",
+        "subtitle": "Our platform helps you save money by routing imports through Mexico and Canada instead of directly from Asia."
+      },
+      "steps": {
+        "title": "Three Simple Steps"
+      }
+    },
+    "signup": {
+      "meta": {
+        "title": "Join Triangle Intelligence - USMCA Optimization Platform",
+        "description": "Start saving $200K+ annually with Triangle Intelligence USMCA routing optimization"
+      },
+      "header": {
+        "title": "Join 240+ Companies Using Triangle Intelligence",
+        "subtitle": "Start optimizing your USMCA routes and saving $200K+ annually with institutional intelligence"
+      },
+      "form": {
+        "businessEmail": "Business Email",
+        "selectIndustry": "Select Industry",
+        "selectVolume": "Select Volume"
+      }
+    },
+    "apiTest": {
+      "meta": {
+        "title": "API Test Dashboard - Triangle Intelligence"
+      },
+      "header": {
+        "title": "🧪 API Test Dashboard",
+        "subtitle": "Test the Triangle Intelligence APIs and see if they're making real external calls"
+      },
+      "sections": {
+        "systemStatus": "1. System Status",
+        "hsCodeTest": "2. HS Code API Test",
+        "routingTest": "3. Routing API Test"
+      },
+      "buttons": {
+        "checkApiConfig": "Check API Configuration",
+        "testHsCodeLookup": "Test HS Code Lookup (Comtrade API)",
+        "testTriangleRouting": "Test Triangle Routing (Shippo API)"
+      }
+    }
+  },
+  "metrics": {
+    "tradeRecords": "Trade Records",
+    "tradeValue": "Trade Value",
+    "successRate": "Success Rate",
+    "liveIntelligence": "Live Intelligence"
+  },
+  "message": {
+    "success": {
+      "foundation_saved": "Company profile saved successfully!",
+      "products_classified": "Products classified with 95% confidence",
+      "routes_identified": "Triangle routes identified with potential savings",
+      "signup_welcome": "Welcome to Triangle Intelligence!",
+      "marcus_generated": "Marcus report generated successfully"
+    },
+    "error": {
+      "service_unavailable": "Service temporarily unavailable. Please try again.",
+      "validation_generic": "Please check your input and try again.",
+      "network": "Network error. Please check your connection.",
+      "auth_required": "Authentication required. Please sign in."
+    }
+  }
+}
