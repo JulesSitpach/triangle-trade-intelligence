@@ -8,12 +8,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
-import useSafeTranslation from '../hooks/useSafeTranslation'
+import { useTranslation } from 'react-i18next'
 import TriangleSideNav from '../components/TriangleSideNav'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function TariffOptimization() {
-  const { t, i18n, isHydrated } = useSafeTranslation(['common', 'partnership'])
+  const { t, i18n } = useTranslation(['common', 'partnership'])
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [foundationData, setFoundationData] = useState(null)

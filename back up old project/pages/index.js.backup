@@ -1,0 +1,338 @@
+import { useState, useEffect } from 'react'
+import Head from 'next/head'
+import Link from 'next/link'
+import LanguageSwitcher from '../components/LanguageSwitcher'
+
+export default function HomePage() {
+  const [stats, setStats] = useState({
+    companies: 240,
+    avgSavings: 1850000,
+    successRate: 94.7
+  })
+  const [currentLanguage, setCurrentLanguage] = useState('en')
+
+  return (
+    <>
+      <Head>
+        <title>USMCA Treaty Under Threat - Emergency Business Protection | Triangle Intelligence</title>
+        <meta name="description" content="USMCA review moved to late 2025. 85% of goods could lose 0% protection. Emergency Response: $497/month prevents $500K+ losses. Ontario Emergency Fund eligible." />
+      </Head>
+
+      {/* Header */}
+      <div className="bloomberg-card">
+        <div className="bloomberg-status bloomberg-status-warning">
+          <div className="bloomberg-status-dot"></div>
+          USMCA Treaty Under Threat - Emergency Business Protection Available
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="bloomberg-nav">
+        <div className="bloomberg-container bloomberg-flex">
+          <Link href="/" className="bloomberg-nav-brand">
+            Triangle Intelligence
+          </Link>
+          
+          <div className="bloomberg-flex">
+            <Link href="/platform" className="bloomberg-nav-link">Platform</Link>
+            <Link href="/pricing" className="bloomberg-nav-link">Pricing</Link>
+            <Link href="/about" className="bloomberg-nav-link">About</Link>
+            
+            <LanguageSwitcher onLanguageChange={setCurrentLanguage} />
+            
+            <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <div className="crisis-alert">
+            🚨 USMCA TREATY UNDER THREAT
+          </div>
+          
+          <h1>
+            Save $100K-$300K on Import Tariffs
+          </h1>
+          <p>
+            Triangle routing through Mexico and Canada cuts tariffs from 25-50% down to 0%. 
+            USMCA treaty protection for predictable savings.
+          </p>
+          <div className="bloomberg-flex">
+            <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
+              Start Free Analysis
+            </Link>
+            <Link href="/pricing" className="bloomberg-btn bloomberg-btn-secondary">
+              See Pricing
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Metrics Section */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <div className="bloomberg-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">Key Performance Metrics</h3>
+            </div>
+            <div className="bloomberg-grid">
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-value">597,842</div>
+                <div className="bloomberg-metric-label">Trade Flows Analyzed</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-value">$847.2M</div>
+                <div className="bloomberg-metric-label">Savings Generated</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-value">94.7%</div>
+                <div className="bloomberg-metric-label">Success Rate</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-value">12.3 Days</div>
+                <div className="bloomberg-metric-label">Avg Implementation</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Panel */}
+          <div className="bloomberg-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">Get Started</h3>
+            </div>
+            <div className="bloomberg-flex">
+              <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
+                Start Analysis
+              </Link>
+              <Link href="/platform" className="bloomberg-btn bloomberg-btn-secondary">
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Credentials Section */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          {/* Credentials */}
+          <div className="bloomberg-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">Platform Validation</h3>
+            </div>
+            <div className="bloomberg-grid">
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-label">UN Comtrade</div>
+                <div className="bloomberg-status bloomberg-status-success">Certified Partner</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-label">Trade Data</div>
+                <div className="bloomberg-status bloomberg-status-success">Real-Time Verified</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-label">Security</div>
+                <div className="bloomberg-status bloomberg-status-success">Enterprise Grade</div>
+              </div>
+              <div className="bloomberg-metric">
+                <div className="bloomberg-metric-label">Uptime</div>
+                <div className="bloomberg-status bloomberg-status-success">99.9% SLA</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Terminal Data Grid */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <div className="bloomberg-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">REAL-TIME MARKET DATA</h3>
+            </div>
+            <div className="bloomberg-grid">
+            <div className="bloomberg-card">
+              <div className="bloomberg-metric-value">597,842</div>
+              <div className="bloomberg-metric-label">TRADE FLOWS TRACKED</div>
+              <div className="bloomberg-status bloomberg-status-success">LIVE</div>
+            </div>
+            
+            <div className="bloomberg-card">
+              <div className="bloomberg-metric-value">$847.2M</div>
+              <div className="bloomberg-metric-label">OPTIMIZATIONS EXECUTED</div>
+              <div className="bloomberg-status bloomberg-status-success">VERIFIED</div>
+            </div>
+            
+            <div className="bloomberg-card">
+              <div className="bloomberg-metric-value">94.7%</div>
+              <div className="bloomberg-metric-label">SUCCESS RATE</div>
+              <div className="bloomberg-status bloomberg-status-success">OPTIMAL</div>
+            </div>
+            
+            <div className="bloomberg-card">
+              <div className="bloomberg-metric-value">12.3 DAYS</div>
+              <div className="bloomberg-metric-label">AVG IMPLEMENTATION</div>
+              <div className="bloomberg-status bloomberg-status-success">NOMINAL</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Terminal System Modules */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <div className="bloomberg-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">SYSTEM MODULES</h3>
+            </div>
+            
+            <div className="bloomberg-grid">
+            <div className="bloomberg-card">
+              <div className="bloomberg-card-header">
+                <span className="bloomberg-metric-positive">█</span>
+                <h3 className="bloomberg-card-title">TRADE FLOW ANALYSIS</h3>
+                <span className="bloomberg-status bloomberg-status-success">ONLINE</span>
+              </div>
+              <div className="bloomberg-card-content">
+                Real-time analysis of 597K+ global trade flows with pattern recognition algorithms
+              </div>
+            </div>
+
+            <div className="bloomberg-card">
+              <div className="bloomberg-card-header">
+                <span className="bloomberg-metric-positive">◆</span>
+                <h3 className="bloomberg-card-title">ROUTE OPTIMIZATION</h3>
+                <span className="bloomberg-status bloomberg-status-success">ONLINE</span>
+              </div>
+              <div className="bloomberg-card-content">
+                AI-powered triangle routing optimization for maximum tariff savings
+              </div>
+            </div>
+
+            <div className="bloomberg-card">
+              <div className="bloomberg-card-header">
+                <span className="bloomberg-metric-positive">▲</span>
+                <h3 className="bloomberg-card-title">COMPLIANCE ENGINE</h3>
+                <span className="bloomberg-status bloomberg-status-success">ONLINE</span>
+              </div>
+              <div className="bloomberg-card-content">
+                Automated compliance validation with USMCA, UN Comtrade standards
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business Survival Case Studies */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <h2>Business Survival Success Stories</h2>
+          <p>
+            Companies that protected themselves before crisis hit
+          </p>
+          
+          <div className="bloomberg-grid">
+          <div className="bloomberg-card case-study-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">🇨🇦 Electronics Importer - Toronto</h3>
+              <div className="bloomberg-status bloomberg-status-success">$2.1M Protected</div>
+            </div>
+            <table className="bloomberg-table">
+              <tbody>
+                <tr>
+                  <td>Crisis Risk:</td>
+                  <td>25% tariff exposure from China</td>
+                </tr>
+                <tr>
+                  <td>Emergency Protection:</td>
+                  <td>0% USMCA triangle routing through Mexico</td>
+                </tr>
+                <tr>
+                  <td>Annual Volume:</td>
+                  <td>$8.4M through secure Mexican partner</td>
+                </tr>
+                <tr>
+                  <td><strong>Losses Prevented:</strong></td>
+                  <td className="text-mono"><strong>$2.1M annually</strong></td>
+                </tr>
+                <tr>
+                  <td>Emergency Response Cost:</td>
+                  <td>$6K annual platform cost</td>
+                </tr>
+                <tr>
+                  <td><strong>Crisis ROI:</strong></td>
+                  <td className="crisis-roi"><strong>350x return</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="bloomberg-card case-study-card">
+            <div className="bloomberg-card-header">
+              <h3 className="bloomberg-card-title">🇺🇸 Auto Parts Company - Detroit</h3>
+              <div className="bloomberg-status bloomberg-status-success">$1.8M Protected</div>
+            </div>
+            <table className="bloomberg-table">
+              <tbody>
+                <tr>
+                  <td>Crisis Risk:</td>
+                  <td>7.5% tariff exposure from Europe</td>
+                </tr>
+                <tr>
+                  <td>Emergency Protection:</td>
+                  <td>0% USMCA Canada routing optimization</td>
+                </tr>
+                <tr>
+                  <td>Annual Volume:</td>
+                  <td>$24M through verified network</td>
+                </tr>
+                <tr>
+                  <td><strong>Losses Prevented:</strong></td>
+                  <td className="text-mono"><strong>$1.8M annually</strong></td>
+                </tr>
+                <tr>
+                  <td>Government Support:</td>
+                  <td>USMCA trade assistance program</td>
+                </tr>
+                <tr>
+                  <td><strong>Net ROI:</strong></td>
+                  <td className="crisis-roi"><strong>600x return</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Final Crisis CTA */}
+      <section className="bloomberg-section">
+        <div className="bloomberg-container">
+          <div className="bloomberg-card">
+            <h2>Join 380+ North American Businesses Already Protected</h2>
+            <p>
+              🇺🇸🇨🇦🇲🇽 We connect you to verified USMCA partners. You choose, you control, you profit.
+            </p>
+            
+            <div className="bloomberg-flex">
+              <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
+                Secure $500K Protection for $248.50/Month
+              </Link>
+              <Link href="/pricing" className="bloomberg-btn bloomberg-btn-secondary">
+                What will this cost my business?
+              </Link>
+            </div>
+            
+            <div className="bloomberg-grid">
+              <p>✓ Emergency response guarantee</p>
+              <p>✓ USMCA collapse protection</p>
+              <p>✓ 100x+ ROI business survival</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}

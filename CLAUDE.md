@@ -8,6 +8,8 @@ Triangle Intelligence is a sophisticated tariff volatility tracking and trade op
 
 **Core Value Proposition**: While bilateral tariffs (China: 30%, India: 50%) change daily with political decisions, USMCA triangle routing rates remain stable at 0% - providing predictable savings in volatile markets.
 
+**Tech Stack**: Next.js 13.5, React 18, Supabase, i18next, Anthropic Claude API, Jest, Node.js
+
 ## Development Commands
 
 ```bash
@@ -60,7 +62,7 @@ The platform's competitive advantage comes from intelligently separating **volat
 
 ### Database Intelligence Bridge
 
-**Critical Architecture**: All intelligence flows through `lib/database-intelligence-bridge.js` which implements the volatile/stable strategy:
+**Critical Architecture**: All intelligence flows through `lib/intelligence/database-intelligence-bridge.js` which implements the volatile/stable strategy:
 
 ```javascript
 // STABLE DATA - Instant responses, zero API costs
@@ -224,7 +226,7 @@ USE_MOCK_APIS=false                                     # Enable real API calls
 ### Always Use Database Intelligence Bridge
 ```javascript
 // CORRECT - Uses volatile/stable optimization with proper imports
-import DatabaseIntelligenceBridge, { StableDataManager, VolatileDataManager } from '../lib/database-intelligence-bridge'
+import DatabaseIntelligenceBridge, { StableDataManager, VolatileDataManager } from '../lib/intelligence/database-intelligence-bridge'
 
 // Get stable data (instant responses, zero API costs)
 const usmcaRate = await StableDataManager.getUSMCARates('CN-MX-US')
@@ -338,6 +340,17 @@ const changeLanguage = async (lng) => {
 - **Network Effects**: Each of 240+ user sessions improves future intelligence
 - **Bundle Optimization**: Production builds with compression and splitting
 
+### Optimization Phases (Feature Flags in .env.local)
+- **Phase 0**: `NEXT_PUBLIC_USE_CORRECTED_DATA_FLOW=true` - Data flow correction (active)
+- **Phase 1**: `NEXT_PUBLIC_USE_UNIFIED_STATE=true` - Unified state management (active)
+- **Phase 2**: `NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true` - Query optimization & batching (active)
+- **Phase 3**: `NEXT_PUBLIC_USE_PREFETCHING=true` - Intelligent prefetching (active)
+
+Expected improvements with all phases active:
+- Query Response Time: 85% faster (2.5s → 0.3s)
+- Page Load Time: 68% faster (3.8s → 1.2s)
+- API Call Reduction: 80% fewer calls (15 → 3 per journey)
+
 ## Testing Strategy
 
 ### Test Coverage Requirements
@@ -412,11 +425,11 @@ describe('DatabaseIntelligenceBridge', () => {
 
 ## Production Security
 
-- **API Key Validation**: All external API calls validated
-- **Security Headers**: Comprehensive headers in next.config.js
-- **Client Protection**: Sensitive data never exposed client-side
-- **Request Monitoring**: IP-based tracking and rate limiting
-- **Environment Validation**: Startup checks for required configuration
+- **API Key Validation**: All external API calls validated through `lib/security.js`
+- **Security Headers**: Comprehensive headers in next.config.js (CSP, HSTS, X-Frame-Options)
+- **Client Protection**: Sensitive data never exposed client-side - use `SUPABASE_SERVICE_ROLE_KEY` only server-side
+- **Request Monitoring**: IP-based tracking and rate limiting via `lib/monitoring.js`
+- **Environment Validation**: Startup checks in `lib/environment-validation.js` ensure all required keys exist
 
 ## Competitive Advantages
 
@@ -427,4 +440,35 @@ describe('DatabaseIntelligenceBridge', () => {
 5. **Network Effects**: Each user improves intelligence for all future users
 
 **Market Position**: While competitors waste money calling APIs for static data, Triangle Intelligence provides superior intelligence at lower cost through database-driven architecture.
-- claud.md
+
+## Key Intelligence Engines
+
+### Core Libraries (`/lib/`)
+- **`supabase-client.js`**: Singleton Supabase client - always use `getSupabaseClient()`
+- **`production-logger.js`**: Comprehensive logging with automatic sensitive data filtering
+- **`environment-validation.js`**: Validates all required env vars on startup
+- **`security.js`**: API key validation and security middleware
+
+### Intelligence Systems (`/lib/`)
+- **`beast-master-controller.js`**: Orchestrates all 6 intelligence systems
+- **`dynamic-savings-engine.js`**: Calculates real-time savings based on market conditions
+- **`dynamic-confidence-engine.js`**: Progressive confidence scoring (1.0 → 10.0)
+- **`hindsight-institutional-learning.js`**: Extracts patterns from user sessions
+- **`similarity-intelligence.js`**: Finds similar business profiles for better predictions
+- **`marcus-claude-api.js`**: Anthropic Claude integration for AI analysis
+- **`unified-hs-classifier.js`**: Intelligent product classification with caching
+- **`tariff-volatility-tracker.js`**: Monitors and alerts on tariff changes
+
+### Performance Optimizers (`/lib/`)
+- **`fast-hs-classifier.js`**: High-performance HS code classification
+- **`dynamic-stats-engine.js`**: Real-time statistics and analytics
+- **`workflow-analysis.js`**: Analyzes user journey patterns
+- **`page-analytics-engine.js`**: Tracks page-level performance metrics
+
+## Common Pitfalls to Avoid
+
+1. **Never create new Supabase clients** - Always use `getSupabaseClient()` singleton
+2. **Never expose service keys client-side** - Use `SUPABASE_SERVICE_ROLE_KEY` only in API routes
+3. **Never make direct API calls for stable data** - Use Database Intelligence Bridge
+4. **Never skip logging** - Use production-logger for all database queries and API calls
+5. **Never store sensitive data in localStorage** - Only non-sensitive page flow data

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
-import useSafeTranslation from '../hooks/useSafeTranslation'
+import { useTranslation } from 'react-i18next'
 import TriangleSideNav from '../components/TriangleSideNav'
 import TriangleLayout from '../components/TriangleLayout'
 import LanguageSwitcher from '../components/LanguageSwitcher'
@@ -11,8 +11,8 @@ import { getSupabaseClient } from '../lib/supabase-client.js'
 const supabase = getSupabaseClient()
 
 export default function RouteAnalysis() {
-  const { t, i18n, isHydrated } = useSafeTranslation(['common', 'routing'])
-  const ready = isHydrated // Translation system ready flag
+  const { t, i18n } = useTranslation(['common', 'routing'])
+  const ready = true // Translation system ready flag
   const [foundationData, setFoundationData] = useState(null)
   const [productData, setProductData] = useState(null)
   

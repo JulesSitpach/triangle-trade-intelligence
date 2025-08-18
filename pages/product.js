@@ -123,18 +123,25 @@ export default function ProductClassification() {
       console.log('Raw foundation localStorage:', foundationStorage)
       console.log('Raw derived localStorage:', derived)
 
-      if (foundationStorage) {
-        const foundationParsed = JSON.parse(foundationStorage)
-        console.log('🔍 PARSED foundation data:', foundationParsed)
-        console.log('🔍 Business type from localStorage:', foundationParsed.businessType)
-        setFoundationData(foundationParsed)
+      let foundationParsed = null
 
-        if (derived) {
-          const derivedParsed = JSON.parse(derived)
-          setDerivedData(derivedParsed)
-          
-          const enhanced = buildEnhancedContext(foundationParsed, derivedParsed)
-          setEnhancedContext(enhanced)
+      if (foundationStorage) {
+        try {
+          foundationParsed = JSON.parse(foundationStorage)
+          console.log('🔍 PARSED foundation data:', foundationParsed)
+          console.log('🔍 Business type from localStorage:', foundationParsed.businessType)
+          setFoundationData(foundationParsed)
+
+          if (derived) {
+            const derivedParsed = JSON.parse(derived)
+            setDerivedData(derivedParsed)
+            
+            const enhanced = buildEnhancedContext(foundationParsed, derivedParsed)
+            setEnhancedContext(enhanced)
+          }
+        } catch (error) {
+          console.error('Error parsing foundation data:', error)
+          foundationParsed = null
         }
       }
 
@@ -148,15 +155,19 @@ export default function ProductClassification() {
 
       // Phase 3: Check for prefetched product data
       if (FEATURES.USE_PREFETCHING && foundationParsed) {
-        const prefetchedProducts = PrefetchManager.getFromCache(
-          `products_${foundationParsed.businessType}_${foundationParsed.zipCode}`
-        )
-        if (prefetchedProducts) {
-          console.log('🚀 Using prefetched product suggestions')
-          // Apply prefetched suggestions to products
-          if (prefetchedProducts.suggestions?.length > 0) {
-            setSuggestedCodes(prefetchedProducts.suggestions)
+        try {
+          const prefetchedProducts = PrefetchManager.getFromCache(
+            `products_${foundationParsed.businessType}_${foundationParsed.zipCode}`
+          )
+          if (prefetchedProducts) {
+            console.log('🚀 Using prefetched product suggestions')
+            // Apply prefetched suggestions to products
+            if (prefetchedProducts.suggestions?.length > 0) {
+              setSuggestedCodes(prefetchedProducts.suggestions)
+            }
           }
+        } catch (error) {
+          console.error('Error accessing prefetched data:', error)
         }
       }
     }
@@ -322,7 +333,7 @@ export default function ProductClassification() {
     const electronicsKeywords = ['laptop', 'smartphone', 'phone', 'computer', 'electronics', 'tablet', 'mobile', 'iphone', 'android', 'tech', 'digital', 'software', 'hardware', 'semiconductor', 'processor', 'memory', 'display', 'battery']
     const automotiveKeywords = ['car', 'vehicle', 'automotive', 'engine', 'brake', 'tire', 'transmission', 'suspension', 'exhaust', 'chassis', 'bumper', 'headlight', 'windshield']
     const textileKeywords = ['fabric', 'cotton', 'textile', 'clothing', 'apparel', 'shirt', 't-shirt', 'dress', 'pants', 'jacket', 'fiber', 'yarn', 'weaving']
-    const medicalKeywords = ['medical', 'pharmaceutical', 'medicine', 'drug', 'device', 'surgical', 'diagnostic', 'treatment', 'therapy', 'healthcare', 'clinical']
+    const medicalKeywords = ['medical', 'pharmaceutical', 'medicine', 'drug', 'surgical', 'diagnostic', 'treatment', 'therapy', 'healthcare', 'clinical', 'biomedical', 'implant', 'prosthetic']
 
     const description = productDescription.toLowerCase()
     

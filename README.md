@@ -199,7 +199,7 @@ await fetch('/api/intelligence/learn-hs-selection', {
 **Root Cause**: localStorage cache + data version mismatch  
 **Solution**: Bump data version or `localStorage.clear()` and restart dev server
 
-### Issue: Stage 3 loading slowly  
+### Issue: Routing page loading slowly  
 **Root Cause**: Calling external APIs for static data  
 **Solution**: Use Database Intelligence Bridge for USMCA rates, ports, routes
 

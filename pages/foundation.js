@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
-// Removed useSafeTranslation - using direct i18n instead
+import { useTranslation } from 'react-i18next'
 import { initIntelligenceSession } from '../lib/intelligence/database-intelligence-bridge'
 import { setTriangleData, getTriangleData, hasValidTriangleData } from '../lib/utils/localStorage-validator'
-// Removed FoundationIntelligenceDashboard - component was consolidated
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TriangleSideNav from '../components/TriangleSideNav'
 
@@ -17,7 +16,7 @@ const FEATURES = {
 }
 
 export default function FoundationBusinessIntake() {
-  const { t, isHydrated } = useSafeTranslation('foundation')
+  const { t } = useTranslation('foundation')
   const [currentLanguage, setCurrentLanguage] = useState('en')
   const [isClient, setIsClient] = useState(false)
   const [formData, setFormData] = useState({
@@ -403,8 +402,8 @@ export default function FoundationBusinessIntake() {
           <div className="bloomberg-flex" style={{justifyContent: 'space-between', alignItems: 'center'}}>
             <Link href="/" className="bloomberg-nav-brand">
               <span className="text-success">◢</span>
-              {isHydrated ? t('nav:brandName') : 'Triangle Intelligence'}
-              <span className="text-primary">{isHydrated ? t('nav:version') : 'PRO v2.1'}</span>
+              {isClient ? t('nav:brandName') : 'Triangle Intelligence'}
+              <span className="text-primary">{isClient ? t('nav:version') : 'PRO v2.1'}</span>
             </Link>
             <div className="bloomberg-flex" style={{justifyContent: 'flex-end', flexWrap: 'wrap', gap: 'var(--space-md)'}}>
               {/* User Session Info */}
@@ -548,7 +547,7 @@ export default function FoundationBusinessIntake() {
                       {businessTypeOptions.map(option => {
                         // Translate business type using dropdown translation keys
                         const translationKey = `dropdown.industry.${option.value.toLowerCase()}`
-                        const translatedText = isHydrated ? t(translationKey) : option.description
+                        const translatedText = isClient ? t(translationKey) : option.description
                         const displayText = translatedText !== translationKey ? translatedText : (option.description || option.label)
                         
                         return (
@@ -612,7 +611,7 @@ export default function FoundationBusinessIntake() {
                       </option>
                       {countryOptions.map(option => (
                         <option key={option.value} value={option.value} title={option.description}>
-                          {isHydrated ? (option.description || option.label) : (option.description || option.label)}
+                          {isClient ? (option.description || option.label) : (option.description || option.label)}
                         </option>
                       ))}
                     </select>
@@ -761,18 +760,111 @@ export default function FoundationBusinessIntake() {
           </summary>
           
           <div className="details-content">
-            <FoundationIntelligenceDashboard 
-              formData={formData}
-              derivedData={derivedData}
-              realTimeAnalysis={marketIntelligence}
-              intelligenceScore={realTimeStats ? Math.round(((Object.values(formData).filter(v => v !== '').length) / Object.keys(formData).length) * 100) : 0}
-            />
+            <div className="bloomberg-grid" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-md)'}}>
+              
+              {/* Company Intelligence Card */}
+              <div className="bloomberg-card">
+                <div className="bloomberg-card-header">
+                  <h4 className="text-primary">Company Intelligence</h4>
+                </div>
+                <div className="bloomberg-card-body">
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Company:</span>
+                    <span className="metric-value">{formData.companyName || 'Not specified'}</span>
+                  </div>
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Business Type:</span>
+                    <span className="metric-value">{formData.businessType || 'Not specified'}</span>
+                  </div>
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Import Volume:</span>
+                    <span className="metric-value">{formData.importVolume || 'Not specified'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Geographic Intelligence Card */}
+              <div className="bloomberg-card">
+                <div className="bloomberg-card-header">
+                  <h4 className="text-success">Geographic Intelligence</h4>
+                </div>
+                <div className="bloomberg-card-body">
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Primary Supplier:</span>
+                    <span className="metric-value">{formData.primarySupplierCountry || 'Not specified'}</span>
+                  </div>
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Location:</span>
+                    <span className="metric-value">{formData.zipCode || 'Not specified'}</span>
+                  </div>
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Timeline Priority:</span>
+                    <span className="metric-value">{formData.timelinePriority || 'Not specified'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Intelligence Score Card */}
+              <div className="bloomberg-card">
+                <div className="bloomberg-card-header">
+                  <h4 className="text-warning">Intelligence Score</h4>
+                </div>
+                <div className="bloomberg-card-body">
+                  <div className="intelligence-score">
+                    <div className="score-display">
+                      {realTimeStats ? Math.round(((Object.values(formData).filter(v => v !== '').length) / Object.keys(formData).length) * 100) : 0}%
+                    </div>
+                    <div className="score-label">Form Completion</div>
+                  </div>
+                  <div className="intelligence-metric">
+                    <span className="metric-label">Next Step:</span>
+                    <span className="metric-value text-primary">Product Intelligence</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </details>
         
         </div> {/* Close page-content */}
         </main>
       </div> {/* Close triangle-layout */}
+      
+      <style jsx>{`
+        .intelligence-metric {
+          display: flex;
+          justify-content: space-between;
+          padding: var(--space-sm) 0;
+          border-bottom: 1px solid var(--color-border-light);
+        }
+        .intelligence-metric:last-child {
+          border-bottom: none;
+        }
+        .metric-label {
+          font-weight: 600;
+          color: var(--color-text-secondary);
+        }
+        .metric-value {
+          font-weight: 500;
+          color: var(--color-text-primary);
+        }
+        .intelligence-score {
+          text-align: center;
+          padding: var(--space-md) 0;
+        }
+        .score-display {
+          font-size: 2.5rem;
+          font-weight: bold;
+          color: var(--color-primary);
+          line-height: 1;
+        }
+        .score-label {
+          font-size: 0.875rem;
+          color: var(--color-text-secondary);
+          margin-top: var(--space-xs);
+        }
+      `}</style>
       
     </>
   )
