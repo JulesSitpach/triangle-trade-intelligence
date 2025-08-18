@@ -4,6 +4,7 @@ import Head from 'next/head'
 import '../styles/bloomberg-professional-clean.css'
 import '../lib/i18n' // Initialize proper i18n system
 import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
+import { TriangleStateProvider } from '../lib/state/TriangleStateContext'
 
 export default function App({ Component, pageProps }) {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function App({ Component, pageProps }) {
   }, [])
 
   return (
-    <>
+    <TriangleStateProvider>
       <Head>
         <title>Triangle Intelligence</title>
         <meta name="description" content="Tariff optimization and triangle routing intelligence" />
@@ -43,6 +44,6 @@ export default function App({ Component, pageProps }) {
         router.pathname.startsWith('/foundation')) && 
         <GlobalHSCodeChat />
       }
-    </>
+    </TriangleStateProvider>
   )
 }

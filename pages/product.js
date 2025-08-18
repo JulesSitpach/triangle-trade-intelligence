@@ -8,6 +8,14 @@ import { getSupabaseClient } from '../lib/supabase-client.js'
 import { trulyDynamicClassifierV2 as trulyDynamicClassifier } from '../lib/unified-hs-classifier.js'
 import TriangleLayout from '../components/TriangleLayout'
 
+// Phase 3: Prefetching imports
+import PrefetchManager from '../lib/prefetch/prefetch-manager'
+
+// Feature flags
+const FEATURES = {
+  USE_PREFETCHING: process.env.NEXT_PUBLIC_USE_PREFETCHING === 'true'
+}
+
 const supabase = getSupabaseClient()
 
 export default function ProductClassification() {
@@ -137,8 +145,58 @@ export default function ProductClassification() {
       } catch (err) {
         setIntelligenceStats({ totalLearned: 0, cacheSize: 0 })
       }
+
+      // Phase 3: Check for prefetched product data
+      if (FEATURES.USE_PREFETCHING && foundationParsed) {
+        const prefetchedProducts = PrefetchManager.getFromCache(
+          `products_${foundationParsed.businessType}_${foundationParsed.zipCode}`
+        )
+        if (prefetchedProducts) {
+          console.log('🚀 Using prefetched product suggestions')
+          // Apply prefetched suggestions to products
+          if (prefetchedProducts.suggestions?.length > 0) {
+            setSuggestedCodes(prefetchedProducts.suggestions)
+          }
+        }
+      }
     }
   }
+
+  // Phase 3: Routing prefetching when products are ready
+  useEffect(() => {
+    if (FEATURES.USE_PREFETCHING && foundationData && products.length > 0) {
+      const validProducts = products.filter(p => p.hsCode && p.description)
+      
+      if (validProducts.length > 0 && analysisComplete) {
+        const productData = {
+          selectedProducts: validProducts.map(p => ({
+            description: p.description,
+            hsCode: p.hsCode,
+            confidence: p.confidence
+          }))
+        }
+
+        console.log('🚀 Prefetching routing intelligence for', validProducts.length, 'products')
+        
+        // Prefetch routing with a small delay to avoid overwhelming the system
+        setTimeout(() => {
+          PrefetchManager.prefetchRouting(foundationData, productData).catch(error => {
+            console.warn('Routing prefetch failed:', error)
+          })
+        }, 1500)
+
+        // Also trigger predictive prefetching for next pages
+        setTimeout(() => {
+          PrefetchManager.predictAndPrefetch('product', {
+            foundation: foundationData,
+            products: productData
+          }).catch(error => {
+            console.warn('Predictive prefetch failed:', error)
+          })
+        }, 3000)
+      }
+    }
+  }, [foundationData, products, analysisComplete, FEATURES.USE_PREFETCHING])
 
   const updateRealTimeStats = () => {
     setRealTimeStats(prev => ({

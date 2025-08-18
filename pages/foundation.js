@@ -8,6 +8,14 @@ import { setTriangleData, getTriangleData, hasValidTriangleData } from '../lib/u
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TriangleSideNav from '../components/TriangleSideNav'
 
+// Phase 3: Prefetching imports
+import PrefetchManager from '../lib/prefetch/prefetch-manager'
+
+// Feature flags
+const FEATURES = {
+  USE_PREFETCHING: process.env.NEXT_PUBLIC_USE_PREFETCHING === 'true'
+}
+
 export default function FoundationBusinessIntake() {
   const { t, isHydrated } = useSafeTranslation('foundation')
   const [currentLanguage, setCurrentLanguage] = useState('en')
@@ -128,11 +136,37 @@ export default function FoundationBusinessIntake() {
   }
 
   const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value })
+    const newFormData = { ...formData, [field]: value }
+    setFormData(newFormData)
     
     // Auto-derive intelligence when core data is available
     if (formData.businessType && formData.zipCode && formData.primarySupplierCountry && value) {
-      setTimeout(() => deriveIntelligence({ ...formData, [field]: value }), 500)
+      setTimeout(() => deriveIntelligence(newFormData), 500)
+    }
+
+    // Phase 3: Intelligent prefetching based on form completion
+    if (FEATURES.USE_PREFETCHING) {
+      // Prefetch product suggestions when business type is selected
+      if (field === 'businessType' && value) {
+        setTimeout(() => {
+          PrefetchManager.prefetchProduct(newFormData).catch(error => {
+            console.warn('Product prefetch failed:', error)
+          })
+        }, 1000) // Wait 1 second for user to potentially select more fields
+      }
+
+      // Predictive prefetching when form reaches completion threshold
+      const completionFields = ['businessType', 'zipCode', 'primarySupplierCountry', 'importVolume']
+      const completedFields = completionFields.filter(f => newFormData[f])
+      const completionRate = completedFields.length / completionFields.length
+
+      if (completionRate >= 0.75) { // 75% form completion
+        setTimeout(() => {
+          PrefetchManager.predictAndPrefetch('foundation', newFormData).catch(error => {
+            console.warn('Predictive prefetch failed:', error)
+          })
+        }, 2000)
+      }
     }
   }
 
