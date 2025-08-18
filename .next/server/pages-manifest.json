@@ -1,6 +1,7 @@
 {
   "/_app": "pages/_app.js",
-  "/_document": "pages/_document.js",
   "/_error": "pages/_error.js",
-  "/api/intelligence/hs-codes": "pages/api/intelligence/hs-codes.js"
+  "/_document": "pages/_document.js",
+  "/dashboard-hub": "pages/dashboard-hub.js",
+  "/api/dashboard-hub-intelligence": "pages/api/dashboard-hub-intelligence.js"
 }

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Triangle Intelligence is a sophisticated tariff volatility tracking and trade optimization platform that delivers $100K-$300K+ annual savings through USMCA triangle routing strategies. The platform's core innovation is intelligent separation of volatile vs stable data to maximize intelligence while minimizing API costs.
 
+**🚀 STATUS: FULLY OPERATIONAL** - Beast Master Controller, Goldmine Intelligence, and Dashboard Hub are all active with compound intelligence generation from 519,341+ database records.
+
 **Core Value Proposition**: While bilateral tariffs (China: 30%, India: 50%) change daily with political decisions, USMCA triangle routing rates remain stable at 0% - providing predictable savings in volatile markets.
 
 **Tech Stack**: Next.js 13.5, React 18, Supabase, i18next, Anthropic Claude API, Jest, Node.js
@@ -30,7 +32,9 @@ npm run type-check  # TypeScript type checking
 
 # System Verification
 curl http://localhost:3000/api/status                      # Check API configuration
-curl http://localhost:3000/api/database-structure-test     # Test database architecture  
+curl http://localhost:3000/api/database-structure-test     # Test database architecture
+curl http://localhost:3000/api/dashboard-hub-intelligence  # Test Beast Master & Goldmine
+Navigate to /dashboard-hub                                  # Bloomberg Terminal-style dashboard
 Navigate to /api-test                                      # Interactive API dashboard
 
 # Bundle Analysis
@@ -76,8 +80,16 @@ const shipping = await VolatileDataManager.getOrFetchAPIData('shippo', params)
 
 **Result**: 80%+ API call reduction while maintaining real-time market intelligence.
 
-## 6-Page Intelligence Journey
+## Intelligence Platform Architecture
 
+### Bloomberg Terminal-style Dashboard Hub (`/dashboard-hub`) ✨ NEW
+**Executive Intelligence Hub** powered by Beast Master Controller and Goldmine Intelligence:
+- **Real-time Compound Insights**: 6 intelligence systems working together
+- **Multi-view Dashboard**: Executive, Intelligence, Financial, Implementation, Partnership
+- **Live Performance Monitoring**: System health and intelligence quality metrics
+- **Network Effects Tracking**: Database growth from user interactions
+
+### 6-Page Intelligence Journey
 1. **Foundation** (`/foundation`) - Business intake with geographic intelligence derivation
 2. **Product** (`/product`) - Product intelligence with HS code mapping via server-side APIs  
 3. **Routing** (`/routing`) - Triangle routing using Database Intelligence Bridge
@@ -85,7 +97,7 @@ const shipping = await VolatileDataManager.getOrFetchAPIData('shippo', params)
 5. **Hindsight** (`/hindsight`) - Hindsight pattern extraction to institutional memory
 6. **Alerts** (`/alerts`) - Predictive alerts based on volatility tracking
 
-**Navigation Flow**: Streamlined 6-page journey for optimal user experience and completion rates.
+**Navigation Flow**: Streamlined 6-page journey with Dashboard Hub for executive oversight.
 
 ## Database Schema (Supabase)
 
@@ -191,18 +203,77 @@ GET /api/real-hindsight-intelligence // Hindsight analysis testing
 ```javascript
 POST /api/trade-intelligence-chat     // Marcus AI conversation system
 GET /api/marcus-intelligence-dashboard // Marcus AI dashboard data
+POST /api/dashboard-hub-intelligence  // Bloomberg Terminal-style dashboard intelligence
 ```
 
-## Beast Master Intelligence System
+### Beast Master & Goldmine Intelligence APIs
+```javascript
+// Core Intelligence Generation
+BeastMasterController.activateAllBeasts(userProfile, currentPage, options)
+// Orchestrates all 6 intelligence systems for compound insights
 
-The platform implements six interconnected intelligence systems:
+UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile)
+// Database-powered intelligence from 519,341+ records
 
-1. **Trade Flow Intelligence** - 597K bilateral trade records
-2. **Pattern Intelligence** - Success patterns from 240+ sessions  
-3. **Similarity Intelligence** - Learn from similar business profiles
-4. **Seasonal Intelligence** - Q4_HEAVY, SUMMER_PEAK timing
-5. **Marcus AI Intelligence** - Anthropic Claude for analysis
-6. **Network Intelligence** - Each user improves future intelligence
+// Real-time Dashboard Intelligence  
+POST /api/dashboard-hub-intelligence
+{
+  "dashboardView": "executive|intelligence|financial|implementation|partnership",
+  "mockUserProfile": {
+    "businessType": "Electronics",
+    "primarySupplierCountry": "China", 
+    "importVolume": "$1M - $5M"
+  }
+}
+
+// Returns compound intelligence with:
+// - Beast Master status (all 5 systems)
+// - Real-time compound insights
+// - Intelligence source metrics
+// - Performance characteristics
+```
+
+## Beast Master Intelligence System - FULLY OPERATIONAL ✅
+
+The platform implements **6 interconnected intelligence systems** that generate **compound insights** impossible with individual systems:
+
+### Core Intelligence Architecture
+```javascript
+🦾 Beast Master Controller (Orchestrates all systems)
+├── 🧠 Similarity Intelligence - 205+ workflow sessions for pattern matching
+├── 📅 Seasonal Intelligence - Q4_HEAVY, SUMMER_PREPARATION timing optimization  
+├── 📊 Market Intelligence - Real-time volatility (China: 85%, Mexico: 25%)
+├── 🏆 Success Pattern Intelligence - 33+ hindsight patterns from database
+├── 🚨 Alert Generation Intelligence - Multi-system alert prioritization
+└── 📈 Network Intelligence - Each user improves future intelligence (compound flywheel)
+```
+
+### Compound Intelligence Generation
+The Beast Master generates insights **only possible by combining multiple systems**:
+
+**Perfect Storm Detection**: Similarity + Seasonal + Market = 95% confidence insights  
+**Network Effects Intelligence**: Growing database improves all future analysis  
+**Institutional Learning**: 205+ sessions create institutional memory  
+**Timing Optimization**: Seasonal + Market alignment for maximum impact
+
+### Goldmine Intelligence Integration
+Beast Master integrates with **Goldmine Intelligence** for database-powered insights:
+
+```javascript
+🏆 Goldmine Intelligence Database (519,341+ Records)
+├── 📊 Comtrade Reference: 17,500+ HS classifications
+├── 🌐 Trade Flows: 500,800+ bilateral trade records
+├── 👥 Workflow Sessions: 205+ user journey patterns
+├── 🤖 Marcus Consultations: 70+ AI analysis records
+└── 📈 Hindsight Patterns: 33+ proven success strategies
+```
+
+### Dashboard Hub Integration
+Beast Master powers the **Bloomberg Terminal-style Executive Dashboard** with:
+- Real-time compound insights updating every 30 seconds
+- Multi-view intelligence (Executive, Financial, Implementation, Partnership)
+- Performance monitoring with intelligence quality metrics
+- Live alert generation with intelligent prioritization
 
 ## Environment Configuration
 
@@ -223,9 +294,34 @@ USE_MOCK_APIS=false                                     # Enable real API calls
 
 ## Critical Development Patterns
 
-### Always Use Database Intelligence Bridge
+### Always Use Beast Master & Goldmine Intelligence Systems
 ```javascript
-// CORRECT - Uses volatile/stable optimization with proper imports
+// CORRECT - Uses Beast Master Controller for compound intelligence
+import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
+import UnifiedGoldmineIntelligence from '../lib/intelligence/goldmine-intelligence'
+
+// Generate compound insights from all 6 intelligence systems
+const beastResults = await BeastMasterController.activateAllBeasts(
+  userProfile, 
+  currentPage,
+  { source: 'dashboard_hub', realTime: true }
+);
+
+// Get database intelligence from 519,341+ records
+const goldmineData = await UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile);
+
+// Access compound insights (only possible with multiple systems)
+const compoundInsights = beastResults.unified?.insights?.compound || [];
+const networkEffects = goldmineData.volatile?.networkEffectsEnabled;
+
+// WRONG - Using individual systems without Beast Master orchestration
+const similarityData = await SimilarityIntelligence.getSimilarCompanies(profile)
+// This misses compound insights that require multiple systems
+```
+
+### Database Intelligence Bridge Integration
+```javascript
+// Beast Master integrates with Database Intelligence Bridge for optimal performance
 import DatabaseIntelligenceBridge, { StableDataManager, VolatileDataManager } from '../lib/intelligence/database-intelligence-bridge'
 
 // Get stable data (instant responses, zero API costs)
@@ -449,15 +545,22 @@ describe('DatabaseIntelligenceBridge', () => {
 - **`environment-validation.js`**: Validates all required env vars on startup
 - **`security.js`**: API key validation and security middleware
 
-### Intelligence Systems (`/lib/`)
-- **`beast-master-controller.js`**: Orchestrates all 6 intelligence systems
+### Intelligence Systems (`/lib/intelligence/`) ✅ FULLY OPERATIONAL
+- **`beast-master-controller.js`**: **RESTORED** - Orchestrates all 6 intelligence systems for compound insights
+- **`goldmine-intelligence.js`**: **RESTORED** - Database intelligence from 519,341+ records with network effects
+- **`database-intelligence-bridge.js`**: Volatile/stable data optimization for 80% API cost reduction
 - **`dynamic-savings-engine.js`**: Calculates real-time savings based on market conditions
 - **`dynamic-confidence-engine.js`**: Progressive confidence scoring (1.0 → 10.0)
-- **`hindsight-institutional-learning.js`**: Extracts patterns from user sessions
-- **`similarity-intelligence.js`**: Finds similar business profiles for better predictions
-- **`marcus-claude-api.js`**: Anthropic Claude integration for AI analysis
+- **`seasonal-intelligence.js`**: **RESTORED** - Q4_HEAVY, SUMMER_PREPARATION timing optimization
+- **`similarity-intelligence.js`**: **RESTORED** - Finds similar business profiles from 205+ sessions
 - **`unified-hs-classifier.js`**: Intelligent product classification with caching
 - **`tariff-volatility-tracker.js`**: Monitors and alerts on tariff changes
+
+### Beast Master Compound Intelligence Features
+- **Perfect Storm Detection**: Similarity + Seasonal + Market = 95% confidence insights
+- **Network Effects Intelligence**: Each user session improves all future analysis
+- **Institutional Learning Integration**: 33+ success patterns + 70+ Marcus consultations
+- **Real-time Dashboard Integration**: Powers Bloomberg Terminal-style executive hub
 
 ### Performance Optimizers (`/lib/`)
 - **`fast-hs-classifier.js`**: High-performance HS code classification
