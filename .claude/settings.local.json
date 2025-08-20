@@ -145,7 +145,8 @@
       "Bash(docker version:*)",
       "Bash(time curl:*)",
       "Bash(NEXT_PUBLIC_SUPABASE_URL=\"https://mrwitpgbcaxgnirqtavt.supabase.co\" SUPABASE_SERVICE_ROLE_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yd2l0cGdiY2F4Z25pcnF0YXZ0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTgyNTEzNCwiZXhwIjoyMDY1NDAxMTM0fQ.ghQeTQAK56uCMX3xkWbeYXb2IAnkSwx7EUhnaZXsFW8\" node -e \"\nconst { createClient } = require(''@supabase/supabase-js'');\nconst supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);\n\nasync function checkTableStructure() {\n  console.log(''🔍 Checking trade_flows table structure...'');\n  \n  // Get sample record to see actual column names\n  const {data: sample, error} = await supabase\n    .from(''trade_flows'')\n    .select(''*'')\n    .limit(1);\n    \n  if (error) {\n    console.error(''❌ Error:'', error.message);\n    return;\n  }\n  \n  if (sample && sample.length > 0) {\n    console.log(''✅ ACTUAL COLUMN NAMES:'');\n    Object.keys(sample[0]).forEach(col => {\n      console.log(''  - '' + col);\n    });\n  } else {\n    console.log(''⚠️ No data found in trade_flows table'');\n  }\n}\n\ncheckTableStructure();\n\")",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
