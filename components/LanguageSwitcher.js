@@ -6,10 +6,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { useTranslation as useI18nTranslation } from 'react-i18next'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 
 export default function LanguageSwitcher({ onLanguageChange }) {
-  const { i18n } = useI18nTranslation()
+  const { i18n } = useSafeTranslation('common')
   const [currentLanguage, setCurrentLanguage] = useState('en')
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
@@ -93,7 +93,7 @@ export default function LanguageSwitcher({ onLanguageChange }) {
     }
   }
 
-  const currentLang = languages.find(lang => lang.code === currentLanguage)
+  const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0]
 
   // Prevent hydration mismatches by showing default until mounted
   if (!mounted) {
@@ -111,8 +111,8 @@ export default function LanguageSwitcher({ onLanguageChange }) {
   return (
     <div className="language-switcher">
       <div className="current-language" onClick={() => document.getElementById('language-dropdown').classList.toggle('open')}>
-        <span className="flag">{currentLang.flag}</span>
-        <span className="label">{currentLang.label}</span>
+        <span className="flag">{currentLang?.flag || '🇺🇸'}</span>
+        <span className="label">{currentLang?.label || 'EN'}</span>
         <span className="chevron">▼</span>
       </div>
 

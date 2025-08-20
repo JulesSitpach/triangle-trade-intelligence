@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
-import { generateMarcusReport } from '../lib/marcus-intelligence'
+import { generateMarcusReport } from '../lib/intelligence/marcus-intelligence'
 
 export default function MarcusReportPage() {
   const [reportData, setReportData] = useState(null)

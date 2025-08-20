@@ -38,7 +38,7 @@ ANTHROPIC_API_KEY=sk-ant-api03-... # Marcus AI system
 # 3. Verify system health
 curl http://localhost:3000/api/status
 curl http://localhost:3000/api/database-structure-test
-# Interactive testing dashboard at: http://localhost:3000/api-test
+# Test individual endpoints - no unified api-test dashboard
 ```
 
 ## 🧠 Revolutionary Architecture: Why This Can't Be Copied
@@ -67,12 +67,12 @@ const shipping = await VolatileDataManager.getOrFetchAPIData('shippo', params)
 **Secret Sauce**: While competitors waste money calling APIs for static treaty data, we separate intelligence by volatility
 
 ### 3. Database Intelligence Bridge (The Core System)
-**CRITICAL**: All intelligence flows through `lib/database-intelligence-bridge.js`
+**CRITICAL**: All intelligence flows through `lib/intelligence/database-intelligence-bridge.js`
 
 ```javascript
-// ✅ CORRECT - Uses 597K trade flows + volatile/stable optimization
-import DatabaseIntelligenceBridge from '../lib/database-intelligence-bridge'
-const intelligence = await DatabaseIntelligenceBridge.getTriangleRouting(params)
+// ✅ CORRECT - Uses database intelligence + volatile/stable optimization
+import DatabaseIntelligenceBridge from '../lib/intelligence/database-intelligence-bridge'
+const intelligence = await DatabaseIntelligenceBridge.getTriangleRoutingIntelligence(params)
 
 // ❌ WRONG - Wastes money calling APIs for static data
 const response = await fetch('external-api.com/static-ports') 
@@ -131,24 +131,27 @@ country_risk_scores: Dynamic       -- Political volatility tracking
 
 ## 🔥 Beast Master Intelligence System
 
-**6 interconnected engines** working simultaneously:
+**6 interconnected engines** working simultaneously (from lib/intelligence/beast-master-controller.js):
 
-1. **Trade Flow Intelligence** - 597K bilateral transaction analysis
-2. **Pattern Intelligence** - Success patterns from 240+ real user journeys  
-3. **Similarity Intelligence** - Match users to similar business profiles
-4. **Seasonal Intelligence** - Q4_HEAVY, SUMMER_PEAK timing optimization
-5. **Marcus AI Intelligence** - Anthropic Claude for complex trade analysis
-6. **Network Intelligence** - Each user improves intelligence for all future users
+1. **Similarity Intelligence** - 240+ workflow sessions for pattern matching
+2. **Seasonal Intelligence** - Q4_HEAVY, SUMMER_PREPARATION timing optimization  
+3. **Market Intelligence** - Real-time volatility tracking (China: 85%, Mexico: 25%)
+4. **Success Pattern Intelligence** - 33+ proven strategies from hindsight database
+5. **Alert Generation Intelligence** - Multi-system alert prioritization
+6. **Shipping Intelligence** - Capacity constraints, carrier performance, route complexity
 
 ```javascript
 // Beast Master Controller orchestrates all systems
-const intelligence = await Promise.all([
-  SimilarityIntelligence.getSimilarCompanyIntelligence(userProfile),
-  SeasonalIntelligence.getSeasonalIntelligence(userProfile), 
-  MarketIntelligence.getMarketIntelligence(userProfile),
-  SuccessPatternIntelligence.getSuccessPatterns(userProfile),
-  StageAnalyticsEngine.getStageAnalytics(userProfile, currentStage)
-])
+import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
+
+const beastResults = await BeastMasterController.activateAllBeasts(
+  userProfile, 
+  currentPage,
+  { source: 'dashboard_hub', realTime: true }
+)
+
+// Access compound insights (only possible with multiple systems)
+const compoundInsights = beastResults.unified?.insights?.compound || []
 ```
 
 ## 🎯 Critical Developer Patterns
@@ -211,18 +214,24 @@ await fetch('/api/intelligence/learn-hs-selection', {
 
 ### Core Intelligence APIs
 ```javascript
-POST /api/intelligence/routing     // Triangle routing with 597K flows  
-POST /api/intelligence/hs-codes    // Product classification with learning
-GET  /api/intelligence/tariffs     // Volatility tracking with caching
-POST /api/product-suggestions      // Real suggestions from trade data
-POST /api/blaze/triangle-routing   // High-performance $100K+ routing
+POST /api/intelligence/routing        // Triangle routing with database intelligence
+POST /api/intelligence/hs-codes       // Product classification with learning
+GET  /api/intelligence/tariffs        // Volatility tracking with caching
+POST /api/intelligence/shipping       // Shipping optimization
+POST /api/intelligence/foundation-derivation // Geographic intelligence
+POST /api/product-suggestions         // Real suggestions from trade data
+POST /api/blaze/triangle-routing      // High-performance routing
+POST /api/dashboard-hub-intelligence  // Bloomberg Terminal-style intelligence
+POST /api/trade-intelligence-chat     // Marcus AI conversation system
 ```
 
 ### System APIs  
 ```javascript
 GET /api/status                    // Production health monitoring
-GET /api/database-structure-test   // Validate 59 tables + 656K records
-GET /api-test                      // Interactive testing dashboard
+GET /api/database-structure-test   // Validate database architecture
+GET /api/production-data-quality-check // Data quality verification
+POST /api/rss-trigger-test         // RSS monitoring system test
+GET /api/redis-rate-limiting-demo  // Rate limiting demonstration
 ```
 
 ## 🧪 Testing & Code Quality
@@ -240,11 +249,13 @@ npm run type-check    # ✅ TypeScript validation passes
 - Missing dependencies in useEffect hooks (dashboard.js, marcus-report.js, etc.)
 - Anonymous default exports in lib files (trade-alert-monitor.js, transparent-hs-classifier.js)
 
-**Latest Updates (August 2025):**
-- ✅ System operational with live database connection
-- ✅ API endpoints responding correctly (status, database-structure-test)
-- ✅ Database Intelligence Bridge fully functional
-- ✅ Beast Master intelligence systems coordinating 6 engines
+**Latest Updates (January 2025):**
+- ✅ System operational with live database connection (500K+ trade flows)
+- ✅ API endpoints responding correctly (40+ endpoints active)
+- ✅ Database Intelligence Bridge fully functional with volatile/stable separation
+- ✅ Beast Master Controller orchestrating all 6 intelligence systems
+- ✅ RSS monitoring system operational with Vercel cron
+- ✅ Redis rate limiting implemented for enterprise-grade performance
 - ⚠️ Minor lint issues require cleanup for production deployment
 
 ## 💎 Competitive Advantages (Impossible to Replicate)
@@ -273,7 +284,7 @@ npm run type-check    # ✅ TypeScript validation passes
 
 ## 📈 Success Metrics & Business Value
 
-### Current Platform Statistics (Live as of August 2025)
+### Current Platform Statistics (Live as of January 2025)
 - **597,072+ trade flow records** - Real transaction intelligence
 - **5,618 enhanced comtrade references** - Optimized HS code database  
 - **240+ workflow sessions** - Building compound intelligence
@@ -345,7 +356,7 @@ This is **not just another SaaS tool** - it's a **collective intelligence system
 4. **Understand the business** - This saves companies $100K-$300K+ annually through USMCA triangle routing
 5. **Focus on intelligence** - Every optimization should improve the compound learning system
 
-**Remember**: You're working on a sophisticated institutional learning platform that delivers real business value, not fixing a broken web app.
+**Remember**: You're working on a sophisticated institutional learning platform with Beast Master Controller, RSS monitoring, and compound intelligence that delivers real business value, not fixing a broken web app.
 
 ---
 

@@ -146,14 +146,14 @@ Mientras resuelvo el problema técnico, puedes:
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="bloomberg-chat-trigger">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          className="bloomberg-chat-trigger-btn"
           title="Partnership Sales Assistant"
         >
           <MessageCircle size={24} />
-          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
+          <div className="bloomberg-chat-trigger-badge">
             🇲🇽
           </div>
         </button>
@@ -162,53 +162,53 @@ Mientras resuelvo el problema técnico, puedes:
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col">
+    <div className="bloomberg-chat-container">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 rounded-t-lg flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+      <div className="bloomberg-chat-header">
+        <div className="bloomberg-chat-header-content">
           <Users size={20} />
-          <div>
-            <h3 className="font-semibold">Partnership Sales Assistant</h3>
-            <p className="text-sm opacity-90">Especialista en Partners Mexicanos</p>
+          <div className="bloomberg-chat-header-text">
+            <h3 className="bloomberg-chat-title">Partnership Sales Assistant</h3>
+            <p className="bloomberg-chat-subtitle">Especialista en Partners Mexicanos</p>
           </div>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-white hover:bg-white/20 p-1 rounded"
+          className="bloomberg-chat-close"
         >
           <X size={20} />
         </button>
       </div>
 
       {/* Quick Actions */}
-      <div className="p-3 border-b bg-gray-50">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="bloomberg-chat-quick-actions">
+        <div className="bloomberg-chat-actions-grid">
           {quickActions.map((action) => (
             <button
               key={action.id}
               onClick={() => sendMessage(action.prompt)}
-              className="flex items-center space-x-2 p-2 text-sm bg-white border rounded hover:bg-gray-50 transition-colors"
+              className="bloomberg-chat-action-btn"
               disabled={isLoading}
             >
-              <action.icon size={14} className="text-blue-600" />
-              <span className="truncate">{action.label}</span>
+              <action.icon size={14} className="bloomberg-chat-action-icon" />
+              <span className="bloomberg-chat-action-label">{action.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="bloomberg-flex-1 bloomberg-overflow-y-auto bloomberg-p-md bloomberg-card">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] p-3 rounded-lg ${
+              className={`max-w-[80%] bloomberg-p-md bloomberg-rounded-lg ${
                 message.type === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bloomberg-btn-primary'
+                  : 'bloomberg-card bloomberg-border-info'
               }`}
             >
               {message.type === 'bot' ? (
@@ -216,13 +216,13 @@ Mientras resuelvo el problema técnico, puedes:
                   dangerouslySetInnerHTML={{
                     __html: formatMessage(message.content)
                   }}
-                  className="prose prose-sm max-w-none"
+                  className="bloomberg-text-sm"
                 />
               ) : (
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="bloomberg-text-sm">{message.content}</p>
               )}
-              <div className={`text-xs mt-2 opacity-70 ${
-                message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+              <div className={`bloomberg-text-xs bloomberg-mt-sm bloomberg-text-muted ${
+                message.type === 'user' ? 'bloomberg-text-muted' : 'bloomberg-text-muted'
               }`}>
                 {new Date(message.timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -235,9 +235,9 @@ Mientras resuelvo el problema técnico, puedes:
         
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 p-3 rounded-lg flex items-center space-x-2">
-              <Loader size={16} className="animate-spin text-blue-600" />
-              <span className="text-gray-600">Analizando...</span>
+            <div className="bloomberg-card bloomberg-border-info bloomberg-p-md bloomberg-rounded-lg bloomberg-flex bloomberg-items-center bloomberg-gap-sm">
+              <Loader size={16} className="bloomberg-pulse text-primary" />
+              <span className="bloomberg-text-muted">Analizando...</span>
             </div>
           </div>
         )}
@@ -245,26 +245,26 @@ Mientras resuelvo el problema técnico, puedes:
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-gray-50">
-        <div className="flex space-x-2">
+      <div className="bloomberg-p-md bloomberg-border-top bloomberg-card">
+        <div className="bloomberg-flex bloomberg-gap-sm">
           <textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Pregunta sobre partnerships, comisiones, analytics..."
-            className="flex-1 p-2 border rounded-lg resize-none h-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bloomberg-input bloomberg-flex-1"
             disabled={isLoading}
             rows={1}
           />
           <button
             onClick={() => sendMessage()}
             disabled={!inputMessage.trim() || isLoading}
-            className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="bloomberg-btn bloomberg-btn-primary"
           >
             <Send size={16} />
           </button>
         </div>
-        <div className="text-xs text-gray-500 mt-2 text-center">
+        <div className="bloomberg-text-xs bloomberg-text-muted bloomberg-mt-sm bloomberg-text-center">
           💡 Usa los botones rápidos o escribe tu pregunta
         </div>
       </div>

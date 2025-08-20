@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useSmartT } from '../lib/smartT';
+import { useMemoryOptimizedPolling } from '../hooks/useMemoryOptimization.js';
+import SalesOperationsDashboard from '../components/SalesOperationsDashboard';
 
 export default function DashboardHub() {
+  const { smartT } = useSmartT();
   const [activeView, setActiveView] = useState('executive');
   const [loading, setLoading] = useState(true);
   const [liveData, setLiveData] = useState({
@@ -24,7 +28,8 @@ export default function DashboardHub() {
     { id: 'intelligence', name: 'Intelligence', icon: '🧠' },
     { id: 'financial', name: 'Financial', icon: '💰' },
     { id: 'implementation', name: 'Implementation', icon: '🚀' },
-    { id: 'partnership', name: 'Partnership', icon: '🤝' }
+    { id: 'partnership', name: 'Partnership', icon: '🤝' },
+    { id: 'sales', name: 'Sales Operations', icon: '🇲🇽' }
   ];
 
   // Set initial time only on client to avoid hydration mismatch
@@ -35,66 +40,66 @@ export default function DashboardHub() {
     }));
   }, []);
 
-  // Connect to real Dashboard Hub Intelligence API
-  useEffect(() => {
-    const fetchIntelligenceData = async () => {
-      try {
-        const response = await fetch('/api/dashboard-hub-intelligence', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            dashboardView: activeView,
-            mockUserProfile: {
-              businessType: 'Electronics',
-              primarySupplierCountry: 'China',
-              importVolume: '$1M - $5M',
-              companyName: 'Dashboard Hub Demo',
-              timelinePriority: 'COST'
-            }
-          })
-        });
-
-        if (response.ok) {
-          const intelligenceData = await response.json();
-          
-          if (intelligenceData.success && intelligenceData.intelligence) {
-            const intel = intelligenceData.intelligence;
-            
-            // Update live metrics with real data from Beast Master & Goldmine
-            setLiveData({
-              tradeFlows: intel.metrics.tradeFlows,
-              intelligence: `${intel.metrics.totalRecords.toLocaleString()}+`,
-              networkEffects: `${intel.metrics.networkSessions}+`,
-              compounds: String(intel.metrics.compoundInsights),
-              volatility: intel.marketContext.volatility,
-              lastUpdate: new Date(intelligenceData.timestamp).toLocaleTimeString()
-            });
-
-            // Update Beast Master status with real activation data
-            setBeastMasterStatus(intel.beastMasterStatus);
-            
-            // Update compound insights from real Beast Master activation
-            setCompoundInsights(intel.compoundInsights);
-            
-            // Update intelligence sources from Goldmine Intelligence
-            setIntelligenceSources(intel.intelligenceSources);
-            
-            // Update performance metrics
-            setPerformance(intel.performance);
+  // Memory-optimized Dashboard Hub Intelligence API connection
+  const fetchIntelligenceData = async () => {
+    try {
+      const response = await fetch('/api/dashboard-hub-intelligence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dashboardView: activeView,
+          mockUserProfile: {
+            businessType: 'Electronics',
+            primarySupplierCountry: 'China',
+            importVolume: '$1M - $5M',
+            companyName: 'Dashboard Hub Demo',
+            timelinePriority: 'COST'
           }
+        })
+      });
+
+      if (response.ok) {
+        const intelligenceData = await response.json();
+        
+        if (intelligenceData.success && intelligenceData.intelligence) {
+          const intel = intelligenceData.intelligence;
+          
+          // Update live metrics with real data from Beast Master & Goldmine
+          setLiveData({
+            tradeFlows: intel.metrics.tradeFlows,
+            intelligence: `${intel.metrics.totalRecords.toLocaleString()}+`,
+            networkEffects: `${intel.metrics.networkSessions}+`,
+            compounds: String(intel.metrics.compoundInsights),
+            volatility: intel.marketContext.volatility,
+            lastUpdate: new Date(intelligenceData.timestamp).toLocaleTimeString()
+          });
+
+          // Update Beast Master status with real activation data
+          setBeastMasterStatus(intel.beastMasterStatus);
+          
+          // Update compound insights from real Beast Master activation
+          setCompoundInsights(intel.compoundInsights);
+          
+          // Update intelligence sources from Goldmine Intelligence
+          setIntelligenceSources(intel.intelligenceSources);
+          
+          // Update performance metrics
+          setPerformance(intel.performance);
         }
-      } catch (error) {
-        console.error('Dashboard Intelligence fetch error:', error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error('Dashboard Intelligence fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Use memory-optimized polling with automatic cleanup (30-second intervals)
+  useMemoryOptimizedPolling(fetchIntelligenceData, 30000, 'DashboardHub');
+
+  // Re-fetch when view changes
+  useEffect(() => {
     fetchIntelligenceData();
-
-    // Real-time updates every 30 seconds
-    const interval = setInterval(fetchIntelligenceData, 30000);
-    return () => clearInterval(interval);
   }, [activeView]);
 
   const ExecutiveView = () => (
@@ -111,7 +116,7 @@ export default function DashboardHub() {
         </div>
         <div className="bloomberg-metric">
           <div className="bloomberg-metric-value">{liveData.tradeFlows}</div>
-          <div className="bloomberg-metric-label">Trade Flows Analyzed</div>
+          <div className="bloomberg-metric-label">Trade Flow Analysis</div>
         </div>
         <div className="bloomberg-metric">
           <div className="bloomberg-metric-value text-success">{liveData.networkEffects}</div>
@@ -174,7 +179,7 @@ export default function DashboardHub() {
       {/* Compound Insights */}
       <div className="bloomberg-card">
         <div className="bloomberg-card-header">
-          <h3 className="bloomberg-card-title">Compound Intelligence Insights</h3>
+          <h3 className="bloomberg-card-title">Compound Intelligence</h3>
           <div className="bloomberg-status bloomberg-status-success">REAL-TIME</div>
         </div>
         <div className="bloomberg-mb-lg">
@@ -299,21 +304,21 @@ export default function DashboardHub() {
             {/* Implementation Progress */}
             <div className="bloomberg-card">
               <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">Implementation Progress</h3>
+                <h3 className="bloomberg-card-title">{smartT("dashboard.implementationprogre")}</h3>
                 <div className="bloomberg-status bloomberg-status-success">READY</div>
               </div>
               <div className="bloomberg-mb-lg">
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value text-success">12.3</div>
-                  <div className="bloomberg-metric-label">Average Days to Implementation</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.averagedaysto")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">92%</div>
-                  <div className="bloomberg-metric-label">Success Rate</div>
+                  <div className="bloomberg-metric-label">{smartT("product.successrate")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">6</div>
-                  <div className="bloomberg-metric-label">Intelligence Systems Active</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.intelligencesystemsa")}</div>
                 </div>
               </div>
               <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
@@ -324,21 +329,21 @@ export default function DashboardHub() {
             {/* Performance Metrics */}
             <div className="bloomberg-card">
               <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">Performance Metrics</h3>
+                <h3 className="bloomberg-card-title">{smartT("dashboard.performancemetrics")}</h3>
                 <div className="bloomberg-status bloomberg-status-success">OPTIMIZED</div>
               </div>
               <div className="bloomberg-mb-lg">
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value text-success">{performance.totalProcessingTime || '0'}ms</div>
-                  <div className="bloomberg-metric-label">Response Time</div>
+                  <div className="bloomberg-metric-label">{smartT("alerts.responsetime")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">{performance.intelligenceQuality || 60}%</div>
-                  <div className="bloomberg-metric-label">Intelligence Quality</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.intelligencequality")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value text-success">{performance.networkEffectsActive ? 'YES' : 'NO'}</div>
-                  <div className="bloomberg-metric-label">Network Effects Active</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.networkeffectsactive")}</div>
                 </div>
               </div>
             </div>
@@ -350,21 +355,21 @@ export default function DashboardHub() {
             {/* Partnership Network */}
             <div className="bloomberg-card">
               <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">Partnership Ecosystem</h3>
+                <h3 className="bloomberg-card-title">{smartT("dashboard.partnershipecosystem")}</h3>
                 <div className="bloomberg-status bloomberg-status-success">ACTIVE</div>
               </div>
               <div className="bloomberg-mb-lg">
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">47+</div>
-                  <div className="bloomberg-metric-label">Strategic Partners</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.strategicpartners")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">23</div>
-                  <div className="bloomberg-metric-label">Countries Covered</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.countriescovered")}</div>
                 </div>
                 <div className="bloomberg-metric bloomberg-mb-md">
                   <div className="bloomberg-metric-value">15+</div>
-                  <div className="bloomberg-metric-label">Trade Specialists</div>
+                  <div className="bloomberg-metric-label">{smartT("dashboard.tradespecialists")}</div>
                 </div>
               </div>
               <Link href="/partnership" className="bloomberg-btn bloomberg-btn-primary">
@@ -375,7 +380,7 @@ export default function DashboardHub() {
             {/* Specialist Connection */}
             <div className="bloomberg-card">
               <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">Specialist Connection</h3>
+                <h3 className="bloomberg-card-title">{smartT("dashboard.specialistconnection")}</h3>
                 <div className="bloomberg-status bloomberg-status-success">AVAILABLE</div>
               </div>
               <div className="bloomberg-mb-lg">
@@ -393,6 +398,8 @@ export default function DashboardHub() {
             </div>
           </div>
         );
+      case 'sales':
+        return <SalesOperationsDashboard />;
       default:
         return <ExecutiveView />;
     }

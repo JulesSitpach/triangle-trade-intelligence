@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 
 export default function MarcusIntelligenceChat({ onSelectCode, onClose }) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useSafeTranslation('common')
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([
     { 

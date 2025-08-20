@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
-import { useTranslation } from 'react-i18next'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
+import { useMemoryOptimization } from '../hooks/useMemoryOptimization.js'
 import { initIntelligenceSession } from '../lib/intelligence/database-intelligence-bridge'
 import { setTriangleData, getTriangleData, hasValidTriangleData } from '../lib/utils/localStorage-validator'
 import LanguageSwitcher from '../components/LanguageSwitcher'
-import TriangleSideNav from '../components/TriangleSideNav'
+import TriangleLayout from '../components/TriangleLayout'
 
 // Phase 3: Prefetching imports
 import PrefetchManager from '../lib/prefetch/prefetch-manager'
+import { smartT } from '../lib/smartT'
 
 // Feature flags
 const FEATURES = {
@@ -16,7 +18,8 @@ const FEATURES = {
 }
 
 export default function FoundationBusinessIntake() {
-  const { t } = useTranslation('foundation')
+  const { t, i18n } = useSafeTranslation('common')
+  const { setOptimizedInterval, registerCleanup } = useMemoryOptimization('Foundation')
   const [currentLanguage, setCurrentLanguage] = useState('en')
   const [isClient, setIsClient] = useState(false)
   const [formData, setFormData] = useState({
@@ -54,17 +57,20 @@ export default function FoundationBusinessIntake() {
     lastUpdate: new Date().toISOString()
   })
 
-  // Real-time updates
+  // Memory-optimized real-time updates
   useEffect(() => {
     setIsClient(true)
     loadEnterpriseData()
     
-    // Update stats every 30 seconds to show live platform activity
-    const interval = setInterval(() => {
+    // Update stats every 30 seconds using memory-optimized interval
+    const interval = setOptimizedInterval(() => {
       updateRealTimeStats()
-    }, 30000)
+    }, 30000, 'realTimeStats')
     
-    return () => clearInterval(interval)
+    // Register additional cleanup if needed
+    registerCleanup(() => {
+      console.log('Foundation component cleanup completed')
+    })
   }, [])
 
   const loadEnterpriseData = async () => {
@@ -193,21 +199,35 @@ export default function FoundationBusinessIntake() {
           dataPointsGenerated: intelligence.dataPointsGenerated || 24
         })
       } else {
-        // Fallback intelligence
-        const geographic = deriveGeographic(data.zipCode)
-        const patterns = deriveBusinessPatterns(data.businessType)
-        const routing = deriveOptimalRouting(data.primarySupplierCountry, geographic)
-        
-        setDerivedData({
-          loading: false,
-          geographic,
-          patterns,
-          routing,
-          projectedSavings: calculateProjectedSavings(data),
-          riskAssessment: calculateRiskAssessment(data),
-          backendEnhanced: false,
-          dataPointsGenerated: 16
-        })
+        // Fallback intelligence with async geographic lookup
+        try {
+          const geographic = await deriveGeographic(data.zipCode)
+          const patterns = deriveBusinessPatterns(data.businessType)
+          const routing = deriveOptimalRouting(data.primarySupplierCountry, geographic)
+          
+          setDerivedData({
+            loading: false,
+            geographic,
+            patterns,
+            routing,
+            projectedSavings: calculateProjectedSavings(data),
+            riskAssessment: calculateRiskAssessment(data),
+            backendEnhanced: false,
+            dataPointsGenerated: geographic?.confidence ? 18 : 16
+          })
+        } catch (error) {
+          console.error('Fallback intelligence error:', error)
+          setDerivedData({
+            loading: false,
+            geographic: { error: 'Geographic lookup failed' },
+            patterns: deriveBusinessPatterns(data.businessType),
+            routing: { error: 'Routing analysis failed' },
+            projectedSavings: calculateProjectedSavings(data),
+            riskAssessment: calculateRiskAssessment(data),
+            backendEnhanced: false,
+            dataPointsGenerated: 12
+          })
+        }
       }
       
       setShowDerived(true)
@@ -267,25 +287,112 @@ export default function FoundationBusinessIntake() {
     }
   }
 
-  const deriveGeographic = (zipCode) => {
+  const deriveGeographic = async (zipCode) => {
     if (!zipCode) return null
     
-    const zipPrefix = zipCode.substring(0, 2)
-    const zipData = {
-      '90': { state: 'CA', city: 'Los Angeles', ports: ['Los Angeles', 'Long Beach'], region: 'West Coast' },
-      '91': { state: 'CA', city: 'Los Angeles', ports: ['Los Angeles', 'Long Beach'], region: 'West Coast' },
-      '94': { state: 'CA', city: 'San Francisco', ports: ['Oakland', 'San Francisco'], region: 'West Coast' },
-      '98': { state: 'WA', city: 'Seattle', ports: ['Seattle', 'Tacoma'], region: 'West Coast' },
-      '10': { state: 'NY', city: 'New York', ports: ['New York', 'Newark'], region: 'East Coast' },
-      '07': { state: 'NJ', city: 'Newark', ports: ['Newark', 'New York'], region: 'East Coast' },
-      '33': { state: 'FL', city: 'Miami', ports: ['Miami', 'Port Everglades'], region: 'East Coast' },
-      '77': { state: 'TX', city: 'Houston', ports: ['Houston'], region: 'Gulf Coast' },
-      '60': { state: 'IL', city: 'Chicago', ports: ['Chicago (inland)'], region: 'Midwest' },
-      'M6': { state: 'ON', city: 'Toronto', ports: ['Port of Halifax', 'Port of Vancouver'], region: 'USMCA Central Hub', country: 'Canada' },
-      'V6': { state: 'BC', city: 'Vancouver', ports: ['Port of Vancouver'], region: 'Pacific Gateway', country: 'Canada' }
+    try {
+      // Use the new USMCA Postal Intelligence system
+      const response = await fetch('/api/intelligence/usmca-postal-lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postalCode: zipCode })
+      })
+
+      if (response.ok) {
+        const intelligence = await response.json()
+        if (!intelligence.error) {
+          return {
+            state: intelligence.state || intelligence.province || intelligence.countryCode,
+            city: intelligence.metro || intelligence.city,
+            region: intelligence.region,
+            country: intelligence.country,
+            ports: intelligence.ports || ['Various'],
+            usmcaGateway: intelligence.usmcaGateway,
+            confidence: intelligence.confidence,
+            source: 'USMCA_Postal_Intelligence'
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('USMCA postal intelligence fallback:', error)
     }
+
+    // Enhanced fallback for unknown postal codes
+    return deriveGeographicFallback(zipCode)
+  }
+
+  const deriveGeographicFallback = (zipCode) => {
+    const cleanCode = zipCode.trim().toUpperCase()
     
-    return zipData[zipPrefix] || { state: 'US', city: 'Continental US', ports: ['Various'], region: 'Continental US' }
+    // Canadian postal code detection
+    if (/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i.test(cleanCode)) {
+      const firstLetter = cleanCode.charAt(0)
+      const canadianRegions = {
+        'M': { province: 'ON', city: 'Toronto Area', region: 'Central Ontario' },
+        'V': { province: 'BC', city: 'Vancouver Area', region: 'British Columbia' },
+        'H': { province: 'QC', city: 'Montreal Area', region: 'Quebec' },
+        'K': { province: 'ON', city: 'Ottawa Area', region: 'Eastern Ontario' }
+      }
+      const regionData = canadianRegions[firstLetter] || { province: 'CA', city: 'Canadian Location', region: 'Canada' }
+      return {
+        state: regionData.province,
+        city: regionData.city,
+        region: regionData.region,
+        country: 'Canada',
+        ports: ['Halifax', 'Vancouver'],
+        usmcaGateway: true,
+        confidence: 60,
+        source: 'Enhanced_Fallback'
+      }
+    }
+
+    // Mexican postal code detection  
+    if (/^\d{5}$/.test(cleanCode) && parseInt(cleanCode) >= 1000) {
+      return {
+        state: 'MX',
+        city: 'Mexican Location',
+        region: 'Mexico',
+        country: 'Mexico',
+        ports: ['Veracruz', 'Manzanillo'],
+        usmcaGateway: true,
+        confidence: 50,
+        source: 'Enhanced_Fallback'
+      }
+    }
+
+    // US ZIP code detection
+    if (/^\d{5}(-\d{4})?$/.test(cleanCode)) {
+      const zipNum = parseInt(cleanCode.substring(0, 3))
+      let region, ports, usmcaGateway = true
+
+      if (zipNum >= 900) { region = 'West Coast'; ports = ['Los Angeles', 'Seattle'] }
+      else if (zipNum >= 800) { region = 'Mountain West'; ports = ['Los Angeles'] }
+      else if (zipNum >= 700) { region = 'South Central'; ports = ['Houston'] }
+      else if (zipNum >= 600) { region = 'Midwest'; ports = ['Chicago'] }
+      else { region = 'East Coast'; ports = ['New York', 'Miami'] }
+
+      return {
+        state: 'US',
+        city: region + ' Area',
+        region: region,
+        country: 'United States',
+        ports: ports,
+        usmcaGateway: usmcaGateway,
+        confidence: 65,
+        source: 'Enhanced_Fallback'
+      }
+    }
+
+    return {
+      state: 'Unknown',
+      city: 'Unknown Location',
+      region: 'Unknown',
+      country: 'Unknown',
+      ports: ['Various'],
+      usmcaGateway: false,
+      confidence: 30,
+      source: 'Fallback'
+    }
   }
 
   const deriveBusinessPatterns = (businessType) => {
@@ -391,103 +498,72 @@ export default function FoundationBusinessIntake() {
   return (
     <>
       <Head>
-        <title>{`${t('title')} - Triangle Intelligence Platform`}</title>
-        <meta name="description" content={t('subtitle')} />
+        <title>Business Intelligence Foundation - Triangle Intelligence Platform</title>
+        <meta name="description" content="Complete your comprehensive business profile to unlock $100K-$300K+ annual savings through USMCA triangle routing optimization" />
       </Head>
 
-
-      {/* Terminal Navigation */}
-      <nav className="bloomberg-nav">
-        <div className="bloomberg-container-padded">
-          <div className="bloomberg-flex" style={{justifyContent: 'space-between', alignItems: 'center'}}>
-            <Link href="/" className="bloomberg-nav-brand">
-              <span className="text-success">◢</span>
-              {isClient ? t('nav:brandName') : 'Triangle Intelligence'}
-              <span className="text-primary">{isClient ? t('nav:version') : 'PRO v2.1'}</span>
-            </Link>
-            <div className="bloomberg-flex" style={{justifyContent: 'flex-end', flexWrap: 'wrap', gap: 'var(--space-md)'}}>
-              {/* User Session Info */}
-              <div className="bloomberg-status bloomberg-status-success">
-                <div className="bloomberg-status-dot"></div>
-                {t('nav:user')}: admin@triangleintel.com
+      <TriangleLayout>
+        <nav className="triangle-nav">
+          <div className="triangle-nav-brand">
+            <div className="triangle-nav-logo">
+              <div className="triangle-icon">▲</div>
+              <div className="triangle-nav-text">
+                <div className="triangle-nav-title">Triangle Intelligence</div>
+                <div className="triangle-nav-subtitle">{t('foundation.navsubtitle', 'Business Intelligence Foundation')}</div>
               </div>
-              
-              {/* Live System Status */}
-              <div className="bloomberg-status bloomberg-status-info">
-                <div className="bloomberg-status-dot"></div>
-                {t('nav:activeSession')}
-              </div>
-              
-              {/* System Notifications */}
-              <div className="bloomberg-status bloomberg-status-warning">
-                <span>🔔</span>
-                3 {t('nav:alerts')}
-              </div>
-              
-              {/* Language Switcher */}
-              <LanguageSwitcher onLanguageChange={setCurrentLanguage} />
-              
-              {/* Logout/Account */}
-              <Link href="/dashboard" className="bloomberg-btn bloomberg-btn-secondary">
-                {t('nav:account')}
-              </Link>
-              <Link href="/" className="bloomberg-btn bloomberg-btn-primary">
-                {t('nav:logout')}
-              </Link>
             </div>
           </div>
-        </div>
-      </nav>
+          <div className="triangle-nav-actions">
+            <LanguageSwitcher />
+          </div>
+        </nav>
 
-      <div className="triangle-layout">
-        <TriangleSideNav />
-        <main className="main-content" style={{
+        <div className="page-content" style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('/image/datos-financieros.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',
           minHeight: '100vh'
         }}>
-        <div className="page-content">
 
         {/* Executive Metrics Bar */}
         <div className="bloomberg-container-padded">
           <div className="metrics-grid">
             <div className="metric-card primary">
               <div className="metric-header">
-                <div className="metric-period">{t('metrics:liveData')}</div>
-                <div className="bloomberg-status bloomberg-status-success small">{t('status:streaming')}</div>
+                <div className="metric-period">{t('metrics.liveData', 'Live Data')}</div>
+                <div className="bloomberg-status bloomberg-status-success small">{t('status.streaming', 'Streaming')}</div>
               </div>
               <div className="metric-value text-primary">{databaseStats.tradeFlowRecords.toLocaleString()}</div>
-              <div className="bloomberg-metric-label">{t('tradeFlowRecords')}</div>
-              <div className="metric-change positive">+12.5% {t('thisMonth')}</div>
+              <div className="bloomberg-metric-label">{t('metrics.tradeRecords')}</div>
+              <div className="metric-change positive">+12.5% {t('thisMonth', 'this month')}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
-                <div className="metric-period">{t('metrics:trackedValue')}</div>
-                <div className="bloomberg-status bloomberg-status-success small">{t('status:active')}</div>
+                <div className="metric-period">{t('metrics.trackedValue', 'Tracked Value')}</div>
+                <div className="bloomberg-status bloomberg-status-success small">{t('status.active')}</div>
               </div>
               <div className="metric-value text-success">${databaseStats.totalTradeValue}B</div>
-              <div className="bloomberg-metric-label">{t('tradeIntelligence')}</div>
-              <div className="metric-change positive">+23.7% {t('yoy')}</div>
+              <div className="bloomberg-metric-label">{t('common.businessIntelligence')}</div>
+              <div className="metric-change positive">+23.7% {t('yoy', 'YoY')}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
-                <div className="metric-period">{t('metrics:optimization')}</div>
-                <div className="bloomberg-status bloomberg-status-success small">{t('status:optimal')}</div>
+                <div className="metric-period">{t('metrics.optimization', 'Optimization')}</div>
+                <div className="bloomberg-status bloomberg-status-success small">{t('status.optimal', 'Optimal')}</div>
               </div>
               <div className="metric-value text-success">{realTimeStats?.successRate ? realTimeStats.successRate.toFixed(1) : '94.2'}%</div>
-              <div className="bloomberg-metric-label">{t('successRate')}</div>
-              <div className="metric-change positive">{t('aboveTarget')}</div>
+              <div className="bloomberg-metric-label">{t('metrics.successRate')}</div>
+              <div className="metric-change positive">{t('aboveTarget', smartT("routing.abovetarget"))}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
-                <div className="metric-period">{t('metrics:realTime')}</div>
-                <div className="bloomberg-status bloomberg-status-info small">{t('status:analyzing')}</div>
+                <div className="metric-period">{t('metrics.realTime', 'Real-Time')}</div>
+                <div className="bloomberg-status bloomberg-status-info small">{t('status.analyzing', 'Analyzing')}</div>
               </div>
               <div className="metric-value text-primary">{realTimeStats?.activeAnalyses || '12'}</div>
-              <div className="bloomberg-metric-label">{t('liveIntelligenceMetric')}</div>
-              <div className="metric-change neutral">{t('processing')}</div>
+              <div className="bloomberg-metric-label">{t('metrics.liveIntelligence')}</div>
+              <div className="metric-change neutral">{t('status.processing')}</div>
             </div>
           </div>
         </div>
@@ -498,9 +574,9 @@ export default function FoundationBusinessIntake() {
           
           {/* Form Section - Takes 2 columns */}
           <div className="foundation-form-section">
-            <h1 className="bloomberg-hero-title">{t('title')}</h1>
+            <h1 className="bloomberg-hero-title">Business Intelligence Foundation</h1>
             <p className="bloomberg-hero-subtitle bloomberg-mb-lg">
-              {t('subtitle')}
+              Complete your comprehensive business profile to unlock $100K-$300K+ annual savings through USMCA triangle routing optimization
             </p>
 
             <form onSubmit={handleSubmit} className="bloomberg-form">
@@ -509,26 +585,26 @@ export default function FoundationBusinessIntake() {
                 <div className="bloomberg-card-header">
                   <span className="section-icon"></span>
                   <div className="section-content">
-                    <h3 className="bloomberg-card-title">{t('businessProfile')}</h3>
-                    <p className="section-subtitle">{t('businessProfileDesc')}</p>
+                    <h3 className="bloomberg-card-title">Business Intelligence Profile</h3>
+                    <p className="section-subtitle">Enterprise business classification and strategic market analysis for USMCA optimization</p>
                   </div>
                 </div>
 
                 <div className="bloomberg-grid bloomberg-grid-2">
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('companyName')}</label>
+                    <label className="bloomberg-label required">Company Name</label>
                     <input
                       className="bloomberg-input"
                       type="text"
                       value={formData.companyName}
                       onChange={(e) => handleInputChange('companyName', e.target.value)}
-                      placeholder={t('companyNamePlaceholder')}
+                      placeholder="Your company or organization name"
                       required
                     />
                   </div>
 
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('industry')}</label>
+                    <label className="bloomberg-label required">Industry Classification</label>
                     <select
                       className="bloomberg-input bloomberg-select"
                       value={formData.businessType}
@@ -542,7 +618,7 @@ export default function FoundationBusinessIntake() {
                       required
                     >
                       <option value="">
-                        {dropdownsLoading ? t('loadingIndustry') : t('industryPlaceholder')}
+                        {dropdownsLoading ? 'Loading industry database...' : 'Select your primary industry'}
                       </option>
                       {businessTypeOptions.map(option => {
                         // Translate business type using dropdown translation keys
@@ -556,7 +632,7 @@ export default function FoundationBusinessIntake() {
                           </option>
                         )
                       })}
-                      <option value="Other">{t('otherIndustry')}</option>
+                      <option value="Other">Other (please specify)</option>
                     </select>
                     
                     {formData.businessType === 'Other' && (
@@ -565,7 +641,7 @@ export default function FoundationBusinessIntake() {
                         type="text"
                         value={customBusinessType}
                         onChange={(e) => setCustomBusinessType(e.target.value)}
-                        placeholder={t('specifyIndustry')}
+                        placeholder="Please specify your industry"
                         required
                       />
                     )}
@@ -578,27 +654,27 @@ export default function FoundationBusinessIntake() {
                 <div className="bloomberg-card-header">
                   <span className="section-icon"></span>
                   <div className="section-content">
-                    <h3 className="bloomberg-card-title">{t('supplyChain')}</h3>
-                    <p className="section-subtitle">{t('supplyChainDesc')}</p>
+                    <h3 className="bloomberg-card-title">Supply Chain Configuration</h3>
+                    <p className="section-subtitle">Strategic analysis of your current supply chain for optimization opportunities</p>
                   </div>
                 </div>
 
                 <div className="bloomberg-grid bloomberg-grid-2">
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('businessLocation')}</label>
+                    <label className="bloomberg-label required">Business Location (ZIP Code)</label>
                     <input
                       className="bloomberg-input"
                       type="text"
                       value={formData.zipCode}
                       onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                      placeholder={t('businessLocationPlaceholder')}
+                      placeholder="Your primary business ZIP code"
                       required
                     />
-                    <div className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>{t('businessLocationHint')}</div>
+                    <div className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>Used for geographic intelligence and port optimization analysis</div>
                   </div>
 
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('primarySupplier')}</label>
+                    <label className="bloomberg-label required">Primary Supplier Country</label>
                     <select
                       className="bloomberg-input bloomberg-select"
                       value={formData.primarySupplierCountry}
@@ -607,7 +683,7 @@ export default function FoundationBusinessIntake() {
                       required
                     >
                       <option value="">
-                        {dropdownsLoading ? t('loadingCountries') : t('primarySupplierPlaceholder')}
+                        {dropdownsLoading ? 'Loading country database...' : 'Select your main supplier country'}
                       </option>
                       {countryOptions.map(option => (
                         <option key={option.value} value={option.value} title={option.description}>
@@ -618,14 +694,14 @@ export default function FoundationBusinessIntake() {
                   </div>
 
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('importVolume')}</label>
+                    <label className="bloomberg-label required">Annual Import Volume</label>
                     <select
                       className="bloomberg-input bloomberg-select"
                       value={formData.importVolume}
                       onChange={(e) => handleInputChange('importVolume', e.target.value)}
                       required
                     >
-                      <option value="">{t('importVolumePlaceholder')}</option>
+                      <option value="">Select your annual import volume</option>
                       {importVolumeOptions.map(option => (
                         <option key={option.value} value={option.value} title={option.description}>
                           {option.description || option.label}
@@ -635,14 +711,14 @@ export default function FoundationBusinessIntake() {
                   </div>
 
                   <div className="bloomberg-form-group">
-                    <label className="bloomberg-label required">{t('optimizationPriority')}</label>
+                    <label className="bloomberg-label required">Optimization Priority</label>
                     <select
                       className="bloomberg-input bloomberg-select"
                       value={formData.timelinePriority}
                       onChange={(e) => handleInputChange('timelinePriority', e.target.value)}
                       required
                     >
-                      <option value="">{t('optimizationPlaceholder')}</option>
+                      <option value="">Select your optimization focus</option>
                       {optimizationPriorityOptions.map(option => (
                         <option key={option.value} value={option.value} title={option.description}>
                           {option.label}
@@ -656,14 +732,14 @@ export default function FoundationBusinessIntake() {
               {/* Form Actions */}
               <div className="bloomberg-hero-actions">
                 <Link href="/dashboard" className="bloomberg-btn bloomberg-btn-secondary">
-                  {t('backToCommand')}
+                  {t('nav.commandCenter')}
                 </Link>
                 <button
                   type="submit"
                   className="bloomberg-btn bloomberg-btn-primary"
                   disabled={loading || dropdownsLoading}
                 >
-                  {loading ? t('processingIntelligence') : t('continueToProduct')}
+                  {loading ? 'Processing Intelligence...' : 'Continue to Product Analysis'}
                 </button>
               </div>
             </form>
@@ -677,9 +753,9 @@ export default function FoundationBusinessIntake() {
             <div className="widget-header">
               <div className="widget-title">
                 <div className="widget-icon">🧠</div>
-                {t('liveIntelligence')}
+                Live Business Intelligence
               </div>
-              <div className="bloomberg-status bloomberg-status-info small">{t('status:realTime')}</div>
+              <div className="bloomberg-status bloomberg-status-info small">{t('status.realTime', 'Real-Time')}</div>
             </div>
             
             {/* Intelligence Level Display */}
@@ -687,9 +763,9 @@ export default function FoundationBusinessIntake() {
               <div className="metric-value text-primary">
                 {(1.0 + ((Object.values(formData).filter(v => v !== '').length) / Object.keys(formData).length) * 1.0).toFixed(1)}/10.0
               </div>
-              <div className="bloomberg-metric-label">{t('intelligenceConfidence')}</div>
+              <div className="bloomberg-metric-label">Intelligence Level</div>
               <div className="intelligence-score">
-                {Math.floor((Object.values(formData).filter(v => v !== '').length / Object.keys(formData).length) * 100)}% {t('complete')}
+                {Math.floor((Object.values(formData).filter(v => v !== '').length / Object.keys(formData).length) * 100)}% {t('status.complete', 'Complete')}
               </div>
             </div>
 
@@ -707,7 +783,7 @@ export default function FoundationBusinessIntake() {
                 <div className="insight-item">
                   <div className="insight-indicator success"></div>
                   <div className="insight-content">
-                    <div className="insight-title">{t('projectedSavings')}</div>
+                    <div className="insight-title">Annual Savings Potential</div>
                     <div className="metric-value text-success" style={{fontSize: '1.5rem'}}>
                       ${derivedData.projectedSavings?.annual ? Math.round(derivedData.projectedSavings.annual / 1000) : 0}K
                     </div>
@@ -717,18 +793,24 @@ export default function FoundationBusinessIntake() {
                 <div className="insight-item">
                   <div className="insight-indicator info"></div>
                   <div className="insight-content">
-                    <div className="insight-title">{t('geographicIntelligence')}</div>
+                    <div className="insight-title">Geographic Intelligence</div>
                     <div className="insight-value">
-                      {derivedData.geographic?.city}, {derivedData.geographic?.region}
+                      {derivedData.geographic?.city || derivedData.geographic?.metro}, {derivedData.geographic?.region}
+                      {derivedData.geographic?.usmcaGateway && <span className="text-success"> 🇺🇸🇨🇦🇲🇽 USMCA</span>}
                     </div>
+                    {derivedData.geographic?.confidence && (
+                      <div className="text-muted" style={{fontSize: '0.75rem'}}>
+                        {derivedData.geographic.confidence}% confidence • {derivedData.geographic.source}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
                 <div className="insight-item">
                   <div className="insight-indicator warning"></div>
                   <div className="insight-content">
-                    <div className="insight-title">{t('routeOptimization')}</div>
-                    <div className="insight-value">{derivedData.routing?.routeConfidence}% {t('confidence')}</div>
+                    <div className="insight-title">Route Confidence</div>
+                    <div className="insight-value">{derivedData.routing?.routeConfidence}% {t('common.confidence', 'confidence')}</div>
                   </div>
                 </div>
               </div>
@@ -736,16 +818,16 @@ export default function FoundationBusinessIntake() {
             
             {/* System Status Widget */}
             <div className="nav-status">
-              <div className="status-header">{t('systemStatus')}</div>
+              <div className="status-header">{t('systemStatus.title')}</div>
               <div className="status-items">
                 <div className="bloomberg-status bloomberg-status-success small">
-                  {t('database')}: {dropdownsLoading ? t('loading') : t('connected')}
+                  Database: {dropdownsLoading ? 'Loading...' : 'Connected'}
                 </div>
                 <div className="bloomberg-status bloomberg-status-success small">
-                  {t('analysis')}: {showDerived ? t('active') : t('ready')}
+                  Analysis: {showDerived ? 'Active' : 'Ready'}
                 </div>
                 <div className="bloomberg-status bloomberg-status-info small">
-                  {t('intelligence')}: {t('monitoring')}
+                  {t('intelligence', 'Intelligence')}: {t('monitoring', 'Monitoring')}
                 </div>
               </div>
             </div>
@@ -755,8 +837,8 @@ export default function FoundationBusinessIntake() {
 
         <details className="bloomberg-section">
           <summary className="bloomberg-card-header">
-            <h3 className="bloomberg-card-title">{t('detailedAnalytics')}</h3>
-            <span className="bloomberg-status bloomberg-status-info">{t('enterpriseDeepDive')}</span>
+            <h3 className="bloomberg-card-title">Enterprise Intelligence Analytics</h3>
+            <span className="bloomberg-status bloomberg-status-info">{t('enterpriseDeepDive', 'Enterprise Deep Dive')}</span>
           </summary>
           
           <div className="details-content">
@@ -765,7 +847,7 @@ export default function FoundationBusinessIntake() {
               {/* Company Intelligence Card */}
               <div className="bloomberg-card">
                 <div className="bloomberg-card-header">
-                  <h4 className="text-primary">Company Intelligence</h4>
+                  <h4 className="text-primary">{smartT("foundation.companyintelligence")}</h4>
                 </div>
                 <div className="bloomberg-card-body">
                   <div className="intelligence-metric">
@@ -786,7 +868,7 @@ export default function FoundationBusinessIntake() {
               {/* Geographic Intelligence Card */}
               <div className="bloomberg-card">
                 <div className="bloomberg-card-header">
-                  <h4 className="text-success">Geographic Intelligence</h4>
+                  <h4 className="text-success">{smartT("foundation.geographicintelligen")}</h4>
                 </div>
                 <div className="bloomberg-card-body">
                   <div className="intelligence-metric">
@@ -807,18 +889,18 @@ export default function FoundationBusinessIntake() {
               {/* Intelligence Score Card */}
               <div className="bloomberg-card">
                 <div className="bloomberg-card-header">
-                  <h4 className="text-warning">Intelligence Score</h4>
+                  <h4 className="text-warning">{smartT("foundation.intelligencescore")}</h4>
                 </div>
                 <div className="bloomberg-card-body">
                   <div className="intelligence-score">
                     <div className="score-display">
                       {realTimeStats ? Math.round(((Object.values(formData).filter(v => v !== '').length) / Object.keys(formData).length) * 100) : 0}%
                     </div>
-                    <div className="score-label">Form Completion</div>
+                    <div className="score-label">{smartT("foundation.formcompletion")}</div>
                   </div>
                   <div className="intelligence-metric">
                     <span className="metric-label">Next Step:</span>
-                    <span className="metric-value text-primary">Product Intelligence</span>
+                    <span className="metric-value text-primary">{smartT("foundation.productintelligence")}</span>
                   </div>
                 </div>
               </div>
@@ -828,8 +910,7 @@ export default function FoundationBusinessIntake() {
         </details>
         
         </div> {/* Close page-content */}
-        </main>
-      </div> {/* Close triangle-layout */}
+      </TriangleLayout>
       
       <style jsx>{`
         .intelligence-metric {

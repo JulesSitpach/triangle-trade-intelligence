@@ -3,7 +3,7 @@
  * Returns: Industry classification + fallback intelligence + user improvement options
  */
 
-import { classifyProductWithFallback, storeUserCorrection, getFallbackTradeData } from '../../lib/transparent-hs-classifier.js'
+import { classifyProductWithFallback, storeUserCorrection, getFallbackTradeData } from '../../lib/unified-hs-classifier.js'
 import DatabaseIntelligenceBridge from '../../lib/intelligence/database-intelligence-bridge.js'
 import { logInfo, logError } from '../../lib/utils/production-logger.js'
 

@@ -1,0 +1,11 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/rss-monitor",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "env": {
+    "CRON_SECRET": "@cron_secret"
+  }
+}

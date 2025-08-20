@@ -8,13 +8,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useDatabaseTranslation } from '../hooks/useDatabaseTranslation'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 import TriangleSideNav from '../components/TriangleSideNav'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import { smartT } from '../lib/smartT'
 
 export default function IntelligentAlertsMonitoring() {
   const router = useRouter()
-  const { t, ready } = useDatabaseTranslation('common')
+  const { t, ready } = useSafeTranslation('common')
   const [currentLanguage, setCurrentLanguage] = useState('en')
   const [loading, setLoading] = useState(false)
   const [isClient, setIsClient] = useState(false)
@@ -32,7 +33,8 @@ export default function IntelligentAlertsMonitoring() {
     live: [],
     patterns: [],
     institutional: [],
-    community: []
+    community: [],
+    rss: [] // Add RSS feed alerts
   })
   
   // Consolidated system status
@@ -50,6 +52,14 @@ export default function IntelligentAlertsMonitoring() {
     criticalAlerts: 3,
     monitoringAccuracy: 98.7,
     responseTime: 147
+  })
+
+  // RSS Feed monitoring state
+  const [rssMonitoring, setRssMonitoring] = useState({
+    checking: false,
+    lastCheck: null,
+    feedStatus: {},
+    alertsSummary: null
   })
   
   // Alert configuration modal
@@ -104,6 +114,76 @@ export default function IntelligentAlertsMonitoring() {
       clearInterval(alertsInterval)
     }
   }, [foundationData, systemStatus.patternEngine, systemStatus.monitoring])
+
+  // RSS Feed monitoring functionality
+  const checkRSSFeeds = async () => {
+    setRssMonitoring(prev => ({ ...prev, checking: true }))
+    
+    try {
+      console.log('🔍 Checking government RSS feeds for trade alerts...')
+      
+      const response = await fetch('/api/trade-alerts/monitor')
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (data.success) {
+          // Process RSS alerts
+          const rssAlerts = data.alerts.map(alert => ({
+            id: `rss_${Date.now()}_${alert.title.replace(/[^a-zA-Z0-9]/g, '_')}`,
+            type: 'rss_alert',
+            source: 'government_rss',
+            priority: alert.urgencyScore > 30 ? 'high' : alert.relevanceScore > 50 ? 'medium' : 'low',
+            title: `Government Alert: ${alert.title}`,
+            message: `${alert.source} reports: Trade alert detected affecting ${alert.detected.countries.join(', ') || 'multiple markets'}`,
+            rssSource: alert.source,
+            relevanceScore: alert.relevanceScore,
+            urgencyScore: alert.urgencyScore,
+            detected: alert.detected,
+            databaseMatches: alert.databaseMatches,
+            solutions: alert.solutions,
+            link: alert.link,
+            pubDate: alert.pubDate,
+            timestamp: new Date().toISOString(),
+            status: alert.urgencyScore > 30 ? 'attention_required' : 'monitoring',
+            impact: alert.urgencyScore > 30 ? 'High' : 'Medium',
+            actionable: alert.solutions && alert.solutions.length > 0,
+            recommendation: alert.solutions?.length > 0 
+              ? `${alert.solutions.length} triangle routing solutions available`
+              : 'Monitor for trade impact and routing opportunities'
+          }))
+          
+          // Update RSS alerts
+          setAlerts(prev => ({ ...prev, rss: rssAlerts }))
+          
+          // Update monitoring status
+          setRssMonitoring(prev => ({
+            ...prev,
+            checking: false,
+            lastCheck: new Date().toISOString(),
+            feedStatus: data.summary.sources.reduce((acc, source) => {
+              acc[source] = 'active'
+              return acc
+            }, {}),
+            alertsSummary: data.summary
+          }))
+          
+          console.log(`✅ RSS Feed check complete: ${rssAlerts.length} alerts detected`)
+          
+        } else {
+          console.error('❌ RSS monitoring failed:', data.error)
+          setRssMonitoring(prev => ({ ...prev, checking: false }))
+        }
+      } else {
+        console.error('❌ RSS monitoring request failed')
+        setRssMonitoring(prev => ({ ...prev, checking: false }))
+      }
+      
+    } catch (error) {
+      console.error('❌ RSS monitoring error:', error)
+      setRssMonitoring(prev => ({ ...prev, checking: false }))
+    }
+  }
 
   const loadCompleteIntelligenceData = async () => {
     try {
@@ -817,9 +897,11 @@ export default function IntelligentAlertsMonitoring() {
       trade_database: '📈',
       regulatory_database: '📋',
       community_success: '✨',
-      risk_detection: '⚠️'
+      risk_detection: '⚠️',
+      government_rss: '📡',
+      rss_alert: '📡'
     }
-    return icons[source] || '🔔'
+    return icons[source] || icons[type] || '🔔'
   }
 
   const getPriorityClass = (priority) => {
@@ -939,7 +1021,8 @@ export default function IntelligentAlertsMonitoring() {
     ...alerts.live,
     ...alerts.patterns,
     ...alerts.community,
-    ...alerts.institutional
+    ...alerts.institutional,
+    ...alerts.rss
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
 
   // Generate sample alerts data for demonstration when no user data exists
@@ -1087,8 +1170,8 @@ export default function IntelligentAlertsMonitoring() {
                 <div className="bloomberg-status bloomberg-status-warning small">MONITORING</div>
               </div>
               <div className="metric-value text-primary">{realTimeStats.activeAlerts}</div>
-              <div className="bloomberg-metric-label">Pattern Monitoring</div>
-              <div className="metric-change positive">Intelligence Active</div>
+              <div className="bloomberg-metric-label">{smartT("alerts.patternmonitoring")}</div>
+              <div className="metric-change positive">{smartT("alerts.intelligenceactive")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -1096,8 +1179,8 @@ export default function IntelligentAlertsMonitoring() {
                 <div className="bloomberg-status bloomberg-status-critical small">HIGH</div>
               </div>
               <div className="metric-value text-warning">{realTimeStats.criticalAlerts}</div>
-              <div className="bloomberg-metric-label">Urgent Attention</div>
-              <div className="metric-change neutral">Review Required</div>
+              <div className="bloomberg-metric-label">{smartT("alerts.urgentattention")}</div>
+              <div className="metric-change neutral">{smartT("alerts.reviewrequired")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -1105,8 +1188,8 @@ export default function IntelligentAlertsMonitoring() {
                 <div className="bloomberg-status bloomberg-status-success small">OPTIMAL</div>
               </div>
               <div className="metric-value text-success">{realTimeStats.monitoringAccuracy}%</div>
-              <div className="bloomberg-metric-label">Pattern Accuracy</div>
-              <div className="metric-change positive">Above Target</div>
+              <div className="bloomberg-metric-label">{smartT("alerts.patternaccuracy")}</div>
+              <div className="metric-change positive">{smartT("routing.abovetarget")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -1114,8 +1197,8 @@ export default function IntelligentAlertsMonitoring() {
                 <div className="bloomberg-status bloomberg-status-info small">FAST</div>
               </div>
               <div className="metric-value text-primary">{realTimeStats.responseTime}ms</div>
-              <div className="bloomberg-metric-label">Alert Response</div>
-              <div className="metric-change positive">Excellent</div>
+              <div className="bloomberg-metric-label">{smartT("alerts.alertresponse")}</div>
+              <div className="metric-change positive">{smartT("hindsight.excellent")}</div>
             </div>
           </div>
         </div> {/* Close bloomberg-container-padded for metrics */}
@@ -1136,7 +1219,7 @@ export default function IntelligentAlertsMonitoring() {
               <div className="bloomberg-card-header">
                 <span className="section-icon">🔔</span>
                 <div className="section-content">
-                  <h3 className="bloomberg-card-title">Alert Intelligence Dashboard</h3>
+                  <h3 className="bloomberg-card-title">{smartT("alerts.alertintelligencedas")}</h3>
                   <p className="section-subtitle">Pattern-based alerting with institutional learning and community intelligence</p>
                 </div>
               </div>
@@ -1175,7 +1258,7 @@ export default function IntelligentAlertsMonitoring() {
             <div className="source-card">
               <div className="source-icon">🧠</div>
               <div className="source-content">
-                <div className="source-title">{ready ? t('alerts.hindsightIntelligence', 'Hindsight Intelligence') : 'Hindsight Intelligence'}</div>
+                <div className="source-title">{ready ? t('alerts.hindsightIntelligence', smartT("hindsight.hindsightintelligenc")) : smartT("hindsight.hindsightintelligenc")}</div>
                 <div className="source-count">{alerts.live.length} {ready ? t('alerts.alerts', 'alerts') : 'alerts'}</div>
                 <div className="source-description">{ready ? t('alerts.marcusConfiguredAlerts', 'Marcus Sterling configured alerts') : 'Marcus Sterling configured alerts'}</div>
               </div>
@@ -1222,14 +1305,14 @@ export default function IntelligentAlertsMonitoring() {
 
             <div className="dashboard-metrics">
               <div className="metric-section">
-                <h5 className="section-title">{ready ? t('alerts.alertIntelligence', 'Alert Intelligence') : 'Alert Intelligence'}</h5>
+                <h5 className="section-title">{ready ? t('alerts.alertIntelligence', smartT("alerts.alertintelligence")) : smartT("alerts.alertintelligence")}</h5>
                 <div className="metrics-grid">
                   <div className="metric-item">
                     <div className="metric-label">{ready ? t('alerts.totalActive', 'Total Active') : 'Total Active'}</div>
                     <div className="metric-value">{systemStatus.realTimeData?.alertStats?.totalActive || 0}</div>
                   </div>
                   <div className="metric-item">
-                    <div className="metric-label">{ready ? t('alerts.patternEngine', 'Pattern Engine') : 'Pattern Engine'}</div>
+                    <div className="metric-label">{ready ? t('alerts.patternEngine', smartT("alerts.patternengine")) : smartT("alerts.patternengine")}</div>
                     <div className="metric-value positive">{systemStatus.realTimeData?.patternEngineStatus}</div>
                   </div>
                   <div className="metric-item">
@@ -1247,7 +1330,7 @@ export default function IntelligentAlertsMonitoring() {
                     <div className="metric-value positive">{systemStatus.performanceMetrics?.alertEffectiveness?.hindsightAccuracy || 96}%</div>
                   </div>
                   <div className="metric-item">
-                    <div className="metric-label">{ready ? t('alerts.patternAccuracy', 'Pattern Accuracy') : 'Pattern Accuracy'}</div>
+                    <div className="metric-label">{ready ? t('alerts.patternAccuracy', smartT("alerts.patternaccuracy")) : smartT("alerts.patternaccuracy")}</div>
                     <div className="metric-value positive">{systemStatus.performanceMetrics?.alertEffectiveness?.patternAccuracy || 89}%</div>
                   </div>
                   <div className="metric-item">
@@ -1266,6 +1349,21 @@ export default function IntelligentAlertsMonitoring() {
             <h3 className="alerts-title">{ready ? t('alerts.intelligentAlertFeed', 'Intelligent Alert Feed') : 'Intelligent Alert Feed'}</h3>
             <div className="alerts-header-actions">
               <button 
+                onClick={checkRSSFeeds}
+                disabled={rssMonitoring.checking}
+                className="bloomberg-btn bloomberg-btn-secondary"
+                style={{ marginRight: '8px' }}
+              >
+                {rssMonitoring.checking ? (
+                  <>
+                    <span className="btn-spinner"></span>
+                    Checking Feeds...
+                  </>
+                ) : (
+                  <>🔍 Check RSS Feeds</>
+                )}
+              </button>
+              <button 
                 onClick={() => setShowAlertConfig(true)} 
                 className="bloomberg-btn bloomberg-btn-primary add-alert-btn"
               >
@@ -1278,6 +1376,7 @@ export default function IntelligentAlertsMonitoring() {
                 <button className="filter-btn">{ready ? t('alerts.patterns', 'Patterns') : 'Patterns'} ({alerts.patterns.length})</button>
                 <button className="filter-btn">{ready ? t('alerts.community', 'Community') : 'Community'} ({alerts.community.length})</button>
                 <button className="filter-btn">{ready ? t('alerts.emerging', 'Emerging') : 'Emerging'} ({alerts.institutional.length})</button>
+                <button className="filter-btn">📡 RSS Feeds ({alerts.rss.length})</button>
               </div>
             </div>
           </div>
@@ -1447,7 +1546,7 @@ export default function IntelligentAlertsMonitoring() {
               <div className="metric-value text-primary">
                 {(realTimeStats.monitoringAccuracy / 10).toFixed(1)}/10.0
               </div>
-              <div className="bloomberg-metric-label">Alert Intelligence</div>
+              <div className="bloomberg-metric-label">{smartT("alerts.alertintelligence")}</div>
               <div className="intelligence-score">
                 {Math.floor(realTimeStats.monitoringAccuracy)}% Monitoring Active
               </div>
@@ -1466,7 +1565,7 @@ export default function IntelligentAlertsMonitoring() {
               <div className="insight-item">
                 <div className="insight-indicator warning"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Active Alerts</div>
+                  <div className="insight-title">{smartT("alerts.activealerts")}</div>
                   <div className="metric-value text-warning" style={{fontSize: '1.5rem'}}>
                     {realTimeStats.activeAlerts}
                   </div>
@@ -1476,7 +1575,7 @@ export default function IntelligentAlertsMonitoring() {
               <div className="insight-item">
                 <div className="insight-indicator success"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Response Time</div>
+                  <div className="insight-title">{smartT("alerts.responsetime")}</div>
                   <div className="insight-value">
                     {realTimeStats.responseTime}ms
                   </div>
@@ -1486,15 +1585,15 @@ export default function IntelligentAlertsMonitoring() {
               <div className="insight-item">
                 <div className="insight-indicator info"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Pattern Engine</div>
-                  <div className="insight-value">Active Learning</div>
+                  <div className="insight-title">{smartT("alerts.patternengine")}</div>
+                  <div className="insight-value">{smartT("alerts.activelearning")}</div>
                 </div>
               </div>
             </div>
             
             {/* System Status Widget */}
             <div className="nav-status">
-              <div className="status-header">Alert System Status</div>
+              <div className="status-header">{smartT("alerts.alertsystemstatus")}</div>
               <div className="status-items">
                 <div className="bloomberg-status bloomberg-status-warning small">
                   Alerts: {realTimeStats.activeAlerts} Active
@@ -1543,7 +1642,7 @@ export default function IntelligentAlertsMonitoring() {
                   <option value="supply_chain">{ready ? t('alerts.supplyChainDisruptions', 'Supply Chain Disruptions') : 'Supply Chain Disruptions'}</option>
                   <option value="compliance">{ready ? t('alerts.complianceUpdates', 'Compliance Updates') : 'Compliance Updates'}</option>
                   <option value="market_opportunity">{ready ? t('alerts.marketOpportunities', 'Market Opportunities') : 'Market Opportunities'}</option>
-                  <option value="cost_optimization">{ready ? t('alerts.costOptimization', 'Cost Optimization') : 'Cost Optimization'}</option>
+                  <option value="cost_optimization">{ready ? t('alerts.costOptimization', smartT("dashboard.costoptimization")) : smartT("dashboard.costoptimization")}</option>
                 </select>
               </div>
 

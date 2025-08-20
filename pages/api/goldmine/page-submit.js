@@ -6,8 +6,8 @@
  * Uses semantic page names: foundation, product, routing, partnership, hindsight, alerts
  */
 
-import { UnifiedGoldmineIntelligence } from '../../../lib/goldmine-intelligence.js'
-import ProgressiveIntelligence from '../../../lib/progressive-intelligence.js'
+import { UnifiedGoldmineIntelligence } from '../../../lib/intelligence/goldmine-intelligence.js'
+import ProgressiveIntelligence from '../../../lib/intelligence/progressive-intelligence.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

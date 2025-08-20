@@ -4,6 +4,7 @@ import Head from 'next/head'
 import '../styles/bloomberg-professional-clean.css'
 import '../lib/i18n' // Initialize proper i18n system
 import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
+import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
 import { TriangleStateProvider } from '../lib/state/TriangleStateContext'
 
 export default function App({ Component, pageProps }) {
@@ -38,11 +39,21 @@ export default function App({ Component, pageProps }) {
       )}
       
       <Component {...pageProps} />
-      {/* Only show chat bot on stage and dashboard pages */}
-      {(router.pathname.startsWith('/stage') || 
-        router.pathname.startsWith('/dashboard') ||
-        router.pathname.startsWith('/foundation')) && 
+      
+      {/* Show appropriate chatbot based on page context */}
+      {(router.pathname.startsWith('/foundation') || 
+        router.pathname.startsWith('/product') ||
+        router.pathname.startsWith('/routing') ||
+        router.pathname.startsWith('/hindsight') ||
+        router.pathname.startsWith('/alerts')) && 
         <GlobalHSCodeChat />
+      }
+      
+      {/* Show sales chatbot on partnership and sales-related pages */}
+      {(router.pathname.startsWith('/partnership') ||
+        router.pathname.includes('sales') ||
+        (router.pathname.startsWith('/dashboard') && router.query?.view === 'sales')) && 
+        <BilingualSalesChatBot />
       }
     </TriangleStateProvider>
   )

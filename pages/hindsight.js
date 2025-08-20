@@ -9,14 +9,15 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useDatabaseTranslation } from '../hooks/useDatabaseTranslation'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 import HindsightInstitutionalLearning from '../lib/hindsight-institutional-learning'
 import TriangleSideNav from '../components/TriangleSideNav'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import { smartT } from '../lib/smartT'
 
 export default function HindsightIntelligenceAnalysis() {
   const router = useRouter()
-  const { t, ready } = useDatabaseTranslation('common')
+  const { t, ready } = useSafeTranslation('common')
   const [currentLanguage, setCurrentLanguage] = useState('en')
   const [loading, setLoading] = useState(true)
   const [analysisProgress, setAnalysisProgress] = useState(0)
@@ -347,7 +348,7 @@ export default function HindsightIntelligenceAnalysis() {
               </div>
               <div className="metric-value text-primary">{realTimeStats.analysisTime}s</div>
               <div className="bloomberg-metric-label">Marcus Analysis</div>
-              <div className="metric-change positive">Hindsight Complete</div>
+              <div className="metric-change positive">{smartT("hindsight.hindsightcomplete")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -355,8 +356,8 @@ export default function HindsightIntelligenceAnalysis() {
                 <div className="bloomberg-status bloomberg-status-success small">EXTRACTED</div>
               </div>
               <div className="metric-value text-success">{realTimeStats.patternsFound}</div>
-              <div className="bloomberg-metric-label">Insights Found</div>
-              <div className="metric-change positive">Above Target</div>
+              <div className="bloomberg-metric-label">{smartT("hindsight.insightsfound")}</div>
+              <div className="metric-change positive">{smartT("routing.abovetarget")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -364,8 +365,8 @@ export default function HindsightIntelligenceAnalysis() {
                 <div className="bloomberg-status bloomberg-status-warning small">CONFIGURED</div>
               </div>
               <div className="metric-value text-warning">{realTimeStats.alertsActive}</div>
-              <div className="bloomberg-metric-label">Smart Monitoring</div>
-              <div className="metric-change neutral">Ready</div>
+              <div className="bloomberg-metric-label">{smartT("hindsight.smartmonitoring")}</div>
+              <div className="metric-change neutral">{smartT("product.ready")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -374,7 +375,7 @@ export default function HindsightIntelligenceAnalysis() {
               </div>
               <div className="metric-value text-success">{realTimeStats.confidence}%</div>
               <div className="bloomberg-metric-label">Analysis Quality</div>
-              <div className="metric-change positive">Excellent</div>
+              <div className="metric-change positive">{smartT("hindsight.excellent")}</div>
             </div>
           </div>
         </div>
@@ -396,7 +397,7 @@ export default function HindsightIntelligenceAnalysis() {
                 <span className="section-icon">🧠</span>
                 <div className="section-content">
                   <h3 className="bloomberg-card-title">Marcus Sterling Hindsight Analysis</h3>
-                  <p className="section-subtitle">Complete journey reassessment with institutional learning and pattern extraction</p>
+                  <p className="section-subtitle">{smartT("hindsight.title")}</p>
                 </div>
               </div>
 
@@ -665,7 +666,7 @@ export default function HindsightIntelligenceAnalysis() {
 
                   <div className="alerts-intelligence">
                     <div className="intelligence-note">
-                      <strong>{ready ? t('hindsight.alerts.alertIntelligence', 'Alert Intelligence') : 'Alert Intelligence'}:</strong> {intelligentAlerts.intelligenceIntegration}
+                      <strong>{ready ? t('hindsight.alerts.alertIntelligence', smartT("alerts.alertintelligence")) : smartT("alerts.alertintelligence")}:</strong> {intelligentAlerts.intelligenceIntegration}
                     </div>
                   </div>
                 </div>
@@ -856,7 +857,7 @@ export default function HindsightIntelligenceAnalysis() {
               <div className="metric-value text-primary">
                 {(realTimeStats.confidence / 10).toFixed(1)}/10.0
               </div>
-              <div className="bloomberg-metric-label">Hindsight Intelligence</div>
+              <div className="bloomberg-metric-label">{smartT("hindsight.hindsightintelligenc")}</div>
               <div className="intelligence-score">
                 {Math.floor(realTimeStats.confidence)}% Analysis Complete
               </div>
@@ -875,7 +876,7 @@ export default function HindsightIntelligenceAnalysis() {
               <div className="insight-item">
                 <div className="insight-indicator success"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Analysis Time</div>
+                  <div className="insight-title">{smartT("hindsight.analysis")}</div>
                   <div className="metric-value text-success" style={{fontSize: '1.5rem'}}>
                     {realTimeStats.analysisTime}s
                   </div>
@@ -885,7 +886,7 @@ export default function HindsightIntelligenceAnalysis() {
               <div className="insight-item">
                 <div className="insight-indicator info"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Patterns Found</div>
+                  <div className="insight-title">{smartT("hindsight.patternsfound")}</div>
                   <div className="insight-value">
                     {realTimeStats.patternsFound} insights
                   </div>
@@ -895,7 +896,7 @@ export default function HindsightIntelligenceAnalysis() {
               <div className="insight-item">
                 <div className="insight-indicator warning"></div>
                 <div className="insight-content">
-                  <div className="insight-title">Alerts Ready</div>
+                  <div className="insight-title">{smartT("hindsight.alertsready")}</div>
                   <div className="insight-value">{realTimeStats.alertsActive} configured</div>
                 </div>
               </div>
@@ -903,7 +904,7 @@ export default function HindsightIntelligenceAnalysis() {
             
             {/* System Status Widget */}
             <div className="nav-status">
-              <div className="status-header">Hindsight System Status</div>
+              <div className="status-header">{smartT("hindsight.hindsightsystemstatu")}</div>
               <div className="status-items">
                 <div className="bloomberg-status bloomberg-status-success small">
                   Marcus Analysis: Complete
@@ -912,7 +913,7 @@ export default function HindsightIntelligenceAnalysis() {
                   Pattern Learning: Active
                 </div>
                 <div className="bloomberg-status bloomberg-status-info small">
-                  Intelligence: {analysisComplete ? 'Configured' : 'Processing'}
+                  Intelligence: {analysisComplete ? 'Configured' : smartT("routing.loading")}
                 </div>
               </div>
             </div>

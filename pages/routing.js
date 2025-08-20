@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
-import { useTranslation } from 'react-i18next'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 import TriangleSideNav from '../components/TriangleSideNav'
 import TriangleLayout from '../components/TriangleLayout'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import DatabaseIntelligenceBridge, { getIntelligentShipping } from '../lib/intelligence/database-intelligence-bridge'
 import { getSupabaseClient } from '../lib/supabase-client.js'
+import { useSmartT } from '../lib/smartT'
 
 const supabase = getSupabaseClient()
 
 export default function RouteAnalysis() {
-  const { t, i18n } = useTranslation(['common', 'routing'])
+  const { t, i18n } = useSafeTranslation('common')
+  const { smartT } = useSmartT()
   const ready = true // Translation system ready flag
   const [foundationData, setFoundationData] = useState(null)
   const [productData, setProductData] = useState(null)
@@ -923,7 +925,7 @@ export default function RouteAnalysis() {
               </div>
               <div className="metric-value text-primary">{realTimeAnalytics.validatedRoutes}</div>
               <div className="bloomberg-metric-label">Validated Routes</div>
-              <div className="metric-change positive">Live Intelligence</div>
+              <div className="metric-change positive">{smartT("routing.liveintelligence")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -931,8 +933,8 @@ export default function RouteAnalysis() {
                 <div className="bloomberg-status bloomberg-status-success small">READY</div>
               </div>
               <div className="metric-value text-success">{routingOptions.length}</div>
-              <div className="bloomberg-metric-label">Route Options</div>
-              <div className="metric-change positive">Optimized</div>
+              <div className="bloomberg-metric-label">{smartT("routing.routeoptions")}</div>
+              <div className="metric-change positive">{smartT("routing.optimized")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -940,8 +942,8 @@ export default function RouteAnalysis() {
                 <div className="bloomberg-status bloomberg-status-success small">HIGH</div>
               </div>
               <div className="metric-value text-success">{realTimeAnalytics.successRate.toFixed(1)}%</div>
-              <div className="bloomberg-metric-label">Implementation Rate</div>
-              <div className="metric-change positive">Above Target</div>
+              <div className="bloomberg-metric-label">{smartT("routing.implementationrate")}</div>
+              <div className="metric-change positive">{smartT("routing.abovetarget")}</div>
             </div>
             <div className="metric-card">
               <div className="metric-header">
@@ -949,8 +951,8 @@ export default function RouteAnalysis() {
                 <div className="bloomberg-status bloomberg-status-info small">LIVE</div>
               </div>
               <div className="metric-value text-primary">{realTimeAnalytics.activeAnalyses}</div>
-              <div className="bloomberg-metric-label">Active Sessions</div>
-              <div className="metric-change neutral">Processing</div>
+              <div className="bloomberg-metric-label">{smartT("routing.activesessions")}</div>
+              <div className="metric-change neutral">{smartT("routing.loading")}</div>
             </div>
           </div>
         </div>
@@ -961,7 +963,7 @@ export default function RouteAnalysis() {
 
           {/* Form Section - Takes 2 columns */}
           <div className="foundation-form-section">
-            <h1 className="bloomberg-hero-title">Route Analysis Intelligence</h1>
+            <h1 className="bloomberg-hero-title">{smartT("routing.analysis")}</h1>
             <p className="bloomberg-hero-subtitle bloomberg-mb-lg">
               USMCA triangle routing optimization • 597K+ trade flows • Real-time savings analysis
             </p>
@@ -984,7 +986,7 @@ export default function RouteAnalysis() {
                 <div className="route-header">
                   <div className="route-badges">
                     {route.database_validated && (
-                      <span className="route-badge verified">DB VALIDATED</span>
+                      <span className="route-badge verified">{smartT("routing.dbvalidated")}</span>
                     )}
                     {route.recommended && (
                       <span className="route-badge recommended">RECOMMENDED</span>
@@ -1025,7 +1027,7 @@ export default function RouteAnalysis() {
                     </div>
                     <div className="metric">
                       <div className="metric-value">{route.successRate}</div>
-                      <div className="metric-label">{ready ? t('routing.routeMetrics.successRate') : 'Success Rate'}</div>
+                      <div className="metric-label">{ready ? t('routing.routeMetrics.successRate') : smartT("product.successrate")}</div>
                     </div>
                   </div>
 
@@ -1154,7 +1156,7 @@ export default function RouteAnalysis() {
                       <span className="detail-value">{calculations.routeDetails.complexity}</span>
                     </div>
                     <div className="detail-item">
-                      <span className="detail-label">{ready ? t('routing.breakdown.successRate') : 'Success Rate'}:</span>
+                      <span className="detail-label">{ready ? t('routing.breakdown.successRate') : smartT("product.successrate")}:</span>
                       <span className="detail-value">{calculations.routeDetails.successRate}</span>
                     </div>
                   </div>
@@ -1214,7 +1216,7 @@ export default function RouteAnalysis() {
               <div className="metric-value text-primary">
                 {(6.0 + (selectedRoute ? 1.5 : 0) + (calculationComplete ? 1.0 : 0)).toFixed(1)}/10.0
               </div>
-              <div className="bloomberg-metric-label">Route Intelligence Score</div>
+              <div className="bloomberg-metric-label">{smartT("routing.routeintelligencesco")}</div>
               <div className="intelligence-score">
                 {Math.floor(((routingOptions.length || 0) / Math.max(3, 1)) * 100)}% Complete
               </div>
@@ -1234,7 +1236,7 @@ export default function RouteAnalysis() {
                 <div className="insight-item">
                   <div className="insight-indicator success"></div>
                   <div className="insight-content">
-                    <div className="insight-title">Projected Annual Savings</div>
+                    <div className="insight-title">{smartT("routing.savings")}</div>
                     <div className="metric-value text-success" style={{fontSize: '1.5rem'}}>
                       ${Math.round(calculations.annualSavings / 1000)}K
                     </div>
@@ -1244,7 +1246,7 @@ export default function RouteAnalysis() {
                 <div className="insight-item">
                   <div className="insight-indicator info"></div>
                   <div className="insight-content">
-                    <div className="insight-title">Route Intelligence</div>
+                    <div className="insight-title">{smartT("routing.routeintelligence")}</div>
                     <div className="insight-value">
                       {routingOptions.length} Options Analyzed
                     </div>
@@ -1254,7 +1256,7 @@ export default function RouteAnalysis() {
                 <div className="insight-item">
                   <div className="insight-indicator warning"></div>
                   <div className="insight-content">
-                    <div className="insight-title">USMCA Optimization</div>
+                    <div className="insight-title">{smartT("routing.usmcaoptimization")}</div>
                     <div className="insight-value">{Math.round(calculations.savingsPercentage)}% Tariff Reduction</div>
                   </div>
                 </div>
@@ -1263,16 +1265,16 @@ export default function RouteAnalysis() {
             
             {/* System Status Widget */}
             <div className="nav-status">
-              <div className="status-header">System Status</div>
+              <div className="status-header">{smartT("routing.systemstatus")}</div>
               <div className="status-items">
                 <div className="bloomberg-status bloomberg-status-success small">
-                  Database: Connected
+                  {smartT("database")}: {smartT("connected")}
                 </div>
                 <div className="bloomberg-status bloomberg-status-success small">
-                  Routes: {routingOptions.length > 0 ? 'Validated' : 'Loading'}
+                  {smartT("routes")}: {routingOptions.length > 0 ? smartT("validated") : smartT("common.loading")}
                 </div>
                 <div className="bloomberg-status bloomberg-status-info small">
-                  Intelligence: {calculationComplete ? 'Complete' : 'Monitoring'}
+                  {smartT("intelligence")}: {calculationComplete ? smartT("common.complete") : smartT("monitoring")}
                 </div>
               </div>
             </div>

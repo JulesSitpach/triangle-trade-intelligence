@@ -4,7 +4,9 @@
  * Restored original working version
  */
 
-export default async function handler(req, res) {
+import { withVolatileRateLimit } from '../../../lib/utils/with-rate-limit.js'
+
+async function handler(req, res) {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -188,3 +190,6 @@ function getCountryName(code) {
   }
   return countryNames[code] || code
 }
+
+// Export the handler with volatile data rate limiting applied
+export default withVolatileRateLimit(handler)

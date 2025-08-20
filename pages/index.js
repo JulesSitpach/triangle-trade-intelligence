@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
-import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function HomePage() {
-  const [currentLanguage, setCurrentLanguage] = useState('en')
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -30,7 +28,7 @@ export default function HomePage() {
         <div className="bloomberg-status bloomberg-status-success">
           <div className="bloomberg-status-dot"></div>
           TRIANGLE INTELLIGENCE PROFESSIONAL TERMINAL
-          <span className="text-muted">SESSION: ACTIVE | STATUS: MONITORING | {isClient ? new Date().toLocaleString() : 'Loading...'}</span>
+          <span className="text-muted">SESSION: HOME | STATUS: ACTIVE | {isClient ? new Date().toLocaleString() : 'Loading...'}</span>
         </div>
       </div>
 
@@ -45,10 +43,9 @@ export default function HomePage() {
             </Link>
             <div className="bloomberg-flex" style={{justifyContent: 'flex-end', flexWrap: 'wrap'}}>
               <Link href="/foundation" className="bloomberg-nav-link">PLATFORM</Link>
-              <Link href="/dashboard" className="bloomberg-nav-link">SOLUTIONS</Link>
+              <Link href="/dashboard-hub" className="bloomberg-nav-link">SOLUTIONS</Link>
               <Link href="/about" className="bloomberg-nav-link">INSIGHTS</Link>
               <Link href="/pricing" className="bloomberg-nav-link">SUPPORT</Link>
-              <LanguageSwitcher onLanguageChange={setCurrentLanguage} />
               <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
                 ACCESS TERMINAL
               </Link>
@@ -58,12 +55,11 @@ export default function HomePage() {
       </nav>
 
       <main style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('/image/datos-financieros.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
+        backgroundColor: 'var(--bloomberg-bg-primary)',
+        color: 'var(--bloomberg-text-primary)',
         minHeight: '100vh'
       }}>
+        <div className="bloomberg-main-background">
         {/* Hero Section with Terminal Styling */}
         <div className="bloomberg-hero">
           <div className="bloomberg-container-padded">
@@ -275,6 +271,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </div>
       </main>
     </>
   )

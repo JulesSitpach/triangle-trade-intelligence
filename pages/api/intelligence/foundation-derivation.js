@@ -5,6 +5,7 @@
 
 import { getSupabaseClient } from '../../../lib/supabase-client'
 import { StableDataManager, VolatileDataManager } from '../../../lib/intelligence/database-intelligence-bridge'
+import { USMCAPostalIntelligence } from '../../../lib/intelligence/usmca-postal-intelligence'
 
 const supabase = getSupabaseClient()
 
@@ -18,8 +19,8 @@ export default async function handler(req, res) {
     
     const { companyName, businessType, zipCode, primarySupplierCountry, importVolume, timelinePriority } = req.body
     
-    // Get real geographic intelligence from database
-    const geographic = await deriveGeographicFromDatabase(zipCode)
+    // Get real geographic intelligence using USMCA postal intelligence system
+    const geographic = await USMCAPostalIntelligence.deriveGeographicIntelligence(zipCode)
     
     // Get real business patterns from USMCA business intelligence
     const patterns = await deriveBusinessPatternsFromDatabase(businessType)
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
     
     // Calculate data points generated
     const dataPointsGenerated = 
-      (geographic ? 4 : 0) + 
+      (geographic && !geographic.error ? 8 : 0) + 
       (patterns ? 5 : 0) + 
       (routing ? 6 : 0) + 
       3 // base metadata
@@ -40,8 +41,9 @@ export default async function handler(req, res) {
       routing,
       enhanced: {
         databaseDriven: true,
+        usmcaPostalIntelligence: true,
         apiEnhanced: false,
-        confidence: routing?.routeConfidence || 85
+        confidence: geographic?.confidence || routing?.routeConfidence || 85
       },
       dataPointsGenerated,
       timestamp: new Date().toISOString()

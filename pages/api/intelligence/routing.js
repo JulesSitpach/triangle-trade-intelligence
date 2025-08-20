@@ -4,14 +4,17 @@
 
 import { logger } from '../../../lib/utils/production-logger'
 import DatabaseIntelligenceBridge from '../../../lib/intelligence/database-intelligence-bridge.js'
+import { queryOptimizer } from '../../../lib/database/query-optimizer.js'
+import { universalCache } from '../../../lib/utils/memory-cache-fallback.js'
 import { createClient } from '@supabase/supabase-js'
+import { withIntelligenceRateLimit } from '../../../lib/utils/with-rate-limit.js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   logger.info('API CALL: /api/intelligence/routing', {
     method: req.method,
     body: req.body,
@@ -109,7 +112,7 @@ export default async function handler(req, res) {
       console.log(`   Volume: ${businessProfile?.importVolume || businessProfile?.volume || 'NOT_FOUND'}`)
       console.log(`   Full businessProfile:`, JSON.stringify(businessProfile))
       
-      // Use Database Intelligence Bridge with 597K trade flows
+      // Use optimized query system for <1s response times
       const intelligenceParams = {
         origin: businessProfile?.primarySupplierCountry || 'China',
         destination: 'USA',
@@ -117,10 +120,10 @@ export default async function handler(req, res) {
         businessType: businessProfile?.businessType || businessProfile?.type || 'Electronics'
       }
       
-      console.log('📊 Querying trade flows database:', intelligenceParams)
+      console.log('📊 Using OPTIMIZED query system:', intelligenceParams)
       
-      // Get triangle routing intelligence from 597K records
-      const intelligence = await DatabaseIntelligenceBridge.getTriangleRoutingIntelligence(intelligenceParams)
+      // Get triangle routing intelligence using optimized queries (target: <500ms)
+      const intelligence = await queryOptimizer.getTriangleRoutingData(intelligenceParams)
       
       console.log('✅ TRADE FLOWS RESPONSE:', {
         directFlows: intelligence.direct.flow.records?.length || 0,
@@ -416,3 +419,6 @@ function getTariffRate(origin, destination) {
   
   return '5-15% (Standard)'
 }
+
+// Export the handler with intelligence rate limiting applied
+export default withIntelligenceRateLimit(handler)

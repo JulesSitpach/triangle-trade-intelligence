@@ -10,6 +10,7 @@ import TriangleLayout from '../components/TriangleLayout'
 
 // Phase 3: Prefetching imports
 import PrefetchManager from '../lib/prefetch/prefetch-manager'
+import { smartT } from '../lib/smartT'
 
 // Feature flags
 const FEATURES = {
@@ -359,63 +360,93 @@ export default function ProductClassification() {
     return { mismatch: false, current: businessType }
   }
 
-  // HS Code suggestion system
+  // HS Code suggestion system - Using working chat intelligence
   const suggestHSCodes = async (description, productIndex) => {
-    if (!foundationData || description.length < 4) return
+    if (description.length < 4) return
 
-    const businessType = foundationData.businessType
     setIsLoadingHSCodes(true)
 
     try {
-      console.log('🔍 Calling server-side HS code API...')
+      console.log('🧠 Using Marcus chat intelligence for HS codes...')
       
-      const response = await fetch('/api/intelligence/hs-codes', {
+      // Use proven chat endpoint that works with 597K+ trade flows
+      const response = await fetch('/api/trade-intelligence-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productDescription: description,
-          businessType: businessType
+          question: `What is the HS code for ${description}?`,
+          sessionId: `product_lookup_${Date.now()}`,
+          language: typeof window !== 'undefined' && window.i18n?.language || 'en'
         })
       })
 
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Server API response:', data)
+        console.log('✅ Chat intelligence response:', data)
         
-        setSuggestedCodes({
-          productIndex,
-          suggestions: data.suggestions,
-          source: data.source,
-          apiCall: data.apiCall,
-          recordsSearched: data.recordsSearched
-        })
+        if (data.success) {
+          // Parse HS code from chat response
+          const hsCodeMatch = data.response.match(/HS code (\d+\.?\d*)/i)
+          const suggestions = hsCodeMatch ? [{
+            code: hsCodeMatch[1],
+            description: data.response,
+            confidence: data.confidence || 90,
+            source: data.dataSource || 'chat_intelligence'
+          }] : []
+          
+          setSuggestedCodes({
+            productIndex,
+            suggestions,
+            source: 'marcus_chat_intelligence',
+            multilingual: true,
+            recordsSearched: '597K+ trade flows',
+            followUpQuestion: data.followUpQuestion
+          })
 
-        const stats = await getIntelligenceStats()
-        setIntelligenceStats(stats)
-        return
+          const stats = await getIntelligenceStats()
+          setIntelligenceStats(stats)
+          return
+        }
       }
 
-      // Fallback to client-side intelligence
-      const intelligence = await getIntelligentHSCodes(description, businessType)
-      setSuggestedCodes({
-        productIndex,
-        suggestions: intelligence.suggestions,
-        source: intelligence.source,
-        freshness: intelligence.freshness,
-        cacheHit: intelligence.cacheHit
+      // Try chat for category guidance as fallback
+      const guidanceResponse = await fetch('/api/trade-intelligence-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: `Help classify product: ${description}`,
+          sessionId: `guidance_${Date.now()}`,
+          language: typeof window !== 'undefined' && window.i18n?.language || 'en'
+        })
       })
 
+      if (guidanceResponse.ok) {
+        const guidanceData = await guidanceResponse.json()
+        setSuggestedCodes({
+          productIndex,
+          suggestions: [{
+            code: 'GUIDANCE',
+            description: guidanceData.response || 'Product classification guidance available',
+            confidence: 70,
+            source: 'chat_guidance'
+          }],
+          source: 'marcus_guidance'
+        })
+      }
+
     } catch (error) {
-      console.error('❌ Intelligence cache error:', error)
+      console.error('❌ Chat intelligence error:', error)
       
-      // Enhanced fallback
-      const fallbackResult = await productClassifier.classifyUserProduct(description, businessType)
-      const suggestions = fallbackResult.suggestions || []
-      
+      // Final fallback - simple guidance
       setSuggestedCodes({
         productIndex,
-        suggestions: suggestions.slice(0, 6),
-        source: 'fallback'
+        suggestions: [{
+          code: 'HELP',
+          description: smartT('product.hsCodeHelp', 'Describe your product more specifically for better classification'),
+          confidence: 50,
+          source: 'guidance'
+        }],
+        source: 'fallback_guidance'
       })
       
     } finally {
@@ -564,33 +595,6 @@ export default function ProductClassification() {
     }
   }, [products])
 
-  if (!foundationData) {
-    return (
-      <>
-        <Head>
-          <title>Product Classification Intelligence - Triangle Intelligence Platform</title>
-        </Head>
-        <TriangleLayout>
-          <div className="foundation-layout">
-            <div className="foundation-workspace">
-              <div className="foundation-form-section">
-                <h1 className="bloomberg-hero-title">Complete Foundation Analysis First</h1>
-                <p className="bloomberg-hero-subtitle">
-                  Please complete your business intelligence profile before proceeding to product classification.
-                </p>
-                
-                <div className="bloomberg-hero-actions">
-                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                    Go to Foundation Analysis →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TriangleLayout>
-      </>
-    )
-  }
 
   return (
     <>
@@ -606,11 +610,11 @@ export default function ProductClassification() {
             <div className="bloomberg-grid bloomberg-grid-4">
               <div className="bloomberg-card">
                 <div className="bloomberg-metric-value">{realTimeStats.totalClassifications.toLocaleString()}</div>
-                <div className="bloomberg-metric-label">Classifications</div>
+                <div className="bloomberg-metric-label">{smartT("product.classifications")}</div>
               </div>
               <div className="bloomberg-card">
                 <div className="bloomberg-metric-value">{realTimeStats.successRate.toFixed(1)}%</div>
-                <div className="bloomberg-metric-label">Success Rate</div>
+                <div className="bloomberg-metric-label">{smartT("product.successrate")}</div>
               </div>
               <div className="bloomberg-card">
                 <div className="bloomberg-metric-value">{realTimeStats.avgConfidence.toFixed(1)}%</div>
@@ -618,7 +622,7 @@ export default function ProductClassification() {
               </div>
               <div className="bloomberg-card">
                 <div className="bloomberg-metric-value">{realTimeStats.activeUsers}</div>
-                <div className="bloomberg-metric-label">Active Users</div>
+                <div className="bloomberg-metric-label">{smartT("product.activeusers")}</div>
               </div>
             </div>
           </div>
@@ -633,7 +637,7 @@ export default function ProductClassification() {
               </p>
 
               {/* Business Context Intelligence */}
-              {enhancedContext && (
+              {foundationData && enhancedContext && (
                 <div className="bloomberg-card">
                   <div className="bloomberg-card-header">
                     <h3 className="bloomberg-card-title">{enhancedContext.companyName} Business Intelligence</h3>
@@ -735,12 +739,12 @@ export default function ProductClassification() {
                 <div className="bloomberg-card-header">
                   <span className="section-icon">📦</span>
                   <div className="section-content">
-                    <h3 className="bloomberg-card-title">Product Classification</h3>
+                    <h3 className="bloomberg-card-title">{smartT("product.productclassificatio")}</h3>
                     <p className="section-subtitle">
                       Automated HS code mapping using trade intelligence database
                     </p>
                   </div>
-                  {enhancedContext && (
+                  {foundationData && enhancedContext && (
                     <div className="bloomberg-status bloomberg-status-info">
                       Route: {enhancedContext.derivedContext.geographic.optimalRoute}
                     </div>
@@ -764,7 +768,7 @@ export default function ProductClassification() {
                               setProducts(newProducts)
                             }}
                             className="badge-remove"
-                            title="Remove suggestion"
+                            title={smartT("product.removesuggestion")}
                           >
                             ×
                           </button>
@@ -783,22 +787,22 @@ export default function ProductClassification() {
 
                   <div className="product-form">
                     <div className="form-group">
-                      <label className="form-label">Product Description</label>
+                      <label className="form-label">{smartT("product.subtitle")}</label>
                       <input
                         className="bloomberg-input"
                         type="text"
                         value={product.description}
                         onChange={(e) => updateProduct(index, 'description', e.target.value)}
                         placeholder={`${
-                          foundationData.businessType === 'Electronics' ? 'Smartphone accessories' :
-                          foundationData.businessType === 'Textiles' ? 'Cotton t-shirts' :
-                          foundationData.businessType === 'Medical' ? 'Medical devices' :
+                          foundationData?.businessType === 'Electronics' ? 'Smartphone accessories' :
+                          foundationData?.businessType === 'Textiles' ? 'Cotton t-shirts' :
+                          foundationData?.businessType === 'Medical' ? 'Medical devices' :
                           'Industrial components'
                         }`}
                       />
                       
                       {/* Smart Mismatch Detection */}
-                      {product.description && (() => {
+                      {foundationData && product.description && (() => {
                         const mismatchResult = detectBusinessTypeMismatch(product.description, foundationData?.businessType)
                         if (mismatchResult.mismatch) {
                           return (
@@ -817,7 +821,7 @@ export default function ProductClassification() {
                                       setFoundationData(updatedFoundationData)
                                       localStorage.setItem('triangle-foundation', JSON.stringify(updatedFoundationData))
                                       console.log(`🔧 Auto-fixed business type: ${foundationData?.businessType} → ${mismatchResult.detected}`)
-                                      alert(`✅ Fixed! Business type updated to ${mismatchResult.detected}`)
+                                      alert(smartT('product.businessTypeUpdated', `✅ Fixed! Business type updated to ${mismatchResult.detected}`))
                                     }}
                                     className="mismatch-action-btn"
                                   >
@@ -858,13 +862,17 @@ export default function ProductClassification() {
                   {suggestedCodes.productIndex === index && (
                     <div className="suggestions-panel">
                       <div className="suggestions-header">
-                        <h5 className="suggestions-title">Intelligent HS Code Suggestions</h5>
+                        <h5 className="suggestions-title">{smartT("product.title")}</h5>
                         <span className={`suggestions-source ${
+                          suggestedCodes.source === 'marcus_chat_intelligence' ? 'marcus' :
+                          suggestedCodes.source === 'marcus_guidance' ? 'guidance' :
                           suggestedCodes.source === 'learned' ? 'learned' :
                           suggestedCodes.source === 'comtrade' ? 'api' :
                           'database'
                         }`}>
-                          {suggestedCodes.source === 'learned' ? '🧠 LEARNED DATA' :
+                          {suggestedCodes.source === 'marcus_chat_intelligence' ? '🧠 MARCUS AI' :
+                           suggestedCodes.source === 'marcus_guidance' ? '💡 MARCUS GUIDANCE' :
+                           suggestedCodes.source === 'learned' ? '🧠 LEARNED DATA' :
                            suggestedCodes.source === 'comtrade' ? '🌐 LIVE API' :
                            '📊 DATABASE'}
                         </span>
@@ -873,8 +881,8 @@ export default function ProductClassification() {
                       {isLoadingHSCodes ? (
                         <div className="loading-panel">
                           <div className="loading-spinner"></div>
-                          <div className="loading-text">Searching UN Comtrade Database...</div>
-                          <div className="loading-subtext">Real-time HS code mapping in progress</div>
+                          <div className="loading-text">{smartT('product.searchingMarcus', 'Marcus AI searching 597K+ trade flows...')}</div>
+                          <div className="loading-subtext">{smartT('product.aiClassification', 'AI-powered product classification in progress')}</div>
                         </div>
                       ) : suggestedCodes.suggestions.length > 0 ? (
                         <div className="suggestions-list">
@@ -894,7 +902,11 @@ export default function ProductClassification() {
                                 {suggestion.description}
                               </div>
                               <div className="suggestion-source">
-                                {suggestion.learnedFrom ? 
+                                {suggestion.source === 'chat_intelligence' || suggestion.source === 'marcus_chat_intelligence' ? 
+                                  `🧠 Marcus AI Intelligence (597K+ trade flows)` :
+                                  suggestion.source === 'chat_guidance' ? 
+                                  `💡 Marcus Classification Guidance` :
+                                  suggestion.learnedFrom ? 
                                   `🧠 Learned from ${suggestion.learnedFrom} similar selections${suggestion.recentUse ? ' (recently used)' : ''}` :
                                   suggestion.noMatch ? 
                                   `📊 Top ${foundationData?.businessType || 'general'} codes` :
@@ -907,7 +919,19 @@ export default function ProductClassification() {
                       ) : (
                         <div className="no-suggestions">
                           <div className="no-suggestions-text">
-                            No suggestions found. Try a more specific description.
+                            {smartT('product.noSuggestions', 'No suggestions found. Try a more specific description.')}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Marcus AI Follow-up Question */}
+                      {suggestedCodes.followUpQuestion && (
+                        <div className="marcus-followup">
+                          <div className="marcus-followup-label">
+                            💡 {smartT('product.marcusQuestion', 'Marcus suggests:')}
+                          </div>
+                          <div className="marcus-followup-text">
+                            {suggestedCodes.followUpQuestion}
                           </div>
                         </div>
                       )}
@@ -970,7 +994,7 @@ export default function ProductClassification() {
                   <div className="results-metrics">
                     <div className="result-metric">
                       <div className="metric-value">{products.filter(p => p.hsCode).length}</div>
-                      <div className="metric-label">Products Mapped</div>
+                      <div className="metric-label">{smartT("product.productsmapped")}</div>
                     </div>
                     <div className="result-metric">
                       <div className="metric-value">
@@ -979,8 +1003,8 @@ export default function ProductClassification() {
                       <div className="metric-label">Avg Confidence</div>
                     </div>
                     <div className="result-metric">
-                      <div className="metric-value">Ready</div>
-                      <div className="metric-label">Triangle Analysis</div>
+                      <div className="metric-value">{smartT("product.ready")}</div>
+                      <div className="metric-label">{smartT("product.analysis")}</div>
                     </div>
                   </div>
 
@@ -999,9 +1023,11 @@ export default function ProductClassification() {
 
               {/* Navigation */}
               <div className="bloomberg-hero-actions">
-                <Link href="/foundation" className="bloomberg-btn bloomberg-btn-secondary">
-                  ← Back to Foundation
-                </Link>
+                {foundationData && (
+                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-secondary">
+                    ← Back to Foundation
+                  </Link>
+                )}
                 {!analysisComplete && products.filter(p => p.hsCode).length > 0 && (
                   <Link href="/routing" className="bloomberg-btn bloomberg-btn-primary">
                     Continue to Route Analysis →
@@ -1011,13 +1037,13 @@ export default function ProductClassification() {
 
             {/* Live Intelligence Panel - Right Side (1/3 width) */}
             <div className="foundation-intelligence-panel">
-              <h3 className="bloomberg-card-title bloomberg-mb-md">Product Intelligence</h3>
+              <h3 className="bloomberg-card-title bloomberg-mb-md">{smartT("foundation.productintelligence")}</h3>
               
               <div className="bloomberg-text-center bloomberg-mb-lg">
                 <div className="bloomberg-metric-value accent">
                   {(2.0 + ((products.filter(p => p.hsCode).length) / Math.max(products.length, 1)) * 3.0).toFixed(1)}/10.0
                 </div>
-                <div className="bloomberg-metric-label">Intelligence Level</div>
+                <div className="bloomberg-metric-label">{smartT("product.intelligencelevel")}</div>
               </div>
 
               <div className="bloomberg-mb-lg">
@@ -1025,7 +1051,7 @@ export default function ProductClassification() {
                   <div className="bloomberg-metric-value" style={{color: 'var(--bloomberg-green)'}}>
                     {products.filter(p => p.hsCode).length}/{products.length}
                   </div>
-                  <div className="bloomberg-metric-label">Products Mapped</div>
+                  <div className="bloomberg-metric-label">{smartT("product.productsmapped")}</div>
                 </div>
                 
                 <div className="bloomberg-mb-md">
@@ -1036,7 +1062,7 @@ export default function ProductClassification() {
                 </div>
                 
                 <div className="bloomberg-mb-md">
-                  <div className="bloomberg-metric-label">Classification Source</div>
+                  <div className="bloomberg-metric-label">{smartT("product.classificationsource")}</div>
                   <div className="bloomberg-text-primary">
                     {suggestedCodes.source === 'learned' ? '🧠 LEARNED DATA' :
                      suggestedCodes.source === 'comtrade' ? '🌐 LIVE API' :

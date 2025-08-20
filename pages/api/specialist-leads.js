@@ -8,7 +8,7 @@
 import { createClient } from '@supabase/supabase-js'
 import CanadaMexicoAdvantageCalculator from '../../lib/canada-mexico-advantage-calculator.js'
 import LeadQualificationSystem from '../../lib/lead-qualification-system.js'
-import PredictiveAlertsNetworkIntelligence from '../../lib/predictive-alerts-network-intelligence.js'
+import PredictiveAlertsNetworkIntelligence from '../../lib/intelligence/predictive-alerts-network-intelligence.js'
 
 // Initialize Supabase client
 const supabase = createClient(

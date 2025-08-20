@@ -4,7 +4,7 @@
  * Final integration of institutional learning with monetization
  */
 
-import PredictiveAlertsNetworkIntelligence from '../../lib/predictive-alerts-network-intelligence.js'
+import PredictiveAlertsNetworkIntelligence from '../../lib/intelligence/predictive-alerts-network-intelligence.js'
 import LeadQualificationSystem from '../../lib/lead-qualification-system.js'
 import HindsightInstitutionalLearning from '../../lib/hindsight-institutional-learning.js'
 

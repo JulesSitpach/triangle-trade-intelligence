@@ -1,6 +1,6 @@
 /**
- * TARIFF: USMCA OPTIMIZATION INTELLIGENCE
- * Comprehensive tariff analysis and USMCA treaty utilization
+ * PARTNERSHIP: USMCA OPTIMIZATION INTELLIGENCE
+ * Comprehensive partnership analysis and USMCA treaty utilization
  * Consolidates stages 4-7 functionality for optimal UX
  */
 
@@ -8,12 +8,13 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useTranslation } from 'react-i18next'
+import { useSafeTranslation } from '../hooks/useSafeTranslation'
 import TriangleSideNav from '../components/TriangleSideNav'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import { smartT } from '../lib/smartT'
 
-export default function TariffOptimization() {
-  const { t, i18n } = useTranslation(['common', 'partnership'])
+export default function Partnership() {
+  const { t, i18n, ready } = useSafeTranslation('common')
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [foundationData, setFoundationData] = useState(null)
@@ -49,382 +50,160 @@ export default function TariffOptimization() {
 
       const foundation = JSON.parse(foundationStorage)
       const product = JSON.parse(productStorage)
-      
+      const routing = routingStorage ? JSON.parse(routingStorage) : {}
+
       setFoundationData(foundation)
       setProductData(product)
-      if (routingStorage) setRoutingData(JSON.parse(routingStorage))
+      setRoutingData(routing)
 
-      // PERFORMANCE OPTIMIZATION: Show page immediately with fast fallback data
-      generateFallbackAnalysis(foundation)
-      generatePartnershipIntelligence(foundation)
+      // Generate partnership intelligence based on user data
+      await generatePartnershipIntelligence(foundation, product, routing)
       
-      // Set loading to false immediately - page renders fast!
       setLoading(false)
-
-      // Run slow calculations in background (non-blocking)
-      setTimeout(async () => {
-        try {
-          await analyzeUSMCARoutes(foundation)
-        } catch (error) {
-          console.warn('Background USMCA analysis failed:', error)
-        }
-      }, 100)
-
     } catch (error) {
-      console.error('Error loading stage data:', error)
+      console.error('🚨 Partnership data loading error:', error)
+      generateSamplePartnershipAnalysis()
       setLoading(false)
     }
   }
 
-  // Generate sample partnership analysis for demonstration
   const generateSamplePartnershipAnalysis = () => {
-    const sampleFoundation = {
-      businessType: 'Electronics',
-      importVolume: '$1M - $5M',
-      primarySupplierCountry: 'CN'
-    }
-    
-    setFoundationData(sampleFoundation)
-    setProductData({ products: [{ description: 'Sample electronic components', hsCode: '8542.31' }] })
-    
-    generateFallbackAnalysis(sampleFoundation)
-    generatePartnershipIntelligence(sampleFoundation)
-    setShowComparison(true)
-  }
-
-  const analyzeUSMCARoutes = async (userData) => {
-    try {
-      // Add 5 second timeout to prevent hanging
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-      const response = await fetch('/api/canada-mexico-advantage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userData }),
-        signal: controller.signal
-      })
-
-      clearTimeout(timeoutId)
-      const result = await response.json()
-      
-      if (result.success) {
-        // Update with enhanced data when available
-        setRouteAnalysis(prevAnalysis => ({
-          ...prevAnalysis,
-          ...result.usmcaAdvantage,
-          enhanced: true
-        }))
-      }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.warn('USMCA API call timed out after 5s - using fast fallback data')
-      } else {
-        console.error('Error analyzing USMCA routes:', error)
-      }
-      // Fallback already set - no need to call again
-    }
-  }
-
-  const generateFallbackAnalysis = (userData) => {
-    const businessType = userData.businessType
-    const importVolume = userData.importVolume
-    const volumeValue = getVolumeValue(importVolume)
-
-    // Dynamic analysis based on business profile
-    const canadaAnalysis = generateCanadaAnalysis(businessType, volumeValue)
-    const mexicoAnalysis = generateMexicoAnalysis(businessType, volumeValue)
+    setFoundationData({
+      companyName: "Sample Manufacturing Co",
+      businessType: "Electronics Manufacturing",
+      importVolume: "$2M - $5M",
+      primarySupplierCountry: "China"
+    })
 
     setRouteAnalysis({
-      canadaRoute: canadaAnalysis,
-      mexicoRoute: mexicoAnalysis,
-      recommendation: determineRecommendation(userData),
-      partnershipValue: calculatePartnershipValue(businessType, volumeValue),
-      crossBorderSynergies: generateSynergies(businessType)
-    })
-    
-    setShowComparison(true)
-  }
-
-  const generateCanadaAnalysis = (businessType, volumeValue) => {
-    const baseTimeline = businessType === 'Medical' ? '8-10 weeks' : '6-8 weeks'
-    const complexity = businessType === 'Medical' ? 'High' : 'Medium'
-    const baseSavings = Math.round(volumeValue * 0.15) // 15% base savings for Canada route
-
-    return {
-      name: 'Canada Partnership Route',
-      timeline: baseTimeline,
-      complexity: complexity,
-      strengths: getCanadaStrengths(businessType),
-      savings: baseSavings,
-      bestFor: getCanadaBestFor(businessType),
-      partnershipBenefits: [
-        'Advanced regulatory compliance expertise',
-        'High-tech manufacturing capabilities',
-        'Strong intellectual property protection',
-        'Excellent logistics infrastructure'
-      ],
-      marketAccess: 'Premium North American markets',
-      culturalAdvantage: 'Canadian business expertise and relationships',
-      complianceRating: businessType === 'Medical' ? 99 : 97
-    }
-  }
-
-  const generateMexicoAnalysis = (businessType, volumeValue) => {
-    const baseTimeline = '4-6 weeks'
-    const complexity = businessType === 'Electronics' ? 'Low' : 'Medium'
-    const baseSavings = Math.round(volumeValue * 0.18) // 18% base savings for Mexico route
-
-    return {
-      name: 'Mexico Partnership Route',
-      timeline: baseTimeline,
-      complexity: complexity,
-      strengths: getMexicoStrengths(businessType),
-      savings: baseSavings,
-      bestFor: getMexicoBestFor(businessType),
-      partnershipBenefits: [
-        'Cost-effective manufacturing hubs',
-        'Rapid implementation capabilities',
-        'Extensive USMCA experience',
-        'Strategic border proximity'
-      ],
-      marketAccess: 'High-volume manufacturing corridor',
-      culturalAdvantage: 'Mexican market expertise and networks',
-      complianceRating: 95
-    }
-  }
-
-  const getCanadaStrengths = (businessType) => {
-    const base = ['Regulatory Excellence', 'Infrastructure Quality', 'Technology Leadership']
-    
-    if (businessType === 'Medical') return [...base, 'Health Canada Expertise']
-    if (businessType === 'Electronics') return [...base, 'R&D Capabilities']
-    return [...base, 'Quality Standards']
-  }
-
-  const getMexicoStrengths = (businessType) => {
-    const base = ['Manufacturing Scale', 'Cost Efficiency', 'Speed to Market']
-    
-    if (businessType === 'Automotive') return [...base, 'Auto Industry Hub']
-    if (businessType === 'Electronics') return [...base, 'Electronics Corridor']
-    return [...base, 'Production Flexibility']
-  }
-
-  const getCanadaBestFor = (businessType) => {
-    if (businessType === 'Medical') return 'High-regulation, premium medical devices'
-    if (businessType === 'Electronics') return 'Advanced technology, R&D intensive products'
-    return 'High-value, quality-critical products'
-  }
-
-  const getMexicoBestFor = (businessType) => {
-    if (businessType === 'Automotive') return 'Volume automotive manufacturing'
-    if (businessType === 'Electronics') return 'Consumer electronics, high-volume production'
-    return 'Cost-sensitive, scale manufacturing'
-  }
-
-  const generatePartnershipIntelligence = async (userData) => {
-    const businessType = userData.businessType
-    const volumeValue = getVolumeValue(userData.importVolume)
-
-    setPartnershipOpportunities({
-      canadaPartners: {
-        totalOpportunities: Math.floor(volumeValue / 100000) + 15,
-        keyIndustries: getCanadaKeyIndustries(businessType),
-        partnershipValue: formatCurrency(volumeValue * 0.25),
-        advantages: [
-          'Access to Canadian regulatory expertise',
-          'Quality-focused manufacturing partnerships',
-          'Advanced technology integration',
-          'Premium market positioning'
-        ]
+      canada: {
+        advantages: ["Strong logistics infrastructure", "Regulatory alignment", "Established trade relations"],
+        savings: "$180K",
+        timeline: "2-4 weeks",
+        risk: "Low"
       },
-      mexicoPartners: {
-        totalOpportunities: Math.floor(volumeValue / 75000) + 25,
-        keyIndustries: getMexicoKeyIndustries(businessType),
-        partnershipValue: formatCurrency(volumeValue * 0.30),
-        advantages: [
-          'Cost-effective production scaling',
-          'Rapid market entry capabilities',
-          'Extensive manufacturing networks',
-          'USMCA implementation expertise'
-        ]
-      },
-      dualMarketStrategy: {
-        combinedValue: formatCurrency(volumeValue * 0.55),
-        synergies: [
-          'Canada: Premium products + Mexico: Volume production',
-          'Regulatory compliance (Canada) + Cost optimization (Mexico)',
-          'Technology development (Canada) + Manufacturing scale (Mexico)',
-          'Market diversification across USMCA corridor'
-        ]
+      mexico: {
+        advantages: ["Lower manufacturing costs", "Growing hub", "Strategic location"],
+        savings: "$220K", 
+        timeline: "3-6 weeks",
+        risk: "Medium"
       }
     })
 
-    setMarketIntelligence({
-      canadaAdvantages: [
-        'Advanced regulatory framework',
-        'High-tech manufacturing base',
-        'Strong IP protection',
-        'Premium market access'
-      ],
-      mexicoAdvantages: [
-        'Manufacturing cost efficiency',
-        'Strategic geographic location',
-        'Experienced workforce',
-        'Established supply chains'
-      ],
-      crossBorderSynergies: [
-        'Complementary manufacturing capabilities',
-        'Risk diversification strategies',
-        'Seasonal production balancing',
-        'Technology transfer opportunities'
-      ]
+    setPartnershipOpportunities({
+      totalOpportunities: 127,
+      verifiedPartners: 89,
+      activePipeline: 23
     })
   }
 
-  const getCanadaKeyIndustries = (businessType) => {
-    if (businessType === 'Medical') return ['Medical Devices', 'Pharmaceuticals', 'Biotechnology']
-    if (businessType === 'Electronics') return ['Advanced Electronics', 'Telecommunications', 'Aerospace']
-    return ['Advanced Manufacturing', 'Technology', 'Resource Processing']
-  }
-
-  const getMexicoKeyIndustries = (businessType) => {
-    if (businessType === 'Automotive') return ['Automotive Manufacturing', 'Auto Parts', 'Assembly Operations']
-    if (businessType === 'Electronics') return ['Electronics Assembly', 'Consumer Goods', 'Telecommunications']
-    return ['Manufacturing', 'Assembly Operations', 'Processing']
-  }
-
-  const getVolumeValue = (volume) => {
-    const ranges = {
-      'Under $500K': 250000,
-      '$500K - $1M': 750000,
-      '$1M - $5M': 3000000,
-      '$5M - $25M': 15000000,
-      'Over $25M': 50000000
+  const generatePartnershipIntelligence = async (foundation, product, routing) => {
+    // Generate route analysis based on user data
+    const analysis = {
+      canada: {
+        advantages: [
+          "Established US-Canada trade corridor ($780B annually)",
+          "Advanced logistics and port infrastructure", 
+          "Regulatory alignment and trade facilitation",
+          "Strong financial services sector"
+        ],
+        savings: calculateSavings(foundation.importVolume, 'canada'),
+        timeline: "2-4 weeks",
+        risk: "Low",
+        confidence: 85
+      },
+      mexico: {
+        advantages: [
+          "Lower manufacturing and labor costs",
+          "Rapidly growing manufacturing hub",
+          "Strategic nearshoring location",
+          "USMCA treaty benefits"
+        ],
+        savings: calculateSavings(foundation.importVolume, 'mexico'),
+        timeline: "3-6 weeks", 
+        risk: "Medium",
+        confidence: 78
+      }
     }
-    return ranges[volume] || 1000000
+
+    setRouteAnalysis(analysis)
+
+    // Partnership opportunities
+    setPartnershipOpportunities({
+      totalOpportunities: Math.floor(Math.random() * 50) + 100,
+      verifiedPartners: Math.floor(Math.random() * 30) + 70,
+      activePipeline: Math.floor(Math.random() * 15) + 20
+    })
   }
 
-  const formatCurrency = (amount) => {
-    // Handle undefined, null, or non-numeric values
-    if (amount === null || amount === undefined || isNaN(amount) || typeof amount !== 'number') {
-      return '$0'
+  const calculateSavings = (importVolume, route) => {
+    const volumeMap = {
+      "Under $500K": 250000,
+      "$500K - $1M": 750000,
+      "$1M - $2M": 1500000,
+      "$2M - $5M": 3500000,
+      "$5M - $10M": 7500000,
+      "$10M+": 15000000
     }
-    
-    // Ensure it's a positive number
-    const num = Math.abs(Number(amount))
-    
-    if (num >= 1000000) return `$${(num/1000000).toFixed(1)}M`
-    if (num >= 1000) return `$${(num/1000).toFixed(0)}K`
-    return `$${num.toLocaleString()}`
-  }
 
-  const calculatePartnershipValue = (businessType, volumeValue) => {
-    let multiplier = 1.0
-    if (businessType === 'Medical') multiplier = 1.3
-    if (businessType === 'Electronics') multiplier = 1.2
-    return Math.round(volumeValue * multiplier * 0.20)
-  }
-
-  const generateSynergies = (businessType) => {
-    const base = [
-      'Dual-market manufacturing strategy',
-      'Risk diversification across borders',
-      'Seasonal production optimization'
-    ]
+    const volume = volumeMap[importVolume] || 1500000
+    const savingsRate = route === 'mexico' ? 0.08 : 0.06
+    const savings = Math.floor(volume * savingsRate / 1000) * 1000
     
-    if (businessType === 'Medical') {
-      return [...base, 'Regulatory compliance + cost efficiency', 'R&D (Canada) + Production (Mexico)']
-    }
-    
-    if (businessType === 'Electronics') {
-      return [...base, 'Technology development + volume production', 'Premium + consumer market access']
-    }
-    
-    return [...base, 'Quality + efficiency optimization']
-  }
-
-  const determineRecommendation = (userData) => {
-    const businessType = userData.businessType
-    const volume = userData.importVolume
-
-    // Business logic for route recommendation
-    if (businessType === 'Medical') return 'canada'
-    if (businessType === 'Electronics' && (volume === '$5M - $25M' || volume === 'Over $25M')) {
-      return 'dual' // Recommend both for high-volume electronics
-    }
-    if (volume === 'Over $25M') return 'dual'
-    return 'mexico'
+    return `$${(savings / 1000).toFixed(0)}K`
   }
 
   const selectRoute = (route) => {
     setSelectedRoute(route)
+    setShowComparison(true)
+
+    // Save partnership selection
+    const partnershipData = {
+      selectedRoute: route,
+      routeAnalysis: routeAnalysis[route],
+      timestamp: new Date().toISOString(),
+      confidence: routeAnalysis[route]?.confidence || 75
+    }
+
+    localStorage.setItem('triangle-partnership', JSON.stringify(partnershipData))
   }
 
   const proceedToNextStage = () => {
-    const partnershipData = {
-      selectedRoute,
-      routeAnalysis,
-      partnershipOpportunities,
-      marketIntelligence,
-      timestamp: new Date().toISOString()
+    if (!selectedRoute) {
+      alert(smartT('partnership.selectRoute'))
+      return
     }
-    localStorage.setItem('triangle-partnership', JSON.stringify(partnershipData))
     router.push('/hindsight')
   }
 
   if (loading) {
     return (
-      <div className="platform-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <h1 className="loading-text">{ready ? t('partnership.loading.analyzingOpportunities', 'Analyzing USMCA Partnership Opportunities...') : 'Analyzing USMCA Partnership Opportunities...'}</h1>
-          <p>{ready ? t('partnership.loading.calculating', 'Calculating Canada vs Mexico strategic advantages') : 'Calculating Canada vs Mexico strategic advantages'}</p>
-        </div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <div>{smartT('common.loading')}</div>
       </div>
     )
   }
 
-  // Always show the full UI - no blocking for missing data
-
   return (
     <>
       <Head>
-        <title>{ready ? t('page.partnership.meta.title') : 'Partnership Ecosystem - Triangle Intelligence Platform'}</title>
-        <meta name="description" content={ready ? t('page.partnership.meta.description') : 'Connect with strategic partners for USMCA triangle routing and manufacturing'} />
+        <title>{smartT("partnership.title")} - Triangle Intelligence</title>
+        <meta name="description" content="Strategic partnership analysis for USMCA triangle routing optimization" />
       </Head>
 
-      {/* Terminal Navigation */}
-      <nav className="bloomberg-nav">
-        <div className="bloomberg-container-padded">
-          <div className="bloomberg-flex" style={{justifyContent: 'space-between', alignItems: 'center'}}>
-            <Link href="/" className="bloomberg-nav-brand">
-              <span className="text-success">◢</span>
-              TRIANGLE INTELLIGENCE
-              <span className="text-primary">PRO v2.1</span>
-            </Link>
-            <div className="bloomberg-flex" style={{justifyContent: 'flex-end', flexWrap: 'wrap', gap: 'var(--space-md)'}}>
-              <div className="bloomberg-status bloomberg-status-success">
-                <div className="bloomberg-status-dot"></div>
-                USER: ADMIN@TRIANGLEINTEL.COM
-              </div>
-              <div className="bloomberg-status bloomberg-status-info">
-                <div className="bloomberg-status-dot"></div>
-                ACTIVE SESSION
-              </div>
-              <div className="bloomberg-status bloomberg-status-warning">
-                <span>🔔</span>
-                3 ALERTS
-              </div>
-              <LanguageSwitcher />
-              <Link href="/dashboard" className="bloomberg-btn bloomberg-btn-secondary">
-                ACCOUNT
-              </Link>
-              <Link href="/" className="bloomberg-btn bloomberg-btn-primary">
-                LOGOUT
-              </Link>
+      <nav className="triangle-nav">
+        <div className="triangle-nav-brand">
+          <div className="triangle-nav-logo">
+            <div className="triangle-icon">▲</div>
+            <div className="triangle-nav-text">
+              <div className="triangle-nav-title">Triangle Intelligence</div>
+              <div className="triangle-nav-subtitle">{smartT("partnership.navsubtitle")}</div>
             </div>
           </div>
+        </div>
+        <div className="triangle-nav-actions">
+          <LanguageSwitcher />
         </div>
       </nav>
 
@@ -437,776 +216,607 @@ export default function TariffOptimization() {
           backgroundAttachment: 'fixed',
           minHeight: '100vh'
         }}>
-        <div className="page-content">
+          <div className="page-content">
 
-        {/* Executive Metrics Bar */}
-        <div className="bloomberg-container-padded">
-          <div className="metrics-grid">
-            <div className="metric-card primary">
-              <div className="metric-header">
-                <div className="metric-period">CONNECTION</div>
-                <div className="bloomberg-status bloomberg-status-warning small">URGENT</div>
-              </div>
-              <div className="metric-value text-warning">24-48hrs</div>
-              <div className="bloomberg-metric-label">Partner Connection Time</div>
-              <div className="metric-change warning">Crisis Response</div>
-            </div>
-            <div className="metric-card">
-              <div className="metric-header">
-                <div className="metric-period">REVENUE</div>
-                <div className="bloomberg-status bloomberg-status-success small">HIGH</div>
-              </div>
-              <div className="metric-value text-success">$500-25K</div>
-              <div className="bloomberg-metric-label">Per Connection</div>
-              <div className="metric-change positive">Partnership Value</div>
-            </div>
-            <div className="metric-card">
-              <div className="metric-header">
-                <div className="metric-period">PARTNERS</div>
-                <div className="bloomberg-status bloomberg-status-success small">READY</div>
-              </div>
-              <div className="metric-value text-primary">100+</div>
-              <div className="bloomberg-metric-label">Mexico Manufacturing</div>
-              <div className="metric-change positive">Active Network</div>
-            </div>
-            <div className="metric-card">
-              <div className="metric-header">
-                <div className="metric-period">USMCA</div>
-                <div className="bloomberg-status bloomberg-status-success small">ACTIVE</div>
-              </div>
-              <div className="metric-value text-success">0%</div>
-              <div className="bloomberg-metric-label">Treaty Tariff Rate</div>
-              <div className="metric-change positive">Protected</div>
-            </div>
-          </div>
-        </div>
+            {/* Executive Metrics Bar */}
+            <div className="bloomberg-container-padded">
+              <div className="bloomberg-grid bloomberg-grid-2">
 
-        {/* Main Content Grid */}
-        <div className="bloomberg-container-padded">
-          <div className="bloomberg-grid bloomberg-grid-2">
-          
-          {/* Form Section - Takes 2 columns */}
-          <div className="bloomberg-card">
-            <h1 className="bloomberg-hero-title">Partnership Ecosystem Intelligence</h1>
-            <p className="bloomberg-hero-subtitle bloomberg-mb-lg">
-              🚨 URGENT: Trump trade threats active • Mexico alternatives ready • Canadian-Mexican family team
-            </p>
-
-            {/* Partnership Intelligence Section */}
-            <div className="bloomberg-card">
-              <div className="bloomberg-card-header">
-                <span className="section-icon"></span>
-                <div className="section-content">
-                  <h3 className="bloomberg-card-title">🚨 Crisis Response Partnership Network</h3>
-                  <p className="section-subtitle">Trump threatens Canada trade deals • Mexico alternatives ready • Family team connects you</p>
-                </div>
-              </div>
-              {/* Partnership Content */}
-              <div className="bloomberg-grid bloomberg-grid-3">
-          <div className="bloomberg-card">
-            <div className="bloomberg-metric">
-              <div className="bloomberg-metric-value">🇨🇦+🇲🇽</div>
-              <div className="bloomberg-metric-label">{ready ? t('partnership.metrics.dualMarket', 'Dual Market') : 'Dual Market'}</div>
-            </div>
-          </div>
-          <div className="bloomberg-card">
-            <div className="bloomberg-metric">
-              <div className="bloomberg-metric-value">USMCA</div>
-              <div className="bloomberg-metric-label">{ready ? t('partnership.metrics.treatyBenefits', 'Treaty Benefits') : 'Treaty Benefits'}</div>
-            </div>
-          </div>
-          <div className="bloomberg-card">
-            <div className="bloomberg-metric">
-              <div className="bloomberg-metric-value">0%</div>
-              <div className="bloomberg-metric-label">{ready ? t('partnership.metrics.tariffRate', 'Tariff Rate') : 'Tariff Rate'}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Cross-Border Expertise Banner */}
-        <div className="bloomberg-card">
-          <div className="bloomberg-card-header">
-            <div className="section-content">
-              <div className="bloomberg-flex">
-                <span className="section-icon">🇨🇦</span>
-                <span className="text-primary">+</span>
-                <span className="section-icon">🇲🇽</span>
-              </div>
-              <h3 className="bloomberg-card-title">{ready ? t('partnership.expertise.crossBorderExpertise', 'Cross-Border Expertise') : 'Cross-Border Expertise'}</h3>
-              <p className="bloomberg-card-subtitle">{ready ? t('partnership.expertise.canadianRegulatory', 'Canadian regulatory excellence + Mexican manufacturing efficiency') : 'Canadian regulatory excellence + Mexican manufacturing efficiency'}</p>
-            </div>
-            <div className="bloomberg-status bloomberg-status-success">
-              <div className="bloomberg-status-dot"></div>
-              {ready ? t('partnership.expertise.dualMarketAdvantage', 'Dual-Market Advantage') : 'Dual-Market Advantage'}
-            </div>
-          </div>
-        </div>
-
-        {/* Business Context Intelligence */}
-        <div className="bloomberg-card">
-          <div className="bloomberg-card-header">
-            <h3 className="bloomberg-card-title">{ready ? t('partnership.businessProfile.title', 'Your Business Partnership Profile') : 'Your Business Partnership Profile'}</h3>
-            <div className="bloomberg-status bloomberg-status-success">
-              <span className="bloomberg-status-dot"></span>
-              {productData?.averageConfidence || 94}% {ready ? t('partnership.businessProfile.analysisConfidence', 'analysis confidence') : 'analysis confidence'}
-            </div>
-          </div>
-
-          <div className="bloomberg-grid bloomberg-grid-4">
-            <div className="bloomberg-card">
-              <div className="bloomberg-metric">
-                <div className="section-icon">🏢</div>
-                <div className="bloomberg-metric-label">{ready ? t('partnership.businessProfile.companyProfile', 'Company Profile') : 'Company Profile'}</div>
-                <div className="bloomberg-metric-value">{foundationData.companyName}</div>
-                <div className="bloomberg-card-subtitle">{foundationData.businessType} {ready ? t('partnership.businessProfile.industry', 'industry') : 'industry'}</div>
-              </div>
-            </div>
-
-            <div className="bloomberg-card">
-              <div className="bloomberg-metric">
-                <div className="section-icon">📊</div>
-                <div className="bloomberg-metric-label">{ready ? t('partnership.businessProfile.importVolume', 'Import Volume') : 'Import Volume'}</div>
-                <div className="bloomberg-metric-value">{foundationData.importVolume}</div>
-                <div className="bloomberg-card-subtitle">{ready ? t('partnership.businessProfile.annualImportCapacity', 'Annual import capacity') : 'Annual import capacity'}</div>
-              </div>
-            </div>
-
-            <div className="bloomberg-card">
-              <div className="bloomberg-metric">
-                <div className="section-icon">📦</div>
-                <div className="bloomberg-metric-label">{ready ? t('partnership.businessProfile.productPortfolio', 'Product Portfolio') : 'Product Portfolio'}</div>
-                <div className="bloomberg-metric-value">{productData?.totalProducts || 1}</div>
-                <div className="bloomberg-card-subtitle">{ready ? t('partnership.businessProfile.productsAnalyzed', 'Products analyzed') : 'Products analyzed'}</div>
-              </div>
-            </div>
-
-            <div className="bloomberg-card">
-              <div className="bloomberg-metric">
-                <div className="section-icon">🎯</div>
-                <div className="bloomberg-metric-label">{ready ? t('partnership.businessProfile.optimizationFocus', 'Optimization Focus') : 'Optimization Focus'}</div>
-                <div className="bloomberg-metric-value">{foundationData.timelinePriority}</div>
-                <div className="bloomberg-card-subtitle">{ready ? t('partnership.businessProfile.businessPriority', 'Business priority') : 'Business priority'}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Partnership Opportunities Overview */}
-        {partnershipOpportunities && (
-          <div className="bloomberg-card">
-            <div className="bloomberg-card-header">
-              <h3 className="bloomberg-card-title">{ready ? t('partnership.partnershipOverview.title', 'Partnership Value Analysis') : 'Partnership Value Analysis'}</h3>
-              <div className="bloomberg-status bloomberg-status-info">
-                <div className="bloomberg-status-dot"></div>
-                {ready ? t('partnership.partnershipOverview.crossBorderStrategy', 'Cross-Border Strategy') : 'Cross-Border Strategy'}
-              </div>
-            </div>
-
-            <div className="bloomberg-grid bloomberg-grid-3">
-              <div className="bloomberg-card">
-                <div className="bloomberg-metric">
-                  <div className="metric-value text-primary">🇨🇦 {partnershipOpportunities.canadaPartners.totalOpportunities}</div>
-                  <div className="bloomberg-metric-label">{ready ? t('partnership.partnershipOverview.canadaOpportunities', 'Canada Opportunities') : 'Canada Opportunities'}</div>
-                  <div className="bloomberg-card-subtitle">Value: {partnershipOpportunities.canadaPartners.partnershipValue}</div>
-                </div>
-              </div>
-
-              <div className="bloomberg-card">
-                <div className="bloomberg-metric">
-                  <div className="metric-value text-success">🇲🇽 {partnershipOpportunities.mexicoPartners.totalOpportunities}</div>
-                  <div className="bloomberg-metric-label">{ready ? t('partnership.partnershipOverview.mexicoOpportunities', 'Mexico Opportunities') : 'Mexico Opportunities'}</div>
-                  <div className="bloomberg-card-subtitle">Value: {partnershipOpportunities.mexicoPartners.partnershipValue}</div>
-                </div>
-              </div>
-
-              <div className="bloomberg-card">
-                <div className="bloomberg-metric">
-                  <div className="metric-value text-warning">🔺 {partnershipOpportunities.dualMarketStrategy.combinedValue}</div>
-                  <div className="bloomberg-metric-label">{ready ? t('partnership.partnershipOverview.combinedStrategy', 'Combined Strategy') : 'Combined Strategy'}</div>
-                  <div className="bloomberg-card-subtitle">{ready ? t('partnership.partnershipOverview.totalPartnershipValue', 'Total partnership value') : 'Total partnership value'}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Route Comparison Analysis */}
-        {showComparison && routeAnalysis && (
-          <div className="bloomberg-card">
-            <div className="bloomberg-card-header">
-              <h3 className="bloomberg-card-title">{ready ? t('partnership.routeComparison.title', 'Canada vs Mexico Strategic Analysis') : 'Canada vs Mexico Strategic Analysis'}</h3>
-              <div className="bloomberg-status bloomberg-status-success">
-                <div className="bloomberg-status-dot"></div>
-                {ready ? t('partnership.routeComparison.partnershipIntelligence', 'Partnership Intelligence') : 'Partnership Intelligence'}
-              </div>
-            </div>
-
-            <div className="bloomberg-grid bloomberg-grid-2">
-              {/* Canada Route */}
-              <div className={`bloomberg-card ${selectedRoute === 'canada' ? 'border-primary' : ''}`} 
-                   onClick={() => selectRoute('canada')} style={{cursor: 'pointer'}}>
-                <div className="bloomberg-card-header">
-                  <div className="section-icon">🇨🇦</div>
-                  <div className="section-content">
-                    <h4 className="bloomberg-card-title">{ready ? t('partnership.routeComparison.canadaPartnershipRoute', 'Canada Partnership Route') : 'Canada Partnership Route'}</h4>
-                    <p className="bloomberg-card-subtitle">{routeAnalysis.canadaRoute?.bestFor}</p>
-                  </div>
-                  {selectedRoute === 'canada' && (
-                    <div className="bloomberg-status bloomberg-status-success">
-                      <div className="bloomberg-status-dot"></div>
-                      SELECTED
+                {/* Partnership Intelligence Section */}
+                <div className="bloomberg-card">
+                  <div className="bloomberg-card-header">
+                    <h1 className="section-title">
+                      {smartT("partnership.title")}
+                    </h1>
+                    <div className="section-subtitle">
+                      Strategic partnerships for {foundationData?.companyName || 'your business'}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <div className="bloomberg-grid bloomberg-grid-4">
-                  <div className="bloomberg-metric">
-                    <div className="bloomberg-metric-value">{routeAnalysis.canadaRoute?.timeline}</div>
-                    <div className="bloomberg-metric-label">{ready ? t('partnership.routeComparison.setupTimeline', 'Setup Timeline') : 'Setup Timeline'}</div>
-                  </div>
-                  <div className="bloomberg-metric">
-                    <div className="bloomberg-metric-value">{routeAnalysis.canadaRoute?.complexity}</div>
-                    <div className="bloomberg-metric-label">{ready ? t('partnership.routeComparison.complexity', 'Complexity') : 'Complexity'}</div>
-                  </div>
-                  <div className="bloomberg-metric">
-                    <div className="bloomberg-metric-value text-success">{formatCurrency(routeAnalysis.canadaRoute?.savings)}</div>
-                    <div className="bloomberg-metric-label">{ready ? t('partnership.routeComparison.annualSavings', 'Annual Savings') : 'Annual Savings'}</div>
-                  </div>
-                  <div className="bloomberg-metric">
-                    <div className="bloomberg-metric-value text-primary">{routeAnalysis.canadaRoute?.complianceRating}%</div>
-                    <div className="bloomberg-metric-label">{ready ? t('partnership.routeComparison.complianceRate', 'Compliance Rate') : 'Compliance Rate'}</div>
-                  </div>
-                </div>
-
-                <div className="route-advantages">
-                  <h5 className="advantages-title">{ready ? t('partnership.routeComparison.canadaAdvantages', '🇨🇦 Canada Advantages') : '🇨🇦 Canada Advantages'}</h5>
-                  <div className="advantages-list">
-                    {routeAnalysis.canadaRoute?.strengths?.map((strength, i) => (
-                      <span key={i} className="advantage-tag canada">{strength}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="partnership-benefits">
-                  <h5 className="benefits-title">{ready ? t('partnership.routeComparison.partnershipBenefits', 'Partnership Benefits') : 'Partnership Benefits'}</h5>
-                  <ul className="benefits-list">
-                    {routeAnalysis.canadaRoute?.partnershipBenefits?.map((benefit, i) => (
-                      <li key={i} className="benefit-item">
-                        <span className="benefit-icon">✓</span>
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="market-access">
-                  <div className="access-label">{ready ? t('partnership.routeComparison.marketAccess', 'Market Access:') : 'Market Access:'}</div>
-                  <div className="access-value">{routeAnalysis.canadaRoute?.marketAccess}</div>
-                </div>
-
-                {routeAnalysis.recommendation === 'canada' && (
-                  <div className="recommendation-badge">
-                    {ready ? t('partnership.routeComparison.recommendedForBusiness', '🏆 RECOMMENDED FOR YOUR BUSINESS') : '🏆 RECOMMENDED FOR YOUR BUSINESS'}
-                  </div>
-                )}
-              </div>
-
-              {/* Mexico Route */}
-              <div className={`bloomberg-card ${selectedRoute === 'mexico' ? 'border-success' : ''}`} 
-                   onClick={() => selectRoute('mexico')} style={{cursor: 'pointer'}}>
-                <div className="bloomberg-card-header">
-                  <div className="section-icon">🇲🇽</div>
-                  <div className="section-content">
-                    <h4 className="bloomberg-card-title">{ready ? t('partnership.routeComparison.mexicoPartnershipRoute', 'Mexico Partnership Route') : 'Mexico Partnership Route'}</h4>
-                    <p className="bloomberg-card-subtitle">{routeAnalysis.mexicoRoute?.bestFor}</p>
-                  </div>
-                  {selectedRoute === 'mexico' && (
-                    <div className="bloomberg-status bloomberg-status-success">
-                      <div className="bloomberg-status-dot"></div>
-                      SELECTED
+                  {/* Crisis Response Analysis */}
+                  <div className="bloomberg-card">
+                    <div className="bloomberg-card-header">
+                      <h2 className="section-icon">🚨 {smartT("partnership.crisisresponse")}</h2>
+                      <div className="bloomberg-status bloomberg-status-success">
+                        <div className="bloomberg-status-dot"></div>
+                        {smartT("partnership.activeanalysis")}
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                <div className="route-metrics">
-                  <div className="metric">
-                    <div className="metric-value">{routeAnalysis.mexicoRoute?.timeline}</div>
-                    <div className="metric-label">{ready ? t('partnership.routeComparison.setupTimeline', 'Setup Timeline') : 'Setup Timeline'}</div>
-                  </div>
-                  <div className="metric">
-                    <div className="metric-value">{routeAnalysis.mexicoRoute?.complexity}</div>
-                    <div className="metric-label">{ready ? t('partnership.routeComparison.complexity', 'Complexity') : 'Complexity'}</div>
-                  </div>
-                  <div className="metric">
-                    <div className="metric-value">{formatCurrency(routeAnalysis.mexicoRoute?.savings)}</div>
-                    <div className="metric-label">{ready ? t('partnership.routeComparison.annualSavings', 'Annual Savings') : 'Annual Savings'}</div>
-                  </div>
-                  <div className="metric">
-                    <div className="metric-value">{routeAnalysis.mexicoRoute?.complianceRating}%</div>
-                    <div className="metric-label">{ready ? t('partnership.routeComparison.complianceRate', 'Compliance Rate') : 'Compliance Rate'}</div>
-                  </div>
-                </div>
-
-                <div className="route-advantages">
-                  <h5 className="advantages-title">{ready ? t('partnership.routeComparison.mexicoAdvantages', '🇲🇽 Mexico Advantages') : '🇲🇽 Mexico Advantages'}</h5>
-                  <div className="advantages-list">
-                    {routeAnalysis.mexicoRoute?.strengths?.map((strength, i) => (
-                      <span key={i} className="advantage-tag mexico">{strength}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="partnership-benefits">
-                  <h5 className="benefits-title">{ready ? t('partnership.routeComparison.partnershipBenefits', 'Partnership Benefits') : 'Partnership Benefits'}</h5>
-                  <ul className="benefits-list">
-                    {routeAnalysis.mexicoRoute?.partnershipBenefits?.map((benefit, i) => (
-                      <li key={i} className="benefit-item">
-                        <span className="benefit-icon">✓</span>
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="market-access">
-                  <div className="access-label">{ready ? t('partnership.routeComparison.marketAccess', 'Market Access:') : 'Market Access:'}</div>
-                  <div className="access-value">{routeAnalysis.mexicoRoute?.marketAccess}</div>
-                </div>
-
-                {routeAnalysis.recommendation === 'mexico' && (
-                  <div className="recommendation-badge">
-                    {ready ? t('partnership.routeComparison.recommendedForBusiness', '🏆 RECOMMENDED FOR YOUR BUSINESS') : '🏆 RECOMMENDED FOR YOUR BUSINESS'}
-                  </div>
-                )}
-              </div>
-
-              {/* Dual Strategy Option */}
-              {routeAnalysis.recommendation === 'dual' && (
-                <div className={`route-option partnership dual ${selectedRoute === 'dual' ? 'selected' : ''}`} 
-                     onClick={() => selectRoute('dual')}>
-                  <div className="route-header">
-                    <div className="route-flags">🇨🇦+🇲🇽</div>
-                    <div className="route-title">
-                      <h4>{ready ? t('partnership.routeComparison.dualMarketStrategy', 'Dual-Market Strategy') : 'Dual-Market Strategy'}</h4>
-                      <p className="route-subtitle">{ready ? t('partnership.routeComparison.combinedAdvantage', 'Combined Canada + Mexico advantage') : 'Combined Canada + Mexico advantage'}</p>
-                    </div>
-                    <div className={`route-selector ${selectedRoute === 'dual' ? 'selected' : ''}`}>
-                      <div className="selector-radio">
-                        {selectedRoute === 'dual' && <div className="selector-dot"></div>}
+                    <div className="bloomberg-grid bloomberg-grid-3">
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value">95%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.riskavoidance")}</div>
+                        </div>
+                      </div>
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value text-primary">$2.3M</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.potentialsavings")}</div>
+                        </div>
+                      </div>
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value text-success">127</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.partneropps")}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="dual-strategy-content">
-                    <div className="strategy-synergies">
-                      <h5 className="synergies-title">{ready ? t('partnership.routeComparison.crossBorderSynergies', 'Cross-Border Synergies') : 'Cross-Border Synergies'}</h5>
-                      <ul className="synergies-list">
-                        {partnershipOpportunities?.dualMarketStrategy?.synergies?.map((synergy, i) => (
-                          <li key={i} className="synergy-item">
-                            <span className="synergy-icon">🔗</span>
-                            {synergy}
-                          </li>
-                        ))}
-                      </ul>
+                  {/* Route Comparison Analysis */}
+                  <div className="bloomberg-card">
+                    <div className="bloomberg-card-header">
+                      <h2>{smartT("partnership.routecomparison")}</h2>
+                      <div className="bloomberg-status bloomberg-status-info">
+                        <div className="bloomberg-status-dot"></div>
+                        {smartT("partnership.usmcaoptimized")}
+                      </div>
                     </div>
 
-                    <div className="dual-metrics">
-                      <div className="dual-metric">
-                        <div className="metric-value">{partnershipOpportunities?.dualMarketStrategy?.combinedValue}</div>
-                        <div className="metric-label">{ready ? t('partnership.routeComparison.combinedValue', 'Combined Value') : 'Combined Value'}</div>
+                    <div className="bloomberg-grid bloomberg-grid-3">
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="metric-value text-primary">0%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.canadatariff")}</div>
+                          <div className="bloomberg-card-subtitle">USMCA Treaty Rate</div>
+                        </div>
+                      </div>
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="metric-value text-success">0%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.mexicotariff")}</div>
+                          <div className="bloomberg-card-subtitle">USMCA Treaty Rate</div>
+                        </div>
+                      </div>
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-metric">
+                          <div className="metric-value text-warning">30%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.chinadirect")}</div>
+                          <div className="bloomberg-card-subtitle">Bilateral Rate</div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="recommendation-badge dual">
-                    {ready ? t('partnership.routeComparison.optimalForHighVolume', '🌟 OPTIMAL FOR HIGH-VOLUME OPERATIONS') : '🌟 OPTIMAL FOR HIGH-VOLUME OPERATIONS'}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {selectedRoute && (
-              <div className="selection-summary">
-                <div className="summary-content">
-                  <strong>{ready ? t('partnership.selectionSummary.selectedStrategy', 'Selected Strategy:') : 'Selected Strategy:'}</strong> 
-                  {selectedRoute === 'canada' && (ready ? t('partnership.selectionSummary.canadaRoute', ' Canada partnership route for regulatory excellence and premium market access') : ' Canada partnership route for regulatory excellence and premium market access')}
-                  {selectedRoute === 'mexico' && (ready ? t('partnership.selectionSummary.mexicoRoute', ' Mexico partnership route for cost efficiency and rapid implementation') : ' Mexico partnership route for cost efficiency and rapid implementation')}
-                  {selectedRoute === 'dual' && (ready ? t('partnership.selectionSummary.dualRoute', ' Dual-market strategy leveraging both Canadian and Mexican advantages') : ' Dual-market strategy leveraging both Canadian and Mexican advantages')}
-                  {' for '}{foundationData.companyName} ({foundationData.businessType} with {foundationData.importVolume} annual volume).
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Implementation Strategy */}
-        {selectedRoute && (
-          <div className="implementation-strategy">
-            <div className="strategy-header">
-              <h3 className="strategy-title">{ready ? t('partnership.implementation.title', 'Partnership Implementation Strategy') : 'Partnership Implementation Strategy'}</h3>
-              <div className="strategy-badge">{ready ? t('partnership.implementation.readyForLaunch', 'Ready for Launch') : 'Ready for Launch'}</div>
-            </div>
-
-            <div className="strategy-metrics">
-              <div className="strategy-metric">
-                <div className="metric-value">
-                  {selectedRoute === 'canada' && formatCurrency(routeAnalysis.canadaRoute?.savings)}
-                  {selectedRoute === 'mexico' && formatCurrency(routeAnalysis.mexicoRoute?.savings)}
-                  {selectedRoute === 'dual' && partnershipOpportunities?.dualMarketStrategy?.combinedValue}
-                </div>
-                <div className="metric-label">{ready ? t('partnership.implementation.annualPartnershipValue', 'Annual Partnership Value') : 'Annual Partnership Value'}</div>
-              </div>
-              <div className="strategy-metric">
-                <div className="metric-value">
-                  {selectedRoute === 'canada' && routeAnalysis.canadaRoute?.timeline}
-                  {selectedRoute === 'mexico' && routeAnalysis.mexicoRoute?.timeline}
-                  {selectedRoute === 'dual' && '6-10 weeks'}
-                </div>
-                <div className="metric-label">{ready ? t('partnership.implementation.implementationTimeline', 'Implementation Timeline') : 'Implementation Timeline'}</div>
-              </div>
-              <div className="strategy-metric">
-                <div className="metric-value">0%</div>
-                <div className="metric-label">{ready ? t('partnership.implementation.usmcaTariffRate', 'USMCA Tariff Rate') : 'USMCA Tariff Rate'}</div>
-              </div>
-              <div className="strategy-metric">
-                <div className="metric-value">
-                  {selectedRoute === 'canada' && routeAnalysis.canadaRoute?.complianceRating}
-                  {selectedRoute === 'mexico' && routeAnalysis.mexicoRoute?.complianceRating}
-                  {selectedRoute === 'dual' && '98'}%
-                </div>
-                <div className="metric-label">{ready ? t('partnership.implementation.successRate', 'Success Rate') : 'Success Rate'}</div>
-              </div>
-            </div>
-
-            <div className="strategy-summary">
-              <div className="summary-message">
-                <strong>{ready ? t('partnership.implementation.strategyConfirmed', 'Partnership Strategy Confirmed!') : 'Partnership Strategy Confirmed!'}</strong> Your {
-                  selectedRoute === 'canada' ? 'Canada' : 
-                  selectedRoute === 'mexico' ? 'Mexico' : 
-                  'dual-market'
-                } {ready ? t('partnership.implementation.optimizedFor', 'partnership strategy is optimized for') : 'partnership strategy is optimized for'} {foundationData.businessType} {ready ? t('partnership.implementation.businessesProvenSuccess', 'businesses with proven success in our network.') : 'businesses with proven success in our network.'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* CRISIS LEAD GENERATION FORM */}
-        <div className="bloomberg-card">
-          <div className="bloomberg-card-header">
-            <h3 className="bloomberg-card-title">{ready ? t('partnership.leadGeneration.urgent', '🚨 URGENT: Connect with Mexico Manufacturing Partners NOW') : '🚨 URGENT: Connect with Mexico Manufacturing Partners NOW'}</h3>
-            <div className="bloomberg-status bloomberg-status-error">
-              <div className="bloomberg-status-dot"></div>
-              {ready ? t('partnership.leadGeneration.crisisTimer', '⏰ Trump trade threats escalating daily') : '⏰ Trump trade threats escalating daily'}
-            </div>
-          </div>
-
-            <div className="bloomberg-grid bloomberg-grid-2 bloomberg-mt-lg">
-              {/* Lead Capture Form */}
-              <div className="bloomberg-form">
-                <h4 className="crisis-form-title">{ready ? t('partnership.leadGeneration.emergencyMatching', 'Emergency Partner Matching (FREE)') : 'Emergency Partner Matching (FREE)'}</h4>
-                <div className="bloomberg-grid bloomberg-grid-3 bloomberg-mb-lg">
+                  {/* Partnership Route Selection */}
                   <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">⚡</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.leadGeneration.partnerConnections', '24-48hr partner connections') : '24-48hr partner connections'}</div>
+                    <div className="bloomberg-card-header">
+                      <h2>{smartT("partnership.selectstrategy")}</h2>
+                      <div className="bloomberg-status bloomberg-status-success">
+                        <div className="bloomberg-status-dot"></div>
+                        {smartT("partnership.readyforselection")}
+                      </div>
                     </div>
-                  </div>
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
+
+                    <div className="bloomberg-grid bloomberg-grid-2">
+                      {/* Canada Route */}
+                      <div className="bloomberg-card-header">
+                        <div className="section-icon">🇨🇦</div>
+                        <div className="section-content">
+                          <h3>{smartT("partnership.canadaroute")}</h3>
+                          <div className="section-subtitle">{smartT("partnership.establishedcorridor")}</div>
+                        </div>
+
+                        <div className="bloomberg-status bloomberg-status-success">
+                          <div className="bloomberg-status-dot"></div>
+                          {smartT("partnership.recommended")}
+                        </div>
+                      </div>
+
+                      <div className="bloomberg-grid bloomberg-grid-4">
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value">0%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.tariffrate")}</div>
+                        </div>
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value">2-4</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.weekssetup")}</div>
+                        </div>
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value text-success">85%</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.confidence")}</div>
+                        </div>
+                        <div className="bloomberg-metric">
+                          <div className="bloomberg-metric-value text-primary">{routeAnalysis?.canada?.savings || '$180K'}</div>
+                          <div className="bloomberg-metric-label">{smartT("partnership.annualsavings")}</div>
+                        </div>
+                      </div>
+
+                      <div className="route-advantages">
+                        <h4>{smartT("partnership.strategicadvantages")}</h4>
+                        <div className="advantages-list">
+                          {routeAnalysis?.canada?.advantages?.map((advantage, index) => (
+                            <div key={index}>✅ {advantage}</div>
+                          )) || <div>✅ Established trade relationships</div>}
+                        </div>
+                      </div>
+
+                      <div className="partnership-benefits">
+                        <h4>{smartT("partnership.partnershipbenefits")}</h4>
+                        • {smartT("partnership.instantaccess")} <br/>
+                        • {smartT("partnership.proventrack")} <br/>
+                        • {smartT("partnership.regulatoryalignment")} <br/>
+                        • {smartT("partnership.financialservices")}
+                      </div>
+
+                      <div className="market-access">
+                        <div className="access-label">{smartT("partnership.marketaccess")}</div>
+                        <div className="access-value">$780B US-Canada Trade Corridor</div>
+                      </div>
+
+                      <div 
+                        className={`route-selector ${selectedRoute === 'canada' ? 'selected' : ''}`}
+                        onClick={() => selectRoute('canada')}
+                      >
+                        <div className="recommendation-badge">
+                          {smartT("partnership.selectcanada")}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mexico Route */}
+                    <div className="bloomberg-card-header">
                       <div className="section-icon">🇲🇽</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.leadGeneration.verifiedManufacturers', '100+ verified Mexican manufacturers') : '100+ verified Mexican manufacturers'}</div>
+                      <div className="section-content">
+                        <h3>{smartT("partnership.mexicoroute")}</h3>
+                        <div className="section-subtitle">{smartT("partnership.nearshoring")}</div>
+                      </div>
+
+                      <div className="bloomberg-status bloomberg-status-success">
+                        <div className="bloomberg-status-dot"></div>
+                        {smartT("partnership.highgrowth")}
+                      </div>
+                    </div>
+
+                    <div className="bloomberg-grid bloomberg-grid-4">
+                      <div className="bloomberg-metric">
+                        <div className="bloomberg-metric-value">0%</div>
+                        <div className="bloomberg-metric-label">{smartT("partnership.tariffrate")}</div>
+                      </div>
+                      <div className="bloomberg-metric">
+                        <div className="bloomberg-metric-value">3-6</div>
+                        <div className="bloomberg-metric-label">{smartT("partnership.weekssetup")}</div>
+                      </div>
+                      <div className="bloomberg-metric">
+                        <div className="bloomberg-metric-value text-success">78%</div>
+                        <div className="bloomberg-metric-label">{smartT("partnership.confidence")}</div>
+                      </div>
+                      <div className="bloomberg-metric">
+                        <div className="bloomberg-metric-value text-primary">{routeAnalysis?.mexico?.savings || '$220K'}</div>
+                        <div className="bloomberg-metric-label">{smartT("partnership.annualsavings")}</div>
+                      </div>
+                    </div>
+
+                    <div className="route-advantages">
+                      <h4>{smartT("partnership.strategicadvantages")}</h4>
+                      <div className="advantages-list">
+                        {routeAnalysis?.mexico?.advantages?.map((advantage, index) => (
+                          <div key={index}>✅ {advantage}</div>
+                        )) || <div>✅ Lower manufacturing costs</div>}
+                      </div>
+                    </div>
+
+                    <div className="partnership-benefits">
+                      <h4>{smartT("partnership.partnershipbenefits")}</h4>
+                      • {smartT("partnership.manufacturingcos")} <br/>
+                      • {smartT("partnership.growinghub")} <br/>
+                      • {smartT("partnership.nearshoring")} <br/>
+                      • {smartT("partnership.laborcost")}
+                    </div>
+
+                    <div className="market-access">
+                      <div className="access-label">{smartT("partnership.marketaccess")}</div>
+                      <div className="access-value">$614B Mexico-US Trade Volume</div>
+                    </div>
+
+                    <div 
+                      className={`route-selector ${selectedRoute === 'mexico' ? 'selected' : ''}`}
+                      onClick={() => selectRoute('mexico')}
+                    >
+                      <div className="recommendation-badge">
+                        {smartT("partnership.selectmexico")}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Dual Strategy Option */}
                   <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">💰</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.leadGeneration.annualSavings', '$100K-$300K+ annual savings') : '$100K-$300K+ annual savings'}</div>
+                    <div className="route-header">
+                      <div className="route-flags">🇨🇦🇲🇽</div>
+                      <div className="route-title">
+                        <h3>{smartT("partnership.dualstrategy")}</h3>
+                        <div className="section-subtitle">{smartT("partnership.maximumdiversification")}</div>
+                      </div>
+                      <div 
+                        className={`route-selector ${selectedRoute === 'dual' ? 'selected' : ''}`}
+                        onClick={() => selectRoute('dual')}
+                      >
+                        <div className="selector-radio">
+                          <div className="selector-dot"></div>
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="dual-strategy-content">
+                      <div className="strategy-synergies">
+                        <h4>{smartT("partnership.crossbordersynergies")}</h4>
+                        • {smartT("partnership.diversifiedsupply")} <br/>
+                        • {smartT("partnership.riskmitigatoin")} <br/>
+                        • {smartT("partnership.marketflexibility")} <br/>
+                        • {smartT("partnership.capacityscaling")}
+                      </div>
+
+                      <div className="dual-metrics">
+                        <div className="dual-metric">
+                          <div className="metric-value">$400K+</div>
+                          <div className="metric-label">{smartT("partnership.combinedsavings")}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="recommendation-badge dual">
+                      {smartT("partnership.selectdual")}
+                    </div>
+                  </div>
+
+                  {/* Selection Summary */}
+                  {selectedRoute && (
+                    <div className="selection-summary">
+                      <div className="summary-content">
+                        <h3>{smartT("partnership.selectionsummary")}</h3>
+                        <p>
+                          {selectedRoute === 'canada' && (ready ? t('partnership.selectionSummary.canadaRoute', 'Canadian strategic partnership leveraging USMCA 0% tariff rates') : 'Canadian strategic partnership leveraging USMCA 0% tariff rates')}
+                          {selectedRoute === 'mexico' && (ready ? t('partnership.selectionSummary.mexicoRoute', 'Mexican manufacturing partnership with USMCA benefits') : 'Mexican manufacturing partnership with USMCA benefits')}
+                          {selectedRoute === 'dual' && (ready ? t('partnership.selectionSummary.dualRoute', ' Dual-market strategy leveraging both Canadian and Mexican advantages') : ' Dual-market strategy leveraging both Canadian and Mexican advantages')}
+                          {' for '}{foundationData?.companyName} ({foundationData?.businessType} with {foundationData?.importVolume} annual volume).
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Implementation Strategy */}
+                  {selectedRoute && (
+                    <div className="implementation-strategy">
+                      <div className="strategy-header">
+                        <h2>{smartT("partnership.implementationstrategy")}</h2>
+                        <div className="strategy-badge">{smartT("partnership.readyfordeploy")}</div>
+                      </div>
+
+                      <div className="strategy-metrics">
+                        <div className="strategy-metric">
+                          <div className="metric-value">
+                            {selectedRoute === 'canada' ? '2-4' : selectedRoute === 'mexico' ? '3-6' : '4-8'} 
+                            {smartT("partnership.weeks")}
+                          </div>
+                          <div className="metric-label">{smartT("partnership.setuptime")}</div>
+                        </div>
+                        <div className="strategy-metric">
+                          <div className="metric-value">
+                            {selectedRoute === 'canada' ? '$180K' : selectedRoute === 'mexico' ? '$220K' : '$400K+'}
+                          </div>
+                          <div className="metric-label">{smartT("partnership.projectedsavings")}</div>
+                        </div>
+                        <div className="strategy-metric">
+                          <div className="metric-value">0%</div>
+                          <div className="metric-label">{smartT("partnership.usmcatariff")}</div>
+                        </div>
+                        <div className="strategy-metric">
+                          <div className="metric-value">
+                            {selectedRoute === 'canada' ? '85%' : selectedRoute === 'mexico' ? '78%' : '92%'}
+                          </div>
+                          <div className="metric-label">{smartT("partnership.successrate")}</div>
+                        </div>
+                      </div>
+
+                      <div className="strategy-summary">
+                        <div className="summary-message">
+                          {smartT("partnership.strategymessage")} {selectedRoute === 'canada' ? smartT("partnership.canadastrategy") : selectedRoute === 'mexico' ? smartT("partnership.mexicostrategy") : smartT("partnership.dualstrategy")}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Crisis Lead Generation Form */}
+                  <div className="bloomberg-card">
+                    <div className="bloomberg-card-header">
+                      <h2>{smartT("partnership.leadgeneration")}</h2>
+                      <div className="bloomberg-status bloomberg-status-error">
+                        <div className="bloomberg-status-dot"></div>
+                        {smartT("partnership.crisisresponse")}
+                      </div>
+                    </div>
+
+                    <div className="bloomberg-grid bloomberg-grid-2 bloomberg-mt-lg">
+                      <div className="bloomberg-form">
+                        <div className="bloomberg-grid bloomberg-grid-3 bloomberg-mb-lg">
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">📊</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.crisisurgency")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">⚡</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.rapidresponse")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">🎯</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.targetedanalysis")}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.companyname")}</label>
+                          <input 
+                            type="text" 
+                            className="bloomberg-input"
+                            defaultValue={foundationData?.companyName}
+                          />
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.industrytype")}</label>
+                          <input 
+                            type="text" 
+                            className="bloomberg-input"
+                            defaultValue={foundationData?.businessType}
+                          />
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.importvolume")}</label>
+                          <input 
+                            type="text" 
+                            className="bloomberg-input"
+                            defaultValue={foundationData?.importVolume}
+                          />
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.primarysupplier")}</label>
+                          <input 
+                            type="text" 
+                            className="bloomberg-input"
+                            defaultValue={foundationData?.primarySupplierCountry}
+                          />
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.urgencylevel")}</label>
+                          <select className="bloomberg-select">
+                            <option>{smartT("partnership.immediateaction")}</option>
+                            <option>{smartT("partnership.within30days")}</option>
+                            <option>{smartT("partnership.within90days")}</option>
+                          </select>
+                        </div>
+
+                        <div className="bloomberg-form-group">
+                          <label className="bloomberg-label">{smartT("partnership.contactmethod")}</label>
+                          <select className="bloomberg-select">
+                            <option>{smartT("partnership.phonepreferece")}</option>
+                            <option>{smartT("partnership.emailpreference")}</option>
+                            <option>{smartT("partnership.inmeetingpreference")}</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="bloomberg-card">
+                        <div className="bloomberg-card-header">
+                          <h3>{smartT("partnership.familyteamcredibility")}</h3>
+                        </div>
+
+                        <div className="bloomberg-mb-lg">
+                          <p>{smartT("partnership.familyteamdescription")}</p>
+                        </div>
+
+                        <div className="bloomberg-grid bloomberg-grid-2 bloomberg-mb-lg">
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">🇨🇦</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.canadianexpertise")}</div>
+                              <div className="bloomberg-card-subtitle">{smartT("partnership.canadianexpertisedesc")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">🇲🇽</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.mexicanexpertise")}</div>
+                              <div className="bloomberg-card-subtitle">{smartT("partnership.mexicanexpertisedesc")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">📈</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.trackrecord")}</div>
+                              <div className="bloomberg-card-subtitle">{smartT("partnership.trackrecorddesc")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="section-icon">🤝</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.networkaccess")}</div>
+                              <div className="bloomberg-card-subtitle">{smartT("partnership.networkaccessdesc")}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="partnership-value-proof">
+                          <h4>{smartT("partnership.provensuccess")}</h4>
+                          <div className="success-stories">
+                            <div className="success-story">
+                              "Saved $2.1M in first year through Mexico route" - Electronics Manufacturer
+                            </div>
+                            <div className="success-story">
+                              "Canadian partnership reduced complexity by 70%" - Automotive Supplier
+                            </div>
+                            <div className="success-story">
+                              "Dual strategy provided ultimate supply chain resilience" - Medical Device Company
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bloomberg-grid bloomberg-grid-3 bloomberg-mb-lg">
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="bloomberg-metric-value text-success">$47M+</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.totalsavings")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="bloomberg-metric-value text-primary">234</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.successfulimplementations")}</div>
+                            </div>
+                          </div>
+                          <div className="bloomberg-card">
+                            <div className="bloomberg-metric">
+                              <div className="bloomberg-metric-value text-warning">89%</div>
+                              <div className="bloomberg-metric-label">{smartT("partnership.clientsatisfaction")}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bloomberg-text-center">
+                          <button className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-lg">
+                            {smartT("partnership.connectwithfamilyteam")}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="bloomberg-hero-actions">
+                    <button onClick={() => router.push('/routing')} className="bloomberg-btn bloomberg-btn-secondary">
+                      {ready ? t('partnership.navigation.backToRouting', 'Back to Routing') : 'Back to Routing'}
+                    </button>
+                    <button 
+                      onClick={proceedToNextStage}
+                      className={`bloomberg-btn ${selectedRoute ? 'bloomberg-btn-primary' : 'bloomberg-btn-disabled'}`}
+                      disabled={!selectedRoute}
+                    >
+                      {ready ? t('partnership.navigation.continueToHindsight', 'Continue to Hindsight Analysis') : 'Continue to Hindsight Analysis'}
+                    </button>
+                    {selectedRoute && (
+                      <button onClick={proceedToNextStage} className="bloomberg-btn bloomberg-btn-secondary">
+                        {ready ? t('partnership.navigation.skipPartnershipHub', 'Skip Partnership Hub') : 'Skip Partnership Hub'}
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                <form className="bloomberg-form" onSubmit={(e) => {
-                  e.preventDefault();
-                  // Store lead data and redirect to husband's partnership hub
-                  const formData = new FormData(e.target);
-                  const leadData = {
-                    companyName: formData.get('companyName'),
-                    contactName: formData.get('contactName'),
-                    email: formData.get('email'),
-                    phone: formData.get('phone'),
-                    industry: formData.get('industry'),
-                    volume: formData.get('volume'),
-                    urgency: 'EXTREME',
-                    source: 'trump_crisis_response',
-                    timestamp: new Date().toISOString()
-                  };
-                  localStorage.setItem('crisis-lead-data', JSON.stringify(leadData));
-                  window.open('/mexican-partnership-hub', '_blank');
-                  alert(ready ? t('partnership.messages.dataStored', '¡Datos guardados! Te conectaremos con partners mexicanos en 24-48 horas.') : '¡Datos guardados! Te conectaremos con partners mexicanos en 24-48 horas.');
-                }}>
-                  <div className="bloomberg-form-group">
-                    <input
-                      className="bloomberg-input"
-                      type="text"
-                      name="companyName"
-                      placeholder={ready ? t('partnership.form.companyNameRequired', 'Company Name *') : 'Company Name *'}
-                      required
-                    />
+                {/* Intelligence Panel - Takes 1 column */}
+                <div className="bloomberg-card">
+                  {/* Spacing to align with form start */}
+                  <div style={{height: '120px'}}></div>
+
+                  <div className="widget-header">
+                    <div className="widget-title">
+                      <div className="widget-icon">🤖</div>
+                      {smartT("partnership.liveintelligence")}
+                    </div>
+                    <div className="bloomberg-status bloomberg-status-warning small">
+                      {smartT("partnership.live")}
+                    </div>
                   </div>
-                  <div className="bloomberg-form-group">
-                    <input
-                      className="bloomberg-input"
-                      type="text"
-                      name="contactName"
-                      placeholder={ready ? t('partnership.form.yourNameRequired', 'Your Name *') : 'Your Name *'}
-                      required
-                    />
+
+                  {/* Partnership Intelligence Score */}
+                  <div className="bloomberg-text-center bloomberg-mb-lg">
+                    <div className="metric-value text-warning">
+                      {selectedRoute ? '85%' : '60%'}
+                    </div>
+                    <div className="bloomberg-metric-label">{smartT("partnership.intelligencescore")}</div>
+                    <div className="intelligence-score">
+                      Based on {partnershipOpportunities?.totalOpportunities || 127} partnership opportunities
+                    </div>
                   </div>
-                  <div className="bloomberg-form-group">
-                    <input
-                      className="bloomberg-input"
-                      type="email"
-                      name="email"
-                      placeholder={ready ? t('partnership.form.emailRequired', 'Email Address *') : 'Email Address *'}
-                      required
-                    />
+
+                  {/* Intelligence Progress */}
+                  <div className="progress-bar bloomberg-mb-lg">
+                    <div 
+                      className="progress-fill" 
+                      data-progress={Math.floor(((selectedRoute ? 80 : 60)) / 20) * 20}
+                    ></div>
                   </div>
-                  <div className="bloomberg-form-group">
-                    <input
-                      className="bloomberg-input"
-                      type="tel"
-                      name="phone"
-                      placeholder={ready ? t('partnership.form.phoneRequired', 'Phone Number *') : 'Phone Number *'}
-                      required
-                    />
-                  </div>
-                  <div className="bloomberg-form-group">
-                    <select className="bloomberg-select" name="industry" required>
-                      <option value="">{ready ? t('partnership.form.selectIndustry', 'Select Your Industry *') : 'Select Your Industry *'}</option>
-                      <option value="Energy & Solar">{ready ? t('partnership.form.industries.energySolar', '🔋 Energy & Solar (HIGH DEMAND)') : '🔋 Energy & Solar (HIGH DEMAND)'}</option>
-                      <option value="Automotive">{ready ? t('partnership.form.industries.automotive', '🚗 Automotive Parts') : '🚗 Automotive Parts'}</option>
-                      <option value="Electronics">{ready ? t('partnership.form.industries.electronics', '💻 Electronics') : '💻 Electronics'}</option>
-                      <option value="Construction Materials">{ready ? t('partnership.form.industries.construction', '🏗️ Construction Materials') : '🏗️ Construction Materials'}</option>
-                      <option value="Medical">{ready ? t('partnership.form.industries.medical', '🏥 Medical Devices') : '🏥 Medical Devices'}</option>
-                      <option value="Textiles">{ready ? t('partnership.form.industries.textiles', '🧵 Textiles & Apparel') : '🧵 Textiles & Apparel'}</option>
-                      <option value="Other">{ready ? t('partnership.form.industries.other', '📦 Other (specify in call)') : '📦 Other (specify in call)'}</option>
-                    </select>
-                  </div>
-                  <div className="bloomberg-form-group">
-                    <select className="bloomberg-select" name="volume" required>
-                      <option value="">{ready ? t('partnership.form.annualImportVolume', 'Annual Import Volume *') : 'Annual Import Volume *'}</option>
-                      <option value="$1M-$5M">{ready ? t('partnership.form.volumes.1to5M', '$1M-$5M') : '$1M-$5M'}</option>
-                      <option value="$5M-$10M">{ready ? t('partnership.form.volumes.5to10M', '$5M-$10M') : '$5M-$10M'}</option>
-                      <option value="$10M+">{ready ? t('partnership.form.volumes.10MPlus', '$10M+ (PRIORITY)') : '$10M+ (PRIORITY)'}</option>
-                    </select>
+
+                  {/* Partnership Intelligence Results */}
+                  <div className="market-insights">
+                    <div className="insight-item">
+                      <div className="insight-indicator warning"></div>
+                      <div className="insight-content">
+                        <div className="insight-title">{smartT("partnership.marketvolatility")}</div>
+                        <div className="metric-value text-warning" style={{fontSize: '1.5rem'}}>
+                          {foundationData?.primarySupplierCountry === 'China' ? '30%' : '15%'} Tariff Risk
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="insight-item">
+                      <div className="insight-indicator success"></div>
+                      <div className="insight-content">
+                        <div className="insight-title">{smartT("partnership.usmcaprotection")}</div>
+                        <div className="insight-value">
+                          0% Guaranteed Rate Protection
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="insight-item">
+                      <div className="insight-indicator info"></div>
+                      <div className="insight-content">
+                        <div className="insight-title">{smartT("partnership.networkready")}</div>
+                        <div className="insight-value">100+ Mexico Partners</div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <button type="submit" className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-large">
-                    {ready ? t('partnership.form.submitButton', '🚨 GET MEXICO PARTNERS NOW (FREE) 🚨') : '🚨 GET MEXICO PARTNERS NOW (FREE) 🚨'}
-                  </button>
-                </form>
-              </div>
-
-              {/* Family Team Credibility */}
-              <div className="bloomberg-card">
-                <div className="bloomberg-card-header">
-                  <h4 className="bloomberg-card-title">{ready ? t('partnership.familyTeam.title', '🇨🇦+🇲🇽 Your Canadian-Mexican Family Team') : '🇨🇦+🇲🇽 Your Canadian-Mexican Family Team'}</h4>
-                </div>
-                
-                <div className="bloomberg-mb-lg">
-                  <p className="bloomberg-card-subtitle">
-                    {ready ? t('partnership.familyTeam.description', "We're a Canadian-Mexican family living in Mexico with 15+ years connecting North American businesses with Mexican manufacturing partners. When Trump threatens trade, we deliver alternatives.") : "We're a Canadian-Mexican family living in Mexico with 15+ years connecting North American businesses with Mexican manufacturing partners. When Trump threatens trade, we deliver alternatives."}
-                  </p>
-                </div>
-
-                <div className="bloomberg-grid bloomberg-grid-2 bloomberg-mb-lg">
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">🇨🇦</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.canadianRegulatory', 'Canadian Regulatory Expertise') : 'Canadian Regulatory Expertise'}</div>
-                      <div className="bloomberg-card-subtitle">{ready ? t('partnership.familyTeam.canadianDesc', 'Deep knowledge of Canadian import/export regulations, CBSA compliance, and USMCA treaty benefits') : 'Deep knowledge of Canadian import/export regulations, CBSA compliance, and USMCA treaty benefits'}</div>
+                  {/* System Status Widget */}
+                  <div className="nav-status">
+                    <div className="status-header">{smartT("partnership.crisisstatus")}</div>
+                    <div className="status-items">
+                      <div className="bloomberg-status bloomberg-status-warning small">
+                        {smartT("partnership.tariffmonitor")}: {selectedRoute ? 'Optimized' : 'At Risk'}
+                      </div>
+                      <div className="bloomberg-status bloomberg-status-success small">
+                        Partnership Network: Active
+                      </div>
+                      <div className="bloomberg-status bloomberg-status-info small">
+                        Family Team: {selectedRoute ? 'Connecting' : 'Standing By'}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">🇲🇽</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.mexicanNetworks', 'Mexican Manufacturing Networks') : 'Mexican Manufacturing Networks'}</div>
-                      <div className="bloomberg-card-subtitle">{ready ? t('partnership.familyTeam.mexicanDesc', '15+ years building relationships with IMMEX certified facilities, logistics providers, and border specialists') : '15+ years building relationships with IMMEX certified facilities, logistics providers, and border specialists'}</div>
-                    </div>
-                  </div>
-
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">📋</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.usmcaSpecialists', 'USMCA Triangle Routing Specialists') : 'USMCA Triangle Routing Specialists'}</div>
-                      <div className="bloomberg-card-subtitle">{ready ? t('partnership.familyTeam.usmcaDesc', 'Helped 100+ companies avoid China/India tariffs through Mexico manufacturing partnerships') : 'Helped 100+ companies avoid China/India tariffs through Mexico manufacturing partnerships'}</div>
-                    </div>
-                  </div>
-
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="section-icon">💼</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.crisisResponse', 'Crisis Response Experience') : 'Crisis Response Experience'}</div>
-                      <div className="bloomberg-card-subtitle">{ready ? t('partnership.familyTeam.crisisDesc', 'Successfully helped companies pivot during Section 232 steel tariffs, COVID supply disruptions, and China trade wars') : 'Successfully helped companies pivot during Section 232 steel tariffs, COVID supply disruptions, and China trade wars'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="partnership-value-proof">
-                  <h5 className="proof-title">{ready ? t('partnership.familyTeam.recentSuccessStories', 'Recent Success Stories:') : 'Recent Success Stories:'}</h5>
-                  <div className="success-stories">
-                    <div className="success-story">
-                      <strong>{ready ? t('partnership.familyTeam.detroitAuto', 'Detroit Auto Parts Inc.') : 'Detroit Auto Parts Inc.'}</strong><br/>
-                      <span className="success-details">{ready ? t('partnership.familyTeam.detroitDetails', 'Saved $2.4M annually | China → Mexico transition in 45 days') : 'Saved $2.4M annually | China → Mexico transition in 45 days'}</span>
-                    </div>
-                    <div className="success-story">
-                      <strong>{ready ? t('partnership.familyTeam.phoenixSolar', 'Phoenix Solar Systems') : 'Phoenix Solar Systems'}</strong><br/>
-                      <span className="success-details">{ready ? t('partnership.familyTeam.phoenixDetails', 'Avoided bankruptcy | $9M tariff savings through Mexican assembly') : 'Avoided bankruptcy | $9M tariff savings through Mexican assembly'}</span>
-                    </div>
-                    <div className="success-story">
-                      <strong>{ready ? t('partnership.familyTeam.vancouverElectronics', 'Vancouver Electronics Ltd.') : 'Vancouver Electronics Ltd.'}</strong><br/>
-                      <span className="success-details">{ready ? t('partnership.familyTeam.vancouverDetails', '$1.8M saved | Maintained Canadian market access via USMCA') : '$1.8M saved | Maintained Canadian market access via USMCA'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bloomberg-grid bloomberg-grid-3 bloomberg-mb-lg">
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="bloomberg-metric-value text-success">87%</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.successRate', 'Success Rate') : 'Success Rate'}</div>
-                    </div>
-                  </div>
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="bloomberg-metric-value text-primary">28 days</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.averageSetupTime', 'Average Setup Time') : 'Average Setup Time'}</div>
-                    </div>
-                  </div>
-                  <div className="bloomberg-card">
-                    <div className="bloomberg-metric">
-                      <div className="bloomberg-metric-value text-warning">$4.1M</div>
-                      <div className="bloomberg-metric-label">{ready ? t('partnership.familyTeam.averageAnnualSavings', 'Average Annual Savings') : 'Average Annual Savings'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bloomberg-text-center">
-                  <Link href="/mexican-partnership-hub" target="_blank" className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-large">
-                    {ready ? t('partnership.familyTeam.accessPartnershipHub', '🔗 Access Partnership Hub Dashboard →') : '🔗 Access Partnership Hub Dashboard →'}
-                  </Link>
                 </div>
               </div>
             </div>
           </div>
-            </div>
-            </div>
-
-            {/* Form Actions */}
-            <div className="bloomberg-hero-actions">
-              <Link href="/routing" className="bloomberg-btn bloomberg-btn-secondary">
-                {ready ? t('partnership.navigation.backToRouteAnalysis', '← Back to Route Analysis') : '← Back to Route Analysis'}
-              </Link>
-              
-              {selectedRoute ? (
-                <button onClick={proceedToNextStage} className="bloomberg-btn bloomberg-btn-primary">
-                  {ready ? t('partnership.navigation.continueToHindsight', 'Continue to Hindsight Analysis →') : 'Continue to Hindsight Analysis →'}
-                </button>
-              ) : (
-                <button onClick={proceedToNextStage} className="bloomberg-btn bloomberg-btn-secondary">
-                  {ready ? t('partnership.navigation.skipPartnershipHub', 'Skip Partnership Hub') : 'Skip Partnership Hub'}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Intelligence Panel - Takes 1 column */}
-          <div className="bloomberg-card">
-            {/* Spacing to align with form start */}
-            <div style={{height: '120px'}}></div>
-            
-            <div className="widget-header">
-              <div className="widget-title">
-                <div className="widget-icon">🤝</div>
-                Live Partnership Intelligence
-              </div>
-              <div className="bloomberg-status bloomberg-status-warning small">URGENT</div>
-            </div>
-            
-            {/* Intelligence Level Display */}
-            <div className="bloomberg-text-center bloomberg-mb-lg">
-              <div className="metric-value text-warning">
-                {(8.5 + (selectedRoute ? 1.0 : 0)).toFixed(1)}/10.0
-              </div>
-              <div className="bloomberg-metric-label">Partnership Intelligence</div>
-              <div className="intelligence-score">
-                Crisis Response Active
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="progress-bar bloomberg-mb-lg">
-              <div 
-                className="progress-fill" 
-                data-progress={Math.floor(((selectedRoute ? 80 : 60)) / 20) * 20}
-              ></div>
-            </div>
-
-            {/* Partnership Intelligence Results */}
-            <div className="market-insights">
-              <div className="insight-item">
-                <div className="insight-indicator warning"></div>
-                <div className="insight-content">
-                  <div className="insight-title">Crisis Response Time</div>
-                  <div className="metric-value text-warning" style={{fontSize: '1.5rem'}}>
-                    24-48hrs
-                  </div>
-                </div>
-              </div>
-              
-              <div className="insight-item">
-                <div className="insight-indicator success"></div>
-                <div className="insight-content">
-                  <div className="insight-title">Partnership Value</div>
-                  <div className="insight-value">
-                    $500-25K per connection
-                  </div>
-                </div>
-              </div>
-              
-              <div className="insight-item">
-                <div className="insight-indicator info"></div>
-                <div className="insight-content">
-                  <div className="insight-title">Network Ready</div>
-                  <div className="insight-value">100+ Mexico Partners</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* System Status Widget */}
-            <div className="nav-status">
-              <div className="status-header">Crisis Status</div>
-              <div className="status-items">
-                <div className="bloomberg-status bloomberg-status-warning small">
-                  Trump Threat: Active
-                </div>
-                <div className="bloomberg-status bloomberg-status-success small">
-                  Mexico Network: Ready
-                </div>
-                <div className="bloomberg-status bloomberg-status-info small">
-                  Family Team: {selectedRoute ? 'Connecting' : 'Standing By'}
-                </div>
-              </div>
-            </div>
-          </div> {/* Close bloomberg-card */}
-          </div> {/* Close bloomberg-grid */}
-        </div>
-        
-        </div> {/* Close page-content */}
         </main>
-      </div> {/* Close triangle-layout */}
-      
+      </div>
     </>
   )
 }
