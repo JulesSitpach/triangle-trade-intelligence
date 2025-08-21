@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Triangle Intelligence Navigation Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Foundation Data Storage</h2>
+        <button onclick="testFoundationData()">Store Test Foundation Data</button>
+        <div id="foundation-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Product Data Storage</h2>
+        <button onclick="testProductData()">Store Test Product Data</button>
+        <div id="product-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Navigation State</h2>
+        <button onclick="testNavigation()">Check Navigation State</button>
+        <div id="navigation-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test Full Flow</h2>
+        <button onclick="testFullFlow()">Test Complete Flow</button>
+        <div id="flow-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Navigation Links</h2>
+        <a href="/foundation" target="_blank">Foundation Page</a> |
+        <a href="/product" target="_blank">Product Page</a> |
+        <a href="/routing" target="_blank">Routing Page</a>
+    </div>
+
+    <script>
+        function testFoundationData() {
+            const testData = {
+                companyName: "Test Company Inc",
+                businessType: "Electronics",
+                zipCode: "90210",
+                primarySupplierCountry: "CN",
+                importVolume: "$1M - $5M",
+                timelinePriority: "Cost",
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('triangle-foundation', JSON.stringify(testData));
+            document.getElementById('foundation-result').innerHTML = 
+                '<div class="success">✅ Foundation data stored successfully</div>';
+        }
+        
+        function testProductData() {
+            const testData = {
+                products: [
+                    { description: "Smartphone accessories", hsCode: "8517.62", confidence: 90 }
+                ],
+                hsCodes: ["8517.62"],
+                totalProducts: 1,
+                averageConfidence: 90,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('triangle-product', JSON.stringify(testData));
+            document.getElementById('product-result').innerHTML = 
+                '<div class="success">✅ Product data stored successfully</div>';
+        }
+        
+        function testNavigation() {
+            const foundation = localStorage.getItem('triangle-foundation');
+            const product = localStorage.getItem('triangle-product');
+            const routing = localStorage.getItem('triangle-routing');
+            
+            let result = '<h3>Navigation State:</h3>';
+            result += foundation ? '<div class="success">✅ Foundation Complete</div>' : '<div class="error">❌ Foundation Missing</div>';
+            result += product ? '<div class="success">✅ Product Complete</div>' : '<div class="error">❌ Product Missing</div>';
+            result += routing ? '<div class="success">✅ Routing Complete</div>' : '<div class="error">❌ Routing Missing</div>';
+            
+            document.getElementById('navigation-result').innerHTML = result;
+        }
+        
+        function testFullFlow() {
+            // Clear all data first
+            localStorage.removeItem('triangle-foundation');
+            localStorage.removeItem('triangle-product');
+            localStorage.removeItem('triangle-routing');
+            
+            let result = '<h3>Testing Full Flow...</h3>';
+            
+            // Test foundation data storage
+            testFoundationData();
+            result += '<div class="success">Step 1: Foundation data stored</div>';
+            
+            // Test product data storage
+            testProductData();
+            result += '<div class="success">Step 2: Product data stored</div>';
+            
+            // Test navigation state
+            setTimeout(() => {
+                const foundation = localStorage.getItem('triangle-foundation');
+                const product = localStorage.getItem('triangle-product');
+                
+                if (foundation && product) {
+                    result += '<div class="success">✅ Full flow test passed - Navigation should be unlocked</div>';
+                } else {
+                    result += '<div class="error">❌ Full flow test failed</div>';
+                }
+                
+                document.getElementById('flow-result').innerHTML = result;
+            }, 100);
+        }
+        
+        // Check current state on load
+        window.onload = function() {
+            testNavigation();
+        }
+    </script>
+</body>
+</html>

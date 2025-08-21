@@ -367,40 +367,79 @@ export default function ProductClassification() {
     setIsLoadingHSCodes(true)
 
     try {
-      console.log('🧠 Using Marcus chat intelligence for HS codes...')
+      console.log('🔍 Getting product suggestions using working API...')
       
-      // Use proven chat endpoint that works with 597K+ trade flows
-      const response = await fetch('/api/trade-intelligence-chat', {
+      // Use the working intelligent classification API
+      const response = await fetch('/api/intelligent-classification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: `What is the HS code for ${description}?`,
-          sessionId: `product_lookup_${Date.now()}`,
-          language: typeof window !== 'undefined' && window.i18n?.language || 'en'
+          productDescription: description,
+          businessType: foundationData?.businessType || 'Electronics'
         })
       })
 
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Chat intelligence response:', data)
+        console.log('✅ Classification response:', data)
         
-        if (data.success) {
-          // Parse HS code from chat response
-          const hsCodeMatch = data.response.match(/HS code (\d+\.?\d*)/i)
-          const suggestions = hsCodeMatch ? [{
-            code: hsCodeMatch[1],
-            description: data.response,
-            confidence: data.confidence || 90,
-            source: data.dataSource || 'chat_intelligence'
-          }] : []
+        if (data.classification) {
+          const suggestions = [{
+            code: data.classification.hsCode,
+            description: data.classification.description,
+            confidence: data.classification.confidence === 'high' ? 95 : data.classification.confidence === 'medium' ? 80 : 65,
+            source: 'intelligent_classification'
+          }]
           
           setSuggestedCodes({
             productIndex,
             suggestions,
-            source: 'marcus_chat_intelligence',
+            source: 'intelligent_classification',
             multilingual: true,
-            recordsSearched: '597K+ trade flows',
-            followUpQuestion: data.followUpQuestion
+            recordsSearched: 'Database classification',
+            confidence: data.classification.confidence
+          })
+
+          const stats = await getIntelligenceStats()
+          setIntelligenceStats(stats)
+          return
+        }
+      }
+
+      // Fallback: Try the working product suggestions API
+      console.log('🔍 Trying product suggestions API as fallback...')
+      const fallbackResponse = await fetch('/api/product-suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          businessType: foundationData?.businessType || 'Electronics'
+        })
+      })
+
+      if (fallbackResponse.ok) {
+        const fallbackData = await fallbackResponse.json()
+        console.log('✅ Product suggestions response:', fallbackData)
+        
+        if (fallbackData.products && fallbackData.products.length > 0) {
+          // Find the best matching product based on description similarity
+          const bestMatch = fallbackData.products.find(p => 
+            description.toLowerCase().includes(p.description?.toLowerCase().split(' ')[0]) ||
+            p.description?.toLowerCase().includes(description.toLowerCase().split(' ')[0])
+          ) || fallbackData.products[0]
+          
+          const suggestions = [{
+            code: bestMatch.hsCode,
+            description: bestMatch.description,
+            confidence: 75,
+            source: 'product_suggestions'
+          }]
+          
+          setSuggestedCodes({
+            productIndex,
+            suggestions,
+            source: 'product_suggestions',
+            multilingual: true,
+            recordsSearched: fallbackData.totalRows + ' trade flows'
           })
 
           const stats = await getIntelligenceStats()

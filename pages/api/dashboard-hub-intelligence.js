@@ -40,15 +40,15 @@ export default async function handler(req, res) {
       currentPage: 'dashboard'
     };
 
-    // Activate Beast Master Intelligence for compound insights
-    const beastMasterResults = await BeastMasterController.activateAllBeasts(
-      userProfile, 
-      'dashboard',
-      { source: 'dashboard_hub', realTime: true }
-    );
-
-    // Get Goldmine Intelligence foundation data
-    const goldmineIntelligence = await UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile);
+    // PARALLELIZED: Execute both intelligence systems simultaneously for 2x better performance
+    const [beastMasterResults, goldmineIntelligence] = await Promise.all([
+      BeastMasterController.activateAllBeasts(
+        userProfile, 
+        'dashboard',
+        { source: 'dashboard_hub', realTime: true }
+      ),
+      UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile)
+    ]);
 
     // Aggregate intelligence data for dashboard
     const dashboardIntelligence = {

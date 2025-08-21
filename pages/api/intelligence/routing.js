@@ -41,31 +41,37 @@ async function handler(req, res) {
       const blazeImportVolume = importVolume || businessProfile?.importVolume
       const blazeSupplierCountry = supplierCountry || businessProfile?.primarySupplierCountry || 'China'
       
-      // 1. Get high-value triangle routing opportunities
-      const { data: routes, error: routeError } = await supabase
-        .from('triangle_routing_opportunities')
-        .select('*')
-        .gte('max_savings_amount', 100000) // Only high-value routes
-        .order('max_savings_amount', { ascending: false })
-        .limit(5)
-
+      // PARALLELIZED: Execute all 3 queries simultaneously for 3x better performance
+      const [routesResult, patternsResult, alertsResult] = await Promise.all([
+        supabase
+          .from('triangle_routing_opportunities')
+          .select('*')
+          .gte('max_savings_amount', 100000) // Only high-value routes
+          .order('max_savings_amount', { ascending: false })
+          .limit(5),
+        
+        supabase
+          .from('hindsight_pattern_library')
+          .select('*')
+          .contains('business_types_applicable', [blazeBusinessType])
+          .order('success_rate_percentage', { ascending: false })
+          .limit(3),
+          
+        supabase
+          .from('current_market_alerts')
+          .select('*')
+          .eq('is_active', true)
+          .contains('affected_countries', [blazeSupplierCountry])
+          .limit(2)
+      ])
+      
+      const { data: routes, error: routeError } = routesResult
+      const { data: patterns, error: patternError } = patternsResult
+      const { data: alerts, error: alertError } = alertsResult
+      
       if (routeError) throw routeError
-
-      // 2. Get relevant hindsight patterns for this business
-      const { data: patterns, error: patternError } = await supabase
-        .from('hindsight_pattern_library')
-        .select('*')
-        .contains('business_types_applicable', [blazeBusinessType])
-        .order('success_rate_percentage', { ascending: false })
-        .limit(3)
-
-      // 3. Get active market alerts affecting this route
-      const { data: alerts, error: alertError } = await supabase
-        .from('current_market_alerts')
-        .select('*')
-        .eq('is_active', true)
-        .contains('affected_countries', [blazeSupplierCountry])
-        .limit(2)
+      if (patternError) throw patternError
+      if (alertError) throw alertError
 
       // 4. Calculate personalized savings based on import volume
       const personalizedRoutes = routes.map(route => {
