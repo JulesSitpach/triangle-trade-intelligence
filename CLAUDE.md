@@ -246,11 +246,17 @@ GET /api/redis-rate-limiting-demo      // Redis rate limiting demo
 // - Performance characteristics
 ```
 
-## Beast Master Intelligence System - FULLY OPERATIONAL ✅
+## Intelligence Architecture - RESTORED & OPERATIONAL ✅
 
-The platform implements **6 interconnected intelligence systems** that generate **compound insights** impossible with individual systems:
+The platform implements both the original **6-system Beast Master** and a new **3-system Consolidated Intelligence Engine** that provides the same business value with reduced complexity:
 
-### Core Intelligence Architecture
+### Dual Intelligence Architecture
+- **Beast Master Controller** (6 systems) - Full compound intelligence with maximum insight depth
+- **Consolidated Intelligence Engine** (3 systems) - Simplified architecture with integrated capabilities
+
+Choose based on use case: Beast Master for maximum intelligence, Consolidated Engine for performance-optimized implementations.
+
+### Beast Master Controller Architecture (6 Systems)
 ```javascript
 🦾 Beast Master Controller (Orchestrates all systems)
 ├── 🧠 Similarity Intelligence - 240+ workflow sessions for pattern matching
@@ -260,6 +266,16 @@ The platform implements **6 interconnected intelligence systems** that generate 
 ├── 🚨 Alert Generation Intelligence - Multi-system alert prioritization
 └── 🚢 Shipping Intelligence - Capacity constraints, carrier performance, route complexity
 ```
+
+### Consolidated Intelligence Engine Architecture (3 Systems)
+```javascript
+⚡ Consolidated Intelligence Engine (Simplified but complete)
+├── 🧠 Enhanced Similarity Intelligence (includes Network Effects + Alert Generation)
+├── 📊 Enhanced Market Intelligence (includes Volatility + Seasonal + Timing Optimization)  
+└── 🏆 Enhanced Success Intelligence (includes Success Patterns + Shipping + Route Complexity)
+```
+
+**Key Difference**: Consolidated Engine integrates functionality rather than removing it, achieving 50% complexity reduction while maintaining all business value.
 
 ### Compound Intelligence Generation
 The Beast Master generates insights **only possible by combining multiple systems**:
@@ -314,27 +330,35 @@ NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true                 # Phase 2 optimization
 
 ## Critical Development Patterns
 
-### Always Use Beast Master & Goldmine Intelligence Systems
+### Always Use Intelligence Systems (Beast Master OR Consolidated Engine)
 ```javascript
-// CORRECT - Uses Beast Master Controller for compound intelligence
+// OPTION 1: Beast Master Controller (6 systems - maximum intelligence)
 import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
 import UnifiedGoldmineIntelligence from '../lib/intelligence/goldmine-intelligence'
 
-// Generate compound insights from all 6 intelligence systems
 const beastResults = await BeastMasterController.activateAllBeasts(
   userProfile, 
   currentPage,
   { source: 'dashboard_hub', realTime: true }
 );
 
-// Get database intelligence from 500K+ records
+// OPTION 2: Consolidated Intelligence Engine (3 systems - optimized performance)  
+import { ConsolidatedIntelligenceEngine } from '../lib/intelligence/consolidated-intelligence-engine'
+
+const consolidatedResults = await ConsolidatedIntelligenceEngine.activateConsolidatedIntelligence(
+  userProfile,
+  currentPage,
+  { useCache: true, realTime: true }
+);
+
+// Both provide the same compound insights and business value
+const compoundInsights = beastResults.unified?.insights?.compound || 
+                        consolidatedResults.unified?.insights?.compound || [];
+
+// Get database intelligence from 500K+ records (works with both systems)
 const goldmineData = await UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile);
 
-// Access compound insights (only possible with multiple systems)
-const compoundInsights = beastResults.unified?.insights?.compound || [];
-const networkEffects = goldmineData.volatile?.networkEffectsEnabled;
-
-// WRONG - Using individual systems without Beast Master orchestration
+// WRONG - Using individual systems without orchestration
 const similarityData = await SimilarityIntelligence.getSimilarCompanies(profile)
 // This misses compound insights that require multiple systems
 ```
@@ -569,6 +593,7 @@ describe('DatabaseIntelligenceBridge', () => {
 
 ### Intelligence Systems (`/lib/intelligence/`) ✅ FULLY OPERATIONAL
 - **`beast-master-controller.js`**: **RESTORED** - Orchestrates all 6 intelligence systems for compound insights
+- **`consolidated-intelligence-engine.js`**: **NEW** - Simplified 3-system architecture with same business value
 - **`goldmine-intelligence.js`**: **RESTORED** - Database intelligence from 519,341+ records with network effects
 - **`database-intelligence-bridge.js`**: Volatile/stable data optimization for 80% API cost reduction
 - **`dynamic-savings-engine.js`**: Calculates real-time savings based on market conditions
@@ -697,6 +722,71 @@ NEXT_PUBLIC_USE_PREFETCHING=true
 - Page Load Time: 68% faster (3.8s → 1.2s)
 - API Call Reduction: 80% fewer calls
 
+## MCP (Model Context Protocol) Integration
+
+### Context7 MCP Server ✅ INSTALLED
+Triangle Intelligence integrates with Claude Desktop via the Context7 MCP server for enhanced development experience:
+
+```bash
+# Context7 MCP Installation Status
+Context7 Server: ✅ Installed globally at /home/paige098/.npm-global/bin/context7-mcp
+Configuration: ✅ ~/.config/claude/claude_desktop_config.json updated
+Project Config: ✅ .context7-mcp-config.json created
+Test Script: ✅ scripts/test-context7-mcp.js available
+```
+
+### MCP Benefits for Development
+- **Enhanced Code Intelligence**: Better understanding of Next.js, React, Supabase patterns
+- **Documentation Access**: Instant access to framework and library documentation
+- **Best Practices**: Triangle Intelligence-specific guidance based on project context
+- **API Integration**: Improved assistance with Comtrade, Shippo, Anthropic APIs
+
+### MCP Usage Pattern
+```javascript
+// MCP automatically provides context-aware suggestions when you work with:
+import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
+// MCP knows this is Triangle Intelligence's core intelligence system
+
+const intelligence = await DatabaseIntelligenceBridge.getTriangleRoutingIntelligence(params)
+// MCP provides relevant documentation for Triangle's volatile/stable data strategy
+```
+
+## Subscription Management & Billing System
+
+### Subscription Architecture
+```javascript
+// Subscription middleware for API route protection
+import { withSubscriptionCheck, requireFeatureAndTrackUsage } from '../lib/subscription-middleware'
+
+// Feature-gated API route with usage tracking
+export default requireFeatureAndTrackUsage('marcus_ai', 'marcusConsultations')(async (req, res) => {
+  // req.subscription contains tier, usage, and limits
+  const { hasSubscription, tier, usage } = req.subscription
+})
+```
+
+### Subscription Tiers
+- **FREE**: Basic triangle routing analysis, limited to 5 routes/month
+- **PROFESSIONAL**: Marcus AI consultations, unlimited analyses, priority support
+- **ENTERPRISE**: Beast Master intelligence, custom APIs, dedicated support
+
+### Usage Tracking & Limits
+```javascript
+// Database schema (subscription-related tables)
+subscriptions: { user_id, tier, status, current_period_end }
+subscription_usage: { user_id, monthly_analyses, saved_routes, marcus_consultations }
+
+// Usage middleware automatically enforces limits
+trackUsage('monthlyAnalyses')(handler) // Tracks and enforces monthly limits
+requireSubscription('ENTERPRISE')(handler) // Requires specific tier
+```
+
+### Subscription Components
+- **`SubscriptionManager.js`**: Main subscription dashboard component
+- **`SubscriptionCard.js`**: Tier selection and upgrade cards
+- **`SubscriptionGatedDashboard.js`**: Feature-gated dashboard views
+- **`useSubscription.js`**: React hook for subscription status
+
 ## Production Deployment Architecture
 
 ### Vercel Configuration
@@ -729,6 +819,33 @@ GET /api/database-structure-test   // Database connectivity and schema
 GET /api/production-data-quality-check // Data quality verification
 ```
 
+## Enterprise Restoration Phase Status
+
+### Current Branch: `enterprise-restoration-phase1`
+The platform is currently undergoing systematic restoration and enhancement as documented in the **Triangle Intelligence - Agent Execution Plan.md**:
+
+#### ✅ Completed Phases (Stage 1-2)
+- **Critical Infrastructure Fixes**: Authentication, API standardization, production logging, database backup
+- **Architecture Simplification**: 6→3 intelligence systems consolidation, Beast Master restoration
+- **Security Hardening**: Console.log removal, sensitive data protection, PCI DSS compliance
+- **Database Resilience**: 519K+ records backed up, connection monitoring implemented
+
+#### 🔄 Current Work (Stage 3-4)
+- **CSS Architecture Modernization**: Breaking down 1,833-line monolithic CSS file
+- **Performance Optimization**: Query batching, caching strategies, bundle splitting
+- **Translation System Completion**: Missing 100+ keys, real-time updates
+
+#### 📋 Upcoming Phases (Stage 5-7)
+- **Security Event Monitoring**: Comprehensive audit logging and alerting
+- **Intelligent Caching**: Redis integration for 85% performance improvement
+- **Bundle Optimization**: Code splitting to reduce 4.9MB bundle
+
+### Enterprise Restoration Goals
+- **Performance**: 85% faster queries (2.5s → 0.3s), 68% faster page loads (3.8s → 1.2s)
+- **Reliability**: Circuit breaker patterns, connection pooling, automatic failover
+- **Security**: Score improvement from 82/100 to 95+/100
+- **Maintainability**: Reduced technical debt, modular architecture, comprehensive testing
+
 ## Common Pitfalls to Avoid
 
 1. **Never create new Supabase clients** - Always use `getSupabaseClient()` singleton
@@ -740,6 +857,7 @@ GET /api/production-data-quality-check // Data quality verification
 7. **Never ignore rate limiting** - Use Redis rate limiter for production API calls
 8. **Never hardcode translations** - Use database-powered i18n system
 9. **Never skip optimization phases** - Enable feature flags for maximum performance
+10. **Never modify without testing** - Follow the Agent Execution Plan validation protocols
 
 ## Development vs Production Differences
 
@@ -756,3 +874,9 @@ GET /api/production-data-quality-check // Data quality verification
 - Redis required for rate limiting and caching
 - Security headers enforced
 - Bundle optimization and compression
+- Add and commit automatically whenever an entire task is finished. Use descriptive commit messages and capture the full scope of changes. Claude Code doesn't have checkpoints, so use git for rollbacks.
+- Run IDE diagnostics after completing each task. This runs type checks, linting, and other project checks in one go using fewer tokens.
+- Use the Context7 MCP server whenever the user requests documentation or when working with updated frameworks/libraries.
+- Document and check existing tech stack and dependencies before installing new libraries. Avoid reinstalling packages that already exist.
+- Understand and maintain the existing project structure. Find files faster and avoid duplicating modules that already exist.
+- Use Puppeteer MCP for browser automation, testing, and checking console errors when working on frontend features.

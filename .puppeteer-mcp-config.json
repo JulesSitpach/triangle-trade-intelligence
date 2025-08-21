@@ -1,0 +1,89 @@
+{
+  "name": "Triangle Intelligence Puppeteer MCP",
+  "version": "1.0.0", 
+  "description": "Puppeteer MCP configuration for Triangle Intelligence Platform web scraping and automation",
+  "server": {
+    "command": "mcp-server-puppeteer",
+    "args": [],
+    "transport": "stdio",
+    "env": {}
+  },
+  "capabilities": {
+    "browser_automation": true,
+    "web_scraping": true,
+    "screenshot_capture": true,
+    "form_interaction": true,
+    "javascript_execution": true
+  },
+  "available_tools": [
+    {
+      "name": "puppeteer_navigate",
+      "description": "Navigate to any URL",
+      "use_cases": [
+        "Navigate to competitor websites for market research",
+        "Access trade data portals for intelligence gathering",
+        "Monitor shipping carrier websites for rate changes"
+      ]
+    },
+    {
+      "name": "puppeteer_screenshot",
+      "description": "Capture screenshots of web pages or specific elements",
+      "use_cases": [
+        "Document tariff rate changes for reports",
+        "Capture trade portal data for analysis",
+        "Create visual evidence for hindsight patterns"
+      ]
+    },
+    {
+      "name": "puppeteer_click",
+      "description": "Click elements on web pages",
+      "use_cases": [
+        "Automate form submissions on trade portals",
+        "Navigate through multi-page data sources",
+        "Interact with dynamic content loaders"
+      ]
+    },
+    {
+      "name": "puppeteer_fill",
+      "description": "Fill form inputs automatically",
+      "use_cases": [
+        "Submit product codes to trade databases",
+        "Fill shipping calculator forms",
+        "Automate data collection workflows"
+      ]
+    },
+    {
+      "name": "puppeteer_evaluate",
+      "description": "Execute JavaScript in browser context",
+      "use_cases": [
+        "Extract data from complex JavaScript applications", 
+        "Manipulate dynamic content for data access",
+        "Perform calculations in web-based tools"
+      ]
+    }
+  ],
+  "triangle_intelligence_integrations": {
+    "market_monitoring": {
+      "description": "Use Puppeteer to monitor trade websites for real-time market changes",
+      "frequency": "Every 4 hours",
+      "targets": [
+        "UN Comtrade portal",
+        "Shipping carrier rate pages", 
+        "Government tariff announcement sites"
+      ]
+    },
+    "competitive_intelligence": {
+      "description": "Gather competitor pricing and strategy information",
+      "use_case": "Monitor competitor trade route options and pricing"
+    },
+    "data_validation": {
+      "description": "Verify external data sources against platform intelligence",
+      "use_case": "Cross-reference platform calculations with official sources"
+    }
+  },
+  "security_considerations": {
+    "rate_limiting": "Built-in delays to avoid overwhelming target sites",
+    "user_agent": "Identifies as legitimate research tool",
+    "respect_robots_txt": "Honors website scraping policies"
+  }
+}
