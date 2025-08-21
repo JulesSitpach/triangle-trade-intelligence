@@ -1,0 +1,610 @@
+/* ============================= */
+/* TRIANGLE INTELLIGENCE         */
+/* Layout Components             */
+/* Bloomberg Terminal Layout     */
+/* ============================= */
+
+/**
+ * Layout Components for Triangle Intelligence Platform
+ * 
+ * This module contains all layout-related components:
+ * - Container systems
+ * - Grid layouts
+ * - Section layouts
+ * - Card layouts
+ * - Hero sections
+ */
+
+/* ===== GLOBAL LAYOUT BASE ===== */
+
+html {
+  font-size: 16px;
+  line-height: var(--leading-normal);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  background-image: radial-gradient(
+    circle at 25% 25%, 
+    rgba(14, 165, 233, 0.05) 0%, 
+    transparent 50%
+  );
+}
+
+body {
+  font-family: var(--font-primary);
+  color: var(--text-primary);
+  font-weight: var(--font-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== CONTAINER SYSTEMS ===== */
+
+/* Base Container */
+.container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--space-lg);
+}
+
+.container-sm {
+  max-width: var(--container-sm);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-md {
+  max-width: var(--container-md);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-lg {
+  max-width: var(--container-lg);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-xl {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-2xl {
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* ===== SPECIALIZED CONTAINERS ===== */
+
+/* Triangle Journey Container */
+.triangle-container {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* Bloomberg Containers (Legacy Support) */
+.bloomberg-container-padded {
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.bloomberg-container-full {
+  width: 100%;
+  padding: 0 var(--space-lg);
+}
+
+/* ===== MAIN LAYOUT SYSTEMS ===== */
+
+/* Triangle Layout System */
+.triangle-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: white;
+  position: relative;
+}
+
+.triangle-layout .main-content {
+  flex: 1;
+  margin-left: var(--side-nav-width);
+  padding-top: var(--top-nav-height);
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* Page Content */
+.page-content {
+  width: 100%;
+  padding: var(--space-xl) 0;
+  background: transparent;
+}
+
+.main-content {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* ===== SECTION LAYOUTS ===== */
+
+/* Bloomberg Section */
+.bloomberg-section {
+  padding: var(--space-2xl) 0;
+  position: relative;
+}
+
+.bloomberg-section-title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.bloomberg-section-subtitle {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  line-height: var(--leading-relaxed);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== HERO SECTIONS ===== */
+
+/* Bloomberg Hero */
+.bloomberg-hero {
+  padding: var(--space-3xl) 0;
+  background: linear-gradient(135deg, 
+    rgba(10, 15, 28, 0.95) 0%, 
+    rgba(16, 23, 42, 0.90) 50%, 
+    rgba(10, 15, 28, 0.95) 100%
+  );
+  border-bottom: var(--border-1) solid var(--bloomberg-gray-700);
+  position: relative;
+  overflow: hidden;
+}
+
+.bloomberg-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 49px,
+      rgba(14, 165, 233, 0.03) 50px
+    );
+  pointer-events: none;
+}
+
+.bloomberg-hero-content {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--space-lg);
+}
+
+.bloomberg-hero-title {
+  font-size: 3.5rem;
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-lg);
+  letter-spacing: var(--tracking-tight);
+}
+
+.bloomberg-hero-subtitle {
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-2xl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bloomberg-hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+/* ===== GRID SYSTEMS ===== */
+
+/* Bloomberg Grid */
+.bloomberg-grid {
+  display: grid;
+  gap: var(--gap-lg);
+}
+
+.bloomberg-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.bloomberg-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.bloomberg-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.bloomberg-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Foundation Workspace Grid */
+.foundation-workspace {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-xl);
+  background: transparent;
+  align-items: start;
+  margin-top: var(--space-lg);
+}
+
+.foundation-layout {
+  width: 100%;
+  padding: 0 var(--space-lg);
+}
+
+.foundation-layout-centered {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+}
+
+/* ===== CARD LAYOUTS ===== */
+
+/* Base Card System */
+.bloomberg-card {
+  background: var(--bg-secondary);
+  border: var(--border-1) solid var(--bloomberg-gray-700);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-all);
+  position: relative;
+  overflow: hidden;
+}
+
+.bloomberg-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--bloomberg-blue-light));
+  opacity: 0;
+  transition: var(--transition-opacity);
+}
+
+.bloomberg-card:hover {
+  border-color: var(--bloomberg-gray-600);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.bloomberg-card:hover::before {
+  opacity: 1;
+}
+
+/* Card Variants */
+.bloomberg-panel {
+  background: var(--bg-secondary);
+  border: var(--border-1) solid var(--bloomberg-gray-700);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.bloomberg-widget {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  border: var(--border-1) solid var(--bloomberg-gray-600);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Card Headers */
+.bloomberg-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-1) solid var(--bloomberg-gray-700);
+}
+
+.bloomberg-card-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.bloomberg-card-subtitle {
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* ===== SPECIALIZED LAYOUTS ===== */
+
+/* Foundation Form Section */
+.foundation-form-section {
+  background: transparent;
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+}
+
+.foundation-intelligence-panel {
+  background: var(--bg-secondary);
+  border: var(--border-1) solid var(--bloomberg-blue-light);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* Executive Dashboard Layout */
+.executive-dashboard-container {
+  width: 100%;
+  padding: var(--space-lg);
+}
+
+.executive-dashboard-container-centered {
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin: 0 auto;
+  padding: var(--space-lg);
+}
+
+/* Partnership Ecosystem Grid */
+.partnership-ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  margin: var(--space-lg) 0;
+}
+
+/* ===== BACKGROUND SYSTEMS ===== */
+
+/* Bloomberg Main Background */
+.bloomberg-main-background {
+  background: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Crisis Alert Banner */
+.bloomberg-accent-banner {
+  background: linear-gradient(90deg, var(--status-error), var(--bloomberg-orange));
+  color: white;
+  padding: var(--space-sm) var(--space-lg);
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-lg);
+  position: relative;
+  z-index: var(--z-crisis-banner);
+}
+
+/* ===== RESPONSIVE LAYOUT ===== */
+
+/* Large Screens */
+@media (max-width: 1440px) {
+  .bloomberg-container-padded,
+  .dashboard-container {
+    max-width: var(--container-xl);
+  }
+}
+
+/* Desktop */
+@media (max-width: 1200px) {
+  .dashboard-container {
+    max-width: var(--container-lg);
+  }
+  
+  .bloomberg-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bloomberg-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet Landscape */
+@media (max-width: 1024px) {
+  .dashboard-container,
+  .content-wrapper {
+    padding: 0 var(--space-md);
+  }
+  
+  .foundation-workspace {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+  
+  .bloomberg-hero-title {
+    font-size: 3rem;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
+  .container,
+  .bloomberg-container-padded,
+  .bloomberg-container-full,
+  .dashboard-container,
+  .content-wrapper {
+    padding: 0 var(--space-md);
+  }
+  
+  .triangle-layout .main-content {
+    margin-left: 0;
+    padding-top: var(--top-nav-height);
+  }
+  
+  .bloomberg-grid-4,
+  .bloomberg-grid-3,
+  .bloomberg-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .partnership-ecosystem-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bloomberg-hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .bloomberg-hero-subtitle {
+    font-size: var(--text-lg);
+  }
+  
+  .bloomberg-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .container,
+  .bloomberg-container-padded,
+  .bloomberg-container-full,
+  .dashboard-container,
+  .content-wrapper {
+    padding: 0 var(--space-sm);
+  }
+  
+  .bloomberg-card {
+    padding: var(--space-md);
+  }
+  
+  .bloomberg-hero-title {
+    font-size: 2rem;
+  }
+  
+  .bloomberg-hero-subtitle {
+    font-size: var(--text-base);
+  }
+  
+  .bloomberg-section-title {
+    font-size: var(--text-2xl);
+  }
+  
+  .foundation-form-section {
+    padding: var(--space-lg);
+  }
+}
+
+/* ===== PRINT LAYOUT ===== */
+
+@media print {
+  .triangle-layout .main-content {
+    margin-left: 0;
+    padding-top: 0;
+  }
+  
+  .bloomberg-hero {
+    padding: var(--space-lg) 0;
+  }
+  
+  .bloomberg-card {
+    box-shadow: none;
+    border: var(--border-1) solid #000;
+  }
+  
+  .page-content {
+    padding: var(--space-md) 0;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Skip to Content */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--accent-primary);
+  color: white;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: var(--font-semibold);
+  z-index: 9999;
+  transition: top var(--transition-fast);
+}
+
+.skip-to-content:focus {
+  top: 6px;
+}
+
+/* High Contrast */
+@media (prefers-contrast: high) {
+  .bloomberg-card,
+  .bloomberg-panel,
+  .bloomberg-widget {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .bloomberg-card:hover {
+    transform: none;
+  }
+  
+  .bloomberg-hero::before {
+    background: none;
+  }
+}

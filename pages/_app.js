@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import '../styles/bloomberg-professional-clean.css'
+import '../styles/globals.css'
 import '../lib/i18n' // Initialize proper i18n system
 import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
