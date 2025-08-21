@@ -5,7 +5,7 @@
  */
 
 import { logInfo, logError, logAPICall } from '../../../lib/production-logger'
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 
 export default async function handler(req, res) {
   if (!['POST', 'GET'].includes(req.method)) {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   const startTime = Date.now()
-  const supabase = getSupabaseClient()
+  const supabase = getServerSupabaseClient()
   
   try {
     // Support both JSON body (POST) and URL parameters (GET)

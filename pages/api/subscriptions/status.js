@@ -1,5 +1,6 @@
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 import { hasFeatureAccess, checkUsageLimit } from '../../../lib/stripe'
+import { logInfo, logError, logDBQuery } from '../../../lib/production-logger'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'User ID is required' })
     }
 
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
 
     // Get user's current subscription
     const { data: subscription, error: subError } = await supabase
@@ -38,7 +39,12 @@ export default async function handler(req, res) {
         .single()
 
       if (usageError && usageError.code !== 'PGRST116') {
-        console.error('Usage query error:', usageError)
+        logError('Usage query error', {
+          errorType: usageError.name,
+          errorCode: usageError.code,
+          message: usageError.message,
+          userId
+        })
       } else if (usageData) {
         usage = usageData
       }
@@ -114,7 +120,11 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Subscription status error:', error)
+    logError('Subscription status error', {
+      errorType: error.name,
+      message: error.message,
+      userId: req.query.userId
+    })
     res.status(500).json({ 
       error: 'Failed to get subscription status',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

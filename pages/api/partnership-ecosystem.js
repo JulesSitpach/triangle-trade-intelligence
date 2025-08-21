@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../../lib/supabase-client';
+import { getServerSupabaseClient } from '../../lib/supabase-client';
 import productionLogger from '../../lib/utils/production-logger';
 
 export default async function handler(req, res) {
@@ -46,7 +46,7 @@ async function getLiveOpportunities(req, res) {
     // - Integration with CRM systems
 
     // For now, simulate live opportunities with database-backed logic
-    const supabase = getSupabaseClient();
+    const supabase = getServerSupabaseClient();
     const { data: recentSessions } = await supabase
       .from('workflow_sessions')
       .select('*')
@@ -255,7 +255,7 @@ async function getRevenueAnalytics(req, res) {
 async function getNetworkIntelligence(req, res) {
   try {
     // Get network statistics from database
-    const supabase = getSupabaseClient();
+    const supabase = getServerSupabaseClient();
     const { count: totalSessions } = await supabase
       .from('workflow_sessions')
       .select('*', { count: 'exact', head: true });

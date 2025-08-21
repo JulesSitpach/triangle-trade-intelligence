@@ -2,23 +2,21 @@
 // Unified triangle routing intelligence with 597K trade flows data + Blaze features
 // Consolidates: routing.js + blaze/triangle-routing.js
 
-import { logger } from '../../../lib/utils/production-logger'
+import { logInfo, logError, logPerformance, logDBQuery } from '../../../lib/production-logger.js'
 import DatabaseIntelligenceBridge from '../../../lib/intelligence/database-intelligence-bridge.js'
 import { queryOptimizer } from '../../../lib/database/query-optimizer.js'
 import { universalCache } from '../../../lib/utils/memory-cache-fallback.js'
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js'
 import { withIntelligenceRateLimit } from '../../../lib/utils/with-rate-limit.js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 async function handler(req, res) {
-  logger.info('API CALL: /api/intelligence/routing', {
+  logInfo('API CALL: /api/intelligence/routing', {
     method: req.method,
-    body: req.body,
-    timestamp: new Date().toISOString()
+    hasBusinessProfile: !!req.body.businessProfile,
+    hasProducts: !!req.body.products,
+    isBlaze: req.body.blaze === true
   })
 
   if (req.method !== 'POST') {
@@ -34,7 +32,11 @@ async function handler(req, res) {
   try {
     if (isBlaze) {
       // BLAZE MODE: High-value routing with $100K-$300K+ opportunities
-      console.log('🔥 BLAZE ROUTING: Finding $100K-$300K+ opportunities...')
+      logInfo('BLAZE ROUTING: Finding high-value opportunities', {
+        businessType: blazeBusinessType,
+        importVolume: blazeImportVolume,
+        supplierCountry: blazeSupplierCountry
+      })
       
       // Extract parameters for blaze mode
       const blazeBusinessType = businessType || businessProfile?.businessType
@@ -112,11 +114,11 @@ async function handler(req, res) {
       
     } else {
       // LEGACY MODE: Standard trade flows database intelligence
-      console.log('🎯 USING 597K TRADE FLOWS DATABASE...')
-      console.log(`   Products: ${products?.length || 0} items`)
-      console.log(`   Business: ${businessProfile?.businessType || businessProfile?.type || 'NOT_FOUND'}`)
-      console.log(`   Volume: ${businessProfile?.importVolume || businessProfile?.volume || 'NOT_FOUND'}`)
-      console.log(`   Full businessProfile:`, JSON.stringify(businessProfile))
+      logInfo('Using trade flows database for routing intelligence', {
+        productsCount: products?.length || 0,
+        businessType: businessProfile?.businessType || businessProfile?.type || 'NOT_FOUND',
+        importVolume: businessProfile?.importVolume || businessProfile?.volume || 'NOT_FOUND'
+      })
       
       // Use optimized query system for <1s response times
       const intelligenceParams = {
@@ -126,22 +128,25 @@ async function handler(req, res) {
         businessType: businessProfile?.businessType || businessProfile?.type || 'Electronics'
       }
       
-      console.log('📊 Using OPTIMIZED query system:', intelligenceParams)
+      logInfo('Using optimized query system', intelligenceParams)
       
       // Get triangle routing intelligence using optimized queries (target: <500ms)
       const intelligence = await queryOptimizer.getTriangleRoutingData(intelligenceParams)
       
-      console.log('✅ TRADE FLOWS RESPONSE:', {
+      logPerformance('trade flows query', intelligence.efficiency.responseTime, {
         directFlows: intelligence.direct.flow.records?.length || 0,
         triangleOptions: intelligence.triangleOptions?.length || 0,
         dataQuality: intelligence.analysis.dataQuality,
-        apiCallsMade: intelligence.efficiency.apiCallsMade,
-        responseTime: intelligence.efficiency.responseTime
+        apiCallsMade: intelligence.efficiency.apiCallsMade
       })
 
       // Only create routes if we have valid user data
       if (!businessProfile || !products || products.length === 0) {
-        console.log('⚠️ No valid user data (businessProfile or products missing), returning empty routes')
+        logInfo('No valid user data provided', {
+          hasBusinessProfile: !!businessProfile,
+          hasProducts: !!products,
+          productsLength: products?.length || 0
+        })
         return res.status(200).json({
           routes: [],
           source: 'no_user_data',
@@ -152,7 +157,10 @@ async function handler(req, res) {
       }
 
       // Create dynamic routes based on actual origin/destination parameters
-      console.log('🛠️ Creating dynamic routes based on origin:', intelligenceParams.origin, 'destination:', intelligenceParams.destination)
+      logInfo('Creating dynamic routes', {
+        origin: intelligenceParams.origin,
+        destination: intelligenceParams.destination
+      })
       
       const origin = intelligenceParams.origin
       const destination = intelligenceParams.destination
@@ -230,8 +238,11 @@ async function handler(req, res) {
     }
 
   } catch (error) {
-    logger.error('API ERROR in routing endpoint', { error: error.message, stack: error.stack })
-    console.error('FULL ERROR DETAILS:', error)
+    logError('API ERROR in routing endpoint', {
+      errorType: error.name,
+      message: error.message,
+      stack: error.stack
+    })
     return res.status(500).json({ 
       error: 'Failed to get routing options',
       message: error.message,
@@ -251,23 +262,34 @@ function processTradeFlowsData(intelligence, businessProfile) {
                    parseFloat(volume) || 1000000
   
   // Process each triangle route with real data  
-  console.log('🧪 About to forEach - triangleOptions:', intelligence.triangleOptions)
-  console.log('🧪 Is array?', Array.isArray(intelligence.triangleOptions))
+  logInfo('Processing triangle options', {
+    triangleOptionsLength: intelligence.triangleOptions?.length || 0,
+    isArray: Array.isArray(intelligence.triangleOptions)
+  })
   
   if (!intelligence.triangleOptions || !Array.isArray(intelligence.triangleOptions)) {
-    console.log('⚠️ triangleOptions is not a valid array, returning empty routes')
+    logInfo('Triangle options is not a valid array, returning empty routes')
     return []
   }
   
   intelligence.triangleOptions.forEach((triangleRoute, index) => {
-    console.log(`🔍 Processing triangleRoute ${index}:`, JSON.stringify(triangleRoute, null, 2))
+    logInfo('Processing triangle route', {
+      routeIndex: index,
+      route: triangleRoute.route,
+      leg1Length: triangleRoute.leg1?.length || 0,
+      leg2Length: triangleRoute.leg2?.length || 0
+    })
     
     // Calculate savings based on real trade values
     const leg1Values = (triangleRoute.leg1 || []).map(r => parseFloat(r?.trade_value) || 0)
     const leg2Values = (triangleRoute.leg2 || []).map(r => parseFloat(r?.trade_value) || 0)
     
-    console.log(`   leg1Values:`, leg1Values)
-    console.log(`   leg2Values:`, leg2Values)
+    logInfo('Calculating trade values', {
+      leg1Count: leg1Values.length,
+      leg2Count: leg2Values.length,
+      avgLeg1Value: avgLeg1Value,
+      avgLeg2Value: avgLeg2Value
+    })
     
     const avgLeg1Value = (leg1Values && leg1Values.length > 0) ? leg1Values.reduce((a, b) => a + b, 0) / leg1Values.length : 0
     const avgLeg2Value = (leg2Values && leg2Values.length > 0) ? leg2Values.reduce((a, b) => a + b, 0) / leg2Values.length : 0
@@ -307,7 +329,7 @@ function processTradeFlowsData(intelligence, businessProfile) {
   // If no triangle routes found, return empty array
   // This allows the frontend to show "Complete Previous Stages" message
   if (routes.length === 0) {
-    console.log('⚠️ No valid triangle routes found, returning empty array')
+    logInfo('No valid triangle routes found, returning empty array')
     return []
   }
   

@@ -3,9 +3,9 @@
  * Provides Marcus AI insights and advanced triangle routing intelligence
  */
 
-import { getSupabaseClient } from '../../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 // Marcus AI Consultation Generator
 async function generateMarcusInsights(businessData, includePersonalized = false) {

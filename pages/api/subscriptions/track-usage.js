@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid usage type' })
     }
 
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
 
     // Use the database function to safely increment usage
     const { data, error } = await supabase.rpc('increment_usage', {

@@ -1,9 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js'
+import { logInfo, logError, logDBQuery, logPerformance } from '../../../lib/production-logger'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -39,7 +37,11 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Live alerts error:', error)
+    logError('Live alerts error', {
+      errorType: error.name,
+      message: error.message,
+      hasUserProfile: !!userProfile
+    })
     return res.status(500).json({ 
       error: 'Failed to generate live alerts',
       details: error.message 

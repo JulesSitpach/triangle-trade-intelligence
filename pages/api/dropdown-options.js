@@ -3,9 +3,9 @@
  * Returns business types, countries, and import volumes with real intelligence data
  */
 
-import { getSupabaseClient } from '../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../lib/supabase-client'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {

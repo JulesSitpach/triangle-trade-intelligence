@@ -1,0 +1,490 @@
+{
+  "table": "hindsight_pattern_library",
+  "exported_at": "2025-08-21T00:53:11.850Z",
+  "record_count": 17,
+  "data": [
+    {
+      "id": "65e2f3f0-eaa6-44d3-becf-e256f164916a",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "hidden_risk",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 5,
+      "description": "Single-country supplier concentration creates vulnerability",
+      "outcome": "No backup options during supply disruptions",
+      "prevention_strategy": "Establish relationships with 3+ suppliers across different regions",
+      "alert_triggers": [
+        "single_supplier_risk",
+        "supply_chain_concentration"
+      ],
+      "similarity_markers": [
+        "single_supplier",
+        "business_type:Technology"
+      ],
+      "created_at": "2025-08-02T12:46:45.606332+00:00",
+      "updated_at": "2025-08-02T12:46:45.606332+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "ed74b420-675e-44e3-9b4a-783df885fd11",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "success",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 7,
+      "description": "Completed full 7-stage optimization journey",
+      "outcome": "Full business intelligence achieved across all areas",
+      "prevention_strategy": "Maintain consistent engagement through all 7 stages",
+      "alert_triggers": [
+        "journey_completion",
+        "optimization_success"
+      ],
+      "similarity_markers": [
+        "business_type:Technology",
+        "full_journey"
+      ],
+      "created_at": "2025-08-02T12:46:45.722509+00:00",
+      "updated_at": "2025-08-02T12:46:45.722509+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "d9f5565f-9462-49c0-8742-b53793b98c77",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "success",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 5,
+      "stage_when_critical": 5,
+      "description": "Stage 5: Achieved high data quality (20+ points)",
+      "outcome": "Comprehensive risk assessment completed successfully",
+      "prevention_strategy": "Prioritize thorough data collection in Stage 5",
+      "alert_triggers": [
+        "stage_5_success",
+        "risk_assessment_complete"
+      ],
+      "similarity_markers": [
+        "business_type:Technology",
+        "stage_5_success"
+      ],
+      "created_at": "2025-08-02T12:46:45.842778+00:00",
+      "updated_at": "2025-08-02T12:46:45.842778+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "4d7a61b8-ffce-4de4-8ff2-8a5aaa817721",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 1,
+      "description": "Stage 1: Limited data quality (3 points)",
+      "outcome": "Reduced intelligence quality in foundational analysis",
+      "prevention_strategy": "Ensure comprehensive data collection from Stage 1",
+      "alert_triggers": [
+        "low_data_quality_stage_1"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_1"
+      ],
+      "created_at": "2025-08-02T12:46:45.961534+00:00",
+      "updated_at": "2025-08-02T12:46:45.961534+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "9d531903-2609-43b6-b35b-2756773d6015",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 2,
+      "description": "Stage 2: Limited data quality (4 points)",
+      "outcome": "Reduced intelligence quality in product classification",
+      "prevention_strategy": "Improve data collection processes early",
+      "alert_triggers": [
+        "low_data_quality_stage_2"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_2"
+      ],
+      "created_at": "2025-08-02T12:46:46.072939+00:00",
+      "updated_at": "2025-08-02T12:46:46.072939+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "dd94108a-e73b-4fbc-a8d0-50a8d6f0d91e",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 3,
+      "description": "Stage 3: Limited data quality (5 points)",
+      "outcome": "Insufficient supply chain mapping",
+      "prevention_strategy": "Allocate more time for Stage 3 data gathering",
+      "alert_triggers": [
+        "low_data_quality_stage_3"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_3"
+      ],
+      "created_at": "2025-08-02T12:46:46.184801+00:00",
+      "updated_at": "2025-08-02T12:46:46.184801+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "7d4255b4-d95e-443f-a567-921c3942411d",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 4,
+      "description": "Stage 4: Limited data quality (6 points)",
+      "outcome": "Incomplete financial optimization analysis",
+      "prevention_strategy": "Prioritize comprehensive financial data collection",
+      "alert_triggers": [
+        "low_data_quality_stage_4"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_4"
+      ],
+      "created_at": "2025-08-02T12:46:46.311435+00:00",
+      "updated_at": "2025-08-02T12:46:46.311435+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "e2eeb5e0-13d9-4ed3-b619-45e25bed5d65",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 6,
+      "description": "Stage 6: Limited data quality (8 points)",
+      "outcome": "Gaps in compliance assessment",
+      "prevention_strategy": "Ensure thorough compliance documentation",
+      "alert_triggers": [
+        "low_data_quality_stage_6"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_6"
+      ],
+      "created_at": "2025-08-02T12:46:46.428842+00:00",
+      "updated_at": "2025-08-02T12:46:46.428842+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "ae4af2bc-ce01-4d05-95f0-d6479df13e05",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 7,
+      "description": "Stage 7: Limited data quality (9 points)",
+      "outcome": "Incomplete crisis preparation planning",
+      "prevention_strategy": "Comprehensive contingency planning required",
+      "alert_triggers": [
+        "low_data_quality_stage_7"
+      ],
+      "similarity_markers": [
+        "data_quality_warning",
+        "stage_7"
+      ],
+      "created_at": "2025-08-02T12:46:46.54801+00:00",
+      "updated_at": "2025-08-02T12:46:46.54801+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "7a682dde-b3a5-421c-b4fa-31ec25dd2af4",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "turning_point",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 5,
+      "stage_when_critical": 7,
+      "description": "Stage 7: Crisis preparation frameworks established",
+      "outcome": "Business continuity planning became priority",
+      "prevention_strategy": "Integrate crisis planning throughout journey",
+      "alert_triggers": [
+        "crisis_readiness_shift",
+        "continuity_priority"
+      ],
+      "similarity_markers": [
+        "turning_point:crisis_prep",
+        "stage_7"
+      ],
+      "created_at": "2025-08-02T12:46:46.676656+00:00",
+      "updated_at": "2025-08-02T12:46:46.676656+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "aab82a52-c495-4330-b4d3-0349066b1940",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 3,
+      "stage_when_critical": 4,
+      "description": "Significant data drop between stages 3 and 4",
+      "outcome": "Progressive intelligence degradation detected",
+      "prevention_strategy": "Maintain consistent data quality across stages",
+      "alert_triggers": [
+        "stage_progression_gap_4"
+      ],
+      "similarity_markers": [
+        "progression_gap",
+        "stage_4"
+      ],
+      "created_at": "2025-08-02T12:46:46.795135+00:00",
+      "updated_at": "2025-08-02T12:46:46.795135+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "1eb62ea2-ebbe-4f86-9351-6950a38b081f",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 4,
+      "stage_when_critical": 5,
+      "description": "Significant data drop between stages 4 and 5",
+      "outcome": "Risk assessment quality compromised",
+      "prevention_strategy": "Ensure data continuity between financial and risk stages",
+      "alert_triggers": [
+        "stage_progression_gap_5"
+      ],
+      "similarity_markers": [
+        "progression_gap",
+        "stage_5"
+      ],
+      "created_at": "2025-08-02T12:46:46.913992+00:00",
+      "updated_at": "2025-08-02T12:46:46.913992+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "a7f0293c-6847-4125-b5ce-aa018d02fc24",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 5,
+      "stage_when_critical": 6,
+      "description": "Significant data drop between stages 5 and 6",
+      "outcome": "Compliance analysis lacks risk context",
+      "prevention_strategy": "Connect risk findings to compliance requirements",
+      "alert_triggers": [
+        "stage_progression_gap_6"
+      ],
+      "similarity_markers": [
+        "progression_gap",
+        "stage_6"
+      ],
+      "created_at": "2025-08-02T12:46:47.022654+00:00",
+      "updated_at": "2025-08-02T12:46:47.022654+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "7246d55c-2361-4799-a1f2-00f4c2557586",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 6,
+      "stage_when_critical": 7,
+      "description": "Significant data drop between stages 6 and 7",
+      "outcome": "Crisis planning lacks compliance foundation",
+      "prevention_strategy": "Build crisis plans on solid compliance framework",
+      "alert_triggers": [
+        "stage_progression_gap_7"
+      ],
+      "similarity_markers": [
+        "progression_gap",
+        "stage_7"
+      ],
+      "created_at": "2025-08-02T12:46:47.128168+00:00",
+      "updated_at": "2025-08-02T12:46:47.128168+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "01257223-2ebc-42d4-a4d7-243442e464a5",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 1,
+      "stage_when_critical": 7,
+      "description": "Primary challenge may need more focus: Supply chain management",
+      "outcome": "Core business challenge not fully addressed",
+      "prevention_strategy": "Ensure primary challenge drives all stage activities",
+      "alert_triggers": [
+        "challenge_focus_gap",
+        "priority_alignment"
+      ],
+      "similarity_markers": [
+        "challenge:supply_chain",
+        "focus_needed"
+      ],
+      "created_at": "2025-08-02T12:46:47.248211+00:00",
+      "updated_at": "2025-08-02T12:46:47.248211+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "af0cbdea-ea7d-4d70-b7eb-854edca7be76",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 2,
+      "stage_when_critical": 3,
+      "description": "Product classification complexity underestimated",
+      "outcome": "May lead to compliance issues downstream",
+      "prevention_strategy": "Invest in professional classification review",
+      "alert_triggers": [
+        "classification_complexity",
+        "compliance_risk"
+      ],
+      "similarity_markers": [
+        "warning:classification",
+        "stage_2_complexity"
+      ],
+      "created_at": "2025-08-02T12:46:47.370128+00:00",
+      "updated_at": "2025-08-02T12:46:47.370128+00:00",
+      "business_type": "General Manufacturing"
+    },
+    {
+      "id": "794a9505-78bb-4007-a100-1a6538e5ab84",
+      "user_id": "53b556a0-f4fb-4e7e-a7dc-5226976ad039",
+      "pattern_type": "warning",
+      "business_context": {
+        "suppliers": [
+          "China"
+        ],
+        "companyType": "Technology",
+        "importVolume": "Medium",
+        "primaryChallenge": "Supply chain management"
+      },
+      "stage_when_visible": 3,
+      "stage_when_critical": 5,
+      "description": "Supply chain mapping incomplete for risk assessment",
+      "outcome": "Hidden vulnerabilities may not be identified",
+      "prevention_strategy": "Complete comprehensive supplier mapping",
+      "alert_triggers": [
+        "mapping_incomplete",
+        "hidden_risks"
+      ],
+      "similarity_markers": [
+        "warning:mapping",
+        "supply_chain_gaps"
+      ],
+      "created_at": "2025-08-02T12:46:47.48479+00:00",
+      "updated_at": "2025-08-02T12:46:47.48479+00:00",
+      "business_type": "General Manufacturing"
+    }
+  ]
+}

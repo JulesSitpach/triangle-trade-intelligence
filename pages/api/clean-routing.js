@@ -8,10 +8,10 @@
  */
 
 import { logInfo, logError, logDBQuery, logPerformance } from '../../lib/production-logger'
-import { getSupabaseClient } from '../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../lib/supabase-client'
 import { withIntelligenceRateLimit } from '../../lib/utils/with-rate-limit'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 async function handler(req, res) {
   const startTime = Date.now()

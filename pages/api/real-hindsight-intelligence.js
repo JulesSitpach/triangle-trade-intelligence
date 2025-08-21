@@ -4,12 +4,10 @@
  * No localStorage - pure database intelligence
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
+import { logInfo, logError, logPerformance } from '../../lib/production-logger'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,7 +22,7 @@ export default async function handler(req, res) {
       importVolume = '$1M-$5M'
     } = req.body
 
-    console.log('🧠 Real hindsight intelligence request:', { businessType, origin, importVolume })
+    logInfo('Real hindsight intelligence request', { businessType, origin, importVolume })
 
     // Get real success patterns from database
     const successPatterns = await getRealSuccessPatterns(businessType, origin)
@@ -42,7 +40,9 @@ export default async function handler(req, res) {
       marcusAnalysis
     }
 
-    console.log('✅ Real hindsight intelligence generated from database')
+    logInfo('Real hindsight intelligence generated from database', {
+      dataPoints: successPatterns.totalRecords + peerBenchmarks.totalRecords
+    })
 
     res.json({
       success: true,
@@ -52,7 +52,12 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('❌ Hindsight intelligence error:', error.message)
+    logError('Hindsight intelligence error', {
+      errorType: error.name,
+      message: error.message,
+      businessType,
+      origin
+    })
     
     res.status(500).json({
       success: false,
@@ -312,7 +317,10 @@ Provide practical, data-driven insights in a professional consulting tone. Focus
       source: 'MARCUS_AI_ANALYSIS'
     };
   } catch (error) {
-    console.error('Marcus analysis error:', error);
+    logError('Marcus analysis error', {
+      errorType: error.name,
+      message: error.message
+    });
     return {
       analysis: `Based on the $76.9B trade database analysis:
 

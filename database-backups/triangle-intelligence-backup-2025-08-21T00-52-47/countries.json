@@ -1,0 +1,408 @@
+{
+  "table": "countries",
+  "exported_at": "2025-08-21T00:53:13.547Z",
+  "record_count": 39,
+  "data": [
+    {
+      "code": "CN",
+      "name": "China",
+      "region": "East Asia",
+      "trade_agreements": [
+        "WTO",
+        "Phase One Deal (Suspended)"
+      ],
+      "risk_factors": [
+        "Trade war active",
+        "Tariff volatility: HIGH",
+        "Currency risk: Medium"
+      ],
+      "created_at": "2025-07-30T15:29:18.25967"
+    },
+    {
+      "code": "TW",
+      "name": "Taiwan",
+      "region": "East Asia",
+      "trade_agreements": [
+        "WTO",
+        "Taiwan Trade Initiative"
+      ],
+      "risk_factors": [
+        "Geopolitical tensions",
+        "Tariff volatility: Medium",
+        "Currency risk: Low"
+      ],
+      "created_at": "2025-07-30T15:29:18.25967"
+    },
+    {
+      "code": "VN",
+      "name": "Vietnam",
+      "region": "Southeast Asia",
+      "trade_agreements": [
+        "WTO",
+        "BTA",
+        "CPTPP"
+      ],
+      "risk_factors": [
+        "Alternative to China",
+        "Tariff volatility: Low",
+        "Growing capacity"
+      ],
+      "created_at": "2025-07-30T15:29:18.25967"
+    },
+    {
+      "code": "MX",
+      "name": "Mexico",
+      "region": "North America",
+      "trade_agreements": [
+        "USMCA",
+        "WTO"
+      ],
+      "risk_factors": [
+        "USMCA benefits",
+        "Nearshoring trend",
+        "Low tariff rates"
+      ],
+      "created_at": "2025-07-30T15:29:18.25967"
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "region": "North America",
+      "trade_agreements": [
+        "USMCA",
+        "WTO"
+      ],
+      "risk_factors": [
+        "Destination country",
+        "Regulatory complexity: High"
+      ],
+      "created_at": "2025-07-30T15:29:18.25967"
+    },
+    {
+      "code": "CA",
+      "name": "Canada",
+      "region": "North America",
+      "trade_agreements": [
+        "USMCA"
+      ],
+      "risk_factors": [
+        "Zero tariffs under USMCA",
+        "Stable partner"
+      ],
+      "created_at": "2025-07-30T15:43:37.637843"
+    },
+    {
+      "code": "BR",
+      "name": "Brazil",
+      "region": "South America",
+      "trade_agreements": [
+        "Mercosur"
+      ],
+      "risk_factors": [
+        "295M consumer market",
+        "Complex import process"
+      ],
+      "created_at": "2025-07-30T15:43:37.637843"
+    },
+    {
+      "code": "CO",
+      "name": "Colombia",
+      "region": "South America",
+      "trade_agreements": [
+        "US-Colombia TPA"
+      ],
+      "risk_factors": [
+        "Preferential tariffs",
+        "Growing economy"
+      ],
+      "created_at": "2025-07-30T15:43:37.637843"
+    },
+    {
+      "code": "CL",
+      "name": "Chile",
+      "region": "South America",
+      "trade_agreements": [
+        "US-Chile FTA"
+      ],
+      "risk_factors": [
+        "Zero tariffs many products",
+        "Pacific access"
+      ],
+      "created_at": "2025-07-30T15:43:37.637843"
+    },
+    {
+      "code": "GT",
+      "name": "Guatemala",
+      "region": "Central America",
+      "trade_agreements": [
+        "CAFTA-DR",
+        "WTO"
+      ],
+      "risk_factors": [
+        "Textile manufacturing hub",
+        "Central America gateway"
+      ],
+      "created_at": "2025-07-30T15:46:13.068103"
+    },
+    {
+      "code": "CR",
+      "name": "Costa Rica",
+      "region": "Central America",
+      "trade_agreements": [
+        "CAFTA-DR",
+        "WTO"
+      ],
+      "risk_factors": [
+        "Electronics assembly",
+        "Stable democracy",
+        "High-tech manufacturing"
+      ],
+      "created_at": "2025-07-30T15:46:13.068103"
+    },
+    {
+      "code": "PA",
+      "name": "Panama",
+      "region": "Central America",
+      "trade_agreements": [
+        "CAFTA-DR",
+        "WTO"
+      ],
+      "risk_factors": [
+        "Logistics hub",
+        "Canal access",
+        "Financial center"
+      ],
+      "created_at": "2025-07-30T15:46:13.068103"
+    },
+    {
+      "code": "AR",
+      "name": "Argentina",
+      "region": "South America",
+      "trade_agreements": [
+        "Mercosur",
+        "WTO"
+      ],
+      "risk_factors": [
+        "Large consumer market",
+        "Agricultural powerhouse",
+        "Currency volatility"
+      ],
+      "created_at": "2025-07-30T15:46:13.068103"
+    },
+    {
+      "code": "PE",
+      "name": "Peru",
+      "region": "South America",
+      "trade_agreements": [
+        "Pacific Alliance",
+        "US-Peru TPA"
+      ],
+      "risk_factors": [
+        "Mining exports",
+        "Textile manufacturing",
+        "Growing middle class"
+      ],
+      "created_at": "2025-07-30T15:46:13.068103"
+    },
+    {
+      "code": "KR",
+      "name": "South Korea",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:34.364023"
+    },
+    {
+      "code": "IN",
+      "name": "India",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:34.50301"
+    },
+    {
+      "code": "TH",
+      "name": "Thailand",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:34.626185"
+    },
+    {
+      "code": "MY",
+      "name": "Malaysia",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:34.75151"
+    },
+    {
+      "code": "ID",
+      "name": "Indonesia",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:47.89301"
+    },
+    {
+      "code": "PH",
+      "name": "Philippines",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:48.017864"
+    },
+    {
+      "code": "BD",
+      "name": "Bangladesh",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:48.123446"
+    },
+    {
+      "code": "SG",
+      "name": "Singapore",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T12:56:48.226702"
+    },
+    {
+      "code": "JP",
+      "name": "Japan",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:47:15.860088"
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.061448"
+    },
+    {
+      "code": "NL",
+      "name": "Netherlands",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.207493"
+    },
+    {
+      "code": "GB",
+      "name": "United Kingdom",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.344418"
+    },
+    {
+      "code": "IT",
+      "name": "Italy",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.48346"
+    },
+    {
+      "code": "PL",
+      "name": "Poland",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.611127"
+    },
+    {
+      "code": "TR",
+      "name": "Turkey",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.729932"
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.838874"
+    },
+    {
+      "code": "AE",
+      "name": "United Arab Emirates",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:49.960344"
+    },
+    {
+      "code": "ZA",
+      "name": "South Africa",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.075365"
+    },
+    {
+      "code": "EG",
+      "name": "Egypt",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.210726"
+    },
+    {
+      "code": "AU",
+      "name": "Australia",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.334073"
+    },
+    {
+      "code": "NZ",
+      "name": "New Zealand",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.461652"
+    },
+    {
+      "code": "CZ",
+      "name": "Czech Republic",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.587516"
+    },
+    {
+      "code": "HU",
+      "name": "Hungary",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.713219"
+    },
+    {
+      "code": "EC",
+      "name": "Ecuador",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.828669"
+    },
+    {
+      "code": "UY",
+      "name": "Uruguay",
+      "region": null,
+      "trade_agreements": null,
+      "risk_factors": null,
+      "created_at": "2025-08-13T13:48:50.943508"
+    }
+  ]
+}

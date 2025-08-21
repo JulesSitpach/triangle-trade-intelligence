@@ -1,9 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js';
+import { logInfo, logError, logDBQuery, logBusiness } from '../../../lib/production-logger';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = getServerSupabaseClient();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -37,7 +35,10 @@ export default async function handler(req, res) {
     const { data: partners, error } = await query;
 
     if (error) {
-      console.error('Database error:', error);
+      logError('Database error in partnerships match', {
+        errorType: error.name,
+        message: error.message
+      });
       // Return mock data if database is not set up yet
       return res.status(200).json({ 
         matches: getMockMatches(importerProfile),
@@ -115,7 +116,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Partnership matching error:', error);
+    logError('Partnership matching error', {
+      errorType: error.name,
+      message: error.message,
+      hasImporterProfile: !!req.body.importerProfile
+    });
     res.status(500).json({ 
       error: 'Failed to generate matches',
       matches: getMockMatches(req.body.importerProfile) 

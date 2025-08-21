@@ -1,0 +1,292 @@
+{
+  "table": "us_ports",
+  "exported_at": "2025-08-21T00:53:14.395Z",
+  "record_count": 15,
+  "data": [
+    {
+      "port_code": "USLAX",
+      "port_name": "Port of Los Angeles",
+      "city": "Los Angeles",
+      "state": "CA",
+      "region": "West Coast",
+      "specialties": [
+        "Electronics",
+        "Automotive",
+        "General cargo"
+      ],
+      "container_capacity": 9300000,
+      "avg_processing_days": 3,
+      "congestion_level": "High",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Limited",
+      "notes": "Largest US port by volume"
+    },
+    {
+      "port_code": "USLGB",
+      "port_name": "Port of Long Beach",
+      "city": "Long Beach",
+      "state": "CA",
+      "region": "West Coast",
+      "specialties": [
+        "Electronics",
+        "Textiles",
+        "Furniture"
+      ],
+      "container_capacity": 8100000,
+      "avg_processing_days": 4,
+      "congestion_level": "High",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Moderate",
+      "notes": "Major container port"
+    },
+    {
+      "port_code": "USOAK",
+      "port_name": "Port of Oakland",
+      "city": "Oakland",
+      "state": "CA",
+      "region": "West Coast",
+      "specialties": [
+        "Electronics",
+        "Food",
+        "Automotive"
+      ],
+      "container_capacity": 2500000,
+      "avg_processing_days": 2,
+      "congestion_level": "Medium",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Northern California gateway"
+    },
+    {
+      "port_code": "USSEA",
+      "port_name": "Port of Seattle",
+      "city": "Seattle",
+      "state": "WA",
+      "region": "West Coast",
+      "specialties": [
+        "Electronics",
+        "Food",
+        "Machinery"
+      ],
+      "container_capacity": 3600000,
+      "avg_processing_days": 2,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Pacific Northwest hub"
+    },
+    {
+      "port_code": "USNYC",
+      "port_name": "Port of New York/New Jersey",
+      "city": "New York",
+      "state": "NY",
+      "region": "East Coast",
+      "specialties": [
+        "Electronics",
+        "Textiles",
+        "Food"
+      ],
+      "container_capacity": 7400000,
+      "avg_processing_days": 2,
+      "congestion_level": "Medium",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Largest East Coast port"
+    },
+    {
+      "port_code": "USSAV",
+      "port_name": "Port of Savannah",
+      "city": "Savannah",
+      "state": "GA",
+      "region": "East Coast",
+      "specialties": [
+        "Automotive",
+        "Electronics",
+        "Textiles"
+      ],
+      "container_capacity": 4500000,
+      "avg_processing_days": 1,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Excellent",
+      "notes": "Fastest growing port"
+    },
+    {
+      "port_code": "USMIA",
+      "port_name": "Port of Miami",
+      "city": "Miami",
+      "state": "FL",
+      "region": "East Coast",
+      "specialties": [
+        "Food",
+        "Electronics",
+        "Textiles"
+      ],
+      "container_capacity": 1200000,
+      "avg_processing_days": 2,
+      "congestion_level": "Medium",
+      "rail_connections": false,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Latin America gateway"
+    },
+    {
+      "port_code": "USHOU",
+      "port_name": "Port of Houston",
+      "city": "Houston",
+      "state": "TX",
+      "region": "Gulf Coast",
+      "specialties": [
+        "Chemicals",
+        "Food",
+        "Machinery"
+      ],
+      "container_capacity": 2800000,
+      "avg_processing_days": 3,
+      "congestion_level": "Medium",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Excellent",
+      "notes": "Largest Gulf port"
+    },
+    {
+      "port_code": "USNOL",
+      "port_name": "Port of New Orleans",
+      "city": "New Orleans",
+      "state": "LA",
+      "region": "Gulf Coast",
+      "specialties": [
+        "Food",
+        "Chemicals",
+        "Steel"
+      ],
+      "container_capacity": 600000,
+      "avg_processing_days": 2,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Mississippi River access"
+    },
+    {
+      "port_code": "USDET",
+      "port_name": "Port of Detroit",
+      "city": "Detroit",
+      "state": "MI",
+      "region": "Great Lakes",
+      "specialties": [
+        "Automotive",
+        "Steel",
+        "Machinery"
+      ],
+      "container_capacity": 200000,
+      "avg_processing_days": 1,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "USMCA automotive hub"
+    },
+    {
+      "port_code": "CAMON",
+      "port_name": "Port of Montreal",
+      "city": "Montreal",
+      "state": "QC",
+      "region": "Canada East",
+      "specialties": [
+        "Manufacturing",
+        "Textiles",
+        "Electronics"
+      ],
+      "container_capacity": 1800000,
+      "avg_processing_days": 2,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Excellent",
+      "notes": "St. Lawrence Seaway access, USMCA processing center"
+    },
+    {
+      "port_code": "CAVAN",
+      "port_name": "Port of Vancouver",
+      "city": "Vancouver",
+      "state": "BC",
+      "region": "Canada West",
+      "specialties": [
+        "Electronics",
+        "Automotive",
+        "Forest products"
+      ],
+      "container_capacity": 3500000,
+      "avg_processing_days": 2,
+      "congestion_level": "Medium",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Gateway to Asia, USMCA triangle hub"
+    },
+    {
+      "port_code": "MXTIJ",
+      "port_name": "Port of Ensenada (Tijuana)",
+      "city": "Tijuana",
+      "state": "MX",
+      "region": "Mexico Pacific",
+      "specialties": [
+        "Electronics",
+        "Maquiladora",
+        "Cross-border"
+      ],
+      "container_capacity": 800000,
+      "avg_processing_days": 2,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Excellent",
+      "notes": "US-Mexico border hub, electronics assembly"
+    },
+    {
+      "port_code": "MXMAN",
+      "port_name": "Port of Manzanillo",
+      "city": "Manzanillo",
+      "state": "MX",
+      "region": "Mexico Pacific",
+      "specialties": [
+        "Electronics",
+        "Automotive",
+        "Manufacturing"
+      ],
+      "container_capacity": 3200000,
+      "avg_processing_days": 3,
+      "congestion_level": "Medium",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Mexico largest Pacific port, USMCA hub"
+    },
+    {
+      "port_code": "MXVER",
+      "port_name": "Port of Veracruz",
+      "city": "Veracruz",
+      "state": "MX",
+      "region": "Mexico Gulf",
+      "specialties": [
+        "Manufacturing",
+        "Automotive",
+        "Chemicals"
+      ],
+      "container_capacity": 1200000,
+      "avg_processing_days": 4,
+      "congestion_level": "Low",
+      "rail_connections": true,
+      "truck_connections": true,
+      "warehouse_availability": "Good",
+      "notes": "Gulf gateway, USMCA triangle route"
+    }
+  ]
+}

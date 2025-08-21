@@ -5,7 +5,7 @@
 
 import { universalCache } from '../../lib/utils/memory-cache-fallback.js'
 import { queryOptimizer } from '../../lib/database/query-optimizer.js'
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logger, logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js'
 
 export default async function handler(req, res) {
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const dbStartTime = Date.now()
     
     try {
-      const supabase = getSupabaseClient()
+      const supabase = getServerSupabaseClient()
       const { data: dbTest, error: dbError } = await supabase
         .from('countries')
         .select('*')

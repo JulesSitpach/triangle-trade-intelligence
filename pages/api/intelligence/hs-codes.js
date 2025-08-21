@@ -3,12 +3,9 @@
 
 import { logInfo, logError, logAPICall } from '../../../lib/production-logger'
 import { fastHSClassifier } from '../../../lib/fast-hs-classifier.js'
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   const startTime = Date.now()
@@ -35,7 +32,10 @@ export default async function handler(req, res) {
       })
     }
 
-    console.log(`🚀 FAST HS CLASSIFICATION: "${productDescription}" (${businessType})`)
+    logInfo('FAST HS CLASSIFICATION initiated', {
+      productDescriptionLength: productDescription.length,
+      businessType: businessType?.trim() || 'unspecified'
+    })
     
     // Use Fast HS Classifier - eliminates database timeouts and terrible fallbacks
     const suggestions = await fastHSClassifier.classifyProduct(
@@ -43,11 +43,14 @@ export default async function handler(req, res) {
       businessType?.trim() || ''
     )
     
-    console.log(`✅ CLASSIFICATION SUCCESS: Found ${suggestions.length} matches`)
-    if (suggestions.length > 0) {
-      console.log(`🎯 Top match: ${suggestions[0].code} - ${suggestions[0].description} (${suggestions[0].confidence}%)`)
-      console.log(`📊 Source: ${suggestions[0].source}`)
-    }
+    logInfo('CLASSIFICATION SUCCESS', {
+      matchesFound: suggestions.length,
+      topMatch: suggestions.length > 0 ? {
+        code: suggestions[0].code,
+        confidence: suggestions[0].confidence,
+        source: suggestions[0].source
+      } : null
+    })
 
     const duration = Date.now() - startTime
     logAPICall('POST', '/api/intelligence/hs-codes', duration, '200')
@@ -92,11 +95,11 @@ async function handleLearning(req, res) {
   try {
     const learningData = req.body
     
-    console.log('🧠 LEARNING: Recording HS code selection:', {
-      product: learningData.productDescription?.substring(0, 50),
+    logInfo('LEARNING: Recording HS code selection', {
+      productDescriptionLength: learningData.productDescription?.length || 0,
       hsCode: learningData.selectedHSCode,
       businessType: learningData.businessType,
-      company: learningData.companyName
+      hasCompanyName: !!learningData.companyName
     })
 
     // Store in Supabase database for institutional learning
@@ -115,7 +118,10 @@ async function handleLearning(req, res) {
       .select()
 
     if (error) {
-      console.warn('Database learning failed:', error.message)
+      logError('Database learning failed', {
+        errorType: error.name,
+        message: error.message
+      })
       return res.status(200).json({
         success: true,
         message: 'Learning recorded (file fallback)',
@@ -123,7 +129,9 @@ async function handleLearning(req, res) {
       })
     }
 
-    console.log('✅ Learning data stored in database successfully')
+    logInfo('Learning data stored in database successfully', {
+      learningId: data[0]?.id
+    })
     return res.status(200).json({
       success: true,
       message: 'HS code selection recorded for institutional learning',
@@ -132,7 +140,10 @@ async function handleLearning(req, res) {
     })
 
   } catch (error) {
-    console.error('❌ LEARNING ERROR:', error)
+    logError('LEARNING ERROR', {
+      errorType: error.name,
+      message: error.message
+    })
     return res.status(500).json({
       success: false,
       error: 'Failed to record learning data',

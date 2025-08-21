@@ -5,16 +5,14 @@
  * Supports: leads retrieval, lead claiming, marketplace qualification, USMCA calculations
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import CanadaMexicoAdvantageCalculator from '../../lib/canada-mexico-advantage-calculator.js'
 import LeadQualificationSystem from '../../lib/lead-qualification-system.js'
 import PredictiveAlertsNetworkIntelligence from '../../lib/intelligence/predictive-alerts-network-intelligence.js'
+import { logInfo, logError, logDBQuery, logBusiness } from '../../lib/production-logger.js'
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mrwitpgbcaxgnirqtavt.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yd2l0cGdiY2F4Z25pcnF0YXZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4MjUxMzQsImV4cCI6MjA2NTQwMTEzNH0.5g-eaUIwy4VQD2YfNC2sFNoZYF1HdUzVTNJZvtuVSI8'
-)
+const supabase = getServerSupabaseClient()
 
 class SpecialistLeadEngine {
   constructor() {
@@ -47,7 +45,10 @@ class SpecialistLeadEngine {
         .limit(20)
 
       if (error) {
-        console.warn('Database query failed:', error)
+        logError('Database query failed for qualified leads', {
+          errorType: error.name,
+          message: error.message
+        })
         return this.getDemoLeads()
       }
 
@@ -72,7 +73,10 @@ class SpecialistLeadEngine {
       }
 
     } catch (error) {
-      console.error('Failed to get qualified leads:', error)
+      logError('Failed to get qualified leads', {
+        errorType: error.name,
+        message: error.message
+      })
       return this.getDemoLeads()
     }
   }
@@ -451,9 +455,8 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Missing user data' })
           }
           
-          console.log('💰 SPECIALIST MARKETPLACE: Processing request')
-          console.log(`🎯 Request Type: ${requestType}`)
-          console.log('📊 Company Profile:', { 
+          logInfo('SPECIALIST MARKETPLACE: Processing request', {
+            requestType,
             businessType: userData.businessType,
             importVolume: userData.importVolume,
             supplierCountry: userData.primarySupplierCountry
@@ -472,8 +475,12 @@ export default async function handler(req, res) {
           // 2. Qualify the lead for specialist opportunities
           const qualification = LeadQualificationSystem.qualifyLead(userData, usmcaResults.advantage)
           
-          console.log(`💎 LEAD QUALIFIED: Score ${qualification.leadScore}/100`)
-          console.log(`💰 SPECIALIST FEE POTENTIAL: $${qualification.specialistFeeEstimate.toLocaleString()}`)
+          logBusiness('Lead qualified for specialist marketplace', {
+            leadScore: qualification.leadScore,
+            specialistFeeEstimate: qualification.specialistFeeEstimate,
+            tier: qualification.tier,
+            isQualified: qualification.isQualified
+          })
           
           // 3. Generate predictive intelligence if requested
           let predictiveIntelligence = null
@@ -510,7 +517,11 @@ export default async function handler(req, res) {
         })
     }
   } catch (error) {
-    console.error('API Error:', error)
+    logError('API Error in specialist-leads', {
+      errorType: error.name,
+      message: error.message,
+      stack: error.stack
+    })
     return res.status(500).json({
       success: false,
       error: 'Internal server error',

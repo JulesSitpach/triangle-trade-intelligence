@@ -1,8 +1,8 @@
 // Test actual database structure and demonstrate volatile/stable concept
-import { getSupabaseClient } from '../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../lib/supabase-client'
 import { logInfo, logError, logDBQuery } from '../../lib/production-logger'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   const startTime = Date.now()

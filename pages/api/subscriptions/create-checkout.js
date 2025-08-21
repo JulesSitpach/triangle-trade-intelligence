@@ -1,5 +1,6 @@
 import { stripe, SUBSCRIPTION_TIERS } from '../../../lib/stripe'
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
+import { logInfo, logError, logDBQuery, logBusiness } from '../../../lib/production-logger'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
     }
 
     const tierConfig = SUBSCRIPTION_TIERS[tier]
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
 
     // Create or get Stripe customer
     let customer
@@ -38,7 +39,10 @@ export default async function handler(req, res) {
         })
       }
     } catch (error) {
-      console.error('Error managing Stripe customer:', error)
+      logError('Error managing Stripe customer', {
+        errorType: error.name,
+        message: error.message
+      })
       return res.status(500).json({ error: 'Failed to create customer' })
     }
 
@@ -84,7 +88,11 @@ export default async function handler(req, res) {
           }
         })
       } catch (dbError) {
-        console.error('Failed to log checkout session:', dbError)
+        logError('Failed to log checkout session', {
+          errorType: dbError.name,
+          message: dbError.message,
+          userId
+        })
         // Don't fail the request for logging errors
       }
     }
@@ -96,7 +104,12 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Create checkout session error:', error)
+    logError('Create checkout session error', {
+      errorType: error.name,
+      message: error.message,
+      tier,
+      hasUserId: !!userId
+    })
     res.status(500).json({ 
       error: 'Failed to create checkout session',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined

@@ -1,6 +1,9 @@
 {
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/api/database-structure-test": "pages/api/database-structure-test.js"
+  "/_error": "pages/_error.js",
+  "/_app": "pages/_app.js",
+  "/api/status": "pages/api/status.js",
+  "/api/intelligence/hs-codes": "pages/api/intelligence/hs-codes.js",
+  "/api/database-structure-test": "pages/api/database-structure-test.js",
+  "/api/intelligence/routing": "pages/api/intelligence/routing.js"
 }

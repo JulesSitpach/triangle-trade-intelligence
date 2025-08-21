@@ -3,7 +3,7 @@
  * Simple demonstration of batch query optimization
  */
 
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js'
 
 export default async function handler(req, res) {
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     logInfo('Testing batch query optimization')
     
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
     const businessTypes = ['Electronics', 'Automotive', 'Textiles']
     
     // N+1 Query Approach (BAD)

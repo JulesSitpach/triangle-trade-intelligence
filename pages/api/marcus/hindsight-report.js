@@ -1,10 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../../lib/supabase-client.js'
 import Anthropic from '@anthropic-ai/sdk'
+import { logInfo, logError, logAPICall, logBusiness } from '../../../lib/production-logger'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 const anthropic = process.env.ANTHROPIC_API_KEY 
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -110,7 +108,13 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Hindsight report error:', error)
+    logError('Hindsight report error', {
+      errorType: error.name,
+      message: error.message,
+      hasFoundationData: !!foundationData,
+      hasProductData: !!productData,
+      hasRoutingData: !!routingData
+    })
     return res.status(500).json({ 
       error: 'Failed to generate hindsight report',
       details: error.message 
@@ -222,7 +226,10 @@ Keep it under 300 words, conversational tone, no bullet points or formal section
       generatedAt: new Date().toISOString()
     }
   } catch (error) {
-    console.error('Marcus AI error:', error)
+    logError('Marcus AI error', {
+      errorType: error.name,
+      message: error.message
+    })
     return {
       recommendations: generateFallbackReport(foundationData, productData, routingData, metrics),
       confidence: metrics.overallConfidence,

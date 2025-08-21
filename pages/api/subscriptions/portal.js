@@ -1,5 +1,5 @@
 import { stripe } from '../../../lib/stripe'
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'User ID is required' })
     }
 
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
 
     // Get user's subscription to find customer ID
     const { data: subscription, error } = await supabase

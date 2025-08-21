@@ -3,12 +3,10 @@
  * Real-time question pattern analysis and business intelligence
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
+import { logInfo, logError, logDBQuery, logPerformance } from '../../lib/production-logger.js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -16,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('📊 Generating Marcus Intelligence Dashboard...')
+    logInfo('Generating Marcus Intelligence Dashboard')
     
     const dashboard = await generateIntelligenceDashboard()
     
@@ -27,7 +25,10 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Marcus dashboard error:', error)
+    logError('Marcus dashboard error', {
+      errorType: error.name,
+      message: error.message
+    })
     return res.status(500).json({ 
       error: 'Failed to generate intelligence dashboard',
       success: false

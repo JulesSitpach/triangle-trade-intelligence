@@ -4,7 +4,7 @@
  */
 
 import { BatchQueryOptimizer } from '../../lib/database/batch-query-optimizer.js'
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js'
 
 export default async function handler(req, res) {
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
  */
 async function demonstrateN1Queries(profiles) {
   const startTime = Date.now()
-  const supabase = getSupabaseClient()
+  const supabase = getServerSupabaseClient()
   let queryCount = 0
   const results = []
   

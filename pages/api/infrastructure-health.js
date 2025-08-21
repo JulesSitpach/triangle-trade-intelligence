@@ -3,7 +3,7 @@
  * Real-time comprehensive system health dashboard
  */
 
-import { getSupabaseClient, getConnectionStats } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient, getConnectionStats } from '../../lib/supabase-client.js'
 import { checkRedisHealth } from '../../lib/redis-client.js'
 import { RSSTrigger } from '../../lib/background-services/rss-comtrade-trigger.js'
 import { logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js'
@@ -113,7 +113,7 @@ async function checkDatabaseHealth() {
   const startTime = Date.now()
   
   try {
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
     
     // Test basic connectivity
     const { data: testData, error: testError } = await supabase
@@ -233,7 +233,7 @@ async function checkPerformanceMetrics() {
   const startTime = Date.now()
   
   try {
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
     
     // Test query performance on critical tables
     const queryStartTime = Date.now()
@@ -283,7 +283,7 @@ async function checkPerformanceMetrics() {
  */
 async function checkDataQualityMetrics() {
   try {
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
     
     // Check for data freshness and completeness
     const [

@@ -1,6 +1,7 @@
 import { stripe } from '../../../lib/stripe'
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 import { buffer } from 'micro'
+import { logInfo, logError, logDBQuery, logSecurity } from '../../../lib/production-logger'
 
 // Disable Next.js body parsing for webhooks
 export const config = {
@@ -18,7 +19,7 @@ export default async function handler(req, res) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
   if (!webhookSecret) {
-    console.error('Missing STRIPE_WEBHOOK_SECRET environment variable')
+    logError('Missing STRIPE_WEBHOOK_SECRET environment variable')
     return res.status(500).json({ error: 'Webhook secret not configured' })
   }
 
@@ -29,11 +30,13 @@ export default async function handler(req, res) {
     rawBody = await buffer(req)
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err.message)
+    logSecurity('Webhook signature verification failed', {
+      errorMessage: err.message
+    })
     return res.status(400).json({ error: `Webhook Error: ${err.message}` })
   }
 
-  const supabase = getSupabaseClient()
+  const supabase = getServerSupabaseClient()
 
   try {
     // Log the event
@@ -68,7 +71,10 @@ export default async function handler(req, res) {
         break
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+        logInfo('Unhandled webhook event type', {
+          eventType: event.type,
+          eventId: event.id
+        })
     }
 
     // Mark event as processed
@@ -83,7 +89,12 @@ export default async function handler(req, res) {
     res.status(200).json({ received: true })
 
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    logError('Webhook processing error', {
+      errorType: error.name,
+      message: error.message,
+      eventType: event.type,
+      eventId: event.id
+    })
     
     // Log error in database
     await supabase
@@ -99,7 +110,10 @@ export default async function handler(req, res) {
 
   // Helper functions for handling different events
   async function handleCheckoutSessionCompleted(session) {
-    console.log('Checkout session completed:', session.id)
+    logInfo('Checkout session completed', {
+      sessionId: session.id,
+      mode: session.mode
+    })
     
     if (session.mode === 'subscription') {
       // Get the subscription
@@ -109,11 +123,16 @@ export default async function handler(req, res) {
   }
 
   async function handleSubscriptionChange(subscription) {
-    console.log('Subscription change:', subscription.id)
+    logInfo('Subscription change processed', {
+      subscriptionId: subscription.id,
+      status: subscription.status
+    })
     
     const userId = subscription.metadata.userId
     if (!userId || userId === 'anonymous') {
-      console.error('No user ID in subscription metadata')
+      logError('No user ID in subscription metadata', {
+        subscriptionId: subscription.id
+      })
       return
     }
 
@@ -146,7 +165,11 @@ export default async function handler(req, res) {
       })
 
     if (error) {
-      console.error('Failed to upsert subscription:', error)
+      logError('Failed to upsert subscription', {
+        errorType: error.name,
+        message: error.message,
+        subscriptionId: subscription.id
+      })
       throw error
     }
 
@@ -155,7 +178,9 @@ export default async function handler(req, res) {
   }
 
   async function handleSubscriptionDeleted(subscription) {
-    console.log('Subscription deleted:', subscription.id)
+    logInfo('Subscription deleted', {
+      subscriptionId: subscription.id
+    })
     
     const { error } = await supabase
       .from('subscriptions')
@@ -167,13 +192,20 @@ export default async function handler(req, res) {
       .eq('stripe_subscription_id', subscription.id)
 
     if (error) {
-      console.error('Failed to update deleted subscription:', error)
+      logError('Failed to update deleted subscription', {
+        errorType: error.name,
+        message: error.message,
+        subscriptionId: subscription.id
+      })
       throw error
     }
   }
 
   async function handlePaymentSucceeded(invoice) {
-    console.log('Payment succeeded:', invoice.id)
+    logInfo('Payment succeeded', {
+      invoiceId: invoice.id,
+      hasSubscription: !!invoice.subscription
+    })
     
     if (invoice.subscription) {
       // Ensure subscription is active
@@ -186,13 +218,20 @@ export default async function handler(req, res) {
         .eq('stripe_subscription_id', invoice.subscription)
 
       if (error) {
-        console.error('Failed to activate subscription after payment:', error)
+        logError('Failed to activate subscription after payment', {
+          errorType: error.name,
+          message: error.message,
+          invoiceId: invoice.id
+        })
       }
     }
   }
 
   async function handlePaymentFailed(invoice) {
-    console.log('Payment failed:', invoice.id)
+    logInfo('Payment failed', {
+      invoiceId: invoice.id,
+      hasSubscription: !!invoice.subscription
+    })
     
     if (invoice.subscription) {
       // Mark subscription as past_due
@@ -205,7 +244,11 @@ export default async function handler(req, res) {
         .eq('stripe_subscription_id', invoice.subscription)
 
       if (error) {
-        console.error('Failed to mark subscription past due:', error)
+        logError('Failed to mark subscription past due', {
+          errorType: error.name,
+          message: error.message,
+          invoiceId: invoice.id
+        })
       }
     }
   }
@@ -229,7 +272,11 @@ export default async function handler(req, res) {
       })
 
     if (error) {
-      console.error('Failed to initialize usage tracking:', error)
+      logError('Failed to initialize usage tracking', {
+        errorType: error.name,
+        message: error.message,
+        userId
+      })
     }
   }
 }

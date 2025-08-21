@@ -5,9 +5,9 @@
  */
 
 import { logInfo, logError, logDBQuery, logAPICall, logPerformance } from '../../lib/production-logger'
-import { getSupabaseClient } from '../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../lib/supabase-client'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   const startTime = Date.now()

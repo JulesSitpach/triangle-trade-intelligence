@@ -3,11 +3,11 @@
  * Uses database intelligence bridge for real-time intelligence derivation
  */
 
-import { getSupabaseClient } from '../../../lib/supabase-client'
+import { getServerSupabaseClient } from '../../../lib/supabase-client'
 import { StableDataManager, VolatileDataManager } from '../../../lib/intelligence/database-intelligence-bridge'
 import { USMCAPostalIntelligence } from '../../../lib/intelligence/usmca-postal-intelligence'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

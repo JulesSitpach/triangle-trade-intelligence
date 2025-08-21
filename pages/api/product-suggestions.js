@@ -3,9 +3,9 @@
  * Returns database-driven product suggestions for business types
  */
 
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

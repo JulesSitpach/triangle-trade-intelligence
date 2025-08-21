@@ -3,12 +3,10 @@
  * Comprehensive Q&A using all database tables
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
+import { logInfo, logError, logDBQuery } from '../../lib/production-logger.js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -22,7 +20,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('🧠 Marcus Intelligence Chat:', question, 'Language:', language)
+    logInfo('Marcus Intelligence Chat initiated', { 
+      questionType: categorizeQuestion(question), 
+      language, 
+      sessionId 
+    })
     
     // Track question patterns for intelligence gathering
     await trackQuestionPattern(question, sessionId)
@@ -42,7 +44,11 @@ export default async function handler(req, res) {
     })
 
   } catch (error) {
-    console.error('Marcus chat error:', error)
+    logError('Marcus chat error', { 
+      errorType: error.name, 
+      message: error.message,
+      stack: error.stack 
+    })
     return res.status(500).json({ 
       error: 'Sorry, I encountered an error. Please try again.',
       success: false
@@ -469,7 +475,10 @@ async function tryExternalHSCodeLookup(question, productKeywords) {
             })
         } catch (dbError) {
           // Silent fail - don't break response if database insert fails
-          console.error('Failed to cache HS code in database:', dbError)
+          logError('Failed to cache HS code in database', { 
+            errorType: dbError.name, 
+            message: dbError.message 
+          })
         }
         
         return {
@@ -480,7 +489,10 @@ async function tryExternalHSCodeLookup(question, productKeywords) {
       }
     }
   } catch (error) {
-    console.error('External HS code lookup failed:', error)
+    logError('External HS code lookup failed', { 
+      errorType: error.name, 
+      message: error.message 
+    })
   }
   
   return null
@@ -559,7 +571,10 @@ async function translateResponse(response, language) {
       // Future enhancement: Use Claude API for translation
       return `${languageInstruction} ${response}`
     } catch (error) {
-      console.error('Translation error:', error)
+      logError('Translation error', { 
+        errorType: error.name, 
+        language 
+      })
       return `${languageInstruction} ${response}`
     }
   }
@@ -585,9 +600,15 @@ async function trackQuestionPattern(question, sessionId) {
       .from('marcus_question_patterns')
       .insert(questionData)
 
-    console.log('📊 Question pattern tracked:', questionData.question_type)
+    logInfo('Question pattern tracked', { 
+      questionType: questionData.question_type, 
+      sessionId: questionData.session_id 
+    })
   } catch (error) {
-    console.error('Failed to track question pattern:', error)
+    logError('Failed to track question pattern', { 
+      errorType: error.name, 
+      message: error.message 
+    })
     // Don't fail the main request if tracking fails
   }
 }
@@ -746,7 +767,10 @@ async function gatherIntelligenceInsights(questionType, originalQuestion) {
       totalQuestions: recentPatterns.length
     }
   } catch (error) {
-    console.error('Failed to gather intelligence insights:', error)
+    logError('Failed to gather intelligence insights', { 
+      errorType: error.name, 
+      message: error.message 
+    })
     return null
   }
 }

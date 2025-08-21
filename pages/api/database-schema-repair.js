@@ -3,7 +3,7 @@
  * Fixes Priority 3 issues: missing tables and columns
  */
 
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logInfo, logError, logDBQuery } from '../../lib/production-logger.js'
 
 export default async function handler(req, res) {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   try {
     logInfo('DATABASE SCHEMA REPAIR: Starting schema fixes')
 
-    const supabase = getSupabaseClient()
+    const supabase = getServerSupabaseClient()
     
     const results = []
     let successCount = 0

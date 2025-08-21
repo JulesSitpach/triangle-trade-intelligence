@@ -1,0 +1,158 @@
+{
+  "table": "trade_routes",
+  "exported_at": "2025-08-21T00:53:14.696Z",
+  "record_count": 8,
+  "data": [
+    {
+      "id": 1,
+      "origin_country": "CN",
+      "destination_country": "US",
+      "major_ports": {
+        "origin": [
+          "Shanghai",
+          "Shenzhen"
+        ],
+        "destination": [
+          "Los Angeles",
+          "Long Beach"
+        ]
+      },
+      "trade_agreements": {
+        "status": "trade_war_active",
+        "current_tariffs": "7.5-25%"
+      },
+      "typical_transit_days": 14,
+      "created_at": "2025-07-30T13:19:49.468341"
+    },
+    {
+      "id": 2,
+      "origin_country": "VN",
+      "destination_country": "US",
+      "major_ports": {
+        "origin": [
+          "Ho Chi Minh",
+          "Hanoi"
+        ],
+        "destination": [
+          "Los Angeles",
+          "Long Beach"
+        ]
+      },
+      "trade_agreements": {
+        "status": "preferred",
+        "current_tariffs": "0-15%"
+      },
+      "typical_transit_days": 18,
+      "created_at": "2025-07-30T13:19:49.468341"
+    },
+    {
+      "id": 3,
+      "origin_country": "MX",
+      "destination_country": "US",
+      "major_ports": {
+        "origin": [
+          "Veracruz",
+          "Lazaro Cardenas"
+        ],
+        "destination": [
+          "Los Angeles",
+          "Houston"
+        ]
+      },
+      "trade_agreements": {
+        "status": "usmca_preferred",
+        "current_tariffs": "0-5%"
+      },
+      "typical_transit_days": 7,
+      "created_at": "2025-07-30T13:19:49.468341"
+    },
+    {
+      "id": 4,
+      "origin_country": "CA",
+      "destination_country": "US",
+      "major_ports": [
+        "Detroit-USDET",
+        "Buffalo-USBUF",
+        "Blaine-USBLI"
+      ],
+      "trade_agreements": [
+        "USMCA - Zero tariffs"
+      ],
+      "typical_transit_days": 1,
+      "created_at": "2025-07-30T15:47:05.239113"
+    },
+    {
+      "id": 5,
+      "origin_country": "BR",
+      "destination_country": "US",
+      "major_ports": [
+        "Santos-BRSSZ",
+        "Miami-USMIA",
+        "Houston-USHOU",
+        "Savannah-USSAV"
+      ],
+      "trade_agreements": [
+        "WTO MFN rates"
+      ],
+      "typical_transit_days": 12,
+      "created_at": "2025-07-30T15:47:05.239113"
+    },
+    {
+      "id": 6,
+      "origin_country": "CO",
+      "destination_country": "US",
+      "major_ports": [
+        "Cartagena-COCTG",
+        "Miami-USMIA",
+        "Houston-USHOU"
+      ],
+      "trade_agreements": [
+        "US-Colombia TPA"
+      ],
+      "typical_transit_days": 8,
+      "created_at": "2025-07-30T15:47:05.239113"
+    },
+    {
+      "id": 7,
+      "origin_country": "CA",
+      "destination_country": "MX",
+      "major_ports": {
+        "origin": [
+          "Vancouver-CAVAN",
+          "Montreal-CAMTR"
+        ],
+        "destination": [
+          "Manzanillo-MXMNZ",
+          "Veracruz-MXVER"
+        ]
+      },
+      "trade_agreements": {
+        "status": "usmca_triangular",
+        "benefits": "Bypass US complications"
+      },
+      "typical_transit_days": 11,
+      "created_at": "2025-07-30T17:24:54.65077"
+    },
+    {
+      "id": 8,
+      "origin_country": "MX",
+      "destination_country": "CA",
+      "major_ports": {
+        "origin": [
+          "Manzanillo-MXMNZ",
+          "Veracruz-MXVER"
+        ],
+        "destination": [
+          "Vancouver-CAVAN",
+          "Montreal-CAMTR"
+        ]
+      },
+      "trade_agreements": {
+        "status": "usmca_triangular",
+        "benefits": "Access Canadian premium market"
+      },
+      "typical_transit_days": 12,
+      "created_at": "2025-07-30T17:24:54.65077"
+    }
+  ]
+}

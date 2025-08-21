@@ -5,10 +5,10 @@
  */
 
 import { universalCache } from '../../lib/utils/memory-cache-fallback.js'
-import { getSupabaseClient } from '../../lib/supabase-client.js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js'
 
-const supabase = getSupabaseClient()
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   const startTime = Date.now()

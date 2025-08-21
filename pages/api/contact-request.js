@@ -4,13 +4,10 @@
  * Integrates with Supabase for lead tracking and follow-up
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { getServerSupabaseClient } from '../../lib/supabase-client.js'
 import { logInfo, logError } from '../../lib/utils/production-logger'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+const supabase = getServerSupabaseClient()
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
