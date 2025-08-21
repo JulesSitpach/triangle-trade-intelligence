@@ -1,5 +1,6 @@
 import React from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import TriangleLayout from '../../components/TriangleLayout'
 
 export default function SubscriptionCanceled() {
@@ -57,7 +58,7 @@ export default function SubscriptionCanceled() {
                 <svg className="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4"></path>
                 </svg>
-                You'd like to explore the platform first with free features
+                You&apos;d like to explore the platform first with free features
               </li>
             </ul>
 
@@ -148,12 +149,12 @@ export default function SubscriptionCanceled() {
               <a href="mailto:support@triangleintelligence.com" className="text-blue-600 hover:text-blue-800">
                 Contact Support
               </a>
-              <a href="/foundation" className="text-blue-600 hover:text-blue-800">
+              <Link href="/foundation" className="text-blue-600 hover:text-blue-800">
                 Start Free Analysis
-              </a>
-              <a href="/" className="text-blue-600 hover:text-blue-800">
+              </Link>
+              <Link href="/" className="text-blue-600 hover:text-blue-800">
                 Back to Home
-              </a>
+              </Link>
             </div>
           </div>
 

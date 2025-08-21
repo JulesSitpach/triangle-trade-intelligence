@@ -670,13 +670,13 @@ export default function Partnership() {
                           <h4>{smartT("partnership.provensuccess")}</h4>
                           <div className="success-stories">
                             <div className="success-story">
-                              "Saved $2.1M in first year through Mexico route" - Electronics Manufacturer
+                              &quot;Saved $2.1M in first year through Mexico route&quot; - Electronics Manufacturer
                             </div>
                             <div className="success-story">
-                              "Canadian partnership reduced complexity by 70%" - Automotive Supplier
+                              &quot;Canadian partnership reduced complexity by 70%&quot; - Automotive Supplier
                             </div>
                             <div className="success-story">
-                              "Dual strategy provided ultimate supply chain resilience" - Medical Device Company
+                              &quot;Dual strategy provided ultimate supply chain resilience&quot; - Medical Device Company
                             </div>
                           </div>
                         </div>

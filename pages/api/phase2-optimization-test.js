@@ -314,7 +314,7 @@ function generateRecommendations(tests) {
       type: 'queries',
       priority: 'high', 
       message: 'Batch operations need optimization',
-      action: 'Enable NEXT_PUBLIC_USE_BATCH_OPERATIONS=true'
+      action: 'Enable NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true (includes batch operations)'
     })
   }
 
@@ -324,7 +324,7 @@ function generateRecommendations(tests) {
       type: 'caching',
       priority: 'medium',
       message: 'Cache effectiveness below optimal',
-      action: 'Enable NEXT_PUBLIC_USE_QUERY_CACHING=true'
+      action: 'Enable NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true (includes query caching)'
     })
   }
 

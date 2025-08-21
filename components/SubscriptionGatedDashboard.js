@@ -34,7 +34,7 @@ export function GatedAnalysisSection({ userId, children, usageType = 'monthlyAna
             </svg>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Analysis Limit Reached</h3>
             <p className="text-gray-600 mb-4">
-              You've reached your monthly analysis limit. Upgrade for unlimited access.
+              You&apos;ve reached your monthly analysis limit. Upgrade for unlimited access.
             </p>
             <button
               onClick={() => window.location.href = '/subscription'}

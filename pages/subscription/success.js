@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import TriangleLayout from '../../components/TriangleLayout'
 
 export default function SubscriptionSuccess() {
@@ -59,7 +60,7 @@ export default function SubscriptionSuccess() {
 
           {/* What's Next */}
           <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">What's Next?</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6">What&apos;s Next?</h2>
             
             <div className="space-y-6">
               <div className="flex items-start">
@@ -149,15 +150,15 @@ export default function SubscriptionSuccess() {
             </button>
             
             <div className="flex justify-center space-x-6 text-sm">
-              <a href="/subscription" className="text-blue-600 hover:text-blue-800">
+              <Link href="/subscription" className="text-blue-600 hover:text-blue-800">
                 Manage Subscription
-              </a>
+              </Link>
               <a href="mailto:support@triangleintelligence.com" className="text-blue-600 hover:text-blue-800">
                 Contact Support
               </a>
-              <a href="/foundation" className="text-blue-600 hover:text-blue-800">
+              <Link href="/foundation" className="text-blue-600 hover:text-blue-800">
                 Start Analysis
-              </a>
+              </Link>
             </div>
           </div>
 

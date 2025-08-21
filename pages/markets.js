@@ -148,7 +148,7 @@ export default function MarketsPage() {
           <section className="markets-hero">
             <h1 className="markets-title">USMCA Triangle Optimization</h1>
             <p className="markets-subtitle">
-              Maximize your trade efficiency across the world's most integrated trade bloc
+              Maximize your trade efficiency across the world&apos;s most integrated trade bloc
             </p>
             
             <div className="markets-overview">

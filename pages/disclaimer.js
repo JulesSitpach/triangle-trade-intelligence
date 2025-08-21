@@ -255,7 +255,7 @@ export default function Disclaimer() {
                   <strong>TO THE FULLEST EXTENT PERMITTED BY LAW:</strong>
                 </p>
                 <ul>
-                  <li>Triangle Intelligence Platform's total liability shall not exceed $100 USD</li>
+                  <li>Triangle Intelligence Platform&apos;s total liability shall not exceed $100 USD</li>
                   <li>We are not liable for indirect, consequential, or punitive damages</li>
                   <li>We are not responsible for business losses, lost profits, or opportunity costs</li>
                   <li>Users assume all risks associated with platform use and business decisions</li>

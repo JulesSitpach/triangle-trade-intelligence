@@ -231,7 +231,7 @@ export default function TestNavigation() {
               overflowY: 'auto'
             }}>
               {testResults.length === 0 ? (
-                <p style={{ color: '#64748b' }}>No test results yet. Click "Run Full Navigation Test" to begin.</p>
+                <p style={{ color: '#64748b' }}>No test results yet. Click &quot;Run Full Navigation Test&quot; to begin.</p>
               ) : (
                 testResults.map((result, index) => (
                   <div 
@@ -331,7 +331,7 @@ export default function TestNavigation() {
         <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#f1f5f9', borderRadius: '8px' }}>
           <h3>Manual Test Instructions:</h3>
           <ol>
-            <li>Click "Run Full Navigation Test" above</li>
+            <li>Click &quot;Run Full Navigation Test&quot; above</li>
             <li>Wait for all tests to complete</li>
             <li>Open Foundation page in new tab</li>
             <li>Verify form dropdowns load (may take a few seconds)</li>

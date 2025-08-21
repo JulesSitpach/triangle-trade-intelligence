@@ -5,6 +5,7 @@
  */
 
 import Head from 'next/head'
+import Link from 'next/link'
 import LegalFooter from '../components/LegalFooter'
 
 export default function TermsOfService() {
@@ -29,7 +30,7 @@ export default function TermsOfService() {
             <section className="terms-section">
               <h2>1. Acceptance of Terms</h2>
               <p>
-                By accessing and using the Triangle Intelligence Platform ("Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using the Triangle Intelligence Platform (&quot;Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
 
@@ -97,7 +98,7 @@ export default function TermsOfService() {
             <section className="terms-section">
               <h2>7. Privacy and Data Collection</h2>
               <p>
-                Your privacy is important to us. Please review our <a href="/privacy-policy">Privacy Policy</a>, which also governs your use of the Service, to understand our practices.
+                Your privacy is important to us. Please review our <Link href="/privacy-policy">Privacy Policy</Link>, which also governs your use of the Service, to understand our practices.
               </p>
             </section>
 

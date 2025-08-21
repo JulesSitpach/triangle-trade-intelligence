@@ -153,7 +153,7 @@ export default function ContactPage() {
         <div className="crisis-alert-banner">
           <div className="crisis-banner-content">
             <span className="crisis-badge">🚨 URGENT</span>
-            <span className="crisis-text">Trump threatens Canada trade deals - Get Mexico alternatives before it's too late</span>
+            <span className="crisis-text">Trump threatens Canada trade deals - Get Mexico alternatives before it&apos;s too late</span>
             <Link href="/partnership" className="crisis-action-btn">Emergency Partners →</Link>
           </div>
         </div>

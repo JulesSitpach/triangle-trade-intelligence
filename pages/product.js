@@ -1050,7 +1050,7 @@ export default function ProductClassification() {
                   <div className="alert-panel success">
                     <div className="alert-content">
                       <strong>Ready for Triangle Analysis!</strong> Your products are now mapped to precise HS codes. 
-                      Next, we'll calculate your potential USMCA savings through strategic triangle routing.
+                      Next, we&apos;ll calculate your potential USMCA savings through strategic triangle routing.
                     </div>
                   </div>
 

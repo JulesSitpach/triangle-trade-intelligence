@@ -149,8 +149,8 @@ export default function LegalFooter({ showBeta = true }) {
               TRADEMARK & BRAND PROTECTION
             </h4>
             <p>
-              "Triangle Intelligence," "Beast Master Controller," "USMCA Triangle Routing," 
-              "Goldmine Intelligence," and all related marks, logos, and trade dress are 
+              &quot;Triangle Intelligence,&quot; &quot;Beast Master Controller,&quot; &quot;USMCA Triangle Routing,&quot; 
+              &quot;Goldmine Intelligence,&quot; and all related marks, logos, and trade dress are 
               trademarks or registered trademarks of Triangle Intelligence Corporation. 
               The distinctive triangular design mark ◢ is a registered trademark. 
               Unauthorized use is strictly prohibited.

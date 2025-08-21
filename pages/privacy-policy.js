@@ -148,7 +148,7 @@ export default function PrivacyPolicy() {
               <ul>
                 <li>Right to know what personal information is collected</li>
                 <li>Right to delete personal information</li>
-                <li>Right to opt-out of sale (we don't sell data)</li>
+                <li>Right to opt-out of sale (we don&apos;t sell data)</li>
                 <li>Right to non-discrimination for exercising privacy rights</li>
               </ul>
 
@@ -199,7 +199,7 @@ export default function PrivacyPolicy() {
               </ul>
 
               <p>
-                This integration is governed by respective government data use policies and our platform's legitimate business interests in providing trade intelligence services.
+                This integration is governed by respective government data use policies and our platform&apos;s legitimate business interests in providing trade intelligence services.
               </p>
             </section>
 
@@ -235,7 +235,7 @@ export default function PrivacyPolicy() {
             </section>
 
             <section className="privacy-section">
-              <h2>10. Children's Privacy</h2>
+              <h2>10. Children&apos;s Privacy</h2>
               
               <p>
                 Our platform is designed for business use and is not intended for children under 13. We do not knowingly collect personal information from children under 13.
@@ -257,7 +257,7 @@ export default function PrivacyPolicy() {
                 We may update this Privacy Policy from time to time. We will notify you of any material changes by:
               </p>
               <ul>
-                <li>Updating the "Last Updated" date</li>
+                <li>Updating the &quot;Last Updated&quot; date</li>
                 <li>Providing notice through our platform</li>
                 <li>Sending email notifications for significant changes</li>
               </ul>
