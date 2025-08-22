@@ -5,6 +5,24 @@
       "static/chunks/lib_intelligence_static-triangle-routes_js.js"
     ]
   },
+  "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-reliability-calculator.js": {
+    "id": "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-reliability-calculator.js",
+    "files": [
+      "static/chunks/lib_calculators_authentic-reliability-calculator_js.js"
+    ]
+  },
+  "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-savings-calculator.js": {
+    "id": "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-savings-calculator.js",
+    "files": [
+      "static/chunks/lib_calculators_authentic-savings-calculator_js.js"
+    ]
+  },
+  "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-shipping-calculator.js": {
+    "id": "..\\lib\\intelligence\\static-triangle-routes.js -> ../calculators/authentic-shipping-calculator.js",
+    "files": [
+      "static/chunks/lib_calculators_authentic-shipping-calculator_js.js"
+    ]
+  },
   "..\\node_modules\\@supabase\\auth-js\\dist\\module\\lib\\helpers.js -> @supabase/node-fetch": {
     "id": "..\\node_modules\\@supabase\\auth-js\\dist\\module\\lib\\helpers.js -> @supabase/node-fetch",
     "files": []
