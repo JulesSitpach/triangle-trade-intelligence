@@ -31,17 +31,17 @@ async function handler(req, res) {
 
   try {
     if (isBlaze) {
+      // Extract parameters for blaze mode FIRST
+      const blazeBusinessType = businessType || businessProfile?.businessType
+      const blazeImportVolume = importVolume || businessProfile?.importVolume
+      const blazeSupplierCountry = supplierCountry || businessProfile?.primarySupplierCountry || 'China'
+      
       // BLAZE MODE: High-value routing with $100K-$300K+ opportunities
       logInfo('BLAZE ROUTING: Finding high-value opportunities', {
         businessType: blazeBusinessType,
         importVolume: blazeImportVolume,
         supplierCountry: blazeSupplierCountry
       })
-      
-      // Extract parameters for blaze mode
-      const blazeBusinessType = businessType || businessProfile?.businessType
-      const blazeImportVolume = importVolume || businessProfile?.importVolume
-      const blazeSupplierCountry = supplierCountry || businessProfile?.primarySupplierCountry || 'China'
       
       // PARALLELIZED: Execute all 3 queries simultaneously for 3x better performance
       const [routesResult, patternsResult, alertsResult] = await Promise.all([
