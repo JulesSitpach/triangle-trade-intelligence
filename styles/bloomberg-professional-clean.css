@@ -841,7 +841,7 @@ a:hover {
 /* Standardized breakpoints: 480px, 768px, 1024px, 1200px, 1440px */
 
 /* Large screens - Desktop and above */
-@media (max-width: 1440px) {
+@media (max-width: var(--breakpoint-xl)) {
   .bloomberg-container-padded,
   .dashboard-container {
     max-width: 1200px;
@@ -849,7 +849,7 @@ a:hover {
 }
 
 /* Desktop */
-@media (max-width: 1200px) {
+@media (max-width: var(--breakpoint-lg)) {
   .dashboard-container {
     max-width: 1024px;
   }
@@ -864,7 +864,7 @@ a:hover {
 }
 
 /* Tablet landscape */
-@media (max-width: 1024px) {
+@media (max-width: var(--breakpoint-md)) {
   .dashboard-container,
   .content-wrapper {
     padding: 0 var(--space-md);
@@ -881,7 +881,7 @@ a:hover {
 }
 
 /* Tablet portrait */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
   .container,
   .bloomberg-container-padded,
   .bloomberg-container-full,
@@ -935,7 +935,7 @@ a:hover {
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .container,
   .bloomberg-container-padded,
   .bloomberg-container-full,

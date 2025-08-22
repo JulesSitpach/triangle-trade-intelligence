@@ -705,32 +705,32 @@
 /* ===== RESPONSIVE UTILITIES ===== */
 
 /* Show/Hide on Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .mobile-hidden { display: none !important; }
   .mobile-only { display: block !important; }
 }
 
-@media (min-width: 481px) {
+@media (min-width: var(--breakpoint-tablet-min)) {
   .mobile-only { display: none !important; }
 }
 
 /* Show/Hide on Tablet */
-@media (max-width: 768px) and (min-width: 481px) {
+@media (max-width: var(--breakpoint-sm)) and (min-width: var(--breakpoint-tablet-min)) {
   .tablet-hidden { display: none !important; }
   .tablet-only { display: block !important; }
 }
 
-@media (max-width: 480px), (min-width: 769px) {
+@media (max-width: var(--breakpoint-xs)), (min-width: var(--breakpoint-desktop-min)) {
   .tablet-only { display: none !important; }
 }
 
 /* Show/Hide on Desktop */
-@media (min-width: 1024px) {
+@media (min-width: var(--breakpoint-md)) {
   .desktop-hidden { display: none !important; }
   .desktop-only { display: block !important; }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: calc(var(--breakpoint-md) - 1px)) {
   .desktop-only { display: none !important; }
 }
 

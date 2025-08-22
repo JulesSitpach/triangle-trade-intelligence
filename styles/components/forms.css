@@ -597,7 +597,7 @@
 /* ===== RESPONSIVE FORMS ===== */
 
 /* Tablet Portrait */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
   .form-row {
     flex-direction: column;
     gap: var(--space-md);
@@ -629,7 +629,7 @@
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .form-container {
     padding: var(--space-md);
     margin: var(--space-sm);

@@ -437,7 +437,7 @@ body {
 /* ===== RESPONSIVE LAYOUT ===== */
 
 /* Large Screens */
-@media (max-width: 1440px) {
+@media (max-width: var(--breakpoint-xl)) {
   .bloomberg-container-padded,
   .dashboard-container {
     max-width: var(--container-xl);
@@ -445,7 +445,7 @@ body {
 }
 
 /* Desktop */
-@media (max-width: 1200px) {
+@media (max-width: var(--breakpoint-lg)) {
   .dashboard-container {
     max-width: var(--container-lg);
   }
@@ -460,7 +460,7 @@ body {
 }
 
 /* Tablet Landscape */
-@media (max-width: 1024px) {
+@media (max-width: var(--breakpoint-md)) {
   .dashboard-container,
   .content-wrapper {
     padding: 0 var(--space-md);
@@ -477,7 +477,7 @@ body {
 }
 
 /* Tablet Portrait */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
   .container,
   .bloomberg-container-padded,
   .bloomberg-container-full,
@@ -516,7 +516,7 @@ body {
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .container,
   .bloomberg-container-padded,
   .bloomberg-container-full,

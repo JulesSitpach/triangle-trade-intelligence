@@ -528,7 +528,7 @@
 }
 
 /* Tablet Portrait */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
   .triangle-nav {
     left: 0;
     padding: 0 var(--space-md);
@@ -566,7 +566,7 @@
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .triangle-nav {
     padding: 0 var(--space-sm);
   }

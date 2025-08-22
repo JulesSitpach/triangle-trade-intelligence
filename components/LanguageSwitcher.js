@@ -306,7 +306,7 @@ export default function LanguageSwitcher({ onLanguageChange }) {
         }
 
         /* Close dropdown when clicking outside */
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-sm)) {
           .language-dropdown {
             right: -50%;
             min-width: 250px;

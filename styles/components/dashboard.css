@@ -448,14 +448,14 @@
 /* ===== RESPONSIVE DASHBOARD ===== */
 
 /* Large Screens */
-@media (max-width: 1440px) {
+@media (max-width: var(--breakpoint-xl)) {
   .dashboard-container {
     max-width: var(--container-xl);
   }
 }
 
 /* Desktop */
-@media (max-width: 1200px) {
+@media (max-width: var(--breakpoint-lg)) {
   .dashboard-container {
     max-width: var(--container-lg);
   }
@@ -467,7 +467,7 @@
 }
 
 /* Tablet Landscape */
-@media (max-width: 1024px) {
+@media (max-width: var(--breakpoint-md)) {
   .dashboard-container,
   .executive-dashboard-container-centered {
     padding: 0 var(--space-md);
@@ -490,7 +490,7 @@
 }
 
 /* Tablet Portrait */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-sm)) {
   .dashboard-grid {
     grid-template-columns: 1fr;
     gap: var(--space-md);
@@ -521,7 +521,7 @@
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (max-width: var(--breakpoint-xs)) {
   .executive-dashboard-container-centered,
   .dashboard-container {
     padding: 0 var(--space-sm);

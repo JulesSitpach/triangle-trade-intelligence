@@ -2,6 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/api/dashboard-hub-intelligence": "pages/api/dashboard-hub-intelligence.js",
-  "/api/intelligence/routing": "pages/api/intelligence/routing.js"
+  "/product": "pages/product.js",
+  "/api/status": "pages/api/status.js"
 }

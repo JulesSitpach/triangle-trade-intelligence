@@ -354,7 +354,7 @@ export default function LegalFooter({ showBeta = true }) {
           color: #f59e0b;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-sm)) {
           .footer-content {
             grid-template-columns: 1fr;
             gap: 1.5rem;
