@@ -5,7 +5,7 @@
 
 import { getServerSupabaseClient } from '../../../lib/supabase-client'
 import { StableDataManager, VolatileDataManager } from '../../../lib/intelligence/database-intelligence-bridge'
-import { USMCAPostalIntelligence } from '../../../lib/intelligence/usmca-postal-intelligence'
+// import { USMCAPostalIntelligence } from '../../../lib/intelligence/usmca-postal-intelligence' // Removed - functionality consolidated into database bridge
 
 const supabase = getServerSupabaseClient()
 
@@ -19,8 +19,8 @@ export default async function handler(req, res) {
     
     const { companyName, businessType, zipCode, primarySupplierCountry, importVolume, timelinePriority } = req.body
     
-    // Get real geographic intelligence using USMCA postal intelligence system
-    const geographic = await USMCAPostalIntelligence.deriveGeographicIntelligence(zipCode)
+    // Get real geographic intelligence using database bridge (consolidated functionality)
+    const geographic = await StableDataManager.getGeographicIntelligence(zipCode)
     
     // Get real business patterns from USMCA business intelligence
     const patterns = await deriveBusinessPatternsFromDatabase(businessType)
