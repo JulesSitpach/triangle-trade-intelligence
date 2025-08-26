@@ -198,6 +198,26 @@
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
+/* Option Elements - Fix white-on-white issue */
+.form-select option,
+.bloomberg-select option {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: var(--space-sm);
+}
+
+.form-select option:checked,
+.bloomberg-select option:checked {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.form-select option:hover,
+.bloomberg-select option:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* Textarea */
 .form-textarea,
 .bloomberg-textarea {

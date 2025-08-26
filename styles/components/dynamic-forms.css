@@ -1,0 +1,345 @@
+/* Dynamic Form Styles - Zero Hardcoded Layout */
+
+/* Dynamic Form Generator Base Styles */
+.dynamic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+}
+
+/* Field Group Container */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Dynamic Field Labels */
+.field-label {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.field-label .required {
+  color: #dc2626;
+  margin-left: 0.25rem;
+}
+
+/* Form Controls - Dynamic Styling */
+.form-field {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: white;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-field:focus {
+  outline: none;
+  border-color: #0052cc;
+  box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+}
+
+.form-field.error {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.form-field:disabled {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Select Dropdowns */
+select.form-field {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5rem 1.5rem;
+  padding-right: 2.5rem;
+  appearance: none;
+}
+
+/* Textarea Styling */
+textarea.form-field {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* Checkbox Styling */
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #0052cc;
+}
+
+/* Radio Button Styling */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+fieldset legend {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #0052cc;
+}
+
+/* Error Messages */
+.field-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* Help Text */
+.field-help {
+  color: #6b7280;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+
+/* Submit Button */
+.submit-button {
+  background: #0052cc;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #0066ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+}
+
+.submit-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Form Error Banner */
+.form-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-weight: 500;
+}
+
+/* Loading States */
+.form-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dynamic-form {
+    gap: 1rem;
+  }
+  
+  .field-group {
+    gap: 0.375rem;
+  }
+  
+  .form-field {
+    padding: 0.625rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .submit-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .form-field {
+    border-width: 3px;
+  }
+  
+  .form-field:focus {
+    box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.3);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .form-field,
+  .submit-button {
+    transition: none;
+  }
+  
+  .submit-button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Dark Mode Support (if enabled) */
+@media (prefers-color-scheme: dark) {
+  .form-field {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+  
+  .form-field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .field-label {
+    color: #f9fafb;
+  }
+  
+  .field-help {
+    color: #9ca3af;
+  }
+  
+  .checkbox-label,
+  .radio-label {
+    color: #f9fafb;
+  }
+}
+
+/* Foundation Page Specific Styles */
+.foundation-form {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Multi-select Enhancement (for future use) */
+.form-field.multi-select {
+  min-height: 120px;
+}
+
+/* File Upload Styling (for future use) */
+.file-upload-area {
+  border: 2px dashed #e0e0e0;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.file-upload-area:hover {
+  border-color: #0052cc;
+  background-color: #f8faff;
+}
+
+.file-upload-area.dragover {
+  border-color: #0052cc;
+  background-color: #f0f8ff;
+  transform: scale(1.02);
+}
+
+/* Conditional Field Animations */
+.field-group.entering {
+  animation: slideIn 0.3s ease-out;
+}
+
+.field-group.exiting {
+  animation: slideOut 0.3s ease-in;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    transform: translateX(-10px);
+  }
+}

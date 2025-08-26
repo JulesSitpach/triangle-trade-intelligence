@@ -72,10 +72,13 @@ export default function HomePage() {
                 access to a global USMCA community - all from one fully integrated solution.
               </p>
               <div className="bloomberg-hero-actions">
-                <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-large">
-                  Order a Terminal Subscription
+                <Link href="/usmca-workflow" className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-large">
+                  🚀 Start USMCA Workflow
                 </Link>
-                <Link href="/pricing" className="bloomberg-btn bloomberg-btn-secondary bloomberg-btn-large">
+                <Link href="/foundation" className="bloomberg-btn bloomberg-btn-secondary bloomberg-btn-large">
+                  Access Full Terminal
+                </Link>
+                <Link href="/pricing" className="bloomberg-btn bloomberg-btn-outline bloomberg-btn-large">
                   View Pricing
                 </Link>
               </div>

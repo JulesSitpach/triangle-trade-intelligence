@@ -299,6 +299,98 @@
   background: var(--status-warning);
 }
 
+/* ===== PRIORITY WORKFLOW STYLING ===== */
+
+/* Priority Workflow Navigation Item */
+.nav-item.priority-workflow {
+  background: linear-gradient(135deg, 
+    rgba(79, 172, 254, 0.15) 0%, 
+    rgba(0, 157, 255, 0.08) 100%);
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item.priority-workflow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(79, 172, 254, 0.1), 
+    transparent);
+  animation: shimmer 2s infinite;
+}
+
+.nav-item.priority-workflow:hover {
+  background: linear-gradient(135deg, 
+    rgba(79, 172, 254, 0.25) 0%, 
+    rgba(0, 157, 255, 0.15) 100%);
+  border-color: rgba(79, 172, 254, 0.5);
+  transform: translateX(2px);
+}
+
+.nav-item.priority-workflow.active {
+  background: linear-gradient(135deg, 
+    rgba(79, 172, 254, 0.3) 0%, 
+    rgba(0, 157, 255, 0.2) 100%);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px rgba(79, 172, 254, 0.3);
+}
+
+/* Priority Indicator Badge */
+.priority-indicator {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+}
+
+/* Priority Workflow Icon Animation */
+.nav-item.priority-workflow .nav-icon {
+  animation: rocket-bounce 3s ease-in-out infinite;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Pulse Glow Animation */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.6);
+    transform: scale(1.05);
+  }
+}
+
+/* Rocket Bounce Animation */
+@keyframes rocket-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
 /* Language Switcher in Nav */
 .nav-language {
   padding: var(--space-md) 0;

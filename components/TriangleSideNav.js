@@ -20,6 +20,7 @@ export default function TriangleSideNav() {
     // Determine current page from path
     const path = router.pathname
     if (path === '/dashboard') setCurrentPage('dashboard')
+    else if (path === '/usmca-workflow') setCurrentPage('usmca-workflow')
     else if (path === '/foundation') setCurrentPage('foundation')
     else if (path === '/product') setCurrentPage('product')
     else if (path === '/routing') setCurrentPage('routing')
@@ -58,6 +59,7 @@ export default function TriangleSideNav() {
     switch (pageKey) {
       case 'dashboard':
       case 'foundation':
+      case 'usmca-workflow':
         return true // Always unlocked
       case 'product':
         return progressState.foundation
@@ -109,6 +111,7 @@ export default function TriangleSideNav() {
 
   const navigationItems = [
     { key: 'dashboard', label: 'Command Center', path: '/dashboard', description: 'System Overview' },
+    { key: 'usmca-workflow', label: 'USMCA Workflow', path: '/usmca-workflow', description: 'Complete Compliance Solution', priority: true },
     { key: 'foundation', label: 'Business Foundation', path: '/foundation', description: 'Company Intelligence' },
     { key: 'product', label: 'Product Classification', path: '/product', description: 'HS Code Mapping' },
     { key: 'routing', label: 'Triangle Routing', path: '/routing', description: 'Optimization Engine' },
@@ -138,18 +141,22 @@ export default function TriangleSideNav() {
         {navigationItems.map(item => {
           const isUnlocked = isPageUnlocked(item.key)
           const isCompleted = progressState[item.key]
+          const isPriority = item.priority
           
           return (
             <Link 
               key={item.key} 
               href={isUnlocked ? item.path : '#'} 
-              className={`nav-item ${currentPage === item.key ? 'active' : ''} ${!isUnlocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''}`}
+              className={`nav-item ${currentPage === item.key ? 'active' : ''} ${!isUnlocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''} ${isPriority ? 'priority-workflow' : ''}`}
               onClick={(e) => handleNavClick(e, item)}
             >
-              <div className="nav-icon">{getPageIcon(item.key)}</div>
+              <div className="nav-icon">
+                {isPriority ? '🚀' : getPageIcon(item.key)}
+              </div>
               <div className="nav-content">
                 <div className="nav-label">
                   {item.label}
+                  {isPriority && <span className="priority-indicator"> NEW</span>}
                   {!isUnlocked && <span className="lock-indicator"> 🔒</span>}
                   {isCompleted && <span className="complete-indicator"> ✅</span>}
                 </div>

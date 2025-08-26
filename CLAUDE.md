@@ -1,938 +1,464 @@
-# CLAUDE.md
+# Triangle Intelligence: USMCA Compliance Platform
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Overview
+Triangle Intelligence is a focused USMCA compliance platform that provides businesses with essential tools for trade classification, qualification checking, tariff savings calculation, and certificate generation. Following strategic cleanup, the platform has been streamlined from a complex multi-stage system to a single-workflow approach focused on operational compliance needs.
 
-## Project Overview
+## Core Architecture
 
-Triangle Intelligence is a sophisticated tariff volatility tracking and trade optimization platform that delivers $100K-$300K+ annual savings through USMCA triangle routing strategies. The platform's core innovation is intelligent separation of volatile vs stable data to maximize intelligence while minimizing API costs.
+### Platform Focus: USMCA Compliance + Regulatory Alerts
+- **Primary Function**: HS code classification and USMCA origin qualification
+- **Key Differentiator**: Regulatory alert system for compliance changes
+- **Target Market**: B2B trade professionals and importers/exporters
+- **Revenue Model**: SaaS pricing ($299-799/month) based on alert capabilities
 
-**🚀 STATUS: FULLY OPERATIONAL** - Beast Master Controller, Goldmine Intelligence, RSS monitoring, Redis rate limiting, and optimization systems are active with compound intelligence generation from 500K+ database records.
+## Technology Stack
 
-**Core Value Proposition**: While bilateral tariffs (China: 30%, India: 50%) change daily with political decisions, USMCA triangle routing rates remain stable at 0% - providing predictable savings in volatile markets through real-time intelligence.
+### Framework & Runtime
+- **Frontend**: Next.js 13.5.6 with React 18.2.0
+- **Backend**: Next.js API routes with Node.js
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel-ready configuration
+- **Language Support**: i18next with EN/ES/FR translations
 
-**Tech Stack**: Next.js 13.5, React 18, Supabase, i18next, Anthropic Claude API, Jest, Node.js, Redis, RSS Parser, ioredis
+### Key Dependencies
+```json
+{
+  "@supabase/supabase-js": "^2.54.0",
+  "next": "^13.5.6",
+  "react": "^18.2.0",
+  "i18next": "^25.3.4",
+  "lucide-react": "^0.539.0"
+}
+```
 
-## Development Commands
+## Build Commands
 
+### Development
 ```bash
-# Development
-npm run dev          # Start development server (localhost:3000)
-npm run build        # Build for production  
-npm start           # Start production server
-
-# Testing (Note: May need workarounds on Windows)
-npm test            # Run Jest tests (if PATH issues: node ./node_modules/.bin/jest)
-npm run test:watch  # Run tests in watch mode
-npm run test:coverage # Generate coverage report
-npm run test:ci     # CI/CD optimized run
-
-# Code Quality
-npm run lint        # ESLint with Next.js config
-npm run type-check  # TypeScript type checking
-
-# System Verification
-curl http://localhost:3000/api/status                      # Check API configuration
-curl http://localhost:3000/api/database-structure-test     # Test database architecture
-curl http://localhost:3000/api/dashboard-hub-intelligence  # Test Beast Master & Goldmine
-Navigate to /dashboard-hub                                  # Bloomberg Terminal-style dashboard
-
-# Direct Testing Scripts (Windows-compatible)
-node test-consolidated-beast-master.js    # Test Beast Master intelligence (requires env vars)
-node test-db-direct.js                   # Test database connectivity directly
-NEXT_PUBLIC_SUPABASE_URL="..." SUPABASE_SERVICE_ROLE_KEY="..." node test-consolidated-beast-master.js
-
-# Bundle Analysis
-ANALYZE=true npm run build  # Generate bundle analyzer report
+npm run dev          # Start development server on http://localhost:3000
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # ESLint code quality check
+npm run type-check   # TypeScript validation
 ```
 
-## Core Architecture: Volatile vs Stable Data Strategy
-
-The platform's competitive advantage comes from intelligently separating **volatile data** (requiring API calls) from **stable data** (cached forever).
-
-### Volatile Data (API Updates Required)
-- **Tariff rates**: China (30%), India (50%) - change daily with political decisions
-- **Shipping costs**: Port congestion, fuel surcharges, carrier capacity
-- **Country risk scores**: Political stability, supply chain disruptions
-
-**Tables**: `current_market_alerts`, `api_cache`, `country_risk_scores`
-**Cache Duration**: 1-4 hours depending on volatility
-**Cost**: API calls required when data expires
-
-### Stable Data (Cache Forever - Zero API Costs) 
-- **USMCA rates**: 0% Mexico/Canada (treaty-locked, never change)
-- **Port locations**: Infrastructure doesn't move
-- **Trade routes**: Geographic routing logic
-- **HS code classifications**: Annual updates maximum
-
-**Tables**: `usmca_tariff_rates`, `us_ports`, `comtrade_reference`, `hindsight_pattern_library`
-**Cache Duration**: FOREVER
-**Cost**: Zero API calls - query database directly
-
-### Database Intelligence Bridge
-
-**Critical Architecture**: All intelligence flows through `lib/intelligence/database-intelligence-bridge.js` which implements the volatile/stable strategy:
-
-```javascript
-// STABLE DATA - Instant responses, zero API costs
-const usmcaRate = await StableDataManager.getUSMCARates('CN-MX-US')  // Always 0%
-const ports = await StableDataManager.getPortInfo('west_coast')      // Static data
-
-// VOLATILE DATA - API calls only when cache expires  
-const currentRate = await VolatileDataManager.getOrFetchAPIData('comtrade', params)
-const shipping = await VolatileDataManager.getOrFetchAPIData('shippo', params)
-```
-
-**Result**: 80%+ API call reduction while maintaining real-time market intelligence.
-
-## Intelligence Platform Architecture
-
-### RSS-Driven Market Monitoring System ✨ OPERATIONAL
-**Real-time Market Intelligence** with automated RSS monitoring:
-- **Live RSS Feeds**: Automated monitoring every 15 minutes via Vercel cron
-- **Market Alert Generation**: Real-time tariff and trade policy changes
-- **Redis Rate Limiting**: Enterprise-grade request throttling and caching
-- **Background Services**: Automated data collection and processing
-
-### Dashboard Hub (`/dashboard-hub`) ✨ ACTIVE
-**Executive Intelligence Hub** powered by Consolidated Beast Master Controller and Goldmine Intelligence:
-- **Real-time Compound Insights**: 3 consolidated intelligence systems working together (50% complexity reduction)
-- **Multi-view Dashboard**: Executive, Intelligence, Financial, Implementation, Partnership
-- **Live Performance Monitoring**: System health and intelligence quality metrics
-- **Network Effects Tracking**: Database growth from user interactions
-
-### 6-Page Intelligence Journey
-1. **Foundation** (`/foundation`) - Business intake with geographic intelligence derivation
-2. **Product** (`/product`) - Product intelligence with HS code mapping via server-side APIs  
-3. **Routing** (`/routing`) - Triangle routing using Database Intelligence Bridge
-4. **Partnership** (`/partnership`) - Strategic partner ecosystem and connections
-5. **Hindsight** (`/hindsight`) - Hindsight pattern extraction to institutional memory
-6. **Alerts** (`/alerts`) - Predictive alerts based on volatility tracking
-
-**Navigation Flow**: Streamlined 6-page journey with Dashboard Hub for executive oversight.
-
-## Database Schema (Supabase)
-
-### Institutional Intelligence (500K+ Trade Flows)
-```sql
-comtrade_reference: 17,500+ rows        # Enhanced HS code classifications
-trade_flows: 500,800+ rows              # Massive bilateral trade analysis
-workflow_sessions: 205+ rows            # User journey patterns for learning
-hindsight_pattern_library: 33+ rows     # Extracted success patterns
-marcus_consultations: 20+ rows          # AI analysis history
-translations: 700+ rows                 # Trilingual support (EN/ES/FR)
-```
-
-### Volatile Market Data & RSS Monitoring
-```sql
-current_market_alerts: Real-time        # Live tariff changes via RSS
-api_cache: TTL-based                    # Cached API responses with expiry
-country_risk_scores: Dynamic            # Risk volatility tracking
-network_intelligence_events: Logging    # Market change events
-rss_monitoring_events: Real-time        # RSS feed monitoring logs
-```
-
-### Stable Treaty Data  
-```sql
-usmca_tariff_rates: 48 rows            # 0% rates, treaty-locked forever
-us_ports: 10 rows                      # Port infrastructure (static)
-countries: 30+ rows                    # Enhanced geographic coverage
-trade_routes: 8 rows                   # Routing logic (stable)
-```
-
-## API Routes Architecture
-
-### Core Intelligence APIs
-```javascript
-// Triangle Routing - Uses 597K trade flows
-POST /api/intelligence/routing  
-{
-  "origin": "CN",
-  "destination": "US",
-  "products": [...],
-  "businessProfile": {...}
-}
-
-// HS Code Intelligence - Product classification
-POST /api/intelligence/hs-codes
-{
-  "productDescription": "Ball bearings", 
-  "businessType": "Manufacturing"
-}
-
-// Tariff Analysis - Volatility tracking
-GET /api/intelligence/tariffs?origin=CN&destination=US
-
-// Shipping Optimization
-POST /api/intelligence/shipping
-```
-
-### System APIs
-```javascript
-GET /api/status                        // Production health monitoring
-GET /api/database-structure-test       // Architecture validation
-GET /api-test                          // Interactive testing dashboard
-```
-
-### Advanced APIs
-```javascript
-POST /api/blaze/triangle-routing      // High-performance routing engine
-POST /api/goldmine/page-submit       // Advanced analytics
-POST /api/specialist-leads            // Professional services integration
-POST /api/marcus/hindsight-report     // AI-powered analysis reports
-POST /api/clean-routing               // Cleaned routing data
-POST /api/clean-products              // Product classification cleanup
-POST /api/clean-stats                 // Statistics cleanup
-POST /api/live-market-intelligence    // Real-time market monitoring
-POST /api/canada-mexico-advantage     // USMCA advantage calculator
-POST /api/intelligent-classification  // AI-powered product classification
-POST /api/product-suggestions         // Smart product suggestions
-POST /api/personalized-monitoring     // Custom alert monitoring
-```
-
-### Partnership & Professional Services APIs
-```javascript
-POST /api/alerts-specialist-connection // Connect to trade specialists
-POST /api/partnership-ecosystem        // Partner network management
-POST /api/contact-request             // Professional consultation requests
-POST /api/retention-tracking          // User engagement analytics
-```
-
-### Development & Testing APIs
-```javascript
-GET /api/status                       // Production health monitoring
-GET /api/database-structure-test      // Validate database architecture
-GET /api/production-data-quality-check // Data quality verification
-GET /api/dropdown-options            // Dynamic form options
-GET /api/phase2-optimization-test     // Phase 2 optimization testing
-GET /api/phase3-prefetch-test         // Phase 3 prefetching testing
-GET /api/test-volatile-stable-separation // Test data separation logic
-GET /api/redis-rate-limit-test        // Redis rate limiting testing
-POST /api/detect-location             // Geographic intelligence testing
-```
-
-### Chat & Intelligence APIs
-```javascript
-POST /api/trade-intelligence-chat     // Marcus AI conversation system
-GET /api/marcus-intelligence-dashboard // Marcus AI dashboard data
-POST /api/dashboard-hub-intelligence  // Bloomberg Terminal-style dashboard intelligence
-```
-
-### Beast Master & Goldmine Intelligence APIs
-```javascript
-// Core Intelligence Generation
-BeastMasterController.activateAllBeasts(userProfile, currentPage, options)
-// Orchestrates all 6 intelligence systems for compound insights
-
-UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile)
-// Database-powered intelligence from 519,341+ records
-
-// Real-time Dashboard Intelligence  
-POST /api/dashboard-hub-intelligence
-{
-  "dashboardView": "executive|intelligence|financial|implementation|partnership",
-  "mockUserProfile": {
-    "businessType": "Electronics",
-    "primarySupplierCountry": "China", 
-    "importVolume": "$1M - $5M"
-  }
-}
-
-// RSS & Background Monitoring
-GET /api/cron/rss-monitor              // RSS feed monitoring endpoint
-POST /api/rss-trigger-test             // Manual RSS monitoring test
-GET /api/redis-rate-limiting-demo      // Redis rate limiting demo
-
-// Returns compound intelligence with:
-// - Beast Master status (all 6 systems)
-// - Real-time compound insights
-// - RSS monitoring status
-// - Intelligence source metrics
-// - Performance characteristics
-```
-
-## Intelligence Architecture - CONSOLIDATED & OPERATIONAL ✅
-
-The platform has been **CONSOLIDATED** from 6 individual systems to 3 enhanced systems that provide the same business value with 50% complexity reduction:
-
-### Consolidated Intelligence Architecture (CURRENT)
-- **Beast Master Controller** - Now orchestrates 3 consolidated systems instead of 6
-- **50% Complexity Reduction** - 6→3 systems with all functionality preserved
-- **Enhanced Integration** - Each system now includes capabilities from multiple original systems
-- **Maintained API Compatibility** - All existing integrations continue to work
-
-### Beast Master Controller Architecture (6 Systems)
-```javascript
-🦾 Beast Master Controller (Orchestrates all systems)
-├── 🧠 Similarity Intelligence - 240+ workflow sessions for pattern matching
-├── 📅 Seasonal Intelligence - Q4_HEAVY, SUMMER_PREPARATION timing optimization  
-├── 📊 Market Intelligence - Real-time volatility (China: 85%, Mexico: 25%)
-├── 🏆 Success Pattern Intelligence - 33+ hindsight patterns from database
-├── 🚨 Alert Generation Intelligence - Multi-system alert prioritization
-└── 🚢 Shipping Intelligence - Capacity constraints, carrier performance, route complexity
-```
-
-### Consolidated Intelligence Engine Architecture (3 Systems)
-```javascript
-⚡ Consolidated Intelligence Engine (Simplified but complete)
-├── 🧠 Enhanced Similarity Intelligence (includes Network Effects + Alert Generation)
-├── 📊 Enhanced Market Intelligence (includes Volatility + Seasonal + Timing Optimization)  
-└── 🏆 Enhanced Success Intelligence (includes Success Patterns + Shipping + Route Complexity)
-```
-
-**Consolidation Achievement**: 50% complexity reduction (6→3 systems) while maintaining all business value, compound intelligence, and API compatibility.
-
-### Consolidated Compound Intelligence Generation
-The Consolidated Beast Master generates insights **only possible by combining the 3 enhanced systems**:
-
-**Consolidated Perfect Storm Detection**: Enhanced Similarity + Enhanced Market + Enhanced Success = 97% confidence insights  
-**Enhanced Network Effects**: Growing database improves all future analysis with integrated capabilities  
-**Consolidated Institutional Learning**: 240+ sessions create institutional memory across all systems  
-**Integrated Timing Optimization**: All systems work together for maximum impact with reduced complexity
-
-### Goldmine Intelligence Integration
-Beast Master integrates with **Goldmine Intelligence** for database-powered insights:
-
-```javascript
-🏆 Goldmine Intelligence Database (500K+ Records)
-├── 📊 Comtrade Reference: 17,500+ HS classifications
-├── 🌐 Trade Flows: 500,800+ bilateral trade records
-├── 👥 Workflow Sessions: 240+ user journey patterns
-├── 🤖 Marcus Consultations: 20+ AI analysis records
-├── 📈 Hindsight Patterns: 33+ proven success strategies
-├── 🌍 Translations: 700+ trilingual entries (EN/ES/FR)
-└── 📡 RSS Events: Real-time market monitoring
-```
-
-### Dashboard Hub Integration
-Beast Master powers the **Bloomberg Terminal-style Executive Dashboard** with:
-- Real-time compound insights updating every 30 seconds
-- Multi-view intelligence (Executive, Financial, Implementation, Partnership)
-- Performance monitoring with intelligence quality metrics
-- Live alert generation with intelligent prioritization
-
-## Environment Configuration
-
-Required in `.env.local`:
+### Testing
 ```bash
-# Supabase (Database Intelligence)
-NEXT_PUBLIC_SUPABASE_URL=https://mrwitpgbcaxgnirqtavt.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJ... # For server-side database queries
-
-# External APIs (Volatile Data Only)
-COMTRADE_API_KEY=4cc45d91763040439c2740a846bd7c53      # UN trade data
-SHIPPO_API_KEY=shippo_test_c09be9af54350a63230d86cb    # Shipping rates
-ANTHROPIC_API_KEY=sk-ant-api03-kOw...                  # Marcus AI reports
-
-# RSS & Background Services
-CRON_SECRET=generate-new-32-byte-hex-secret            # RSS cron authentication
-
-# API Strategy Control
-USE_MOCK_APIS=false                                     # Enable real API calls
-NEXT_PUBLIC_USE_PREFETCHING=true                       # Phase 3 prefetching
-NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true                 # Phase 2 optimization
+npm test             # Run Jest test suite
+npm run test:watch   # Watch mode for tests
+npm run test:coverage # Coverage report
+npm run test:ci      # CI-friendly test run
 ```
 
-## Critical Development Patterns
+## Core System Architecture
 
-### ES Module Import Requirements (CRITICAL)
-**All imports in the intelligence system MUST include `.js` extensions** due to ES module architecture:
+### 1. Single Workflow Approach
+**File**: `pages/api/simple-usmca-compliance.js`
+- Handles complete USMCA compliance workflow in one API call
+- Actions: `classify_product`, `check_qualification`, `calculate_savings`, `generate_certificate`
+- Eliminates multi-stage complexity while maintaining full functionality
 
-```javascript
-// ✅ CORRECT - Required .js extensions
-import { BeastMasterController } from '../lib/intelligence/beast-master-controller.js'
-import { getOptimizedRoutes } from '../lib/intelligence/static-triangle-routes.js'
-import { getSupabaseClient } from '../lib/supabase-client.js'
-import { logInfo, logError } from '../lib/production-logger.js'
+### 2. Core Classification Engine
+**File**: `lib/core/simple-usmca-classifier.js`
+- `SimpleUSMCAClassifier` class with essential methods:
+  - `classifyProduct()`: Product description → HS code classification  
+  - `checkUSMCAQualification()`: USMCA rules of origin verification
+  - `calculateSavings()`: MFN vs USMCA tariff comparison
+  - `generateCertificateData()`: Official certificate form population
 
-// ❌ WRONG - Missing extensions (will cause MODULE_NOT_FOUND errors)
-import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
-import { getOptimizedRoutes } from '../lib/intelligence/static-triangle-routes'
+### 3. Intelligence APIs
+**Directory**: `pages/api/intelligence/`
+- `hs-codes.js`: Advanced HS code classification with Census Bureau data
+- `routing.js`: Triangle routing analysis with tariff differentials
+- `shipping.js`: Shipping cost and logistics calculations
+- `tariffs.js`: Comprehensive tariff rate analysis
+
+### 4. Essential UI Components
+**Directory**: `components/`
+- `TriangleLayout.js`: Main application layout
+- `LanguageSwitcher.js`: Multi-language support (EN/ES/FR)
+- `TriangleSideNav.js`: Navigation component
+- `ErrorBoundary.js`: Error handling wrapper
+
+## Database Schema (Essential Tables)
+
+### USMCA Rules of Origin
+```sql
+usmca_rules (
+    hs_code TEXT PRIMARY KEY,
+    product_description TEXT,
+    rule_type TEXT, -- 'percentage', 'tariff_shift', 'process'
+    regional_content_percentage DECIMAL,
+    tariff_shift_rule TEXT,
+    specific_process_requirements TEXT,
+    certification_required BOOLEAN
+);
 ```
 
-### Always Use Intelligence Systems (Beast Master OR Consolidated Engine)
-```javascript
-// OPTION 1: Beast Master Controller (6 systems - maximum intelligence)
-import { BeastMasterController } from '../lib/intelligence/beast-master-controller.js'
-import UnifiedGoldmineIntelligence from '../lib/intelligence/goldmine-intelligence.js'
-
-const beastResults = await BeastMasterController.activateAllBeasts(
-  userProfile, 
-  currentPage,
-  { source: 'dashboard_hub', realTime: true }
+### Customer Alert System
+```sql
+customer_alerts (
+    id UUID PRIMARY KEY,
+    user_id UUID,
+    alert_type TEXT, -- 'regulatory', 'product_specific', 'deadline', 'operational'
+    hs_codes TEXT[], -- Customer's tracked products
+    countries TEXT[], -- Customer's trade routes
+    alert_priority TEXT, -- 'critical', 'high', 'medium', 'info'
+    notification_preferences JSONB, -- email, sms, in-app
+    created_at TIMESTAMP,
+    is_active BOOLEAN
 );
 
-// OPTION 2: Consolidated Intelligence Engine (3 systems - optimized performance)  
-import { ConsolidatedIntelligenceEngine } from '../lib/intelligence/consolidated-intelligence-engine.js'
-
-const consolidatedResults = await ConsolidatedIntelligenceEngine.activateConsolidatedIntelligence(
-  userProfile,
-  currentPage,
-  { useCache: true, realTime: true }
+regulatory_updates (
+    id UUID PRIMARY KEY,
+    source TEXT, -- 'CBP', 'CBSA', 'SAT', 'USMCA_Committee'
+    update_type TEXT, -- 'rule_interpretation', 'procedure_change', 'tariff_update'
+    affected_hs_codes TEXT[],
+    affected_countries TEXT[],
+    effective_date DATE,
+    update_content TEXT,
+    severity TEXT, -- 'critical', 'high', 'medium', 'low'
+    created_at TIMESTAMP
 );
-
-// Both provide the same compound insights and business value
-const compoundInsights = beastResults.unified?.insights?.compound || 
-                        consolidatedResults.unified?.insights?.compound || [];
-
-// Get database intelligence from 500K+ records (works with both systems)
-const goldmineData = await UnifiedGoldmineIntelligence.getFoundationIntelligence(userProfile);
-
-// WRONG - Using individual systems without orchestration
-const similarityData = await SimilarityIntelligence.getSimilarCompanies(profile)
-// This misses compound insights that require multiple systems
 ```
 
-### Database Intelligence Bridge Integration
-```javascript
-// Beast Master integrates with Database Intelligence Bridge for optimal performance
-import DatabaseIntelligenceBridge, { StableDataManager, VolatileDataManager } from '../lib/intelligence/database-intelligence-bridge.js'
-
-// Get stable data (instant responses, zero API costs)
-const usmcaRate = await StableDataManager.getUSMCARates('CN-MX-US')
-const ports = await StableDataManager.getPortInfo('west_coast')
-const patterns = await StableDataManager.getSuccessPatterns(businessType)
-
-// Get volatile data (API calls only when cache expires)
-const currentRate = await VolatileDataManager.getOrFetchAPIData('comtrade', params)
-
-// WRONG - Direct API calls waste money on static data
-const response = await fetch('api.example.com/static-data')
+### Tariff Rates
+```sql
+tariff_rates (
+    hs_code TEXT,
+    country TEXT, -- US, CA, MX
+    mfn_rate DECIMAL,
+    usmca_rate DECIMAL,
+    effective_date DATE,
+    staging_category TEXT
+);
 ```
 
-### Supabase Client Pattern (Singleton)
-```javascript
-// Always use the shared singleton instance
-import { getSupabaseClient } from '../lib/supabase-client.js'
-const supabase = getSupabaseClient()
-
-// Never create multiple instances - causes conflicts
-// WRONG: const supabase = createClient(url, key)
+### HS Code Master Database
+```sql
+hs_codes (
+    hs_code TEXT PRIMARY KEY,
+    description TEXT,
+    chapter INTEGER,
+    section TEXT,
+    search_keywords TEXT[]
+);
 ```
 
-### Production Logging Pattern 
-```javascript
-import { logInfo, logError, logDBQuery, logAPICall, logPerformance } from '../lib/production-logger.js'
+## API Endpoints
 
-// Comprehensive logging with automatic sensitive data filtering
-logDBQuery('trade_flows', 'SELECT', duration, data?.length)
-logAPICall('GET', 'comtrade', apiDuration, 'success')
-logPerformance('getTriangleRoutingIntelligence', totalDuration, metadata)
+### Core USMCA Compliance API
+**POST** `/api/simple-usmca-compliance`
 
-// Automatically filters API keys, JWT tokens, passwords, secrets
-```
+**Actions**:
+- `classify_product`: Product description → HS code
+- `check_qualification`: USMCA rules of origin verification  
+- `calculate_savings`: Tariff savings calculation
+- `generate_certificate`: Certificate of Origin generation
+- `complete_workflow`: End-to-end processing
 
-### Page Data Flow Pattern
-```javascript
-// Page-to-page data persistence via localStorage with error handling
-try {
-  const foundationData = JSON.parse(localStorage.getItem('triangle-foundation') || '{}')
-  const productData = JSON.parse(localStorage.getItem('triangle-product') || '{}')
-  
-  // Always validate data structure before use
-  if (!foundationData.companyName) {
-    router.push('/foundation') // Redirect to missing page
-    return
-  }
-} catch (error) {
-  logError('Failed to parse page data', { error })
-  localStorage.clear() // Clear corrupted data
-}
-```
-
-### Triangle Routing Intelligence Pattern
-```javascript
-// Use the unified bridge for complete triangle routing analysis
-const intelligence = await DatabaseIntelligenceBridge.getTriangleRoutingIntelligence({
-  origin: foundationData.primarySupplierCountry || 'CN',
-  destination: 'US',
-  hsCode: selectedProduct.hsCode,
-  businessType: foundationData.businessType
-})
-
-// Process results with efficiency tracking
-const routes = intelligence.triangleOptions.map(route => ({
-  route: route.route,
-  usmcaTariff: route.usmcaTariff, // Always 0%
-  savings: calculateSavings(foundationData.importVolume, route),
-  confidence: intelligence.analysis.confidence
-}))
-
-// Always log efficiency metrics
-logPerformance('triangle_routing', Date.now() - startTime, {
-  apiCallsMade: intelligence.efficiency.apiCallsMade,
-  dataSource: intelligence.efficiency.allFromDatabase ? 'DATABASE' : 'HYBRID'
-})
-```
-
-### Internationalization Pattern (Database-Powered)
-```javascript
-// Database-powered translations with fallback to static JSON
-import { getTranslation } from '../lib/i18n-database-backend.js'
-
-// Load translations from Supabase with caching
-const translations = await getTranslation('en', 'common')
-
-// Use i18next with database backend
-import { useTranslation } from 'react-i18next'
-const { t, i18n } = useTranslation('common')
-
-// Database translation structure
-const translation = {
-  key: 'foundation.title',
-  language: 'en',
-  value: 'Company Foundation Intelligence',
-  context: 'Foundation'
-}
-
-// Language switching with database sync
-const changeLanguage = async (lng) => {
-  await i18n.changeLanguage(lng)
-  // Database backend automatically loads new translations
-}
-```
-
-## Performance & Cost Optimization
-
-- **Database Queries**: Optimized indexes for 500K+ trade flow records
-- **API Call Reduction**: 80%+ savings through volatile/stable separation
-- **Smart Caching**: TTL-based caching with Redis and intelligent expiry
-- **RSS Monitoring**: Real-time market data via automated RSS feeds
-- **Network Effects**: Each of 205+ user sessions improves future intelligence
-- **Bundle Optimization**: Production builds with compression and splitting
-- **Rate Limiting**: Redis-powered enterprise-grade throttling
-
-### Optimization Phases (Feature Flags in .env.local)
-- **Phase 0**: `NEXT_PUBLIC_USE_CORRECTED_DATA_FLOW=true` - Data flow correction (active)
-- **Phase 1**: `NEXT_PUBLIC_USE_UNIFIED_STATE=true` - Unified state management (active)
-- **Phase 2**: `NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true` - Query optimization & batching (active)
-- **Phase 3**: `NEXT_PUBLIC_USE_PREFETCHING=true` - Intelligent prefetching (active)
-
-Expected improvements with all phases active:
-- Query Response Time: 85% faster (2.5s → 0.3s)
-- Page Load Time: 68% faster (3.8s → 1.2s)
-- API Call Reduction: 80% fewer calls (15 → 3 per journey)
-
-## Testing Strategy
-
-### Test Coverage Requirements
-- **Statements**: 70% minimum
-- **Branches**: 70% minimum  
-- **Functions**: 70% minimum
-- **Lines**: 70% minimum
-
-### Test Commands
-```bash
-npm test              # Run all tests  
-npm run test:watch    # Watch mode for development
-npm run test:coverage # Generate coverage report with thresholds
-npm run test:ci       # CI/CD optimized run (no watch, coverage)
-```
-
-### Jest Configuration Highlights
-```javascript
-// Coverage thresholds (jest.config.js)
-coverageThreshold: {
-  global: {
-    branches: 70,
-    functions: 70,
-    lines: 80,
-    statements: 80
-  }
-}
-
-// Module mapping for absolute imports
-moduleNameMapper: {
-  '^@/(.*)$': '<rootDir>/$1',
-  '^lib/(.*)$': '<rootDir>/lib/$1',
-  '^components/(.*)$': '<rootDir>/components/$1'
-}
-```
-
-### Test Patterns
-```javascript
-// API endpoint testing with proper error handling
-describe('POST /api/intelligence/routing', () => {
-  it('should return triangle routes with savings', async () => {
-    const response = await request(app)
-      .post('/api/intelligence/routing')
-      .send({ origin: 'CN', destination: 'US' })
-    
-    expect(response.status).toBe(200)
-    expect(response.body.routes).toHaveLength(3)
-    expect(response.body.efficiency.apiCallsMade).toBeLessThan(5)
-    expect(response.body.triangleOptions).toBeDefined()
-  })
-  
-  it('should handle missing page data gracefully', async () => {
-    const response = await request(app)
-      .post('/api/intelligence/routing')
-      .send({}) // Empty payload
-      
-    expect(response.status).toBe(400)
-    expect(response.body.error).toContain('Missing required')
-  })
-})
-
-// Database Intelligence Bridge testing
-describe('DatabaseIntelligenceBridge', () => {
-  it('should use stable data for USMCA rates', async () => {
-    const result = await StableDataManager.getUSMCARates('MX-US')
-    expect(result.rate).toBe(0)
-    expect(result.apiCallNeeded).toBe(false)
-    expect(result.status).toBe('TREATY_LOCKED')
-  })
-})
-```
-
-## Production Security
-
-- **API Key Validation**: All external API calls validated through `lib/security.js`
-- **Security Headers**: Comprehensive headers in next.config.js (CSP, HSTS, X-Frame-Options)
-- **Client Protection**: Sensitive data never exposed client-side - use `SUPABASE_SERVICE_ROLE_KEY` only server-side
-- **Request Monitoring**: IP-based tracking and rate limiting via `lib/monitoring.js`
-- **Environment Validation**: Startup checks in `lib/environment-validation.js` ensure all required keys exist
-
-## Competitive Advantages
-
-1. **Volatility Protection**: USMCA rates stay 0% while bilateral tariffs fluctuate wildly
-2. **Cost Optimization**: 80%+ API savings through intelligent volatile/stable separation  
-3. **Institutional Learning**: 597K trade flows + 240+ sessions create unbeatable intelligence
-4. **Real-Time Alerts**: Immediate notification when tariffs change (India: 25% → 50% overnight)
-5. **Network Effects**: Each user improves intelligence for all future users
-
-**Market Position**: While competitors waste money calling APIs for static data, Triangle Intelligence provides superior intelligence at lower cost through database-driven architecture.
-
-## Key Intelligence Engines
-
-### Core Libraries (`/lib/`)
-- **`supabase-client.js`**: Singleton Supabase client - always use `getSupabaseClient()`
-- **`production-logger.js`**: Comprehensive logging with automatic sensitive data filtering
-- **`environment-validation.js`**: Validates all required env vars on startup
-- **`security.js`**: API key validation and security middleware
-
-### Intelligence Systems (`/lib/intelligence/`) ✅ FULLY OPERATIONAL
-- **`beast-master-controller.js`**: **RESTORED** - Orchestrates all 6 intelligence systems for compound insights
-- **`consolidated-intelligence-engine.js`**: **NEW** - Simplified 3-system architecture with same business value
-- **`goldmine-intelligence.js`**: **RESTORED** - Database intelligence from 519,341+ records with network effects
-- **`database-intelligence-bridge.js`**: Volatile/stable data optimization for 80% API cost reduction
-- **`dynamic-savings-engine.js`**: Calculates real-time savings based on market conditions
-- **`dynamic-confidence-engine.js`**: Progressive confidence scoring (1.0 → 10.0)
-- **`seasonal-intelligence.js`**: **RESTORED** - Q4_HEAVY, SUMMER_PREPARATION timing optimization
-- **`similarity-intelligence.js`**: **RESTORED** - Finds similar business profiles from 205+ sessions
-- **`unified-hs-classifier.js`**: Intelligent product classification with caching
-- **`tariff-volatility-tracker.js`**: Monitors and alerts on tariff changes
-
-### Beast Master Compound Intelligence Features
-- **Perfect Storm Detection**: Similarity + Seasonal + Market = 95% confidence insights
-- **Network Effects Intelligence**: Each user session improves all future analysis
-- **Institutional Learning Integration**: 33+ success patterns + 70+ Marcus consultations
-- **Real-time Dashboard Integration**: Powers Bloomberg Terminal-style executive hub
-
-### RSS & Background Services (`/lib/background-services/`)
-- **`rss-comtrade-trigger.js`**: Automated RSS feed monitoring and processing
-- **`redis-client.js`**: Redis connection management and caching
-- **`redis-rate-limiter.js`**: Enterprise-grade request throttling
-
-### Performance Optimizers (`/lib/`)
-- **`fast-hs-classifier.js`**: High-performance HS code classification
-- **`dynamic-stats-engine.js`**: Real-time statistics and analytics
-- **`workflow-analysis.js`**: Analyzes user journey patterns
-- **`page-analytics-engine.js`**: Tracks page-level performance metrics
-- **`progressive-geo-detection.js`**: Geographic intelligence and language detection
-
-### State Management (`/lib/state/`)
-- **`TriangleStateContext.js`**: Unified state management context
-- **`pageStateHooks.js`**: Page-specific state hooks
-- **`statePersistence.js`**: localStorage persistence with validation
-- **`intelligenceIntegration.js`**: Intelligence system integration
-
-## RSS Market Monitoring System
-
-### Real-time Market Intelligence
-The platform implements automated RSS monitoring for real-time market intelligence:
-
-```javascript
-// RSS monitoring configuration (vercel.json)
+**Request Format**:
+```json
 {
-  "crons": [
-    {
-      "path": "/api/cron/rss-monitor",
-      "schedule": "*/15 * * * *"  // Every 15 minutes
-    }
-  ]
-}
-```
-
-### Background Services Architecture
-```javascript
-// RSS trigger service
-import RSSComtradeMonitor from '../lib/background-services/rss-comtrade-trigger'
-
-// Automated market data collection
-const rssResults = await RSSComtradeMonitor.processFeeds()
-const alerts = await RSSComtradeMonitor.generateAlerts(rssResults)
-
-// Redis-powered caching and rate limiting
-import { redisClient } from '../lib/redis-client'
-import { withRateLimit } from '../lib/middleware/redis-rate-limiter'
-```
-
-### RSS Monitoring Endpoints
-```javascript
-GET /api/cron/rss-monitor        // Automated RSS feed processing (Vercel cron)
-POST /api/rss-trigger-test       // Manual RSS monitoring test
-GET /api/redis-rate-limiting-demo // Rate limiting demonstration
-```
-
-## Multilingual Support (USMCA Markets)
-
-### Trilingual Architecture
-The platform supports English, Spanish, and French for comprehensive USMCA market coverage:
-
-```javascript
-// Database-powered translations
-const translations = await supabase
-  .from('translations')
-  .select('*')
-  .eq('language', currentLanguage)
-
-// Geographic language detection
-import { useProgressiveLanguage } from '../hooks/useProgressiveLanguage'
-const { detectedLanguage, confidence } = useProgressiveLanguage()
-
-// Safe translation pattern
-import { useSafeTranslation } from '../hooks/useSafeTranslation'
-const { t } = useSafeTranslation('common')
-```
-
-### Translation Management
-- **700+ Translation Keys**: Comprehensive coverage across all pages
-- **Database Storage**: Translations stored in Supabase for easy management
-- **Fallback Support**: Graceful degradation to English if translations missing
-- **Context-Aware**: Translations include business context for accuracy
-
-## State Management & Optimization
-
-### Unified State Architecture
-```javascript
-// Triangle State Context - Unified state management
-import { TriangleStateProvider, useTriangleState } from '../lib/state'
-
-// Page-specific state hooks
-import { useFoundationState, useProductState } from '../lib/state/pageStateHooks'
-
-// Persistent state with validation
-import { setTriangleData, getTriangleData } from '../lib/utils/localStorage-validator'
-```
-
-### Optimization Phases
-The platform implements progressive optimization phases controlled by feature flags:
-
-```bash
-# Phase 2: Query Optimization & Batching
-NEXT_PUBLIC_USE_OPTIMIZED_QUERIES=true
-
-# Phase 3: Intelligent Prefetching  
-NEXT_PUBLIC_USE_PREFETCHING=true
-```
-
-**Performance Improvements**:
-- Query Response Time: 85% faster (2.5s → 0.3s)
-- Page Load Time: 68% faster (3.8s → 1.2s)
-- API Call Reduction: 80% fewer calls
-
-## MCP (Model Context Protocol) Integration
-
-### Context7 MCP Server ✅ INSTALLED
-Triangle Intelligence integrates with Claude Desktop via the Context7 MCP server for enhanced development experience:
-
-```bash
-# Context7 MCP Installation Status
-Context7 Server: ✅ Installed globally at /home/paige098/.npm-global/bin/context7-mcp
-Configuration: ✅ ~/.config/claude/claude_desktop_config.json updated
-Project Config: ✅ .context7-mcp-config.json created
-Test Script: ✅ scripts/test-context7-mcp.js available
-```
-
-### MCP Benefits for Development
-- **Enhanced Code Intelligence**: Better understanding of Next.js, React, Supabase patterns
-- **Documentation Access**: Instant access to framework and library documentation
-- **Best Practices**: Triangle Intelligence-specific guidance based on project context
-- **API Integration**: Improved assistance with Comtrade, Shippo, Anthropic APIs
-
-### MCP Usage Pattern
-```javascript
-// MCP automatically provides context-aware suggestions when you work with:
-import { BeastMasterController } from '../lib/intelligence/beast-master-controller'
-// MCP knows this is Triangle Intelligence's core intelligence system
-
-const intelligence = await DatabaseIntelligenceBridge.getTriangleRoutingIntelligence(params)
-// MCP provides relevant documentation for Triangle's volatile/stable data strategy
-```
-
-## Subscription Management & Billing System
-
-### Subscription Architecture
-```javascript
-// Subscription middleware for API route protection
-import { withSubscriptionCheck, requireFeatureAndTrackUsage } from '../lib/subscription-middleware'
-
-// Feature-gated API route with usage tracking
-export default requireFeatureAndTrackUsage('marcus_ai', 'marcusConsultations')(async (req, res) => {
-  // req.subscription contains tier, usage, and limits
-  const { hasSubscription, tier, usage } = req.subscription
-})
-```
-
-### Subscription Tiers
-- **FREE**: Basic triangle routing analysis, limited to 5 routes/month
-- **PROFESSIONAL**: Marcus AI consultations, unlimited analyses, priority support
-- **ENTERPRISE**: Beast Master intelligence, custom APIs, dedicated support
-
-### Usage Tracking & Limits
-```javascript
-// Database schema (subscription-related tables)
-subscriptions: { user_id, tier, status, current_period_end }
-subscription_usage: { user_id, monthly_analyses, saved_routes, marcus_consultations }
-
-// Usage middleware automatically enforces limits
-trackUsage('monthlyAnalyses')(handler) // Tracks and enforces monthly limits
-requireSubscription('ENTERPRISE')(handler) // Requires specific tier
-```
-
-### Subscription Components
-- **`SubscriptionManager.js`**: Main subscription dashboard component
-- **`SubscriptionCard.js`**: Tier selection and upgrade cards
-- **`SubscriptionGatedDashboard.js`**: Feature-gated dashboard views
-- **`useSubscription.js`**: React hook for subscription status
-
-## Production Deployment Architecture
-
-### Vercel Configuration
-```javascript
-// vercel.json - Production configuration
-{
-  "crons": [
-    {
-      "path": "/api/cron/rss-monitor",
-      "schedule": "*/15 * * * *"
-    }
-  ],
-  "env": {
-    "CRON_SECRET": "@cron_secret"
+  "action": "complete_workflow",
+  "data": {
+    "company_name": "Example Corp",
+    "business_type": "Electronics",
+    "supplier_country": "CN", 
+    "trade_volume": 1000000,
+    "product_description": "Smartphone components",
+    "component_origins": [
+      {"origin_country": "CN", "value_percentage": 60},
+      {"origin_country": "MX", "value_percentage": 40}
+    ],
+    "manufacturing_location": "MX"
   }
 }
 ```
 
-### Security Headers (next.config.js)
-- **CSP**: Content Security Policy with restricted sources
-- **HSTS**: HTTP Strict Transport Security
-- **X-Frame-Options**: Clickjacking protection
-- **Rate Limiting**: Redis-powered request throttling
+### Intelligence APIs
+**POST** `/api/intelligence/hs-codes` - Advanced HS classification
+**POST** `/api/intelligence/routing` - Triangle routing analysis
+**POST** `/api/intelligence/shipping` - Shipping calculations
+**POST** `/api/intelligence/tariffs` - Tariff analysis
 
-### Production Monitoring
-```javascript
-// Health check endpoints
-GET /api/status                    // System health and configuration
-GET /api/database-structure-test   // Database connectivity and schema
-GET /api/production-data-quality-check // Data quality verification
+### Support APIs
+**POST** `/api/simple-classification` - Basic HS code mapping
+**GET** `/api/simple-dropdown-options` - UI dropdown data
+**POST** `/api/simple-savings` - Quick savings calculator
+**GET** `/api/status` - System health check
+
+## Configuration
+
+### Environment Variables
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 ```
 
-## Enterprise Restoration Phase Status
+### Next.js Configuration
+**File**: `next.config.js`
+- Configured for Vercel deployment
+- Static export capabilities
+- Asset optimization settings
 
-### Current Branch: `enterprise-restoration-phase1`
-The platform is currently undergoing systematic restoration and enhancement as documented in the **Triangle Intelligence - Agent Execution Plan.md**:
+### TypeScript Configuration
+**File**: `tsconfig.json`
+- Strict mode enabled for type safety
+- JSX preserve for React components
+- Path mapping for lib imports
 
-#### ✅ Completed Phases (Stage 1-2)
-- **Critical Infrastructure Fixes**: Authentication, API standardization, production logging, database backup
-- **Architecture Simplification**: 6→3 intelligence systems consolidation, Beast Master restoration
-- **Security Hardening**: Console.log removal, sensitive data protection, PCI DSS compliance
-- **Database Resilience**: 519K+ records backed up, connection monitoring implemented
+## Strategic Business Model
 
-#### 🔄 Current Work (Stage 3-4)
-- **CSS Architecture Modernization**: Breaking down 1,833-line monolithic CSS file
-- **Performance Optimization**: Query batching, caching strategies, bundle splitting
-- **Translation System Completion**: Missing 100+ keys, real-time updates
+### Revenue Streams
+- **Professional**: $299/month - Basic compliance + regulatory alerts
+- **Enterprise**: $799/month - Priority alerts + API access + compliance audit trail
+- **Enterprise+**: Custom pricing - Dedicated monitoring + white-label options
 
-#### 📋 Upcoming Phases (Stage 5-7)
-- **Security Event Monitoring**: Comprehensive audit logging and alerting
-- **Intelligent Caching**: Redis integration for 85% performance improvement
-- **Bundle Optimization**: Code splitting to reduce 4.9MB bundle
+### Value Proposition
+1. **Risk Mitigation**: Avoid $25,000+ compliance penalties
+2. **Audit Protection**: Documentation of regulatory awareness  
+3. **Operational Efficiency**: Proactive regulatory updates
+4. **Competitive Advantage**: Early awareness of rule changes
 
-### Enterprise Restoration Goals
-- **Performance**: 85% faster queries (2.5s → 0.3s), 68% faster page loads (3.8s → 1.2s)
-- **Reliability**: Circuit breaker patterns, connection pooling, automatic failover
-- **Security**: Score improvement from 82/100 to 95+/100
-- **Maintainability**: Reduced technical debt, modular architecture, comprehensive testing
+### Key Differentiators
+- **Regulatory Alert System**: Real-time monitoring of CBP/CBSA/SAT feeds
+- **Single Workflow**: Complete compliance process in minutes
+- **Professional Integration**: Built for customs brokers and trade professionals
+- **USMCA Expertise**: Deep knowledge of trilateral agreement rules
 
-### Recent Fixes Applied (Current Session)
-- **✅ ES Module Import Issues**: Fixed missing `.js` extensions in Beast Master and database bridge imports
-- **✅ Static Triangle Routes**: Restored executive intelligence system with instant routing decisions
-- **✅ Beast Master Integration**: All 6 intelligence systems operational (458ms response time)
-- **✅ Database Connectivity**: Verified 519K+ records accessible with proper service role authentication
-- **✅ MCP Integration**: Added Context7 and Puppeteer MCP configurations for enhanced development
+## Development Guidelines
 
-## Common Pitfalls to Avoid
+### Code Organization
+- **`lib/core/`**: Essential business logic and calculations
+- **`pages/api/`**: API endpoints with clear, focused responsibilities
+- **`components/`**: Reusable UI components with consistent patterns
+- **`styles/`**: Organized CSS with component-specific styles
 
-1. **Never omit `.js` extensions** - All ES module imports MUST include `.js` extensions (causes MODULE_NOT_FOUND)
-2. **Never create new Supabase clients** - Always use `getSupabaseClient()` singleton
-3. **Never expose service keys client-side** - Use `SUPABASE_SERVICE_ROLE_KEY` only in API routes
-4. **Never make direct API calls for stable data** - Use Database Intelligence Bridge
-5. **Never skip logging** - Use production-logger for all database queries and API calls
-6. **Never store sensitive data in localStorage** - Only non-sensitive page flow data
-7. **Never bypass RSS monitoring** - Use automated feeds for real-time market intelligence
-8. **Never ignore rate limiting** - Use Redis rate limiter for production API calls
-9. **Never hardcode translations** - Use database-powered i18n system
-10. **Never skip optimization phases** - Enable feature flags for maximum performance
-11. **Never modify without testing** - Follow the Agent Execution Plan validation protocols
+### Key Principles
+1. **No Hardcoding**: All data dynamic, configurable through database
+2. **Single Workflow**: Eliminate multi-stage complexity
+3. **Professional Focus**: Build for trade professionals, not general consumers
+4. **Authentic Data**: Use verified sources (Census Bureau, UN Comtrade)
+5. **Compliance First**: Every calculation includes proper disclaimers
 
-## Development vs Production Differences
+### Testing Strategy
+- **Unit Tests**: Core business logic in `lib/core/`
+- **API Tests**: Endpoint functionality and response formats
+- **Integration Tests**: Database connectivity and data consistency
+- **Error Handling**: Graceful degradation with professional fallback guidance
 
-### Development Environment
-- Hot reload with Next.js dev server
-- Mock APIs available via `USE_MOCK_APIS=true`
-- Detailed logging and error reporting
-- Redis optional (fallback to memory caching)
+## Deployment & Operations
 
-### Production Environment  
-- Vercel deployment with cron jobs
-- Real API integrations required
-- RSS monitoring every 15 minutes
-- Redis required for rate limiting and caching
-- Security headers enforced
-- Bundle optimization and compression
-- Add and commit automatically whenever an entire task is finished. Use descriptive commit messages and capture the full scope of changes. Claude Code doesn't have checkpoints, so use git for rollbacks.
-- Run IDE diagnostics after completing each task. This runs type checks, linting, and other project checks in one go using fewer tokens.
-- Use the Context7 MCP server whenever the user requests documentation or when working with updated frameworks/libraries.
-- Document and check existing tech stack and dependencies before installing new libraries. Avoid reinstalling packages that already exist.
-- Understand and maintain the existing project structure. Find files faster and avoid duplicating modules that already exist.
-- Use Puppeteer MCP for browser automation, testing, and checking console errors when working on frontend features.
+### Vercel Deployment
+- **Config**: `vercel.json` configured for Next.js optimization
+- **Environment**: Production environment variables managed through Vercel dashboard
+- **Domains**: Support for custom domain configuration
 
-## Intelligence System Testing Commands
+### Database Management
+- **Supabase**: Managed PostgreSQL with real-time capabilities
+- **Migrations**: SQL schema files in `lib/database/`
+- **Seeding**: Dynamic data population scripts in `scripts/`
 
-### Beast Master Controller Testing
-```bash
-# Test the consolidated 3-system Beast Master (simplified architecture)
-NEXT_PUBLIC_SUPABASE_URL="https://mrwitpgbcaxgnirqtavt.supabase.co" SUPABASE_SERVICE_ROLE_KEY="[KEY]" node test-consolidated-beast-master.js
+### Monitoring & Logging
+- **File**: `lib/production-logger.js` - Structured logging system
+- **Performance**: Response time tracking for API endpoints
+- **Errors**: Comprehensive error logging with stack traces
+- **Business Metrics**: Classification accuracy and user workflow completion rates
 
-# Expected output: ~458ms response time, 72% confidence, compound intelligence generation
-```
+## Success Metrics
 
-### Database Intelligence Validation  
-```bash  
-# Test direct database connectivity and intelligence bridge
-NEXT_PUBLIC_SUPABASE_URL="https://mrwitpgbcaxgnirqtavt.supabase.co" SUPABASE_SERVICE_ROLE_KEY="[KEY]" node test-db-direct.js
+### Operational Metrics
+- Classification accuracy rate >95%
+- Certificate acceptance rate by customs >98%
+- Average workflow completion time <3 minutes
+- API response time <500ms for core operations
 
-# Expected output: Database connection successful, sample translations loaded from 519K+ records
-```
+### Business Metrics  
+- Customer LTV >$15,000 (5x annual subscription cost)
+- Net Revenue Retention >120%
+- Partner referral conversion >25%
+- Alert engagement rate >60%
 
-### System Health Monitoring
-```bash
-# Check production status and API health (when dev server running)
-curl http://localhost:3000/api/status
-curl http://localhost:3000/api/database-structure-test
+## Strategic Roadmap
 
-# MCP Integration Testing
-node scripts/test-context7-mcp.js      # Test Context7 MCP server integration
-node scripts/test-puppeteer-mcp.js     # Test Puppeteer MCP automation
-```
+### Phase 1: Core Platform (Complete)
+- HS code classification system
+- USMCA rules of origin engine  
+- Basic certificate generation
+- Tariff savings calculator
+
+### Phase 2: Regulatory Alerts (Current Focus)
+- Real-time regulatory feed integration
+- Customer alert subscription system
+- Notification delivery (email/SMS/in-app)
+- Alert management dashboard
+
+### Phase 3: Professional Integration
+- Partner commission tracking
+- White-label options for customs brokers
+- API access for enterprise clients
+- Advanced compliance audit trails
+
+### Phase 4: Market Expansion
+- Additional trade agreements (CPTPP, EU-UK TCA)
+- Multi-language regulatory content
+- Regional compliance expertise
+- Advanced analytics and reporting
+
+## Important Notes for Future Development
+
+### Data Authenticity Requirements
+- All tariff calculations must include disclaimers
+- Professional verification required for implementation
+- No fabricated metrics or artificial confidence scores
+- Census Bureau and UN Comtrade are primary data sources
+
+### Compliance Focus
+- Build for operational use by trade professionals
+- Generate documents customs authorities accept
+- Calculate savings customs will recognize
+- Classifications that pass audit scrutiny
+
+### Platform Positioning
+- This is operational compliance software, not a lead generation tool
+- Target customers are businesses with existing trade operations
+- Value proposition is compliance accuracy and regulatory awareness
+- Revenue model based on professional-grade alert capabilities
+
+---
+
+*Last Updated: Based on strategic cleanup and master plan analysis*
+*Platform Status: Core functionality complete, regulatory alerts in development*
+*Next Priority: Customer alert subscription system implementation*
+- Rule 1: No Inline Styles
+
+NEVER: style={{marginTop: '20px', color: 'red'}}
+ALWAYS: Use CSS classes or styled components
+USE: Tailwind classes, CSS modules, or external stylesheets
+WHY: Maintainability, consistency, theme-ability
+- Rule 2: No Hard Coding Values
+
+NEVER: Hard-coded strings, numbers, URLs, or configuration
+ALWAYS: Use constants, config files, or environment variables
+CENTRALIZE: All business logic constants in config files
+- Rule 3: Maximum Flexibility
+
+DESIGN: Every component should accept props for customization
+AVOID: Components that only work in one specific context
+BUILD: Reusable, composable components
+- Rule 4: No Over-Engineering
+
+KEEP: Components under 150 lines
+AVOID: Abstract factories, complex inheritance, meta-programming
+PREFER: Simple, direct solutions over clever ones
+ASK: "Is this the simplest thing that works?"
+- Rule 5: Configuration Management
+jsx// ✅ Create config files for all constants
+// config/usmca-rules.js
+export const USMCA_CONFIG = {
+  COUNTRIES: ['US', 'CA', 'MX'],
+  DEFAULT_TARIFF_RATES: {
+    US: 0.15,
+    CA: 0.12,
+    MX: 0.10
+  },
+  CERTIFICATE_VALIDITY_DAYS: 365
+};
+
+// ✅ Use throughout application
+import { USMCA_CONFIG } from '../config/usmca-rules';
+- Rule 6: Styling Architecture
+jsx// ✅ Use consistent class naming
+<div className="usmca-form__container">
+  <div className="usmca-form__field">
+    <label className="usmca-form__label">
+    <input className="usmca-form__input" />
+  </div>
+</div>
+
+// ✅ Or use Tailwind with custom classes
+<div className="form-container">
+  <div className="form-field">
+    <label className="form-label">
+    <input className="form-input" />
+  </div>
+</div>
+- Rule 7: Component Flexibility
+jsx// ✅ Flexible, reusable components
+function AlertCard({ 
+  type = 'info', 
+  title, 
+  message, 
+  action, 
+  dismissible = true,
+  className = '' 
+}) {
+  return (
+    <div className={`alert alert--${type} ${className}`}>
+      <h3 className="alert__title">{title}</h3>
+      <p className="alert__message">{message}</p>
+      {action && <div className="alert__action">{action}</div>}
+      {dismissible && <button className="alert__dismiss">×</button>}
+    </div>
+  );
+}
+- Rule 8: API Design Principles
+javascript// ✅ Flexible API endpoints
+export default async function handler(req, res) {
+  const {
+    hsCode,
+    originCountry,
+    destinationCountry,
+    format = 'json',
+    language = 'en'
+  } = req.query;
+
+  // Flexible response format
+  const result = await calculateUSMCACompliance({
+    hsCode,
+    originCountry,
+    destinationCountry,
+    options: { language }
+  });
+
+  if (format === 'pdf') {
+    return res.pdf(result);
+  }
+  
+  res.json(result);
+}
+- Rule 9: Don't Build These Things
+
+No custom CSS frameworks (use Tailwind)
+No complex state management (use React hooks)
+No over-abstracted utilities (write direct code)
+No "future-proofing" (build for current needs)
+- Rule 10: Complexity Indicators (RED FLAGS)
+
+Files over 200 lines
+Functions with >5 parameters
+Nested ternary operators
+Magic numbers or strings
+Components that do >1 thing
+- Rule 11: Code Review Checklist
+
+ No inline styles?
+ No hard-coded values?
+ Component accepts props for flexibility?
+ Under 150 lines?
+ Single responsibility?
+ Can this be simpler?
+- SUMMARY CHECKLIST
+Before committing any code, verify:
+
+ No inline styles used
+ No hard-coded values
+ Component is flexible and reusable
+ Under complexity thresholds
+ Follows naming conventions
+ Self-documenting
+ Performance conscious
+
+Remember: Simple, flexible, maintainable code beats clever code every time.

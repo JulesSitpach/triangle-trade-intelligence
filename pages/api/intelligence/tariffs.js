@@ -1,195 +1,158 @@
 /**
- * 🌐 COMTRADE TARIFF API
- * Real-time tariff data from UN Comtrade for volatile countries
- * Restored original working version
+ * TARIFF ANALYSIS API - CONTEXT7 VERIFIED LIMITATIONS
+ * 
+ * CRITICAL FINDINGS from Context7:
+ * - UN Comtrade provides historical trade statistics, NOT current tariff rates
+ * - No real-time tariff APIs available to public
+ * - Must direct users to official customs authorities
+ * 
+ * This API provides ONLY what's actually available: trade flow context
  */
 
-import { withVolatileRateLimit } from '../../../lib/utils/with-rate-limit.js'
+import { logInfo, logError, logPerformance } from '../../../lib/production-logger.js';
+import { 
+  analyzeBilateralTrade, 
+  validateCalculationAuthenticity 
+} from '../../../lib/core/trade-analysis.js';
 
-async function handler(req, res) {
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
+export default async function handler(req, res) {
+  const startTime = Date.now();
   
+  logInfo('API CALL: /api/intelligence/tariffs', {
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      error: 'Method not allowed',
+      allowedMethods: ['POST'] 
+    });
+  }
+
+  const { country, product, hsCode } = req.body;
+
   try {
-    // Support both GET query params and POST body
-    const country = req.method === 'GET' ? req.query.country : req.body?.country
-    const product = req.method === 'GET' ? req.query.product : req.body?.product
-    
-    if (!country || !product) {
-      return res.status(400).json({ error: 'Missing country or product parameter' })
+    // Context7 Verified: NO APIs provide real-time tariff rates
+    logInfo('Tariff analysis request', { country, product, hsCode });
+
+    // What we CAN provide: Historical trade context
+    let tradeContext = null;
+    if (country) {
+      tradeContext = await analyzeBilateralTrade(country, 'US');
     }
-    
-    console.log('🌐 COMTRADE API: Fetching tariff data', { country, product })
-    console.log('Environment check:', {
-      COMTRADE_API_KEY: !!process.env.COMTRADE_API_KEY,
-      USE_MOCK_APIS: process.env.USE_MOCK_APIS,
-      USE_MOCK: process.env.USE_MOCK
-    })
-    
-    // Check if we should use real API or fallback
-    const useRealAPI = process.env.COMTRADE_API_KEY && process.env.USE_MOCK_APIS !== 'true' && process.env.USE_MOCK !== 'true'
-    
-    if (useRealAPI) {
-      // Make real Comtrade API call with working endpoint
-      const countryCode = country === 'CN' ? '156' : 
-                         country === 'IN' ? '699' :
-                         country === 'MX' ? '484' :
-                         country === 'CA' ? '124' :
-                         country === 'VN' ? '704' : '0'
-      
-      const comtradeUrl = `https://comtradeapi.un.org/data/v1/get/C/A/HS`
-      const params = new URLSearchParams({
-        r: '842',        // USA 
-        p: countryCode,  // Partner country
-        ps: '2023',      // Year
-        px: 'HS',        // Classification
-        rg: '1',         // Imports
-        cc: 'TOTAL',     // All commodities
-        max: '500'       // Limit results
-      })
-      
-      const fullUrl = `${comtradeUrl}?${params}`
-      console.log('📡 Making real Comtrade API call')
-      
-      const headers = {
-        'Ocp-Apim-Subscription-Key': process.env.COMTRADE_API_KEY
-      }
-      
-      const response = await fetch(fullUrl, {
-        headers: headers,
-        timeout: 10000
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Comtrade API error: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      
-      // Process Comtrade response
-      const countryTariff = extractCountryTariff(data, country, product)
-      
-      console.log('✅ Real Comtrade data retrieved', { country, tariff: countryTariff.rate })
-      
-      return res.status(200).json({
-        success: true,
-        source: 'UN_COMTRADE_API',
+
+    // USMCA treaty rates are the ONLY verifiable rates (always 0% when qualified)
+    const usmcaCountries = ['US', 'CA', 'MX'];
+    const isUSMCARoute = usmcaCountries.includes(country) && usmcaCountries.includes('US');
+
+    const response = {
+      request: {
         country: country,
         product: product,
-        tariff: countryTariff,
-        timestamp: new Date().toISOString(),
-        cacheFor: 3600000
-      })
-      
-    } else {
-      // Use fallback data 
-      console.log('📊 Using fallback tariff data (API disabled)')
-      
-      const fallbackTariffs = {
-        'CN': { rate: 25, status: 'HIGH_VOLATILITY', note: 'Subject to trade tensions' },
-        'IN': { rate: 50, status: 'VERY_HIGH', note: 'Recent doubling due to policy change' },
-        'VN': { rate: 15, status: 'MODERATE', note: 'Growing trade relationship' },
-        'KR': { rate: 8, status: 'STABLE', note: 'KORUS FTA benefits' },
-        'JP': { rate: 12, status: 'STABLE', note: 'Long-term trade partner' },
-        'EU': { rate: 18, status: 'MODERATE', note: 'Various EU regulations' },
-        'UK': { rate: 10, status: 'STABLE', note: 'Post-Brexit agreement' },
-        'MX': { rate: 0, status: 'USMCA', note: 'USMCA 0% tariff' },
-        'CA': { rate: 0, status: 'USMCA', note: 'USMCA 0% tariff' }
-      }
-      
-      const tariff = fallbackTariffs[country] || { rate: 20, status: 'UNKNOWN', note: 'Standard MFN rate' }
-      
-      return res.status(200).json({
-        success: true,
-        source: 'FALLBACK_DATA',
-        country: country,
-        product: product,
-        tariff: tariff,
-        timestamp: new Date().toISOString(),
-        cacheFor: 3600000,
-        note: 'Using fallback data - enable COMTRADE_API_KEY for live data'
-      })
-    }
-    
-  } catch (error) {
-    console.error('❌ Tariff API error:', error)
-    
-    // Return emergency fallback
-    return res.status(200).json({
-      success: false,
-      error: error.message,
-      fallback: {
-        rate: 25,
-        status: 'ESTIMATED', 
-        note: 'Emergency fallback rate due to API failure'
+        hsCode: hsCode,
+        destinationMarket: 'US'
       },
-      source: 'EMERGENCY_FALLBACK',
+      tariff_analysis: {
+        // Context7 Verified: This is the ONLY accurate tariff information available
+        usmca_qualified: isUSMCARoute ? {
+          tariff_rate: '0%',
+          source: 'USMCA Treaty Text',
+          verified: true,
+          note: 'USMCA members qualify for 0% tariffs on qualifying goods'
+        } : null,
+        
+        // What we CANNOT provide
+        current_bilateral_tariff: {
+          available: false,
+          reason: 'No public APIs provide real-time tariff rates',
+          context7_verified: 'UN Comtrade provides trade statistics, not tariff rates',
+          last_verified: new Date().toISOString()
+        }
+      },
+      historical_trade_context: tradeContext ? {
+        route: tradeContext.route,
+        trade_exists: tradeContext.tradeExists,
+        historical_records: tradeContext.statistics?.recordCount || 0,
+        disclaimer: tradeContext.dataSource?.disclaimer,
+        limitations: tradeContext.limitations
+      } : null,
+      professional_verification_required: {
+        current_tariff_rates: {
+          contact: 'U.S. Customs and Border Protection',
+          website: 'https://www.cbp.gov/trade/rulings/informed-compliance-publications',
+          phone: '(202) 325-0000',
+          purpose: 'Official current tariff rates'
+        },
+        hs_code_classification: {
+          contact: 'Licensed Customs Broker',
+          purpose: 'Verify HS code classification accuracy',
+          note: 'Classification affects applicable tariff rates'
+        },
+        usmca_qualification: {
+          contact: 'Trade Attorney or Customs Broker',
+          purpose: 'Verify USMCA qualification requirements',
+          note: 'Rules of origin and other requirements apply'
+        }
+      },
+      mandatory_disclaimers: [
+        'NO TARIFF RATES PROVIDED - Contact customs authorities',
+        'Historical trade data only - not current market conditions', 
+        'USMCA 0% rate requires qualification verification',
+        'Professional verification required before relying on any estimate'
+      ],
+      data_source_verification: {
+        context7_findings: [
+          'UN Comtrade: Historical trade statistics only (2+ years old)',
+          'No public APIs provide real-time tariff rates',
+          'Country reporting decreased from 177 to 146 countries since 2017',
+          'Trade data can be revised up to 5 years after initial publication'
+        ],
+        authentic_sources: [
+          'U.S. Customs and Border Protection - Official tariff schedules',
+          'USMCA Treaty Text - Verified 0% rates for qualifying goods',
+          'WTO Tariff Database - Official MFN rates (requires manual lookup)'
+        ]
+      },
+      calculation_authenticity: validateCalculationAuthenticity({
+        hasDisclaimers: true,
+        providesOnlyVerifiableData: true,
+        redirectsToOfficialSources: true
+      }),
+      performance: {
+        responseTime: Date.now() - startTime,
+        dataProvidedFrom: 'Historical database + treaty verification',
+        realTimeDataClaimed: false,
+        lastUpdated: new Date().toISOString()
+      }
+    };
+
+    logPerformance('tariff analysis', response.performance.responseTime, {
+      country,
+      usmcaQualified: isUSMCARoute,
+      tradeRecordsFound: tradeContext?.statistics?.recordCount || 0
+    });
+
+    return res.status(200).json(response);
+
+  } catch (error) {
+    logError('Tariff analysis failed', {
+      error: error.message,
+      stack: error.stack,
+      country,
       timestamp: new Date().toISOString()
-    })
+    });
+
+    return res.status(500).json({
+      error: 'Tariff analysis failed',
+      message: error.message,
+      fallback_guidance: {
+        immediate_action: 'Contact U.S. Customs and Border Protection directly',
+        phone: '(202) 325-0000',
+        website: 'https://www.cbp.gov/trade',
+        disclaimer: 'No automated tariff data available - professional consultation required'
+      },
+      timestamp: new Date().toISOString()
+    });
   }
 }
-
-/**
- * Extract tariff rate for specific country from Comtrade response
- */
-function extractCountryTariff(comtradeData, targetCountry, product) {
-  if (!comtradeData.data || !Array.isArray(comtradeData.data)) {
-    return { rate: 20, status: 'NO_DATA', note: 'No Comtrade data available' }
-  }
-  
-  // Find data for target country
-  const countryData = comtradeData.data.find(record => 
-    record.ptCode === targetCountry || record.ptTitle?.includes(getCountryName(targetCountry))
-  )
-  
-  if (!countryData) {
-    return { rate: 20, status: 'COUNTRY_NOT_FOUND', note: 'Country not in dataset' }
-  }
-  
-  // Calculate effective tariff rate
-  const tariffRate = calculateEffectiveTariff(countryData)
-  
-  return {
-    rate: tariffRate,
-    status: 'COMTRADE_OFFICIAL',
-    note: 'Official UN Comtrade data',
-    tradeValue: countryData.tradeValue,
-    netWeight: countryData.netWgt,
-    dataYear: countryData.period
-  }
-}
-
-/**
- * Calculate effective tariff rate from Comtrade data
- */
-function calculateEffectiveTariff(record) {
-  // Basic tariff calculation logic
-  if (record.customsValue && record.tradeValue) {
-    const tariffAmount = record.tradeValue - record.customsValue
-    const rate = (tariffAmount / record.customsValue) * 100
-    return Math.max(0, Math.min(100, rate)) // Cap between 0-100%
-  }
-  
-  // Fallback to standard rates by country
-  return 15 // Default rate
-}
-
-/**
- * Get full country name from code
- */
-function getCountryName(code) {
-  const countryNames = {
-    'CN': 'China',
-    'IN': 'India', 
-    'MX': 'Mexico',
-    'CA': 'Canada',
-    'VN': 'Vietnam',
-    'KR': 'Korea',
-    'JP': 'Japan'
-  }
-  return countryNames[code] || code
-}
-
-// Export the handler with volatile data rate limiting applied
-export default withVolatileRateLimit(handler)
