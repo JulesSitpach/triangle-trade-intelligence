@@ -1,10 +1,11 @@
 /**
  * Simple USMCA Compliance API
  * Direct, focused approach - handles all core USMCA functions
- * No over-engineering, just the essentials
+ * Enhanced with accurate HS code normalization
  */
 
 import { usmcaClassifier } from '../../lib/core/simple-usmca-classifier.js';
+import { normalizeHSCode, validateHSCodeFormat } from '../../lib/utils/hs-code-normalizer.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -62,8 +63,28 @@ async function handleProductClassification(req, res) {
 async function handleUSMCAQualification(req, res) {
   const { hs_code, component_origins, manufacturing_location } = req.body.data;
   
+  // Validate and normalize HS code
+  if (!hs_code) {
+    return res.status(400).json({ 
+      error: 'HS code is required for USMCA qualification check',
+      suggestion: 'Provide HS code (e.g., "8544.42.90" or "85444290")'
+    });
+  }
+  
+  const validation = validateHSCodeFormat(hs_code);
+  if (!validation.valid) {
+    return res.status(400).json({
+      error: 'Invalid HS code format',
+      details: validation.error,
+      suggestion: validation.suggestion,
+      originalInput: hs_code
+    });
+  }
+  
+  const normalizedHSCode = validation.normalized;
+  
   const result = await usmcaClassifier.checkUSMCAQualification(
-    hs_code, 
+    normalizedHSCode, 
     component_origins, 
     manufacturing_location
   );
@@ -71,6 +92,11 @@ async function handleUSMCAQualification(req, res) {
   return res.json({
     success: true,
     qualification: result,
+    hsCode: {
+      original: hs_code,
+      normalized: normalizedHSCode,
+      validation: validation
+    },
     next_step: result.qualified ? 'calculate_savings' : 'review_requirements'
   });
 }
@@ -78,8 +104,25 @@ async function handleUSMCAQualification(req, res) {
 async function handleSavingsCalculation(req, res) {
   const { hs_code, annual_import_value, supplier_country } = req.body.data;
   
+  // Validate and normalize HS code for accurate tariff calculation
+  if (!hs_code) {
+    return res.status(400).json({ 
+      error: 'HS code is required for accurate savings calculation',
+      suggestion: 'Provide specific HS code for your product'
+    });
+  }
+  
+  const normalizedHSCode = normalizeHSCode(hs_code);
+  if (!normalizedHSCode) {
+    return res.status(400).json({
+      error: 'Invalid HS code format',
+      originalInput: hs_code,
+      suggestion: 'Provide valid HS code (e.g., "8544.42.90")'
+    });
+  }
+  
   const result = await usmcaClassifier.calculateSavings(
-    hs_code, 
+    normalizedHSCode, 
     annual_import_value, 
     supplier_country
   );
@@ -87,6 +130,11 @@ async function handleSavingsCalculation(req, res) {
   return res.json({
     success: true,
     savings: result,
+    hsCode: {
+      original: hs_code,
+      normalized: normalizedHSCode,
+      note: 'Calculations based on normalized HS code for accuracy'
+    },
     next_step: result.success && result.annual_savings > 0 ? 'generate_certificate' : 'review_options'
   });
 }

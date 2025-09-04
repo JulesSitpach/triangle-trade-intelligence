@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import TriangleLayout from '../components/TriangleLayout'
+import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
 
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
@@ -12,270 +14,208 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Triangle Intelligence Professional Services</title>
-        <meta name="description" content="The trade intelligence world in full focus built on next gen technology." />
+        <title>TradeFlow Intelligence | USMCA Compliance & Supply Chain Optimization</title>
+        <meta name="description" content="Professional trade services platform delivering comprehensive USMCA compliance analysis and supply chain optimization for North American manufacturers and importers." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="TradeFlow Intelligence | USMCA Compliance Platform" />
+        <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for enterprise clients." />
       </Head>
 
-      {/* Crisis Alert Banner */}
-      <div className="bloomberg-accent-banner">
-        <span>TRADE WAR ALERT: USMCA Treaty Under Review - Emergency Business Protection Active</span>
-        <span className="bloomberg-status bloomberg-status-warning">597K+ Trade Flows Monitored</span>
-      </div>
-
-      {/* Terminal Status Bar */}
-      <div className="bloomberg-card" style={{margin: 0, borderRadius: 0, borderBottom: '1px solid var(--bloomberg-gray-700)'}}>
-        <div className="bloomberg-status bloomberg-status-success">
-          <div className="bloomberg-status-dot"></div>
-          TRIANGLE INTELLIGENCE PROFESSIONAL TERMINAL
-          <span className="text-muted">SESSION: HOME | STATUS: ACTIVE | {isClient ? new Date().toLocaleString() : 'Loading...'}</span>
-        </div>
-      </div>
-
-      {/* Terminal Navigation */}
-      <nav className="bloomberg-nav">
-        <div className="bloomberg-container-padded">
-          <div className="bloomberg-flex" style={{justifyContent: 'space-between', alignItems: 'center'}}>
-            <Link href="/" className="bloomberg-nav-brand">
-              <span className="text-success">◢</span>
-              TRIANGLE INTELLIGENCE
-              <span className="text-primary">PRO v2.1</span>
-            </Link>
-            <div className="bloomberg-flex" style={{justifyContent: 'flex-end', flexWrap: 'wrap'}}>
-              <Link href="/foundation" className="bloomberg-nav-link">PLATFORM</Link>
-              <Link href="/dashboard-hub" className="bloomberg-nav-link">SOLUTIONS</Link>
-              <Link href="/about" className="bloomberg-nav-link">INSIGHTS</Link>
-              <Link href="/pricing" className="bloomberg-nav-link">SUPPORT</Link>
-              <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                ACCESS TERMINAL
-              </Link>
+      {/* Fixed Navigation */}
+      <nav className="nav-fixed">
+        <div className="nav-container">
+          <Link href="/" className="nav-logo-link">
+            <div className="nav-logo-icon">
+              T
             </div>
+            <div>
+              <div className="nav-logo-text">
+                TradeFlow Intelligence
+              </div>
+              <div className="nav-logo-subtitle">
+                USMCA Compliance Platform
+              </div>
+            </div>
+          </Link>
+          <div className="nav-menu">
+            <Link href="/solutions" className="nav-menu-link">
+              Solutions
+            </Link>
+            <Link href="/industries" className="nav-menu-link">
+              Industries
+            </Link>
+            <Link href="/intelligence" className="nav-menu-link">
+              Intelligence
+            </Link>
+            <Link href="/services" className="nav-menu-link">
+              Services
+            </Link>
+            <Link href="/pricing" className="nav-menu-link">
+              Pricing
+            </Link>
+            <Link href="/usmca-workflow" className="nav-cta-button">
+              Start Analysis
+            </Link>
           </div>
         </div>
       </nav>
 
-      <main style={{
-        backgroundColor: 'var(--bloomberg-bg-primary)',
-        color: 'var(--bloomberg-text-primary)',
-        minHeight: '100vh'
-      }}>
-        <div className="bloomberg-main-background">
-        {/* Hero Section with Terminal Styling */}
-        <div className="bloomberg-hero">
-          <div className="bloomberg-container-padded">
-            <div className="bloomberg-hero-content">
-              <h1 className="bloomberg-hero-title">
-                The financial world in full focus built on next gen technology.
-              </h1>
-              <p className="bloomberg-hero-subtitle">
-                Power your decision making with best-in-class tariff data, triangle routing analytics and 
-                access to a global USMCA community - all from one fully integrated solution.
-              </p>
-              <div className="bloomberg-hero-actions">
-                <Link href="/usmca-workflow" className="bloomberg-btn bloomberg-btn-primary bloomberg-btn-large">
-                  🚀 Start USMCA Workflow
-                </Link>
-                <Link href="/foundation" className="bloomberg-btn bloomberg-btn-secondary bloomberg-btn-large">
-                  Access Full Terminal
-                </Link>
-                <Link href="/pricing" className="bloomberg-btn bloomberg-btn-outline bloomberg-btn-large">
-                  View Pricing
-                </Link>
-              </div>
-            </div>
+      {/* Video Hero Section */}
+      <section className="hero-video-section">
+        <video
+          className="hero-video-element"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={(e) => {
+            e.target.playbackRate = 0.8; // Slow down to 50% speed
+          }}
+          onError={(e) => {
+            console.warn('Video failed to load:', e);
+            e.target.style.display = 'none';
+          }}
+        >
+          <source src="/image/earth-seamless-loop.mp4" type="video/mp4" />
+          <source src="/image/earth-seamless-loop.webm" type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+        
+        {/* Gradient Overlay */}
+        <div className="hero-gradient-overlay" />
+        
+        {/* Hero Content */}
+        <div className="hero-content-container">
+          <div className="hero-badge">
+            Trade Policy Update: USMCA Optimization Opportunities Available
+          </div>
+          
+          <h1 className="hero-main-title">
+            Move The World
+          </h1>
+          <h2 className="hero-sub-title">
+            Enterprise <span className="hero-gradient-text">USMCA Compliance</span><br/>
+            <span>& Supply Chain Optimization</span>
+          </h2>
+          
+          <p className="hero-description-text">
+            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for Fortune 500 manufacturers and importers.
+          </p>
+          
+          <div className="hero-button-group">
+            <Link href="/usmca-workflow" className="hero-primary-button">
+              Start USMCA Analysis
+            </Link>
+            <Link href="#calculator" className="hero-secondary-button">
+              Calculate Savings
+            </Link>
           </div>
         </div>
+      </section>
 
-        {/* Real-time Market Status */}
-        <section className="bloomberg-section">
-          <div className="bloomberg-container-padded">
-            <div className="bloomberg-card">
-              <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">LIVE MARKET INTELLIGENCE</h3>
-                <span className="bloomberg-status bloomberg-status-success">
-                  <div className="bloomberg-status-dot"></div>
-                  REAL-TIME
-                </span>
-              </div>
-              <div className="bloomberg-grid bloomberg-grid-4">
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-primary">597K+</div>
-                  <div className="bloomberg-metric-label">Trade Flow Records</div>
-                  <div className="bloomberg-metric-change bloomberg-metric-positive">+12.5% This Month</div>
-                </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-success">$847M</div>
-                  <div className="bloomberg-metric-label">Total Savings Tracked</div>
-                  <div className="bloomberg-metric-change bloomberg-metric-positive">+23.7% YoY</div>
-                </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-success">0%</div>
-                  <div className="bloomberg-metric-label">USMCA Tariff Rate</div>
-                  <div className="bloomberg-metric-change bloomberg-metric-neutral">Treaty Protected</div>
-                </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-error">25-50%</div>
-                  <div className="bloomberg-metric-label">Direct Import Tariffs</div>
-                  <div className="bloomberg-metric-change bloomberg-metric-negative">Rising Risk</div>
-                </div>
-              </div>
+      {isClient && (
+        <>
+          <section id="calculator" className="main-content gradient-subtle py-16">
+            <div className="container-app">
+              <SimpleSavingsCalculator />
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Terminal Products */}
-        <section className="bloomberg-section">
-          <div className="bloomberg-container-padded">
-            <h2 className="bloomberg-section-title">OUR PRODUCTS</h2>
-            
-            {/* Top Row - 3 Main Products */}
-            <div className="bloomberg-grid bloomberg-grid-3 bloomberg-mb-xl">
-              {/* Triangle Terminal */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Triangle Terminal
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  Professional trade routing and tariff optimization platform for enterprise clients.
+          {/* USMCA Compliance Solutions Section */}
+          <section className="main-content">
+            <div className="container-app">
+              <div className="section-header">
+                <h2 className="section-header-title">USMCA Compliance Solutions</h2>
+                <p className="section-header-subtitle">
+                  Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for enterprise clients.
                 </p>
-                <div className="bloomberg-flex">
-                  <Link href="/dashboard" className="bloomberg-btn bloomberg-btn-primary">
-                    Access Terminal
-                  </Link>
-                </div>
-              </div>
-
-              {/* Data Intelligence */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Data Intelligence
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  Real-time trade data, tariff analysis and market intelligence powered by 597K+ trade flows.
-                </p>
-                <div className="bloomberg-flex">
-                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                    View Data
-                  </Link>
-                </div>
-              </div>
-
-              {/* Trading Analytics */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Trading Analytics
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  Advanced analytics for triangle routing strategies and USMCA optimization.
-                </p>
-                <div className="bloomberg-flex">
-                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                    Start Analysis
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row - 3 Additional Products */}
-            <div className="bloomberg-grid bloomberg-grid-3">
-              {/* Risk Management */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Risk Management
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  Monitor political risk, tariff volatility and supply chain disruptions in real-time.
-                </p>
-                <div className="bloomberg-flex">
-                  <Link href="/alerts" className="bloomberg-btn bloomberg-btn-primary">
-                    Monitor Risk
-                  </Link>
-                </div>
-              </div>
-
-              {/* Compliance Monitor */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Compliance Monitor
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  USMCA compliance tracking and regulatory change alerts for seamless operations.
-                </p>
-                <div className="bloomberg-flex">
-                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                    Check Compliance
-                  </Link>
-                </div>
-              </div>
-
-              {/* Market Indices */}
-              <div className="bloomberg-card">
-                <h3 className="bloomberg-card-title bloomberg-font-bold">
-                  Market Indices
-                </h3>
-                <p className="bloomberg-card-subtitle bloomberg-mb-lg">
-                  Track market performance, trade volume indices and economic indicators across USMCA region.
-                </p>
-                <div className="bloomberg-flex">
-                  <Link href="/markets" className="bloomberg-btn bloomberg-btn-primary">
-                    View Markets
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* USMCA Crisis Intelligence */}
-        <section className="bloomberg-section">
-          <div className="bloomberg-container-padded">
-            <div className="bloomberg-card">
-              <div className="bloomberg-card-header">
-                <h3 className="bloomberg-card-title">USMCA TREATY CRISIS MONITOR</h3>
-                <span className="bloomberg-status bloomberg-status-error">
-                  <div className="bloomberg-status-dot"></div>
-                  URGENT
-                </span>
               </div>
               
-              {/* Crisis Description */}
-              <div className="bloomberg-mb-lg">
-                <h4 className="bloomberg-card-title bloomberg-mb-md">Emergency Business Protection</h4>
-                <p className="bloomberg-mb-lg">USMCA treaty under review. 85% of goods could lose 0% protection status. Emergency response team providing immediate business survival protection across all three USMCA countries.</p>
-                <div className="bloomberg-flex">
-                  <Link href="/foundation" className="bloomberg-btn bloomberg-btn-primary">
-                    Emergency Assessment
+              <div className="grid-2-cols">
+                <div className="content-card classification">
+                  <div className="content-card-icon">HC</div>
+                  <h3 className="content-card-title">Trade Classification & Analysis</h3>
+                  <p className="content-card-description">
+                    Professional harmonized system classification with CBP-verified accuracy for streamlined customs processing and duty optimization.
+                  </p>
+                  <Link href="/usmca-workflow" className="content-card-link">
+                    Start Classification Analysis
                   </Link>
-                  <Link href="/pricing" className="bloomberg-btn bloomberg-btn-secondary">
-                    Crisis Pricing
+                </div>
+
+                <div className="content-card analysis">
+                  <div className="content-card-icon">RA</div>
+                  <h3 className="content-card-title">Supply Chain Route Analysis</h3>
+                  <p className="content-card-description">
+                    Comprehensive assessment of trade corridors through Mexico and Canada to identify cost savings and compliance opportunities.
+                  </p>
+                  <Link href="/usmca-workflow" className="content-card-link">
+                    Analyze Trade Routes
                   </Link>
                 </div>
-              </div>
-              
-              {/* Crisis Metrics */}
-              <div className="bloomberg-grid bloomberg-grid-4">
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-error">$1.8T</div>
-                  <div className="bloomberg-metric-label">Trade at Risk</div>
+
+                <div className="content-card certificates">
+                  <div className="content-card-icon">CO</div>
+                  <h3 className="content-card-title">Certificate of Origin Services</h3>
+                  <p className="content-card-description">
+                    Complete documentation services with audit-ready compliance records and professional customs broker partnership.
+                  </p>
+                  <Link href="/usmca-workflow" className="content-card-link">
+                    Generate Certificates
+                  </Link>
                 </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-warning">85%</div>
-                  <div className="bloomberg-metric-label">Goods Losing Protection</div>
-                </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-success">240+</div>
-                  <div className="bloomberg-metric-label">Companies Protected</div>
-                </div>
-                <div className="bloomberg-metric">
-                  <div className="bloomberg-metric-value text-primary">2025</div>
-                  <div className="bloomberg-metric-label">USMCA Review Date</div>
+
+                <div className="content-card compliance">
+                  <div className="content-card-icon">RC</div>
+                  <h3 className="content-card-title">Regulatory Compliance Management</h3>
+                  <p className="content-card-description">
+                    Expert guidance on evolving trade regulations with real-time updates and implementation support for enterprise clients.
+                  </p>
+                  <Link href="/trump-tariff-alerts" className="content-card-link">
+                    Monitor Regulations
+                  </Link>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-        </div>
-      </main>
+          </section>
+
+          {/* Industry Insights Section */}
+          <section className="main-content">
+            <div className="container-app">
+              <div className="section-header">
+                <h2 className="section-header-title">TradeFlow Intelligence Insights</h2>
+                <p className="section-header-subtitle">
+                  Professional insights and analysis for strategic supply chain optimization and regulatory compliance management.
+                </p>
+              </div>
+              
+              <div className="insights-layout">
+                <div className="content-card">
+                  <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
+                  <p className="content-card-description">
+                    Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for enterprise manufacturers.
+                  </p>
+                  <div className="insights-button-group">
+                    <Link href="/usmca-workflow" className="btn-primary">
+                      Read the Analysis
+                    </Link>
+                    <Link href="#calculator" className="btn-secondary">
+                      Calculate Your Savings
+                    </Link>
+                  </div>
+                </div>
+                
+                <img 
+                  src="/image/datos-financieros.jpg" 
+                  alt="Professional Trade Analysis Dashboard"
+                  className="insights-image"
+                />
+              </div>
+            </div>
+          </section>
+        </>
+      )}
     </>
   )
 }

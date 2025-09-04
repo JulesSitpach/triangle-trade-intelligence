@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-09-03T15:06:03.791Z",
+  "total_captures": 3,
+  "successful_captures": 0,
+  "failed_captures": 3,
+  "sources_processed": 3,
+  "viewports_tested": 1,
+  "capture_summary": [
+    {
+      "source": "descartes-homepage",
+      "viewport": "desktop",
+      "success": false,
+      "components": 0
+    },
+    {
+      "source": "descartes-solutions",
+      "viewport": "desktop",
+      "success": false,
+      "components": 0
+    },
+    {
+      "source": "descartes-products",
+      "viewport": "desktop",
+      "success": false,
+      "components": 0
+    }
+  ],
+  "errors": [
+    {
+      "source": "descartes-homepage",
+      "viewport": "desktop",
+      "error": "page.screenshot: options.quality is unsupported for the png screenshots"
+    },
+    {
+      "source": "descartes-solutions",
+      "viewport": "desktop",
+      "error": "page.screenshot: options.quality is unsupported for the png screenshots"
+    },
+    {
+      "source": "descartes-products",
+      "viewport": "desktop",
+      "error": "page.screenshot: options.quality is unsupported for the png screenshots"
+    }
+  ],
+  "quality_metrics": {
+    "success_rate": "0.0%",
+    "avg_components_per_source": "0.0"
+  },
+  "next_steps": [
+    "Review captured references in .claude/references/descartes/",
+    "Run visual comparison: /descartes-compare",
+    "Validate compliance: /descartes-validate",
+    "Generate design fixes: /descartes-fix"
+  ]
+}

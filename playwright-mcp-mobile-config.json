@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "playwright-mobile": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "0"
+      },
+      "config": {
+        "browser": "chromium",
+        "headless": false,
+        "device": "iPhone 15",
+        "args": [
+          "--disable-web-security"
+        ]
+      }
+    }
+  }
+}
