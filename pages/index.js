@@ -6,10 +6,15 @@ import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
 
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
+  }
 
   return (
     <>
@@ -37,23 +42,33 @@ export default function HomePage() {
               </div>
             </div>
           </Link>
-          <div className="nav-menu">
-            <Link href="/solutions" className="nav-menu-link">
+          {/* Mobile Menu Button */}
+          <button 
+            className="nav-menu-toggle"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            ☰
+          </button>
+          
+          <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+            <Link href="/solutions" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Solutions
             </Link>
-            <Link href="/industries" className="nav-menu-link">
+            <Link href="/industries" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Industries
             </Link>
-            <Link href="/intelligence" className="nav-menu-link">
+            <Link href="/intelligence" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Intelligence
             </Link>
-            <Link href="/services" className="nav-menu-link">
+            <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Services
             </Link>
-            <Link href="/pricing" className="nav-menu-link">
+            <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
-            <Link href="/usmca-workflow" className="nav-cta-button">
+            <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
               Start Analysis
             </Link>
           </div>
@@ -104,10 +119,18 @@ export default function HomePage() {
           </p>
           
           <div className="hero-button-group">
-            <Link href="/usmca-workflow" className="hero-primary-button">
+            <Link 
+              href="/usmca-workflow" 
+              className="hero-primary-button"
+              aria-label="Start comprehensive USMCA compliance analysis workflow"
+            >
               Start USMCA Analysis
             </Link>
-            <Link href="#calculator" className="hero-secondary-button">
+            <Link 
+              href="#calculator" 
+              className="hero-secondary-button"
+              aria-label="Scroll to tariff savings calculator section"
+            >
               Calculate Savings
             </Link>
           </div>
@@ -134,45 +157,61 @@ export default function HomePage() {
               
               <div className="grid-2-cols">
                 <div className="content-card classification">
-                  <div className="content-card-icon">HC</div>
+                  <div className="content-card-icon" aria-hidden="true">HC</div>
                   <h3 className="content-card-title">Trade Classification & Analysis</h3>
                   <p className="content-card-description">
                     Professional harmonized system classification with CBP-verified accuracy for streamlined customs processing and duty optimization.
                   </p>
-                  <Link href="/usmca-workflow" className="content-card-link">
+                  <Link 
+                    href="/usmca-workflow" 
+                    className="content-card-link"
+                    aria-label="Start trade classification and analysis workflow"
+                  >
                     Start Classification Analysis
                   </Link>
                 </div>
 
                 <div className="content-card analysis">
-                  <div className="content-card-icon">RA</div>
+                  <div className="content-card-icon" aria-hidden="true">RA</div>
                   <h3 className="content-card-title">Supply Chain Route Analysis</h3>
                   <p className="content-card-description">
                     Comprehensive assessment of trade corridors through Mexico and Canada to identify cost savings and compliance opportunities.
                   </p>
-                  <Link href="/usmca-workflow" className="content-card-link">
+                  <Link 
+                    href="/usmca-workflow" 
+                    className="content-card-link"
+                    aria-label="Start supply chain route analysis and optimization"
+                  >
                     Analyze Trade Routes
                   </Link>
                 </div>
 
                 <div className="content-card certificates">
-                  <div className="content-card-icon">CO</div>
+                  <div className="content-card-icon" aria-hidden="true">CO</div>
                   <h3 className="content-card-title">Certificate of Origin Services</h3>
                   <p className="content-card-description">
                     Complete documentation services with audit-ready compliance records and professional customs broker partnership.
                   </p>
-                  <Link href="/usmca-workflow" className="content-card-link">
+                  <Link 
+                    href="/usmca-workflow" 
+                    className="content-card-link"
+                    aria-label="Start certificate of origin generation and documentation services"
+                  >
                     Generate Certificates
                   </Link>
                 </div>
 
                 <div className="content-card compliance">
-                  <div className="content-card-icon">RC</div>
+                  <div className="content-card-icon" aria-hidden="true">RC</div>
                   <h3 className="content-card-title">Regulatory Compliance Management</h3>
                   <p className="content-card-description">
                     Expert guidance on evolving trade regulations with real-time updates and implementation support for enterprise clients.
                   </p>
-                  <Link href="/trump-tariff-alerts" className="content-card-link">
+                  <Link 
+                    href="/trump-tariff-alerts" 
+                    className="content-card-link"
+                    aria-label="Access real-time regulatory compliance monitoring and alerts"
+                  >
                     Monitor Regulations
                   </Link>
                 </div>
