@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-08-28T23:55:32.600Z",
+  "source": "uncomtrade",
+  "total_codes": 6940,
+  "stats": {
+    "total": 6940,
+    "byLength": {
+      "2": 97,
+      "4": 1229,
+      "6": 5613,
+      "other": 1
+    },
+    "valid": 6939,
+    "invalid": 1,
+    "issues": [
+      {
+        "code": "TOTAL",
+        "issues": [
+          "Invalid format: TOTAL (should be 2-6 digits)"
+        ]
+      }
+    ],
+    "samples": [
+      {
+        "code": "TOTAL",
+        "description": "Total - All H6 commodities",
+        "length": 5
+      },
+      {
+        "code": "01",
+        "description": "01 - Animals; live",
+        "length": 2
+      },
+      {
+        "code": "0101",
+        "description": "0101 - Horses, asses, mules and hinnies; live",
+        "length": 4
+      },
+      {
+        "code": "010121",
+        "description": "010121 - Horses; live, pure-bred breeding animals",
+        "length": 6
+      },
+      {
+        "code": "010129",
+        "description": "010129 - Horses; live, other than pure-bred breeding animals",
+        "length": 6
+      },
+      {
+        "code": "010130",
+        "description": "010130 - Asses; live",
+        "length": 6
+      },
+      {
+        "code": "010190",
+        "description": "010190 - Mules and hinnies; live",
+        "length": 6
+      },
+      {
+        "code": "0102",
+        "description": "0102 - Bovine animals; live",
+        "length": 4
+      },
+      {
+        "code": "010221",
+        "description": "010221 - Cattle; live, pure-bred breeding animals",
+        "length": 6
+      },
+      {
+        "code": "010229",
+        "description": "010229 - Cattle; live, other than pure-bred breeding animals",
+        "length": 6
+      }
+    ],
+    "chapters": {}
+  },
+  "files_generated": {
+    "json": "validated-hs-codes.json",
+    "csv": "hs-codes-for-database.csv",
+    "sql": "import-hs-codes.sql"
+  },
+  "database_import_instructions": [
+    "1. Use import-hs-codes.sql for Postgres/MySQL",
+    "2. Use hs-codes-for-database.csv for bulk CSV import",
+    "3. Table structure: hs_code, description, chapter, version"
+  ],
+  "validationRules": [
+    "HS codes must be 2, 4, or 6 digits",
+    "Codes must follow hierarchical structure",
+    "No empty or null codes allowed"
+  ]
+}

@@ -1,0 +1,191 @@
+[
+  {
+    "fraccion": "870323",
+    "descripcion_es": "Automóviles de turismo con motor de explosión de 1500-3000cc",
+    "descripcion_en": "Motor cars with spark-ignition engine 1500-3000cc (TIGIE 2024)",
+    "arancel_general": 5,
+    "tmec_rate": 0,
+    "chapter": 87,
+    "sector": "Automotive Manufacturing"
+  },
+  {
+    "fraccion": "870333",
+    "descripcion_es": "Automóviles con motor de combustión interna diesel superior a 2500cc",
+    "descripcion_en": "Motor cars with compression-ignition engine >2500cc (TIGIE 2024)",
+    "arancel_general": 5,
+    "tmec_rate": 0,
+    "chapter": 87,
+    "sector": "Automotive Manufacturing"
+  },
+  {
+    "fraccion": "870829",
+    "descripcion_es": "Partes y accesorios de carrocerías",
+    "descripcion_en": "Body parts and accessories for vehicles (TIGIE 2024)",
+    "arancel_general": 10,
+    "tmec_rate": 0,
+    "chapter": 87,
+    "sector": "Automotive Parts"
+  },
+  {
+    "fraccion": "854231",
+    "descripcion_es": "Circuitos integrados procesadores y controladores",
+    "descripcion_en": "Electronic integrated circuits, processors (TIGIE 2024)",
+    "arancel_general": 0,
+    "tmec_rate": 0,
+    "chapter": 85,
+    "sector": "Electronics Manufacturing"
+  },
+  {
+    "fraccion": "854233",
+    "descripcion_es": "Circuitos integrados amplificadores",
+    "descripcion_en": "Electronic integrated circuits, amplifiers (TIGIE 2024)",
+    "arancel_general": 0,
+    "tmec_rate": 0,
+    "chapter": 85,
+    "sector": "Electronics Manufacturing"
+  },
+  {
+    "fraccion": "852520",
+    "descripcion_es": "Aparatos emisores para radiotelefonía y televisión",
+    "descripcion_en": "Transmission apparatus for television (TIGIE 2024)",
+    "arancel_general": 15,
+    "tmec_rate": 0,
+    "chapter": 85,
+    "sector": "Electronics Manufacturing"
+  },
+  {
+    "fraccion": "847130",
+    "descripcion_es": "Máquinas automáticas portátiles de procesamiento de datos",
+    "descripcion_en": "Portable digital data processing machines (TIGIE 2024)",
+    "arancel_general": 0,
+    "tmec_rate": 0,
+    "chapter": 84,
+    "sector": "Electronics Manufacturing"
+  },
+  {
+    "fraccion": "610910",
+    "descripcion_es": "Camisetas de punto de algodón",
+    "descripcion_en": "T-shirts, singlets, knitted, of cotton (TIGIE 2024)",
+    "arancel_general": 35,
+    "tmec_rate": 0,
+    "chapter": 61,
+    "sector": "Textile Manufacturing"
+  },
+  {
+    "fraccion": "620342",
+    "descripcion_es": "Pantalones largos de algodón para hombres",
+    "descripcion_en": "Men's trousers, of cotton, not knitted (TIGIE 2024)",
+    "arancel_general": 35,
+    "tmec_rate": 0,
+    "chapter": 62,
+    "sector": "Textile Manufacturing"
+  },
+  {
+    "fraccion": "630260",
+    "descripcion_es": "Ropa de baño y cocina de tejido afelpado",
+    "descripcion_en": "Toilet and kitchen linen, of terry towelling (TIGIE 2024)",
+    "arancel_general": 25,
+    "tmec_rate": 0,
+    "chapter": 63,
+    "sector": "Textile Manufacturing"
+  },
+  {
+    "fraccion": "100190",
+    "descripcion_es": "Trigo excepto trigo duro",
+    "descripcion_en": "Wheat other than durum wheat (TIGIE 2024)",
+    "arancel_general": 15,
+    "tmec_rate": 5,
+    "chapter": 10,
+    "sector": "Agricultural Products"
+  },
+  {
+    "fraccion": "170199",
+    "descripcion_es": "Azúcar de caña o remolacha refinada",
+    "descripcion_en": "Cane or beet sugar, refined (TIGIE 2024)",
+    "arancel_general": 20,
+    "tmec_rate": 0,
+    "chapter": 17,
+    "sector": "Agricultural Products"
+  },
+  {
+    "fraccion": "200799",
+    "descripcion_es": "Mermeladas y confituras de frutas",
+    "descripcion_en": "Jams, fruit jellies, marmalades (TIGIE 2024)",
+    "arancel_general": 20,
+    "tmec_rate": 5,
+    "chapter": 20,
+    "sector": "Food Processing"
+  },
+  {
+    "fraccion": "220300",
+    "descripcion_es": "Cerveza de malta",
+    "descripcion_en": "Beer made from malt (TIGIE 2024)",
+    "arancel_general": 25,
+    "tmec_rate": 0,
+    "chapter": 22,
+    "sector": "Beverages"
+  },
+  {
+    "fraccion": "220421",
+    "descripcion_es": "Vino de uvas frescas en recipientes de hasta 2 litros",
+    "descripcion_en": "Wine of fresh grapes, ≤2L containers (TIGIE 2024)",
+    "arancel_general": 20,
+    "tmec_rate": 0,
+    "chapter": 22,
+    "sector": "Beverages"
+  },
+  {
+    "fraccion": "300490",
+    "descripcion_es": "Medicamentos para venta al por menor",
+    "descripcion_en": "Medicaments, retail packages (TIGIE 2024)",
+    "arancel_general": 0,
+    "tmec_rate": 0,
+    "chapter": 30,
+    "sector": "Pharmaceuticals"
+  },
+  {
+    "fraccion": "390110",
+    "descripcion_es": "Polietileno de densidad inferior a 0,94",
+    "descripcion_en": "Polyethylene, density < 0.94 (TIGIE 2024)",
+    "arancel_general": 10,
+    "tmec_rate": 0,
+    "chapter": 39,
+    "sector": "Chemicals & Plastics"
+  },
+  {
+    "fraccion": "640351",
+    "descripcion_es": "Calzado con suela de caucho o plástico que cubra el tobillo",
+    "descripcion_en": "Footwear with outer soles of rubber/plastic, covering ankle (TIGIE 2024)",
+    "arancel_general": 35,
+    "tmec_rate": 0,
+    "chapter": 64,
+    "sector": "Footwear"
+  },
+  {
+    "fraccion": "640419",
+    "descripcion_es": "Calzado con suela de caucho y parte superior textil",
+    "descripcion_en": "Footwear with outer soles of rubber, upper textile (TIGIE 2024)",
+    "arancel_general": 32,
+    "tmec_rate": 0,
+    "chapter": 64,
+    "sector": "Footwear"
+  },
+  {
+    "fraccion": "950300",
+    "descripcion_es": "Otros juguetes y modelos a escala reducida",
+    "descripcion_en": "Other toys, reduced-size models (TIGIE 2024)",
+    "arancel_general": 15,
+    "tmec_rate": 0,
+    "chapter": 95,
+    "sector": "Consumer Goods"
+  },
+  {
+    "fraccion": "940161",
+    "descripcion_es": "Asientos con armazón de madera tapizados",
+    "descripcion_en": "Seats with wooden frames, upholstered (TIGIE 2024)",
+    "arancel_general": 15,
+    "tmec_rate": 0,
+    "chapter": 94,
+    "sector": "Furniture"
+  }
+]

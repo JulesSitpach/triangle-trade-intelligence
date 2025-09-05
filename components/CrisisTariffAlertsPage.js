@@ -533,30 +533,32 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
 
   const getSeverityColor = (severity) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-50 border-red-200';
-      case 'high': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-blue-600 bg-blue-50 border-blue-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      case 'critical': return 'alert-error';
+      case 'high': return 'alert-warning';
+      case 'medium': return 'alert-warning';
+      case 'low': return 'alert-info';
+      default: return 'alert';
     }
   };
 
   const getSeverityIcon = (severity) => {
     switch (severity) {
-      case 'critical': return <AlertCircle className="w-5 h-5 text-red-500" />;
-      case 'high': return <TrendingUp className="w-5 h-5 text-orange-500" />;
-      case 'medium': return <Clock className="w-5 h-5 text-yellow-500" />;
-      case 'low': return <Bell className="w-5 h-5 text-blue-500" />;
-      default: return <Bell className="w-5 h-5 text-gray-500" />;
+      case 'critical': return <AlertCircle className="icon-md" style={{color: '#dc2626'}} />;
+      case 'high': return <TrendingUp className="icon-md" style={{color: '#d97706'}} />;
+      case 'medium': return <Clock className="icon-md" style={{color: '#eab308'}} />;
+      case 'low': return <Bell className="icon-md" style={{color: 'var(--blue-500)'}} />;
+      default: return <Bell className="icon-md" style={{color: 'var(--gray-500)'}} />;
     }
   };
 
   if (servicesLoading || dataLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading crisis monitoring services...</p>
+      <div className="app-layout">
+        <div className="container-app" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh'}}>
+          <div style={{textAlign: 'center'}}>
+            <RefreshCw className="icon-lg loading-spinner" />
+            <p className="text-body" style={{marginTop: '1rem', color: 'var(--gray-600)'}}>Loading crisis monitoring services...</p>
+          </div>
         </div>
       </div>
     );
@@ -573,30 +575,30 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
     dynamicMessages?.volatilityWarning || 'Tariff rates changing rapidly. Triangle Intelligence monitors government sources 24/7 to keep you protected.';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-layout">
       {/* Dynamic Header - NO HARDCODED TEXT */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+      <div className="card">
+        <div className="container-app">
+          <div className="header-content" style={{paddingTop: '1.5rem', paddingBottom: '1.5rem'}}>
             <div>
               <h1 className="page-title">
                 {heroTitle}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="page-subtitle">
                 {heroSubtitle}
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="header-actions">
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                className="btn-secondary"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`icon-sm ${refreshing ? 'loading-spinner' : ''}`} style={{marginRight: '0.5rem'}} />
                 Refresh
               </button>
-              <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                <Settings className="w-4 h-4 mr-2" />
+              <button className="btn-primary">
+                <Settings className="icon-sm" style={{marginRight: '0.5rem'}} />
                 Settings
               </button>
             </div>
@@ -606,23 +608,23 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
 
       {/* Professional Validation Banner - DATABASE-DRIVEN */}
       {professionalValidator && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Shield className="w-6 h-6 text-blue-600" />
+        <div className="alert alert-info">
+          <div className="container-app">
+            <div className="header-content">
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                <Shield className="icon-md" style={{color: 'var(--blue-600)'}} />
                 <div>
-                  <p className="text-sm font-medium text-blue-900">
+                  <p className="form-label" style={{color: 'var(--navy-900)', marginBottom: '0.25rem'}}>
                     Professional Validation Available
                   </p>
-                  <p className="text-xs text-blue-700">
+                  <p className="text-muted" style={{fontSize: '0.75rem', color: 'var(--blue-700)'}}>
                     Validated by {professionalValidator.validator_name}, 
                     Licensed Customs Broker #{professionalValidator.license_number}
                     {professionalValidator.experience_years && ` • ${professionalValidator.experience_years} years experience`}
                   </p>
                 </div>
               </div>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              <button className="btn-primary">
                 Book Consultation - ${professionalValidator.hourly_rate || 500}/hour
               </button>
             </div>
@@ -632,80 +634,80 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
 
       {/* Crisis Impact Calculator - DYNAMIC DATA */}
       {calculatorData && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-6">
-            <div className="flex items-center mb-4">
-              <AlertCircle className="w-6 h-6 text-red-600 mr-3" />
-              <h2 className="text-lg font-semibold text-gray-900">Your Crisis Impact Assessment</h2>
+        <div className="container-app">
+          <div className="card" style={{border: '2px solid var(--amber-300)', background: 'linear-gradient(135deg, var(--amber-50) 0%, rgba(255, 255, 255, 0.8) 100%)'}}>
+            <div style={{display: 'flex', alignItems: 'center', marginBottom: '1rem'}}>
+              <AlertCircle className="icon-md" style={{color: '#dc2626', marginRight: '0.75rem'}} />
+              <h2 className="card-title">Your Crisis Impact Assessment</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between">
+            <div className="status-grid">
+              <div className="status-card">
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <div>
-                    <p className="text-sm text-gray-600">Crisis Tariff Penalty</p>
-                    <p className="text-2xl font-bold text-red-600">
+                    <p className="status-label">Crisis Tariff Penalty</p>
+                    <p className="status-value" style={{color: '#dc2626'}}>
                       {formatCurrency(calculatorData.crisis_penalty || dynamicDefaults?.crisisAmount || 250000)}
                     </p>
-                    <p className="text-xs text-red-500">
+                    <p className="text-muted" style={{fontSize: '0.75rem', color: '#dc2626'}}>
                       {(calculatorData.crisis_tariff_rate * 100 || 25).toFixed(1)}% rate
                     </p>
                   </div>
-                  <TrendingUp className="w-8 h-8 text-red-500" />
+                  <TrendingUp className="icon-lg" style={{color: '#dc2626'}} />
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between">
+              <div className="status-card">
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <div>
-                    <p className="text-sm text-gray-600">With USMCA Compliance</p>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="status-label">With USMCA Compliance</p>
+                    <p className="status-value success">
                       {formatCurrency(calculatorData.usmca_penalty || 0)}
                     </p>
-                    <p className="text-xs text-green-500">
+                    <p className="text-muted" style={{fontSize: '0.75rem', color: 'var(--green-500)'}}>
                       {(calculatorData.usmca_rate * 100 || 0).toFixed(1)}% rate
                     </p>
                   </div>
-                  <Shield className="w-8 h-8 text-green-500" />
+                  <Shield className="icon-lg" style={{color: 'var(--green-500)'}} />
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between">
+              <div className="status-card">
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                   <div>
-                    <p className="text-sm text-gray-600">Total Savings</p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="status-label">Total Savings</p>
+                    <p className="status-value info">
                       {formatCurrency(calculatorData.total_savings || dynamicDefaults?.crisisAmount || 250000)}
                     </p>
-                    <p className="text-xs text-blue-500">
+                    <p className="text-muted" style={{fontSize: '0.75rem', color: 'var(--blue-500)'}}>
                       Annual protection
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-blue-500" />
+                  <DollarSign className="icon-lg" style={{color: 'var(--blue-500)'}} />
                 </div>
               </div>
             </div>
 
             {/* ROI with Dynamic Pricing */}
             {pricingTiers.length > 0 && (
-              <div className="mt-6 p-4 bg-white rounded-lg">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">
+              <div className="status-card" style={{marginTop: '1.5rem'}}>
+                <h3 className="form-label" style={{marginBottom: '0.75rem'}}>
                   Platform ROI Analysis - Professional Protection
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="status-grid">
                   {pricingTiers.slice(0, 3).map((tier, index) => {
                     const annualCost = tier.base_price * 12;
                     const roi = calculatorData.total_savings ? (calculatorData.total_savings * 12) / annualCost : 0;
                     const paybackDays = calculatorData.total_savings ? Math.ceil((annualCost / calculatorData.total_savings) * 30) : 0;
                     
                     return (
-                      <div key={tier.service_slug} className="text-center">
-                        <p className="text-sm font-medium text-gray-700">{tier.display_name_en}</p>
-                        <p className="text-lg font-bold text-blue-600">{roi.toFixed(1)}x ROI</p>
-                        <p className="text-xs text-gray-500">
+                      <div key={tier.service_slug} style={{textAlign: 'center'}}>
+                        <p className="form-label">{tier.display_name_en}</p>
+                        <p className="status-value info">{roi.toFixed(1)}x ROI</p>
+                        <p className="text-muted" style={{fontSize: '0.75rem'}}>
                           Pays for itself in {paybackDays} days
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-muted" style={{fontSize: '0.75rem'}}>
                           ${tier.base_price}/month
                         </p>
                       </div>
@@ -719,64 +721,64 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
       )}
 
       {/* Alerts List - DYNAMIC DATA */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
+      <div className="container-app">
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">
               Your Crisis Alerts ({alerts.length})
             </h2>
           </div>
           
           {alerts.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No active alerts</h3>
-              <p className="text-gray-500">
+            <div className="alerts-empty">
+              <Bell className="alerts-empty-icon" style={{color: 'var(--gray-400)'}} />
+              <h3 className="card-title" style={{marginBottom: '0.5rem'}}>No active alerts</h3>
+              <p className="text-muted">
                 You&apos;ll see crisis alerts here when tariff changes affect your business.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="alerts-list">
               {alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className={`p-6 ${!alert.read_status ? 'bg-blue-50' : ''} hover:bg-gray-50`}
+                  className={`alert-item ${!alert.read_status ? 'unread' : ''}`}
                 >
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
+                  <div className="alert-header">
+                    <div style={{flexShrink: 0}}>
                       {getSeverityIcon(alert.severity)}
                     </div>
                     
-                    <div className="ml-4 flex-1">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <div className="alert-content">
+                      <div>
+                        <div>
+                          <h3 className="alert-title">
                             {alert.alert_title}
                           </h3>
                           
-                          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-3 ${getSeverityColor(alert.severity)}`}>
+                          <div className={`badge ${getSeverityColor(alert.severity)}`} style={{marginBottom: '0.75rem'}}>
                             {alert.severity.toUpperCase()}
                           </div>
                           
                           {alert.estimated_impact && (
-                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                              <h4 className="font-medium text-gray-900 mb-2">Estimated Impact</h4>
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div className="status-card" style={{marginBottom: '1rem'}}>
+                              <h4 className="card-title" style={{marginBottom: '0.5rem'}}>Estimated Impact</h4>
+                              <div className="status-grid" style={{fontSize: '0.875rem'}}>
                                 <div>
-                                  <p className="text-gray-600">Potential Penalty</p>
-                                  <p className="font-bold text-red-600">
+                                  <p className="text-muted">Potential Penalty</p>
+                                  <p className="status-value" style={{color: '#dc2626'}}>
                                     {formatCurrency(alert.estimated_impact.cost_increase)}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-gray-600">Tariff Rate</p>
-                                  <p className="font-bold text-orange-600">
+                                  <p className="text-muted">Tariff Rate</p>
+                                  <p className="status-value warning">
                                     {alert.estimated_impact.percentage_increase?.toFixed(1)}%
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-gray-600">Products Affected</p>
-                                  <p className="font-bold text-blue-600">
+                                  <p className="text-muted">Products Affected</p>
+                                  <p className="status-value info">
                                     {alert.estimated_impact.affected_products}
                                   </p>
                                 </div>
@@ -784,23 +786,23 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
                             </div>
                           )}
                           
-                          <div className="text-sm text-gray-600 mb-4 whitespace-pre-line">
+                          <div className="text-body" style={{marginBottom: '1rem', whiteSpace: 'pre-line'}}>
                             {alert.alert_message}
                           </div>
                           
                           {alert.recommended_actions && alert.recommended_actions.length > 0 && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                              <h4 className="font-medium text-green-900 mb-2">
+                            <div className="alert alert-success">
+                              <h4 className="alert-title" style={{color: 'var(--green-900)', marginBottom: '0.5rem'}}>
                                 Recommended Actions - Professional Validation Available
                               </h4>
-                              <ul className="list-disc list-inside space-y-1 text-sm text-green-800">
+                              <ul style={{listStyle: 'disc', listStylePosition: 'inside', fontSize: '0.875rem', color: 'var(--green-800)'}}>
                                 {alert.recommended_actions.slice(0, 5).map((action, actionIndex) => (
-                                  <li key={actionIndex}>{action}</li>
+                                  <li key={actionIndex} style={{marginBottom: '0.25rem'}}>{action}</li>
                                 ))}
                               </ul>
                               {professionalValidator && (
-                                <div className="mt-3 pt-3 border-t border-green-200">
-                                  <button className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">
+                                <div style={{marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--green-200)'}}>
+                                  <button className="btn-success">
                                     Schedule Professional Review - ${professionalValidator.hourly_rate}/hour
                                   </button>
                                 </div>
@@ -809,14 +811,14 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
                           )}
                         </div>
                         
-                        <div className="ml-6 flex-shrink-0 text-right">
-                          <p className="text-sm text-gray-500">
+                        <div className="alert-timestamp">
+                          <p className="text-muted" style={{fontSize: '0.875rem'}}>
                             {formatDate(alert.created_at)}
                           </p>
                           {!alert.read_status && (
                             <button
                               onClick={() => markAsRead(alert.id)}
-                              className="mt-2 text-xs text-blue-600 hover:text-blue-800"
+                              className="btn-secondary" style={{marginTop: '0.5rem', fontSize: '0.75rem'}}
                             >
                               Mark as read
                             </button>
@@ -833,21 +835,21 @@ export default function CrisisTariffAlertsPage({ customerId, companyName }) {
       </div>
 
       {/* Crisis Context - DYNAMIC MESSAGING */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <div className="flex">
-            <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
+      <div className="container-app">
+        <div className="alert alert-warning">
+          <div className="alert-content">
+            <AlertCircle className="alert-icon icon-md" style={{color: '#dc2626'}} />
+            <div>
+              <h3 className="alert-title" style={{color: '#991b1b'}}>
                 Crisis Monitoring Active
               </h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="text-body" style={{marginTop: '0.5rem', color: '#b91c1c'}}>
                 <p>
                   {volatilityWarning}
                   <span className="font-semibold"> Professional validation available for critical decisions.</span>
                 </p>
                 {professionalValidator && (
-                  <p className="mt-2">
+                  <p style={{marginTop: '0.5rem'}}>
                     <strong>Expert Available:</strong> {professionalValidator.validator_name}, 
                     Licensed Customs Broker #{professionalValidator.license_number}
                   </p>

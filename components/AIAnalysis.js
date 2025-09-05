@@ -47,28 +47,28 @@ const AIAnalysis = ({
   };
 
   const getConfidenceColor = (confidence) => {
-    if (confidence >= CONFIDENCE_CONFIG.highConfidence) return 'bg-sage-100 text-sage-700';
-    if (confidence >= CONFIDENCE_CONFIG.mediumConfidence) return 'bg-teal-100 text-teal-700';
-    if (confidence >= CONFIDENCE_CONFIG.lowConfidence) return 'bg-yellow-100 text-yellow-700';
-    return 'bg-gray-100 text-gray-700';
+    if (confidence >= CONFIDENCE_CONFIG.highConfidence) return 'status-success';
+    if (confidence >= CONFIDENCE_CONFIG.mediumConfidence) return 'status-info';
+    if (confidence >= CONFIDENCE_CONFIG.lowConfidence) return 'status-warning';
+    return 'badge';
   };
 
   const renderClarifyingQuestion = (item, index) => (
-    <div key={index} className="p-4 bg-navy-50 border border-navy-200 rounded-lg">
-      <h4 className="font-medium text-navy-900 mb-3">{item.question}</h4>
+    <div key={index} className="alert alert-info">
+      <h4 className="alert-title">{item.question}</h4>
       <div className={STYLE_CONFIG.spacing.resultGap}>
         {item.options?.map((option, optIndex) => (
           <button
             key={optIndex}
             onClick={() => handleClarifyingOptionSelect(option)}
-            className="w-full text-left p-3 bg-white border border-navy-200 rounded hover:bg-navy-50 hover:border-navy-300 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500"
+            className="btn-secondary" style={{width: '100%', textAlign: 'left', marginBottom: '0.5rem'}}
             aria-label={`Select ${option.option_text}`}
           >
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-navy-800">{option.option_text}</span>
-              <span className="text-sm text-gray-600">{option.description}</span>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <span className="form-label">{option.option_text}</span>
+              <span className="text-muted">{option.description}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Sample codes: {option.sample_codes}</p>
+            <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>Sample codes: {option.sample_codes}</p>
           </button>
         ))}
       </div>
@@ -76,32 +76,32 @@ const AIAnalysis = ({
   );
 
   const renderSpecificCode = (item, index) => (
-    <div key={index} className="p-3 bg-white border border-warm-gray-200 rounded-md hover:border-navy-200 transition-colors">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center space-x-2">
-          <span className="font-mono text-sm font-medium text-navy-700">{item.hs_code}</span>
+    <div key={index} className="status-card">
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem'}}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+          <span className="hs-code-display">{item.hs_code}</span>
           {item.confidence && (
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${getConfidenceColor(item.confidence)}`}>
+            <span className={`badge ${getConfidenceColor(item.confidence)}`}>
               {item.confidence}% Match
             </span>
           )}
         </div>
         <button
           onClick={() => handleHSCodeSelect(item)}
-          className="text-xs px-3 py-1 bg-navy-600 text-white rounded hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy-500 transition-colors"
+          className="btn-primary" style={{fontSize: '0.75rem', padding: '0.25rem 0.75rem'}}
           aria-label={`Use HS code ${item.hs_code}`}
         >
           {UI_TEXT.buttons.useThisCode}
         </button>
       </div>
-      <p className="text-xs text-gray-600 mb-1">{item.description}</p>
-      <div className="text-xs text-gray-500">
-        <span className={`mr-2 ${item.usmca_eligible ? 'text-sage-600' : 'text-amber-600'}`}>
+      <p className="hs-description">{item.description}</p>
+      <div className="hs-rates-display">
+        <span style={{marginRight: '0.5rem', color: item.usmca_eligible ? 'var(--green-600)' : 'var(--amber-600)'}}>
           {item.usmca_eligible ? '✓ USMCA Eligible' : '✗ Not USMCA Eligible'}
         </span>
         <span>Chapter {item.chapter}</span>
         {item.confidence_label && (
-          <span className="ml-2 text-gray-400">• {item.confidence_label}</span>
+          <span style={{marginLeft: '0.5rem', color: 'var(--gray-400)'}}>• {item.confidence_label}</span>
         )}
       </div>
     </div>
@@ -110,45 +110,45 @@ const AIAnalysis = ({
   const renderRegularSuggestion = (item, index) => (
     <div
       key={index}
-      className={`w-full p-3 rounded-md border transition-colors ${
-        item.isUserProvided
-          ? 'bg-gradient-to-r from-sage-50 to-sage-100 border-sage-300'
-          : 'bg-white border-warm-gray-200 hover:bg-navy-50 hover:border-navy-200'
-      }`}
+      className={item.isUserProvided ? 'status-card' : 'card'}
+      style={item.isUserProvided ? {
+        background: 'linear-gradient(135deg, var(--green-50) 0%, rgba(255, 255, 255, 0.8) 100%)',
+        border: '1px solid var(--green-300)'
+      } : {}}
     >
-      <div className="flex justify-between items-center">
-        <span className="font-medium">
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <span className="form-label">
           {item.chapter ? `${item.category} (Chapter ${item.chapter})` : item.category}
         </span>
-        <span className="text-sm text-gray-600">
+        <span className="text-muted">
           {item.confidence}% confidence
         </span>
       </div>
-      <p className="text-xs text-gray-600 mt-1">{item.reason}</p>
+      <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>{item.reason}</p>
       
       {/* Show complete USMCA results for user-provided HS codes */}
       {item.isUserProvided && item.usmcaResults && (
-        <div className="mt-3 p-2 bg-white rounded border border-sage-200">
-          <h4 className="text-sm font-medium text-sage-800 mb-2">Complete USMCA Analysis Results:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="status-card" style={{marginTop: '0.75rem', border: '1px solid var(--green-200)'}}>
+          <h4 className="form-label" style={{color: 'var(--green-800)', marginBottom: '0.5rem'}}>Complete USMCA Analysis Results:</h4>
+          <div className="form-grid-2" style={{fontSize: '0.75rem'}}>
             <div>
-              <span className="font-medium">USMCA Qualified:</span>{' '}
-              <span className={item.usmcaResults.qualified ? 'text-sage-600' : 'text-amber-600'}>
+              <span className="status-label">USMCA Qualified:</span>{' '}
+              <span style={{color: item.usmcaResults.qualified ? 'var(--green-600)' : 'var(--amber-600)'}}>
                 {item.usmcaResults.qualified ? 'YES' : 'NO'}
               </span>
             </div>
             <div>
-              <span className="font-medium">Annual Savings:</span>{' '}
-              <span className="text-sage-600 font-bold">
+              <span className="status-label">Annual Savings:</span>{' '}
+              <span className="status-value success">
                 ${item.usmcaResults.savings?.toLocaleString() || '0'}
               </span>
             </div>
           </div>
-          <div className="mt-2 flex space-x-2">
-            <button className="text-xs px-2 py-1 bg-sage-600 text-white rounded hover:bg-sage-700 focus:outline-none focus:ring-2 focus:ring-sage-500">
+          <div style={{marginTop: '0.5rem', display: 'flex', gap: '0.5rem'}}>
+            <button className="btn-success" style={{fontSize: '0.75rem', padding: '0.25rem 0.5rem'}}>
               {UI_TEXT.buttons.generateCertificate}
             </button>
-            <button className="text-xs px-2 py-1 bg-navy-600 text-white rounded hover:bg-navy-700 focus:outline-none focus:ring-2 focus:ring-navy-500">
+            <button className="btn-primary" style={{fontSize: '0.75rem', padding: '0.25rem 0.5rem'}}>
               {UI_TEXT.buttons.viewRoutes}
             </button>
           </div>
@@ -159,7 +159,7 @@ const AIAnalysis = ({
       {item.isDynamicHSCode && (
         <button
           onClick={() => handleHSCodeSelect(item)}
-          className="mt-2 text-xs px-3 py-1 bg-navy-600 text-white rounded hover:bg-navy-700 transition-colors focus:outline-none focus:ring-2 focus:ring-navy-500"
+          className="btn-primary" style={{marginTop: '0.5rem', fontSize: '0.75rem', padding: '0.25rem 0.75rem'}}
           aria-label={`Use HS Code ${item.hs_code}`}
         >
           Use HS Code {item.hs_code}
@@ -170,7 +170,7 @@ const AIAnalysis = ({
       {!item.isUserProvided && !item.isDynamicHSCode && (
         <button
           onClick={() => handleCategorySelect(item.category)}
-          className="mt-2 text-xs text-navy-600 hover:text-navy-800 focus:outline-none focus:underline"
+          className="btn-secondary" style={{marginTop: '0.5rem', fontSize: '0.75rem', textDecoration: 'underline'}}
         >
           {UI_TEXT.buttons.selectCategory}
         </button>
@@ -191,25 +191,25 @@ const AIAnalysis = ({
   };
 
   return (
-    <div className={`bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 ${className}`}>
+    <div className={`alert alert-info ${className}`}>
       {isAnalyzing ? (
         <div 
-          className="flex items-center space-x-2"
+          style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
           role="status"
           aria-label={A11Y_CONFIG.ariaLabels.loadingSpinner}
         >
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" aria-hidden="true"></div>
-          <span className="text-sm text-blue-700">AI analyzing your product description...</span>
+          <div className="loading-spinner" aria-hidden="true"></div>
+          <span className="text-body">AI analyzing your product description...</span>
         </div>
       ) : error ? (
-        <div className="flex items-center space-x-2 text-red-700" role="alert">
-          <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">{error}</span>
+        <div className="alert alert-error" role="alert">
+          <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
+          <span className="text-body">{error}</span>
         </div>
       ) : suggestions.length > 0 ? (
         <div role="region" aria-label={A11Y_CONFIG.ariaLabels.analysisResults}>
           {showTitle && (
-            <p className="text-sm font-medium text-blue-900 mb-2">
+            <p className="form-label" style={{marginBottom: '0.5rem'}}>
               {suggestions.some(s => s.isDynamicHSCode) 
                 ? 'Found these HS codes for your product:'
                 : 'Based on your description, this appears to be:'
@@ -222,12 +222,12 @@ const AIAnalysis = ({
           </div>
           
           {suggestions.length > DISPLAY_CONFIG.maxSuggestionDisplay && (
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.5rem'}}>
               Showing {DISPLAY_CONFIG.maxSuggestionDisplay} of {suggestions.length} results
             </p>
           )}
           
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.5rem'}}>
             Select a suggestion above, or continue with manual classification below
           </p>
         </div>

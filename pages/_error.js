@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-function Error({ statusCode, hasGetInitialPropsRun, err }) {
+function Error({ statusCode, err }) {
   useEffect(() => {
     if (err) {
       // Log error to monitoring service

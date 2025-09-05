@@ -198,31 +198,34 @@ export default function ComponentOriginsStepEnhanced({
   };
 
   return (
-    <div className="card">
-      <div className="element-spacing">
-        <h2 className="section-title">
+    <div className="dashboard-container">
+      <div className="form-section">
+        <h2 className="form-section-title">
           Step 2: Product & Component Analysis
         </h2>
-        <p className="text-muted">
+        <p className="form-section-description">
           Describe your product, manufacturing location, and break it down into components with their origins and HS codes
         </p>
         
         {/* Educational template button */}
-        <button
-          type="button"
-          onClick={loadExample}
-          className="btn-secondary"
-          style={{ marginTop: '12px' }}
-        >
-          Show form structure example (educational only)
-        </button>
+        <div className="alert alert-info">
+          <div className="alert-content">
+            <button
+              type="button"
+              onClick={loadExample}
+              className="btn-secondary"
+            >
+              Show form structure example (educational only)
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Product Overview Section */}
-      <div className="section-spacing card">
-        <h3 className="card-title">Product Overview</h3>
+      <div className="form-section">
+        <h3 className="form-section-title">Product Overview</h3>
         
-        <div className="grid-2">
+        <div className="form-grid-2">
           {/* Main Product Description */}
           <div className="form-group">
             <label className="form-label">
@@ -235,9 +238,9 @@ export default function ComponentOriginsStepEnhanced({
               placeholder="Describe your complete product (e.g., Electronic device, Machinery assembly, Textile product)"
               className="form-input"
             />
-            <p className="text-muted" style={{ fontSize: '12px', marginTop: '4px' }}>
+            <div className="form-help">
               Brief description of your complete product
-            </p>
+            </div>
           </div>
 
           {/* Manufacturing Location */}
@@ -262,9 +265,9 @@ export default function ComponentOriginsStepEnhanced({
               <option value="KR">South Korea</option>
               <option value="TW">Taiwan</option>
             </select>
-            <p className="text-muted" style={{ fontSize: '12px', marginTop: '4px' }}>
+            <div className="form-help">
               Where is the final product assembled/manufactured?
-            </p>
+            </div>
           </div>
         </div>
       </div>
@@ -277,10 +280,10 @@ export default function ComponentOriginsStepEnhanced({
         </p>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
+      <div className="element-spacing">
         {components.map((component, index) => (
-          <div key={index} className="card-compact" style={{ marginBottom: '16px' }}>
-            <div className="header-actions" style={{ marginBottom: '12px' }}>
+          <div key={index} className="form-section">
+            <div className="header-actions tight-spacing">
               <h3 className="card-title">Component {index + 1}</h3>
               {components.length > 1 && (
                 <button
@@ -288,7 +291,6 @@ export default function ComponentOriginsStepEnhanced({
                   onClick={() => removeComponent(index)}
                   className="btn-danger"
                   title="Remove component"
-                  style={{ padding: '6px' }}
                 >
                   <X className="icon-sm" />
                 </button>
@@ -297,7 +299,7 @@ export default function ComponentOriginsStepEnhanced({
 
             <div className="grid-2">
               {/* Component Description */}
-              <div style={{ gridColumn: '1 / -1' }} className="form-group">
+              <div className="form-group">
                 <label className="form-label">
                   Component Description
                 </label>
@@ -338,7 +340,7 @@ export default function ComponentOriginsStepEnhanced({
                 <label className="form-label">
                   Value Percentage
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="form-input-group">
                   <input
                     type="number"
                     min="0"
@@ -347,22 +349,22 @@ export default function ComponentOriginsStepEnhanced({
                     onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || 0)}
                     className="form-input"
                   />
-                  <span className="text-muted" style={{ marginLeft: '8px' }}>%</span>
+                  <span className="form-input-suffix">%</span>
                 </div>
               </div>
 
               {/* HS Code Input with Suggestions */}
-              <div style={{ gridColumn: '1 / -1' }} className="form-group">
+              <div className="form-group">
                 <label className="form-label">
                   HS Code
                   {searchingHS[index] && (
-                    <span className="status-info" style={{ marginLeft: '8px' }}>Searching...</span>
+                    <span className="status-info">Searching...</span>
                   )}
-                  <span className="status-success" style={{ marginLeft: '8px' }}>
+                  <span className="status-success">
                     (Manual entries help improve our database)
                   </span>
                 </label>
-                <div style={{ position: 'relative' }}>
+                <div className="form-input-container">
                   <input
                     type="text"
                     value={component.hs_code}
@@ -373,8 +375,8 @@ export default function ComponentOriginsStepEnhanced({
                   
                   {/* HS Code Suggestions */}
                   {component.hs_suggestions && component.hs_suggestions.length > 0 && (
-                    <div className="card-compact" style={{ marginTop: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-                      <div className="text-muted" style={{ padding: '8px', borderBottom: '1px solid var(--border-light)', fontSize: '12px' }}>
+                    <div className="hs-suggestions-container">
+                      <div className="hs-suggestions-header">
                         Suggested HS codes based on description:
                       </div>
                       {component.hs_suggestions.slice(0, 5).map((suggestion, sIndex) => (
@@ -382,23 +384,16 @@ export default function ComponentOriginsStepEnhanced({
                           key={sIndex}
                           type="button"
                           onClick={() => selectHSCode(index, suggestion.hsCode, suggestion.description)}
-                          className="btn-secondary"
-                          style={{ 
-                            width: '100%', 
-                            textAlign: 'left', 
-                            padding: '8px',
-                            borderBottom: sIndex < component.hs_suggestions.slice(0, 5).length - 1 ? '1px solid var(--border-light)' : 'none',
-                            borderRadius: '0'
-                          }}
+                          className="btn-secondary hs-suggestion-button"
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                            <div style={{ flex: 1 }}>
-                              <div className="text-body" style={{ fontWeight: '500', fontSize: '14px' }}>{suggestion.hsCode}</div>
-                              <div className="text-muted" style={{ fontSize: '12px' }}>
+                          <div className="hs-suggestion-content">
+                            <div className="hs-suggestion-info">
+                              <div className="hs-code-display">{suggestion.hsCode}</div>
+                              <div className="hs-description">
                                 {suggestion.description}
                               </div>
                             </div>
-                            <div style={{ marginLeft: '8px' }}>
+                            <div className="hs-confidence">
                               <span className={
                                 suggestion.confidence >= 75 ? 'status-success' :
                                 suggestion.confidence >= 50 ? 'status-warning' :
@@ -408,7 +403,7 @@ export default function ComponentOriginsStepEnhanced({
                               </span>
                             </div>
                           </div>
-                          <div className="text-muted" style={{ fontSize: '12px', marginTop: '4px' }}>
+                          <div className="hs-rates-display">
                             MFN: {suggestion.mfnRate}% | USMCA: {suggestion.usmcaRate}%
                           </div>
                         </button>
@@ -425,40 +420,22 @@ export default function ComponentOriginsStepEnhanced({
         <button
           type="button"
           onClick={addComponent}
-          className="btn-secondary"
-          style={{ 
-            width: '100%', 
-            padding: '12px', 
-            border: '2px dashed var(--border-medium)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }}
+          className="btn-secondary add-component-button"
         >
           <Plus className="icon-sm" />
           Add Component
         </button>
 
         {/* Total Percentage Display */}
-        <div className={getTotalPercentage() === 100 ? 'status-success' : 'status-warning'} 
-             style={{ 
-               padding: '16px', 
-               borderRadius: 'var(--radius-lg)',
-               border: getTotalPercentage() === 100 ? '1px solid var(--green-200)' : '1px solid var(--amber-200)',
-               backgroundColor: getTotalPercentage() === 100 ? 'var(--green-50)' : 'var(--amber-50)'
-             }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className="text-body" style={{ fontWeight: '600' }}>Total Value Percentage:</span>
-            <span className="metric-value" style={{ 
-              fontSize: '18px',
-              color: getTotalPercentage() === 100 ? 'var(--green-700)' : 'var(--amber-700)'
-            }}>
+        <div className={getTotalPercentage() === 100 ? 'percentage-summary success' : 'percentage-summary warning'}>
+          <div className="percentage-display">
+            <span className="percentage-label">Total Value Percentage:</span>
+            <span className="percentage-value">
               {getTotalPercentage().toFixed(1)}%
             </span>
           </div>
           {getTotalPercentage() !== 100 && (
-            <p className="text-muted" style={{ fontSize: '14px', marginTop: '4px' }}>
+            <p className="form-help">
               Components must total exactly 100% of product value
             </p>
           )}
@@ -466,7 +443,7 @@ export default function ComponentOriginsStepEnhanced({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="header-actions section-divider" style={{ paddingTop: '24px' }}>
+      <div className="dashboard-actions section-spacing">
         <button
           onClick={onPrevious}
           className="btn-secondary"
@@ -476,14 +453,7 @@ export default function ComponentOriginsStepEnhanced({
         <button
           onClick={onProcessWorkflow}
           disabled={!isValid() || isLoading}
-          className={isValid() && !isLoading ? 'btn-primary' : 'btn-secondary'}
-          style={{ 
-            opacity: isValid() && !isLoading ? 1 : 0.5,
-            cursor: isValid() && !isLoading ? 'pointer' : 'not-allowed',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
+          className={`${isValid() && !isLoading ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading ? 'disabled' : ''}`}
         >
           {isLoading ? (
             <>Processing...</>

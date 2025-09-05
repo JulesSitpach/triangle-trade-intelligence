@@ -37,17 +37,17 @@ const CategorySelector = ({
   }
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-300 p-4 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+    <div className={`form-section ${className}`}>
+      <label className="form-label">
         {UI_TEXT.labels.categorySection}
       </label>
     
       {/* Show AI suggestion status */}
       {showAISuggestionStatus && hasAIError && (
-        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-          <div className="flex items-center">
-            <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" aria-hidden="true" />
-            <span className="text-sm text-yellow-800">
+        <div className="alert alert-warning" style={{marginBottom: '0.75rem'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
+            <span className="text-body">
               AI classification unavailable. Please select a category manually from the dropdown below.
             </span>
           </div>
@@ -55,20 +55,20 @@ const CategorySelector = ({
       )}
       
       {showAISuggestionStatus && aiSuggestions.length > 0 && !hasAIError && (
-        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <span className="text-sm text-blue-800">
+        <div className="alert alert-info" style={{marginBottom: '0.75rem'}}>
+          <span className="text-body">
             AI suggested a category above, or manually select a different one below.
           </span>
         </div>
       )}
 
       {/* Category Selector */}
-      <div className="relative">
+      <div className="form-input-container">
         <select
           value={selectedCategory}
           onChange={handleSelectChange}
           disabled={isLoading}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="form-select"
           aria-label={A11Y_CONFIG.ariaLabels.categorySelect}
           aria-describedby="category-help"
         >
@@ -85,30 +85,30 @@ const CategorySelector = ({
         </select>
         
         {isLoading && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" aria-hidden="true"></div>
+          <div style={{position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)'}}>
+            <div className="loading-spinner" aria-hidden="true"></div>
           </div>
         )}
       </div>
       
       {/* Selection Confirmation */}
       {selectedCategory && !isLoading && (
-        <div className="mt-2 text-sm text-green-600 flex items-center">
-          <CheckCircle className="h-4 w-4 mr-1" aria-hidden="true" />
+        <div className="alert alert-success" style={{marginTop: '0.5rem', padding: '0.5rem'}}>
+          <CheckCircle className="alert-icon icon-sm" aria-hidden="true" />
           <span>Category selected: {selectedCategory}</span>
         </div>
       )}
       
       {/* Error Display */}
       {error && (
-        <div className="mt-2 text-sm text-red-600 flex items-center" role="alert">
-          <AlertTriangle className="h-4 w-4 mr-1" aria-hidden="true" />
+        <div className="alert alert-error" style={{marginTop: '0.5rem', padding: '0.5rem'}} role="alert">
+          <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
       
       {/* Help Text */}
-      <p id="category-help" className="text-xs text-gray-600 mt-2">
+      <p id="category-help" className="form-help" style={{marginTop: '0.5rem'}}>
         {businessType && businessType !== 'general' ? 
           `Showing categories relevant to ${businessType} business. This dropdown is always available regardless of AI status.` :
           'This dropdown is always available regardless of AI status. Select the category that best matches your product.'
@@ -117,8 +117,8 @@ const CategorySelector = ({
       
       {/* No Categories Available */}
       {!isLoading && categories.length === 0 && (
-        <div className="mt-2 p-2 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600">
-          <AlertTriangle className="h-4 w-4 inline mr-1" aria-hidden="true" />
+        <div className="alert" style={{marginTop: '0.5rem', padding: '0.5rem'}}>
+          <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" style={{display: 'inline', marginRight: '0.25rem'}} />
           No categories available. Please try refreshing the page or contact support.
         </div>
       )}

@@ -1,0 +1,14 @@
+{
+  "desktop": "footer-desktop-test.png",
+  "mobile": "footer-mobile-test.png",
+  "tablet": "footer-tablet-test.png",
+  "validation": {
+    "structure": true,
+    "content": true,
+    "typography": true,
+    "links": true,
+    "copyright": true,
+    "responsive": false,
+    "professional": true
+  }
+}

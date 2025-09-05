@@ -1,0 +1,38 @@
+{
+  "overallScore": 75,
+  "professionalAppearance": {
+    "colorProfessionalism": {
+      "score": 10,
+      "issues": [
+        "Color scheme lacks government portal professionalism"
+      ]
+    },
+    "typographyQuality": {
+      "score": 15,
+      "issues": [
+        "Headings lack authority and hierarchy"
+      ]
+    },
+    "layoutMaturity": {
+      "score": 25,
+      "issues": []
+    },
+    "brandConsistency": {
+      "score": 25,
+      "issues": []
+    }
+  },
+  "designQuality": {},
+  "governmentStandards": {
+    "accessibilityScore": 50,
+    "securityIndicators": 50,
+    "professionalLayout": 50,
+    "trustSignals": 0,
+    "issues": []
+  },
+  "userExperience": {},
+  "visualIssues": [
+    "25 elements with insufficient padding - layout appears cramped"
+  ],
+  "recommendations": []
+}

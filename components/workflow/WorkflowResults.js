@@ -66,10 +66,11 @@ export default function WorkflowResults({
   if (!results) return null;
 
   return (
-    <div className="card">
-      <h2 className="page-title section-spacing">
-        USMCA Compliance Results
-      </h2>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">USMCA Compliance Results</h1>
+        <p className="dashboard-subtitle">Professional certificate analysis and tariff savings assessment</p>
+      </div>
       
       <CompanyProfile results={results} />
       
@@ -92,28 +93,28 @@ export default function WorkflowResults({
 
       {/* Data Integration Status */}
       {dataSentToAlerts && (
-        <div className="status-success section-spacing" style={{display: 'block', padding: '16px', borderRadius: '8px'}}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
-            <div style={{width: '8px', height: '8px', backgroundColor: 'var(--sage-500)', borderRadius: '50%'}}></div>
-            <p className="text-body" style={{fontWeight: '500'}}>
-              ✅ Certificate data automatically added to crisis alerts monitoring system
-            </p>
+        <div className="alert alert-success">
+          <div className="alert-icon">✅</div>
+          <div className="alert-content">
+            <div className="alert-title">Integration Complete</div>
+            <p>Certificate data automatically added to crisis alerts monitoring system</p>
+            <p>Visit <a href="/trump-tariff-alerts" target="_blank">Crisis Alerts Dashboard</a> to see your personalized monitoring</p>
           </div>
-          <p className="text-body" style={{fontSize: '12px', marginTop: '4px'}}>
-            Visit <a href="/trump-tariff-alerts" target="_blank" style={{textDecoration: 'underline'}}>Crisis Alerts Dashboard</a> to see your personalized monitoring
-          </p>
         </div>
       )}
       
-      <div className="section-divider" style={{textAlign: 'center', paddingTop: '24px'}}>
-        <button 
-          onClick={onReset}
-          className="btn-secondary element-spacing"
-        >
-          🔄 Start New Analysis
-        </button>
-        
-        <RecommendedActions results={results} />
+      <div className="dashboard-actions">
+        <div className="dashboard-actions-left">
+          <RecommendedActions results={results} />
+        </div>
+        <div className="dashboard-actions-right">
+          <button 
+            onClick={onReset}
+            className="btn-secondary"
+          >
+            🔄 Start New Analysis
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -93,7 +93,6 @@ export default function HomePage() {
           }}
         >
           <source src="/image/earth-seamless-loop.mp4" type="video/mp4" />
-          <source src="/image/earth-seamless-loop.webm" type="video/webm" />
           Your browser does not support the video tag.
         </video>
         
@@ -139,7 +138,7 @@ export default function HomePage() {
 
       {isClient && (
         <>
-          <section id="calculator" className="main-content gradient-subtle py-16">
+          <section id="calculator" className="main-content gradient-subtle">
             <div className="container-app">
               <SimpleSavingsCalculator />
             </div>

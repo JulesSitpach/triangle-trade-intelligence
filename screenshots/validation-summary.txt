@@ -1,0 +1,45 @@
+
+USMCA DASHBOARD VALIDATION SUMMARY
+Generated: 2025-09-04, 5:34:38 p.m.
+========================================
+
+OVERALL ASSESSMENT
+Overall Score: 85%
+Status: GOOD
+
+DETAILED SCORES
+CSS Validation: 100%
+Professional Standards: 100%
+Accessibility (WCAG 2.1 AA): 56%
+
+TEST COVERAGE
+Viewports Tested: 2 (Desktop 1920x1080, Mobile iPhone 15)
+Screenshots Captured: 2
+Total Issues Found: 2
+Critical Issues: 0
+
+SCREENSHOTS CAPTURED
+DESKTOP: screenshots\usmca-dashboard-desktop.png (1920x1080)
+MOBILE: screenshots\usmca-dashboard-mobile.png (375x667)
+
+KEY FINDINGS
+- FORM_INTERACTION_ERROR: page.waitForSelector: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('select option:not([disabled])') to be visible[22m
+[2m    15 × locator resolved to 96 elements. Proceeding with the first one: <option value="" selected>Select your primary business activity</option>[22m
+
+- FORM_INTERACTION_ERROR: page.waitForSelector: Timeout 5000ms exceeded.
+Call log:
+[2m  - waiting for locator('select option:not([disabled])') to be visible[22m
+[2m    15 × locator resolved to 96 elements. Proceeding with the first one: <option value="" selected>Select your primary business activity</option>[22m
+
+
+RECOMMENDATIONS
+
+- Review CSS class implementation for missing dashboard classes
+- Enhance accessibility features for WCAG 2.1 AA compliance
+- Improve professional form standards alignment
+- Validate responsive behavior across all breakpoints
+
+
+For detailed analysis, see usmca-dashboard-validation-report.json

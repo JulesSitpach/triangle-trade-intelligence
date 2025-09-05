@@ -15,29 +15,43 @@ import { useRouter } from 'next/router'
 export default function TriangleLayout({ children, showCrisisBanner = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [crisisBannerVisible, setCrisisBannerVisible] = useState(showCrisisBanner)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const router = useRouter()
 
-  // Close mobile menu on route change
+  // Close mobile menu and dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false)
+    setUserDropdownOpen(false)
   }, [router.pathname])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userDropdownOpen && !event.target.closest('.dashboard-nav-dropdown')) {
+        setUserDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [userDropdownOpen])
 
   const navigationItems = [
     {
-      path: '/',
-      label: 'Home',
-      description: 'Platform overview'
-    },
-    {
       path: '/usmca-workflow',
-      label: 'USMCA Workflow',
+      label: 'Workflow',
       description: 'Complete compliance analysis'
     },
     {
       path: '/trump-tariff-alerts',
-      label: 'Crisis Alerts',
+      label: 'Reports',
       description: 'Real-time tariff monitoring',
       badge: '3' // Show alert count
+    },
+    {
+      path: '/admin/supplier-management',
+      label: 'Settings',
+      description: 'Manage suppliers and preferences'
     }
   ]
 
@@ -67,106 +81,111 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
 
       {/* Main App Layout */}
       <div className="app-layout">
-        {/* Professional Header Navigation */}
-        <header className="app-header">
-          <div className="header-container">
-            <div className="header-content">
-              {/* Professional Logo */}
-              <Link href="/" className="header-logo">
-                  <div className="gradient-accent">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 2L3 7v11h4v-6h6v6h4V7l-7-5z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="logo-text">
-                      Triangle Intelligence
-                    </span>
-                    <div className="logo-subtitle">
-                      USMCA Compliance Platform
-                    </div>
-                  </div>
-              </Link>
+        {/* Professional Dashboard Navigation */}
+        <header className="dashboard-nav">
+          <div className="dashboard-nav-container">
+            {/* Professional Brand */}
+            <Link href="/" className="dashboard-nav-brand">
+              <div className="dashboard-nav-logo">
+                TI
+              </div>
+              <div className="dashboard-nav-title">
+                Triangle Intelligence
+              </div>
+            </Link>
 
-              {/* Desktop Navigation */}
-              <nav className="header-nav">
-                {navigationItems.map((item) => (
-                  <Link 
-                    key={item.path} 
-                    href={item.path}
-                    className={`nav-link ${router.pathname === item.path ? 'nav-link-active' : ''}`}
-                  >
-                    <span>{item.label}</span>
-                    {item.badge && <span className="status-warning">{item.badge}</span>}
-                  </Link>
-                ))}
-              </nav>
-
-              {/* Header Actions */}
-              <div className="header-actions">
+            {/* Desktop Navigation Menu */}
+            <nav className="dashboard-nav-menu">
+              {navigationItems.map((item) => (
                 <Link 
-                  href="/usmca-workflow" 
-                  className="btn-primary"
+                  key={item.path} 
+                  href={item.path}
+                  className={`dashboard-nav-link ${router.pathname === item.path ? 'active' : ''}`}
                 >
-                  Start Analysis
+                  <span>{item.label}</span>
+                  {item.badge && <span className="badge badge-warning">{item.badge}</span>}
                 </Link>
-              </div>
-              
-              {/* Mobile Menu Toggle */}
-              <button
-                className="mobile-menu-button"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-              >
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
+              ))}
+            </nav>
 
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-              <div className="mobile-menu">
-                <div>
-                  {navigationItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      className={`mobile-nav-link ${
-                        router.pathname === item.path
-                          ? 'mobile-nav-link-active'
-                          : ''
-                      }`}
-                    >
-                      <div className="header-content">
-                        <span>{item.label}</span>
-                        {item.badge && (
-                          <span className="status-error">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-muted">
-                        {item.description}
-                      </div>
+            {/* Professional User Section */}
+            <div className="dashboard-nav-user">
+              <Link 
+                href="/usmca-workflow" 
+                className="btn-primary"
+              >
+                New Analysis
+              </Link>
+              
+              {/* User Profile Dropdown */}
+              <div className="dashboard-nav-dropdown">
+                <button 
+                  className="dashboard-nav-avatar"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  aria-label="User menu"
+                >
+                  U
+                </button>
+                
+                {userDropdownOpen && (
+                  <div className="dashboard-nav-dropdown-menu">
+                    <Link href="/admin/profile" className="dashboard-nav-dropdown-item">
+                      Profile Settings
                     </Link>
-                  ))}
-                  <div>
-                    <Link
-                      href="/usmca-workflow"
-                      className="btn-primary"
-                    >
-                      Start Analysis
+                    <Link href="/admin/billing" className="dashboard-nav-dropdown-item">
+                      Billing & Plans
+                    </Link>
+                    <Link href="/admin/preferences" className="dashboard-nav-dropdown-item">
+                      Preferences
+                    </Link>
+                    <div className="nav-dropdown-divider"></div>
+                    <Link href="/auth/logout" className="dashboard-nav-dropdown-item">
+                      Sign Out
                     </Link>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
+              
+            {/* Mobile Menu Toggle */}
+            <button
+              className="nav-menu-toggle"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
           </div>
+
+          {/* Mobile Menu - Only renders when open */}
+          {mobileMenuOpen && (
+            <div className="dashboard-nav-mobile-menu open">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`dashboard-nav-link ${
+                    router.pathname === item.path ? 'active' : ''
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                  {item.badge && (
+                    <span className="badge badge-warning">
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+              <Link
+                href="/usmca-workflow"
+                className="btn-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                New Analysis
+              </Link>
+            </div>
+          )}
         </header>
 
         {/* Main Content */}

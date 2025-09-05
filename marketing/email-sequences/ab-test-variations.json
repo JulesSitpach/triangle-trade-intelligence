@@ -1,0 +1,357 @@
+{
+  "abTestingFramework": "Triangle Intelligence Email A/B Testing Variations",
+  "description": "Comprehensive A/B test variations for high-impact emails across all sequences",
+  "testingMethodology": "Statistical significance required (95% confidence), minimum 500 sends per variation",
+  
+  "subjectLineTests": {
+    "urgencyVsValue": {
+      "description": "Test urgency-driven vs value-driven subject lines",
+      "sequences": ["calculator-lead-nurture", "consultation-follow-up", "crisis-alert-series"],
+      "variations": {
+        "urgency": {
+          "examples": [
+            "{{firstName}}, your ${{calculatedSavings}} opportunity expires tomorrow",
+            "URGENT: {{companyName}}'s Mexico supplier slots filling fast",
+            "Final notice: Don't lose ${{potentialSavings}} to Trump tariffs"
+          ],
+          "psychology": "Fear of missing out, time pressure, scarcity"
+        },
+        "value": {
+          "examples": [
+            "{{firstName}}, how {{companyName}} can save ${{calculatedSavings}} annually",
+            "Your Mexico USMCA routing plan is ready for {{companyName}}",
+            "{{calculatedSavings}} in tariff savings identified for {{companyName}}"
+          ],
+          "psychology": "Benefit focus, solution orientation, value proposition"
+        }
+      },
+      "success_metrics": ["open_rate", "click_rate", "conversion_rate"],
+      "hypothesis": "Value-driven subject lines will outperform urgency-driven for professional B2B audience"
+    },
+    
+    "personalVsCorporate": {
+      "description": "Test personal vs corporate messaging approach",
+      "sequences": ["cold-outreach", "trial-workflow-users"],
+      "variations": {
+        "personal": {
+          "examples": [
+            "{{firstName}}, quick question about {{companyName}}'s China imports",
+            "{{firstName}}, I found 3 Mexico suppliers perfect for you",
+            "{{firstName}}, your trial results exceeded my expectations"
+          ],
+          "psychology": "Personal connection, individual focus, relationship building"
+        },
+        "corporate": {
+          "examples": [
+            "{{companyName}}: Mexico USMCA routing opportunities identified",
+            "Trade intelligence update for {{companyName}} leadership",
+            "{{companyName}}'s USMCA compliance analysis complete"
+          ],
+          "psychology": "Professional authority, business focus, institutional approach"
+        }
+      },
+      "success_metrics": ["open_rate", "response_rate", "meeting_bookings"],
+      "hypothesis": "Personal approach will generate higher engagement but corporate approach will generate higher-quality leads"
+    },
+    
+    "questionVsStatement": {
+      "description": "Test question-based vs statement-based subject lines",
+      "sequences": ["cold-outreach", "calculator-lead-nurture"],
+      "variations": {
+        "question": {
+          "examples": [
+            "{{firstName}}, is {{companyName}} paying Trump's 25% tariffs?",
+            "How much is {{companyName}} spending on China tariffs?",
+            "{{firstName}}, ready to eliminate {{companyName}}'s tariff costs?"
+          ],
+          "psychology": "Curiosity gap, engagement invitation, thought provocation"
+        },
+        "statement": {
+          "examples": [
+            "{{companyName}} can eliminate ${{savings}} in annual tariffs",
+            "{{firstName}}, your Mexico routing analysis is complete",
+            "Triangle Intelligence identified ${{savings}} in savings for {{companyName}}"
+          ],
+          "psychology": "Direct value proposition, confidence, authority"
+        }
+      },
+      "success_metrics": ["open_rate", "email_replies", "calculator_completions"],
+      "hypothesis": "Questions will generate higher open rates but statements will generate higher conversion rates"
+    }
+  },
+  
+  "contentStructureTests": {
+    "shortVsLong": {
+      "description": "Test concise vs detailed email content",
+      "sequences": ["consultation-follow-up", "customer-onboarding"],
+      "variations": {
+        "short": {
+          "word_count": "150-250 words",
+          "structure": "Problem → Solution → CTA",
+          "bullet_points": "3-5 key points maximum",
+          "examples": [
+            "Quick consultation recap: ${{savings}} potential identified. Next step: secure Mexico partnerships. Ready to start? {{CTA}}"
+          ]
+        },
+        "long": {
+          "word_count": "400-600 words",
+          "structure": "Context → Detailed Analysis → Multiple Options → CTA",
+          "bullet_points": "7-10 detailed points",
+          "examples": [
+            "Comprehensive consultation analysis with detailed supplier profiles, implementation timelines, cost breakdowns, and multiple pathway options"
+          ]
+        }
+      },
+      "success_metrics": ["click_rate", "time_spent_reading", "conversion_rate"],
+      "hypothesis": "Short emails will generate higher engagement but long emails will generate higher conversion quality"
+    },
+    
+    "bulletVsParagraph": {
+      "description": "Test bullet point vs paragraph formatting",
+      "sequences": ["trial-workflow-users", "cold-outreach"],
+      "variations": {
+        "bullets": {
+          "format": "Heavy use of bullet points, numbered lists, clear sections",
+          "examples": [
+            "✓ USMCA qualification: 87%\n✓ Annual savings: ${{amount}}\n✓ Implementation: 90 days\n✓ Success rate: 94%"
+          ]
+        },
+        "paragraphs": {
+          "format": "Narrative flow, paragraph structure, story-telling approach",
+          "examples": [
+            "Your USMCA analysis reveals impressive opportunities. With 87% qualification potential and ${{amount}} in annual savings, {{companyName}} is perfectly positioned for Mexico routing success."
+          ]
+        }
+      },
+      "success_metrics": ["readability_engagement", "click_rate", "response_quality"],
+      "hypothesis": "Bullet points will improve scanning and engagement while paragraphs will improve comprehension and trust"
+    }
+  },
+  
+  "ctaTests": {
+    "imperativeVsSoft": {
+      "description": "Test commanding vs soft CTA language",
+      "sequences": ["calculator-lead-nurture", "crisis-alert-series"],
+      "variations": {
+        "imperative": {
+          "examples": [
+            "Schedule Your Emergency Consultation Now",
+            "Claim Your 30% Discount Today", 
+            "Secure Your Mexico Partnerships Immediately",
+            "Start Your Implementation"
+          ],
+          "psychology": "Direct command, urgency, immediate action"
+        },
+        "soft": {
+          "examples": [
+            "I'd love to discuss your opportunities",
+            "When would be a good time to explore this?",
+            "Would you like to see how this applies to {{companyName}}?",
+            "Let me know if you'd like to learn more"
+          ],
+          "psychology": "Invitation, choice, collaboration, relationship"
+        }
+      },
+      "success_metrics": ["click_rate", "conversion_rate", "response_sentiment"],
+      "hypothesis": "Soft CTAs will generate higher click rates but imperative CTAs will generate higher conversion rates"
+    },
+    
+    "singleVsMultiple": {
+      "description": "Test single focused CTA vs multiple options",
+      "sequences": ["consultation-follow-up", "cold-outreach"],
+      "variations": {
+        "single": {
+          "structure": "One primary CTA, no alternatives",
+          "examples": [
+            "Schedule Your Implementation Call"
+          ],
+          "psychology": "Clear direction, no decision paralysis, focused action"
+        },
+        "multiple": {
+          "structure": "Primary CTA + 2-3 alternative options",
+          "examples": [
+            "Primary: Schedule Implementation Call\nAlternative 1: Download Case Studies\nAlternative 2: Calculate Your Savings"
+          ],
+          "psychology": "Choice, flexibility, different engagement levels"
+        }
+      },
+      "success_metrics": ["total_click_rate", "primary_cta_rate", "conversion_quality"],
+      "hypothesis": "Single CTAs will generate higher conversion rates while multiple CTAs will generate higher total engagement"
+    }
+  },
+  
+  "socialProofTests": {
+    "specificVsGeneral": {
+      "description": "Test specific case studies vs general social proof",
+      "sequences": ["cold-outreach", "trial-workflow-users"],
+      "variations": {
+        "specific": {
+          "examples": [
+            "AutoParts Mexico SA saved exactly $685,000 in their first 90 days using this strategy",
+            "TechFlow Electronics reduced compliance time from 40 hours to 11 hours monthly",
+            "Jennifer Martinez, CEO of TechFlow: 'The ROI was immediate and the peace of mind is priceless'"
+          ],
+          "psychology": "Concrete proof, detailed validation, specific outcomes"
+        },
+        "general": {
+          "examples": [
+            "500+ companies trust Triangle Intelligence",
+            "Average savings: $425K annually", 
+            "94% client satisfaction rate",
+            "Over $12.8M in tariff savings achieved"
+          ],
+          "psychology": "Scale validation, statistical proof, community belonging"
+        }
+      },
+      "success_metrics": ["credibility_perception", "conversion_rate", "response_quality"],
+      "hypothesis": "Specific case studies will build stronger trust while general proof will demonstrate scale and reliability"
+    }
+  },
+  
+  "urgencyTests": {
+    "deadlineVsScarcity": {
+      "description": "Test time-based vs supply-based urgency",
+      "sequences": ["crisis-alert-series", "consultation-follow-up"],
+      "variations": {
+        "deadline": {
+          "examples": [
+            "Partnership window closes in 72 hours",
+            "Discount expires at midnight tomorrow",
+            "Response needed by Friday 5 PM EST"
+          ],
+          "psychology": "Time pressure, specific deadlines, countdown urgency"
+        },
+        "scarcity": {
+          "examples": [
+            "Only 3 supplier partnership slots remaining",
+            "47 companies on waiting list",
+            "Limited to 10 emergency consultations this week"
+          ],
+          "psychology": "Supply limitation, exclusivity, competitive pressure"
+        }
+      },
+      "success_metrics": ["immediate_response_rate", "conversion_rate", "customer_satisfaction"],
+      "hypothesis": "Deadline urgency will generate faster responses while scarcity will generate higher conversion quality"
+    }
+  },
+  
+  "personalizationTests": {
+    "industryVsCompany": {
+      "description": "Test industry-specific vs company-specific personalization",
+      "sequences": ["cold-outreach", "calculator-lead-nurture"],
+      "variations": {
+        "industry": {
+          "examples": [
+            "As an automotive company, {{companyName}} faces unique USMCA challenges",
+            "Electronics manufacturers like you are seeing 340% increased Mexico demand",
+            "The textile industry is rapidly shifting to Mexico routing"
+          ],
+          "personalization_fields": ["industry", "industry_trends", "sector_challenges"]
+        },
+        "company": {
+          "examples": [
+            "{{companyName}}'s specific import profile shows ${{savings}} potential",
+            "Based on {{companyName}}'s {{location}} operations, I recommend...",
+            "Your {{productType}} products qualify for 87% USMCA benefits"
+          ],
+          "personalization_fields": ["companyName", "location", "productType", "importVolume"]
+        }
+      },
+      "success_metrics": ["relevance_perception", "response_rate", "conversion_quality"],
+      "hypothesis": "Company-specific personalization will outperform industry-level personalization for engagement and conversion"
+    }
+  },
+  
+  "emailTimingTests": {
+    "morningVsAfternoon": {
+      "description": "Test optimal send times for B2B decision makers",
+      "sequences": ["All sequences"],
+      "variations": {
+        "morning": {
+          "send_times": ["8:00 AM", "9:00 AM", "10:00 AM"],
+          "timezone": "Recipient local time",
+          "psychology": "Fresh attention, priority review, start-of-day planning"
+        },
+        "afternoon": {
+          "send_times": ["1:00 PM", "2:00 PM", "3:00 PM"],
+          "timezone": "Recipient local time", 
+          "psychology": "Post-lunch engagement, afternoon planning, end-of-day review"
+        }
+      },
+      "success_metrics": ["open_rate", "immediate_response_rate", "quality_responses"],
+      "hypothesis": "Morning sends will generate higher open rates while afternoon sends will generate higher quality responses"
+    },
+    
+    "weekdayVsWeekend": {
+      "description": "Test business days vs weekend sending",
+      "sequences": ["crisis-alert-series", "consultation-follow-up"],
+      "variations": {
+        "weekday": {
+          "send_days": ["Tuesday", "Wednesday", "Thursday"],
+          "psychology": "Business mindset, immediate action possible, team availability"
+        },
+        "weekend": {
+          "send_days": ["Saturday", "Sunday"],
+          "psychology": "Personal time, strategic thinking, less competition"
+        }
+      },
+      "success_metrics": ["open_rate", "response_rate", "conversion_rate"],
+      "hypothesis": "Weekday sends will generate higher conversion rates while weekend sends will generate higher engagement time"
+    }
+  },
+  
+  "testImplementation": {
+    "sampleSizes": {
+      "minimum_per_variation": 250,
+      "recommended_per_variation": 500,
+      "statistical_significance": "95% confidence level",
+      "test_duration": "Minimum 7 days, maximum 30 days"
+    },
+    
+    "testPriority": {
+      "tier1_tests": [
+        "Subject line urgency vs value",
+        "CTA imperative vs soft", 
+        "Content short vs long"
+      ],
+      "tier2_tests": [
+        "Personal vs corporate messaging",
+        "Single vs multiple CTAs",
+        "Specific vs general social proof"
+      ],
+      "tier3_tests": [
+        "Morning vs afternoon timing",
+        "Industry vs company personalization",
+        "Question vs statement subjects"
+      ]
+    },
+    
+    "rolloutStrategy": {
+      "testing_phase": "30% of audience gets test variations",
+      "validation_phase": "Confirm results with additional 20% audience",
+      "deployment_phase": "Roll winning variations to 100% audience",
+      "monitoring_phase": "Ongoing performance tracking and optimization"
+    }
+  },
+  
+  "successMetrics": {
+    "primary_kpis": {
+      "conversion_rate": "Email to consultation/subscription conversion",
+      "revenue_per_email": "Attributed revenue divided by emails sent",
+      "customer_acquisition_cost": "Total email costs divided by customers acquired"
+    },
+    
+    "secondary_kpis": {
+      "open_rate": "Emails opened divided by emails delivered",
+      "click_rate": "Links clicked divided by emails delivered", 
+      "response_rate": "Direct replies divided by emails sent",
+      "unsubscribe_rate": "Unsubscribes divided by emails delivered"
+    },
+    
+    "quality_metrics": {
+      "lead_quality_score": "Sales team rating of lead quality from email sources",
+      "customer_lifetime_value": "LTV of customers acquired through email",
+      "time_to_conversion": "Days from first email to conversion"
+    }
+  }
+}

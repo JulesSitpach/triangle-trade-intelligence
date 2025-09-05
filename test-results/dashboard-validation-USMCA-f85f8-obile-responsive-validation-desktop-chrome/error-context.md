@@ -1,0 +1,178 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - link "T TradeFlow Intelligence USMCA Compliance Platform" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6] [cursor=pointer]: T
+        - generic [ref=e7] [cursor=pointer]:
+          - generic [ref=e8] [cursor=pointer]: TradeFlow Intelligence
+          - generic [ref=e9] [cursor=pointer]: USMCA Compliance Platform
+    - generic [ref=e10]:
+      - generic [ref=e13]:
+        - heading "USMCA Compliance Analysis" [level=1] [ref=e14]
+        - heading "Enterprise Trade Classification & Certificate Generation Platform" [level=2] [ref=e15]
+        - paragraph [ref=e16]: AI-powered compliance analysis with government-verified data. Generate audit-ready certificates and optimize tariff savings through professional USMCA qualification assessment.
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - generic [ref=e19]: 34,476
+            - generic [ref=e20]: Government Records
+            - generic [ref=e21]: Verified
+          - generic [ref=e22]:
+            - generic [ref=e23]: 99.9%
+            - generic [ref=e24]: System Uptime
+            - generic [ref=e25]: Operational
+          - generic [ref=e26]:
+            - generic [ref=e27]: Licensed
+            - generic [ref=e28]: Customs Brokers
+            - generic [ref=e29]: Expert Network
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: "1"
+          - generic [ref=e35]: Company Information
+          - generic [ref=e36]: Step 1
+        - generic [ref=e37]:
+          - generic [ref=e38]: "2"
+          - generic [ref=e39]: Product & Components
+          - generic [ref=e40]: Step 2
+        - generic [ref=e41]:
+          - generic [ref=e42]: "3"
+          - generic [ref=e43]: Results & Certificate
+          - generic [ref=e44]: Step 3
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - heading "USMCA Compliance Analysis" [level=1] [ref=e50]
+          - paragraph [ref=e51]: Professional Trade Classification & Certificate Generation Platform
+        - generic [ref=e52]:
+          - heading "Company Information" [level=2] [ref=e53]
+          - paragraph [ref=e54]: Step 1 of 3 - Establish your business profile for compliance analysis
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Company Name *
+              - textbox "Enter your legal entity name" [ref=e58]
+              - generic [ref=e59]: Legal entity name as registered with authorities
+            - generic [ref=e60]:
+              - generic [ref=e61]: Business Type *
+              - combobox [ref=e62]:
+                - option "Select your primary business activity" [selected]
+                - option "Agriculture & Food"
+                - option "Automotive"
+                - option "Electronics & Technology"
+                - option "Energy Equipment"
+                - option "General"
+                - option "General Manufacturing"
+                - option "Machinery & Equipment"
+                - option "Other"
+                - option "Textiles & Apparel"
+              - generic [ref=e63]: Primary business activity for accurate trade classification
+          - generic [ref=e64]:
+            - generic [ref=e65]:
+              - generic [ref=e66]: Primary Supplier Country
+              - combobox [ref=e67]:
+                - option "Select primary supplier country"
+                - option "Argentina"
+                - option "Australia"
+                - option "Bangladesh"
+                - option "Brazil"
+                - option "Canada"
+                - option "Chile"
+                - option "China" [selected]
+                - option "Colombia"
+                - option "Costa Rica"
+                - option "Czech Republic"
+                - option "Ecuador"
+                - option "Egypt"
+                - option "France"
+                - option "Germany"
+                - option "Guatemala"
+                - option "Hungary"
+                - option "India"
+                - option "Indonesia"
+                - option "Italy"
+                - option "Japan"
+                - option "Malaysia"
+                - option "Mexico"
+                - option "Netherlands"
+                - option "New Zealand"
+                - option "Panama"
+                - option "Peru"
+                - option "Philippines"
+                - option "Poland"
+                - option "Singapore"
+                - option "South Africa"
+                - option "South Korea"
+                - option "Taiwan"
+                - option "Thailand"
+                - option "Turkey"
+                - option "United Arab Emirates"
+                - option "United Kingdom"
+                - option "United States"
+                - option "Uruguay"
+                - option "Vietnam"
+              - generic [ref=e68]: Country where products originate
+            - generic [ref=e69]:
+              - generic [ref=e70]: Destination Market
+              - combobox [ref=e71]:
+                - option "United States" [selected]
+                - option "Canada"
+                - option "Mexico"
+                - option "Argentina"
+                - option "Australia"
+                - option "Bangladesh"
+                - option "Brazil"
+                - option "Chile"
+                - option "China"
+                - option "Colombia"
+                - option "Costa Rica"
+                - option "Czech Republic"
+                - option "Ecuador"
+                - option "Egypt"
+                - option "France"
+                - option "Germany"
+                - option "Guatemala"
+                - option "Hungary"
+                - option "India"
+                - option "Indonesia"
+                - option "Italy"
+                - option "Japan"
+                - option "Malaysia"
+                - option "Netherlands"
+                - option "New Zealand"
+                - option "Panama"
+                - option "Peru"
+                - option "Philippines"
+                - option "Poland"
+                - option "Singapore"
+                - option "South Africa"
+                - option "South Korea"
+                - option "Taiwan"
+                - option "Thailand"
+                - option "Turkey"
+                - option "United Arab Emirates"
+                - option "United Kingdom"
+                - option "Uruguay"
+                - option "Vietnam"
+              - generic [ref=e72]: Where will the finished product be imported?
+          - generic [ref=e73]:
+            - generic [ref=e74]: Annual Trade Volume *
+            - combobox [ref=e75]:
+              - option "Select your annual import volume" [selected]
+              - option "Under $100K"
+              - option "$100K - $500K"
+              - option "$500K - $1M"
+              - option "$1M - $5M"
+              - option "$5M - $10M"
+              - option "$10M+"
+            - generic [ref=e76]: Estimated annual import value for compliance assessment
+          - generic [ref=e77]:
+            - generic [ref=e78]: 🔒
+            - generic [ref=e79]:
+              - generic [ref=e80]: Information Security
+              - text: All company information is encrypted and protected in compliance with enterprise data governance requirements. Your data remains confidential and is used solely for USMCA compliance analysis.
+          - generic [ref=e81]:
+            - generic [ref=e83]: Step 1 of 3 - All required fields must be completed
+            - button "Continue to Product Details" [disabled] [ref=e85] [cursor=pointer]
+  - alert [ref=e86]
+```

@@ -1,0 +1,29 @@
+[
+  {
+    "hs_code": "640411",
+    "description": "Sports footwear; tennis shoes, basketball shoes, gym shoes, training shoes and the like, whether or not having metal reinforcements",
+    "chapter": 64,
+    "mfn_rate": 37.5,
+    "usmca_rate": 0,
+    "source": "USITC_HTS_2024",
+    "effective_date": "2024-01-01"
+  },
+  {
+    "hs_code": "611020",
+    "description": "Jerseys, pullovers, cardigans, waistcoats and similar articles, knitted or crocheted, of cotton",
+    "chapter": 61,
+    "mfn_rate": 32,
+    "usmca_rate": 0,
+    "source": "USITC_HTS_2024",
+    "effective_date": "2024-01-01"
+  },
+  {
+    "hs_code": "020130",
+    "description": "Meat of bovine animals, boneless, fresh or chilled",
+    "chapter": 2,
+    "mfn_rate": 26.4,
+    "usmca_rate": 0,
+    "source": "USITC_HTS_2024",
+    "effective_date": "2024-01-01"
+  }
+]

@@ -1,0 +1,360 @@
+{
+  "emailAutomationSystem": "Triangle Intelligence Email Marketing Automation",
+  "description": "Comprehensive behavioral triggers and automation rules for all email sequences",
+  "lastUpdated": "2025-01-02",
+  
+  "behavioralTriggers": {
+    "websiteEngagement": {
+      "calculatorUsage": {
+        "trigger": "User completes savings calculator",
+        "condition": "No consultation scheduled within 2 hours",
+        "action": "Enter Calculator Lead Nurture sequence",
+        "sequenceFile": "calculator-lead-nurture.json",
+        "priority": "HIGH",
+        "tags": ["calculator_user", "warm_lead"],
+        "personalization": {
+          "calculatedSavings": "Pull from calculator results",
+          "industry": "Detect from company profile or manual input",
+          "companySize": "Estimate from import volume"
+        }
+      },
+      "websiteVisitAfterEmail": {
+        "trigger": "User visits website after email send",
+        "condition": "Within 72 hours of email receipt",
+        "action": "Immediate sales team notification + personal follow-up",
+        "priority": "MAXIMUM",
+        "tags": ["hot_lead", "email_engaged"],
+        "escalation": "Direct phone call within 4 hours"
+      },
+      "multiplePageVisits": {
+        "trigger": "User visits 3+ pages in single session",
+        "condition": "Not current customer",
+        "action": "Exit cold sequence, enter warm nurture",
+        "priority": "HIGH",
+        "tags": ["engaged_prospect"],
+        "followUp": "Personalized email within 24 hours"
+      }
+    },
+    
+    "emailEngagement": {
+      "highOpenRate": {
+        "trigger": "Opens 80%+ of emails in sequence",
+        "condition": "No response or action taken",
+        "action": "Sales director escalation + direct outreach",
+        "priority": "HIGH",
+        "tags": ["engaged_but_silent"],
+        "escalation": "Personal phone call from senior team member"
+      },
+      "multipleClicks": {
+        "trigger": "Clicks 3+ CTAs across sequence",
+        "condition": "No consultation scheduled",
+        "action": "Immediate sales team handoff",
+        "priority": "MAXIMUM", 
+        "tags": ["high_intent"],
+        "followUp": "Same-day phone call"
+      },
+      "forwardBehavior": {
+        "trigger": "Email forwarded to others (tracking pixel detection)",
+        "condition": "Decision maker identification",
+        "action": "Send decision-maker focused sequence",
+        "priority": "HIGH",
+        "tags": ["decision_maker_involved"],
+        "specialHandling": "Executive-level messaging"
+      }
+    },
+    
+    "platformEngagement": {
+      "trialRegistration": {
+        "trigger": "User creates trial account",
+        "condition": "Account created but no login within 24 hours",
+        "action": "Enter Trial Workflow Users sequence",
+        "sequenceFile": "trial-workflow-users.json",
+        "priority": "HIGH",
+        "tags": ["trial_user", "needs_activation"]
+      },
+      "workflowCompletion": {
+        "trigger": "User completes full USMCA workflow",
+        "condition": "No subscription within 24 hours",
+        "action": "Accelerated conversion sequence with trial discount",
+        "priority": "MAXIMUM",
+        "tags": ["workflow_completed", "conversion_ready"],
+        "offer": "30% trial user discount"
+      },
+      "partialWorkflow": {
+        "trigger": "User starts but doesn't complete workflow",
+        "condition": "Abandons at specific step",
+        "action": "Step-specific assistance email",
+        "priority": "MEDIUM",
+        "tags": ["workflow_abandoned"],
+        "customization": "Email content based on abandonment point"
+      }
+    },
+    
+    "consultationBehavior": {
+      "consultationScheduled": {
+        "trigger": "User books emergency consultation",
+        "condition": "Consultation completed",
+        "action": "Enter Consultation Follow-Up sequence",
+        "sequenceFile": "consultation-follow-up.json",
+        "priority": "MAXIMUM",
+        "tags": ["consultation_completed"],
+        "timing": "2 hours post-consultation"
+      },
+      "consultationNoShow": {
+        "trigger": "Scheduled consultation not attended",
+        "condition": "No reschedule within 48 hours",
+        "action": "Reschedule outreach + value reinforcement",
+        "priority": "HIGH",
+        "tags": ["consultation_missed"],
+        "followUp": "Personal phone call + flexible rescheduling"
+      },
+      "multipleReschedules": {
+        "trigger": "User reschedules consultation 2+ times",
+        "condition": "Pattern of avoidance detected",
+        "action": "Low-pressure nurture + timing assessment",
+        "priority": "MEDIUM",
+        "tags": ["timing_issues"],
+        "approach": "Quarterly updates instead of aggressive follow-up"
+      }
+    }
+  },
+  
+  "sequenceTransitionRules": {
+    "coldToWarm": {
+      "triggers": [
+        "Website visit after cold email",
+        "Email reply (any type)",
+        "Calculator usage",
+        "Resource download"
+      ],
+      "action": "Exit cold sequence, enter appropriate warm sequence",
+      "cooling_period": "48 hours before re-engagement"
+    },
+    "warmToHot": {
+      "triggers": [
+        "Multiple email clicks",
+        "Consultation scheduling", 
+        "Trial account creation",
+        "Phone number provided"
+      ],
+      "action": "Immediate sales team handoff",
+      "response_time": "4 hours maximum"
+    },
+    "customerRetention": {
+      "triggers": [
+        "Subscription cancellation",
+        "Usage decline >50%",
+        "Support ticket escalation",
+        "Negative feedback"
+      ],
+      "action": "Customer success intervention",
+      "priority": "URGENT"
+    }
+  },
+  
+  "industrySpecificRules": {
+    "automotive": {
+      "keywordTriggers": ["automotive", "car", "vehicle", "parts", "assembly"],
+      "customization": {
+        "caseStudy": "AutoParts Mexico SA emphasis",
+        "suppliers": "Automotive-specific Mexico partners",
+        "compliance": "TS 16949 certification focus"
+      }
+    },
+    "electronics": {
+      "keywordTriggers": ["electronics", "semiconductor", "circuit", "component"],
+      "customization": {
+        "caseStudy": "TechFlow Electronics emphasis",
+        "suppliers": "Electronics-specific Tijuana partners",
+        "compliance": "IPC standards focus"
+      }
+    },
+    "textiles": {
+      "keywordTriggers": ["textile", "fabric", "apparel", "clothing", "fashion"],
+      "customization": {
+        "caseStudy": "Sustainable manufacturing focus",
+        "suppliers": "WRAP certified partners",
+        "compliance": "Sustainable materials emphasis"
+      }
+    }
+  },
+  
+  "responseHandling": {
+    "positiveResponses": {
+      "interestedReply": {
+        "keywords": ["interested", "tell me more", "when can we", "sounds good"],
+        "action": "Immediate sales team notification",
+        "response_time": "2 hours maximum",
+        "follow_up": "Personal phone call"
+      },
+      "timingQuestions": {
+        "keywords": ["when", "timeline", "how long", "implementation time"],
+        "action": "Timeline-focused response with case studies",
+        "response_time": "4 hours maximum",
+        "content_focus": "Implementation speed and success stories"
+      },
+      "pricingQuestions": {
+        "keywords": ["cost", "price", "budget", "investment", "how much"],
+        "action": "ROI-focused response with savings calculations",
+        "response_time": "4 hours maximum", 
+        "content_focus": "Value demonstration and payment options"
+      }
+    },
+    
+    "objectionResponses": {
+      "skepticalReply": {
+        "keywords": ["skeptical", "doubt", "unsure", "concerned", "worried"],
+        "action": "Objection handling email + reference customer offer",
+        "response_time": "6 hours maximum",
+        "content_focus": "Social proof and risk mitigation"
+      },
+      "competitorMention": {
+        "keywords": ["using", "working with", "other company", "competitor"],
+        "action": "Competitive differentiation response",
+        "response_time": "4 hours maximum",
+        "content_focus": "Unique advantages and switching benefits"
+      },
+      "notRightTime": {
+        "keywords": ["not now", "later", "busy", "priorities", "timing"],
+        "action": "Respectful acknowledgment + quarterly nurture",
+        "response_time": "24 hours maximum",
+        "content_focus": "No pressure, future value"
+      }
+    },
+    
+    "negativeResponses": {
+      "notInterested": {
+        "keywords": ["not interested", "remove me", "unsubscribe"],
+        "action": "Immediate removal + confirmation",
+        "response_time": "1 hour maximum",
+        "follow_up": "None unless requested"
+      },
+      "angryResponse": {
+        "keywords": ["spam", "stop", "angry", "annoyed", "harassment"],
+        "action": "Immediate removal + management escalation",
+        "response_time": "30 minutes maximum",
+        "escalation": "Customer service director review"
+      }
+    }
+  },
+  
+  "crisisAutomation": {
+    "crisisTriggers": {
+      "tariffAnnouncement": {
+        "monitoring": "News APIs, government feeds, trade publications",
+        "threshold": "Tariff increase >10% affecting major industries",
+        "action": "Immediate Crisis Alert Series deployment",
+        "timing": "Within 2 hours of verified announcement"
+      },
+      "supplyChainDisruption": {
+        "monitoring": "Supply chain news, port delays, transportation issues",
+        "threshold": "Disruption affecting >$1B in trade",
+        "action": "Targeted crisis outreach to affected industries",
+        "timing": "Within 4 hours of disruption confirmation"
+      }
+    },
+    
+    "crisisSegmentation": {
+      "highRisk": {
+        "criteria": "Large China importers in affected industries",
+        "messaging": "Maximum urgency, immediate action required",
+        "response_options": "Emergency consultation, crisis calculator"
+      },
+      "mediumRisk": {
+        "criteria": "Moderate importers with some exposure", 
+        "messaging": "Moderate urgency, planning recommended",
+        "response_options": "Impact assessment, planning consultation"
+      },
+      "lowRisk": {
+        "criteria": "Minimal import exposure",
+        "messaging": "Market awareness, future planning",
+        "response_options": "Market intelligence, monitoring services"
+      }
+    }
+  },
+  
+  "segmentationLogic": {
+    "companySize": {
+      "enterprise": {
+        "criteria": "Annual imports >$5M OR 500+ employees",
+        "messaging": "Enterprise features, white-glove service",
+        "pricing": "Custom pricing, volume discounts"
+      },
+      "midMarket": {
+        "criteria": "Annual imports $1M-$5M OR 50-500 employees",
+        "messaging": "Professional features, dedicated support",
+        "pricing": "Enterprise plan emphasis"
+      },
+      "small": {
+        "criteria": "Annual imports <$1M OR <50 employees",
+        "messaging": "Professional features, self-service options",
+        "pricing": "Professional plan emphasis"
+      }
+    },
+    
+    "urgencyLevel": {
+      "immediate": {
+        "criteria": "High tariff exposure + near-term renewal decisions",
+        "sequence_timing": "Accelerated (50% shorter delays)",
+        "messaging": "Urgent language, immediate action CTAs"
+      },
+      "planning": {
+        "criteria": "Moderate exposure + longer decision timelines",
+        "sequence_timing": "Standard timing",
+        "messaging": "Planning-focused, educational content"
+      },
+      "monitoring": {
+        "criteria": "Low exposure + information gathering",
+        "sequence_timing": "Extended (25% longer delays)",
+        "messaging": "Market intelligence, future-focused"
+      }
+    }
+  },
+  
+  "qualityControls": {
+    "sendingLimits": {
+      "perHour": 100,
+      "perDay": 500,
+      "perWeek": 2000,
+      "respectsTimeZones": true,
+      "businessHoursOnly": true
+    },
+    
+    "contentValidation": {
+      "spamChecking": "Required before send",
+      "linkValidation": "All links tested",
+      "personalizationCheck": "All variables populated",
+      "deliverabilityScore": ">8.0 required"
+    },
+    
+    "suppressionRules": {
+      "hardBounces": "Immediate permanent suppression",
+      "spamComplaints": "Immediate permanent suppression", 
+      "unsubscribes": "Immediate permanent suppression",
+      "inactiveEmails": "Suppress after 90 days no engagement"
+    }
+  },
+  
+  "performanceTracking": {
+    "keyMetrics": {
+      "deliverability": ">95% target",
+      "openRates": ">25% target", 
+      "clickRates": ">5% target",
+      "conversionRates": ">2% target",
+      "unsubscribeRates": "<0.5% target"
+    },
+    
+    "sequenceOptimization": {
+      "abTestingRules": "Test subject lines, send times, content variations",
+      "winnerDetermination": "Statistical significance required",
+      "rolloutProcess": "Gradual deployment of winning variations"
+    },
+    
+    "reportingSchedule": {
+      "daily": "Delivery and engagement metrics",
+      "weekly": "Sequence performance and conversion tracking",
+      "monthly": "ROI analysis and optimization recommendations",
+      "quarterly": "Strategic review and sequence updates"
+    }
+  }
+}

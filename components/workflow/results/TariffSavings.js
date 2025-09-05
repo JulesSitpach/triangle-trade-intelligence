@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { DollarSign } from '../../Icons';
 
 export default function TariffSavings({ results }) {
   if (!results?.savings) return null;
@@ -17,38 +18,41 @@ export default function TariffSavings({ results }) {
   } = results.savings;
 
   return (
-    <div className="mb-8">
-      <h3 className="card-title">Tariff Savings Analysis</h3>
-      <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="text-center">
-            <div className="metric-value-large text-green-800">
+    <div className="form-section">
+      <div className="section-header">
+        <DollarSign className="icon-sm" />
+        <h3 className="form-section-title">Tariff Savings Analysis</h3>
+      </div>
+      <div className="savings-summary-card">
+        <div className="savings-metrics-grid">
+          <div className="savings-metric-card primary">
+            <div className="metric-value success">
               ${annual_savings.toLocaleString()}
             </div>
-            <div className="metric-label font-medium">Annual Savings USD</div>
+            <div className="metric-label">Annual Savings USD</div>
           </div>
-          <div className="text-center">
-            <div className="metric-value text-green-700">
+          <div className="savings-metric-card">
+            <div className="metric-value">
               ${monthly_savings.toLocaleString()}
             </div>
-            <div className="metric-label font-medium">Monthly Savings</div>
+            <div className="metric-label">Monthly Savings</div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-700 mb-2">
+          <div className="savings-metric-card">
+            <div className="metric-value success">
               {savings_percentage.toFixed(2)}%
             </div>
-            <div className="text-sm font-medium text-gray-600">Savings Rate</div>
+            <div className="metric-label">Savings Rate</div>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-green-200">
-          <div className="flex justify-between items-center">
-            <span className="font-medium text-gray-600">MFN Tariff Rate:</span>
-            <span className="font-bold text-red-600">{mfn_rate}%</span>
+        <div className="tariff-rates-comparison">
+          <div className="rate-comparison-item">
+            <span className="rate-label">MFN Tariff Rate:</span>
+            <span className="rate-value warning">{mfn_rate}%</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="font-medium text-gray-600">USMCA Rate:</span>
-            <span className="font-bold text-green-600">
+          <div className="rate-comparison-item">
+            <span className="rate-label">USMCA Rate:</span>
+            <span className="rate-value success">
               {usmca_rate !== undefined ? usmca_rate : 0}%
             </span>
           </div>

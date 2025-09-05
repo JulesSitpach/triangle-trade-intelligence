@@ -1,17 +1,8 @@
-// Jest setup for Triangle Intelligence Platform testing
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
+import dotenv from 'dotenv';
 
-// Mock environment variables for testing
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test-project.supabase.co'
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
-process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
-process.env.ANTHROPIC_API_KEY = 'test-anthropic-key'
-process.env.COMTRADE_API_KEY = 'test-comtrade-key'
-process.env.SHIPPO_API_KEY = 'test-shippo-key'
-process.env.NODE_ENV = 'test'
-
-// Mock fetch globally
-global.fetch = jest.fn()
+// Load environment variables for testing
+dotenv.config();
 
 // Mock next/router
 jest.mock('next/router', () => ({
@@ -22,50 +13,61 @@ jest.mock('next/router', () => ({
       query: {},
       asPath: '/',
       push: jest.fn(),
-      replace: jest.fn(),
+      pop: jest.fn(),
+      reload: jest.fn(),
       back: jest.fn(),
+      prefetch: jest.fn().mockResolvedValue(undefined),
       beforePopState: jest.fn(),
-      prefetch: jest.fn(),
+      isFallback: false,
       events: {
         on: jest.fn(),
         off: jest.fn(),
         emit: jest.fn(),
       },
-    }
+    };
   },
-}))
+}));
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-}
-global.localStorage = localStorageMock
+// Mock Supabase client
+jest.mock('@supabase/supabase-js', () => ({
+  createClient: jest.fn(() => ({
+    from: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    gte: jest.fn().mockReturnThis(),
+    lte: jest.fn().mockReturnThis(),
+    like: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
+    then: jest.fn().mockResolvedValue({ data: [], error: null })
+  }))
+}));
 
-// Mock window.location
-delete window.location
-window.location = { 
-  href: 'http://localhost:3000',
-  origin: 'http://localhost:3000',
-  pathname: '/',
-  search: '',
-  hash: '',
-  assign: jest.fn(),
-  reload: jest.fn(),
-  replace: jest.fn(),
-}
+// Global test environment setup
+global.console = {
+  ...console,
+  // Suppress console output during tests unless specifically testing logs
+  log: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn()
+};
 
-// Mock console methods to keep test output clean
-console.log = jest.fn()
-console.warn = jest.fn()
-console.error = jest.fn()
+// Mock process.env values for consistent testing
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
 
-// Setup test utilities
-beforeEach(() => {
-  jest.clearAllMocks()
-})
-
-// Global test timeout
-jest.setTimeout(10000)
+// Performance timing mock for testing
+global.performance = {
+  now: jest.fn(() => Date.now()),
+  mark: jest.fn(),
+  measure: jest.fn(),
+  getEntriesByName: jest.fn(() => []),
+  getEntriesByType: jest.fn(() => [])
+};

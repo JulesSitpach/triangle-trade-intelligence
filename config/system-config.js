@@ -106,6 +106,35 @@ export const SYSTEM_CONFIG = {
     maxFileUploadSize: parseInt(getEnvValue('MAX_FILE_UPLOAD_MB', '10'))
   },
 
+  // Country Configuration - For form dropdowns and mapping
+  countries: {
+    // Standard country code mappings
+    codeMappings: {
+      'China': 'CN',
+      'Mexico': 'MX', 
+      'Canada': 'CA',
+      'United States': 'US',
+      'India': 'IN',
+      'Vietnam': 'VN',
+      'Germany': 'DE',
+      'Japan': 'JP',
+      'South Korea': 'KR',
+      'Thailand': 'TH',
+      'Malaysia': 'MY',
+      'Singapore': 'SG',
+      'Indonesia': 'ID',
+      'Turkey': 'TR',
+      'Brazil': 'BR',
+      'Italy': 'IT',
+      'United Kingdom': 'GB',
+      'Netherlands': 'NL'
+    },
+    // Default destination for USMCA forms
+    defaultDestination: getEnvValue('DEFAULT_DESTINATION_COUNTRY', 'US'),
+    // USMCA member countries
+    usmcaCountries: ['US', 'CA', 'MX']
+  },
+
   // Business Type to HS Chapter Mappings - DATA-DRIVEN FROM ACTUAL DATABASE CONTENT
   // Based on analysis of actual products in hs_master_rebuild table (34,476 records)
   businessTypeChapters: {

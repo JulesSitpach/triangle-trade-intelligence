@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import Head from 'next/head'
 import '../styles/globals.css'
-import '../styles/components/usmca-workflow.css'
+import '../styles/dashboard.css'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 // import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
@@ -10,7 +9,6 @@ import '../styles/components/usmca-workflow.css'
 // import ErrorBoundary from '../components/ErrorBoundary'
 
 export default function App({ Component, pageProps }) {
-  const router = useRouter()
   const [showLoading, setShowLoading] = useState(true)
   
   useEffect(() => {

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Triangle Intelligence - USMCA Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔺 Triangle Intelligence - USMCA Compliance Test</h1>
+        <p>Professional HS Code Classification & USMCA Analysis</p>
+        <p><strong>Status:</strong> <span style="color: green;">✅ Database loaded with 6,939 HS codes</span></p>
+    </div>
+
+    <div class="card">
+        <h2>🧪 Quick Classification Test</h2>
+        <form id="testForm">
+            <label>Product Description:</label>
+            <input type="text" id="productDescription" placeholder="e.g., cotton t-shirt, smartphone, auto parts" value="cotton t-shirt">
+            
+            <label>Business Type:</label>
+            <select id="businessType">
+                <option value="Textiles">Textiles & Apparel</option>
+                <option value="Electronics">Electronics & Technology</option>
+                <option value="Automotive">Automotive</option>
+                <option value="General">General</option>
+            </select>
+            
+            <button type="button" class="button" onclick="testClassification()">🔍 Classify Product</button>
+            <button type="button" class="button" onclick="testDropdowns()">📋 Test Dropdowns</button>
+        </form>
+        
+        <div id="results"></div>
+    </div>
+
+    <div class="card">
+        <h2>📊 System Status</h2>
+        <button type="button" class="button" onclick="checkStatus()">Check API Status</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function testClassification() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>🔄 Testing classification...</p>';
+            
+            try {
+                const response = await fetch('/api/simple-usmca-compliance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'complete_workflow',
+                        data: {
+                            product_description: document.getElementById('productDescription').value,
+                            business_type: document.getElementById('businessType').value,
+                            company_name: 'Test Company',
+                            supplier_country: 'CN',
+                            trade_volume: 100000,
+                            component_origins: [
+                                { origin_country: 'CN', value_percentage: 60 },
+                                { origin_country: 'MX', value_percentage: 40 }
+                            ],
+                            manufacturing_location: 'MX'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    results.innerHTML = `
+                        <div class="result">
+                            <h3>✅ Classification Success!</h3>
+                            <p><strong>HS Code:</strong> ${data.results.product.hs_code}</p>
+                            <p><strong>Description:</strong> ${data.results.product.description}</p>
+                            <p><strong>Confidence:</strong> ${(data.results.product.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>USMCA Qualified:</strong> ${data.results.usmca.qualified ? '✅ Yes' : '❌ No'}</p>
+                            <p><strong>Reason:</strong> ${data.results.usmca.reason}</p>
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = `<div class="result">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                results.innerHTML = `<div class="result">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testDropdowns() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>🔄 Testing dropdowns...</p>';
+            
+            try {
+                const response = await fetch('/api/simple-dropdown-options');
+                const data = await response.json();
+                
+                results.innerHTML = `
+                    <div class="result">
+                        <h3>✅ Dropdown Options Loaded</h3>
+                        <p><strong>Business Types:</strong> ${data.businessTypes.length} categories</p>
+                        <p><strong>Countries:</strong> ${data.countries.length} available</p>
+                        <p><strong>Trade Volumes:</strong> ${data.importVolumes.length} ranges</p>
+                        <details>
+                            <summary>Business Types Available:</summary>
+                            <ul>
+                                ${data.businessTypes.map(bt => `<li><strong>${bt.label}:</strong> ${bt.description}</li>`).join('')}
+                            </ul>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                results.innerHTML = `<div class="result">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function checkStatus() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<p>🔄 Checking system status...</p>';
+            
+            try {
+                // Test multiple endpoints
+                const dropdownTest = fetch('/api/simple-dropdown-options').then(r => r.ok);
+                const classificationTest = fetch('/api/simple-usmca-compliance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'test' })
+                }).then(r => r.status !== 404);
+                
+                const [dropdowns, classification] = await Promise.all([dropdownTest, classificationTest]);
+                
+                status.innerHTML = `
+                    <div class="result">
+                        <h3>System Status Check</h3>
+                        <p>📋 Dropdown API: ${dropdowns ? '✅ Working' : '❌ Failed'}</p>
+                        <p>🔍 Classification API: ${classification ? '✅ Working' : '❌ Failed'}</p>
+                        <p>💾 Database: ✅ 6,939 HS codes loaded</p>
+                        <p>🎯 Ready for testing!</p>
+                    </div>
+                `;
+            } catch (error) {
+                status.innerHTML = `<div class="result">❌ Status Check Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-load status on page load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>

@@ -87,7 +87,29 @@ export default function ComplianceSolutions() {
 
       {/* Hero Section */}
       <section className="hero-video-section">
+        <video
+          className="hero-video-element"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={(e) => {
+            e.target.playbackRate = 0.8; // Slow down to 80% speed
+          }}
+          onError={(e) => {
+            console.warn('Video failed to load:', e);
+            e.target.style.display = 'none';
+          }}
+        >
+          <source src="/image/earth-seamless-loop.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        
+        {/* Gradient Overlay */}
         <div className="hero-gradient-overlay" />
+        
+        {/* Hero Content */}
         <div className="hero-content-container">
           <div className="hero-badge">
             Enterprise USMCA Compliance Platform
@@ -140,12 +162,11 @@ export default function ComplianceSolutions() {
                 <h3 className="content-card-title">{service.title}</h3>
                 <p className="content-card-description">{service.description}</p>
                 
-                <div className="trust-indicators-grid">
+                <div>
                   {service.features.map((feature, idx) => (
-                    <div key={idx} className="trust-indicator">
-                      <span className="trust-indicator-value">✓</span>
-                      <div className="trust-indicator-label">{feature}</div>
-                    </div>
+                    <p key={idx} className="text-body">
+                      ✓ {feature}
+                    </p>
                   ))}
                 </div>
                 
@@ -191,26 +212,91 @@ export default function ComplianceSolutions() {
       </section>
 
       {/* CTA Section */}
-      <section className="hero-video-section">
-        <div className="hero-gradient-overlay" />
-        <div className="hero-content-container">
-          <h2 className="hero-main-title">
-            Ready to Optimize Your Trade Compliance?
-          </h2>
-          <p className="hero-description-text">
-            Start your free USMCA analysis and discover potential tariff savings for your products
-          </p>
-          <div className="hero-button-group">
-            <Link 
-              href="/usmca-workflow" 
-              className="hero-primary-button"
-              aria-label="Start free USMCA compliance analysis workflow"
-            >
-              Start Free Analysis
-            </Link>
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">
+              Ready to Optimize Your Trade Compliance?
+            </h2>
+            <p className="section-header-subtitle">
+              Start your free USMCA analysis and discover potential tariff savings for your products
+            </p>
+            <div className="hero-button-group">
+              <Link 
+                href="/usmca-workflow" 
+                className="hero-primary-button"
+                aria-label="Start free USMCA compliance analysis workflow"
+              >
+                Start Free Analysis
+              </Link>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Professional Footer */}
+      <footer className="content-card">
+        <div className="container-app">
+          {/* Footer Content */}
+          <div className="grid-3-cols">
+            {/* Company Information */}
+            <div>
+              <h3 className="section-header-title">TradeFlow Intelligence</h3>
+              <p className="text-body">
+                Professional USMCA compliance platform delivering trade classification, supply chain optimization, and regulatory guidance for North American manufacturers.
+              </p>
+            </div>
+            
+            {/* Solutions Links */}
+            <div>
+              <h4 className="content-card-title">Solutions</h4>
+              <div>
+                <p className="text-body">
+                  <Link href="/usmca-workflow" className="nav-link">USMCA Analysis</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/industries" className="nav-link">Industries</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/services" className="nav-link">Trade Services</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/pricing" className="nav-link">Pricing</Link>
+                </p>
+              </div>
+            </div>
+            
+            {/* Company & Legal Links */}
+            <div>
+              <h4 className="content-card-title">Company</h4>
+              <div>
+                <p className="text-body">
+                  <Link href="/intelligence" className="nav-link">Intelligence</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/contact" className="nav-link">Contact</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/privacy-policy" className="nav-link">Privacy Policy</Link>
+                </p>
+                <p className="text-body">
+                  <Link href="/terms-of-service" className="nav-link">Terms of Service</Link>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Copyright Bar */}
+          <div className="section-header">
+            <p className="text-body">
+              © 2024 TradeFlow Intelligence. All rights reserved.
+            </p>
+            <p className="text-body">
+              Professional trade compliance platform for enterprise clients.
+            </p>
+          </div>
+        </div>
+      </footer>
     </>
   )
 }

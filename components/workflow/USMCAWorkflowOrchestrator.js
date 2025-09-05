@@ -174,45 +174,33 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       <section className="main-content hero-section">
         <div className="container-app">
           <div className="section-header">
-            <h1 className="hero-main-title" style={{ fontSize: '3.5rem', marginBottom: '1rem', color: 'var(--navy-900)' }}>
+            <h1 className="page-title">
               USMCA Compliance Analysis
             </h1>
-            <h2 className="hero-sub-title" style={{ marginBottom: '1.5rem', color: 'var(--navy-700)' }}>
+            <h2 className="page-subtitle">
               Enterprise Trade Classification & Certificate Generation Platform
             </h2>
-            <p className="hero-description-text" style={{ color: 'var(--gray-700)' }}>
+            <p className="page-description">
               AI-powered compliance analysis with government-verified data. Generate audit-ready certificates 
               and optimize tariff savings through professional USMCA qualification assessment.
             </p>
             
-            {/* Professional Status Indicators */}
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              gap: '2rem', 
-              marginTop: '2rem',
-              flexWrap: 'wrap'
-            }}>
-              <div className="trust-indicator">
-                <div className="trust-icon">✓</div>
-                <div>
-                  <div className="trust-title" style={{ color: 'var(--navy-700)' }}>Data Verified</div>
-                  <div className="trust-subtitle" style={{ color: 'var(--gray-600)' }}>34,476 Government Records</div>
-                </div>
+            {/* Professional Status Dashboard */}
+            <div className="status-grid">
+              <div className="status-card">
+                <div className="status-value success">34,476</div>
+                <div className="status-label">Government Records</div>
+                <div className="badge badge-success">Verified</div>
               </div>
-              <div className="trust-indicator">
-                <div className="trust-icon">●</div>
-                <div>
-                  <div className="trust-title" style={{ color: 'var(--navy-700)' }}>System Operational</div>
-                  <div className="trust-subtitle" style={{ color: 'var(--gray-600)' }}>99.9% Uptime SLA</div>
-                </div>
+              <div className="status-card">
+                <div className="status-value info">99.9%</div>
+                <div className="status-label">System Uptime</div>
+                <div className="badge badge-info">Operational</div>
               </div>
-              <div className="trust-indicator">
-                <div className="trust-icon">◉</div>
-                <div>
-                  <div className="trust-title" style={{ color: 'var(--navy-700)' }}>Expert Network</div>
-                  <div className="trust-subtitle" style={{ color: 'var(--gray-600)' }}>Licensed Customs Brokers</div>
-                </div>
+              <div className="status-card">
+                <div className="status-value primary">Licensed</div>
+                <div className="status-label">Customs Brokers</div>
+                <div className="badge badge-info">Expert Network</div>
               </div>
             </div>
           </div>
