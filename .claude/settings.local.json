@@ -13,7 +13,14 @@
       "Bash(find:*)",
       "Bash(npm run build:*)",
       "Bash(timeout 30 npm run dev)",
-      "Bash(timeout 20 npx next dev -p 3001)"
+      "Bash(timeout 20 npx next dev -p 3001)",
+      "Read(/D:\\bacjup\\triangle-simple\\styles/**)",
+      "Read(/D:\\bacjup\\triangle-simple\\styles/**)",
+      "Bash(grep:*)",
+      "Read(/D:\\/**)",
+      "Read(/D:\\/**)",
+      "Bash(sed:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

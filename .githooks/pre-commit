@@ -30,16 +30,35 @@ echo "$STAGED_FILES" | sed 's/^/  - /'
 echo ""
 
 # PHASE 1: CSS Protection Check (CRITICAL)
-echo -e "${YELLOW}🛡️  PHASE 1: CSS Protection Check${NC}"
+echo -e "${YELLOW}🛡️  PHASE 1: Enhanced CSS Protection Check${NC}"
 
-# Check for protected CSS file modifications
-PROTECTED_CSS=$(echo "$STAGED_FILES" | grep -E '\.(css|scss|sass)$' || true)
-if [ ! -z "$PROTECTED_CSS" ]; then
-    if echo "$PROTECTED_CSS" | grep -q "styles/globals.css"; then
-        echo -e "${RED}❌ CRITICAL: styles/globals.css modification blocked${NC}"
-        echo -e "${RED}   This file is protected by CSS architecture rules${NC}"
+# Run comprehensive CSS protection system
+if command -v node &> /dev/null && [ -f ".css-protection.js" ]; then
+    echo "🔒 Running CSS Protection System..."
+    node .css-protection.js check
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ CRITICAL: CSS Protection System violations${NC}"
         CSS_VIOLATIONS=1
         CRITICAL_ERRORS=1
+    fi
+else
+    echo "⚠️  CSS Protection System not found - using basic checks"
+    
+    # Check for protected CSS file modifications
+    PROTECTED_CSS=$(echo "$STAGED_FILES" | grep -E '\.(css|scss|sass)$' || true)
+    if [ ! -z "$PROTECTED_CSS" ]; then
+        if echo "$PROTECTED_CSS" | grep -q "styles/globals.css"; then
+            echo -e "${RED}❌ CRITICAL: styles/globals.css modification blocked${NC}"
+            echo -e "${RED}   This file is protected by CSS architecture rules${NC}"
+            CSS_VIOLATIONS=1
+            CRITICAL_ERRORS=1
+        fi
+        if echo "$PROTECTED_CSS" | grep -q "styles/dashboard.css"; then
+            echo -e "${RED}❌ CRITICAL: styles/dashboard.css modification blocked${NC}"
+            echo -e "${RED}   This file is protected by CSS architecture rules${NC}"
+            CSS_VIOLATIONS=1
+            CRITICAL_ERRORS=1
+        fi
     fi
 fi
 
