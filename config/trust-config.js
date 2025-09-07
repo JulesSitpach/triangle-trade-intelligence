@@ -301,17 +301,17 @@ export async function getDynamicTrustConfig(supabaseClient) {
  */
 export async function getTrustIndicators() {
   return {
-    system_status: 'operational',
-    data_provenance: 'verified',
-    expert_validation: 'available',
-    continuous_verification: 'active',
-    accuracy_rate: '96.8%',
-    response_time: '<200ms',
-    uptime: '99.9%',
+    system_status: getTrustEnvValue('TRUST_SYSTEM_STATUS', 'operational'),
+    data_provenance: getTrustEnvValue('TRUST_DATA_PROVENANCE', 'verified'),
+    expert_validation: getTrustEnvValue('TRUST_EXPERT_VALIDATION', 'available'),
+    continuous_verification: getTrustEnvValue('TRUST_CONTINUOUS_VERIFICATION', 'active'),
+    accuracy_rate: getTrustEnvValue('TRUST_ACCURACY_RATE', '96.8%'),
+    response_time: getTrustEnvValue('TRUST_RESPONSE_TIME', '<200ms'),
+    uptime: getTrustEnvValue('TRUST_UPTIME', '99.9%'),
     last_verified: new Date().toISOString(),
     verification_sources: Object.keys(TRUST_CONFIG.provenance.sourceReliabilityScores),
-    expert_network: 'licensed_customs_brokers',
-    audit_trail: 'complete'
+    expert_network: getTrustEnvValue('TRUST_EXPERT_NETWORK', 'licensed_customs_brokers'),
+    audit_trail: getTrustEnvValue('TRUST_AUDIT_TRAIL', 'complete')
   };
 }
 

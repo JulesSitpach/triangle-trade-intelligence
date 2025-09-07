@@ -34,7 +34,10 @@
     "css:approve": "node .css-protection.js approve",
     "css:status": "node .css-protection.js status",
     "css:lock": "npm run css:approve && echo '🔒 CSS files are now locked and protected'",
-    "protection:full": "npm run css:check && npm run check-hardcoding && echo '🛡️ Full protection check passed'"
+    "protection:full": "npm run css:check && npm run check-hardcoding && echo '🛡️ Full protection check passed'",
+    "validate:smart": "node smart-validation-framework.js",
+    "validate:discover": "node auto-discovery-validator.js",
+    "validate:all": "npm run validate:discover && npm run validate:smart"
   },
   "keywords": [
     "trade",

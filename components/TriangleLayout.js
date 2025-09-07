@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useAlertContext } from '../lib/contexts/AlertContext'
 
 /**
  * TriangleLayout Component
@@ -16,12 +17,17 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [crisisBannerVisible, setCrisisBannerVisible] = useState(showCrisisBanner)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false)
   const router = useRouter()
+  
+  // Get alert count from context
+  const { alertCount, loading } = useAlertContext()
 
   // Close mobile menu and dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false)
     setUserDropdownOpen(false)
+    setAdminDropdownOpen(false)
   }, [router.pathname])
 
   // Close dropdown when clicking outside
@@ -30,28 +36,74 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
       if (userDropdownOpen && !event.target.closest('.dashboard-nav-dropdown')) {
         setUserDropdownOpen(false)
       }
+      if (adminDropdownOpen && !event.target.closest('.admin-dropdown')) {
+        setAdminDropdownOpen(false)
+      }
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  }, [userDropdownOpen])
+  }, [userDropdownOpen, adminDropdownOpen])
+
+  // Developer access: Add ?dev=true to URL or localStorage flag
+  const isDev = router.query.dev === 'true' || 
+                (typeof window !== 'undefined' && localStorage.getItem('triangle-dev-mode') === 'true')
+  
+  // Admin access detection (environment-based)
+  const isAdmin = process.env.NODE_ENV === 'development' || isDev
 
   const navigationItems = [
     {
       path: '/usmca-workflow',
       label: 'Workflow',
-      description: 'Complete compliance analysis'
+      description: 'Complete compliance analysis',
+      public: true
     },
     {
       path: '/trump-tariff-alerts',
-      label: 'Reports',
+      label: 'Alerts',
       description: 'Real-time tariff monitoring',
-      badge: '3' // Show alert count
-    },
+      badge: !loading && alertCount > 0 ? alertCount.toString() : null,
+      public: true
+    }
+  ]
+
+  // Internal admin dashboard items
+  const adminItems = [
     {
       path: '/admin/supplier-management',
-      label: 'Settings',
+      label: 'Supplier Management',
       description: 'Manage suppliers and preferences'
+    },
+    {
+      path: '/admin/user-management',
+      label: 'User Management', 
+      description: 'Manage customer accounts'
+    },
+    {
+      path: '/admin/analytics',
+      label: 'Analytics',
+      description: 'Platform usage and metrics'
+    },
+    {
+      path: '/admin/system-config',
+      label: 'System Config',
+      description: 'Configure system settings'
+    },
+    {
+      path: '/sales/dashboard',
+      label: 'Sales Dashboard',
+      description: 'Sales team tools and metrics'
+    },
+    {
+      path: '/admin/crisis-management',
+      label: 'Crisis Management',
+      description: 'Monitor and manage tariff crises'
+    },
+    {
+      path: '/system-status',
+      label: 'System Status',
+      description: 'Real-time platform health monitoring'
     }
   ]
 
@@ -106,6 +158,38 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                   {item.badge && <span className="badge badge-warning">{item.badge}</span>}
                 </Link>
               ))}
+              
+              {/* Admin Dropdown - Only visible to admin/dev users */}
+              {(isAdmin || isDev) && (
+                <div className="admin-dropdown">
+                  <button 
+                    className={`dashboard-nav-link ${router.pathname.startsWith('/admin') || router.pathname.startsWith('/sales') ? 'active' : ''}`}
+                    onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
+                    aria-label="Admin menu"
+                  >
+                    <span>Admin</span>
+                    <span className="dropdown-arrow">{adminDropdownOpen ? '▲' : '▼'}</span>
+                  </button>
+                  
+                  {adminDropdownOpen && (
+                    <div className="admin-dropdown-menu">
+                      {adminItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          href={item.path}
+                          className={`admin-dropdown-item ${router.pathname === item.path ? 'active' : ''}`}
+                          onClick={() => setAdminDropdownOpen(false)}
+                        >
+                          <div>
+                            <div className="admin-item-label">{item.label}</div>
+                            <div className="admin-item-description">{item.description}</div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </nav>
 
             {/* Professional User Section */}
@@ -177,6 +261,29 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                   )}
                 </Link>
               ))}
+              
+              {/* Admin Menu Items for Mobile - Only visible to admin/dev users */}
+              {(isAdmin || isDev) && (
+                <>
+                  <div className="mobile-section-divider">Admin Tools</div>
+                  {adminItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className={`dashboard-nav-link admin-mobile-item ${
+                        router.pathname === item.path ? 'active' : ''
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <div>
+                        <div className="admin-item-label">{item.label}</div>
+                        <div className="admin-item-description">{item.description}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </>
+              )}
+              
               <Link
                 href="/usmca-workflow"
                 className="btn-primary"

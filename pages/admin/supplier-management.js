@@ -75,7 +75,7 @@ export default function SupplierManagement() {
     usmca_certification_time_days: '',
     production_capacity: '',
     quality_certifications: '',
-    broker_verified: false,
+    verification_status: 'pending',
     broker_notes: ''
   });
 
@@ -86,36 +86,20 @@ export default function SupplierManagement() {
 
   const loadSuppliers = async () => {
     try {
-      // TODO: Implement API call to get suppliers
-      // const response = await fetch('/api/admin/suppliers');
-      // const result = await response.json();
-      // setSuppliers(result.suppliers || []);
-      
-      // Mock data for now
-      setSuppliers([
-        {
-          id: '1',
-          company_name: 'ElectroMex Solutions',
-          location: 'Querétaro, México',
-          contact_person: 'María González',
-          hs_specialties: ['8544', '8536'],
-          pricing_premium_percent: 15,
-          broker_verified: false,
-          introduction_count: 3,
-          successful_partnerships: 1
-        },
-        {
-          id: '2',
-          company_name: 'AutoComponentes Norte',
-          location: 'Tijuana, México',
-          contact_person: 'Roberto Martínez',
-          hs_specialties: ['8708', '8714'],
-          pricing_premium_percent: 12,
-          broker_verified: true,
-          introduction_count: 7,
-          successful_partnerships: 4
+      // Try to load from real supplier API
+      try {
+        const response = await fetch('/api/admin/suppliers');
+        if (response.ok) {
+          const result = await response.json();
+          setSuppliers(result.suppliers || []);
+        } else {
+          console.log('No /api/admin/suppliers API - showing empty state');
+          setSuppliers([]);
         }
-      ]);
+      } catch (error) {
+        console.log('Supplier API not available:', error.message);
+        setSuppliers([]);
+      }
     } catch (error) {
       console.error('Failed to load suppliers:', error);
     }
@@ -157,18 +141,25 @@ export default function SupplierManagement() {
         usmca_certification_time_days: parseInt(newSupplier.usmca_certification_time_days) || 21
       };
 
-      // TODO: Implement API call to add supplier
-      console.log('Adding supplier:', supplierData);
-      
-      // Mock success for now
-      const mockSupplier = {
-        id: Date.now().toString(),
-        ...supplierData,
-        introduction_count: 0,
-        successful_partnerships: 0
-      };
-      
-      setSuppliers(prev => [...prev, mockSupplier]);
+      // Try to add supplier via API
+      try {
+        const response = await fetch('/api/admin/suppliers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(supplierData)
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          setSuppliers(prev => [...prev, result.supplier]);
+        } else {
+          throw new Error('Failed to add supplier via API');
+        }
+      } catch (apiError) {
+        console.log('Add supplier API not available:', apiError.message);
+        alert('Supplier management API not implemented yet. Cannot add supplier.');
+        return;
+      }
       setShowAddForm(false);
       setNewSupplier({
         company_name: '',
@@ -182,7 +173,7 @@ export default function SupplierManagement() {
         usmca_certification_time_days: '',
         production_capacity: '',
         quality_certifications: '',
-        broker_verified: false,
+        verification_status: 'pending',
         broker_notes: ''
       });
       
@@ -194,14 +185,26 @@ export default function SupplierManagement() {
 
   const handleVerifySupplier = async (supplierId) => {
     try {
-      // TODO: Implement API call to verify supplier
-      console.log('Verifying supplier:', supplierId);
-      
-      setSuppliers(prev => prev.map(supplier => 
-        supplier.id === supplierId 
-          ? { ...supplier, broker_verified: true }
-          : supplier
-      ));
+      // Try to verify supplier via API
+      try {
+        const response = await fetch(`/api/admin/suppliers/${supplierId}/verify`, {
+          method: 'PUT'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          setSuppliers(prev => prev.map(supplier => 
+            supplier.id === supplierId 
+              ? { ...supplier, verification_status: 'verified', verified_at: result.supplier?.verified_at }
+              : supplier
+          ));
+        } else {
+          throw new Error('Failed to verify supplier via API');
+        }
+      } catch (apiError) {
+        console.log('Verify supplier API not available:', apiError.message);
+        alert('Supplier verification API not implemented yet.');
+      }
       
     } catch (error) {
       console.error('Failed to verify supplier:', error);
@@ -247,7 +250,7 @@ export default function SupplierManagement() {
               <div className="calculator-metric-value info">{suppliers.length}</div>
               <div className="calculator-metric-title">Total Suppliers</div>
               <p className="text-muted">
-                {suppliers.filter(s => s.broker_verified).length} Verified
+                {suppliers.filter(s => s.verification_status === 'verified').length} Verified
               </p>
             </div>
             
@@ -458,10 +461,10 @@ export default function SupplierManagement() {
                   <label className="form-label">
                     <input
                       type="checkbox"
-                      checked={newSupplier.broker_verified}
-                      onChange={(e) => updateNewSupplier('broker_verified', e.target.checked)}
+                      checked={newSupplier.verification_status === 'verified'}
+                      onChange={(e) => updateNewSupplier('verification_status', e.target.checked ? 'verified' : 'pending')}
                     />
-                    <span>Mark as Broker Verified</span>
+                    <span>Mark as Verified</span>
                   </label>
                   <p className="text-muted">I have personally visited or thoroughly vetted this facility</p>
                 </div>
@@ -514,7 +517,7 @@ function SuppliersList({ suppliers, onVerifySupplier }) {
                 <h3 className="content-card-title">
                   {supplier.company_name}
                 </h3>
-                {supplier.broker_verified && (
+                {supplier.verification_status === 'verified' && (
                   <span className="status-success">
                     <CheckCircle className="icon-sm" />
                     <span>Verified</span>
@@ -551,7 +554,7 @@ function SuppliersList({ suppliers, onVerifySupplier }) {
           </div>
           
           <div className="hero-button-group">
-            {!supplier.broker_verified && (
+            {supplier.verification_status !== 'verified' && (
               <button
                 onClick={() => onVerifySupplier(supplier.id)}
                 className="btn-success"

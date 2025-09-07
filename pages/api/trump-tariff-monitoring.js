@@ -11,7 +11,8 @@ import { TrumpTariffMonitorService } from '../../lib/services/trump-tariff-monit
 import { ProductionLogger } from '../../lib/utils/production-logger.js';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
 
-const logger = new ProductionLogger('TrumpTariffMonitoringAPI');
+// Use ProductionLogger as an object, not a constructor
+const logger = ProductionLogger;
 
 export default async function handler(req, res) {
   const startTime = Date.now();

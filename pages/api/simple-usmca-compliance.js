@@ -13,7 +13,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { action, data } = req.body;
+    // Support both action/data format and direct format for backward compatibility
+    let action, data;
+    
+    if (req.body.action) {
+      // New format: { action, data }
+      action = req.body.action;
+      data = req.body.data || {};
+    } else {
+      // Direct format: determine action from data content
+      if (req.body.hs_code && req.body.action === 'check_qualification') {
+        action = 'check_qualification';
+        data = req.body;
+      } else if (req.body.hs_code && req.body.action === 'calculate_savings') {
+        action = 'calculate_savings';
+        data = req.body;
+      } else if (req.body.product_description) {
+        action = 'classify_product';
+        data = req.body;
+      } else {
+        return res.status(400).json({ error: 'Unable to determine action from request' });
+      }
+    }
+
+    // Store data in req.body.data for handlers
+    req.body.data = data;
 
     switch (action) {
       case 'classify_product':
@@ -32,7 +56,7 @@ export default async function handler(req, res) {
         return await handleCompleteWorkflow(req, res);
       
       default:
-        return res.status(400).json({ error: 'Unknown action' });
+        return res.status(400).json({ error: `Unknown action: ${action}` });
     }
 
   } catch (error) {
@@ -163,11 +187,28 @@ async function handleCompleteWorkflow(req, res) {
   } = req.body.data;
 
   try {
-    // Step 1: Classify product
+    // Step 1: Classify product using working classification API
     console.log('🔍 Step 1: Classifying product...');
-    const classification = await usmcaClassifier.classifyProduct(product_description);
+    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/simple-classification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_description,
+        business_type: 'Manufacturing'
+      })
+    });
     
-    if (!classification.success || !classification.recommended) {
+    if (!classificationResponse.ok) {
+      return res.json({
+        success: false,
+        error: 'Classification API failed',
+        step: 'classification'
+      });
+    }
+    
+    const classificationResult = await classificationResponse.json();
+    
+    if (!classificationResult.success || !classificationResult.results || classificationResult.results.length === 0) {
       return res.json({
         success: false,
         error: 'Could not classify product',
@@ -175,8 +216,9 @@ async function handleCompleteWorkflow(req, res) {
       });
     }
 
-    const hsCode = classification.recommended.hs_code;
-    console.log(`✅ Product classified as: ${hsCode}`);
+    const bestMatch = classificationResult.results[0];
+    const hsCode = bestMatch.hs_code;
+    console.log(`✅ Product classified as: ${hsCode} (confidence: ${bestMatch.confidence})`);
 
     // Step 2: Check USMCA qualification
     console.log('🌎 Step 2: Checking USMCA qualification...');
@@ -221,8 +263,17 @@ async function handleCompleteWorkflow(req, res) {
         },
         product: {
           description: product_description,
+          product_description: product_description,
           hs_code: hsCode,
-          classification_confidence: classification.recommended.relevance_score
+          classified_hs_code: hsCode,
+          confidence: bestMatch.confidence,
+          classification_confidence: bestMatch.confidence,
+          classification_method: 'ai_enhanced',
+          tariff_rates: {
+            mfn_rate: bestMatch.mfn_rate || bestMatch.mfn_tariff_rate,
+            usmca_rate: bestMatch.usmca_rate || bestMatch.usmca_tariff_rate,
+            savings_percent: bestMatch.savings_percent
+          }
         },
         usmca: {
           qualified: qualification.qualified,

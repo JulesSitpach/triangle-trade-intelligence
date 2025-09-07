@@ -1,0 +1,621 @@
+{
+  "timestamp": "2025-09-05T17:50:06.516Z",
+  "summary": {
+    "totalTests": 37,
+    "passed": 25,
+    "failed": 12,
+    "passRate": 68
+  },
+  "results": {
+    "server": {
+      "Server responds on port 3000": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "statusCode": 200
+      },
+      "Landing page loads with content": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "contentLength": 3715
+      },
+      "Next.js is properly configured": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      }
+    },
+    "coreWorkflow": {
+      "USMCA workflow page loads": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Product classification API works": {
+        "status": "FAIL",
+        "reason": "No HS code in classification response",
+        "success": false,
+        "response": {
+          "success": true,
+          "results": [
+            {
+              "hs_code": "8501324500",
+              "description": "Electric motors of a kind used as the primary source of mechanical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_rate": 0,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Electric motors of a kind used as the primary source of mechanical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_tariff_rate": 0,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 0,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 1,
+              "termCoverage": 0.25,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.30000000000000004,
+                "electricalScore": 0.75,
+                "automotiveScore": 0.5,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8507204000",
+              "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_rate": 3.5,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_tariff_rate": 3.5,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 3.5,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 1,
+              "termCoverage": 0.25,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.30000000000000004,
+                "electricalScore": 0.75,
+                "automotiveScore": 0.5,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8507304000",
+              "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_rate": 2.5,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_tariff_rate": 2.5,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 2.5,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 1,
+              "termCoverage": 0.25,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.30000000000000004,
+                "electricalScore": 0.75,
+                "automotiveScore": 0.5,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8507804100",
+              "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_rate": 3.4,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+              "mfn_tariff_rate": 3.4,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 3.4,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 1,
+              "termCoverage": 0.25,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.30000000000000004,
+                "electricalScore": 0.75,
+                "automotiveScore": 0.5,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8516804000",
+              "description": "Assembled only with simple insulated former and electrical connections, used for anti-icing or deicing (HTS 2025)",
+              "mfn_rate": 0,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Assembled only with simple insulated former and electrical connections, used for anti-icing or deicing (HTS 2025)",
+              "mfn_tariff_rate": 0,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 0,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 1,
+              "termCoverage": 0.25,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.30000000000000004,
+                "electricalScore": 0.75,
+                "automotiveScore": 0.25,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8502400000",
+              "description": "Electric rotary converters (HTS 2025)",
+              "mfn_rate": 3,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Electric rotary converters (HTS 2025)",
+              "mfn_tariff_rate": 3,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 3,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 0,
+              "termCoverage": 0,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.2,
+                "electricalScore": 0.5,
+                "automotiveScore": 0.25,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8504404000",
+              "description": "Speed drive controllers for electric motors (HTS 2025)",
+              "mfn_rate": 0,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Speed drive controllers for electric motors (HTS 2025)",
+              "mfn_tariff_rate": 0,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 0,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 0,
+              "termCoverage": 0,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.2,
+                "electricalScore": 0.5,
+                "automotiveScore": 0.5,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "85161000",
+              "description": "Electric instantaneous or storage water heaters and immersion heaters (HTS 2025)",
+              "mfn_rate": 0,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Electric instantaneous or storage water heaters and immersion heaters (HTS 2025)",
+              "mfn_tariff_rate": 0,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 0,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 0,
+              "termCoverage": 0,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.2,
+                "electricalScore": 0.5,
+                "automotiveScore": 0.25,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8516902500",
+              "description": "Housings and steel bases for the electric flatirons of subheading 8516.40 (HTS 2025)",
+              "mfn_rate": 3.9,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Housings and steel bases for the electric flatirons of subheading 8516.40 (HTS 2025)",
+              "mfn_tariff_rate": 3.9,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 3.9,
+              "confidence": 0.95,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 0,
+              "termCoverage": 0,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.2,
+                "electricalScore": 0.5,
+                "automotiveScore": 0.25,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            },
+            {
+              "hs_code": "8518500000",
+              "description": "Electric sound amplifier sets (HTS 2025)",
+              "mfn_rate": 0,
+              "usmca_rate": 0,
+              "country_source": "US",
+              "chapter": 85,
+              "ai_search_strategy": "electrical_machinery_general",
+              "ai_confidence_boost": 0.1,
+              "match_type": "exact",
+              "business_boost": 0.15,
+              "product_description": "Electric sound amplifier sets (HTS 2025)",
+              "mfn_tariff_rate": 0,
+              "usmca_tariff_rate": 0,
+              "savings_percent": 0,
+              "confidence": 0.8999999999999999,
+              "matchedTerm": "exact",
+              "business_context_applied": true,
+              "termMatches": 0,
+              "termCoverage": 0,
+              "hsChapter": 85,
+              "contextAnalysis": {
+                "contextualRelevance": 0.2,
+                "electricalScore": 0.5,
+                "automotiveScore": 0.25,
+                "metalScore": 0,
+                "contextMismatch": false
+              }
+            }
+          ],
+          "total_matches": 10,
+          "method": "direct_database_search"
+        }
+      },
+      "USMCA compliance check works": {
+        "status": "FAIL",
+        "reason": "API returned 400",
+        "success": false
+      },
+      "Tariff savings calculator works": {
+        "status": "FAIL",
+        "reason": "API returned 400",
+        "success": false
+      }
+    },
+    "adminDashboards": {
+      "Admin page: /admin/crisis-management": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Admin page: /admin/user-management": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Admin page: /admin/analytics": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Admin page: /admin/system-config": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Admin page: /admin/supplier-management": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Admin API: /api/admin/users": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/suppliers": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/daily-activity": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/performance-analytics": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/rss-feeds": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/workflow-analytics": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/user-analytics": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/subscriptions": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      },
+      "Admin API: /api/admin/revenue-analytics": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "dataType": "object",
+        "recordCount": "object"
+      }
+    },
+    "apis": {
+      "HS Code Verification": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "statusCode": 200
+      },
+      "Certificate Generation": {
+        "status": "FAIL",
+        "reason": "Status: 400",
+        "success": false,
+        "statusCode": 400
+      },
+      "Complete Workflow": {
+        "status": "FAIL",
+        "reason": "Status: 400",
+        "success": false,
+        "statusCode": 400
+      },
+      "Crisis Calculator": {
+        "status": "FAIL",
+        "reason": "Status: 400",
+        "success": false,
+        "statusCode": 400
+      }
+    },
+    "businessLogic": {
+      "AI classification produces valid HS codes": {
+        "status": "FAIL",
+        "reason": "Invalid HS code format: undefined"
+      },
+      "Tariff savings calculation is realistic": {
+        "status": "FAIL",
+        "reason": "Savings API failed",
+        "success": false
+      },
+      "USMCA qualification rules are logical": {
+        "status": "FAIL",
+        "reason": "USMCA compliance API failed",
+        "success": false
+      }
+    },
+    "dataIntegrity": {
+      "Database connection works": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "HS code data has required fields": {
+        "status": "FAIL",
+        "reason": "Missing required fields: hs_code, description, tariff rates",
+        "success": false,
+        "fields": [
+          "success",
+          "verified",
+          "hs_code",
+          "input_code",
+          "description",
+          "source",
+          "trust_score",
+          "verification_timestamp",
+          "match_type",
+          "tariff_info",
+          "alternatives"
+        ]
+      },
+      "USMCA qualification rules exist": {
+        "status": "FAIL",
+        "reason": "USMCA qualification rules not accessible",
+        "success": false
+      }
+    },
+    "userExperience": {
+      "CSS files are properly loaded": {
+        "status": "FAIL",
+        "reason": "No CSS references found in HTML",
+        "success": false
+      },
+      "No hardcoded values in configuration": {
+        "status": "PASS",
+        "success": true,
+        "reason": null,
+        "note": "File-based check needed for full validation"
+      },
+      "Crisis monitoring RSS feeds": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      }
+    },
+    "revenueTracking": {
+      "Subscription management API": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "Revenue analytics API": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      },
+      "User analytics for conversion tracking": {
+        "status": "PASS",
+        "success": true,
+        "reason": null
+      }
+    },
+    "overall": {}
+  },
+  "criticalFailures": [
+    {
+      "category": "coreWorkflow",
+      "test": "Product classification API works",
+      "status": "FAIL",
+      "reason": "No HS code in classification response"
+    },
+    {
+      "category": "coreWorkflow",
+      "test": "USMCA compliance check works",
+      "status": "FAIL",
+      "reason": "API returned 400"
+    },
+    {
+      "category": "coreWorkflow",
+      "test": "Tariff savings calculator works",
+      "status": "FAIL",
+      "reason": "API returned 400"
+    },
+    {
+      "category": "apis",
+      "test": "Certificate Generation",
+      "status": "FAIL",
+      "reason": "Status: 400"
+    },
+    {
+      "category": "apis",
+      "test": "Complete Workflow",
+      "status": "FAIL",
+      "reason": "Status: 400"
+    },
+    {
+      "category": "apis",
+      "test": "Crisis Calculator",
+      "status": "FAIL",
+      "reason": "Status: 400"
+    },
+    {
+      "category": "businessLogic",
+      "test": "AI classification produces valid HS codes",
+      "status": "FAIL",
+      "reason": "Invalid HS code format: undefined"
+    },
+    {
+      "category": "businessLogic",
+      "test": "Tariff savings calculation is realistic",
+      "status": "FAIL",
+      "reason": "Savings API failed"
+    },
+    {
+      "category": "businessLogic",
+      "test": "USMCA qualification rules are logical",
+      "status": "FAIL",
+      "reason": "USMCA compliance API failed"
+    },
+    {
+      "category": "dataIntegrity",
+      "test": "HS code data has required fields",
+      "status": "FAIL",
+      "reason": "Missing required fields: hs_code, description, tariff rates"
+    },
+    {
+      "category": "dataIntegrity",
+      "test": "USMCA qualification rules exist",
+      "status": "FAIL",
+      "reason": "USMCA qualification rules not accessible"
+    },
+    {
+      "category": "userExperience",
+      "test": "CSS files are properly loaded",
+      "status": "FAIL",
+      "reason": "No CSS references found in HTML"
+    }
+  ]
+}

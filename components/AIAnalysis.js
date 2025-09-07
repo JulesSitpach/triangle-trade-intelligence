@@ -61,14 +61,14 @@ const AIAnalysis = ({
           <button
             key={optIndex}
             onClick={() => handleClarifyingOptionSelect(option)}
-            className="btn-secondary" style={{width: '100%', textAlign: 'left', marginBottom: '0.5rem'}}
+            className="btn-secondary btn-full-width"
             aria-label={`Select ${option.option_text}`}
           >
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div className="hero-button-group">
               <span className="form-label">{option.option_text}</span>
               <span className="text-muted">{option.description}</span>
             </div>
-            <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>Sample codes: {option.sample_codes}</p>
+            <p className="text-muted small-text section-spacing">Sample codes: {option.sample_codes}</p>
           </button>
         ))}
       </div>
@@ -77,8 +77,8 @@ const AIAnalysis = ({
 
   const renderSpecificCode = (item, index) => (
     <div key={index} className="status-card">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem'}}>
-        <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+      <div className="hero-button-group">
+        <div className="hero-button-group">
           <span className="hs-code-display">{item.hs_code}</span>
           {item.confidence && (
             <span className={`badge ${getConfidenceColor(item.confidence)}`}>
@@ -88,7 +88,7 @@ const AIAnalysis = ({
         </div>
         <button
           onClick={() => handleHSCodeSelect(item)}
-          className="btn-primary" style={{fontSize: '0.75rem', padding: '0.25rem 0.75rem'}}
+          className="btn-primary btn-sm"
           aria-label={`Use HS code ${item.hs_code}`}
         >
           {UI_TEXT.buttons.useThisCode}
@@ -96,12 +96,12 @@ const AIAnalysis = ({
       </div>
       <p className="hs-description">{item.description}</p>
       <div className="hs-rates-display">
-        <span style={{marginRight: '0.5rem', color: item.usmca_eligible ? 'var(--green-600)' : 'var(--amber-600)'}}>
+        <span className={item.usmca_eligible ? 'status-success' : 'status-warning'}>
           {item.usmca_eligible ? '✓ USMCA Eligible' : '✗ Not USMCA Eligible'}
         </span>
         <span>Chapter {item.chapter}</span>
         {item.confidence_label && (
-          <span style={{marginLeft: '0.5rem', color: 'var(--gray-400)'}}>• {item.confidence_label}</span>
+          <span className="text-muted">• {item.confidence_label}</span>
         )}
       </div>
     </div>
@@ -110,13 +110,9 @@ const AIAnalysis = ({
   const renderRegularSuggestion = (item, index) => (
     <div
       key={index}
-      className={item.isUserProvided ? 'status-card' : 'card'}
-      style={item.isUserProvided ? {
-        background: 'linear-gradient(135deg, var(--green-50) 0%, rgba(255, 255, 255, 0.8) 100%)',
-        border: '1px solid var(--green-300)'
-      } : {}}
+      className={item.isUserProvided ? 'status-card success' : 'card'}
     >
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+      <div className="hero-button-group">
         <span className="form-label">
           {item.chapter ? `${item.category} (Chapter ${item.chapter})` : item.category}
         </span>
@@ -124,16 +120,16 @@ const AIAnalysis = ({
           {item.confidence}% confidence
         </span>
       </div>
-      <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.25rem'}}>{item.reason}</p>
+      <p className="text-muted small-text section-spacing">{item.reason}</p>
       
       {/* Show complete USMCA results for user-provided HS codes */}
       {item.isUserProvided && item.usmcaResults && (
-        <div className="status-card" style={{marginTop: '0.75rem', border: '1px solid var(--green-200)'}}>
-          <h4 className="form-label" style={{color: 'var(--green-800)', marginBottom: '0.5rem'}}>Complete USMCA Analysis Results:</h4>
-          <div className="form-grid-2" style={{fontSize: '0.75rem'}}>
+        <div className="status-card success margin-top-md border-green-200">
+          <h4 className="form-label text-green-800 margin-bottom-sm">Complete USMCA Analysis Results:</h4>
+          <div className="form-grid-2 small-text">
             <div>
               <span className="status-label">USMCA Qualified:</span>{' '}
-              <span style={{color: item.usmcaResults.qualified ? 'var(--green-600)' : 'var(--amber-600)'}}>
+              <span className={item.usmcaResults.qualified ? 'text-success' : 'text-warning'}>
                 {item.usmcaResults.qualified ? 'YES' : 'NO'}
               </span>
             </div>
@@ -144,11 +140,11 @@ const AIAnalysis = ({
               </span>
             </div>
           </div>
-          <div style={{marginTop: '0.5rem', display: 'flex', gap: '0.5rem'}}>
-            <button className="btn-success" style={{fontSize: '0.75rem', padding: '0.25rem 0.5rem'}}>
+          <div className="margin-top-sm hero-button-group">
+            <button className="btn-success btn-sm">
               {UI_TEXT.buttons.generateCertificate}
             </button>
-            <button className="btn-primary" style={{fontSize: '0.75rem', padding: '0.25rem 0.5rem'}}>
+            <button className="btn-primary btn-sm">
               {UI_TEXT.buttons.viewRoutes}
             </button>
           </div>
@@ -159,7 +155,7 @@ const AIAnalysis = ({
       {item.isDynamicHSCode && (
         <button
           onClick={() => handleHSCodeSelect(item)}
-          className="btn-primary" style={{marginTop: '0.5rem', fontSize: '0.75rem', padding: '0.25rem 0.75rem'}}
+          className="btn-primary margin-top-sm btn-sm-extended"
           aria-label={`Use HS Code ${item.hs_code}`}
         >
           Use HS Code {item.hs_code}
@@ -170,7 +166,7 @@ const AIAnalysis = ({
       {!item.isUserProvided && !item.isDynamicHSCode && (
         <button
           onClick={() => handleCategorySelect(item.category)}
-          className="btn-secondary" style={{marginTop: '0.5rem', fontSize: '0.75rem', textDecoration: 'underline'}}
+          className="btn-secondary margin-top-sm small-text btn-underlined"
         >
           {UI_TEXT.buttons.selectCategory}
         </button>
@@ -194,7 +190,7 @@ const AIAnalysis = ({
     <div className={`alert alert-info ${className}`}>
       {isAnalyzing ? (
         <div 
-          style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}
+          className="flex-center-gap"
           role="status"
           aria-label={A11Y_CONFIG.ariaLabels.loadingSpinner}
         >
@@ -209,7 +205,7 @@ const AIAnalysis = ({
       ) : suggestions.length > 0 ? (
         <div role="region" aria-label={A11Y_CONFIG.ariaLabels.analysisResults}>
           {showTitle && (
-            <p className="form-label" style={{marginBottom: '0.5rem'}}>
+            <p className="form-label margin-bottom-sm">
               {suggestions.some(s => s.isDynamicHSCode) 
                 ? 'Found these HS codes for your product:'
                 : 'Based on your description, this appears to be:'
@@ -222,12 +218,12 @@ const AIAnalysis = ({
           </div>
           
           {suggestions.length > DISPLAY_CONFIG.maxSuggestionDisplay && (
-            <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.5rem'}}>
+            <p className="text-muted small-text margin-top-sm">
               Showing {DISPLAY_CONFIG.maxSuggestionDisplay} of {suggestions.length} results
             </p>
           )}
           
-          <p className="text-muted" style={{fontSize: '0.75rem', marginTop: '0.5rem'}}>
+          <p className="text-muted small-text margin-top-sm">
             Select a suggestion above, or continue with manual classification below
           </p>
         </div>

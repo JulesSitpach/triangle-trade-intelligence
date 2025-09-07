@@ -20,7 +20,8 @@
       "Read(/D:\\/**)",
       "Read(/D:\\/**)",
       "Bash(sed:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run validate:discover:*)"
     ],
     "deny": [],
     "ask": []

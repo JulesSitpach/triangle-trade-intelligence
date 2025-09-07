@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { findHSCodes } from '../../lib/classification/simple-hs-matcher';
+import { workflowService } from '../../lib/services/workflow-service.js';
 // Custom SVG icons to avoid lucide-react ESM import issues
 const Search = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -74,19 +74,48 @@ export default function ComponentOriginsStepEnhanced({
     const newComponents = [...components];
     newComponents[index][field] = value;
     
-    // If description changed, search for HS codes
+    // If description changed, search for HS codes using the working classification API
     if (field === 'description' && value.length > 3) {
       setSearchingHS({ ...searchingHS, [index]: true });
       try {
-        const matches = await findHSCodes(value);
-        newComponents[index].hs_suggestions = matches;
+        const classificationResult = await workflowService.classifyProduct(
+          value, 
+          formData.business_type || 'Manufacturing'
+        );
         
-        // Auto-select best match if confidence is high
-        if (matches.length > 0 && matches[0].confidence >= 75) {
-          newComponents[index].hs_code = matches[0].hsCode;
+        if (classificationResult?.success && classificationResult.classification) {
+          const suggestions = [{
+            hsCode: classificationResult.classification.hs_code,
+            description: classificationResult.classification.description,
+            confidence: classificationResult.classification.confidence,
+            confidenceText: `${classificationResult.classification.confidence.toFixed(1)}% confidence`,
+            mfnRate: classificationResult.classification.tariff_rates?.mfn_rate || '0',
+            usmcaRate: classificationResult.classification.tariff_rates?.usmca_rate || '0'
+          }];
+          
+          // Add alternatives if available
+          if (classificationResult.alternatives) {
+            classificationResult.alternatives.slice(0, 4).forEach(alt => {
+              suggestions.push({
+                hsCode: alt.hs_code,
+                description: alt.description || alt.product_description,
+                confidence: alt.confidence,
+                confidenceText: `${alt.confidence.toFixed(1)}% confidence`,
+                mfnRate: alt.mfn_rate || alt.mfn_tariff_rate || '0',
+                usmcaRate: alt.usmca_rate || alt.usmca_tariff_rate || '0'
+              });
+            });
+          }
+          
+          newComponents[index].hs_suggestions = suggestions;
+          
+          // Auto-select best match if confidence is high
+          if (suggestions.length > 0 && suggestions[0].confidence >= 85) {
+            newComponents[index].hs_code = suggestions[0].hsCode;
+          }
         }
       } catch (error) {
-        console.error('HS code search failed:', error);
+        console.error('HS code classification failed:', error);
         newComponents[index].hs_suggestions = [];
       }
       setSearchingHS({ ...searchingHS, [index]: false });

@@ -44,8 +44,8 @@ const CategorySelector = ({
     
       {/* Show AI suggestion status */}
       {showAISuggestionStatus && hasAIError && (
-        <div className="alert alert-warning" style={{marginBottom: '0.75rem'}}>
-          <div style={{display: 'flex', alignItems: 'center'}}>
+        <div className="alert alert-warning element-spacing">
+          <div className="hero-button-group">
             <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
             <span className="text-body">
               AI classification unavailable. Please select a category manually from the dropdown below.
@@ -55,7 +55,7 @@ const CategorySelector = ({
       )}
       
       {showAISuggestionStatus && aiSuggestions.length > 0 && !hasAIError && (
-        <div className="alert alert-info" style={{marginBottom: '0.75rem'}}>
+        <div className="alert alert-info element-spacing">
           <span className="text-body">
             AI suggested a category above, or manually select a different one below.
           </span>
@@ -85,7 +85,7 @@ const CategorySelector = ({
         </select>
         
         {isLoading && (
-          <div style={{position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)'}}>
+          <div className="form-spinner-position">
             <div className="loading-spinner" aria-hidden="true"></div>
           </div>
         )}
@@ -93,7 +93,7 @@ const CategorySelector = ({
       
       {/* Selection Confirmation */}
       {selectedCategory && !isLoading && (
-        <div className="alert alert-success" style={{marginTop: '0.5rem', padding: '0.5rem'}}>
+        <div className="alert alert-success section-spacing">
           <CheckCircle className="alert-icon icon-sm" aria-hidden="true" />
           <span>Category selected: {selectedCategory}</span>
         </div>
@@ -101,14 +101,14 @@ const CategorySelector = ({
       
       {/* Error Display */}
       {error && (
-        <div className="alert alert-error" style={{marginTop: '0.5rem', padding: '0.5rem'}} role="alert">
+        <div className="alert alert-error section-spacing" role="alert">
           <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
           <span>{error}</span>
         </div>
       )}
       
       {/* Help Text */}
-      <p id="category-help" className="form-help" style={{marginTop: '0.5rem'}}>
+      <p id="category-help" className="form-help section-spacing">
         {businessType && businessType !== 'general' ? 
           `Showing categories relevant to ${businessType} business. This dropdown is always available regardless of AI status.` :
           'This dropdown is always available regardless of AI status. Select the category that best matches your product.'
@@ -117,8 +117,8 @@ const CategorySelector = ({
       
       {/* No Categories Available */}
       {!isLoading && categories.length === 0 && (
-        <div className="alert" style={{marginTop: '0.5rem', padding: '0.5rem'}}>
-          <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" style={{display: 'inline', marginRight: '0.25rem'}} />
+        <div className="alert section-spacing">
+          <AlertTriangle className="alert-icon icon-sm" aria-hidden="true" />
           No categories available. Please try refreshing the page or contact support.
         </div>
       )}

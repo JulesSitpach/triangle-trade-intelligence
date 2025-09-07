@@ -6,6 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
+import { useAlertContext } from '../lib/contexts/AlertContext';
+import { SYSTEM_CONFIG } from '../config/system-config';
 // import PartnerSolutions from '../components/crisis/PartnerSolutions';
 
 // Simple icon components to avoid import issues
@@ -70,6 +72,9 @@ export default function TrumpTariffAlerts() {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [personalizedAlerts, setPersonalizedAlerts] = useState([]);
+  
+  // Get alert context
+  const { refreshAlerts } = useAlertContext();
 
   useEffect(() => {
     loadUserProfile();
@@ -125,7 +130,7 @@ export default function TrumpTariffAlerts() {
           const demoProfiles = {
             'acme-electronics': {
               companyName: 'Acme Electronics Corporation',
-              annualTradeVolume: 2500000,
+              annualTradeVolume: SYSTEM_CONFIG.business.defaultTradeVolume * 5,
               businessType: 'electronics',
               primaryHSCode: '8517.62.00.00',
               componentOrigins: [
@@ -250,7 +255,7 @@ export default function TrumpTariffAlerts() {
         id: `crisis-${userProfile.companyName}-${hsChapter}`,
         level: 'CRITICAL',
         title: `Section 301 Investigation Targets ${userProfile.companyName} Products`,
-        description: `USITC announces investigation specifically targeting ${productDescription} under HS codes ${userProfile.primaryHSCode}. Proposed 25% tariff rates directly affect ${userProfile.companyName}'s $${(userProfile.annualTradeVolume / 1000000).toFixed(1)}M annual imports.`,
+        description: `USITC announces investigation specifically targeting ${productDescription} under HS codes ${userProfile.primaryHSCode}. Proposed ${SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates directly affect ${userProfile.companyName}'s $${(userProfile.annualTradeVolume / 1000000).toFixed(1)}M annual imports.`,
         source: 'USITC Press Releases',
         timestamp: new Date().toISOString(),
         affectedHSCodes: [userProfile.primaryHSCode],
@@ -260,7 +265,7 @@ export default function TrumpTariffAlerts() {
           companyName: userProfile.companyName,
           annualVolume: userProfile.annualTradeVolume,
           specificProducts: userProfile.products || [productDescription],
-          estimatedLoss: crisisData?.crisis_impact?.crisisPenalty || (userProfile.annualTradeVolume * 0.25)
+          estimatedLoss: crisisData?.crisis_impact?.crisisPenalty || (userProfile.annualTradeVolume * (SYSTEM_CONFIG.alerts.defaultTariffRate / 100))
         }
       },
       {
@@ -305,6 +310,11 @@ export default function TrumpTariffAlerts() {
 
     console.log('Generated', personalizedCrisisAlerts.length, 'personalized alerts');
     setPersonalizedAlerts(personalizedCrisisAlerts);
+    
+    // Trigger global badge count refresh
+    if (refreshAlerts) {
+      refreshAlerts();
+    }
   };
 
   const getProductDescription = async (hsCode) => {
@@ -363,7 +373,7 @@ export default function TrumpTariffAlerts() {
       id: 'sec-301-electronics',
       level: 'CRITICAL',
       title: 'Section 301 Electronics Investigation',
-      description: 'USITC announces investigation targeting Chinese electronics and IoT devices under HS codes 8517.62, 8542.31. Proposed 25% tariff rates effective in 30 days.',
+      description: `USITC announces investigation targeting Chinese electronics and IoT devices under HS codes 8517.62, 8542.31. Proposed ${SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates effective in 30 days.`,
       source: 'USITC Press Releases',
       timestamp: '2025-09-01T14:30:00Z',
       affectedHSCodes: ['8517.62', '8542.31', '8534.00'],
@@ -454,9 +464,9 @@ export default function TrumpTariffAlerts() {
                   <div>
                     <p className="impact-label">Crisis Tariff Cost</p>
                     <p className="impact-amount">
-                      {formatCurrency(crisisData.crisis_impact?.crisisPenalty || 250000)}
+                      {formatCurrency(crisisData.crisis_impact?.crisisPenalty || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
                     </p>
-                    <p className="impact-label">25% tariff on Chinese electronics</p>
+                    <p className="impact-label">{SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff on Chinese electronics</p>
                   </div>
                   <AlertTriangle className="icon-md" />
                 </div>
@@ -478,9 +488,9 @@ export default function TrumpTariffAlerts() {
                   <div>
                     <p className="impact-label">Annual Savings</p>
                     <p className="impact-amount">
-                      {formatCurrency(crisisData.crisis_impact?.potentialSavings || 250000)}
+                      {formatCurrency(crisisData.crisis_impact?.potentialSavings || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
                     </p>
-                    <p className="impact-label">ROI: {crisisData.roi_analysis?.roi || '10,000'}% on filing</p>
+                    <p className="impact-label">ROI: {crisisData.roi_analysis?.roi || SYSTEM_CONFIG.alerts.defaultROI.toLocaleString()}% on filing</p>
                   </div>
                   <DollarSign className="icon-md" />
                 </div>
@@ -500,7 +510,7 @@ export default function TrumpTariffAlerts() {
                   className="btn-primary"
                 >
                   <FileText className="icon-sm" />
-                  <span>Emergency USMCA Filing - $2,500</span>
+                  <span>Emergency USMCA Filing - ${SYSTEM_CONFIG.subscriptions.emergencyFilingFee.toLocaleString()}</span>
                 </button>
                 
                 <button 
@@ -508,7 +518,7 @@ export default function TrumpTariffAlerts() {
                   className="btn-secondary"
                 >
                   <Phone className="icon-sm" />
-                  <span>Crisis Consultation Call - $495</span>
+                  <span>Crisis Consultation Call - ${SYSTEM_CONFIG.subscriptions.consultationFee.toLocaleString()}</span>
                 </button>
                 
                 <button 
@@ -516,7 +526,7 @@ export default function TrumpTariffAlerts() {
                   className="btn-success"
                 >
                   <TrendingUp className="icon-sm" />
-                  <span>Upgrade to Priority ($799/mo)</span>
+                  <span>Upgrade to Priority (${SYSTEM_CONFIG.subscriptions.priorityPrice}/mo)</span>
                 </button>
               </div>
 
@@ -723,11 +733,11 @@ export default function TrumpTariffAlerts() {
               <div className="element-spacing">
                 <div className="header-actions">
                   <span className="text-body">Current Plan:</span>
-                  <span className="text-body">Professional ($299/mo)</span>
+                  <span className="text-body">Professional (${SYSTEM_CONFIG.subscriptions.professionalPrice}/mo)</span>
                 </div>
                 <div className="header-actions">
                   <span className="text-body">Upgrade to:</span>
-                  <span className="text-body">Priority ($799/mo)</span>
+                  <span className="text-body">Priority (${SYSTEM_CONFIG.subscriptions.priorityPrice}/mo)</span>
                 </div>
               </div>
               <button className="btn-primary">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import '../styles/globals.css'
 import '../styles/dashboard.css'
+import { AlertProvider } from '../lib/contexts/AlertContext'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 // import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
@@ -38,7 +39,9 @@ export default function App({ Component, pageProps }) {
         </div>
       )}
       
-      <Component {...pageProps} />
+      <AlertProvider>
+        <Component {...pageProps} />
+      </AlertProvider>
     </>
   )
 }

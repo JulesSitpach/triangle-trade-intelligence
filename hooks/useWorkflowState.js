@@ -148,6 +148,41 @@ export function useWorkflowState() {
     }
   }, [formData]);
 
+  // Classify product only (separate from full workflow)
+  const classifyProduct = useCallback(async (productDescription, businessType) => {
+    if (!productDescription || productDescription.length < 10) {
+      setError('Product description must be at least 10 characters');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const classificationResult = await workflowService.classifyProduct(productDescription, businessType);
+      
+      if (classificationResult.success) {
+        // Update form data with classification results
+        updateFormData({
+          classified_hs_code: classificationResult.classification.hs_code,
+          hs_code_confidence: classificationResult.classification.confidence,
+          hs_code_description: classificationResult.classification.description,
+          classification_method: classificationResult.method
+        });
+
+        return classificationResult;
+      } else {
+        setError('Classification failed');
+        return null;
+      }
+    } catch (err) {
+      setError(`Classification failed: ${err.message}`);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [updateFormData]);
+
   // Reset workflow
   const resetWorkflow = useCallback(() => {
     setCurrentStep(1);
@@ -261,6 +296,7 @@ export function useWorkflowState() {
     
     // Workflow actions
     processWorkflow,
+    classifyProduct,
     resetWorkflow,
     
     // Navigation

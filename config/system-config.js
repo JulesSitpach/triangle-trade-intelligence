@@ -98,6 +98,26 @@ export const SYSTEM_CONFIG = {
     defaultTradeVolume: parseInt(getEnvValue('DEFAULT_TRADE_VOLUME', '500000'))
   },
 
+  // Alert System Configuration
+  alerts: {
+    refreshIntervalMs: parseInt(getEnvValue('ALERT_REFRESH_INTERVAL_MS', '300000')), // 5 minutes
+    defaultCrisisImpactAmount: parseInt(getEnvValue('DEFAULT_CRISIS_IMPACT', '250000')),
+    defaultTariffRate: parseFloat(getEnvValue('DEFAULT_TARIFF_RATE', '25.0')),
+    minDutyIncrease: parseFloat(getEnvValue('MIN_DUTY_INCREASE', '15.0')),
+    maxDutyIncrease: parseFloat(getEnvValue('MAX_DUTY_INCREASE', '25.0')),
+    minTariffSavings: parseFloat(getEnvValue('MIN_TARIFF_SAVINGS', '40.0')),
+    maxTariffSavings: parseFloat(getEnvValue('MAX_TARIFF_SAVINGS', '60.0')),
+    defaultROI: parseFloat(getEnvValue('DEFAULT_ROI_PERCENTAGE', '10000'))
+  },
+
+  // Subscription Tiers Configuration  
+  subscriptions: {
+    professionalPrice: parseInt(getEnvValue('SUBSCRIPTION_PROFESSIONAL_PRICE', '299')),
+    priorityPrice: parseInt(getEnvValue('SUBSCRIPTION_PRIORITY_PRICE', '799')),
+    emergencyFilingFee: parseInt(getEnvValue('EMERGENCY_FILING_FEE', '2500')),
+    consultationFee: parseInt(getEnvValue('CONSULTATION_FEE', '495'))
+  },
+
   // UI Configuration
   ui: {
     defaultLanguage: getEnvValue('DEFAULT_LANGUAGE', 'en'),
