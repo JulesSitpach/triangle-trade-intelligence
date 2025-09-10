@@ -1,0 +1,238 @@
+{
+  "totalCommands": 12,
+  "successfulCommands": 0,
+  "failedCommands": 12,
+  "executionTime": 97,
+  "outputs": {
+    "systemStatus": {
+      "category": "systemStatus",
+      "commands": 3,
+      "outputs": [
+        {
+          "command": "npm run build",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "node scripts/test-database-connection.js || echo \"Database test skipped\"",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "curl -f http://localhost:3000/api/system-status || echo \"System status unavailable\"",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        }
+      ],
+      "startTime": "2025-09-08T22:48:47.774Z",
+      "endTime": "2025-09-08T22:48:47.803Z"
+    },
+    "apiTesting": {
+      "category": "apiTesting",
+      "commands": 3,
+      "outputs": [
+        {
+          "command": "curl -s http://localhost:3000/api/health | head -1",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "curl -s http://localhost:3000/api/simple-hs-search?query=electronics | head -5",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "curl -s http://localhost:3000/api/simple-usmca-compliance | head -3",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        }
+      ],
+      "startTime": "2025-09-08T22:48:47.803Z",
+      "endTime": "2025-09-08T22:48:47.835Z"
+    },
+    "performanceTesting": {
+      "category": "performanceTesting",
+      "commands": 3,
+      "outputs": [
+        {
+          "command": "npm run test 2>&1 | tail -10",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "npm run lint 2>&1 | tail -5",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "du -sh node_modules/",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        }
+      ],
+      "startTime": "2025-09-08T22:48:47.835Z",
+      "endTime": "2025-09-08T22:48:47.852Z"
+    },
+    "securityTesting": {
+      "category": "securityTesting",
+      "commands": 3,
+      "outputs": [
+        {
+          "command": "npm audit --audit-level=high",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "grep -r \"console.log\" pages/api/ | wc -l",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        },
+        {
+          "command": "find . -name \"*.env*\" -type f | head -5",
+          "success": false,
+          "error": "Command exited with code 3221225794",
+          "exitCode": 3221225794
+        }
+      ],
+      "startTime": "2025-09-08T22:48:47.852Z",
+      "endTime": "2025-09-08T22:48:47.871Z"
+    }
+  },
+  "evidence": [
+    {
+      "tool": "BASH",
+      "category": "systemStatus",
+      "timestamp": "2025-09-08T22:48:47.803Z",
+      "results": {
+        "category": "systemStatus",
+        "commands": 3,
+        "outputs": [
+          {
+            "command": "npm run build",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "node scripts/test-database-connection.js || echo \"Database test skipped\"",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "curl -f http://localhost:3000/api/system-status || echo \"System status unavailable\"",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          }
+        ],
+        "startTime": "2025-09-08T22:48:47.774Z",
+        "endTime": "2025-09-08T22:48:47.803Z"
+      }
+    },
+    {
+      "tool": "BASH",
+      "category": "apiTesting",
+      "timestamp": "2025-09-08T22:48:47.835Z",
+      "results": {
+        "category": "apiTesting",
+        "commands": 3,
+        "outputs": [
+          {
+            "command": "curl -s http://localhost:3000/api/health | head -1",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "curl -s http://localhost:3000/api/simple-hs-search?query=electronics | head -5",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "curl -s http://localhost:3000/api/simple-usmca-compliance | head -3",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          }
+        ],
+        "startTime": "2025-09-08T22:48:47.803Z",
+        "endTime": "2025-09-08T22:48:47.835Z"
+      }
+    },
+    {
+      "tool": "BASH",
+      "category": "performanceTesting",
+      "timestamp": "2025-09-08T22:48:47.852Z",
+      "results": {
+        "category": "performanceTesting",
+        "commands": 3,
+        "outputs": [
+          {
+            "command": "npm run test 2>&1 | tail -10",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "npm run lint 2>&1 | tail -5",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "du -sh node_modules/",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          }
+        ],
+        "startTime": "2025-09-08T22:48:47.835Z",
+        "endTime": "2025-09-08T22:48:47.852Z"
+      }
+    },
+    {
+      "tool": "BASH",
+      "category": "securityTesting",
+      "timestamp": "2025-09-08T22:48:47.871Z",
+      "results": {
+        "category": "securityTesting",
+        "commands": 3,
+        "outputs": [
+          {
+            "command": "npm audit --audit-level=high",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "grep -r \"console.log\" pages/api/ | wc -l",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          },
+          {
+            "command": "find . -name \"*.env*\" -type f | head -5",
+            "success": false,
+            "error": "Command exited with code 3221225794",
+            "exitCode": 3221225794
+          }
+        ],
+        "startTime": "2025-09-08T22:48:47.852Z",
+        "endTime": "2025-09-08T22:48:47.871Z"
+      }
+    }
+  ]
+}

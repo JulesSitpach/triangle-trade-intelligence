@@ -49,7 +49,7 @@ export const SAFE_COUNTRIES = {
  */
 export const SAFE_ENDPOINTS = {
   // Core APIs
-  classification: getEnvValue('API_CLASSIFICATION', '/api/dynamic-hs-codes-simplified'),
+  classification: getEnvValue('API_CLASSIFICATION', '/api/ai-classification'),
   compliance: getEnvValue('API_COMPLIANCE', '/api/database-driven-usmca-compliance'),
   dropdownOptions: getEnvValue('API_DROPDOWN', '/api/database-driven-dropdown-options'),
   

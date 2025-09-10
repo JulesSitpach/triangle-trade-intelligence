@@ -14,8 +14,10 @@ export default function WorkflowProgress({
 }) {
   const steps = [
     { step: 1, label: 'Company Information', icon: 'CO' },
-    { step: 2, label: 'Product & Components', icon: 'PC' },
-    { step: 3, label: 'Results & Certificate', icon: 'RC' }
+    { step: 2, label: 'Product Details', icon: 'PD' },
+    { step: 3, label: 'Supply Chain', icon: 'SC' },
+    { step: 4, label: 'Authorization', icon: 'AU' },
+    { step: 5, label: 'Review & Generate', icon: 'RG' }
   ];
 
   const handleStepClick = (step) => {

@@ -10,60 +10,6 @@ import { useAlertContext } from '../lib/contexts/AlertContext';
 import { SYSTEM_CONFIG } from '../config/system-config';
 // import PartnerSolutions from '../components/crisis/PartnerSolutions';
 
-// Simple icon components to avoid import issues
-const AlertTriangle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
-);
-
-const DollarSign = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="1" x2="12" y2="23"/>
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-  </svg>
-);
-
-const Shield = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
-);
-
-const TrendingUp = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-    <polyline points="16,7 22,7 22,13"/>
-  </svg>
-);
-
-const Clock = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12,6 12,12 16,14"/>
-  </svg>
-);
-
-const Activity = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
-  </svg>
-);
-
-const Phone = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-  </svg>
-);
-
-const FileText = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
-    <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/>
-  </svg>
-);
 
 export default function TrumpTariffAlerts() {
   const [crisisData, setCrisisData] = useState(null);
@@ -72,14 +18,52 @@ export default function TrumpTariffAlerts() {
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [personalizedAlerts, setPersonalizedAlerts] = useState([]);
+  const [dynamicConfig, setDynamicConfig] = useState(null);
   
   // Get alert context
   const { refreshAlerts } = useAlertContext();
 
   useEffect(() => {
+    loadDynamicConfig();
     loadUserProfile();
     loadRSSStatus();
   }, []);
+
+  const loadDynamicConfig = async () => {
+    try {
+      // Get dynamic configuration from database instead of hard-coded values
+      const response = await fetch('/api/simple-savings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          importVolume: '$1M - $5M',
+          supplierCountry: 'CN',
+          businessType: 'Electronics',
+          destinationCountry: 'US'
+        })
+      });
+      
+      const result = await response.json();
+      
+      const config = {
+        defaultTariffRate: result.currentRoute?.tariffRate || SYSTEM_CONFIG.alerts.defaultTariffRate,
+        defaultTradeVolume: SYSTEM_CONFIG.business.defaultTradeVolume || 1000000,
+        defaultCrisisImpact: result.savings?.annualTariffSavings || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount,
+        defaultROI: result.analysis?.confidence || SYSTEM_CONFIG.alerts.defaultROI
+      };
+      
+      setDynamicConfig(config);
+    } catch (error) {
+      console.error('Failed to load dynamic config:', error);
+      // Fallback to system config
+      setDynamicConfig({
+        defaultTariffRate: SYSTEM_CONFIG.alerts.defaultTariffRate,
+        defaultTradeVolume: SYSTEM_CONFIG.business.defaultTradeVolume || 1000000,
+        defaultCrisisImpact: SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount,
+        defaultROI: SYSTEM_CONFIG.alerts.defaultROI
+      });
+    }
+  };
 
   useEffect(() => {
     if (userProfile) {
@@ -112,7 +96,7 @@ export default function TrumpTariffAlerts() {
         
         const profile = {
           companyName: companyData.name || workflowData.company?.name || 'Your Company',
-          annualTradeVolume: companyData.annual_trade_volume || workflowData.company?.annual_trade_volume || 1000000,
+          annualTradeVolume: companyData.annual_trade_volume || workflowData.company?.annual_trade_volume || dynamicConfig?.defaultTradeVolume || 1000000,
           businessType: companyData.business_type || workflowData.company?.business_type || 'manufacturing',
           primaryHSCode: workflowData.product?.hs_code || '8517.62.00.00',
           componentOrigins: workflowData.componentOrigins || [],
@@ -130,7 +114,7 @@ export default function TrumpTariffAlerts() {
           const demoProfiles = {
             'acme-electronics': {
               companyName: 'Acme Electronics Corporation',
-              annualTradeVolume: SYSTEM_CONFIG.business.defaultTradeVolume * 5,
+              annualTradeVolume: (dynamicConfig?.defaultTradeVolume || SYSTEM_CONFIG.business.defaultTradeVolume) * 5,
               businessType: 'electronics',
               primaryHSCode: '8517.62.00.00',
               componentOrigins: [
@@ -173,7 +157,7 @@ export default function TrumpTariffAlerts() {
           } else {
             setUserProfile({
               companyName: 'Demo Electronics Inc',
-              annualTradeVolume: 1000000,
+              annualTradeVolume: dynamicConfig?.defaultTradeVolume || 1000000,
               businessType: 'electronics',
               primaryHSCode: '8517.62.00.00',
               componentOrigins: [],
@@ -255,7 +239,7 @@ export default function TrumpTariffAlerts() {
         id: `crisis-${userProfile.companyName}-${hsChapter}`,
         level: 'CRITICAL',
         title: `Section 301 Investigation Targets ${userProfile.companyName} Products`,
-        description: `USITC announces investigation specifically targeting ${productDescription} under HS codes ${userProfile.primaryHSCode}. Proposed ${SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates directly affect ${userProfile.companyName}'s $${(userProfile.annualTradeVolume / 1000000).toFixed(1)}M annual imports.`,
+        description: `USITC announces investigation specifically targeting ${productDescription} under HS codes ${userProfile.primaryHSCode}. Proposed ${dynamicConfig?.defaultTariffRate || SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates directly affect ${userProfile.companyName}'s $${(userProfile.annualTradeVolume / 1000000).toFixed(1)}M annual imports.`,
         source: 'USITC Press Releases',
         timestamp: new Date().toISOString(),
         affectedHSCodes: [userProfile.primaryHSCode],
@@ -265,7 +249,7 @@ export default function TrumpTariffAlerts() {
           companyName: userProfile.companyName,
           annualVolume: userProfile.annualTradeVolume,
           specificProducts: userProfile.products || [productDescription],
-          estimatedLoss: crisisData?.crisis_impact?.crisisPenalty || (userProfile.annualTradeVolume * (SYSTEM_CONFIG.alerts.defaultTariffRate / 100))
+          estimatedLoss: crisisData?.crisis_impact?.crisisPenalty || (userProfile.annualTradeVolume * ((dynamicConfig?.defaultTariffRate || SYSTEM_CONFIG.alerts.defaultTariffRate) / 100))
         }
       },
       {
@@ -373,7 +357,7 @@ export default function TrumpTariffAlerts() {
       id: 'sec-301-electronics',
       level: 'CRITICAL',
       title: 'Section 301 Electronics Investigation',
-      description: `USITC announces investigation targeting Chinese electronics and IoT devices under HS codes 8517.62, 8542.31. Proposed ${SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates effective in 30 days.`,
+      description: `USITC announces investigation targeting Chinese electronics and IoT devices under HS codes 8517.62, 8542.31. Proposed ${dynamicConfig?.defaultTariffRate || SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff rates effective in 30 days.`,
       source: 'USITC Press Releases',
       timestamp: '2025-09-01T14:30:00Z',
       affectedHSCodes: ['8517.62', '8542.31', '8534.00'],
@@ -433,11 +417,10 @@ export default function TrumpTariffAlerts() {
 
   return (
     <TriangleLayout>
-      <div className="main-content">
+      <div className="dashboard-container">
         {/* Header */}
         <div className="page-header">
           <h1 className="page-title">
-            <AlertTriangle className="icon-md" />
             Crisis Alert Dashboard
           </h1>
           <p className="page-subtitle">
@@ -450,7 +433,6 @@ export default function TrumpTariffAlerts() {
           <div className="crisis-alert">
             <div className="crisis-alert-header">
               <h2 className="crisis-alert-title">
-                <TrendingUp className="icon-md" />
                 Your Crisis Impact Analysis
               </h2>
               <div className="status-error">
@@ -464,11 +446,10 @@ export default function TrumpTariffAlerts() {
                   <div>
                     <p className="impact-label">Crisis Tariff Cost</p>
                     <p className="impact-amount">
-                      {formatCurrency(crisisData.crisis_impact?.crisisPenalty || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
+                      {formatCurrency(crisisData.crisis_impact?.crisisPenalty || dynamicConfig?.defaultCrisisImpact || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
                     </p>
-                    <p className="impact-label">{SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff on Chinese electronics</p>
+                    <p className="impact-label">{dynamicConfig?.defaultTariffRate || SYSTEM_CONFIG.alerts.defaultTariffRate}% tariff on Chinese electronics</p>
                   </div>
-                  <AlertTriangle className="icon-md" />
                 </div>
               </div>
 
@@ -479,7 +460,6 @@ export default function TrumpTariffAlerts() {
                     <p className="impact-amount">$0</p>
                     <p className="impact-label">Duty-free with proper certification</p>
                   </div>
-                  <Shield className="icon-md" />
                 </div>
               </div>
 
@@ -488,11 +468,10 @@ export default function TrumpTariffAlerts() {
                   <div>
                     <p className="impact-label">Annual Savings</p>
                     <p className="impact-amount">
-                      {formatCurrency(crisisData.crisis_impact?.potentialSavings || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
+                      {formatCurrency(crisisData.crisis_impact?.potentialSavings || dynamicConfig?.defaultCrisisImpact || SYSTEM_CONFIG.alerts.defaultCrisisImpactAmount)}
                     </p>
-                    <p className="impact-label">ROI: {crisisData.roi_analysis?.roi || SYSTEM_CONFIG.alerts.defaultROI.toLocaleString()}% on filing</p>
+                    <p className="impact-label">ROI: {crisisData.roi_analysis?.roi || (dynamicConfig?.defaultROI || SYSTEM_CONFIG.alerts.defaultROI).toLocaleString()}% on filing</p>
                   </div>
-                  <DollarSign className="icon-md" />
                 </div>
               </div>
             </div>
@@ -500,7 +479,6 @@ export default function TrumpTariffAlerts() {
             {/* Emergency Actions */}
             <div className="card">
               <h3 className="card-title">
-                <Clock className="icon-sm" />
                 Emergency Response Required
               </h3>
               
@@ -509,7 +487,6 @@ export default function TrumpTariffAlerts() {
                   onClick={() => window.open('/usmca-workflow', '_blank')}
                   className="btn-primary"
                 >
-                  <FileText className="icon-sm" />
                   <span>Emergency USMCA Filing - ${SYSTEM_CONFIG.subscriptions.emergencyFilingFee.toLocaleString()}</span>
                 </button>
                 
@@ -517,7 +494,6 @@ export default function TrumpTariffAlerts() {
                   onClick={() => window.open('tel:+1-555-USMCA-01', '_blank')}
                   className="btn-secondary"
                 >
-                  <Phone className="icon-sm" />
                   <span>Crisis Consultation Call - ${SYSTEM_CONFIG.subscriptions.consultationFee.toLocaleString()}</span>
                 </button>
                 
@@ -525,7 +501,6 @@ export default function TrumpTariffAlerts() {
                   onClick={() => window.open('/platform', '_blank')}
                   className="btn-success"
                 >
-                  <TrendingUp className="icon-sm" />
                   <span>Upgrade to Priority (${SYSTEM_CONFIG.subscriptions.priorityPrice}/mo)</span>
                 </button>
               </div>
@@ -533,7 +508,7 @@ export default function TrumpTariffAlerts() {
               <div className="status-warning">
                 <p className="text-body">
                   <strong>Time-Sensitive:</strong> Section 301 tariffs typically take effect 30 days after announcement. 
-                  Filing USMCA certification now protects your {formatCurrency(userProfile?.annualTradeVolume || 1000000)} annual trade volume.
+                  Filing USMCA certification now protects your {formatCurrency(userProfile?.annualTradeVolume || dynamicConfig?.defaultTradeVolume || 1000000)} annual trade volume.
                 </p>
               </div>
             </div>
@@ -545,7 +520,6 @@ export default function TrumpTariffAlerts() {
           {/* Main Alerts Panel */}
           <div>
             <h2 className="section-title">
-              <AlertTriangle className="icon-md" />
               Active Crisis Alerts
             </h2>
 
@@ -577,11 +551,9 @@ export default function TrumpTariffAlerts() {
 
                       <div className="header-actions">
                         <div className="header-actions">
-                          <Clock className="icon-sm" />
                           {new Date(alert.timestamp).toLocaleDateString()} at {new Date(alert.timestamp).toLocaleTimeString()}
                         </div>
                         <div className="header-actions">
-                          <FileText className="icon-sm" />
                           HS Codes: {Array.isArray(alert.affectedHSCodes) ? alert.affectedHSCodes.join(', ') : alert.affectedHSCodes}
                         </div>
                       </div>
@@ -650,7 +622,6 @@ export default function TrumpTariffAlerts() {
           {/* RSS Feed Status Sidebar */}
           <div>
             <h2 className="section-title">
-              <Activity className="icon-md" />
               RSS Monitoring Status
             </h2>
 

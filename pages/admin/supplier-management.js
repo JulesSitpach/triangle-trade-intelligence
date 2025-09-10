@@ -9,50 +9,27 @@ import TriangleLayout from '../../components/TriangleLayout';
 
 // Simple icon components
 const Plus = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
+  <span className={className}>[plus]</span>
 );
 
 const Edit = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-  </svg>
+  <span className={className}>[edit]</span>
 );
 
 const Trash = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="3,6 5,6 21,6"/>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-    <line x1="10" y1="11" x2="10" y2="17"/>
-    <line x1="14" y1="11" x2="14" y2="17"/>
-  </svg>
+  <span className={className}>[trash]</span>
 );
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const AlertCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
+  <span className={className}>[alert]</span>
 );
 
 const Users = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-    <circle cx="9" cy="7" r="4"/>
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-  </svg>
+  <span className={className}>[users]</span>
 );
 
 export default function SupplierManagement() {
@@ -233,7 +210,7 @@ export default function SupplierManagement() {
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
-          <div className="flex-1">
+          <div className="content-card">
             <h1 className="page-title">
               Supplier Network Management
             </h1>
@@ -290,9 +267,9 @@ export default function SupplierManagement() {
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="text-muted hover:text-gray-600 transition-colors"
+                className="text-muted"
               >
-                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="icon-sm" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
@@ -512,7 +489,7 @@ function SuppliersList({ suppliers, onVerifySupplier }) {
       {suppliers.map(supplier => (
         <div key={supplier.id} className="content-card">
           <div className="card-header">
-            <div className="flex-1">
+            <div className="content-card">
               <div className="hero-button-group">
                 <h3 className="content-card-title">
                   {supplier.company_name}
@@ -592,7 +569,7 @@ function IntroductionRequestsList({ requests }) {
         requests.map(request => (
           <div key={request.id} className="content-card">
             <div className="card-header">
-              <div className="flex-1">
+              <div className="content-card">
                 <h3 className="content-card-title">
                   {request.company_name}
                 </h3>

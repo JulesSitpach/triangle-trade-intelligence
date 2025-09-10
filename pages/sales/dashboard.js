@@ -102,7 +102,7 @@ export default function SalesDashboard() {
     <TriangleLayout>
       <div className="container-app main-content">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
+        <div className="section-spacing">
           <h1 className="hero-title">
             Sales Dashboard
           </h1>
@@ -116,7 +116,7 @@ export default function SalesDashboard() {
           <div className="card">
             <div className="card-header">
               <Users className="icon-sm" />
-              <div className="flex-1">
+              <div className="content-card">
                 <p className="calculator-metric-value">{stats.totalLeads}</p>
                 <p className="text-muted">Total Leads</p>
               </div>
@@ -126,7 +126,7 @@ export default function SalesDashboard() {
           <div className="card">
             <div className="card-header">
               <TrendingUp className="icon-sm" />
-              <div className="flex-1">
+              <div className="content-card">
                 <p className="calculator-metric-value">{stats.activeCustomers}</p>
                 <p className="text-muted">Active Customers</p>
               </div>
@@ -136,7 +136,7 @@ export default function SalesDashboard() {
           <div className="card">
             <div className="card-header">
               <DollarSign className="icon-sm" />
-              <div className="flex-1">
+              <div className="content-card">
                 <p className="calculator-metric-value success">{formatCurrency(stats.monthlyRevenue)}</p>
                 <p className="text-muted">Monthly Revenue</p>
               </div>
@@ -146,7 +146,7 @@ export default function SalesDashboard() {
           <div className="card">
             <div className="card-header">
               <Users className="icon-sm" />
-              <div className="flex-1">
+              <div className="content-card">
                 <p className="calculator-metric-value">{stats.partnerIntroductions}</p>
                 <p className="text-muted">Partner Intros</p>
               </div>
@@ -163,7 +163,7 @@ export default function SalesDashboard() {
               {recentLeads.map(lead => (
                 <div key={lead.id} className="content-card">
                   <div className="card-header">
-                    <div className="flex-1">
+                    <div className="content-card">
                       <h3 className="content-card-title">{lead.companyName}</h3>
                       <p className="text-muted">{lead.contactPerson}</p>
                     </div>
@@ -232,7 +232,7 @@ export default function SalesDashboard() {
                 introductionRequests.map(request => (
                   <div key={request.id} className="content-card">
                     <div className="card-header">
-                      <div className="flex-1">
+                      <div className="content-card">
                         <h3 className="content-card-title">{request.company_name}</h3>
                         <p className="text-muted">{request.user_email}</p>
                       </div>

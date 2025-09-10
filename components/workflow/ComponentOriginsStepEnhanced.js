@@ -5,42 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { workflowService } from '../../lib/services/workflow-service.js';
-// Custom SVG icons to avoid lucide-react ESM import issues
-const Search = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/>
-    <path d="m21 21-4.35-4.35"/>
-  </svg>
-);
-
-const Plus = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
-
-const X = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-
-const Info = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="16" x2="12" y2="12"/>
-    <line x1="12" y1="8" x2="12.01" y2="8"/>
-  </svg>
-);
-
-const Check = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="20,6 9,17 4,12"/>
-  </svg>
-);
+// Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
   formData,
@@ -53,15 +18,18 @@ export default function ComponentOriginsStepEnhanced({
   isFormValid,
   isLoading
 }) {
-  const [components, setComponents] = useState(formData.component_origins || [
-    { 
-      description: '', 
-      origin_country: 'CN', 
-      value_percentage: 0, 
-      hs_code: '',
-      hs_suggestions: []
-    }
-  ]);
+  const [components, setComponents] = useState(() => {
+    // FORCE EMPTY DEFAULTS - ignore any existing data
+    return [
+      { 
+        description: '', 
+        origin_country: '', 
+        value_percentage: '', 
+        hs_code: '',
+        hs_suggestions: []
+      }
+    ];
+  });
   
   const [searchingHS, setSearchingHS] = useState({});
 
@@ -74,48 +42,50 @@ export default function ComponentOriginsStepEnhanced({
     const newComponents = [...components];
     newComponents[index][field] = value;
     
-    // If description changed, search for HS codes using the working classification API
-    if (field === 'description' && value.length > 3) {
+    // Only search for HS codes when ALL 3 fields are filled by user
+    const hasAllFields = newComponents[index].description && newComponents[index].description.length > 3 && 
+                        newComponents[index].origin_country && 
+                        newComponents[index].value_percentage;
+    
+    if (hasAllFields && !newComponents[index].hs_suggestions?.length) {
       setSearchingHS({ ...searchingHS, [index]: true });
       try {
-        const classificationResult = await workflowService.classifyProduct(
-          value, 
-          formData.business_type || 'Manufacturing'
-        );
+        const response = await fetch('/api/ai-classification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productDescription: newComponents[index].description,
+            businessContext: { 
+              companyType: formData.business_type || 'Manufacturing'
+            },
+            userProfile: {}
+          })
+        });
+
+        const result = await response.json();
         
-        if (classificationResult?.success && classificationResult.classification) {
-          const suggestions = [{
-            hsCode: classificationResult.classification.hs_code,
-            description: classificationResult.classification.description,
-            confidence: classificationResult.classification.confidence,
-            confidenceText: `${classificationResult.classification.confidence.toFixed(1)}% confidence`,
-            mfnRate: classificationResult.classification.tariff_rates?.mfn_rate || '0',
-            usmcaRate: classificationResult.classification.tariff_rates?.usmca_rate || '0'
-          }];
-          
-          // Add alternatives if available
-          if (classificationResult.alternatives) {
-            classificationResult.alternatives.slice(0, 4).forEach(alt => {
-              suggestions.push({
-                hsCode: alt.hs_code,
-                description: alt.description || alt.product_description,
-                confidence: alt.confidence,
-                confidenceText: `${alt.confidence.toFixed(1)}% confidence`,
-                mfnRate: alt.mfn_rate || alt.mfn_tariff_rate || '0',
-                usmcaRate: alt.usmca_rate || alt.usmca_tariff_rate || '0'
-              });
-            });
-          }
+        if (result.results && result.results.length > 0) {
+          // Convert AI classification results to expected format
+          const suggestions = result.results.map(item => ({
+            hsCode: item.hsCode || item.hs_code,
+            description: item.description,
+            confidence: item.confidence,
+            confidenceText: `${item.confidence}% confidence`,
+            mfnRate: item.mfnRate || item.mfn_rate || '0',
+            usmcaRate: item.usmcaRate || item.usmca_rate || '0'
+          }));
           
           newComponents[index].hs_suggestions = suggestions;
           
           // Auto-select best match if confidence is high
-          if (suggestions.length > 0 && suggestions[0].confidence >= 85) {
+          if (suggestions.length > 0 && suggestions[0].confidence >= 75) {
             newComponents[index].hs_code = suggestions[0].hsCode;
           }
+        } else {
+          newComponents[index].hs_suggestions = [];
         }
       } catch (error) {
-        console.error('HS code classification failed:', error);
+        console.error('HS code search failed:', error);
         newComponents[index].hs_suggestions = [];
       }
       setSearchingHS({ ...searchingHS, [index]: false });
@@ -161,8 +131,8 @@ export default function ComponentOriginsStepEnhanced({
   const addComponent = () => {
     setComponents([...components, { 
       description: '', 
-      origin_country: 'CN', 
-      value_percentage: 0, 
+      origin_country: '', 
+      value_percentage: '', 
       hs_code: '',
       hs_suggestions: []
     }]);
@@ -283,16 +253,15 @@ export default function ComponentOriginsStepEnhanced({
               className="form-select"
             >
               <option value="">Select manufacturing country...</option>
-              <option value="CN">China</option>
-              <option value="MX">Mexico</option>
-              <option value="CA">Canada</option>
-              <option value="US">United States</option>
-              <option value="IN">India</option>
-              <option value="VN">Vietnam</option>
-              <option value="DE">Germany</option>
-              <option value="JP">Japan</option>
-              <option value="KR">South Korea</option>
-              <option value="TW">Taiwan</option>
+              {dropdownOptions.countries?.map(country => {
+                const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                const countryName = typeof country === 'string' ? country : country.label || country.name;
+                return (
+                  <option key={countryCode} value={countryCode}>
+                    {countryName}
+                  </option>
+                );
+              })}
             </select>
             <div className="form-help">
               Where is the final product assembled/manufactured?
@@ -321,7 +290,6 @@ export default function ComponentOriginsStepEnhanced({
                   className="btn-danger"
                   title="Remove component"
                 >
-                  <X className="icon-sm" />
                 </button>
               )}
             </div>
@@ -351,16 +319,16 @@ export default function ComponentOriginsStepEnhanced({
                   onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
                   className="form-select"
                 >
-                  <option value="CN">China</option>
-                  <option value="MX">Mexico</option>
-                  <option value="CA">Canada</option>
-                  <option value="US">United States</option>
-                  <option value="IN">India</option>
-                  <option value="VN">Vietnam</option>
-                  <option value="DE">Germany</option>
-                  <option value="JP">Japan</option>
-                  <option value="KR">South Korea</option>
-                  <option value="TW">Taiwan</option>
+                  <option value="">Select origin country...</option>
+                  {dropdownOptions.countries?.map(country => {
+                    const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                    const countryName = typeof country === 'string' ? country : country.label || country.name;
+                    return (
+                      <option key={countryCode} value={countryCode}>
+                        {countryName}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -451,7 +419,6 @@ export default function ComponentOriginsStepEnhanced({
           onClick={addComponent}
           className="btn-secondary add-component-button"
         >
-          <Plus className="icon-sm" />
           Add Component
         </button>
 
@@ -489,7 +456,6 @@ export default function ComponentOriginsStepEnhanced({
           ) : (
             <>
               Process USMCA Compliance
-              <Check className="icon-sm" />
             </>
           )}
         </button>

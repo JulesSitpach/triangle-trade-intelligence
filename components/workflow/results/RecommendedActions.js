@@ -13,32 +13,46 @@ export default function RecommendedActions({ results }) {
   if (!showRecommendations) return null;
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 text-left">
-      <h4 className="text-lg font-bold text-gray-800 mb-4">Recommended Next Steps:</h4>
-      <ul className="space-y-2">
-        <li className="flex items-start gap-2">
-          <span className="text-green-600 font-bold">✓</span>
-          <span className="text-gray-700">Download and complete the certificate template</span>
-        </li>
-        <li className="flex items-start gap-2">
-          <span className="text-green-600 font-bold">✓</span>
-          <span className="text-gray-700">Gather required documentation</span>
-        </li>
-        <li className="flex items-start gap-2">
-          <span className="text-green-600 font-bold">✓</span>
-          <span className="text-gray-700">Consult with customs broker for implementation</span>
-        </li>
-        <li className="flex items-start gap-2">
-          <span className="text-green-600 font-bold">✓</span>
-          <span className="text-gray-700">Set up supplier compliance procedures</span>
-        </li>
-        {results?.trust_assessment?.expert_validation_required && (
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 font-bold">✓</span>
-            <span className="text-gray-700">Consider expert validation for high-value transactions</span>
-          </li>
-        )}
-      </ul>
+    <div className="element-spacing">
+      <div className="card">
+        <div className="card-header">
+          <h4 className="card-title">Recommended Next Steps</h4>
+        </div>
+        <div className="element-spacing">
+          <div className="status-card success">
+            <div className="header-actions">
+              <span className="status-value success">✓</span>
+              <span className="text-body">Download and complete the certificate template</span>
+            </div>
+          </div>
+          <div className="status-card success">
+            <div className="header-actions">
+              <span className="status-value success">✓</span>
+              <span className="text-body">Gather required documentation</span>
+            </div>
+          </div>
+          <div className="status-card success">
+            <div className="header-actions">
+              <span className="status-value success">✓</span>
+              <span className="text-body">Consult with customs broker for implementation</span>
+            </div>
+          </div>
+          <div className="status-card success">
+            <div className="header-actions">
+              <span className="status-value success">✓</span>
+              <span className="text-body">Set up supplier compliance procedures</span>
+            </div>
+          </div>
+          {results?.trust_assessment?.expert_validation_required && (
+            <div className="status-card info">
+              <div className="header-actions">
+                <span className="status-value info">✓</span>
+                <span className="text-body">Consider expert validation for high-value transactions</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

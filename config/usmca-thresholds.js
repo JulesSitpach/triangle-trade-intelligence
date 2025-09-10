@@ -114,12 +114,12 @@ const getOfficialUSMCAThreshold = (businessType, hsCode) => {
     
     // Electronics (Chapter 85) - Official USMCA requirement
     'Electronics': {
-      threshold: 75.0,
+      threshold: 65.0,
       source: 'usmca_treaty_annex_4b',
       rule_type: 'regional_value_content'
     },
     'Electronics & Technology': {
-      threshold: 75.0,
+      threshold: 65.0,
       source: 'usmca_treaty_annex_4b', 
       rule_type: 'regional_value_content'
     },

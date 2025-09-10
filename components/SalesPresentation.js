@@ -133,7 +133,7 @@ export default function SalesPresentation({
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading presentation...</p>
+          <p className="text-body">Loading presentation...</p>
         </div>
       </div>
     );
@@ -296,7 +296,7 @@ function renderSlideContent(slideData, presentationType) {
   switch (slideData.type) {
     case 'crisis_alert':
       return (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-lg">
+        <div className="status-warning">
           <div className="text-amber-800">
             <h3 className="text-xl font-semibold mb-4">URGENT ACTION REQUIRED</h3>
             <ul className="space-y-3">
@@ -350,9 +350,9 @@ function renderSlideContent(slideData, presentationType) {
               <h4 className="text-xl font-semibold mb-2">{tier.name}</h4>
               <div className="metric-value text-navy-600">
                 {tier.price}
-                <span className="text-sm text-gray-600">/{tier.period}</span>
+                <span className="text-muted">/{tier.period}</span>
               </div>
-              <p className="text-gray-600 mb-4">{tier.description}</p>
+              <p className="text-body">{tier.description}</p>
               <ul className="space-y-2">
                 {tier.features.map((feature, fIndex) => (
                   <li key={fIndex} className="flex items-start">
@@ -400,13 +400,13 @@ function renderSlideContent(slideData, presentationType) {
  */
 function getSlideIconColor(slideType) {
   const colorMap = {
-    'crisis_alert': 'bg-amber-600',
-    'problem': 'bg-amber-500',
+    'crisis_alert': 'btn-warning',
+    'problem': 'btn-warning',
     'solution': 'bg-sage-600',
     'demo_results': 'bg-navy-600',
     'competitive': 'bg-teal-600',
     'pricing': 'bg-sage-600',
-    'roi_timeline': 'bg-amber-600',
+    'roi_timeline': 'btn-warning',
     'architecture': 'bg-navy-600',
     'next_steps': 'bg-navy-600'
   };

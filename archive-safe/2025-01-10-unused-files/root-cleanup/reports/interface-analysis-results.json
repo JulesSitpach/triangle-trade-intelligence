@@ -1,0 +1,210 @@
+{
+  "baseline": {
+    "desktop": "analysis-desktop-baseline.png",
+    "mobile": "analysis-mobile-baseline.png"
+  },
+  "cssValidation": {
+    "professionalStylesApplied": true,
+    "missingClasses": [],
+    "workingClasses": [
+      ".form-section",
+      ".form-section-title",
+      ".form-group",
+      ".form-input",
+      ".form-select",
+      ".workflow-progress",
+      ".workflow-step",
+      ".workflow-step-indicator",
+      ".trust-indicators",
+      ".trust-indicator"
+    ],
+    "computedStyles": {
+      ".form-section": {
+        "background": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "32px",
+        "border": "1px solid rgb(204, 205, 206)",
+        "borderRadius": "12px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      },
+      ".form-section-title": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px 0px 12px",
+        "border": "",
+        "borderRadius": "0px",
+        "fontSize": "18px",
+        "fontWeight": "600",
+        "color": "rgb(1, 42, 73)"
+      },
+      ".form-group": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px",
+        "border": "0px none rgb(86, 86, 86)",
+        "borderRadius": "0px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      },
+      ".form-input": {
+        "background": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "20px 24px",
+        "border": "3px solid rgb(168, 169, 170)",
+        "borderRadius": "6px",
+        "fontSize": "16px",
+        "fontWeight": "500",
+        "color": "rgb(1, 42, 73)"
+      },
+      ".form-select": {
+        "background": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "20px 24px",
+        "border": "3px solid rgb(168, 169, 170)",
+        "borderRadius": "6px",
+        "fontSize": "16px",
+        "fontWeight": "500",
+        "color": "rgb(1, 42, 73)"
+      },
+      ".workflow-progress": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px",
+        "border": "0px none rgb(86, 86, 86)",
+        "borderRadius": "0px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      },
+      ".workflow-step": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px",
+        "border": "0px none rgb(86, 86, 86)",
+        "borderRadius": "0px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      },
+      ".workflow-step-indicator": {
+        "background": "rgb(0, 156, 235) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px",
+        "border": "2px solid rgb(0, 156, 235)",
+        "borderRadius": "50%",
+        "fontSize": "20px",
+        "fontWeight": "600",
+        "color": "rgb(255, 255, 255)"
+      },
+      ".trust-indicators": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "16px",
+        "border": "0px none rgb(86, 86, 86)",
+        "borderRadius": "0px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      },
+      ".trust-indicator": {
+        "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+        "padding": "0px",
+        "border": "0px none rgb(86, 86, 86)",
+        "borderRadius": "12px",
+        "fontSize": "20px",
+        "fontWeight": "300",
+        "color": "rgb(86, 86, 86)"
+      }
+    },
+    "elementCounts": {
+      ".form-section": 1,
+      ".form-section-title": 1,
+      ".form-group": 5,
+      ".form-input": 1,
+      ".form-select": 4,
+      ".workflow-progress": 1,
+      ".workflow-step": 3,
+      ".workflow-step-indicator": 3,
+      ".trust-indicators": 1,
+      ".trust-indicator": 6
+    }
+  },
+  "workflowValidation": {
+    "stepsVisible": true,
+    "stepCount": 3,
+    "activeStep": "1Company InformationStep 1",
+    "progressIndicator": true,
+    "trustIndicators": true,
+    "navigationClear": true
+  },
+  "accessibilityIssues": {
+    "missingLabels": [
+      "Input 1: text",
+      "Input 2: select-one",
+      "Input 3: select-one",
+      "Input 4: select-one",
+      "Input 5: select-one"
+    ],
+    "missingAltText": [],
+    "colorContrastIssues": [],
+    "keyboardNavigation": false,
+    "ariaIssues": []
+  },
+  "visualHierarchy": {
+    "titleHierarchy": {
+      "H1": {
+        "fontSize": "80px",
+        "fontWeight": "300",
+        "color": "rgb(255, 255, 255)",
+        "marginBottom": "32px"
+      },
+      "H2": {
+        "fontSize": "18px",
+        "fontWeight": "600",
+        "color": "rgb(1, 42, 73)",
+        "marginBottom": "24px"
+      },
+      "DIV": {
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "color": "rgb(86, 86, 86)",
+        "marginBottom": "0px"
+      }
+    },
+    "colorContrast": {},
+    "spacing": {
+      "formGroupMargin": "40px"
+    },
+    "typography": {
+      "fontSize": "16px",
+      "lineHeight": "24px",
+      "color": "rgb(86, 86, 86)"
+    },
+    "issues": []
+  },
+  "responsiveness": {
+    "formReadable": true,
+    "touchTargetsAdequate": false,
+    "horizontalScroll": true,
+    "textOverflow": false,
+    "buttonsAccessible": false,
+    "issues": [
+      "1 buttons below 44px touch target",
+      "Horizontal scroll detected on mobile"
+    ]
+  },
+  "actionableRecommendations": [
+    {
+      "priority": "HIGH",
+      "category": "Mobile",
+      "issue": "1 buttons below 44px touch target",
+      "action": "Fix responsive design issues for mobile users"
+    },
+    {
+      "priority": "HIGH",
+      "category": "Mobile",
+      "issue": "Horizontal scroll detected on mobile",
+      "action": "Fix responsive design issues for mobile users"
+    },
+    {
+      "priority": "HIGH",
+      "category": "Accessibility",
+      "issue": "5 form inputs missing labels",
+      "action": "Add proper <label> elements or aria-label attributes to all form inputs"
+    }
+  ]
+}

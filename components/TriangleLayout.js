@@ -195,7 +195,7 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
             {/* Professional User Section */}
             <div className="dashboard-nav-user">
               <Link 
-                href="/usmca-workflow" 
+                href="/usmca-workflow?reset=true" 
                 className="btn-primary"
               >
                 New Analysis

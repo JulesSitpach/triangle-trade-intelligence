@@ -7,91 +7,46 @@
 import React, { useState, useEffect } from 'react';
 // Custom SVG icons to avoid lucide-react ESM import issues
 const Route = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="6" cy="19" r="3"/>
-    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>
-    <circle cx="18" cy="5" r="3"/>
-  </svg>
+  <span className={className}>[route]</span>
 );
 
 const Plus = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
+  <span className={className}>[plus]</span>
 );
 
 const Trash2 = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="3,6 5,6 21,6"/>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-    <line x1="10" y1="11" x2="10" y2="17"/>
-    <line x1="14" y1="11" x2="14" y2="17"/>
-  </svg>
+  <span className={className}>[trash]</span>
 );
 
 const Calculator = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect width="16" height="20" x="4" y="2" rx="2"/>
-    <line x1="8" y1="6" x2="16" y2="6"/>
-    <line x1="16" y1="14" x2="16" y2="18"/>
-    <path d="M16 10h.01"/>
-    <path d="M12 10h.01"/>
-    <path d="M8 10h.01"/>
-    <path d="M12 14h.01"/>
-    <path d="M8 14h.01"/>
-    <path d="M12 18h.01"/>
-    <path d="M8 18h.01"/>
-  </svg>
+  <span className={className}>[calculator]</span>
 );
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const AlertCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
+  <span className={className}>[alert]</span>
 );
 
 const Info = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="16" x2="12" y2="12"/>
-    <line x1="12" y1="8" x2="12.01" y2="8"/>
-  </svg>
+  <span className={className}>[info]</span>
 );
 
 const MapPin = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-    <circle cx="12" cy="10" r="3"/>
-  </svg>
+  <span className={className}>[location]</span>
 );
 
 const Percent = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="19" y1="5" x2="5" y2="19"/>
-    <circle cx="6.5" cy="6.5" r="2.5"/>
-    <circle cx="17.5" cy="17.5" r="2.5"/>
-  </svg>
+  <span className={className}>[percent]</span>
 );
 
 const Globe = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="2" y1="12" x2="22" y2="12"/>
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-  </svg>
+  <span className={className}>[globe]</span>
 );
 
-export default function SupplyChainStep({ data, onChange, validation }) {
+export default function SupplyChainStep({ data = {}, onChange, validation = { errors: [] } }) {
   const [countries, setCountries] = useState([]);
   const [usmcaThresholds, setUsmcaThresholds] = useState(null);
   const [qualificationResults, setQualificationResults] = useState(null);
@@ -235,37 +190,37 @@ export default function SupplyChainStep({ data, onChange, validation }) {
     const isUsmcaMember = ['US', 'CA', 'MX'].includes(component.origin_country);
 
     return (
-      <div key={index} className={`p-4 border-2 rounded-lg mb-4 ${
-        isUsmcaMember ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+      <div key={index} className={`card ${
+        isUsmcaMember ? 'card-success' : ''
       }`}>
-        <div className="flex justify-between items-start mb-3">
-          <h4 className="font-medium text-gray-900">Component {index + 1}</h4>
-          <div className="flex items-center space-x-2">
+        <div className="card-header">
+          <h4 className="card-title">Component {index + 1}</h4>
+          <div className="header-actions">
             {isUsmcaMember && (
-              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+              <span className="status-success">
                 USMCA Member
               </span>
             )}
             {componentOrigins.length > 1 && (
               <button
                 onClick={() => removeComponentOrigin(index)}
-                className="text-red-600 hover:text-red-800"
+                className="btn-danger"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="icon-sm" />
               </button>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Origin Country <span className="text-red-500">*</span>
+        <div className="grid-3-cols">
+          <div className="form-group">
+            <label className="form-label required">
+              Origin Country
             </label>
             <select
               value={component.origin_country}
               onChange={(e) => updateComponentOrigin(index, 'origin_country', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+              className="form-select"
             >
               <option value="">Select country...</option>
               {countries.map(country => (
@@ -276,11 +231,11 @@ export default function SupplyChainStep({ data, onChange, validation }) {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Value Percentage <span className="text-red-500">*</span>
+          <div className="form-group">
+            <label className="form-label required">
+              Value Percentage
             </label>
-            <div className="relative">
+            <div className="form-input-group">
               <input
                 type="number"
                 min="0"
@@ -288,28 +243,28 @@ export default function SupplyChainStep({ data, onChange, validation }) {
                 step="0.1"
                 value={component.value_percentage}
                 onChange={(e) => updateComponentOrigin(index, 'value_percentage', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+                className="form-input"
               />
-              <Percent className="absolute right-2 top-2.5 w-4 h-4 text-gray-400" />
+              <span className="form-input-suffix">%</span>
             </div>
             {totalPercentage > 100 && (
-              <p className="text-xs text-red-600 mt-1">Total exceeds 100%</p>
+              <div className="form-error">Total exceeds 100%</div>
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Component Description <span className="text-red-500">*</span>
+          <div className="form-group">
+            <label className="form-label required">
+              Component Description
             </label>
             <input
               type="text"
               value={component.description}
               onChange={(e) => updateComponentOrigin(index, 'description', e.target.value)}
               placeholder="e.g., Copper electrical wire, Automotive connectors"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+              className="form-input"
             />
             {!component.description && (
-              <p className="text-xs text-red-600 mt-1">Component description is required for certificate</p>
+              <div className="form-error">Component description is required for certificate</div>
             )}
           </div>
         </div>
@@ -322,31 +277,33 @@ export default function SupplyChainStep({ data, onChange, validation }) {
     const totalPercentage = getTotalPercentage();
     
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <div className="flex items-center mb-3">
-          <Calculator className="w-5 h-5 text-blue-600 mr-2" />
-          <h3 className="font-medium text-blue-900">Supply Chain Analysis</h3>
+      <div className="alert alert-info">
+        <div className="alert-icon">
+          <Calculator className="icon-md" />
+        </div>
+        <div className="alert-content">
+          <div className="alert-title">Supply Chain Analysis</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-white p-3 rounded border">
-            <div className="text-blue-700 font-medium">Total Components</div>
-            <div className="text-2xl font-bold text-gray-900">{totalPercentage.toFixed(1)}%</div>
-            <div className={`text-xs ${totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="grid-3-cols">
+          <div className="content-card">
+            <div className="card-title">Total Components</div>
+            <div className="dashboard-metric">{totalPercentage.toFixed(1)}%</div>
+            <div className={`status-text ${totalPercentage === 100 ? 'status-success' : 'status-error'}`}>
               {totalPercentage === 100 ? 'Complete' : totalPercentage > 100 ? 'Exceeds 100%' : 'Incomplete'}
             </div>
           </div>
 
-          <div className="bg-white p-3 rounded border">
-            <div className="text-blue-700 font-medium">USMCA Content</div>
-            <div className="text-2xl font-bold text-green-600">{regionalContent.toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">North American content</div>
+          <div className="content-card">
+            <div className="card-title">USMCA Content</div>
+            <div className="dashboard-metric status-success">{regionalContent.toFixed(1)}%</div>
+            <div className="small-text">North American content</div>
           </div>
 
-          <div className="bg-white p-3 rounded border">
-            <div className="text-blue-700 font-medium">Non-USMCA Content</div>
-            <div className="text-2xl font-bold text-gray-600">{(totalPercentage - regionalContent).toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">Other countries</div>
+          <div className="content-card">
+            <div className="card-title">Non-USMCA Content</div>
+            <div className="dashboard-metric">{(totalPercentage - regionalContent).toFixed(1)}%</div>
+            <div className="small-text">Other countries</div>
           </div>
         </div>
       </div>
@@ -354,15 +311,15 @@ export default function SupplyChainStep({ data, onChange, validation }) {
   };
 
   const renderManufacturingLocation = () => (
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Manufacturing/Assembly Location <span className="text-red-500">*</span>
+    <div className="form-group">
+      <label className="form-label required">
+        Manufacturing/Assembly Location
       </label>
       
       <select
         value={manufacturingLocation}
         onChange={(e) => setManufacturingLocation(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+        className="form-select"
       >
         <option value="">Select manufacturing country...</option>
         {countries.map(country => (
@@ -372,9 +329,9 @@ export default function SupplyChainStep({ data, onChange, validation }) {
         ))}
       </select>
       
-      <p className="text-xs text-gray-500 mt-1">
+      <div className="form-help">
         Country where the final product is manufactured or assembled
-      </p>
+      </div>
     </div>
   );
 
@@ -382,41 +339,43 @@ export default function SupplyChainStep({ data, onChange, validation }) {
     if (!qualificationResults) return null;
 
     return (
-      <div className={`border-2 rounded-lg p-4 ${
-        qualificationResults.qualified ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+      <div className={`alert ${
+        qualificationResults.qualified ? 'alert-success' : 'alert-error'
       }`}>
-        <div className="flex items-center mb-3">
+        <div className="alert-icon">
           {qualificationResults.qualified ? (
-            <CheckCircle className="w-6 h-6 text-green-600 mr-2" />
+            <CheckCircle className="icon-lg" />
           ) : (
-            <AlertCircle className="w-6 h-6 text-red-600 mr-2" />
+            <AlertCircle className="icon-lg" />
           )}
-          <h3 className={`font-medium ${qualificationResults.qualified ? 'text-green-900' : 'text-red-900'}`}>
+        </div>
+        <div className="alert-content">
+          <div className="alert-title">
             USMCA Qualification: {qualificationResults.qualified ? 'QUALIFIED' : 'NOT QUALIFIED'}
-          </h3>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="grid-2-cols">
           <div>
-            <div className="font-medium text-gray-900">Required Threshold:</div>
-            <div className="text-lg">{qualificationResults.threshold_required}%</div>
+            <div className="card-title">Required Threshold:</div>
+            <div className="dashboard-metric">{qualificationResults.threshold_required}%</div>
           </div>
           <div>
-            <div className="font-medium text-gray-900">Your Content:</div>
-            <div className={`text-lg ${qualificationResults.qualified ? 'text-green-600' : 'text-red-600'}`}>
+            <div className="card-title">Your Content:</div>
+            <div className={`dashboard-metric ${qualificationResults.qualified ? 'status-success' : 'status-error'}`}>
               {qualificationResults.regional_content}%
             </div>
           </div>
         </div>
 
-        <div className="mt-3 p-3 bg-white rounded border">
-          <div className="font-medium text-gray-900 mb-2">Qualification Rule:</div>
-          <div className="text-sm text-gray-700">{qualificationResults.rule_description}</div>
+        <div className="card">
+          <div className="card-title">Qualification Rule:</div>
+          <div className="text-body">{qualificationResults.rule_description}</div>
         </div>
 
         {!qualificationResults.qualified && (
-          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-            <div className="text-sm text-yellow-800">
+          <div className="alert alert-warning">
+            <div className="text-body">
               <strong>Recommendation:</strong> Increase North American content to {qualificationResults.threshold_required}% 
               or consider triangle routing through Mexico to achieve USMCA qualification.
             </div>
@@ -427,34 +386,35 @@ export default function SupplyChainStep({ data, onChange, validation }) {
   };
 
   const renderVerificationSection = () => (
-    <div className="border-t pt-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Supply Chain Verification</h3>
-        <div className={`px-3 py-1 rounded-full text-sm ${
+    <div className="form-section">
+      <div className="section-header">
+        <h3 className="section-header-title">Supply Chain Verification</h3>
+        <div className={`status-badge ${
           data.supply_chain_verified 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
+            ? 'status-success' 
+            : 'status-error'
         }`}>
           {data.supply_chain_verified ? 'Verified' : 'Requires Verification'}
         </div>
       </div>
 
       {!data.supply_chain_verified && getTotalPercentage() === 100 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center mb-2">
-            <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
-            <span className="font-medium text-yellow-900">Verification Required</span>
+        <div className="alert alert-warning">
+          <div className="alert-icon">
+            <AlertCircle className="icon-md" />
           </div>
-          
-          <p className="text-sm text-yellow-800 mb-4">
-            Please verify that the supply chain breakdown is accurate and complete.
-          </p>
+          <div className="alert-content">
+            <div className="alert-title">Verification Required</div>
+            <div className="text-body">
+              Please verify that the supply chain breakdown is accurate and complete.
+            </div>
+          </div>
           
           <button
             onClick={() => onChange({ supply_chain_verified: true })}
-            className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center justify-center"
+            className="btn-primary"
           >
-            <CheckCircle className="w-4 h-4 mr-2" />
+            <CheckCircle className="icon-sm" />
             I Verify This Supply Chain Information is Accurate
           </button>
         </div>
@@ -463,27 +423,29 @@ export default function SupplyChainStep({ data, onChange, validation }) {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="text-center p-4 bg-blue-50 rounded-lg">
-        <div className="flex items-center justify-center mb-2">
-          <Route className="w-5 h-5 text-blue-600 mr-2" />
-          <span className="font-medium text-blue-900">Supply Chain & Regional Content Calculator</span>
+    <div className="element-spacing">
+      <div className="alert alert-info">
+        <div className="alert-icon">
+          <Route className="icon-md" />
         </div>
-        <p className="text-sm text-blue-700">
-          Add all component origins to calculate USMCA qualification and regional value content.
-        </p>
+        <div className="alert-content">
+          <div className="alert-title">Supply Chain & Regional Content Calculator</div>
+          <div className="text-body">
+            Add all component origins to calculate USMCA qualification and regional value content.
+          </div>
+        </div>
       </div>
 
       {renderSupplyChainSummary()}
 
       <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Component Origins</h3>
+        <div className="section-header">
+          <h3 className="section-header-title">Component Origins</h3>
           <button
             onClick={addComponentOrigin}
-            className="flex items-center px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="btn-primary"
           >
-            <Plus className="w-4 h-4 mr-1" />
+            <Plus className="icon-sm" />
             Add Component
           </button>
         </div>
@@ -496,8 +458,8 @@ export default function SupplyChainStep({ data, onChange, validation }) {
       {renderManufacturingLocation()}
       
       {isCalculating && (
-        <div className="flex items-center justify-center p-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
           <span>Calculating USMCA qualification...</span>
         </div>
       )}
@@ -507,16 +469,18 @@ export default function SupplyChainStep({ data, onChange, validation }) {
 
       {/* Validation Messages */}
       {validation.errors && validation.errors.length > 0 && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center mb-2">
-            <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-            <h4 className="font-medium text-red-900">Please complete the following:</h4>
+        <div className="alert alert-error">
+          <div className="alert-icon">
+            <AlertCircle className="icon-md" />
           </div>
-          <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
-            {validation.errors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
+          <div className="alert-content">
+            <div className="alert-title">Please complete the following:</div>
+            <ul className="validation-errors">
+              {validation.errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>

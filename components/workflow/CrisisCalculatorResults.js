@@ -8,31 +8,19 @@ import AlertsSubscriptionFlow from './AlertsSubscriptionFlow';
 
 // Simple icon components
 const AlertTriangle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
+  <span className={className}>[warning]</span>
 );
 
 const DollarSign = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="1" x2="12" y2="23"/>
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-  </svg>
+  <span className={className}>[dollar]</span>
 );
 
 const Shield = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
+  <span className={className}>[shield]</span>
 );
 
 const TrendingUp = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-    <polyline points="16,7 22,7 22,13"/>
-  </svg>
+  <span className={className}>[trending-up]</span>
 );
 
 export default function CrisisCalculatorResults({ 
@@ -164,10 +152,10 @@ export default function CrisisCalculatorResults({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl p-10 shadow-lg mb-5">
-        <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Calculating your crisis impact...</p>
+      <div className="card">
+        <div className="loading-container">
+          <div className="loading-spinner loading-spinner-lg"></div>
+          <p className="text-body">Calculating your crisis impact...</p>
         </div>
       </div>
     );
@@ -185,8 +173,8 @@ export default function CrisisCalculatorResults({
   // Show subscription flow overlay
   if (showSubscriptionFlow) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="loading-overlay">
+        <div className="subscription-modal">
           <AlertsSubscriptionFlow
             userProfile={userProfile}
             onSubscriptionComplete={handleSubscriptionComplete}
@@ -198,61 +186,61 @@ export default function CrisisCalculatorResults({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="element-spacing">
       {/* Crisis Impact Summary */}
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-xl p-8">
-        <div className="text-center mb-6">
-          <h2 className="section-title flex items-center justify-center gap-3">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="alert alert-error crisis-summary">
+        <div className="crisis-header">
+          <h2 className="crisis-title">
+            <AlertTriangle className="icon-xl status-error" />
             Free Crisis Assessment Results
           </h2>
-          <p className="text-red-700">
+          <p className="crisis-company-info">
             <strong>{formData.company_name}</strong> • {formatCurrency(getTradeVolumeValue(formData.trade_volume))} Annual Trade Volume
           </p>
-          <p className="text-sm text-red-600 mt-1">
+          <p className="crisis-status">
             ✅ Initial qualification analysis complete • Professional filing required for compliance
           </p>
         </div>
 
         {crisisData?.success && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-lg p-6 border border-red-200">
-                <div className="flex items-center justify-between">
+            <div className="grid-3-cols">
+              <div className="crisis-metric-card crisis-risk">
+                <div className="metric-content">
                   <div>
-                    <p className="metric-label text-red-600 font-medium">Crisis Tariff Risk</p>
+                    <p className="metric-label status-error">Crisis Tariff Risk</p>
                     <p className="metric-value">
                       {formatCurrency(crisisData.crisis_impact?.crisisPenalty || 0)}
                     </p>
-                    <p className="metric-label text-red-600">Estimated annual exposure</p>
+                    <p className="metric-label status-error">Estimated annual exposure</p>
                   </div>
-                  <TrendingUp className="w-8 h-8 text-red-500" />
+                  <TrendingUp className="icon-xl status-error" />
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-6 border border-green-200">
-                <div className="flex items-center justify-between">
+              <div className="crisis-metric-card crisis-success">
+                <div className="metric-content">
                   <div>
-                    <p className="text-sm text-green-600 font-medium">USMCA Qualification</p>
-                    <p className="metric-value text-green-700">✓ LIKELY</p>
-                    <p className="text-xs text-green-600">Based on initial product analysis</p>
+                    <p className="metric-label status-success">USMCA Qualification</p>
+                    <p className="metric-value status-success">✓ LIKELY</p>
+                    <p className="small-text status-success">Based on initial product analysis</p>
                   </div>
-                  <Shield className="w-8 h-8 text-green-500" />
+                  <Shield className="icon-xl status-success" />
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-6 border border-blue-200">
-                <div className="flex items-center justify-between">
+              <div className="crisis-metric-card crisis-info">
+                <div className="metric-content">
                   <div>
-                    <p className="text-sm text-blue-600 font-medium">Protection Value</p>
-                    <p className="metric-value text-blue-700">
+                    <p className="metric-label status-info">Protection Value</p>
+                    <p className="metric-value status-info">
                       {formatCurrency(crisisData.crisis_impact?.potentialSavings || 0)}
                     </p>
-                    <p className="text-xs text-blue-600">
+                    <p className="small-text status-info">
                       Estimated savings with proper filing
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-blue-500" />
+                  <DollarSign className="icon-xl status-info" />
                 </div>
               </div>
             </div>
@@ -260,109 +248,111 @@ export default function CrisisCalculatorResults({
 
             {/* Data Integration Status */}
             {dataSentToAlerts && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-2 text-green-800">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <p className="text-sm font-medium">
+              <div className="alert alert-success">
+                <div className="alert-icon">
+                  <div className="status-indicator status-success"></div>
+                </div>
+                <div className="alert-content">
+                  <div className="small-text">
                     ✅ Your data has been automatically added to the crisis alerts monitoring system
-                  </p>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Consultation Cliff - Strategic Limitation */}
-            <div className="bg-orange-50 border-l-4 border-orange-400 p-6 mb-6">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-orange-600 mt-1 flex-shrink-0" />
-                <div>
-                  <h4 className="text-lg font-semibold text-orange-900 mb-2">
-                    Complex Compliance Requirements Detected
-                  </h4>
-                  <p className="text-orange-800 mb-3">
-                    Your product involves multi-country supply chains and intricate component origin calculations. 
-                    USMCA qualification requires detailed analysis of:
-                  </p>
-                  <ul className="text-sm text-orange-700 space-y-1 mb-4 pl-4">
-                    <li>• Regional content value calculations (de minimis rules)</li>
-                    <li>• Component-specific HS code validations</li>
-                    <li>• Supply chain documentation requirements</li>
-                    <li>• Manufacturing process qualifications</li>
-                  </ul>
-                  <p className="text-sm text-orange-600 font-medium">
-                    ⚠️ DIY mistakes in USMCA filing can result in customs penalties, duty reassessments, 
-                    and compliance violations averaging $125K+ per incident.
-                  </p>
+            <div className="alert alert-warning">
+              <div className="alert-icon">
+                <AlertTriangle className="icon-lg" />
+              </div>
+              <div className="alert-content">
+                <div className="alert-title">
+                  Complex Compliance Requirements Detected
+                </div>
+                <div className="text-body">
+                  Your product involves multi-country supply chains and intricate component origin calculations. 
+                  USMCA qualification requires detailed analysis of:
+                </div>
+                <ul className="compliance-requirements">
+                  <li>• Regional content value calculations (de minimis rules)</li>
+                  <li>• Component-specific HS code validations</li>
+                  <li>• Supply chain documentation requirements</li>
+                  <li>• Manufacturing process qualifications</li>
+                </ul>
+                <div className="warning-notice">
+                  ⚠️ DIY mistakes in USMCA filing can result in customs penalties, duty reassessments, 
+                  and compliance violations averaging $125K+ per incident.
                 </div>
               </div>
             </div>
 
             {/* Strategic Upgrade Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid-2-cols">
               {/* Alerts Option - Featured */}
-              <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-xl p-6 relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+              <div className="pricing-card pricing-featured">
+                <div className="pricing-badge-featured">
                   RECOMMENDED
                 </div>
-                <h4 className="text-xl font-bold text-orange-900 mb-3 mt-2">Crisis Alert Monitoring</h4>
-                <div className="mb-4">
-                  <p className="metric-value text-orange-600">$99<span className="text-sm">/month</span></p>
-                  <p className="text-sm text-orange-700">Only $3.30/day to protect {formatCurrency(getTradeVolumeValue(formData.trade_volume))}</p>
+                <h4 className="pricing-title">Crisis Alert Monitoring</h4>
+                <div className="pricing-amount-group">
+                  <p className="pricing-amount status-warning">$99<span className="small-text">/month</span></p>
+                  <p className="pricing-detail">Only $3.30/day to protect {formatCurrency(getTradeVolumeValue(formData.trade_volume))}</p>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-700 mb-6">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                <ul className="pricing-features">
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-warning"></div>
                     Real-time tariff change alerts for your HS codes
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-warning"></div>
                     Personalized crisis impact notifications
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-warning"></div>
                     Policy change monitoring & analysis
                   </li>
                 </ul>
                 <button 
                   onClick={handleStartAlertsSubscription}
-                  className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-orange-700 transition-colors"
+                  className="btn-primary pricing-button"
                 >
                   Start Monitoring Now
                 </button>
-                <p className="text-xs text-orange-600 text-center mt-2">
+                <div className="pricing-help pricing-help-featured">
                   Cancel anytime • 0.048% of your protected trade value
-                </p>
+                </div>
               </div>
 
               {/* Certificate Option */}
-              <div className="bg-white border-2 border-blue-300 rounded-xl p-6">
-                <h4 className="text-xl font-bold text-blue-900 mb-3">Professional Certificate Filing</h4>
-                <div className="mb-4">
-                  <p className="metric-value text-blue-600">$2,500</p>
-                  <p className="text-sm text-blue-700">One-time professional service</p>
+              <div className="pricing-card">
+                <h4 className="pricing-title">Professional Certificate Filing</h4>
+                <div className="pricing-amount-group">
+                  <p className="pricing-amount status-info">$2,500</p>
+                  <p className="pricing-detail">One-time professional service</p>
                 </div>
-                <ul className="space-y-2 text-sm text-gray-700 mb-6">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <ul className="pricing-features">
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-info"></div>
                     Complete component origin validation
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-info"></div>
                     Professional certificate preparation
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                  <li className="pricing-feature">
+                    <div className="feature-bullet status-info"></div>
                     Customs broker review & filing
                   </li>
                 </ul>
                 <button 
                   onClick={onUpgradeToCertificate}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  className="btn-primary pricing-button"
                 >
                   Get Professional Filing
                 </button>
-                <p className="text-xs text-blue-600 text-center mt-2">
+                <div className="pricing-help">
                   ROI: {Math.round((crisisData.crisis_impact?.potentialSavings || 250000) / 2500 * 100)}% first-year return
-                </p>
+                </div>
               </div>
             </div>
           </>

@@ -1,0 +1,58 @@
+{
+  "healthy": false,
+  "tests": {
+    "basic_connection": {
+      "success": false,
+      "error": "this.supabase.from(...).select(...).limit is not a function",
+      "score": 0,
+      "timestamp": "2025-09-08T22:41:13.231Z"
+    },
+    "read_permissions": {
+      "success": true,
+      "tablesAccessed": 0,
+      "totalTables": 4,
+      "details": {
+        "hs_master_rebuild": {
+          "accessible": false,
+          "error": "this.supabase.from(...).select(...).limit is not a function"
+        },
+        "user_profiles": {
+          "accessible": false,
+          "error": "this.supabase.from(...).select(...).limit is not a function"
+        },
+        "workflow_completions": {
+          "accessible": false,
+          "error": "this.supabase.from(...).select(...).limit is not a function"
+        },
+        "rss_feeds": {
+          "accessible": false,
+          "error": "this.supabase.from(...).select(...).limit is not a function"
+        }
+      },
+      "score": 0,
+      "timestamp": "2025-09-08T22:41:13.231Z"
+    },
+    "write_permissions": {
+      "success": true,
+      "writeable": false,
+      "error": "this.supabase.from(...).insert(...).select is not a function",
+      "score": 1,
+      "timestamp": "2025-09-08T22:41:13.232Z"
+    },
+    "rpc_functions": {
+      "success": true,
+      "rpcAvailable": true,
+      "version": "Unknown",
+      "score": 5,
+      "timestamp": "2025-09-08T22:41:13.232Z"
+    },
+    "connection_pooling": {
+      "success": false,
+      "error": "this.supabase.from(...).select(...).limit is not a function",
+      "score": 0,
+      "timestamp": "2025-09-08T22:41:13.232Z"
+    }
+  },
+  "overall_score": "1.40",
+  "status": "DEGRADED"
+}

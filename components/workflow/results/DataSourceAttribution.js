@@ -10,65 +10,61 @@ export default function DataSourceAttribution({ results, trustIndicators }) {
   const confidence = results?.product?.classification_confidence || results?.product?.confidence || 95;
 
   return (
-    <div className="mb-8">
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="text-sm font-semibold text-gray-600 mb-3 flex items-center gap-2">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
+    <div className="element-spacing">
+      <div className="card">
+        <h4 className="card-title">
+          <span className="icon-sm">[info]</span>
           Data Sources & Verification
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">HS Classification:</span>
-              <span className="font-medium text-gray-800">
+        <div className="grid-2-cols">
+          <div className="element-spacing">
+            <div className="data-source-item">
+              <span className="text-muted">HS Classification:</span>
+              <span className="data-source-value">
                 {results?.product?.method || 'UN Comtrade Database'}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Last Verified:</span>
-              <span className="font-medium text-green-700">
+            <div className="data-source-item">
+              <span className="text-muted">Last Verified:</span>
+              <span className="data-source-value status-success">
                 {new Date().toLocaleDateString()}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">AI Confidence:</span>
-              <span className="font-medium text-blue-700">
+            <div className="data-source-item">
+              <span className="text-muted">AI Confidence:</span>
+              <span className="data-source-value status-info">
                 {confidence.toFixed(1)}%
               </span>
             </div>
           </div>
           
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Tariff Rates:</span>
-              <span className="font-medium text-gray-800">CBP Harmonized Schedule</span>
+          <div className="element-spacing">
+            <div className="data-source-item">
+              <span className="text-muted">Tariff Rates:</span>
+              <span className="data-source-value">CBP Harmonized Schedule</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">USMCA Rules:</span>
-              <span className="font-medium text-gray-800">Official USMCA Agreement</span>
+            <div className="data-source-item">
+              <span className="text-muted">USMCA Rules:</span>
+              <span className="data-source-value">Official USMCA Agreement</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Data Quality:</span>
-              <span className="font-medium text-green-700 flex items-center gap-1">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+            <div className="data-source-item">
+              <span className="text-muted">Data Quality:</span>
+              <span className="data-source-value status-success">
+                <span className="icon-xs">[check]</span>
                 {trustIndicators?.data_provenance === 'verified' ? 'Verified' : 'Standard'}
               </span>
             </div>
           </div>
         </div>
         
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500 italic">
+        <div className="data-source-footer">
+          <p className="data-source-disclaimer">
             All classifications and rates sourced from official government databases. 
             For production use, verify current rates with customs authorities.
           </p>
           {trustIndicators?.expert_validation === 'available' && (
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="data-source-expert">
               Expert validation available for high-value transactions.
             </p>
           )}

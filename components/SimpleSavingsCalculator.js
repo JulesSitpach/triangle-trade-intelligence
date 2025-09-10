@@ -6,6 +6,38 @@
 
 import React, { useState } from 'react';
 
+// Helper function to convert country name to ISO code
+const getCountryCode = (countryName) => {
+  const countryMap = {
+    'China': 'CN',
+    'Germany': 'DE', 
+    'Japan': 'JP',
+    'South Korea': 'KR',
+    'Taiwan': 'TW',
+    'Vietnam': 'VN',
+    'Thailand': 'TH',
+    'India': 'IN',
+    'Mexico': 'MX',
+    'Canada': 'CA',
+    'United States': 'US'
+  };
+  return countryMap[countryName] || 'CN';
+};
+
+// Helper function to get volume amount from range
+const getVolumeAmount = (volumeRange) => {
+  const volumeMap = {
+    'Under $500K': 250000,
+    '$500K-1M': 750000,
+    '$1M-2M': 1500000,
+    '$2M-5M': 3500000,
+    '$5M-10M': 7500000,
+    '$10M+': 15000000,
+    'Over $25M': 40000000
+  };
+  return volumeMap[volumeRange] || 3500000;
+};
+
 export default function SimpleSavingsCalculator() {
   const [productType, setProductType] = useState('automotive');
   const [importVolume, setImportVolume] = useState('$2M-5M');
@@ -17,35 +49,57 @@ export default function SimpleSavingsCalculator() {
   const [leadCompany, setLeadCompany] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
   const [leadCaptured, setLeadCaptured] = useState(false);
+  const [dropdownsLoaded, setDropdownsLoaded] = useState(false);
+  
+  // Dynamic dropdown state
+  const [productOptions, setProductOptions] = useState([]);
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [volumeOptions, setVolumeOptions] = useState([]);
 
-  const productOptions = [
-    { value: 'automotive', label: 'Automotive Parts' },
-    { value: 'electronics', label: 'Electronics' },
-    { value: 'textiles', label: 'Textiles & Fabrics' },
-    { value: 'machinery', label: 'Machinery' },
-    { value: 'chemicals', label: 'Chemicals' },
-    { value: 'agricultural', label: 'Agricultural Products' }
-  ];
+  // Load dynamic dropdown options from database
+  React.useEffect(() => {
+    loadDropdownOptions();
+  }, []);
 
-  const volumeOptions = [
-    { value: '$500K-1M', label: '$500K - $1M' },
-    { value: '$1M-2M', label: '$1M - $2M' },
-    { value: '$2M-5M', label: '$2M - $5M' },
-    { value: '$5M-10M', label: '$5M - $10M' },
-    { value: '$10M+', label: '$10M+' }
-  ];
+  const loadDropdownOptions = async () => {
+    try {
+      const response = await fetch('/api/database-driven-dropdown-options?category=all');
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Update business types from database
+        if (result.data.business_types) {
+          setProductOptions(result.data.business_types.map(bt => ({
+            value: bt.value || bt.label.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+            label: bt.label
+          })));
+        }
+        
+        // Update countries from database
+        if (result.data.countries) {
+          setCountryOptions(result.data.countries.map(country => ({
+            value: typeof country === 'string' ? country : country.name || country.label,
+            label: typeof country === 'string' ? country : country.name || country.label
+          })));
+        }
+        
+        // Update import volumes from database
+        if (result.data.trade_volumes) {
+          setVolumeOptions(result.data.trade_volumes.map(vol => ({
+            value: vol.value,
+            label: vol.label
+          })));
+        }
+      }
+      
+      setDropdownsLoaded(true);
+    } catch (error) {
+      console.error('Failed to load dropdown options:', error);
+      // Keep default values if API fails
+      setDropdownsLoaded(true);
+    }
+  };
 
-  const countryOptions = [
-    { value: 'China', label: 'China' },
-    { value: 'Germany', label: 'Germany' },
-    { value: 'Japan', label: 'Japan' },
-    { value: 'South Korea', label: 'South Korea' },
-    { value: 'Taiwan', label: 'Taiwan' },
-    { value: 'Vietnam', label: 'Vietnam' },
-    { value: 'Thailand', label: 'Thailand' },
-    { value: 'India', label: 'India' },
-    { value: 'Other', label: 'Other' }
-  ];
 
   const calculateSavings = async () => {
     setIsCalculating(true);
@@ -70,44 +124,34 @@ export default function SimpleSavingsCalculator() {
           percentage: result.savings.savingsPercentage
         });
       } else {
-        // Smart calculation using average tariff differentials
-        const volumeMap = {
-          '$500K-1M': 750000,
-          '$1M-2M': 1500000,
-          '$2M-5M': 3500000,
-          '$5M-10M': 7500000,
-          '$10M+': 15000000
-        };
-
-        // Product Type Average MFN Tariff Rates (USMCA = 0%)
-        const productMultipliers = {
-          'automotive': 0.0325,    // 2.5-4% typical
-          'electronics': 0.03,     // 0-6% range average
-          'textiles': 0.12,        // 8-16% (highest tariffs)
-          'machinery': 0.0185,     // 0-3.7% typical  
-          'chemicals': 0.045,      // 3-6% average
-          'agricultural': 0.125    // 0-25% highly variable, using conservative avg
-        };
-
-        // Origin Country Risk Factors
-        const countryMultipliers = {
-          'China': 1.2,        // Highest tariff exposure
-          'Germany': 0.8,      // EU trade agreements
-          'Japan': 0.7,        // Close trade relationship
-          'South Korea': 0.9,   // KORUS FTA considerations
-          'Taiwan': 1.0,       // Standard rates
-          'Vietnam': 1.1,      // Growing trade, higher exposure
-          'Thailand': 0.9,     // ASEAN considerations
-          'India': 1.0,        // Standard rates
-          'Other': 0.9         // Conservative estimate
-        };
+        // Fallback calculation - get dynamic tariff rates from database via API
+        const fallbackResponse = await fetch('/api/simple-savings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            importVolume,
+            supplierCountry: getCountryCode(originCountry),
+            businessType: productType,
+            hsCode: null // Let API determine appropriate rates
+          })
+        });
         
-        const baseVolume = volumeMap[importVolume] || 3500000;
-        const productRate = productMultipliers[productType] || 0.05;
-        const countryFactor = countryMultipliers[originCountry] || 1.0;
+        if (fallbackResponse.ok) {
+          const fallbackResult = await fallbackResponse.json();
+          if (fallbackResult.savings) {
+            setEstimatedSavings({
+              annual: fallbackResult.savings.annualTariffSavings,
+              monthly: fallbackResult.savings.monthlyTariffSavings,
+              percentage: fallbackResult.savings.savingsPercentage
+            });
+            return;
+          }
+        }
         
-        const effectiveRate = productRate * countryFactor;
-        const annualSavings = Math.round(baseVolume * effectiveRate);
+        // Emergency fallback - use basic calculation
+        const baseVolume = getVolumeAmount(importVolume) || 3500000;
+        const estimatedRate = 0.08; // Default 8% savings rate
+        const annualSavings = Math.round(baseVolume * estimatedRate);
         
         setEstimatedSavings({
           annual: annualSavings,
@@ -167,11 +211,15 @@ export default function SimpleSavingsCalculator() {
             onChange={(e) => setProductType(e.target.value)}
             className="form-select"
           >
-            {productOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            {!dropdownsLoaded ? (
+              <option disabled>Loading industries...</option>
+            ) : (
+              productOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
@@ -183,11 +231,15 @@ export default function SimpleSavingsCalculator() {
             onChange={(e) => setImportVolume(e.target.value)}
             className="form-select"
           >
-            {volumeOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            {!dropdownsLoaded ? (
+              <option disabled>Loading volumes...</option>
+            ) : (
+              volumeOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
@@ -199,11 +251,15 @@ export default function SimpleSavingsCalculator() {
             onChange={(e) => setOriginCountry(e.target.value)}
             className="form-select"
           >
-            {countryOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            {!dropdownsLoaded ? (
+              <option disabled>Loading countries...</option>
+            ) : (
+              countryOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))
+            )}
           </select>
         </div>
       </div>

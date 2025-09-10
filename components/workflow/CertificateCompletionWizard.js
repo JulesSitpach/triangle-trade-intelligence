@@ -7,79 +7,43 @@
 import React, { useState, useEffect } from 'react';
 // Custom SVG icons to avoid lucide-react ESM import issues
 const ChevronRight = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="9,18 15,12 9,6"/>
-  </svg>
+  <span className={className}>[chevron-right]</span>
 );
 
 const ChevronLeft = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="15,18 9,12 15,6"/>
-  </svg>
+  <span className={className}>[chevron-left]</span>
 );
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const AlertCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
+  <span className={className}>[alert]</span>
 );
 
 const FileText = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z"/>
-    <polyline points="14,2 14,8 20,8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <polyline points="10,9 9,9 8,9"/>
-  </svg>
+  <span className={className}>[document]</span>
 );
 
 const Building = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
-    <path d="M6 12h4v6h4v-6h4"/>
-  </svg>
+  <span className={className}>[building]</span>
 );
 
 const Package = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/>
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-    <polyline points="3.29,7 12,12 20.71,7"/>
-    <line x1="12" y1="22" x2="12" y2="12"/>
-  </svg>
+  <span className={className}>[package]</span>
 );
 
 const Route = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="6" cy="19" r="3"/>
-    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>
-    <circle cx="18" cy="5" r="3"/>
-  </svg>
+  <span className={className}>[route]</span>
 );
 
 const Signature = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/>
-    <path d="M6 8a2 2 0 1 1-4 0c0-1.1.9-2 2-2s2 .9 2 2"/>
-    <path d="M14 16a2 2 0 1 1-4 0c0-1.1.9-2 2-2s2 .9 2 2"/>
-  </svg>
+  <span className={className}>[signature]</span>
 );
 
 const Eye = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
+  <span className={className}>[view]</span>
 );
 import CompanyInfoStep from './CompanyInfoStep';
 import ProductDetailsStep from './ProductDetailsStep';
@@ -606,7 +570,7 @@ export default function CertificateCompletionWizard({
   };
 
   const renderStepIndicator = () => (
-    <div className="flex items-center justify-between mb-8">
+    <div className="dashboard-actions">
       {CERTIFICATE_STEPS.map((step, index) => {
         const isActive = index === currentStep;
         const isCompleted = stepValidation[step.id]?.isValid;
@@ -614,32 +578,32 @@ export default function CertificateCompletionWizard({
         const IconComponent = step.icon;
 
         return (
-          <div key={step.id} className="flex items-center">
-            <div className={`
-              flex items-center justify-center w-12 h-12 rounded-full border-2 
-              ${isActive ? 'border-blue-600 bg-blue-50' : ''}
-              ${isCompleted ? 'border-green-600 bg-green-50' : ''}
-              ${hasErrors ? 'border-red-600 bg-red-50' : ''}
-              ${!isActive && !isCompleted && !hasErrors ? 'border-gray-300 bg-white' : ''}
-            `}>
+          <div key={step.id} className="step-indicator-item">
+            <div className={`step-indicator-circle ${
+              isActive ? 'step-active' : ''
+            } ${
+              isCompleted ? 'step-completed' : ''
+            } ${
+              hasErrors ? 'step-error' : ''
+            }`}>
               {isCompleted ? (
-                <CheckCircle className="w-6 h-6 text-green-600" />
+                <CheckCircle className="icon-lg status-success" />
               ) : hasErrors ? (
-                <AlertCircle className="w-6 h-6 text-red-600" />
+                <AlertCircle className="icon-lg status-error" />
               ) : (
-                <IconComponent className={`w-6 h-6 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                <IconComponent className={`icon-lg ${isActive ? 'status-info' : 'text-muted'}`} />
               )}
             </div>
             
-            <div className={`ml-3 ${index < CERTIFICATE_STEPS.length - 1 ? 'flex-1' : ''}`}>
-              <p className={`text-sm font-medium ${isActive ? 'text-blue-900' : 'text-gray-900'}`}>
+            <div className="step-indicator-content">
+              <p className={`step-title ${isActive ? 'step-title-active' : ''}`}>
                 {step.title}
               </p>
-              <p className="text-xs text-gray-500">{step.description}</p>
+              <p className="step-description">{step.description}</p>
             </div>
             
             {index < CERTIFICATE_STEPS.length - 1 && (
-              <ChevronRight className="w-5 h-5 text-gray-300 mx-4" />
+              <ChevronRight className="icon-md text-muted" />
             )}
           </div>
         );
@@ -654,14 +618,14 @@ export default function CertificateCompletionWizard({
     switch (step.id) {
       case 'company_info':
         return <CompanyInfoStep 
-          data={certificateData.company_info} 
+          data={certificateData.company_info || {}} 
           onChange={(data) => updateCertificateData('company_info', data)}
           validation={validation}
         />;
       
       case 'product_details':
         return <ProductDetailsStep 
-          data={certificateData.product_details}
+          data={certificateData.product_details || {}}
           productInfo={certificateData.product}
           onChange={(data) => updateCertificateData('product_details', data)}
           validation={validation}
@@ -669,14 +633,14 @@ export default function CertificateCompletionWizard({
       
       case 'supply_chain':
         return <SupplyChainStep 
-          data={certificateData.supply_chain}
+          data={certificateData.supply_chain || {}}
           onChange={(data) => updateCertificateData('supply_chain', data)}
           validation={validation}
         />;
       
       case 'authorization':
         return <AuthorizationStep 
-          data={certificateData.authorization}
+          data={certificateData.authorization || {}}
           onChange={(data) => updateCertificateData('authorization', data)}
           validation={validation}
         />;
@@ -702,7 +666,7 @@ export default function CertificateCompletionWizard({
         <button
           onClick={prevStep}
           disabled={currentStep === 0}
-          className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center px-4 py-2 btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Previous
@@ -711,7 +675,7 @@ export default function CertificateCompletionWizard({
         <div className="flex space-x-3">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            className="px-4 py-2 btn-secondary"
           >
             Cancel
           </button>
@@ -744,7 +708,7 @@ export default function CertificateCompletionWizard({
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <div className="mb-6">
         <h2 className="section-title">USMCA Certificate Completion</h2>
-        <p className="text-gray-600">Complete all required information to generate your professional USMCA Certificate of Origin</p>
+        <p className="text-body">Complete all required information to generate your professional USMCA Certificate of Origin</p>
       </div>
 
       {renderStepIndicator()}
@@ -796,12 +760,12 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
       </div>
 
       {/* Signatory Information */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Authorized Signatory Information</h3>
+      <div className="card">
+        <h3 className="section-title mb-4">Authorized Signatory Information</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="form-label">
               Signatory Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -809,12 +773,12 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
               value={data.signatory_name || ''}
               onChange={(e) => handleSignatoryChange('signatory_name', e.target.value)}
               placeholder="Full name of authorized person"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+              className="form-input"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="form-label">
               Title/Position <span className="text-red-500">*</span>
             </label>
             <input
@@ -822,32 +786,32 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
               value={data.signatory_title || ''}
               onChange={(e) => handleSignatoryChange('signatory_title', e.target.value)}
               placeholder="e.g., Export Manager, President"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500"
+              className="form-input"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="form-label">
             Date of Signature
           </label>
           <input
             type="date"
             value={data.signatory_date || ''}
             onChange={(e) => handleSignatoryChange('signatory_date', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:border-blue-500 max-w-xs"
+            className="form-input max-w-xs"
           />
         </div>
       </div>
 
       {/* Digital Signature Section */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Digital Signature</h3>
+      <div className="card">
+        <h3 className="section-title mb-4">Digital Signature</h3>
         
         {!signatureDrawn ? (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <Signature className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">Digital signature required to validate this certificate</p>
+          <div className="form-help">
+            <Signature className="icon-lg mx-auto mb-4" />
+            <p className="text-body mb-4">Digital signature required to validate this certificate</p>
             <button
               onClick={handleDigitalSignature}
               disabled={!data.signatory_name || !data.signatory_title}
@@ -873,8 +837,8 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
       </div>
 
       {/* Legal Declaration */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Legal Declaration</h3>
+      <div className="card">
+        <h3 className="section-title mb-4">Legal Declaration</h3>
         
         {!showDeclaration ? (
           <button
@@ -885,8 +849,8 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
           </button>
         ) : (
           <div className="space-y-4">
-            <div className="bg-gray-50 border border-gray-200 rounded p-4 text-sm text-gray-700 max-h-64 overflow-y-auto">
-              <h4 className="font-medium text-gray-900 mb-2">USMCA Certificate of Origin Declaration</h4>
+            <div className="form-help max-h-64 overflow-y-auto">
+              <h4 className="card-title mb-2">USMCA Certificate of Origin Declaration</h4>
               <p className="mb-3">
                 I certify that the information on this document is true and accurate and I assume the responsibility for proving such representations. I understand that I am liable for any false statements or material omissions made on or in connection with this document.
               </p>
@@ -909,7 +873,7 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
                 onChange={(e) => handleDeclarationAccept(e.target.checked)}
                 className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="declaration-accept" className="text-sm text-gray-700">
+              <label htmlFor="declaration-accept" className="text-body">
                 <span className="font-medium">I accept this declaration</span> and certify that all information provided is true and accurate. I understand the legal responsibilities associated with signing this USMCA Certificate of Origin.
               </label>
             </div>
@@ -917,7 +881,7 @@ const AuthorizationStep = ({ data, onChange, validation }) => {
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowDeclaration(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                className="btn-secondary"
               >
                 Close Declaration
               </button>
@@ -1003,8 +967,8 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
       {/* Certificate Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Exporter Information */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+        <div className="card-compact">
+          <h4 className="card-title mb-3 flex items-center">
             <Building className="w-4 h-4 mr-2 text-blue-600" />
             Exporter Information
           </h4>
@@ -1016,8 +980,8 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
         </div>
 
         {/* Product Information */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+        <div className="card-compact">
+          <h4 className="card-title mb-3 flex items-center">
             <Package className="w-4 h-4 mr-2 text-blue-600" />
             Product Information
           </h4>
@@ -1029,8 +993,8 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
         </div>
 
         {/* Origin Information */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+        <div className="card-compact">
+          <h4 className="card-title mb-3 flex items-center">
             <Route className="w-4 h-4 mr-2 text-blue-600" />
             Origin Information
           </h4>
@@ -1042,8 +1006,8 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
         </div>
 
         {/* Authorization */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+        <div className="card-compact">
+          <h4 className="card-title mb-3 flex items-center">
             <Signature className="w-4 h-4 mr-2 text-blue-600" />
             Authorization
           </h4>
@@ -1057,12 +1021,12 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
       </div>
 
       {/* Component Origins Detail */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium text-gray-900 mb-3">Component Origins Breakdown</h4>
+      <div className="card-compact">
+        <h4 className="card-title mb-3">Component Origins Breakdown</h4>
         <div className="space-y-2">
           {certificatePreview.origin.components.map((component, index) => (
             <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <div className="flex-1">
+              <div className="content-card">
                 <span className="font-medium">{component.origin_country}:</span> {component.description}
               </div>
               <div className="text-right">
@@ -1074,9 +1038,9 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
       </div>
 
       {/* Certificate Preview Toggle */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="card-compact">
         <div className="flex justify-between items-center mb-3">
-          <h4 className="font-medium text-gray-900">Certificate Preview</h4>
+          <h4 className="card-title">Certificate Preview</h4>
           <button
             onClick={() => setShowPreview(!showPreview)}
             className="text-blue-600 hover:text-blue-800 font-medium text-sm"
@@ -1086,11 +1050,11 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
         </div>
         
         {showPreview && (
-          <div className="bg-gray-50 border border-gray-200 rounded p-4 text-xs font-mono max-h-64 overflow-y-auto">
+          <div className="form-help max-h-64 overflow-y-auto">
             <div className="text-center mb-4">
               <div className="font-bold text-sm">UNITED STATES-MEXICO-CANADA AGREEMENT</div>
               <div className="font-bold text-sm">CERTIFICATE OF ORIGIN</div>
-              <div className="text-xs text-gray-600">Generated: {new Date().toLocaleDateString()}</div>
+              <div className="text-xs text-body">Generated: {new Date().toLocaleDateString()}</div>
             </div>
             
             <div className="grid grid-cols-1 gap-4">
@@ -1157,7 +1121,7 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
             </button>
           </div>
           
-          <div className="mt-4 text-xs text-gray-600">
+          <div className="mt-4 text-xs text-body">
             <p>Generated certificate will include digital signature and timestamp for authenticity.</p>
             <p>Certificate will be available in PDF format for official submission.</p>
           </div>
@@ -1169,8 +1133,8 @@ const ReviewGenerateStep = ({ certificateData, onGenerate, isGenerating }) => {
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Generating Certificate</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="section-title mb-2">Generating Certificate</h3>
+              <p className="text-sm text-body">
                 Creating your professional USMCA Certificate of Origin with digital signature...
               </p>
             </div>

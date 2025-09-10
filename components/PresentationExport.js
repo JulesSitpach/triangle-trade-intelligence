@@ -238,36 +238,36 @@ export default function PresentationExport({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Export Presentation</h3>
+    <div className="container-app" style={{background: 'white', border: '1px solid #e8e9ea', borderRadius: '0.75rem', padding: '1.5rem'}}>
+      <h3 className="section-title">Export Presentation</h3>
       
       {/* Export progress */}
       {isExporting && (
         <div className="mb-4">
-          <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <div style={{display: 'flex', justifyContent: 'space-between', color: '#6a6b6c', marginBottom: '0.5rem'}}>
             <span>Generating export...</span>
             <span>{exportProgress}%</span>
           </div>
-          <div className="w-full bg-warm-gray-200 rounded-full h-2">
-            <div className="progress-bar" data-progress={exportProgress} />
+          <div style={{width: '100%', background: '#cccdce', borderRadius: '9999px', height: '0.5rem'}}>
+            <div style={{height: '100%', background: 'var(--blue-500)', borderRadius: '9999px', width: `${exportProgress}%`, transition: 'width 0.3s ease'}} />
           </div>
         </div>
       )}
 
       {/* Export options */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem'}}>
         
         {/* PDF Slides Export */}
         <button
           onClick={exportAsPDFSlides}
           disabled={isExporting}
-          className="flex items-center justify-center p-4 border border-warm-gray-300 rounded-lg hover:bg-navy-50 
-                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-secondary"
+          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', opacity: isExporting ? 0.5 : 1, cursor: isExporting ? 'not-allowed' : 'pointer'}}
         >
-          <Presentation className="w-6 h-6 text-navy-600 mr-3" />
-          <div className="text-left">
-            <div className="font-medium">PDF Slides</div>
-            <div className="text-sm text-warm-gray-600">Presentation format</div>
+          <Presentation style={{width: '1.5rem', height: '1.5rem', color: 'var(--navy-600)', marginRight: '0.75rem'}} />
+          <div style={{textAlign: 'left'}}>
+            <div style={{fontWeight: 500}}>PDF Slides</div>
+            <div style={{fontSize: '0.875rem', color: 'var(--gray-600)'}}>Presentation format</div>
           </div>
         </button>
 
@@ -275,13 +275,13 @@ export default function PresentationExport({
         <button
           onClick={exportAsPDFDocument}
           disabled={isExporting}
-          className="flex items-center justify-center p-4 border border-warm-gray-300 rounded-lg hover:bg-sage-50 
-                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-secondary"
+          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', opacity: isExporting ? 0.5 : 1, cursor: isExporting ? 'not-allowed' : 'pointer'}}
         >
-          <FileText className="w-6 h-6 text-sage-600 mr-3" />
-          <div className="text-left">
-            <div className="font-medium">PDF Document</div>
-            <div className="text-sm text-warm-gray-600">Report format</div>
+          <FileText style={{width: '1.5rem', height: '1.5rem', color: 'var(--green-600)', marginRight: '0.75rem'}} />
+          <div style={{textAlign: 'left'}}>
+            <div style={{fontWeight: 500}}>PDF Document</div>
+            <div style={{fontSize: '0.875rem', color: 'var(--gray-600)'}}>Report format</div>
           </div>
         </button>
 
@@ -289,13 +289,13 @@ export default function PresentationExport({
         <button
           onClick={exportAsPowerPointOutline}
           disabled={isExporting}
-          className="flex items-center justify-center p-4 border border-warm-gray-300 rounded-lg hover:bg-amber-50 
+          className="btn-secondary 
                    disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Download className="w-6 h-6 text-amber-600 mr-3" />
-          <div className="text-left">
-            <div className="font-medium">PowerPoint Outline</div>
-            <div className="text-sm text-warm-gray-600">Text structure</div>
+          <Download style={{width: '1.5rem', height: '1.5rem', color: 'var(--amber-600)', marginRight: '0.75rem'}} />
+          <div style={{textAlign: 'left'}}>
+            <div style={{fontWeight: 500}}>PowerPoint Outline</div>
+            <div style={{fontSize: '0.875rem', color: 'var(--gray-600)'}}>Text structure</div>
           </div>
         </button>
 
@@ -303,21 +303,21 @@ export default function PresentationExport({
         <button
           onClick={generateEmailSummary}
           disabled={isExporting}
-          className="flex items-center justify-center p-4 border border-warm-gray-300 rounded-lg hover:bg-teal-50 
-                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-secondary"
+          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', opacity: isExporting ? 0.5 : 1, cursor: isExporting ? 'not-allowed' : 'pointer'}}
         >
-          <Mail className="w-6 h-6 text-teal-600 mr-3" />
-          <div className="text-left">
-            <div className="font-medium">Email Summary</div>
-            <div className="text-sm text-warm-gray-600">2-page overview</div>
+          <Mail style={{width: '1.5rem', height: '1.5rem', color: 'var(--blue-600)', marginRight: '0.75rem'}} />
+          <div style={{textAlign: 'left'}}>
+            <div style={{fontWeight: 500}}>Email Summary</div>
+            <div style={{fontSize: '0.875rem', color: 'var(--gray-600)'}}>2-page overview</div>
           </div>
         </button>
 
       </div>
 
       {/* Export instructions */}
-      <div className="mt-4 p-3 bg-sage-50 border border-sage-200 rounded text-sm">
-        <p className="text-sage-800">
+      <div style={{marginTop: '1rem', padding: '0.75rem', background: 'var(--green-50)', border: '1px solid var(--green-200)', borderRadius: 'var(--radius-base)', fontSize: '0.875rem'}}>
+        <p style={{color: 'var(--green-700)'}}>
           <strong>Export Tips:</strong> PDF slides are best for presentations. 
           PDF document format works well for detailed reviews. 
           PowerPoint outline provides structured content for custom slides.

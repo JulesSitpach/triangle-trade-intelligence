@@ -1,0 +1,2841 @@
+{
+  "auditId": "quick_1757371153222",
+  "timestamp": "2025-09-08T22:48:47.874Z",
+  "executionTime": 574651,
+  "toolsExecuted": [
+    "READ",
+    "GLOB",
+    "GREP",
+    "BASH"
+  ],
+  "results": {
+    "filesAnalyzed": 71,
+    "patternsSearched": 16,
+    "commandsExecuted": 12,
+    "totalEvidence": 9
+  },
+  "comprehensiveAnalysis": {
+    "systemArchitecture": {
+      "totalFiles": 31534,
+      "sourceCodeFiles": 27735,
+      "apiEndpoints": 3,
+      "businessLogicFiles": 10,
+      "configurationFiles": 3
+    },
+    "businessCapabilities": {
+      "usmcaCompliance": 0,
+      "tariffCalculations": 0,
+      "hsClassification": 0,
+      "savingsCalculations": 0
+    },
+    "technicalHealth": {
+      "buildSuccess": false,
+      "testExecution": false,
+      "apiConnectivity": 0,
+      "securityAudit": false
+    },
+    "implementationQuality": {
+      "errorHandling": 0,
+      "databaseIntegrations": 0,
+      "securityMeasures": 0,
+      "codeComplexity": {
+        "high": 6,
+        "medium": 3,
+        "low": 4,
+        "total": 13
+      }
+    },
+    "evidenceIntegrity": {
+      "toolsExecuted": 4,
+      "evidenceFilesGenerated": 9,
+      "persistentStateManaged": true,
+      "methodologyViolations": [
+        {
+          "type": "HIGH_BASH_FAILURE_RATE",
+          "severity": "MEDIUM",
+          "description": "More than 30% of bash commands failed"
+        },
+        {
+          "type": "NO_PATTERN_MATCHES",
+          "severity": "HIGH",
+          "description": "No patterns found in codebase analysis"
+        }
+      ]
+    }
+  },
+  "evidenceDirectory": "D:\\bacjup\\triangle-simple\\mcp-evidence\\quick_1757371153222",
+  "persistentState": {
+    "auditId": "quick_1757371153222",
+    "discoveryCache": {
+      "package.json": {
+        "filePath": "package.json",
+        "lineCount": 131,
+        "size": 5908,
+        "lastModified": "2025-09-08T22:38:56.752Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff"
+        ],
+        "complexity": "medium"
+      },
+      "next.config.js": {
+        "filePath": "next.config.js",
+        "lineCount": 5,
+        "size": 90,
+        "lastModified": "2025-09-04T20:33:24.598Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [],
+        "complexity": "low"
+      },
+      "lib/core/simple-usmca-classifier.js": {
+        "filePath": "lib/core/simple-usmca-classifier.js",
+        "lineCount": 172,
+        "size": 6114,
+        "lastModified": "2025-09-08T16:30:41.090Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "@supabase/supabase-js",
+          "../services/cascaded-tariff-service.js"
+        ],
+        "exports": [
+          "usmcaClassifier"
+        ],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "lib/classification/intelligent-hs-classifier.js": {
+        "filePath": "lib/classification/intelligent-hs-classifier.js",
+        "lineCount": 998,
+        "size": 34719,
+        "lastModified": "2025-09-08T21:15:17.620Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "../database/supabase-client.js",
+          "../utils/production-logger.js"
+        ],
+        "exports": [
+          "IntelligentHSClassifier",
+          "intelligentHSClassifier",
+          "async"
+        ],
+        "functions": [
+          "highConfidenceResults",
+          "keyTerms",
+          "and",
+          "phraseWords",
+          "overlap",
+          "overlap",
+          "descMatchOverlap",
+          "baseMatchOverlap",
+          "keywordMatches",
+          "overlap",
+          "for",
+          "performIntelligentClassification"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification"
+        ],
+        "complexity": "high"
+      },
+      "lib/services/trump-tariff-monitor-service.js": {
+        "filePath": "lib/services/trump-tariff-monitor-service.js",
+        "lineCount": 824,
+        "size": 27130,
+        "lastModified": "2025-09-08T19:23:36.303Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "../database/supabase-client.js",
+          "../../config/system-config.js",
+          "./data-provenance-service.js",
+          "../utils/production-logger.js"
+        ],
+        "exports": [
+          "TrumpTariffMonitorService"
+        ],
+        "functions": [
+          "formatCurrency",
+          "formatPercent",
+          "isUrgent",
+          "recentEvents",
+          "isTradeRelated"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "compliance"
+        ],
+        "complexity": "high"
+      },
+      "pages/api/simple-usmca-compliance.js": {
+        "filePath": "pages/api/simple-usmca-compliance.js",
+        "lineCount": 451,
+        "size": 14532,
+        "lastModified": "2025-09-08T22:02:32.995Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "../../lib/core/simple-usmca-classifier.js",
+          "../../lib/utils/hs-code-normalizer.js",
+          "@supabase/supabase-js"
+        ],
+        "exports": [
+          "async"
+        ],
+        "functions": [
+          "normalizeParameters",
+          "getRealTariffData",
+          "avgMfnRate",
+          "avgUsmcaRate",
+          "handler",
+          "handleProductClassification",
+          "handleUSMCAQualification",
+          "handleSavingsCalculation",
+          "handleCertificateGeneration",
+          "handleCompleteWorkflow"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "pages/api/simple-savings.js": {
+        "filePath": "pages/api/simple-savings.js",
+        "lineCount": 576,
+        "size": 21206,
+        "lastModified": "2025-09-08T17:32:51.326Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "@supabase/supabase-js"
+        ],
+        "exports": [
+          "async"
+        ],
+        "functions": [
+          "generateSystemResponse",
+          "normalizeHSCode",
+          "lookupTariffWithFallback",
+          "generateFallbackCodes",
+          "getTariffRatesFromDatabase",
+          "avgMfnRate",
+          "avgUsmcaRate",
+          "calculateRealTariffSavings",
+          "normalizeParameters",
+          "handler",
+          "getImplementationComplexity"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "high"
+      },
+      "pages/api/system-status.js": {
+        "filePath": "pages/api/system-status.js",
+        "lineCount": 164,
+        "size": 6456,
+        "lastModified": "2025-09-08T22:05:11.969Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "@supabase/supabase-js"
+        ],
+        "exports": [
+          "async"
+        ],
+        "functions": [
+          "handler"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "config/system-config.js": {
+        "filePath": "config/system-config.js",
+        "lineCount": 523,
+        "size": 21465,
+        "lastModified": "2025-09-05T14:11:26.037Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "./table-constants.js"
+        ],
+        "exports": [
+          "SYSTEM_CONFIG",
+          "TABLE_CONFIG",
+          "EXTERNAL_SERVICES",
+          "MESSAGES",
+          "AI_PROMPTS",
+          "VALIDATION_RULES",
+          "async",
+          "default"
+        ],
+        "functions": [
+          "getEnvValue",
+          "fetches",
+          "getDynamicConfig"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "config/table-constants.js": {
+        "filePath": "config/table-constants.js",
+        "lineCount": 17,
+        "size": 582,
+        "lastModified": "2025-09-01T03:01:20.034Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [
+          "VERIFIED_TABLE_CONFIG",
+          "TABLE_CONFIG"
+        ],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff"
+        ],
+        "complexity": "low"
+      },
+      "config/trust-config.js": {
+        "filePath": "config/trust-config.js",
+        "lineCount": 328,
+        "size": 16232,
+        "lastModified": "2025-09-05T16:10:25.432Z",
+        "patterns": {
+          "hasDatabase": true,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "./system-config.js"
+        ],
+        "exports": [
+          "TRUST_CONFIG",
+          "TRUST_TABLE_CONFIG",
+          "TRUST_VALIDATION_RULES",
+          "TRUST_MESSAGES",
+          "TRUST_ENDPOINTS",
+          "TRUST_CACHE_CONFIG",
+          "TRUST_PERFORMANCE_CONFIG",
+          "async",
+          "async",
+          "default"
+        ],
+        "functions": [
+          "getTrustEnvValue",
+          "getDynamicTrustConfig",
+          "getTrustIndicators"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "classification",
+          "savings"
+        ],
+        "complexity": "medium"
+      },
+      "components/AIAnalysis.js": {
+        "filePath": "components/AIAnalysis.js",
+        "lineCount": 235,
+        "size": 8075,
+        "lastModified": "2025-09-05T16:20:39.104Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "lucide-react"
+        ],
+        "exports": [
+          "AIAnalysis"
+        ],
+        "functions": [
+          "handleHSCodeSelect",
+          "handleClarifyingOptionSelect",
+          "handleCategorySelect",
+          "getConfidenceColor",
+          "renderClarifyingQuestion",
+          "renderSpecificCode",
+          "renderRegularSuggestion",
+          "renderSuggestion"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "savings",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "components/CategorySelector.js": {
+        "filePath": "components/CategorySelector.js",
+        "lineCount": 129,
+        "size": 4288,
+        "lastModified": "2025-09-05T16:15:06.191Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "lucide-react"
+        ],
+        "exports": [
+          "CategorySelector"
+        ],
+        "functions": [
+          "handleSelectChange",
+          "hasDynamicHSCodes",
+          "hasAIError"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "classification"
+        ],
+        "complexity": "medium"
+      },
+      "components/crisis/PartnerSolutions.js": {
+        "filePath": "components/crisis/PartnerSolutions.js",
+        "lineCount": 473,
+        "size": 17354,
+        "lastModified": "2025-09-01T21:51:48.496Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "PartnerSolutions"
+        ],
+        "functions": [
+          "CheckCircle",
+          "Users",
+          "MapPin",
+          "Clock",
+          "DollarSign",
+          "Phone",
+          "ChevronDown",
+          "ChevronUp",
+          "PartnerSolutions",
+          "loadSuppliersForHSCode",
+          "requestIntroduction",
+          "formatCurrency",
+          "getAccessLevel",
+          "SupplierCard",
+          "formatBenefit"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings"
+        ],
+        "complexity": "medium"
+      },
+      "components/CrisisAlertBanner.js": {
+        "filePath": "components/CrisisAlertBanner.js",
+        "lineCount": 343,
+        "size": 12730,
+        "lastModified": "2025-09-02T03:54:04.552Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "CrisisAlertBanner"
+        ],
+        "functions": [
+          "AlertCircle",
+          "DollarSign",
+          "Clock",
+          "Shield",
+          "X",
+          "TrendingUp",
+          "AlertTriangle",
+          "CrisisAlertBanner",
+          "loadCrisisAlerts",
+          "crisisAlerts",
+          "handleDismiss",
+          "formatCurrency",
+          "getAlertStyles",
+          "getAlertIcon",
+          "mostCriticalAlert"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings"
+        ],
+        "complexity": "medium"
+      },
+      "components/CrisisTariffAlertsPage.js": {
+        "filePath": "components/CrisisTariffAlertsPage.js",
+        "lineCount": 864,
+        "size": 32980,
+        "lastModified": "2025-09-05T16:22:24.126Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "CrisisTariffAlertsPage"
+        ],
+        "functions": [
+          "AlertCircle",
+          "Clock",
+          "DollarSign",
+          "TrendingUp",
+          "Bell",
+          "Settings",
+          "RefreshCw",
+          "Shield",
+          "Award",
+          "getDefaultCrisisRate",
+          "getDefaultCrisisMessages",
+          "getDefaultCompanyName",
+          "getDefaultBusinessType",
+          "getDefaultSupplierCountry",
+          "getDefaultTradeVolume",
+          "getDefaultProductDescription",
+          "getDefaultHSCode",
+          "getDynamicHeroTitle",
+          "getDynamicHeroSubtitle",
+          "getDynamicVolatilityWarning",
+          "getDefaultCrisisAmount",
+          "useCrisisServices",
+          "loadCrisisServices",
+          "CrisisTariffAlertsPage",
+          "loadDynamicDefaults",
+          "loadDynamicMessages",
+          "loadAlertsData",
+          "loadCalculatorData",
+          "handleRefresh",
+          "markAsRead",
+          "formatCurrency",
+          "formatDate",
+          "getSeverityColor",
+          "getSeverityIcon"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/CrisisTariffAlertsPageSimple.js": {
+        "filePath": "components/CrisisTariffAlertsPageSimple.js",
+        "lineCount": 29,
+        "size": 681,
+        "lastModified": "2025-09-02T16:17:39.193Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "CrisisTariffAlertsPageSimple"
+        ],
+        "functions": [
+          "CrisisTariffAlertsPageSimple",
+          "timer"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "tariff"
+        ],
+        "complexity": "low"
+      },
+      "components/DynamicRSSAlerts.js": {
+        "filePath": "components/DynamicRSSAlerts.js",
+        "lineCount": 391,
+        "size": 15367,
+        "lastModified": "2025-09-01T14:56:39.573Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "DynamicRSSAlerts"
+        ],
+        "functions": [
+          "AlertTriangle",
+          "ExternalLink",
+          "Clock",
+          "Flag",
+          "TrendingUp",
+          "RefreshCw",
+          "DynamicRSSAlerts",
+          "fetchAlerts",
+          "formatDate",
+          "getSeverityStyle",
+          "getAlertTypeInfo"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification"
+        ],
+        "complexity": "medium"
+      },
+      "components/EmailTemplateGenerator.js": {
+        "filePath": "components/EmailTemplateGenerator.js",
+        "lineCount": 893,
+        "size": 36788,
+        "lastModified": "2025-09-02T02:58:43.749Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "lucide-react"
+        ],
+        "exports": [
+          "EmailTemplateGenerator",
+          "provided"
+        ],
+        "functions": [
+          "EmailTemplateGenerator",
+          "generateEmailContent",
+          "generateExecutiveSummaryEmail",
+          "generatePostDemoEmail",
+          "generateROIAnalysisEmail",
+          "generateCrisisResponseEmail",
+          "generateProposalEmail",
+          "generateCheckInEmail",
+          "handleFieldChange",
+          "copyToClipboard",
+          "downloadEmail"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/GuidedProductInput.js": {
+        "filePath": "components/GuidedProductInput.js",
+        "lineCount": 793,
+        "size": 34993,
+        "lastModified": "2025-08-30T18:48:18.160Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "lucide-react",
+          "../config/safe-config.js"
+        ],
+        "exports": [
+          "GuidedProductInput"
+        ],
+        "functions": [
+          "GuidedProductInput",
+          "loadCategories",
+          "getDynamicHSCodes",
+          "specificCodes",
+          "for",
+          "analyzeProductDescription",
+          "generateFollowUpQuestion",
+          "options",
+          "generateFallbackError",
+          "handleCategoryChange",
+          "handleClarifyingOptionSelection",
+          "specificCodes",
+          "handleHSCodeSelection",
+          "for",
+          "analyzeProductDescriptionWithCategory",
+          "handleUserHSCodeSubmit",
+          "triggerCompleteUSMCAWorkflow"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/GuidedProductInputRefactored.js": {
+        "filePath": "components/GuidedProductInputRefactored.js",
+        "lineCount": 298,
+        "size": 9983,
+        "lastModified": "2025-08-29T22:17:47.758Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../hooks/useGuidedProductState",
+          "../hooks/useProductClassification",
+          "../hooks/useProductCategories",
+          "./HSCodeEntry",
+          "./ProductInput",
+          "./AIAnalysis",
+          "./CategorySelector"
+        ],
+        "exports": [
+          "GuidedProductInputRefactored"
+        ],
+        "functions": [
+          "handleInputChange",
+          "handleCategorySelection",
+          "handleHSCodeSubmit",
+          "handleHSCodeSelection",
+          "handleClarifyingOptionSelection",
+          "handleError"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification"
+        ],
+        "complexity": "medium"
+      },
+      "components/HSCodeEntry.js": {
+        "filePath": "components/HSCodeEntry.js",
+        "lineCount": 159,
+        "size": 5694,
+        "lastModified": "2025-08-29T16:11:19.733Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "lucide-react",
+          "../config/classificationConfig",
+          "../lib/utils/a11yUtils"
+        ],
+        "exports": [
+          "HSCodeEntry"
+        ],
+        "functions": [
+          "handleSubmit",
+          "handleKeyPress",
+          "handleInputChange"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "certificate"
+        ],
+        "complexity": "low"
+      },
+      "components/Icons.js": {
+        "filePath": "components/Icons.js",
+        "lineCount": 81,
+        "size": 3472,
+        "lastModified": "2025-09-05T04:16:06.745Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "Users",
+          "DollarSign",
+          "TrendingUp",
+          "Phone",
+          "Mail",
+          "Calendar",
+          "Package",
+          "Shield",
+          "CheckCircle",
+          "XCircle"
+        ],
+        "functions": [
+          "Users",
+          "DollarSign",
+          "TrendingUp",
+          "Phone",
+          "Mail",
+          "Calendar",
+          "Package",
+          "Shield",
+          "CheckCircle",
+          "XCircle"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [],
+        "complexity": "low"
+      },
+      "components/PresentationExport.js": {
+        "filePath": "components/PresentationExport.js",
+        "lineCount": 511,
+        "size": 16945,
+        "lastModified": "2025-09-02T15:32:55.593Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "lucide-react",
+          "jspdf"
+        ],
+        "exports": [
+          "formats",
+          "formats",
+          "PresentationExport",
+          "failed",
+          "failed"
+        ],
+        "functions": [
+          "PresentationExport",
+          "exportAsPDFSlides",
+          "exportAsPDFDocument",
+          "exportAsPowerPointOutline",
+          "generateEmailSummary",
+          "addTitlePage",
+          "addSlidePage",
+          "addContactPage",
+          "addDocumentHeader",
+          "addExecutiveSummary",
+          "addCaseStudiesSection",
+          "addPricingSection",
+          "addNextStepsSection"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "high"
+      },
+      "components/ProductInput.js": {
+        "filePath": "components/ProductInput.js",
+        "lineCount": 102,
+        "size": 3787,
+        "lastModified": "2025-08-29T16:06:43.273Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "lucide-react"
+        ],
+        "exports": [
+          "ProductInput"
+        ],
+        "functions": [
+          "handleChange"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "classification"
+        ],
+        "complexity": "low"
+      },
+      "components/RefactorTestPage.js": {
+        "filePath": "components/RefactorTestPage.js",
+        "lineCount": 95,
+        "size": 3849,
+        "lastModified": "2025-09-02T16:17:47.696Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "./GuidedProductInputRefactored"
+        ],
+        "exports": [
+          "RefactorTestPage"
+        ],
+        "functions": [
+          "RefactorTestPage",
+          "handleProductChange",
+          "handleCategoryChange"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [],
+        "complexity": "low"
+      },
+      "components/SalesPresentation.js": {
+        "filePath": "components/SalesPresentation.js",
+        "lineCount": 415,
+        "size": 14050,
+        "lastModified": "2025-09-02T16:20:02.525Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "SalesPresentation"
+        ],
+        "functions": [
+          "SalesPresentation",
+          "loadPresentationData",
+          "nextSlide",
+          "prevSlide",
+          "goToSlide",
+          "handleKeyPress",
+          "SlideRenderer",
+          "getSlideIcon",
+          "renderSlideContent",
+          "getSlideIconColor"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "savings"
+        ],
+        "complexity": "medium"
+      },
+      "components/SimpleSavingsCalculator.js": {
+        "filePath": "components/SimpleSavingsCalculator.js",
+        "lineCount": 395,
+        "size": 15265,
+        "lastModified": "2025-09-02T23:38:31.561Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "SimpleSavingsCalculator"
+        ],
+        "functions": [
+          "SimpleSavingsCalculator",
+          "calculateSavings",
+          "formatCurrency",
+          "handleLeadSubmit"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "medium"
+      },
+      "components/TriangleLayout.js": {
+        "filePath": "components/TriangleLayout.js",
+        "lineCount": 305,
+        "size": 10700,
+        "lastModified": "2025-09-07T16:13:24.726Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "next/link",
+          "next/router",
+          "../lib/contexts/AlertContext"
+        ],
+        "exports": [
+          "TriangleLayout"
+        ],
+        "functions": [
+          "TriangleLayout",
+          "handleClickOutside"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "compliance"
+        ],
+        "complexity": "medium"
+      },
+      "components/TrumpTariffAlertsPage.js": {
+        "filePath": "components/TrumpTariffAlertsPage.js",
+        "lineCount": 367,
+        "size": 15030,
+        "lastModified": "2025-09-02T16:11:59.193Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "lucide-react"
+        ],
+        "exports": [
+          "TrumpTariffAlertsPage"
+        ],
+        "functions": [
+          "TrumpTariffAlertsPage",
+          "loadAlertsData",
+          "loadMonitoringStatus",
+          "handleRefresh",
+          "markAsRead",
+          "formatCurrency",
+          "formatDate",
+          "getSeverityColor",
+          "getSeverityIcon"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "tariff"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/AlertsSubscriptionFlow.js": {
+        "filePath": "components/workflow/AlertsSubscriptionFlow.js",
+        "lineCount": 337,
+        "size": 13820,
+        "lastModified": "2025-09-02T16:19:54.577Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "AlertsSubscriptionFlow"
+        ],
+        "functions": [
+          "AlertTriangle",
+          "CreditCard",
+          "Shield",
+          "CheckIcon",
+          "AlertsSubscriptionFlow",
+          "formatCurrency",
+          "updateSubscriptionData",
+          "handleStartSubscription"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/CertificateCompletionWizard.js": {
+        "filePath": "components/workflow/CertificateCompletionWizard.js",
+        "lineCount": 1182,
+        "size": 53873,
+        "lastModified": "2025-09-02T16:12:17.228Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": true,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "./CompanyInfoStep",
+          "./ProductDetailsStep",
+          "./SupplyChainStep"
+        ],
+        "exports": [
+          "CertificateCompletionWizard"
+        ],
+        "functions": [
+          "ChevronRight",
+          "ChevronLeft",
+          "CheckCircle",
+          "AlertCircle",
+          "FileText",
+          "Building",
+          "Package",
+          "Route",
+          "Signature",
+          "Eye",
+          "CertificateCompletionWizard",
+          "validateCurrentStep",
+          "updateCertificateData",
+          "nextStep",
+          "prevStep",
+          "generateCertificate",
+          "missingFields",
+          "value",
+          "generateAndDownloadPDF",
+          "renderStepIndicator",
+          "renderStepContent",
+          "renderNavigationButtons",
+          "AuthorizationStep",
+          "handleSignatoryChange",
+          "handleDigitalSignature",
+          "handleDeclarationAccept",
+          "ReviewGenerateStep",
+          "formatCertificatePreview"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/CompanyInformationStep.js": {
+        "filePath": "components/workflow/CompanyInformationStep.js",
+        "lineCount": 266,
+        "size": 10382,
+        "lastModified": "2025-09-05T02:12:52.003Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../../config/system-config.js"
+        ],
+        "exports": [
+          "CompanyInformationStep"
+        ],
+        "functions": [
+          "Building",
+          "Briefcase",
+          "Globe",
+          "Target",
+          "TrendingUp",
+          "Shield",
+          "CompanyInformationStep",
+          "getCountryCode"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/CompanyInfoStep.js": {
+        "filePath": "components/workflow/CompanyInfoStep.js",
+        "lineCount": 342,
+        "size": 12262,
+        "lastModified": "2025-09-01T04:58:22.879Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": true,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "../../config/safe-config.js"
+        ],
+        "exports": [
+          "CompanyInfoStep"
+        ],
+        "functions": [
+          "Building",
+          "MapPin",
+          "Phone",
+          "Mail",
+          "CreditCard",
+          "AlertCircle",
+          "CheckCircle",
+          "Info",
+          "CompanyInfoStep",
+          "loadCountries",
+          "handleFieldChange",
+          "validateTaxId",
+          "renderFormSection",
+          "renderValidationMessage",
+          "error",
+          "renderInputField",
+          "hasError",
+          "renderCountrySelect",
+          "hasError"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/ComponentOriginsStepEnhanced.js": {
+        "filePath": "components/workflow/ComponentOriginsStepEnhanced.js",
+        "lineCount": 678,
+        "size": 28438,
+        "lastModified": "2025-09-08T18:18:31.690Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "../../lib/services/workflow-service.js"
+        ],
+        "exports": [
+          "ComponentOriginsStepEnhanced"
+        ],
+        "functions": [
+          "Search",
+          "Plus",
+          "X",
+          "Info",
+          "Check",
+          "ComponentOriginsStepEnhanced",
+          "updateComponent",
+          "captureUserHSCode",
+          "addComponent",
+          "removeComponent",
+          "getTotalPercentage",
+          "selectHSCode",
+          "isValid",
+          "allFieldsFilled",
+          "loadExample"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/CrisisCalculatorResults.js": {
+        "filePath": "components/workflow/CrisisCalculatorResults.js",
+        "lineCount": 373,
+        "size": 15743,
+        "lastModified": "2025-09-02T16:19:06.280Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react",
+          "./AlertsSubscriptionFlow"
+        ],
+        "exports": [
+          "CrisisCalculatorResults"
+        ],
+        "functions": [
+          "AlertTriangle",
+          "DollarSign",
+          "Shield",
+          "TrendingUp",
+          "CrisisCalculatorResults",
+          "calculateCrisisImpact",
+          "getTradeVolumeValue",
+          "saveToAlertsSystem",
+          "formatCurrency",
+          "handleViewAlertsClick",
+          "handleStartAlertsSubscription",
+          "handleSubscriptionComplete",
+          "handleSubscriptionCancel"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/ProductDetailsStep.js": {
+        "filePath": "components/workflow/ProductDetailsStep.js",
+        "lineCount": 455,
+        "size": 17216,
+        "lastModified": "2025-09-01T21:14:23.984Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "ProductDetailsStep"
+        ],
+        "functions": [
+          "Package",
+          "Search",
+          "CheckCircle",
+          "AlertCircle",
+          "Info",
+          "Shield",
+          "FileText",
+          "Eye",
+          "ProductDetailsStep",
+          "verifyHsCode",
+          "handleHsCodeChange",
+          "handleManualVerification",
+          "selectAlternativeHsCode",
+          "renderClassificationSummary",
+          "renderHsCodeField",
+          "renderProductDescription",
+          "renderCommercialDescription",
+          "renderTariffInformation",
+          "renderAlternativeHsCodes",
+          "renderVerificationSection"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/results/CertificateSection.js": {
+        "filePath": "components/workflow/results/CertificateSection.js",
+        "lineCount": 221,
+        "size": 9168,
+        "lastModified": "2025-09-01T02:04:30.755Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../CertificateCompletionWizard"
+        ],
+        "exports": [
+          "CertificateSection"
+        ],
+        "functions": [
+          "CertificateSection",
+          "handleWizardComplete",
+          "generatePDFCertificate"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/results/CompanyProfile.js": {
+        "filePath": "components/workflow/results/CompanyProfile.js",
+        "lineCount": 32,
+        "size": 1216,
+        "lastModified": "2025-08-29T17:40:38.256Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "CompanyProfile"
+        ],
+        "functions": [
+          "CompanyProfile"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [],
+        "complexity": "low"
+      },
+      "components/workflow/results/DataSourceAttribution.js": {
+        "filePath": "components/workflow/results/DataSourceAttribution.js",
+        "lineCount": 79,
+        "size": 3734,
+        "lastModified": "2025-08-31T19:04:55.199Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "DataSourceAttribution"
+        ],
+        "functions": [
+          "DataSourceAttribution"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/results/ProductClassification.js": {
+        "filePath": "components/workflow/results/ProductClassification.js",
+        "lineCount": 105,
+        "size": 4164,
+        "lastModified": "2025-09-05T20:55:33.675Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "ProductClassification"
+        ],
+        "functions": [
+          "ProductClassification",
+          "getConfidenceColor"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/results/RecommendedActions.js": {
+        "filePath": "components/workflow/results/RecommendedActions.js",
+        "lineCount": 57,
+        "size": 2396,
+        "lastModified": "2025-09-08T19:19:51.239Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "RecommendedActions"
+        ],
+        "functions": [
+          "RecommendedActions",
+          "mexicoPartnerStep"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "low"
+      },
+      "components/workflow/results/TariffSavings.js": {
+        "filePath": "components/workflow/results/TariffSavings.js",
+        "lineCount": 63,
+        "size": 2043,
+        "lastModified": "2025-09-05T04:14:48.580Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../../Icons"
+        ],
+        "exports": [
+          "TariffSavings"
+        ],
+        "functions": [
+          "TariffSavings"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings"
+        ],
+        "complexity": "low"
+      },
+      "components/workflow/results/USMCAQualification.js": {
+        "filePath": "components/workflow/results/USMCAQualification.js",
+        "lineCount": 56,
+        "size": 2128,
+        "lastModified": "2025-09-05T04:14:37.790Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../../Icons"
+        ],
+        "exports": [
+          "USMCAQualification"
+        ],
+        "functions": [
+          "USMCAQualification"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/SupplyChainStep.js": {
+        "filePath": "components/workflow/SupplyChainStep.js",
+        "lineCount": 524,
+        "size": 20276,
+        "lastModified": "2025-09-01T05:00:21.218Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "SupplyChainStep"
+        ],
+        "functions": [
+          "Route",
+          "Plus",
+          "Trash2",
+          "Calculator",
+          "CheckCircle",
+          "AlertCircle",
+          "Info",
+          "MapPin",
+          "Percent",
+          "Globe",
+          "SupplyChainStep",
+          "loadCountries",
+          "loadUsmcaThresholds",
+          "calculateRegionalContent",
+          "calculateUSMCAQualification",
+          "addComponentOrigin",
+          "removeComponentOrigin",
+          "updateComponentOrigin",
+          "updated",
+          "getTotalPercentage",
+          "getCountryFlag",
+          "renderComponentOriginForm",
+          "renderSupplyChainSummary",
+          "renderManufacturingLocation",
+          "renderQualificationResults",
+          "renderVerificationSection"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/USMCAWorkflowOrchestrator.js": {
+        "filePath": "components/workflow/USMCAWorkflowOrchestrator.js",
+        "lineCount": 290,
+        "size": 10372,
+        "lastModified": "2025-09-04T23:51:20.877Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": true,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "../../hooks/useWorkflowState",
+          "../../hooks/useTrustIndicators",
+          "../../lib/utils/trust-verified-certificate-formatter",
+          "./WorkflowProgress",
+          "./CompanyInformationStep",
+          "./ComponentOriginsStepEnhanced",
+          "./WorkflowResults",
+          "./WorkflowLoading",
+          "./WorkflowError",
+          "./CrisisCalculatorResults",
+          "./WorkflowPathSelection"
+        ],
+        "exports": [
+          "USMCAWorkflowOrchestrator"
+        ],
+        "functions": [
+          "USMCAWorkflowOrchestrator",
+          "handleDownloadCertificate",
+          "handleCertificateFormatSelection",
+          "handleDownloadSimpleCertificate",
+          "formatSimpleCertificateForDownload",
+          "handleRetryProcessing",
+          "handleViewAlertsFromCrisisCalc",
+          "handleUpgradeToCertificate",
+          "handleSelectFreeAnalysis",
+          "handleSelectAlertsSubscription",
+          "handleSelectCertificate"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "components/workflow/WorkflowError.js": {
+        "filePath": "components/workflow/WorkflowError.js",
+        "lineCount": 41,
+        "size": 1303,
+        "lastModified": "2025-08-29T17:42:09.690Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "WorkflowError"
+        ],
+        "functions": [
+          "WorkflowError"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "classification"
+        ],
+        "complexity": "low"
+      },
+      "components/workflow/WorkflowLoading.js": {
+        "filePath": "components/workflow/WorkflowLoading.js",
+        "lineCount": 25,
+        "size": 1049,
+        "lastModified": "2025-08-29T17:42:01.865Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "WorkflowLoading"
+        ],
+        "functions": [
+          "WorkflowLoading"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "low"
+      },
+      "components/workflow/WorkflowPathSelection.js": {
+        "filePath": "components/workflow/WorkflowPathSelection.js",
+        "lineCount": 255,
+        "size": 11370,
+        "lastModified": "2025-09-02T16:19:17.975Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "WorkflowPathSelection"
+        ],
+        "functions": [
+          "CalculatorIcon",
+          "AlertIcon",
+          "ShieldIcon",
+          "CheckIcon",
+          "WorkflowPathSelection",
+          "getTradeVolumeDisplay"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "components/workflow/WorkflowProgress.js": {
+        "filePath": "components/workflow/WorkflowProgress.js",
+        "lineCount": 67,
+        "size": 1932,
+        "lastModified": "2025-09-05T02:15:03.761Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react"
+        ],
+        "exports": [
+          "WorkflowProgress"
+        ],
+        "functions": [
+          "WorkflowProgress",
+          "handleStepClick",
+          "getStepStatus"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "certificate"
+        ],
+        "complexity": "low"
+      },
+      "components/workflow/WorkflowResults.js": {
+        "filePath": "components/workflow/WorkflowResults.js",
+        "lineCount": 121,
+        "size": 4394,
+        "lastModified": "2025-09-04T23:55:44.653Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": true,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": true,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [
+          "react",
+          "./results/CompanyProfile",
+          "./results/ProductClassification",
+          "./results/DataSourceAttribution",
+          "./results/USMCAQualification",
+          "./results/TariffSavings",
+          "./results/CertificateSection",
+          "./results/RecommendedActions"
+        ],
+        "exports": [
+          "WorkflowResults"
+        ],
+        "functions": [
+          "WorkflowResults",
+          "sendCertificateDataToAlerts"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./ADMIN_DATABASE_SCHEMA.sql": {
+        "filePath": "./ADMIN_DATABASE_SCHEMA.sql",
+        "lineCount": 489,
+        "size": 20514,
+        "lastModified": "2025-09-05T15:04:03.281Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "./data/government-sources/usitc-insert.sql": {
+        "filePath": "./data/government-sources/usitc-insert.sql",
+        "lineCount": 71,
+        "size": 1953,
+        "lastModified": "2025-08-30T15:09:58.613Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca"
+        ],
+        "complexity": "low"
+      },
+      "./data/import-hs-codes.sql": {
+        "filePath": "./data/import-hs-codes.sql",
+        "lineCount": 6971,
+        "size": 1191244,
+        "lastModified": "2025-08-28T23:55:32.601Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [
+          "and",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "but",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "amino",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "compounds",
+          "printing",
+          "printing",
+          "by",
+          "by",
+          "by"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "tariff",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "./disable_rls_for_testing.sql": {
+        "filePath": "./disable_rls_for_testing.sql",
+        "lineCount": 29,
+        "size": 1467,
+        "lastModified": "2025-09-05T15:13:36.797Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": false,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "certificate"
+        ],
+        "complexity": "low"
+      },
+      "./lib/database/01-create-tables.sql": {
+        "filePath": "./lib/database/01-create-tables.sql",
+        "lineCount": 116,
+        "size": 3143,
+        "lastModified": "2025-09-01T21:55:12.890Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "low"
+      },
+      "./lib/database/02-create-indexes.sql": {
+        "filePath": "./lib/database/02-create-indexes.sql",
+        "lineCount": 63,
+        "size": 2049,
+        "lastModified": "2025-09-01T21:55:26.537Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca"
+        ],
+        "complexity": "low"
+      },
+      "./lib/database/03-sample-data.sql": {
+        "filePath": "./lib/database/03-sample-data.sql",
+        "lineCount": 56,
+        "size": 1299,
+        "lastModified": "2025-09-01T21:55:37.937Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [
+          "works"
+        ],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca"
+        ],
+        "complexity": "low"
+      },
+      "./lib/database/company-profiles-schema.sql": {
+        "filePath": "./lib/database/company-profiles-schema.sql",
+        "lineCount": 133,
+        "size": 5006,
+        "lastModified": "2025-09-01T19:02:00.237Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification"
+        ],
+        "complexity": "low"
+      },
+      "./lib/database/crisis-pivot-schema.sql": {
+        "filePath": "./lib/database/crisis-pivot-schema.sql",
+        "lineCount": 464,
+        "size": 25635,
+        "lastModified": "2025-08-29T20:39:33.793Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": true,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "high"
+      },
+      "./lib/database/partner-suppliers-schema.sql": {
+        "filePath": "./lib/database/partner-suppliers-schema.sql",
+        "lineCount": 283,
+        "size": 9433,
+        "lastModified": "2025-09-01T21:49:30.180Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "compliance"
+        ],
+        "complexity": "medium"
+      },
+      "./lib/database/tariff-monitoring-schema.sql": {
+        "filePath": "./lib/database/tariff-monitoring-schema.sql",
+        "lineCount": 112,
+        "size": 6522,
+        "lastModified": "2025-08-29T18:06:12.053Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": true,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff"
+        ],
+        "complexity": "medium"
+      },
+      "./RSS_FEEDS_SAMPLE_DATA.sql": {
+        "filePath": "./RSS_FEEDS_SAMPLE_DATA.sql",
+        "lineCount": 162,
+        "size": 8597,
+        "lastModified": "2025-09-05T15:37:06.826Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./RSS_FEEDS_SAMPLE_DATA_FIXED.sql": {
+        "filePath": "./RSS_FEEDS_SAMPLE_DATA_FIXED.sql",
+        "lineCount": 182,
+        "size": 10017,
+        "lastModified": "2025-09-05T15:41:27.284Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./RSS_FEEDS_SCHEMA.sql": {
+        "filePath": "./RSS_FEEDS_SCHEMA.sql",
+        "lineCount": 239,
+        "size": 12511,
+        "lastModified": "2025-09-05T15:33:39.107Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": true,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./RSS_FEEDS_TABLES_ONLY.sql": {
+        "filePath": "./RSS_FEEDS_TABLES_ONLY.sql",
+        "lineCount": 121,
+        "size": 4975,
+        "lastModified": "2025-09-07T17:04:52.688Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "tariff",
+          "savings",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./sample_user_data.sql": {
+        "filePath": "./sample_user_data.sql",
+        "lineCount": 141,
+        "size": 9156,
+        "lastModified": "2025-09-05T15:07:00.001Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "medium"
+      },
+      "./scripts/add-test-companies.sql": {
+        "filePath": "./scripts/add-test-companies.sql",
+        "lineCount": 72,
+        "size": 2495,
+        "lastModified": "2025-09-01T19:20:39.945Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification"
+        ],
+        "complexity": "low"
+      },
+      "./scripts/create-company-profiles.sql": {
+        "filePath": "./scripts/create-company-profiles.sql",
+        "lineCount": 67,
+        "size": 2339,
+        "lastModified": "2025-09-01T19:08:30.177Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification"
+        ],
+        "complexity": "low"
+      },
+      "./scripts/fixed-multicountry-view.sql": {
+        "filePath": "./scripts/fixed-multicountry-view.sql",
+        "lineCount": 76,
+        "size": 2913,
+        "lastModified": "2025-08-30T15:26:54.579Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": false,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": false
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "tariff",
+          "savings"
+        ],
+        "complexity": "low"
+      },
+      "./simple_test_data.sql": {
+        "filePath": "./simple_test_data.sql",
+        "lineCount": 29,
+        "size": 2128,
+        "lastModified": "2025-09-05T15:15:55.986Z",
+        "patterns": {
+          "hasDatabase": false,
+          "hasAuth": true,
+          "hasAPIEndpoints": false,
+          "hasReactComponents": false,
+          "hasBusinessLogic": true,
+          "hasErrorHandling": false,
+          "hasValidation": false,
+          "hasConfiguration": false,
+          "hasTesting": true
+        },
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "apiEndpoints": [],
+        "businessEntities": [
+          "usmca",
+          "classification",
+          "savings",
+          "compliance",
+          "certificate"
+        ],
+        "complexity": "low"
+      }
+    },
+    "testExecutions": [],
+    "evidenceChain": [
+      {
+        "timestamp": "2025-09-08T22:39:13.223Z",
+        "auditId": "quick_1757371153222",
+        "action": "INIT",
+        "message": "MCP Integration system initialized"
+      },
+      {
+        "timestamp": "2025-09-08T22:39:15.386Z",
+        "evidenceFile": "automated-read-analysis.json",
+        "dataSize": 62407,
+        "action": "EVIDENCE_SAVED"
+      },
+      {
+        "timestamp": "2025-09-08T22:39:15.386Z",
+        "auditId": "quick_1757371153222",
+        "action": "READ_COMPLETE",
+        "message": "Analyzed 71 files with 26512 total lines"
+      },
+      {
+        "timestamp": "2025-09-08T22:39:29.022Z",
+        "evidenceFile": "automated-glob-discovery.json",
+        "dataSize": 26753,
+        "action": "EVIDENCE_SAVED"
+      },
+      {
+        "timestamp": "2025-09-08T22:39:29.023Z",
+        "auditId": "quick_1757371153222",
+        "action": "GLOB_COMPLETE",
+        "message": "Discovered 31534 files across 5 categories"
+      },
+      {
+        "timestamp": "2025-09-08T22:48:47.773Z",
+        "evidenceFile": "automated-grep-analysis.json",
+        "dataSize": 2409,
+        "action": "EVIDENCE_SAVED"
+      },
+      {
+        "timestamp": "2025-09-08T22:48:47.773Z",
+        "auditId": "quick_1757371153222",
+        "action": "GREP_COMPLETE",
+        "message": "Analyzed 16 patterns with 0 total matches"
+      },
+      {
+        "timestamp": "2025-09-08T22:48:47.872Z",
+        "evidenceFile": "automated-bash-testing.json",
+        "dataSize": 5073,
+        "action": "EVIDENCE_SAVED"
+      },
+      {
+        "timestamp": "2025-09-08T22:48:47.872Z",
+        "auditId": "quick_1757371153222",
+        "action": "BASH_COMPLETE",
+        "message": "Executed 12 commands with 0 successes"
+      }
+    ],
+    "timestamp": "2025-09-08T22:48:47.875Z",
+    "version": "1.0.0"
+  }
+}

@@ -7,43 +7,23 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const AlertCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
+  <span className={className}>[warning]</span>
 );
 
 const XCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="15" y1="9" x2="9" y2="15"/>
-    <line x1="9" y1="9" x2="15" y2="15"/>
-  </svg>
+  <span className={className}>[error]</span>
 );
 
 const Database = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <ellipse cx="12" cy="5" rx="9" ry="3"/>
-    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-  </svg>
+  <span className={className}>[database]</span>
 );
 
 const Server = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-    <line x1="6" y1="6" x2="6.01" y2="6"/>
-    <line x1="6" y1="18" x2="6.01" y2="18"/>
-  </svg>
+  <span className={className}>[server]</span>
 );
 
 export default function SystemStatus() {
@@ -113,9 +93,9 @@ export default function SystemStatus() {
         </div>
 
         {/* Overall Status */}
-        <div className="status-hero" style={{ borderColor: getHealthColor(status?.health_score || 0) }}>
+        <div className="status-hero">
           <div className="status-hero-content">
-            <div className="health-score" style={{ color: getHealthColor(status?.health_score || 0) }}>
+            <div className="health-score">
               {status?.health_score || 0}%
             </div>
             <div className="status-info">

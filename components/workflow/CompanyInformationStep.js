@@ -8,50 +8,7 @@ import React from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
 
 // Professional SVG icons for form fields
-const Building = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
-    <path d="M6 12h12"/>
-    <path d="M6 16h12"/>
-  </svg>
-);
-
-const Briefcase = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
-    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-  </svg>
-);
-
-const Globe = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="m2 12 20 0"/>
-    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-  </svg>
-);
-
-const Target = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <circle cx="12" cy="12" r="6"/>
-    <circle cx="12" cy="12" r="2"/>
-  </svg>
-);
-
-const TrendingUp = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-    <polyline points="16,7 22,7 22,13"/>
-  </svg>
-);
-
-const Shield = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 13c0 5-3.5 7.5-8 7.5s-8-2.5-8-7.5c0-1 0-3 0-3s0-2 8-2 8 1 8 2 0 2 0 3"/>
-    <path d="m9 12 2 2 4-4"/>
-  </svg>
-);
+// Icons removed - no longer using icon placeholders
 
 export default function CompanyInformationStep({
   formData,
@@ -88,19 +45,19 @@ export default function CompanyInformationStep({
         <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label required">
-              <Building className="icon-sm" />
               Company Name
             </label>
-            <div className="professional-input-group">
-              <input
-                type="text"
-                className="form-input"
-                value={formData.company_name || ''}
-                onChange={(e) => updateFormData('company_name', e.target.value)}
-                placeholder="Enter your legal entity name"
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.company_name || ''}
+              onChange={(e) => {
+                console.log('Input onChange fired:', e.target.value);
+                updateFormData('company_name', e.target.value);
+              }}
+              placeholder="Enter your legal entity name"
+              required
+            />
             <div className="form-help">
               Legal entity name as registered with authorities
             </div>
@@ -108,11 +65,9 @@ export default function CompanyInformationStep({
 
           <div className="form-group">
             <label className="form-label required">
-              <Briefcase className="icon-sm" />
               Business Type
             </label>
-            <div className="professional-input-group">
-              <select
+            <select
                 className="form-select"
                 value={formData.business_type || ''}
                 onChange={(e) => updateFormData('business_type', e.target.value)}
@@ -128,8 +83,7 @@ export default function CompanyInformationStep({
                     </option>
                   )) || []
                 )}
-              </select>
-            </div>
+            </select>
             <div className="form-help">
               Primary business activity for accurate trade classification
             </div>
@@ -139,11 +93,9 @@ export default function CompanyInformationStep({
         <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label">
-              <Globe className="icon-sm" />
               Primary Supplier Country
             </label>
-            <div className="professional-input-group">
-              <select
+            <select
                 className="form-select"
                 value={formData.supplier_country || ''}
                 onChange={(e) => updateFormData('supplier_country', e.target.value)}
@@ -164,8 +116,7 @@ export default function CompanyInformationStep({
                     })}
                   </>
                 )}
-              </select>
-            </div>
+            </select>
             <div className="form-help">
               Country where products originate
             </div>
@@ -173,18 +124,22 @@ export default function CompanyInformationStep({
 
           <div className="form-group">
             <label className="form-label">
-              <Target className="icon-sm" />
               Destination Market
             </label>
-            <div className="professional-input-group">
-              <select
+            <select
                 className="form-select"
                 value={formData.destination_country || SYSTEM_CONFIG.countries.defaultDestination}
                 onChange={(e) => updateFormData('destination_country', e.target.value)}
               >
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="MX">Mexico</option>
+                {dropdownOptions.usmcaCountries?.map(country => {
+                  const countryCode = country.code || country.value;
+                  const countryName = country.label || country.name;
+                  return (
+                    <option key={countryCode} value={countryCode}>
+                      {countryName}
+                    </option>
+                  );
+                })}
                 <optgroup label="Other Markets">
                   {dropdownOptions.countries?.filter(country => {
                     const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
@@ -199,8 +154,7 @@ export default function CompanyInformationStep({
                     );
                   })}
                 </optgroup>
-              </select>
-            </div>
+            </select>
             <div className="form-help">
               Where will the finished product be imported?
             </div>
@@ -209,7 +163,6 @@ export default function CompanyInformationStep({
 
         <div className="form-group">
           <label className="form-label required">
-            <TrendingUp className="icon-sm" />
             Annual Trade Volume
           </label>
           <div className="professional-input-group">
@@ -238,7 +191,7 @@ export default function CompanyInformationStep({
 
         <div className="alert alert-info">
           <div className="alert-icon">
-            <Shield className="icon-md" />
+            
           </div>
           <div className="alert-content">
             <div className="alert-title">Enterprise Data Security</div>

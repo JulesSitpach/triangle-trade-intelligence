@@ -4,13 +4,15 @@
  * Integrates all focused components and trust microservices
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useWorkflowState } from '../../hooks/useWorkflowState';
 import { useTrustIndicators } from '../../hooks/useTrustIndicators';
 import { trustVerifiedCertificateFormatter } from '../../lib/utils/trust-verified-certificate-formatter';
 import WorkflowProgress from './WorkflowProgress';
 import CompanyInformationStep from './CompanyInformationStep';
 import ComponentOriginsStepEnhanced from './ComponentOriginsStepEnhanced';
+import SupplyChainStep from './SupplyChainStep';
 import WorkflowResults from './WorkflowResults';
 import WorkflowLoading from './WorkflowLoading';
 import WorkflowError from './WorkflowError';
@@ -18,6 +20,7 @@ import CrisisCalculatorResults from './CrisisCalculatorResults';
 import WorkflowPathSelection from './WorkflowPathSelection';
 
 export default function USMCAWorkflowOrchestrator() {
+  const router = useRouter();
   const {
     currentStep,
     workflowPath,
@@ -43,6 +46,16 @@ export default function USMCAWorkflowOrchestrator() {
   } = useWorkflowState();
 
   const { trustIndicators } = useTrustIndicators();
+
+  // Handle "New Analysis" reset trigger
+  useEffect(() => {
+    if (router.query.reset === 'true') {
+      console.log('🔄 New Analysis triggered - resetting workflow');
+      resetWorkflow();
+      // Clean up the URL by removing the reset parameter
+      router.replace('/usmca-workflow', undefined, { shallow: true });
+    }
+  }, [router.query.reset, resetWorkflow, router]);
 
   // Enhanced certificate download handler with trust verification
   const handleDownloadCertificate = (formatType = 'official') => {
@@ -260,6 +273,39 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onSelectCertificate={handleSelectCertificate}
           />
         )}
+        {currentStep === 3 && workflowPath === 'certificate' && (
+          <div>
+            <SupplyChainStep
+              data={formData}
+              onChange={updateFormData}
+              validation={{ errors: [] }}
+            />
+            <div className="hero-buttons">
+              <button onClick={previousStep} className="btn-secondary">
+                ← Previous Step
+              </button>
+              <button onClick={() => nextStep()} className="btn-primary">
+                Continue to Authorization →
+              </button>
+            </div>
+          </div>
+        )}
+        {currentStep === 4 && workflowPath === 'certificate' && (
+          <div>
+            <AuthorizationStep
+              formData={formData}
+              updateFormData={updateFormData}
+            />
+            <div className="hero-buttons">
+              <button onClick={previousStep} className="btn-secondary">
+                ← Previous Step
+              </button>
+              <button onClick={() => nextStep()} className="btn-primary">
+                Continue to Review & Generate →
+              </button>
+            </div>
+          </div>
+        )}
 
         {currentStep === 3 && workflowPath === 'crisis-calculator' && (
           <CrisisCalculatorResults
@@ -279,12 +325,99 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             trustIndicators={trustIndicators}
           />
         )}
+        {currentStep === 5 && results && (
+          <WorkflowResults
+            results={results}
+            onReset={resetWorkflow}
+            onDownloadCertificate={handleCertificateFormatSelection}
+            onDownloadSimpleCertificate={handleDownloadSimpleCertificate}
+            trustIndicators={trustIndicators}
+          />
+        )}
           </div>
         </div>
       </section>
 
       {/* Loading Overlay */}
       <WorkflowLoading isVisible={isLoading} />
+    </div>
+  );
+}
+
+// Authorization Step Component
+function AuthorizationStep({ formData, updateFormData }) {
+  return (
+    <div className="element-spacing">
+      <div className="alert alert-info">
+        <div className="alert-content">
+          <div className="alert-title">Authorization & Digital Signature</div>
+          <div className="text-body">
+            Complete authorized signatory information for official USMCA certificate generation.
+          </div>
+        </div>
+      </div>
+
+      <div className="form-section">
+        <h3 className="form-section-title">Authorized Signatory Information</h3>
+        
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">Authorized Signatory Name</label>
+            <input
+              type="text"
+              value={formData.signatory_name || ''}
+              onChange={(e) => updateFormData('signatory_name', e.target.value)}
+              className="form-input"
+              placeholder="Full name of authorized person"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label required">Title/Position</label>
+            <input
+              type="text"
+              value={formData.signatory_title || ''}
+              onChange={(e) => updateFormData('signatory_title', e.target.value)}
+              className="form-input"
+              placeholder="e.g., President, Export Manager"
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input
+              type="tel"
+              value={formData.signatory_phone || ''}
+              onChange={(e) => updateFormData('signatory_phone', e.target.value)}
+              className="form-input"
+              placeholder="Contact phone number"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              value={formData.signatory_email || ''}
+              onChange={(e) => updateFormData('signatory_email', e.target.value)}
+              className="form-input"
+              placeholder="signatory@company.com"
+            />
+          </div>
+        </div>
+        
+        <div className="alert alert-warning">
+          <div className="alert-content">
+            <div className="alert-title">Authorization Declaration</div>
+            <div className="text-body">
+              By completing this section, the authorized signatory certifies that the goods described 
+              qualify as originating under the USMCA and that the information is true and accurate.
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

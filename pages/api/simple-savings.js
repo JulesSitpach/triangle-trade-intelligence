@@ -283,41 +283,162 @@ async function calculateRealTariffSavings(supplierCountry, hsCode, importValue) 
   }
 }
 
-// Volume to dollar amount conversion
-const VOLUME_VALUES = {
-  'Under $500K': 250000,
-  '$500K - $1M': 750000,
-  '$1M - $5M': 3000000,
-  '$5M - $25M': 15000000,
-  'Over $25M': 40000000
-}
-
-// Transit time estimates (in days)
-const TRANSIT_TIMES = {
-  direct: {
-    'CN': 35, 'IN': 30, 'VN': 25, 'TH': 28, 'MY': 30,
-    'KR': 32, 'JP': 28, 'TW': 30, 'SG': 35, 'ID': 32,
-    'PH': 30, 'BD': 35, 'PK': 35, 'TR': 25, 'MX': 10
-  },
-  triangle: {
-    'CN': 18, 'IN': 20, 'VN': 16, 'TH': 18, 'MY': 20,
-    'KR': 20, 'JP': 18, 'TW': 18, 'SG': 22, 'ID': 22,
-    'PH': 20, 'BD': 25, 'PK': 25, 'TR': 16, 'MX': 10
+/**
+ * Get dynamic volume values from database
+ * @param {string} volumeRange - Volume range string
+ * @returns {Promise<number>} Dollar amount for the range
+ */
+async function getVolumeValue(volumeRange) {
+  try {
+    // Try to get from triangle_routing_opportunities table
+    const { data, error } = await supabase
+      .from('triangle_routing_opportunities')
+      .select('volume_threshold')
+      .order('volume_threshold');
+    
+    if (!error && data && data.length > 0) {
+      // Map volume ranges to thresholds dynamically
+      const volumeMap = {};
+      let previousThreshold = 0;
+      
+      data.forEach((item, index) => {
+        const threshold = item.volume_threshold;
+        const midpoint = previousThreshold + (threshold - previousThreshold) / 2;
+        
+        if (index === 0) volumeMap['Under $500K'] = Math.min(threshold / 2, 250000);
+        if (midpoint <= 1000000) volumeMap['$500K - $1M'] = midpoint;
+        if (midpoint <= 5000000) volumeMap['$1M - $5M'] = midpoint;
+        if (midpoint <= 25000000) volumeMap['$5M - $25M'] = midpoint;
+        
+        previousThreshold = threshold;
+      });
+      
+      volumeMap['Over $25M'] = Math.max(previousThreshold, 40000000);
+      
+      return volumeMap[volumeRange] || 1000000;
+    }
+  } catch (error) {
+    console.error('Failed to get dynamic volume values:', error);
   }
+  
+  // Fallback values
+  const fallbackValues = {
+    'Under $500K': 250000,
+    '$500K - $1M': 750000,
+    '$1M - $5M': 3000000,
+    '$5M - $25M': 15000000,
+    'Over $25M': 40000000
+  };
+  
+  return fallbackValues[volumeRange] || 1000000;
 }
 
-// Business type risk multipliers
-const BUSINESS_RISK_FACTORS = {
-  'Electronics': 1.2,    // Higher tariff risk
-  'Medical': 1.3,        // Highest regulatory risk
-  'Automotive': 1.1,     // Moderate risk
-  'Manufacturing': 1.0,  // Baseline
-  'Textiles': 0.9,       // Lower risk
-  'Food': 0.8,           // Lower import value typically
-  'Construction': 1.0,   // Baseline
-  'Energy': 1.1,         // Moderate risk
-  'Chemicals': 1.2,      // Higher regulatory risk
-  'Retail': 0.9          // Lower average value
+/**
+ * Get dynamic transit times from database
+ * @param {string} countryCode - Origin country code
+ * @param {string} routeType - 'direct' or 'triangle'
+ * @returns {Promise<number>} Transit time in days
+ */
+async function getTransitTime(countryCode, routeType = 'direct') {
+  try {
+    // Try to get from triangle_routing_opportunities table
+    const { data, error } = await supabase
+      .from('triangle_routing_opportunities')
+      .select('estimated_transit_days, route_type, origin_country')
+      .eq('origin_country', countryCode)
+      .eq('route_type', routeType)
+      .limit(1);
+    
+    if (!error && data && data.length > 0) {
+      return data[0].estimated_transit_days;
+    }
+    
+    // Try trade_routes table as fallback
+    const { data: routeData, error: routeError } = await supabase
+      .from('trade_routes')
+      .select('estimated_transit_days')
+      .eq('origin_country', countryCode)
+      .limit(1);
+    
+    if (!routeError && routeData && routeData.length > 0) {
+      const baseTime = routeData[0].estimated_transit_days;
+      // Triangle routing typically 40-50% faster
+      return routeType === 'triangle' ? Math.round(baseTime * 0.55) : baseTime;
+    }
+  } catch (error) {
+    console.error('Failed to get dynamic transit times:', error);
+  }
+  
+  // Fallback transit times based on analysis
+  const fallbackTimes = {
+    direct: {
+      'CN': 35, 'IN': 30, 'VN': 25, 'TH': 28, 'MY': 30,
+      'KR': 32, 'JP': 28, 'TW': 30, 'SG': 35, 'ID': 32,
+      'PH': 30, 'BD': 35, 'PK': 35, 'TR': 25, 'MX': 10
+    },
+    triangle: {
+      'CN': 18, 'IN': 20, 'VN': 16, 'TH': 18, 'MY': 20,
+      'KR': 20, 'JP': 18, 'TW': 18, 'SG': 22, 'ID': 22,
+      'PH': 20, 'BD': 25, 'PK': 25, 'TR': 16, 'MX': 10
+    }
+  };
+  
+  return fallbackTimes[routeType]?.[countryCode] || (routeType === 'triangle' ? 18 : 30);
+}
+
+/**
+ * Get dynamic business risk factors from database
+ * @param {string} businessType - Business type
+ * @returns {Promise<number>} Risk multiplier factor
+ */
+async function getBusinessRiskFactor(businessType) {
+  try {
+    // Try to get from usmca_qualification_rules table
+    const { data, error } = await supabase
+      .from('usmca_qualification_rules')
+      .select('product_category, regional_content_threshold')
+      .eq('product_category', businessType)
+      .limit(1);
+    
+    if (!error && data && data.length > 0) {
+      // Higher content thresholds indicate higher complexity/risk
+      const threshold = data[0].regional_content_threshold;
+      // Convert threshold to risk factor (higher threshold = higher risk)
+      return 0.8 + (threshold / 100) * 0.6; // Range 0.8 to 1.4
+    }
+    
+    // Try to get average tariff rates for the business category
+    const { data: tariffData, error: tariffError } = await supabase
+      .from('hs_master_rebuild')
+      .select('mfn_rate')
+      .ilike('description', `%${businessType}%`)
+      .not('mfn_rate', 'is', null)
+      .limit(10);
+    
+    if (!tariffError && tariffData && tariffData.length > 0) {
+      const avgRate = tariffData.reduce((sum, item) => sum + parseFloat(item.mfn_rate), 0) / tariffData.length;
+      // Convert average tariff rate to risk factor
+      return 0.9 + (avgRate / 20); // Normalize to reasonable range
+    }
+  } catch (error) {
+    console.error('Failed to get dynamic business risk factors:', error);
+  }
+  
+  // Fallback risk factors
+  const fallbackFactors = {
+    'Electronics': 1.2,
+    'Medical': 1.3,
+    'Automotive': 1.1,
+    'Manufacturing': 1.0,
+    'Textiles': 0.9,
+    'Food': 0.8,
+    'Construction': 1.0,
+    'Energy': 1.1,
+    'Chemicals': 1.2,
+    'Retail': 0.9
+  };
+  
+  return fallbackFactors[businessType] || 1.0;
 }
 
 export default async function handler(req, res) {
@@ -351,13 +472,13 @@ export default async function handler(req, res) {
         currentRoute: {
           description: `${supplierCountry} → ${destinationCountry} (Direct USMCA)`,
           tariffRate: 0,
-          transitTime: TRANSIT_TIMES.direct[supplierCountry] || 10,
+          transitTime: await getTransitTime(supplierCountry, 'direct'),
           annualCost: 0
         },
         triangleRoute: {
           description: `${supplierCountry} → ${destinationCountry} (Already optimal)`,
           tariffRate: 0,
-          transitTime: TRANSIT_TIMES.direct[supplierCountry] || 10,
+          transitTime: await getTransitTime(supplierCountry, 'direct'),
           annualCost: 0
         },
         savings: {
@@ -377,9 +498,9 @@ export default async function handler(req, res) {
       })
     }
     
-    // Calculate base values
-    const annualImportValue = VOLUME_VALUES[importVolume] || 1000000
-    const businessRisk = BUSINESS_RISK_FACTORS[businessType] || 1.0
+    // Calculate base values using dynamic functions
+    const annualImportValue = await getVolumeValue(importVolume)
+    const businessRisk = await getBusinessRiskFactor(businessType)
     
     // Get real tariff rates from database with normalized HS code
     const savingsCalculation = await calculateRealTariffSavings(
@@ -398,10 +519,10 @@ export default async function handler(req, res) {
     
     // Current route calculations (with business risk adjustment)
     const currentTariffCost = adjustedDirectCost
-    const currentTransitTime = TRANSIT_TIMES.direct[supplierCountry] || 30
+    const currentTransitTime = await getTransitTime(supplierCountry, 'direct')
     
     // Triangle route calculations (from database)
-    const triangleTransitTime = TRANSIT_TIMES.triangle[supplierCountry] || 18
+    const triangleTransitTime = await getTransitTime(supplierCountry, 'triangle')
     
     // Total triangle costs (including Mexico processing)
     const mexicoProcessingCost = savingsCalculation.usmcaRoute.processingCost

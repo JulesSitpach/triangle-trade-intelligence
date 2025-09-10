@@ -1,0 +1,2850 @@
+{
+  "timestamp": "2025-09-05T20:53:01.691Z",
+  "summary": {
+    "totalAPIs": 59,
+    "passingAPIs": 16,
+    "passRate": 27
+  },
+  "discoveredAPIs": {
+    "/api/admin/daily-activity": {
+      "endpoint": "/api/admin/daily-activity",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/performance-analytics": {
+      "endpoint": "/api/admin/performance-analytics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/revenue-analytics": {
+      "endpoint": "/api/admin/revenue-analytics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/rss-feeds": {
+      "endpoint": "/api/admin/rss-feeds",
+      "expectedParams": {
+        "name": "string",
+        "url": "string",
+        "category": "string",
+        "priority_level": "string",
+        "check_frequency_minutes": "string",
+        "keywords": "string",
+        "exclusion_keywords": "string",
+        "alert_threshold": "string",
+        "notification_enabled": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields: name, url",
+        "Feed ID is required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "name": "test_value",
+        "url": "test_value",
+        "category": "test_value",
+        "priority_level": "test_value",
+        "check_frequency_minutes": "test_value",
+        "keywords": "test_value",
+        "exclusion_keywords": "test_value",
+        "alert_threshold": "test_value",
+        "notification_enabled": "test_value"
+      }
+    },
+    "/api/admin/subscriptions": {
+      "endpoint": "/api/admin/subscriptions",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/suppliers": {
+      "endpoint": "/api/admin/suppliers",
+      "expectedParams": {
+        "name": "string",
+        "legal_name": "string",
+        "location": "string",
+        "country": "string",
+        "specialization": "string",
+        "contact_email": "string",
+        "contact_phone": "string",
+        "website": "string",
+        "primary_contact_name": "string",
+        "business_license": "string",
+        "established_year": "string",
+        "employee_count": "string",
+        "annual_revenue_range": "string",
+        "manufacturing_capabilities": "string",
+        "certifications": "string",
+        "quality_standards": "string",
+        "minimum_order_quantity": "string",
+        "lead_time_days": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields: name, location, country"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "name": "test_value",
+        "legal_name": "test_value",
+        "location": "test_value",
+        "country": "test_value",
+        "specialization": "test_value",
+        "contact_email": "test_value",
+        "contact_phone": "test_value",
+        "website": "test_value",
+        "primary_contact_name": "test_value",
+        "business_license": "test_value",
+        "established_year": "test_value",
+        "employee_count": "test_value",
+        "annual_revenue_range": "test_value",
+        "manufacturing_capabilities": "test_value",
+        "certifications": "test_value",
+        "quality_standards": "test_value",
+        "minimum_order_quantity": "test_value",
+        "lead_time_days": "test_value"
+      }
+    },
+    "/api/admin/user-analytics": {
+      "endpoint": "/api/admin/user-analytics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/users": {
+      "endpoint": "/api/admin/users",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/admin/workflow-analytics": {
+      "endpoint": "/api/admin/workflow-analytics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/ai-category-analysis": {
+      "endpoint": "/api/ai-category-analysis",
+      "expectedParams": {
+        "productDescription": "string",
+        "businessType": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "productDescription": "test_value",
+        "businessType": "Manufacturing"
+      }
+    },
+    "/api/ai-classify": {
+      "endpoint": "/api/ai-classify",
+      "expectedParams": {
+        "product_description": "string",
+        "context": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Product description required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "product_description": "automotive electrical wire",
+        "context": "test_value"
+      }
+    },
+    "/api/classify-business": {
+      "endpoint": "/api/classify-business",
+      "expectedParams": {
+        "company_name": "string",
+        "business_type": "string",
+        "trade_volume": "string",
+        "supply_chain": "string",
+        "primary_products": "string",
+        "origin_countries": "string",
+        "destination_markets": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Company name required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "company_name": "test_value",
+        "business_type": "Manufacturing",
+        "trade_volume": "test_value",
+        "supply_chain": "test_value",
+        "primary_products": "test_value",
+        "origin_countries": "test_value",
+        "destination_markets": "test_value"
+      }
+    },
+    "/api/classify": {
+      "endpoint": "/api/classify",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Product description required (minimum 3 characters)"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/context-classification": {
+      "endpoint": "/api/context-classification",
+      "expectedParams": {
+        "product_description": "string",
+        "company_id": "string",
+        "use_context": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Product description required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "product_description": "automotive electrical wire",
+        "company_id": "test_value",
+        "use_context": "test_value"
+      }
+    },
+    "/api/crisis-alerts": {
+      "endpoint": "/api/crisis-alerts",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/crisis-calculator": {
+      "endpoint": "/api/crisis-calculator",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Valid tradeVolume is required",
+        "sessionId is required for analytics tracking",
+        "hsCode is required",
+        "Valid totalSavings amount is required",
+        "calculations array is required",
+        "Valid volume is required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/crisis-config": {
+      "endpoint": "/api/crisis-config",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "configKey and configValue are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/crisis-messaging": {
+      "endpoint": "/api/crisis-messaging",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "messageKey is required",
+        "context is required",
+        "contentKey is required",
+        "messageKey and variantContent are required",
+        "messageKey and updates are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/crisis-solutions": {
+      "endpoint": "/api/crisis-solutions",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "hs_code is required",
+        "user_profile.email and supplier_id are required",
+        "Either crisis_alert_id or hs_code is required",
+        "supplier_id and user_profile are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/database-driven-dropdown-options": {
+      "endpoint": "/api/database-driven-dropdown-options",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/database-driven-usmca-compliance-simple": {
+      "endpoint": "/api/database-driven-usmca-compliance-simple",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/database-driven-usmca-compliance": {
+      "endpoint": "/api/database-driven-usmca-compliance",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/dynamic-hs-codes": {
+      "endpoint": "/api/dynamic-hs-codes",
+      "expectedParams": {
+        "businessType": "string",
+        "productDescription": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value"
+      }
+    },
+    "/api/dynamic-pricing": {
+      "endpoint": "/api/dynamic-pricing",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "serviceSlug is required",
+        "Valid tradeVolume is required",
+        "serviceSlug is required",
+        "Valid amount is required",
+        "fromCurrency and toCurrency are required",
+        "fromCurrency and toCurrency are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/dynamic-rss-alerts": {
+      "endpoint": "/api/dynamic-rss-alerts",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "HS code is required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/enhanced-classification": {
+      "endpoint": "/api/enhanced-classification",
+      "expectedParams": {
+        "product_description": "string",
+        "business_type": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "product_description": "automotive electrical wire",
+        "business_type": "Manufacturing"
+      }
+    },
+    "/api/granular-categories": {
+      "endpoint": "/api/granular-categories",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Business type parameter is required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/health": {
+      "endpoint": "/api/health",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/intelligent-classification": {
+      "endpoint": "/api/intelligent-classification",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Valid product description required (minimum 3 characters)"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/learn-from-user-contributions": {
+      "endpoint": "/api/learn-from-user-contributions",
+      "expectedParams": {
+        "productDescription": "string",
+        "businessType": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "productDescription": "test_value",
+        "businessType": "Manufacturing"
+      }
+    },
+    "/api/performance-metrics": {
+      "endpoint": "/api/performance-metrics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/professional-validation": {
+      "endpoint": "/api/professional-validation",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "requestType is required",
+        "clientCompany and clientEmail are required",
+        "requestId and status are required",
+        "requestId is required",
+        "requestType is required for estimation",
+        "Valid tradeVolume is required for estimation",
+        "clientCompany, clientEmail, and urgentIssue are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/rss-monitoring": {
+      "endpoint": "/api/rss-monitoring",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Action parameter required",
+        "feedKey required for single feed test"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/simple-classification": {
+      "endpoint": "/api/simple-classification",
+      "expectedParams": {
+        "product_description": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Product description required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "product_description": "automotive electrical wire"
+      }
+    },
+    "/api/simple-dropdown-options": {
+      "endpoint": "/api/simple-dropdown-options",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/simple-hs-search": {
+      "endpoint": "/api/simple-hs-search",
+      "expectedParams": {
+        "searchTerm": "string",
+        "description": "string",
+        "businessType": "string",
+        "limit": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Product description required (minimum 3 characters)"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "searchTerm": "test_value",
+        "description": "test_value",
+        "businessType": "Manufacturing",
+        "limit": "test_value"
+      }
+    },
+    "/api/simple-savings": {
+      "endpoint": "/api/simple-savings",
+      "expectedParams": {
+        "importVolume": "number",
+        "supplierCountry": "string (country code)",
+        "businessType": "string",
+        "destinationCountry": "string (country code)",
+        "hsCode": "string (HS code)"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Import volume and supplier country are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "importVolume": 100000,
+        "supplierCountry": "CN",
+        "businessType": "Manufacturing",
+        "destinationCountry": "test_value",
+        "hsCode": "8544300000"
+      }
+    },
+    "/api/simple-usmca-compliance": {
+      "endpoint": "/api/simple-usmca-compliance",
+      "expectedParams": {
+        "product_description": "string"
+      },
+      "hasActionPattern": true,
+      "hasDataPattern": true,
+      "validationErrors": [
+        "Product description required",
+        "HS code is required for USMCA qualification check",
+        "HS code is required for accurate savings calculation"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "check_qualification",
+        "data": {
+          "product_description": "automotive electrical wire"
+        }
+      }
+    },
+    "/api/smart-chapter-detection": {
+      "endpoint": "/api/smart-chapter-detection",
+      "expectedParams": {
+        "businessType": "string",
+        "productDescription": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value"
+      }
+    },
+    "/api/smart-rss-status": {
+      "endpoint": "/api/smart-rss-status",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/status": {
+      "endpoint": "/api/status",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/submit-missing-product": {
+      "endpoint": "/api/submit-missing-product",
+      "expectedParams": {
+        "businessType": "string",
+        "productDescription": "string",
+        "companyName": "string",
+        "contactEmail": "string",
+        "suspectedHSCode": "string",
+        "urgencyLevel": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Business type and product description are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value",
+        "companyName": "test_value",
+        "contactEmail": "test_value",
+        "suspectedHSCode": "test_value",
+        "urgencyLevel": "test_value"
+      }
+    },
+    "/api/test-company-profile": {
+      "endpoint": "/api/test-company-profile",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/test-crisis-rss-integration": {
+      "endpoint": "/api/test-crisis-rss-integration",
+      "expectedParams": {
+        "scenario": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "scenario": "test_value"
+      }
+    },
+    "/api/trump-tariff-monitoring": {
+      "endpoint": "/api/trump-tariff-monitoring",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Action parameter required",
+        "Customer ID required for alerts lookup"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/calculate-qualification": {
+      "endpoint": "/api/trust/calculate-qualification",
+      "expectedParams": {
+        "component_origins": "string",
+        "manufacturing_location": "string",
+        "hs_code": "string (HS code)",
+        "business_type": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Component origins and manufacturing location are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "component_origins": "test_value",
+        "manufacturing_location": "test_value",
+        "hs_code": "8544300000",
+        "business_type": "Manufacturing"
+      }
+    },
+    "/api/trust/case-studies": {
+      "endpoint": "/api/trust/case-studies",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields: case_study_id, expert_review",
+        "Missing required field: case_study_id"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/complete-certificate-simple": {
+      "endpoint": "/api/trust/complete-certificate-simple",
+      "expectedParams": {
+        "companyName": "string",
+        "hsCode": "string (HS code)",
+        "productDescription": "string",
+        "manufacturingLocation": "string",
+        "componentOrigins": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "companyName": "test_value",
+        "hsCode": "8544300000",
+        "productDescription": "test_value",
+        "manufacturingLocation": "test_value",
+        "componentOrigins": "test_value"
+      }
+    },
+    "/api/trust/complete-certificate": {
+      "endpoint": "/api/trust/complete-certificate",
+      "expectedParams": {
+        "action": "string",
+        "certificateData": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "certificateData": "test_value"
+      }
+    },
+    "/api/trust/complete-workflow": {
+      "endpoint": "/api/trust/complete-workflow",
+      "expectedParams": {
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "data": "test_value"
+      }
+    },
+    "/api/trust/data-provenance": {
+      "endpoint": "/api/trust/data-provenance",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Missing required fields: dataType and identifiers"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/expert-validation": {
+      "endpoint": "/api/trust/expert-validation",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Validation ID required for status check",
+        "Missing required fields: validation_id, expert_id, review_result"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/success-stories": {
+      "endpoint": "/api/trust/success-stories",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "Story ID required for validation"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/trust-metrics-lightweight": {
+      "endpoint": "/api/trust/trust-metrics-lightweight",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/trust/trust-metrics": {
+      "endpoint": "/api/trust/trust-metrics",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/trust/usmca-thresholds": {
+      "endpoint": "/api/trust/usmca-thresholds",
+      "expectedParams": {},
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {}
+    },
+    "/api/trust/verify-hs-code": {
+      "endpoint": "/api/trust/verify-hs-code",
+      "expectedParams": {
+        "hs_code": "string (HS code)"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "HS code is required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "hs_code": "8544300000"
+      }
+    },
+    "/api/trusted-compliance-workflow": {
+      "endpoint": "/api/trusted-compliance-workflow",
+      "expectedParams": {
+        "action": "string",
+        "data": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [],
+      "method": "POST",
+      "sampleRequest": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/user-contributed-hs-code": {
+      "endpoint": "/api/user-contributed-hs-code",
+      "expectedParams": {
+        "hs_code": "string (HS code)",
+        "product_description": "string",
+        "business_type": "string",
+        "user_confidence": "string",
+        "company_name": "string"
+      },
+      "hasActionPattern": false,
+      "hasDataPattern": false,
+      "validationErrors": [
+        "HS code and product description are required"
+      ],
+      "method": "POST",
+      "sampleRequest": {
+        "hs_code": "8544300000",
+        "product_description": "automotive electrical wire",
+        "business_type": "Manufacturing",
+        "user_confidence": "test_value",
+        "company_name": "test_value"
+      }
+    }
+  },
+  "testResults": {
+    "/api/admin/daily-activity": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/performance-analytics": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/revenue-analytics": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/rss-feeds": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "error": "Invalid URL format"
+      },
+      "request": {
+        "name": "test_value",
+        "url": "test_value",
+        "category": "test_value",
+        "priority_level": "test_value",
+        "check_frequency_minutes": "test_value",
+        "keywords": "test_value",
+        "exclusion_keywords": "test_value",
+        "alert_threshold": "test_value",
+        "notification_enabled": "test_value"
+      }
+    },
+    "/api/admin/subscriptions": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/suppliers": {
+      "status": "FAIL",
+      "statusCode": 500,
+      "response": {
+        "error": "Failed to add supplier"
+      },
+      "request": {
+        "name": "test_value",
+        "legal_name": "test_value",
+        "location": "test_value",
+        "country": "test_value",
+        "specialization": "test_value",
+        "contact_email": "test_value",
+        "contact_phone": "test_value",
+        "website": "test_value",
+        "primary_contact_name": "test_value",
+        "business_license": "test_value",
+        "established_year": "test_value",
+        "employee_count": "test_value",
+        "annual_revenue_range": "test_value",
+        "manufacturing_capabilities": "test_value",
+        "certifications": "test_value",
+        "quality_standards": "test_value",
+        "minimum_order_quantity": "test_value",
+        "lead_time_days": "test_value"
+      }
+    },
+    "/api/admin/user-analytics": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/users": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/admin/workflow-analytics": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/ai-category-analysis": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "suggestions": [],
+        "processing_time_ms": 569,
+        "analysis_method": "database_keyword_matching"
+      },
+      "request": {
+        "productDescription": "test_value",
+        "businessType": "Manufacturing"
+      }
+    },
+    "/api/ai-classify": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "product_description": "automotive electrical wire",
+        "likely_chapters": [
+          8544,
+          85
+        ],
+        "primary_application": "electrical_conductor",
+        "industry_context": "general",
+        "supply_chain_context": {
+          "routing_strategy": "Direct",
+          "content_optimization": "Standard",
+          "classification_impact": "Consider supply chain for final classification",
+          "usmca_relevance": "High"
+        },
+        "trade_context": {
+          "objective": "Cost optimization",
+          "agreement": "USMCA",
+          "volume": "Medium",
+          "priority": "Tariff savings"
+        },
+        "technical_specifications": {
+          "specifications": {
+            "material": "unspecified",
+            "gauge": null,
+            "voltage": null,
+            "dimensions": null,
+            "grade": "automotive"
+          },
+          "technical_category": "general_component",
+          "precision_level": 0.2
+        },
+        "confidence": 0.9,
+        "reasoning": "Function-first: Electrical products classified by electrical function, not material or industry",
+        "search_strategy": {
+          "primary_chapters": [
+            8544,
+            85
+          ],
+          "search_terms": [
+            "conductor",
+            "wire",
+            "cable"
+          ],
+          "priority_order": "ai_guided_first",
+          "fallback_strategy": "broad_search_if_insufficient"
+        }
+      },
+      "request": {
+        "product_description": "automotive electrical wire",
+        "context": "test_value"
+      }
+    },
+    "/api/classify-business": {
+      "status": "FAIL",
+      "statusCode": 500,
+      "response": {
+        "error": "Business classification failed",
+        "message": "products.join is not a function"
+      },
+      "request": {
+        "company_name": "test_value",
+        "business_type": "Manufacturing",
+        "trade_volume": "test_value",
+        "supply_chain": "test_value",
+        "primary_products": "test_value",
+        "origin_countries": "test_value",
+        "destination_markets": "test_value"
+      }
+    },
+    "/api/classify": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "error": "Product description required (minimum 3 characters)",
+        "received": {
+          "business_type": null,
+          "context": {}
+        }
+      },
+      "request": {}
+    },
+    "/api/context-classification": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "results": [
+          {
+            "hs_code": "7115106466",
+            "description": "Catalysts in the form of wire cloth or grill, of platinum (CBSA 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "CA",
+            "product_description": "Catalysts in the form of wire cloth or grill, of platinum (CBSA 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerms": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 71,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "7115106467",
+            "description": "Catalysts in the form of wire cloth or grill, of platinum (CBSA 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "CA",
+            "product_description": "Catalysts in the form of wire cloth or grill, of platinum (CBSA 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerms": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 71,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "2716000000",
+            "description": "Electrical energy (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Electrical energy (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerms": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 27,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "3603600000",
+            "description": "Electric detonators (HTS 2025)",
+            "mfn_rate": 0.2,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Electric detonators (HTS 2025)",
+            "mfn_tariff_rate": 0.2,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0.2,
+            "confidence": 0.85,
+            "matchedTerms": 0,
+            "termCoverage": 0,
+            "hsChapter": 36,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "3926909600",
+            "description": "Casing for bicycle derailleur cables; and casing for cable or inner wire for caliper and cantilever brakes, whether or not cut to length (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Casing for bicycle derailleur cables; and casing for cable or inner wire for caliper and cantilever brakes, whether or not cut to length (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.85,
+            "matchedTerms": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 39,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "3801101000",
+            "description": "Plates, rods, powder and other forms, wholly or partly manufactured, for manufacturing into brushes for electric generators, motors or other machines or appliances (HTS 2025)",
+            "mfn_rate": 3.7,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Plates, rods, powder and other forms, wholly or partly manufactured, for manufacturing into brushes for electric generators, motors or other machines or appliances (HTS 2025)",
+            "mfn_tariff_rate": 3.7,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 3.7,
+            "confidence": 0.8,
+            "matchedTerms": 0,
+            "termCoverage": 0,
+            "hsChapter": 38,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "40169310",
+            "description": "Of a kind used in the automotive goods of chapter 87 (HTS 2025)",
+            "mfn_rate": 2.5,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Of a kind used in the automotive goods of chapter 87 (HTS 2025)",
+            "mfn_tariff_rate": 2.5,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 2.5,
+            "confidence": 0.7999999999999999,
+            "matchedTerms": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 40,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "63012000",
+            "description": "Blankets (other than electric blankets) and traveling rugs, of wool or fine animal hair (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Blankets (other than electric blankets) and traveling rugs, of wool or fine animal hair (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.6499999999999999,
+            "matchedTerms": 0,
+            "termCoverage": 0,
+            "hsChapter": 63,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "6301100000",
+            "description": "Electric blankets (666) (HTS 2025)",
+            "mfn_rate": 11.4,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Electric blankets (666) (HTS 2025)",
+            "mfn_tariff_rate": 11.4,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 11.4,
+            "confidence": 0.6,
+            "matchedTerms": 0,
+            "termCoverage": 0,
+            "hsChapter": 63,
+            "contextMatch": null
+          },
+          {
+            "hs_code": "63013000",
+            "description": "Blankets (other than electric blankets) and traveling rugs, of cotton (HTS 2025)",
+            "mfn_rate": 8.4,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "product_description": "Blankets (other than electric blankets) and traveling rugs, of cotton (HTS 2025)",
+            "mfn_tariff_rate": 8.4,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 8.4,
+            "confidence": 0.55,
+            "matchedTerms": 0,
+            "termCoverage": 0,
+            "hsChapter": 63,
+            "contextMatch": null
+          }
+        ],
+        "total_matches": 20,
+        "method": "general_search",
+        "company_context": null
+      },
+      "request": {
+        "product_description": "automotive electrical wire",
+        "company_id": "test_value",
+        "use_context": "test_value"
+      }
+    },
+    "/api/crisis-alerts": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "test_rss_crisis_detection",
+          "simulate_crisis_scenario",
+          "get_queued_alerts",
+          "generate_sample_alert",
+          "test_phoenix_electronics",
+          "get_active_alerts"
+        ]
+      },
+      "request": {}
+    },
+    "/api/crisis-calculator": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "calculate_crisis_penalty",
+          "get_usmca_rate",
+          "calculate_roi_analysis",
+          "batch_calculate",
+          "quick_estimate",
+          "health_check"
+        ]
+      },
+      "request": {}
+    },
+    "/api/crisis-config": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "get_crisis_rate",
+          "get_all_config",
+          "get_validation_thresholds",
+          "get_roi_params",
+          "update_config",
+          "health_check"
+        ]
+      },
+      "request": {}
+    },
+    "/api/crisis-messaging": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "get_message",
+          "get_context_messages",
+          "get_landing_page_messages",
+          "get_localized_text",
+          "create_variant",
+          "update_message",
+          "health_check"
+        ]
+      },
+      "request": {}
+    },
+    "/api/crisis-solutions": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "get_suppliers_for_hs_code",
+          "request_supplier_introduction",
+          "get_crisis_solutions",
+          "calculate_solution_benefits",
+          "update_supplier_performance",
+          "get_introduction_requests"
+        ]
+      },
+      "request": {}
+    },
+    "/api/database-driven-dropdown-options": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed",
+        "allowed_methods": [
+          "GET"
+        ]
+      },
+      "request": {}
+    },
+    "/api/database-driven-usmca-compliance-simple": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "error": "Invalid action"
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/database-driven-usmca-compliance": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "complete_workflow",
+          "classify_product",
+          "check_qualification",
+          "calculate_savings",
+          "generate_certificate",
+          "health_check"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/dynamic-hs-codes": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "data": {
+          "ai_keywords": [
+            "since the product description provided is \"test_value\" and the business type is \"manufacturing\"",
+            "i do not have enough information to determine a specific product type and provide the corresponding hs classification codes and keywords.\n\nwithout more details about the actual product",
+            "i cannot provide a meaningful classification response. please provide more specific information about the product",
+            "and i will be happy to assist in analyzing it for the appropriate hs classification codes and keywords."
+          ],
+          "matching_hs_codes": [],
+          "total_matches": 0,
+          "classification_confidence": "low",
+          "workflow_path": {
+            "step1": "AI extracted keywords: [since the product description provided is \"test_value\" and the business type is \"manufacturing\", i do not have enough information to determine a specific product type and provide the corresponding hs classification codes and keywords.\n\nwithout more details about the actual product, i cannot provide a meaningful classification response. please provide more specific information about the product, and i will be happy to assist in analyzing it for the appropriate hs classification codes and keywords.]",
+            "step2": "Database search found 0 potential matches",
+            "step3": "AI ranked and filtered to 0 best matches",
+            "step4": "Formatted 0 HS codes for dropdown"
+          }
+        }
+      },
+      "request": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value"
+      }
+    },
+    "/api/dynamic-pricing": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "get_platform_tiers",
+          "get_service_price",
+          "get_emergency_rate",
+          "get_professional_services",
+          "calculate_custom_pricing",
+          "convert_currency",
+          "get_exchange_rate",
+          "get_all_pricing",
+          "health_check"
+        ]
+      },
+      "request": {}
+    },
+    "/api/dynamic-rss-alerts": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "HS code is required",
+        "usage": "/api/dynamic-rss-alerts?hsCode=851712&companyName=YourCompany"
+      },
+      "request": {}
+    },
+    "/api/enhanced-classification": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "results": [],
+        "totalMatches": 0,
+        "method": "enhanced_database_search",
+        "processingTimeMs": 531,
+        "timestamp": "2025-09-05T20:52:49.967Z",
+        "healthIndicators": {
+          "databaseHealthy": false,
+          "connectionRetries": 0,
+          "responseTime": 531
+        },
+        "dataQuality": null
+      },
+      "request": {
+        "product_description": "automotive electrical wire",
+        "business_type": "Manufacturing"
+      }
+    },
+    "/api/granular-categories": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "success": false,
+        "error": "Method not allowed - use GET"
+      },
+      "request": {}
+    },
+    "/api/health": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/intelligent-classification": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Valid product description required (minimum 3 characters)",
+        "example": "copper wire for electrical circuits"
+      },
+      "request": {}
+    },
+    "/api/learn-from-user-contributions": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "suggestions": [],
+        "user_contributions_analyzed": 61,
+        "similar_products_found": 0,
+        "processing_time_ms": 122,
+        "learning_method": "user_contribution_similarity"
+      },
+      "request": {
+        "productDescription": "test_value",
+        "businessType": "Manufacturing"
+      }
+    },
+    "/api/performance-metrics": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/professional-validation": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown action",
+        "available_actions": [
+          "get_active_validators",
+          "get_primary_validator",
+          "request_validation",
+          "update_validation_status",
+          "get_validation_status",
+          "estimate_validation_work",
+          "book_emergency_consultation",
+          "get_validator_specializations",
+          "health_check"
+        ]
+      },
+      "request": {}
+    },
+    "/api/rss-monitoring": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unsupported action: test_value",
+        "supportedActions": [
+          "start_monitoring",
+          "stop_monitoring",
+          "check_feeds_now",
+          "get_recent_items",
+          "test_single_feed"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/simple-classification": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "results": [
+          {
+            "hs_code": "8501324500",
+            "description": "Electric motors of a kind used as the primary source of mechanical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Electric motors of a kind used as the primary source of mechanical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.30000000000000004,
+              "electricalScore": 0.75,
+              "automotiveScore": 0.5,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8507204000",
+            "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_rate": 3.5,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_tariff_rate": 3.5,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 3.5,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.30000000000000004,
+              "electricalScore": 0.75,
+              "automotiveScore": 0.5,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8507304000",
+            "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_rate": 2.5,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_tariff_rate": 2.5,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 2.5,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.30000000000000004,
+              "electricalScore": 0.75,
+              "automotiveScore": 0.5,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8507804100",
+            "description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_rate": 3.4,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Of a kind used as the primary source of electrical power for electrically powered vehicles of subheadings 8703.40, 8703.50, 8703.60, 8703.70 or 8703.80 (HTS 2025)",
+            "mfn_tariff_rate": 3.4,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 3.4,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.30000000000000004,
+              "electricalScore": 0.75,
+              "automotiveScore": 0.5,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8516804000",
+            "description": "Assembled only with simple insulated former and electrical connections, used for anti-icing or deicing (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Assembled only with simple insulated former and electrical connections, used for anti-icing or deicing (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 1,
+            "termCoverage": 0.3333333333333333,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.30000000000000004,
+              "electricalScore": 0.75,
+              "automotiveScore": 0.25,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8502400000",
+            "description": "Electric rotary converters (HTS 2025)",
+            "mfn_rate": 3,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Electric rotary converters (HTS 2025)",
+            "mfn_tariff_rate": 3,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 3,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 0,
+            "termCoverage": 0,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.2,
+              "electricalScore": 0.5,
+              "automotiveScore": 0.25,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8504404000",
+            "description": "Speed drive controllers for electric motors (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Speed drive controllers for electric motors (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 0,
+            "termCoverage": 0,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.2,
+              "electricalScore": 0.5,
+              "automotiveScore": 0.5,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "85161000",
+            "description": "Electric instantaneous or storage water heaters and immersion heaters (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Electric instantaneous or storage water heaters and immersion heaters (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 0,
+            "termCoverage": 0,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.2,
+              "electricalScore": 0.5,
+              "automotiveScore": 0.25,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8516902500",
+            "description": "Housings and steel bases for the electric flatirons of subheading 8516.40 (HTS 2025)",
+            "mfn_rate": 3.9,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Housings and steel bases for the electric flatirons of subheading 8516.40 (HTS 2025)",
+            "mfn_tariff_rate": 3.9,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 3.9,
+            "confidence": 0.95,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 0,
+            "termCoverage": 0,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.2,
+              "electricalScore": 0.5,
+              "automotiveScore": 0.25,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          },
+          {
+            "hs_code": "8518500000",
+            "description": "Electric sound amplifier sets (HTS 2025)",
+            "mfn_rate": 0,
+            "usmca_rate": 0,
+            "country_source": "US",
+            "chapter": 85,
+            "ai_search_strategy": "electrical_machinery_general",
+            "ai_confidence_boost": 0.1,
+            "match_type": "exact",
+            "business_boost": 0.15,
+            "product_description": "Electric sound amplifier sets (HTS 2025)",
+            "mfn_tariff_rate": 0,
+            "usmca_tariff_rate": 0,
+            "savings_percent": 0,
+            "confidence": 0.8999999999999999,
+            "matchedTerm": "exact",
+            "business_context_applied": true,
+            "termMatches": 0,
+            "termCoverage": 0,
+            "hsChapter": 85,
+            "contextAnalysis": {
+              "contextualRelevance": 0.2,
+              "electricalScore": 0.5,
+              "automotiveScore": 0.25,
+              "metalScore": 0,
+              "contextMismatch": false
+            }
+          }
+        ],
+        "total_matches": 10,
+        "method": "direct_database_search"
+      },
+      "request": {
+        "product_description": "automotive electrical wire"
+      }
+    },
+    "/api/simple-dropdown-options": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "businessTypes": [
+          {
+            "value": "AgricultureFood",
+            "label": "Agriculture & Food",
+            "description": "USMCA threshold: 60%"
+          },
+          {
+            "value": "Automotive",
+            "label": "Automotive",
+            "description": "USMCA threshold: 75%"
+          },
+          {
+            "value": "ElectronicsTechnology",
+            "label": "Electronics & Technology",
+            "description": "USMCA threshold: 75%"
+          },
+          {
+            "value": "EnergyEquipment",
+            "label": "Energy Equipment",
+            "description": "USMCA threshold: 62.5%"
+          },
+          {
+            "value": "General",
+            "label": "General",
+            "description": "USMCA threshold: 62.5%"
+          },
+          {
+            "value": "MachineryEquipment",
+            "label": "Machinery & Equipment",
+            "description": "USMCA threshold: 70%"
+          },
+          {
+            "value": "TextilesApparel",
+            "label": "Textiles & Apparel",
+            "description": "USMCA threshold: 62.5%"
+          },
+          {
+            "value": "Manufacturing",
+            "label": "General Manufacturing",
+            "description": "General manufacturing products"
+          },
+          {
+            "value": "Other",
+            "label": "Other",
+            "description": "Other business types"
+          }
+        ],
+        "countries": [
+          "Brazil",
+          "Germany",
+          "Italy",
+          "United Kingdom",
+          "Netherlands"
+        ],
+        "importVolumes": [
+          {
+            "value": "Under $500K",
+            "label": "Under $500K annually",
+            "description": "$8K potential annual savings",
+            "potentialSavings": 7620.799999999999,
+            "routingBeneficial": false
+          },
+          {
+            "value": "$500K - $2M",
+            "label": "$500K - $2M annually",
+            "description": "$38K potential annual savings",
+            "potentialSavings": 38104,
+            "routingBeneficial": true
+          },
+          {
+            "value": "$2M - $10M",
+            "label": "$2M - $10M annually",
+            "description": "$183K potential annual savings • Setup recommended",
+            "potentialSavings": 182899.19999999998,
+            "routingBeneficial": true
+          },
+          {
+            "value": "$10M - $50M",
+            "label": "$10M - $50M annually",
+            "description": "$914K potential annual savings • High priority",
+            "potentialSavings": 914496,
+            "routingBeneficial": true
+          },
+          {
+            "value": "Over $50M",
+            "label": "Over $50M annually",
+            "description": "Enterprise-level - Custom triangle routing strategies",
+            "potentialSavings": 3048320,
+            "routingBeneficial": true
+          }
+        ],
+        "optimizationPriorities": [
+          {
+            "value": "cost_savings",
+            "label": "USMCA Tariff Savings",
+            "description": "Focus on reducing tariff costs through USMCA compliance"
+          },
+          {
+            "value": "time_efficiency",
+            "label": "Time Efficiency",
+            "description": "Faster delivery and processing through optimized routes"
+          },
+          {
+            "value": "risk_reduction",
+            "label": "Supply Chain Risk Reduction",
+            "description": "Diversify supplier dependencies and routing options"
+          },
+          {
+            "value": "compliance",
+            "label": "Regulatory Compliance",
+            "description": "Ensure customs and trade compliance across all routes"
+          }
+        ]
+      },
+      "request": {}
+    },
+    "/api/simple-hs-search": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "query": "test_value",
+        "businessType": "Manufacturing",
+        "resultsCount": 0,
+        "results": [],
+        "approach": "basic_keyword_search",
+        "message": "No matching HS codes found. Try different keywords or be more specific.",
+        "note": "Intelligent classification returned no relevant results, using basic search"
+      },
+      "request": {
+        "searchTerm": "test_value",
+        "description": "test_value",
+        "businessType": "Manufacturing",
+        "limit": "test_value"
+      }
+    },
+    "/api/simple-savings": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "currentRoute": {
+          "description": "CN → test_value (Direct Import)",
+          "tariffRate": 500,
+          "transitTime": 35,
+          "annualCost": 5000000
+        },
+        "triangleRoute": {
+          "description": "CN → Mexico → test_value (USMCA Triangle)",
+          "tariffRate": 0,
+          "transitTime": 18,
+          "annualCost": 30000,
+          "processingCost": 30000
+        },
+        "savings": {
+          "annualTariffSavings": 4970000,
+          "monthlyTariffSavings": 414167,
+          "transitTimeSaved": 17,
+          "totalSavingsUSD": 4970000,
+          "savingsPercentage": 99.4
+        },
+        "analysis": {
+          "systemDecision": "AUTOMATED_CALCULATION",
+          "confidence": 45,
+          "dataSource": "exact_match_8544300000",
+          "recommendation": "High-confidence analysis shows strong triangle routing potential",
+          "implementationComplexity": "Medium - Standard implementation"
+        },
+        "riskFactors": {
+          "supplierCountryRisk": "High",
+          "businessTypeRisk": "Low",
+          "volumeRisk": "Medium",
+          "dataQualityRisk": "Medium"
+        },
+        "nextSteps": [
+          "Verify tariff rates with customs authorities",
+          "Identify Mexico manufacturing/processing partners",
+          "Calculate total landed cost including all fees",
+          "Assess regulatory compliance requirements",
+          "Pilot program with small volume"
+        ],
+        "disclaimer": "ESTIMATES - VERIFY WITH CUSTOMS AUTHORITIES • Actual rates may vary by specific HS code classification • Additional costs may apply (logistics, processing, compliance) • Mexico processing setup required for triangle routing • Professional verification recommended for large volumes",
+        "calculation": {
+          "importVolume": 100000,
+          "supplierCountry": "CN",
+          "businessType": "Manufacturing",
+          "baseTariffRate": 5,
+          "adjustedTariffRate": 5,
+          "businessRiskFactor": 1,
+          "dataSource": {
+            "source": "exact_match_8544300000",
+            "recordCount": 1,
+            "hsCodeUsed": "8544300000"
+          }
+        },
+        "timestamp": "2025-09-05T20:52:54.622Z"
+      },
+      "request": {
+        "importVolume": 100000,
+        "supplierCountry": "CN",
+        "businessType": "Manufacturing",
+        "destinationCountry": "test_value",
+        "hsCode": "8544300000"
+      }
+    },
+    "/api/simple-usmca-compliance": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "error": "HS code is required for USMCA qualification check",
+        "suggestion": "Provide HS code (e.g., \"8544.42.90\" or \"85444290\")"
+      },
+      "request": {
+        "action": "check_qualification",
+        "data": {
+          "product_description": "automotive electrical wire"
+        }
+      }
+    },
+    "/api/smart-chapter-detection": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "data": {
+          "detected_chapter": "99",
+          "chapter_source": "product_analysis",
+          "business_type_chapters": [],
+          "product_analysis_chapters": [],
+          "available_categories": [],
+          "analysis": {
+            "business_type": "Manufacturing",
+            "product_description_keywords": [
+              "test_value"
+            ],
+            "confidence": 0.5
+          }
+        },
+        "timestamp": "2025-09-05T20:52:55.242Z"
+      },
+      "request": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value"
+      }
+    },
+    "/api/smart-rss-status": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "success": false,
+        "error": "Method not allowed",
+        "allowed_methods": [
+          "GET"
+        ]
+      },
+      "request": {}
+    },
+    "/api/status": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/submit-missing-product": {
+      "status": "FAIL",
+      "statusCode": 500,
+      "response": {
+        "success": false,
+        "error": "Failed to submit product request",
+        "technical_error": "Failed to create request: undefined",
+        "processing_time_ms": 228
+      },
+      "request": {
+        "businessType": "Manufacturing",
+        "productDescription": "test_value",
+        "companyName": "test_value",
+        "contactEmail": "test_value",
+        "suspectedHSCode": "test_value",
+        "urgencyLevel": "test_value"
+      }
+    },
+    "/api/test-company-profile": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "all_profiles": [
+          {
+            "company_id": "autoparts_mexico_sa",
+            "company_name": "AutoParts Mexico SA",
+            "primary_hs_chapters": [
+              8544,
+              85,
+              8708,
+              87
+            ]
+          },
+          {
+            "company_id": "techflow_electronics_inc",
+            "company_name": "TechFlow Electronics Inc",
+            "primary_hs_chapters": [
+              8471,
+              85,
+              8517,
+              8544
+            ]
+          },
+          {
+            "company_id": "northern_textiles_ltd",
+            "company_name": "Northern Textiles Ltd",
+            "primary_hs_chapters": [
+              52,
+              54,
+              61,
+              62
+            ]
+          }
+        ],
+        "all_error": null,
+        "specific_profile": {
+          "id": "a784622c-9d80-40ce-a5ec-09a5c77348aa",
+          "company_id": "autoparts_mexico_sa",
+          "company_name": "AutoParts Mexico SA",
+          "business_type": "Automotive Manufacturing",
+          "industry_sectors": [
+            "automotive",
+            "electrical_components"
+          ],
+          "ai_business_context": {
+            "complexity": "multi_component",
+            "classification": "automotive_electrical_assembly",
+            "usmca_optimized": true,
+            "primary_products": [
+              "wire_harness",
+              "dashboard_components"
+            ]
+          },
+          "primary_hs_chapters": [
+            8544,
+            85,
+            8708,
+            87
+          ],
+          "secondary_hs_chapters": [
+            40,
+            39,
+            73,
+            74
+          ],
+          "trade_volume": "$3,000,000",
+          "supply_chain_pattern": "US components → Mexico assembly → US export",
+          "trade_agreements": [
+            "USMCA"
+          ],
+          "keyword_priorities": {
+            "wire": 10,
+            "harness": 9,
+            "dashboard": 8,
+            "automotive": 7,
+            "electrical": 10
+          },
+          "material_focus": [
+            "copper",
+            "plastic",
+            "rubber"
+          ],
+          "application_focus": [
+            "wire_harness",
+            "dashboard",
+            "electrical_conductor"
+          ],
+          "analysis_confidence": 0.92,
+          "last_ai_analysis": "2025-09-01T19:15:51.149944",
+          "created_at": "2025-09-01T19:15:51.149944",
+          "updated_at": "2025-09-01T19:15:51.149944"
+        },
+        "specific_error": null,
+        "rpc_result": [
+          {
+            "company_name": "AutoParts Mexico SA",
+            "primary_chapters": [
+              8544,
+              85,
+              8708,
+              87
+            ],
+            "secondary_chapters": [
+              40,
+              39,
+              73,
+              74
+            ],
+            "keyword_priorities": {
+              "wire": 10,
+              "harness": 9,
+              "dashboard": 8,
+              "automotive": 7,
+              "electrical": 10
+            },
+            "material_focus": [
+              "copper",
+              "plastic",
+              "rubber"
+            ],
+            "application_focus": [
+              "wire_harness",
+              "dashboard",
+              "electrical_conductor"
+            ],
+            "analysis_confidence": 0.92
+          }
+        ],
+        "rpc_error": null,
+        "total_found": 3
+      },
+      "request": {}
+    },
+    "/api/test-crisis-rss-integration": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Unknown test scenario: test_value",
+        "available_scenarios": [
+          "section_301_electronics",
+          "mexican_dof_automotive",
+          "canada_gazette_wood",
+          "trade_war_escalation",
+          "classification_change"
+        ]
+      },
+      "request": {
+        "scenario": "test_value"
+      }
+    },
+    "/api/trump-tariff-monitoring": {
+      "status": "FAIL",
+      "statusCode": 500,
+      "response": {
+        "raw": "<!DOCTYPE html><html><head><style data-next-hide-fouc=\"true\">body{display:none}</style><noscript data-next-hide-fouc=\"true\"><style>body{display:block}</style></noscript><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><meta name=\"next-head-count\" content=\"2\"/><noscript data-n-css=\"\"></noscript><script defer=\"\" nomodule=\"\" src=\"/_next/static/chunks/polyfills.js\"></script><script src=\"/_next/static/chunks/webpack.js\" defer=\"\"></script><script src=\"/_next/static/chunks/main.js\" defer=\"\"></script><script src=\"/_next/static/chunks/pages/_app.js\" defer=\"\"></script><script src=\"/_next/static/chunks/pages/_error.js\" defer=\"\"></script><script src=\"/_next/static/development/_buildManifest.js\" defer=\"\"></script><script src=\"/_next/static/development/_ssgManifest.js\" defer=\"\"></script><noscript id=\"__next_css__DO_NOT_USE__\"></noscript></head><body><div id=\"__next\"></div><script src=\"/_next/static/chunks/react-refresh.js\"></script><script id=\"__NEXT_DATA__\" type=\"application/json\">{\"props\":{\"pageProps\":{\"statusCode\":500}},\"page\":\"/_error\",\"query\":{},\"buildId\":\"development\",\"isFallback\":false,\"err\":{\"name\":\"TypeError\",\"source\":\"server\",\"message\":\"_lib_utils_production_logger_js__WEBPACK_IMPORTED_MODULE_1__.ProductionLogger is not a constructor\",\"stack\":\"TypeError: _lib_utils_production_logger_js__WEBPACK_IMPORTED_MODULE_1__.ProductionLogger is not a constructor\\n    at eval (webpack-internal:///(api)/./pages/api/trump-tariff-monitoring.js:18:16)\\n    at (api)/./pages/api/trump-tariff-monitoring.js (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:112:1)\\n    at __webpack_require__ (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\webpack-api-runtime.js:33:42)\\n    at eval (webpack-internal:///(api)/./node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js?kind=PAGES_API\\u0026page=%2Fapi%2Ftrump-tariff-monitoring\\u0026preferredRegion=\\u0026absolutePagePath=.%2Fpages%5Capi%5Ctrump-tariff-monitoring.js\\u0026middlewareConfigBase64=e30%3D!:11:95)\\n    at (api)/./node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js?kind=PAGES_API\\u0026page=%2Fapi%2Ftrump-tariff-monitoring\\u0026preferredRegion=\\u0026absolutePagePath=.%2Fpages%5Capi%5Ctrump-tariff-monitoring.js\\u0026middlewareConfigBase64=e30%3D! (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:42:1)\\n    at __webpack_require__ (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\webpack-api-runtime.js:33:42)\\n    at __webpack_exec__ (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:122:39)\\n    at D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:123:83\\n    at __webpack_require__.X (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\webpack-api-runtime.js:116:21)\\n    at D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:123:47\\n    at Object.\\u003canonymous\\u003e (D:\\\\bacjup\\\\triangle-simple\\\\.next\\\\server\\\\pages\\\\api\\\\trump-tariff-monitoring.js:126:3)\\n    at Module._compile (node:internal/modules/cjs/loader:1546:14)\\n    at Object..js (node:internal/modules/cjs/loader:1689:10)\\n    at Module.load (node:internal/modules/cjs/loader:1318:32)\\n    at Function._load (node:internal/modules/cjs/loader:1128:12)\"},\"gip\":true,\"scriptLoader\":[]}</script></body></html>"
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/calculate-qualification": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": false,
+        "qualified": false,
+        "error": "Qualification calculation unavailable",
+        "trust_score": 0,
+        "fallback": "Manual qualification review required",
+        "message": "Component origins array is required and cannot be empty"
+      },
+      "request": {
+        "component_origins": "test_value",
+        "manufacturing_location": "test_value",
+        "hs_code": "8544300000",
+        "business_type": "Manufacturing"
+      }
+    },
+    "/api/trust/case-studies": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "submit_case_study",
+          "get_case_studies",
+          "validate_case_study",
+          "get_study_details"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/complete-certificate-simple": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "certificate_generated": true,
+        "certificate_id": "TI-1757105578293-ES45MZ",
+        "certificate_data": {
+          "certificate_id": "TI-1757105578293-ES45MZ",
+          "company_name": "test_value",
+          "product": {
+            "hs_code": "8544300000",
+            "description": "test_value",
+            "manufacturing_location": "test_value"
+          },
+          "usmca": {
+            "qualified": true,
+            "regional_content": 85,
+            "rule_applied": "Regional Value Content"
+          },
+          "tariff_rates": {
+            "mfn_rate": 5,
+            "usmca_rate": 0,
+            "savings_rate": 5
+          },
+          "certification": {
+            "issued_date": "2025-09-05",
+            "valid_until": "2026-09-05",
+            "issuing_authority": "Triangle Intelligence USMCA Platform",
+            "status": "QUALIFIED"
+          },
+          "component_origins": "test_value",
+          "disclaimers": [
+            "This certificate is generated for informational purposes only",
+            "Final USMCA qualification requires customs authority verification",
+            "Consult with licensed customs broker for official certification"
+          ]
+        },
+        "pdf_ready": true,
+        "download_available": true
+      },
+      "request": {
+        "companyName": "test_value",
+        "hsCode": "8544300000",
+        "productDescription": "test_value",
+        "manufacturingLocation": "test_value",
+        "componentOrigins": "test_value"
+      }
+    },
+    "/api/trust/complete-certificate": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "error": "Invalid action"
+      },
+      "request": {
+        "action": "test_value",
+        "certificateData": "test_value"
+      }
+    },
+    "/api/trust/complete-workflow": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "errors": [
+          "Missing required action field"
+        ],
+        "trust_context": {
+          "timestamp": "2025-09-05T20:52:58.770Z",
+          "user_agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+          "ip_address": "unknown",
+          "trust_level_required": 0.95
+        }
+      },
+      "request": {
+        "data": "test_value"
+      }
+    },
+    "/api/trust/data-provenance": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "verify_data_sources",
+          "get_provenance_report",
+          "check_verification_status",
+          "validate_source_agreement"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/expert-validation": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "request_expert_validation",
+          "check_validation_status",
+          "get_expert_requirements",
+          "escalate_complex_case",
+          "get_available_experts",
+          "submit_expert_review"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/success-stories": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "get_success_stories",
+          "get_client_testimonials",
+          "validate_success_story",
+          "get_story_metrics"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/trust/trust-metrics-lightweight": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "public_metrics": {
+          "performance": {
+            "average_response_time_ms": 147,
+            "accuracy_rate": 0.968,
+            "uptime_percentage": 0.999,
+            "data_freshness_hours": 24,
+            "verification_sources_active": 4
+          },
+          "health_indicators": {
+            "classification_system": "operational",
+            "data_verification": "active",
+            "expert_validation": "available",
+            "continuous_monitoring": "active"
+          },
+          "trust_score": 0.94,
+          "last_updated": "2025-09-05T20:53:00.111Z",
+          "verification_status": {
+            "government_sources_verified": true,
+            "expert_network_active": true,
+            "audit_trail_complete": true,
+            "transparency_enabled": true
+          }
+        },
+        "trust_indicators": {
+          "system_status": "operational",
+          "data_provenance": "verified",
+          "expert_validation": "available",
+          "continuous_verification": "active",
+          "accuracy_rate": "96.8%",
+          "response_time": "<200ms",
+          "uptime": "99.9%",
+          "last_verified": "2025-09-05T20:53:00.111Z",
+          "verification_sources": [
+            "CBP",
+            "CBSA",
+            "SAT",
+            "COMTRADE"
+          ],
+          "expert_network": "licensed_customs_brokers",
+          "audit_trail": "complete"
+        },
+        "metrics_generated_at": "2025-09-05T20:53:00.111Z",
+        "transparency_note": "All metrics verified from official sources and expert validation systems"
+      },
+      "request": {}
+    },
+    "/api/trust/trust-metrics": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "public_metrics": {
+          "performance": {
+            "average_response_time_ms": 150,
+            "accuracy_rate": 0.968,
+            "uptime_percentage": 0.999,
+            "data_freshness_hours": 24,
+            "verification_sources_active": 4
+          },
+          "health_indicators": {
+            "classification_system": "operational",
+            "data_verification": "active",
+            "expert_validation": "available",
+            "continuous_monitoring": "active"
+          },
+          "trust_score": 0.94,
+          "last_updated": "2025-09-05T20:53:00.223Z"
+        },
+        "trust_indicators": {
+          "system_status": "operational",
+          "data_provenance": "verified",
+          "expert_validation": "available",
+          "continuous_verification": "active",
+          "accuracy_rate": "96.8%",
+          "response_time": "<200ms",
+          "uptime": "99.9%",
+          "last_verified": "2025-09-05T20:53:00.223Z",
+          "verification_sources": [
+            "CBP",
+            "CBSA",
+            "SAT",
+            "COMTRADE"
+          ],
+          "expert_network": "licensed_customs_brokers",
+          "audit_trail": "complete"
+        },
+        "metrics_generated_at": "2025-09-05T20:53:00.223Z"
+      },
+      "request": {}
+    },
+    "/api/trust/usmca-thresholds": {
+      "status": "FAIL",
+      "statusCode": 405,
+      "response": {
+        "error": "Method not allowed"
+      },
+      "request": {}
+    },
+    "/api/trust/verify-hs-code": {
+      "status": "PASS",
+      "statusCode": 200,
+      "response": {
+        "success": true,
+        "verified": true,
+        "hs_code": "8544300000",
+        "input_code": "8544300000",
+        "description": "Ignition wiring sets and other wiring sets of a kind used in vehicles, aircraft or ships (HTS 2025)",
+        "source": "Official US Database",
+        "trust_score": 0.7,
+        "verification_timestamp": "2025-09-05T20:53:00.558Z",
+        "match_type": "exact",
+        "tariff_info": {
+          "mfn_rate": 5,
+          "usmca_rate": 0,
+          "usmca_eligible": true,
+          "rates": [
+            {
+              "country": "US",
+              "mfn_rate": 5,
+              "usmca_rate": 0
+            }
+          ]
+        },
+        "alternatives": [
+          {
+            "hs_code": "85441100",
+            "description": "Of copper (HTS 2025)",
+            "confidence": 0.8,
+            "functional_match": true,
+            "mfn_rate": 3.5
+          },
+          {
+            "hs_code": "8544200000",
+            "description": "Coaxial cable and other coaxial electric conductors (HTS 2025)",
+            "confidence": 0.8,
+            "functional_match": true,
+            "mfn_rate": 5.3
+          },
+          {
+            "hs_code": "8544421000",
+            "description": "Fitted with modular telephone connectors (HTS 2025)",
+            "confidence": 0.8,
+            "functional_match": true,
+            "mfn_rate": 0
+          },
+          {
+            "hs_code": "8544422000",
+            "description": "Of a kind used for telecommunications (HTS 2025)",
+            "confidence": 0.8,
+            "functional_match": true,
+            "mfn_rate": 0
+          },
+          {
+            "hs_code": "8544491000",
+            "description": "Of a kind used for telecommunications (HTS 2025)",
+            "confidence": 0.8,
+            "functional_match": true,
+            "mfn_rate": 0
+          }
+        ]
+      },
+      "request": {
+        "hs_code": "8544300000"
+      }
+    },
+    "/api/trusted-compliance-workflow": {
+      "status": "FAIL",
+      "statusCode": 400,
+      "response": {
+        "success": false,
+        "error": "Invalid action",
+        "supported_actions": [
+          "trusted_complete_workflow",
+          "verify_data_provenance",
+          "request_expert_validation",
+          "get_trust_metrics",
+          "get_success_stories",
+          "submit_case_study"
+        ]
+      },
+      "request": {
+        "action": "test_value",
+        "data": "test_value"
+      }
+    },
+    "/api/user-contributed-hs-code": {
+      "status": "FAIL",
+      "statusCode": 500,
+      "response": {
+        "success": false,
+        "error": "Failed to save HS code",
+        "processing_time_ms": 117
+      },
+      "request": {
+        "hs_code": "8544300000",
+        "product_description": "automotive electrical wire",
+        "business_type": "Manufacturing",
+        "user_confidence": "test_value",
+        "company_name": "test_value"
+      }
+    }
+  },
+  "correctUsageExamples": {
+    "/api/ai-category-analysis": {
+      "curl": "curl -X POST http://localhost:3000/api/ai-category-analysis \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"productDescription\":\"test_value\",\"businessType\":\"Manufacturing\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/ai-category-analysis', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"productDescription\": \"test_value\",\n  \"businessType\": \"Manufacturing\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "productDescription": "string",
+        "businessType": "string"
+      }
+    },
+    "/api/ai-classify": {
+      "curl": "curl -X POST http://localhost:3000/api/ai-classify \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"product_description\":\"automotive electrical wire\",\"context\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/ai-classify', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"product_description\": \"automotive electrical wire\",\n  \"context\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "product_description": "string",
+        "context": "string"
+      }
+    },
+    "/api/context-classification": {
+      "curl": "curl -X POST http://localhost:3000/api/context-classification \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"product_description\":\"automotive electrical wire\",\"company_id\":\"test_value\",\"use_context\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/context-classification', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"product_description\": \"automotive electrical wire\",\n  \"company_id\": \"test_value\",\n  \"use_context\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "product_description": "string",
+        "company_id": "string",
+        "use_context": "string"
+      }
+    },
+    "/api/dynamic-hs-codes": {
+      "curl": "curl -X POST http://localhost:3000/api/dynamic-hs-codes \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"businessType\":\"Manufacturing\",\"productDescription\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/dynamic-hs-codes', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"businessType\": \"Manufacturing\",\n  \"productDescription\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "businessType": "string",
+        "productDescription": "string"
+      }
+    },
+    "/api/enhanced-classification": {
+      "curl": "curl -X POST http://localhost:3000/api/enhanced-classification \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"product_description\":\"automotive electrical wire\",\"business_type\":\"Manufacturing\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/enhanced-classification', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"product_description\": \"automotive electrical wire\",\n  \"business_type\": \"Manufacturing\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "product_description": "string",
+        "business_type": "string"
+      }
+    },
+    "/api/learn-from-user-contributions": {
+      "curl": "curl -X POST http://localhost:3000/api/learn-from-user-contributions \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"productDescription\":\"test_value\",\"businessType\":\"Manufacturing\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/learn-from-user-contributions', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"productDescription\": \"test_value\",\n  \"businessType\": \"Manufacturing\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "productDescription": "string",
+        "businessType": "string"
+      }
+    },
+    "/api/simple-classification": {
+      "curl": "curl -X POST http://localhost:3000/api/simple-classification \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"product_description\":\"automotive electrical wire\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/simple-classification', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"product_description\": \"automotive electrical wire\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "product_description": "string"
+      }
+    },
+    "/api/simple-dropdown-options": {
+      "curl": "curl -X POST http://localhost:3000/api/simple-dropdown-options \\\n  -H \"Content-Type: application/json\" \\\n  -d '{}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/simple-dropdown-options', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({})\n});\nconst data = await response.json();",
+      "expectedParams": {}
+    },
+    "/api/simple-hs-search": {
+      "curl": "curl -X POST http://localhost:3000/api/simple-hs-search \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"searchTerm\":\"test_value\",\"description\":\"test_value\",\"businessType\":\"Manufacturing\",\"limit\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/simple-hs-search', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"searchTerm\": \"test_value\",\n  \"description\": \"test_value\",\n  \"businessType\": \"Manufacturing\",\n  \"limit\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "searchTerm": "string",
+        "description": "string",
+        "businessType": "string",
+        "limit": "string"
+      }
+    },
+    "/api/simple-savings": {
+      "curl": "curl -X POST http://localhost:3000/api/simple-savings \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"importVolume\":100000,\"supplierCountry\":\"CN\",\"businessType\":\"Manufacturing\",\"destinationCountry\":\"test_value\",\"hsCode\":\"8544300000\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/simple-savings', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"importVolume\": 100000,\n  \"supplierCountry\": \"CN\",\n  \"businessType\": \"Manufacturing\",\n  \"destinationCountry\": \"test_value\",\n  \"hsCode\": \"8544300000\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "importVolume": "number",
+        "supplierCountry": "string (country code)",
+        "businessType": "string",
+        "destinationCountry": "string (country code)",
+        "hsCode": "string (HS code)"
+      }
+    },
+    "/api/smart-chapter-detection": {
+      "curl": "curl -X POST http://localhost:3000/api/smart-chapter-detection \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"businessType\":\"Manufacturing\",\"productDescription\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/smart-chapter-detection', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"businessType\": \"Manufacturing\",\n  \"productDescription\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "businessType": "string",
+        "productDescription": "string"
+      }
+    },
+    "/api/test-company-profile": {
+      "curl": "curl -X POST http://localhost:3000/api/test-company-profile \\\n  -H \"Content-Type: application/json\" \\\n  -d '{}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/test-company-profile', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({})\n});\nconst data = await response.json();",
+      "expectedParams": {}
+    },
+    "/api/trust/calculate-qualification": {
+      "curl": "curl -X POST http://localhost:3000/api/trust/calculate-qualification \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"component_origins\":\"test_value\",\"manufacturing_location\":\"test_value\",\"hs_code\":\"8544300000\",\"business_type\":\"Manufacturing\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/trust/calculate-qualification', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"component_origins\": \"test_value\",\n  \"manufacturing_location\": \"test_value\",\n  \"hs_code\": \"8544300000\",\n  \"business_type\": \"Manufacturing\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "component_origins": "string",
+        "manufacturing_location": "string",
+        "hs_code": "string (HS code)",
+        "business_type": "string"
+      }
+    },
+    "/api/trust/complete-certificate-simple": {
+      "curl": "curl -X POST http://localhost:3000/api/trust/complete-certificate-simple \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"companyName\":\"test_value\",\"hsCode\":\"8544300000\",\"productDescription\":\"test_value\",\"manufacturingLocation\":\"test_value\",\"componentOrigins\":\"test_value\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/trust/complete-certificate-simple', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"companyName\": \"test_value\",\n  \"hsCode\": \"8544300000\",\n  \"productDescription\": \"test_value\",\n  \"manufacturingLocation\": \"test_value\",\n  \"componentOrigins\": \"test_value\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "companyName": "string",
+        "hsCode": "string (HS code)",
+        "productDescription": "string",
+        "manufacturingLocation": "string",
+        "componentOrigins": "string"
+      }
+    },
+    "/api/trust/trust-metrics-lightweight": {
+      "curl": "curl -X POST http://localhost:3000/api/trust/trust-metrics-lightweight \\\n  -H \"Content-Type: application/json\" \\\n  -d '{}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/trust/trust-metrics-lightweight', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({})\n});\nconst data = await response.json();",
+      "expectedParams": {}
+    },
+    "/api/trust/trust-metrics": {
+      "curl": "curl -X POST http://localhost:3000/api/trust/trust-metrics \\\n  -H \"Content-Type: application/json\" \\\n  -d '{}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/trust/trust-metrics', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({})\n});\nconst data = await response.json();",
+      "expectedParams": {}
+    },
+    "/api/trust/verify-hs-code": {
+      "curl": "curl -X POST http://localhost:3000/api/trust/verify-hs-code \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"hs_code\":\"8544300000\"}'",
+      "javascript": "\nconst response = await fetch('http://localhost:3000/api/trust/verify-hs-code', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n  \"hs_code\": \"8544300000\"\n})\n});\nconst data = await response.json();",
+      "expectedParams": {
+        "hs_code": "string (HS code)"
+      }
+    }
+  }
+}

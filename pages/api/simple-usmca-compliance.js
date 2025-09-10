@@ -6,6 +6,100 @@
 
 import { usmcaClassifier } from '../../lib/core/simple-usmca-classifier.js';
 import { normalizeHSCode, validateHSCodeFormat } from '../../lib/utils/hs-code-normalizer.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// Cache for dynamic HS code examples
+let hsCodeExamples = null;
+
+/**
+ * Get dynamic HS code examples from database
+ * @returns {Promise<Array>} Array of HS code examples
+ */
+async function getHSCodeExamples() {
+  if (hsCodeExamples) {
+    return hsCodeExamples;
+  }
+  
+  try {
+    // Get sample HS codes from the database
+    const { data, error } = await supabase
+      .from('hs_master_rebuild')
+      .select('hs_code, description')
+      .not('hs_code', 'is', null)
+      .not('description', 'is', null)
+      .limit(10);
+    
+    if (error || !data || data.length === 0) {
+      // Fallback examples if database query fails
+      hsCodeExamples = [
+        { hs_code: '8544.42.90', description: 'Electric conductors' },
+        { hs_code: '8517.62.00', description: 'Communication equipment' },
+        { hs_code: '8703.23.00', description: 'Motor vehicles' }
+      ];
+    } else {
+      // Format HS codes with dots for user examples
+      hsCodeExamples = data.slice(0, 3).map(item => ({
+        hs_code: formatHSCodeWithDots(item.hs_code),
+        description: item.description
+      }));
+    }
+    
+    return hsCodeExamples;
+  } catch (error) {
+    console.error('Failed to load HS code examples:', error);
+    // Emergency fallback
+    hsCodeExamples = [
+      { hs_code: '8544.42.90', description: 'Electric conductors' },
+      { hs_code: '8517.62.00', description: 'Communication equipment' }
+    ];
+    return hsCodeExamples;
+  }
+}
+
+/**
+ * Format HS code with dots for user display
+ * @param {string} hsCode - Raw HS code
+ * @returns {string} Formatted HS code with dots
+ */
+function formatHSCodeWithDots(hsCode) {
+  if (!hsCode || hsCode.length < 6) return hsCode;
+  
+  // Format as XX.XX.XX.XX for 8+ digit codes
+  if (hsCode.length >= 8) {
+    return `${hsCode.substring(0, 4)}.${hsCode.substring(4, 6)}.${hsCode.substring(6, 8)}.${hsCode.substring(8)}`;
+  }
+  
+  // Format as XX.XX.XX for 6-digit codes
+  return `${hsCode.substring(0, 4)}.${hsCode.substring(4, 6)}`;
+}
+
+/**
+ * Generate dynamic HS code suggestion text
+ * @returns {Promise<string>} Suggestion text with real examples
+ */
+async function generateHSCodeSuggestion() {
+  try {
+    const examples = await getHSCodeExamples();
+    const firstExample = examples[0];
+    const secondExample = examples[1];
+    
+    if (firstExample && secondExample) {
+      return `Provide HS code (e.g., "${firstExample.hs_code}" for ${firstExample.description} or "${secondExample.hs_code}" for ${secondExample.description})`;
+    } else if (firstExample) {
+      return `Provide HS code (e.g., "${firstExample.hs_code}" for ${firstExample.description})`;
+    } else {
+      return 'Provide valid HS code for your product';
+    }
+  } catch (error) {
+    console.error('Failed to generate HS code suggestion:', error);
+    return 'Provide valid HS code for your product';
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -91,7 +185,7 @@ async function handleUSMCAQualification(req, res) {
   if (!hs_code) {
     return res.status(400).json({ 
       error: 'HS code is required for USMCA qualification check',
-      suggestion: 'Provide HS code (e.g., "8544.42.90" or "85444290")'
+      suggestion: await generateHSCodeSuggestion()
     });
   }
   
@@ -141,7 +235,7 @@ async function handleSavingsCalculation(req, res) {
     return res.status(400).json({
       error: 'Invalid HS code format',
       originalInput: hs_code,
-      suggestion: 'Provide valid HS code (e.g., "8544.42.90")'
+      suggestion: await generateHSCodeSuggestion()
     });
   }
   
@@ -189,7 +283,7 @@ async function handleCompleteWorkflow(req, res) {
   try {
     // Step 1: Classify product using working classification API
     console.log('🔍 Step 1: Classifying product...');
-    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/simple-classification`, {
+    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ai-classification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

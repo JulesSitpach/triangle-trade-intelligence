@@ -7,46 +7,27 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../../components/TriangleLayout';
 
 const Plus = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
+  <span className={className}>[plus]</span>
 );
 
 const Edit = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-  </svg>
+  <span className={className}>[edit]</span>
 );
 
 const User = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-  </svg>
+  <span className={className}>[user]</span>
 );
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const AlertCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="12" y1="8" x2="12" y2="12"/>
-    <line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
+  <span className={className}>[alert]</span>
 );
 
 const Mail = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-    <polyline points="22,6 12,13 2,6"/>
-  </svg>
+  <span className={className}>[mail]</span>
 );
 
 export default function UserManagement() {
@@ -217,7 +198,7 @@ export default function UserManagement() {
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
-          <div className="flex-1">
+          <div className="content-card">
             <h1 className="page-title">
               User Management
             </h1>
@@ -309,7 +290,7 @@ function UsersList({ users, onUpgradeUser }) {
       {users.map(user => (
         <div key={user.id} className="content-card">
           <div className="card-header">
-            <div className="flex-1">
+            <div className="content-card">
               <div className="hero-button-group">
                 <h3 className="content-card-title">
                   {user.company_name}
@@ -394,7 +375,7 @@ function SubscriptionsList({ subscriptions, users }) {
         return (
           <div key={subscription.id} className="content-card">
             <div className="card-header">
-              <div className="flex-1">
+              <div className="content-card">
                 <div className="hero-button-group">
                   <h3 className="content-card-title">
                     {user?.company_name}

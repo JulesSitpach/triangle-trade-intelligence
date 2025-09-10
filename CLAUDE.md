@@ -97,7 +97,18 @@ Two-phase approach:
 - `config/system-config.js` - Central system configuration
 - `config/table-constants.js` - Database table names (never hardcode)
 - `config/trust-config.js` - Trust system settings
+- `config/usmca-thresholds.js` - Industry-specific USMCA thresholds
 - `.env.local` - Environment variables (Supabase, Anthropic, etc.)
+
+### Critical USMCA Threshold Configuration
+
+**IMPORTANT**: Electronics industry uses 65% threshold, NOT 75%:
+- Electronics/Electronics & Technology: **65.0%** (not 75%)
+- Automotive: **75.0%** ✓
+- Textiles/Textiles & Apparel: **62.5%** ✓
+- General Manufacturing: **62.5%** ✓
+
+**Fixed Issue**: `config/usmca-thresholds.js` previously had Electronics set to 75% instead of the correct 65% threshold. This caused incorrect USMCA qualification results for electronics companies.
 
 ### CSS Architecture Rules (STRICTLY ENFORCED)
 
@@ -110,11 +121,20 @@ Two-phase approach:
 ### Database Schema
 
 Primary tables (Supabase PostgreSQL):
-- `hs_master_rebuild` - 34,476 HS codes (critical)
+- `hs_master_rebuild` - 34,476 HS codes (critical - MAIN tariff data source)
+- `tariff_rates` - 14,486 records (WARNING: Many 0% rates - use as fallback only)
+- `usmca_tariff_rates` - 48 records (Limited coverage)
 - `user_profiles` - User accounts (empty = sample data)
 - `workflow_completions` - Completed workflows
 - `rss_feeds` - Crisis monitoring feeds
 - `usmca_qualification_rules` - Qualification logic
+
+**CRITICAL TARIFF TABLE PRIORITY:**
+1. **hs_master_rebuild** (PRIMARY): 34,476 codes with real tariff rates
+2. **usmca_tariff_rates** (SECONDARY): Limited but high-quality data  
+3. **tariff_rates** (FALLBACK): Many records have 0% rates - use only as last resort
+
+**KNOWN ISSUE RESOLVED:** Previous versions incorrectly prioritized `tariff_rates` table first, causing electrical components to return 0% rates. Fixed 2025-09-10 to use `hs_master_rebuild` as primary source.
 
 ### Testing Strategy
 

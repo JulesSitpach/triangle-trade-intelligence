@@ -1,0 +1,242 @@
+#!/bin/bash
+
+# BUSINESS CONTEXT GIT HOOKS
+# Enforce business context consideration before every commit
+
+echo "🎯 BUSINESS CONTEXT PRE-COMMIT CHECK"
+echo "======================================"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Business context validation
+business_context_check() {
+    echo -e "\n${BLUE}1. BUSINESS CONTEXT VALIDATION${NC}"
+    
+    # Check if PROJECT-CONTEXT-DOCUMENT.md exists
+    if [ ! -f "PROJECT-CONTEXT-DOCUMENT.md" ]; then
+        echo -e "${RED}❌ PROJECT-CONTEXT-DOCUMENT.md not found!${NC}"
+        echo -e "${YELLOW}   Business context is required for all development${NC}"
+        return 1
+    fi
+    
+    # Check if CLAUDE.md has business context requirements
+    if ! grep -q "MANDATORY BUSINESS CONTEXT CHECK" CLAUDE.md 2>/dev/null; then
+        echo -e "${RED}❌ CLAUDE.md missing mandatory business context requirements${NC}"
+        return 1
+    fi
+    
+    echo -e "${GREEN}✅ Business context documents present${NC}"
+    return 0
+}
+
+# Check staged files for business impact
+staged_files_check() {
+    echo -e "\n${BLUE}2. STAGED FILES BUSINESS IMPACT CHECK${NC}"
+    
+    staged_files=$(git diff --cached --name-only)
+    
+    if [ -z "$staged_files" ]; then
+        echo -e "${YELLOW}⚠️  No staged files found${NC}"
+        return 0
+    fi
+    
+    echo "Staged files:"
+    echo "$staged_files" | while read file; do
+        echo "  • $file"
+    done
+    
+    # Check for critical business files
+    api_changes=$(echo "$staged_files" | grep -E "pages/api/|lib/services/" | wc -l)
+    component_changes=$(echo "$staged_files" | grep -E "components/|pages/" | wc -l)
+    
+    if [ "$api_changes" -gt 0 ]; then
+        echo -e "\n${YELLOW}📡 API CHANGES DETECTED (${api_changes} files)${NC}"
+        echo "Business impact questions:"
+        echo "  • How do these API changes serve customer workflows?"
+        echo "  • Do these maintain professional response times (<2s)?"
+        echo "  • Are changes aligned with customer success criteria?"
+    fi
+    
+    if [ "$component_changes" -gt 0 ]; then
+        echo -e "\n${YELLOW}🖥️  COMPONENT CHANGES DETECTED (${component_changes} files)${NC}"
+        echo "Business impact questions:"
+        echo "  • Do these improve customer workflow efficiency?"
+        echo "  • Is professional credibility maintained?"
+        echo "  • Can users still complete analysis in <30 minutes?"
+    fi
+    
+    return 0
+}
+
+# Business context questionnaire
+business_impact_questionnaire() {
+    echo -e "\n${BLUE}3. BUSINESS IMPACT QUESTIONNAIRE${NC}"
+    
+    echo -e "\nPlease confirm you've considered these business contexts:"
+    echo -e "${YELLOW}Customer Impact:${NC}"
+    echo "  • Sarah (Import Compliance Manager): <30min analysis, 95% accuracy"
+    echo "  • Mike (Procurement Specialist): Total landed cost visibility"
+    echo "  • Lisa (CFO/Finance Director): Accurate duty forecasting"
+    
+    echo -e "\n${YELLOW}Success Criteria:${NC}"
+    echo "  • Customer: 95% accuracy, <30min workflows, $150K+ savings"
+    echo "  • Business: 25% conversion, 90% retention, NPS >50"
+    echo "  • Technical: <2s response, 99.9% uptime, database-driven"
+    
+    echo -e "\n${YELLOW}Real Scenarios:${NC}"
+    echo "  • Electronics: TechCorp smart speaker ($245K savings potential)"
+    echo "  • Automotive: AutoDist brake assembly ($625K savings potential)"
+    echo "  • Fashion: Supplier switch evaluation ($180K savings potential)"
+    
+    # Interactive confirmation
+    echo -e "\n${BLUE}BUSINESS CONTEXT CONFIRMATION:${NC}"
+    read -p "1. How does this commit advance customer business outcomes? " customer_impact
+    
+    if [ ${#customer_impact} -lt 10 ]; then
+        echo -e "${RED}❌ Please provide meaningful customer impact description (minimum 10 characters)${NC}"
+        return 1
+    fi
+    
+    read -p "2. Which customer scenario does this primarily serve? [electronics/automotive/fashion/all]: " scenario
+    
+    case "$scenario" in
+        electronics|automotive|fashion|all)
+            echo -e "${GREEN}✅ Valid customer scenario selected${NC}"
+            ;;
+        *)
+            echo -e "${RED}❌ Please select a valid customer scenario${NC}"
+            return 1
+            ;;
+    esac
+    
+    read -p "3. Does this maintain professional credibility with compliance experts? [y/N]: " credibility
+    
+    case "$credibility" in
+        [Yy]*)
+            echo -e "${GREEN}✅ Professional credibility confirmed${NC}"
+            ;;
+        *)
+            echo -e "${RED}❌ Professional credibility concern - please review changes${NC}"
+            return 1
+            ;;
+    esac
+    
+    # Store responses for commit message enhancement
+    echo "BUSINESS_CONTEXT_VALIDATED=true" > .git/business-context-check
+    echo "CUSTOMER_IMPACT=\"$customer_impact\"" >> .git/business-context-check
+    echo "CUSTOMER_SCENARIO=\"$scenario\"" >> .git/business-context-check
+    echo "PROFESSIONAL_CREDIBILITY=\"$credibility\"" >> .git/business-context-check
+    
+    return 0
+}
+
+# Commit message enhancement suggestion
+suggest_commit_message_enhancement() {
+    echo -e "\n${BLUE}4. COMMIT MESSAGE ENHANCEMENT${NC}"
+    
+    if [ -f ".git/business-context-check" ]; then
+        source .git/business-context-check
+        
+        echo -e "\nSuggested commit message format:"
+        echo -e "${GREEN}[business-context] Your commit message${NC}"
+        echo -e "${GREEN}${NC}"
+        echo -e "${GREEN}Business Impact: $CUSTOMER_IMPACT${NC}"
+        echo -e "${GREEN}Customer Scenario: $CUSTOMER_SCENARIO${NC}"
+        echo -e "${GREEN}Professional Grade: $PROFESSIONAL_CREDIBILITY${NC}"
+        
+        echo -e "\n${YELLOW}💡 TIP: Include business context in your commit message${NC}"
+    fi
+    
+    return 0
+}
+
+# CSS protection check (existing functionality)
+css_protection_check() {
+    echo -e "\n${BLUE}5. CSS PROTECTION CHECK${NC}"
+    
+    # Check for CSS violations in staged files
+    if git diff --cached --name-only | xargs grep -l 'style=' 2>/dev/null; then
+        echo -e "${RED}❌ CRITICAL: Inline styles detected!${NC}"
+        echo -e "${YELLOW}   Business Impact: Breaks professional UI standards${NC}"
+        echo -e "${YELLOW}   Customer Impact: Undermines credibility with compliance professionals${NC}"
+        echo -e "${YELLOW}   Solution: Use existing classes from styles/globals.css${NC}"
+        return 1
+    fi
+    
+    # Check for Tailwind classes
+    if git diff --cached --name-only | xargs grep -l 'className=".*\(bg-\|text-\|p-\|m-\)' 2>/dev/null; then
+        echo -e "${RED}❌ CRITICAL: Tailwind CSS classes detected!${NC}"
+        echo -e "${YELLOW}   Business Impact: Inconsistent with enterprise design system${NC}"
+        echo -e "${YELLOW}   Customer Impact: May break professional interface standards${NC}"
+        echo -e "${YELLOW}   Solution: This project uses custom CSS only${NC}"
+        return 1
+    fi
+    
+    echo -e "${GREEN}✅ CSS protection check passed${NC}"
+    return 0
+}
+
+# Hardcoding protection check (existing functionality)
+hardcoding_check() {
+    echo -e "\n${BLUE}6. HARDCODING PROTECTION CHECK${NC}"
+    
+    # Check for hardcoded values that could break business logic
+    hardcoded_patterns=(
+        "0.068"    # Hardcoded tariff rates
+        "6.8%"     # Hardcoded percentages
+        "localhost:3000"  # Hardcoded URLs
+        "console.log.*PLACEHOLDER"  # Development placeholders
+    )
+    
+    violations_found=false
+    
+    for pattern in "${hardcoded_patterns[@]}"; do
+        if git diff --cached | grep -q "$pattern"; then
+            echo -e "${RED}❌ HARDCODED VALUE DETECTED: $pattern${NC}"
+            echo -e "${YELLOW}   Business Impact: May break customer calculations${NC}"
+            echo -e "${YELLOW}   Customer Risk: Sarah's USMCA qualifications could be inaccurate${NC}"
+            violations_found=true
+        fi
+    done
+    
+    if [ "$violations_found" = true ]; then
+        echo -e "${YELLOW}   Solution: Use configuration files or database values${NC}"
+        return 1
+    fi
+    
+    echo -e "${GREEN}✅ No hardcoded values detected${NC}"
+    return 0
+}
+
+# Main execution
+main() {
+    echo -e "${BLUE}Starting business context validation...${NC}\n"
+    
+    # Run all checks
+    business_context_check || exit 1
+    staged_files_check || exit 1
+    business_impact_questionnaire || exit 1
+    suggest_commit_message_enhancement
+    css_protection_check || exit 1
+    hardcoding_check || exit 1
+    
+    echo -e "\n${GREEN}🎉 ALL BUSINESS CONTEXT CHECKS PASSED!${NC}"
+    echo -e "${GREEN}✅ Commit approved - business context validated${NC}"
+    echo -e "${GREEN}✅ Customer impact considered${NC}"
+    echo -e "${GREEN}✅ Professional standards maintained${NC}"
+    echo -e "${GREEN}✅ Technical excellence preserved${NC}"
+    
+    # Cleanup
+    rm -f .git/business-context-check
+    
+    echo -e "\n${BLUE}Proceeding with commit...${NC}"
+    exit 0
+}
+
+# Run main function
+main "$@"

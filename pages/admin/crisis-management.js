@@ -7,68 +7,39 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../../components/TriangleLayout';
 
 const AlertTriangle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
+  <span className={className}>[warning]</span>
 );
 
 const Activity = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
-  </svg>
+  <span className={className}>[activity]</span>
 );
 
 const Rss = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M4 11a9 9 0 0 1 9 9"/>
-    <path d="M4 4a16 16 0 0 1 16 16"/>
-    <circle cx="5" cy="19" r="1"/>
-  </svg>
+  <span className={className}>[rss]</span>
 );
 
 const Shield = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-  </svg>
+  <span className={className}>[shield]</span>
 );
 
 const Bell = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-  </svg>
+  <span className={className}>[bell]</span>
 );
 
 const CheckCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
+  <span className={className}>[check]</span>
 );
 
 const PlayCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <polygon points="10,8 16,12 10,16 10,8"/>
-  </svg>
+  <span className={className}>[play]</span>
 );
 
 const PauseCircle = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="10" y1="15" x2="10" y2="9"/>
-    <line x1="14" y1="15" x2="14" y2="9"/>
-  </svg>
+  <span className={className}>[pause]</span>
 );
 
 const RefreshCw = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="23,4 23,10 17,10"/>
-    <polyline points="1,20 1,14 7,14"/>
-    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
-  </svg>
+  <span className={className}>[refresh]</span>
 );
 
 export default function CrisisManagement() {
@@ -237,7 +208,7 @@ export default function CrisisManagement() {
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
-          <div className="flex-1">
+          <div className="content-card">
             <h1 className="page-title">
               Crisis Management
             </h1>
@@ -376,7 +347,7 @@ function RssMonitoring({ feeds }) {
       {feeds.map(feed => (
         <div key={feed.id} className="content-card">
           <div className="card-header">
-            <div className="flex-1">
+            <div className="content-card">
               <div className="hero-button-group">
                 <h3 className="content-card-title">
                   {feed.name}
@@ -440,7 +411,7 @@ function CrisisAlerts({ alerts }) {
       {alerts.map(alert => (
         <div key={alert.id} className="content-card">
           <div className="card-header">
-            <div className="flex-1">
+            <div className="content-card">
               <div className="hero-button-group">
                 <h3 className="content-card-title">
                   {alert.title}
@@ -503,7 +474,7 @@ function AutomatedResponses({ responses }) {
       {responses.map(response => (
         <div key={response.id} className="content-card">
           <div className="card-header">
-            <div className="flex-1">
+            <div className="content-card">
               <div className="hero-button-group">
                 <h3 className="content-card-title">
                   {response.action}

@@ -36,6 +36,34 @@ export default function SalesPresentations() {
   const [customizations, setCustomizations] = useState({});
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [dropdownOptions, setDropdownOptions] = useState({
+    businessTypes: []
+  });
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+
+  // Load dropdown options on component mount
+  useEffect(() => {
+    const loadDropdownOptions = async () => {
+      try {
+        setIsLoadingOptions(true);
+        const response = await fetch('/api/database-driven-dropdown-options?category=business_types');
+        const result = await response.json();
+        
+        if (result.success && result.data.business_types) {
+          setDropdownOptions({
+            businessTypes: result.data.business_types
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load dropdown options:', error);
+        // Keep empty array as fallback
+      } finally {
+        setIsLoadingOptions(false);
+      }
+    };
+
+    loadDropdownOptions();
+  }, []);
 
   // Presentation type configurations
   const presentationTypes = [
@@ -302,12 +330,15 @@ function PresentationCustomizer({ presentationType, customizations, onChange, on
                 className="form-select"
               >
                 <option value="">Select industry</option>
-                <option value="automotive">Automotive</option>
-                <option value="electronics">Electronics</option>
-                <option value="textile">Textile & Apparel</option>
-                <option value="chemicals">Chemicals</option>
-                <option value="agriculture">Agriculture & Food</option>
-                <option value="metals">Metals & Manufacturing</option>
+                {isLoadingOptions ? (
+                  <option disabled>Loading industries...</option>
+                ) : (
+                  dropdownOptions.businessTypes.map(businessType => (
+                    <option key={businessType.value} value={businessType.value}>
+                      {businessType.label}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 

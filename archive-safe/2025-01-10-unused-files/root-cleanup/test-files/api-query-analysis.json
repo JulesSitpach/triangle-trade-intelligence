@@ -1,0 +1,846 @@
+{
+  "apis": {
+    "admin/daily-activity.js": {
+      "path": "admin/daily-activity.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/performance-analytics.js": {
+      "path": "admin/performance-analytics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/revenue-analytics.js": {
+      "path": "admin/revenue-analytics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/rss-feeds.js": {
+      "path": "admin/rss-feeds.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/subscriptions.js": {
+      "path": "admin/subscriptions.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/suppliers/[id]/verify.js": {
+      "path": "admin/suppliers/[id]/verify.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/suppliers.js": {
+      "path": "admin/suppliers.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/user-analytics.js": {
+      "path": "admin/user-analytics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/users.js": {
+      "path": "admin/users.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "admin/workflow-analytics.js": {
+      "path": "admin/workflow-analytics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "ai-category-analysis.js": {
+      "path": "ai-category-analysis.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "ai-classify.js": {
+      "path": "ai-classify.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "classify-business.js": {
+      "path": "classify-business.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "classify.js": {
+      "path": "classify.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "context-classification.js": {
+      "path": "context-classification.js",
+      "queries": [
+        {
+          "table": "company_profiles",
+          "type": "select",
+          "conditions": [
+            "company_id = companyId"
+          ],
+          "context": "const { data, error } = await optimizedSupabase\r\n      .from('company_profiles')\r\n      .select(`\r\n        company_name,\r\n        primary_hs_chapters,\r\n        secondary_hs_chapters,\r\n        keyword_..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data, error } = await performQuery(\r\n      (client) => client\r\n        .from('usmca_tariff_rates')\r\n.select('hs_code, hs_description, mfn_rate, usmca_rate, data_source')\r\n        .or(chapterFi..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [
+            "hs_description condition `%${fullDescription}%`"
+          ],
+          "context": "const { data: exactData } = await performQuery(\r\n      (client) => client\r\n        .from('usmca_tariff_rates')\r\n.select('hs_code, hs_description, mfn_rate, usmca_rate, data_source')\r\n        .ilike('h..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: broadData } = await performQuery(\r\n      (client) => client\r\n        .from('usmca_tariff_rates')\r\n.select('hs_code, hs_description, mfn_rate, usmca_rate, data_source')\r\n        .or(searc..."
+        }
+      ],
+      "tables": [
+        "usmca_tariff_rates",
+        "company_profiles"
+      ],
+      "fallbacks": [
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "(cacheKey, response, 3600000); // 1 hour cache return res.status(200).json(response); } catch (error) { console.error('Classification error:', error); return res.status(500).json({ error: 'Classification failed', message: error.message }); } } /** "
+        },
+        {
+          "trigger": "error_condition",
+          "action": "return_empty",
+          "context": "og('No company context found:', companyId); return null; } return data; } catch (error) { console.error('Error fetching company context:', error); return null; } } /** * EXTRACT SEARCH TERMS with context awareness */ function extractSearchTerms(descrip"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "sole.error('Focused search error:', error); return []; } return data || []; } catch (error) { console.error('Search error:', error); return []; } } /** * PERFORM BROAD SEARCH across all chapters */ async function performBroadSearch(searchTerms, fullDescrip"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "n.has(item.hs_code)) return false; seen.add(item.hs_code); return true; }); } catch (error) { console.error('Broad search error:', error); return []; } } /** * SCORE AND RANK RESULTS based on relevance */ function scoreResults(results, searchTerms, context"
+        },
+        {
+          "trigger": "insufficient_results",
+          "action": "unknown_action",
+          "context": "s]; } } // FALLBACK: Broad search if no context or insufficient results if (results.length < 5) { const broadResults = await performBroadSearch(searchTerms, product_description); results = [...results, ...broadResults]; } // SCORE AND RANK RESULT"
+        }
+      ],
+      "usesRealData": true,
+      "queryStrategy": "usmca_priority + intelligent_fallback"
+    },
+    "crisis-alerts.js": {
+      "path": "crisis-alerts.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "crisis-calculator.js": {
+      "path": "crisis-calculator.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "crisis-config.js": {
+      "path": "crisis-config.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "crisis-messaging.js": {
+      "path": "crisis-messaging.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "crisis-solutions.js": {
+      "path": "crisis-solutions.js",
+      "queries": [
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "status = 'active'"
+          ],
+          "context": "const { data: suppliers, error } = await supabase\r\n    .from('partner_suppliers')\r\n    .select(`\r\n      id,\r\n      company_name,\r\n      location,\r\n      country_code,\r\n      contact_person,\r\n      con..."
+        },
+        {
+          "table": "supplier_introduction_requests",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: request, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .insert({\r\n      user_email: user_profile.email,\r\n      company_name: user_profile.companyName || user..."
+        },
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "id = supplier_id"
+          ],
+          "context": "const { data: request, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .insert({\r\n      user_email: user_profile.email,\r\n      company_name: user_profile.companyName || user..."
+        },
+        {
+          "table": "crisis_solutions",
+          "type": "select",
+          "conditions": [
+            "crisis_alert_id = crisis_alert_id",
+            "is_active = true"
+          ],
+          "context": "const { data: existingSolutions } = await supabase\r\n      .from('crisis_solutions')\r\n      .select(`\r\n        *,\r\n        supplier:partner_suppliers(*)\r\n      `)\r\n      .eq('crisis_alert_id', crisis_a..."
+        },
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "id = supplier_id"
+          ],
+          "context": "const { data: supplier } = await supabase\r\n    .from('partner_suppliers')\r\n    .select('*')\r\n    .eq('id', supplier_id)\r\n    .single()..."
+        },
+        {
+          "table": "supplier_introduction_requests",
+          "type": "select",
+          "conditions": [
+            "status = status"
+          ],
+          "context": "const { data: requests, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .select(`\r\n      *,\r\n      supplier:partner_suppliers(company_name, location, contact_person)\r\n    `)..."
+        },
+        {
+          "table": "hs_master_rebuild",
+          "type": "select",
+          "conditions": [
+            "hs_code = normalizedCode"
+          ],
+          "context": "const { data, error } = await supabase\r\n        .from('hs_master_rebuild')\r\n        .select('mfn_rate, usmca_rate')\r\n        .eq('hs_code', normalizedCode)\r\n        .limit(1)..."
+        },
+        {
+          "table": "hs_master_rebuild",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: avgData } = await supabase\r\n          .from('hs_master_rebuild')\r\n          .select('mfn_rate, usmca_rate')\r\n          .not('mfn_rate', 'is', null)\r\n          .not('usmca_rate', 'is', nu..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: avgData } = await supabase\r\n        .from('usmca_tariff_rates')\r\n        .select('tariff_differential')\r\n        .not('tariff_differential', 'is', null)\r\n        .limit(10)..."
+        },
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "status = 'active'"
+          ],
+          "context": "const { data: suppliers, error } = await supabase\r\n    .from('partner_suppliers')\r\n    .select(`\r\n      id,\r\n      company_name,\r\n      location,\r\n      country_code,\r\n      contact_person,\r\n      con..."
+        },
+        {
+          "table": "supplier_introduction_requests",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: request, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .insert({\r\n      user_email: user_profile.email,\r\n      company_name: user_profile.companyName || user..."
+        },
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "id = supplier_id"
+          ],
+          "context": "const { data: request, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .insert({\r\n      user_email: user_profile.email,\r\n      company_name: user_profile.companyName || user..."
+        },
+        {
+          "table": "crisis_solutions",
+          "type": "select",
+          "conditions": [
+            "crisis_alert_id = crisis_alert_id",
+            "is_active = true"
+          ],
+          "context": "const { data: existingSolutions } = await supabase\r\n      .from('crisis_solutions')\r\n      .select(`\r\n        *,\r\n        supplier:partner_suppliers(*)\r\n      `)\r\n      .eq('crisis_alert_id', crisis_a..."
+        },
+        {
+          "table": "partner_suppliers",
+          "type": "select",
+          "conditions": [
+            "id = supplier_id"
+          ],
+          "context": "const { data: supplier } = await supabase\r\n    .from('partner_suppliers')\r\n    .select('*')\r\n    .eq('id', supplier_id)\r\n    .single()..."
+        },
+        {
+          "table": "supplier_introduction_requests",
+          "type": "select",
+          "conditions": [
+            "status = status"
+          ],
+          "context": "const { data: requests, error } = await supabase\r\n    .from('supplier_introduction_requests')\r\n    .select(`\r\n      *,\r\n      supplier:partner_suppliers(company_name, location, contact_person)\r\n    `)..."
+        },
+        {
+          "table": "hs_master_rebuild",
+          "type": "select",
+          "conditions": [
+            "hs_code = normalizedCode"
+          ],
+          "context": "const { data, error } = await supabase\r\n        .from('hs_master_rebuild')\r\n        .select('mfn_rate, usmca_rate')\r\n        .eq('hs_code', normalizedCode)\r\n        .limit(1)..."
+        },
+        {
+          "table": "hs_master_rebuild",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: avgData } = await supabase\r\n          .from('hs_master_rebuild')\r\n          .select('mfn_rate, usmca_rate')\r\n          .not('mfn_rate', 'is', null)\r\n          .not('usmca_rate', 'is', nu..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: avgData } = await supabase\r\n        .from('usmca_tariff_rates')\r\n        .select('tariff_differential')\r\n        .not('tariff_differential', 'is', null)\r\n        .limit(10)..."
+        }
+      ],
+      "tables": [
+        "hs_master_rebuild",
+        "usmca_tariff_rates",
+        "partner_suppliers",
+        "crisis_solutions"
+      ],
+      "fallbacks": [
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "lier_performance', 'get_introduction_requests' ] }); } } catch (error) { logError('Crisis solutions API error', { error: error.message, action, processing_time_ms: Date.now() - startTime }); return res.status(500).json("
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": " + (parseFloat(item.tariff_differential) || 0), 0 ) / avgData.length; } } } catch (error) { console.error('Error querying tariff rates:', error); // Use conservative estimate from config if database query fails tariffSavings = parseFloat(process.env.DEFAULT_TAR"
+        }
+      ],
+      "usesRealData": true,
+      "queryStrategy": "usmca_priority + comprehensive_fallback + intelligent_fallback"
+    },
+    "database-driven-dropdown-options.js": {
+      "path": "database-driven-dropdown-options.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "database-driven-usmca-compliance-simple.js": {
+      "path": "database-driven-usmca-compliance-simple.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "database-driven-usmca-compliance.js": {
+      "path": "database-driven-usmca-compliance.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "dynamic-hs-codes.js": {
+      "path": "dynamic-hs-codes.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "dynamic-pricing.js": {
+      "path": "dynamic-pricing.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "dynamic-rss-alerts.js": {
+      "path": "dynamic-rss-alerts.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "enhanced-classification.js": {
+      "path": "enhanced-classification.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "granular-categories.js": {
+      "path": "granular-categories.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "health.js": {
+      "path": "health.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "integrated-usmca-classification.js": {
+      "path": "integrated-usmca-classification.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "intelligent-classification.js": {
+      "path": "intelligent-classification.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "learn-from-user-contributions.js": {
+      "path": "learn-from-user-contributions.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "performance-metrics.js": {
+      "path": "performance-metrics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "professional-validation.js": {
+      "path": "professional-validation.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "recalculate-usmca-qualification.js": {
+      "path": "recalculate-usmca-qualification.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "rss-monitoring.js": {
+      "path": "rss-monitoring.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "simple-classification.js": {
+      "path": "simple-classification.js",
+      "queries": [
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: contextualData } = await performQuery(\n          (client) => {\n            let query = client\n              .from('usmca_tariff_rates')\n              .select('hs_code, hs_description, mf..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: fallbackData } = await performQuery(\n        (client) => client\n          .from('usmca_tariff_rates')\n          .select('hs_code, hs_description, mfn_rate, usmca_rate, data_source')\n    ..."
+        },
+        {
+          "table": "usmca_tariff_rates",
+          "type": "select",
+          "conditions": [
+            "hs_description condition `%${product_description}%`"
+          ],
+          "context": "const { data: supplementData, error: broadError } = await performQuery(\n      (client) => client\n        .from('usmca_tariff_rates') \n        .select('hs_code, hs_description, mfn_rate, usmca_rate, da..."
+        },
+        {
+          "table": "hs_master_rebuild",
+          "type": "select",
+          "conditions": [],
+          "context": "const { data: fallbackResults } = await performQuery(\n        (client) => client\n          .from('hs_master_rebuild')\n          .select('hs_code, description, mfn_rate, usmca_rate, country_source, cha..."
+        }
+      ],
+      "tables": [
+        "hs_master_rebuild",
+        "usmca_tariff_rates"
+      ],
+      "fallbacks": [
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "plication: aiAnalysis.application, confidence: aiAnalysis.confidence }); } catch (error) { console.log('AI classification error:', error.message); console.log('Falling back to database-only search'); } // Extract basic search terms (no hardcoded synonym "
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "eSet(cacheKey, response, 3600000); // 1 hour cache return res.status(200).json(response); } catch (error) { console.error('Classification error:', error); return res.status(500).json({ error: 'Classification failed', message: error.message }); } } /** * BUILD CO"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "unknown_action",
+          "context": " // INTELLIGENT FALLBACK: Broader search with intelligent term extraction const { data: fallbackData } = await performQuery( (client) => client .from('usmca_tariff_rates') .select('hs_code, hs_description, mfn_rate, usmca_rate, data_source') .or(sear"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "handle_error",
+          "context": "term}%`).join(',')) .limit(20), 'intelligent_fallback' ); exactData = fallbackData || []; } // SUPPLEMENTARY: Always do some exact phrase matching as backup const { data: supplementData, error: broadError } = await performQuery( (client) => client "
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "fallback_to_hs_master",
+          "context": "ALLBACK: If insufficient results from usmca_tariff_rates, supplement with hs_master_rebuild let fallbackData = []; const totalResults = (exactData?.length || 0) + (broadData?.length || 0); if (totalResults < 5) { console.log(`🔄 Insufficient results (${totalResults}) from offi"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "fallback_to_hs_master",
+          "context": "llback_coverage' ); if (fallbackResults && fallbackResults.length > 0) { fallbackData = fallbackResults.map(item => ({ ...item, data_source: 'hs_master_fallback', match_type: 'fallback' })); console.log(` ✅ Added ${fallbackDa"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "unknown_action",
+          "context": "s_master_fallback', match_type: 'fallback' })); console.log(` ✅ Added ${fallbackData.length} fallback results for better coverage`); } } // STEP 3: COMBINE AND DEDUPLICATE - Get all unique matches first const rawResults = []; const seenCodes = new S"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "unknown_action",
+          "context": "enCodes.add(item.hs_code); } }); // Add fallback matches (avoid duplicates) (fallbackData || []).forEach(item => { if (!seenCodes.has(item.hs_code)) { rawResults.push({ ...item, match_type: 'fallback' }); seenCodes.add(item.hs_code); } }); "
+        }
+      ],
+      "usesRealData": true,
+      "queryStrategy": "usmca_priority + comprehensive_fallback + intelligent_fallback"
+    },
+    "simple-dropdown-options.js": {
+      "path": "simple-dropdown-options.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "simple-hs-search.js": {
+      "path": "simple-hs-search.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "simple-savings.js": {
+      "path": "simple-savings.js",
+      "queries": [
+        {
+          "table": "tariff_rates",
+          "type": "select",
+          "conditions": [
+            "hs_code = code"
+          ],
+          "context": "const { data, error } = await supabase\n        .from('tariff_rates')\n        .select('hs_code, mfn_rate, usmca_rate, country, description')\n        .eq('hs_code', code)\n        .limit(1)..."
+        },
+        {
+          "table": "tariff_rates",
+          "type": "select",
+          "conditions": [
+            "country = countryCode === 'CN' ? 'China' : \n          countryCode === 'IN' ? 'India' : \n          countryCode === 'VN' ? 'Vietnam' : \n          countryCode === 'JP' ? 'Japan' : \n          countryCode === 'KR' ? 'South Korea' : 'US'"
+          ],
+          "context": "const codes = [hsCode]; // Start with exact code\n  \n  // Add progressively shorter versions for fallback\n  if (hsCode.length > 6) {\n    codes.push(hsCode.substring(0, 8)); // 8-digit\n    codes.push(hs..."
+        },
+        {
+          "table": "tariff_rates",
+          "type": "select",
+          "conditions": [
+            "hs_code = code"
+          ],
+          "context": "const { data, error } = await supabase\n        .from('tariff_rates')\n        .select('hs_code, mfn_rate, usmca_rate, country, description')\n        .eq('hs_code', code)\n        .limit(1)..."
+        },
+        {
+          "table": "tariff_rates",
+          "type": "select",
+          "conditions": [
+            "country = countryCode === 'CN' ? 'China' : \n          countryCode === 'IN' ? 'India' : \n          countryCode === 'VN' ? 'Vietnam' : \n          countryCode === 'JP' ? 'Japan' : \n          countryCode === 'KR' ? 'South Korea' : 'US'"
+          ],
+          "context": "const codes = [hsCode]; // Start with exact code\n  \n  // Add progressively shorter versions for fallback\n  if (hsCode.length > 6) {\n    codes.push(hsCode.substring(0, 8)); // 8-digit\n    codes.push(hs..."
+        }
+      ],
+      "tables": [
+        "tariff_rates"
+      ],
+      "fallbacks": [
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "'exact' : 'fallback', fallbackLevel: fallbackCodes.indexOf(code) }; } } catch (error) { console.error(`Failed to lookup HS code ${code}:`, error); } } // No exact matches found - use country averages but flag it const countryFallback = await getTariffRa"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": " note: 'Using statistical averages - specific HS code lookup recommended' }; } } catch (error) { console.error('Database tariff lookup error:', error); // Emergency fallback - return conservative estimates return { success: false, mfnRate: 0.10, // Con"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "annualSavings / 12, savingsPercentage }, dataSource: tariffData }; } catch (error) { console.error('Real tariff calculation error:', error); return { success: false, error: error.message, fallback: true }; } } // Volume to dollar a"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "${importVolume} annual volume` } ); res.status(200).json(finalResponse) } catch (error) { console.error('Simple savings calculation error:', error) // System error - professional referral required const errorResponse = generateSystemResponse( 25, // V"
+        },
+        {
+          "trigger": "insufficient_results",
+          "action": "return_empty",
+          "context": "de.replace(/[^0-9]/g, ''); // Ensure we have a valid HS code (at least 2 digits for chapter) if (cleanCode.length < 2) return null; // Pad with zeros if needed (some systems expect specific lengths) if (cleanCode.length === 2) return cleanCode.padEnd(6, '0'); // Chapter only if (clea"
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "return_empty",
+          "context": " error); } } // No exact matches found - use country averages but flag it const countryFallback = await getTariffRatesFromDatabase(countryCode, null); return { ...countryFallback, hsCodeProvided: hsCode, note: `No exact match for HS ${hsCode}, using country averages`, "
+        },
+        {
+          "trigger": "sample_data_mode",
+          "action": "unknown_action",
+          "context": "ll volume' : 'Medium', dataQualityRisk: savingsCalculation.dataSource.source === 'emergency_fallback' ? 'High - Estimated data' : savingsCalculation.dataSource.source === 'cbp_harmonized_tariff_schedule' ? 'Low - Authentic data' : 'Medium' }, nextSt"
+        }
+      ],
+      "usesRealData": true,
+      "queryStrategy": "general_tariff + intelligent_fallback"
+    },
+    "simple-usmca-compliance.js": {
+      "path": "simple-usmca-compliance.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": [
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": " default: return res.status(400).json({ error: `Unknown action: ${action}` }); } } catch (error) { console.error('USMCA API error:', error); return res.status(500).json({ error: 'Internal server error', details: error.message }); } } async function handl"
+        },
+        {
+          "trigger": "error_condition",
+          "action": "handle_error",
+          "context": "ns for tracking // (This would use existing table structure) return res.json(result); } catch (error) { console.error('Complete workflow error:', error); return res.status(500).json({ success: false, error: 'Workflow processing failed', details: error.message "
+        }
+      ],
+      "usesRealData": false,
+      "queryStrategy": "intelligent_fallback"
+    },
+    "smart-chapter-detection.js": {
+      "path": "smart-chapter-detection.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "smart-rss-status.js": {
+      "path": "smart-rss-status.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "status.js": {
+      "path": "status.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "submit-missing-product.js": {
+      "path": "submit-missing-product.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "system-status.js": {
+      "path": "system-status.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "test-company-profile.js": {
+      "path": "test-company-profile.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "test-crisis-rss-integration.js": {
+      "path": "test-crisis-rss-integration.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trump-tariff-monitoring.js": {
+      "path": "trump-tariff-monitoring.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/calculate-qualification.js": {
+      "path": "trust/calculate-qualification.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/case-studies.js": {
+      "path": "trust/case-studies.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/complete-certificate-simple.js": {
+      "path": "trust/complete-certificate-simple.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/complete-certificate.js": {
+      "path": "trust/complete-certificate.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/complete-workflow.js": {
+      "path": "trust/complete-workflow.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/data-provenance.js": {
+      "path": "trust/data-provenance.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/expert-validation.js": {
+      "path": "trust/expert-validation.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/success-stories.js": {
+      "path": "trust/success-stories.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/trust-metrics-lightweight.js": {
+      "path": "trust/trust-metrics-lightweight.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/trust-metrics.js": {
+      "path": "trust/trust-metrics.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/usmca-thresholds.js": {
+      "path": "trust/usmca-thresholds.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trust/verify-hs-code.js": {
+      "path": "trust/verify-hs-code.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "trusted-compliance-workflow.js": {
+      "path": "trusted-compliance-workflow.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    },
+    "user-contributed-hs-code.js": {
+      "path": "user-contributed-hs-code.js",
+      "queries": [],
+      "tables": [],
+      "fallbacks": []
+    }
+  },
+  "queryPatterns": {},
+  "dataFlow": {
+    "Product Classification": {
+      "userInput": "Product description",
+      "apiEndpoint": "simple-classification.js",
+      "databaseQueries": [
+        "usmca_tariff_rates",
+        "hs_master_rebuild"
+      ],
+      "fallbackLogic": "If insufficient results from USMCA data, use HS master",
+      "uiOutput": "HS codes with rates and descriptions"
+    },
+    "Savings Calculator": {
+      "userInput": "HS code + import value",
+      "apiEndpoint": "simple-savings.js",
+      "databaseQueries": [
+        "tariff_rates"
+      ],
+      "fallbackLogic": "Country-based averages if no exact match",
+      "uiOutput": "Dollar savings calculations"
+    },
+    "USMCA Compliance": {
+      "userInput": "HS code + component origins",
+      "apiEndpoint": "simple-usmca-compliance.js",
+      "databaseQueries": [
+        "tariff_rates via classifier"
+      ],
+      "fallbackLogic": "Zero rates if no data found",
+      "uiOutput": "Qualification status and requirements"
+    }
+  },
+  "fallbackLogic": {
+    "Insufficient Real Data": {
+      "trigger": "Less than 5 results from primary data source",
+      "apis": [
+        "simple-classification.js"
+      ],
+      "action": "Query hs_master_rebuild for additional coverage",
+      "impact": "Returns placeholder rates (mostly zeros)"
+    },
+    "Empty User Tables": {
+      "trigger": "user_profiles table has 0 records",
+      "apis": [
+        "admin/users.js"
+      ],
+      "action": "Return sample user data for demo",
+      "impact": "Admin dashboard shows demo users, not real data"
+    },
+    "Missing HS Code": {
+      "trigger": "HS code not found in primary tables",
+      "apis": [
+        "simple-savings.js"
+      ],
+      "action": "Use country-based average rates",
+      "impact": "Approximate savings calculations"
+    },
+    "API Error Handling": {
+      "trigger": "Database connection or query errors",
+      "apis": [
+        "All APIs"
+      ],
+      "action": "Return error response or empty results",
+      "impact": "Graceful degradation but no functionality"
+    }
+  },
+  "integrationPoints": {
+    "ComponentOriginsStepEnhanced.js": {
+      "apis": [
+        "simple-classification",
+        "simple-usmca-compliance"
+      ],
+      "dataFlow": "User enters components → API classification → Display results",
+      "criticalPath": true
+    },
+    "WorkflowResults.js": {
+      "apis": [
+        "simple-savings",
+        "trust/complete-certificate"
+      ],
+      "dataFlow": "Show final results → Calculate savings → Generate certificate",
+      "criticalPath": true
+    },
+    "Admin Dashboards": {
+      "apis": [
+        "admin/users",
+        "admin/suppliers",
+        "admin/rss-feeds"
+      ],
+      "dataFlow": "Display management data → Fallback to samples if empty",
+      "criticalPath": false
+    }
+  }
+}

@@ -16,31 +16,53 @@ export function useWorkflowState() {
   const [dropdownOptions, setDropdownOptions] = useState({
     businessTypes: [],
     countries: [],
+    usmcaCountries: [],
     importVolumes: []
   });
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
-  // Form data state with dynamic defaults
-  const [formData, setFormData] = useState({
-    // Company Information
-    company_name: '',
-    business_type: '',
-    supplier_country: '',
-    trade_volume: '',
-    
-    // Product Information  
-    product_description: '',
-    manufacturing_location: '',
-    
-    // HS Code Classification Results
-    classified_hs_code: '',
-    hs_code_confidence: 0,
-    hs_code_description: '',
-    classification_method: '',
-    
-    // Component Origins
-    component_origins: []
+  // Load saved user data from localStorage
+  const loadSavedData = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('triangleUserData');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          console.log('Loading saved user data:', parsed);
+          return parsed;
+        } catch (e) {
+          console.error('Error loading saved data:', e);
+        }
+      }
+    }
+    return null;
+  };
+
+  // Form data state with saved data or defaults
+  const [formData, setFormData] = useState(() => {
+    const saved = loadSavedData();
+    return saved || {
+      // Company Information
+      company_name: '',
+      business_type: '',
+      supplier_country: '',
+      trade_volume: '',
+      destination_country: '',
+      
+      // Product Information  
+      product_description: '',
+      manufacturing_location: '',
+      
+      // HS Code Classification Results
+      classified_hs_code: '',
+      hs_code_confidence: 0,
+      hs_code_description: '',
+      classification_method: '',
+      
+      // Component Origins
+      component_origins: []
+    };
   });
 
   // Load dropdown options on mount
@@ -78,8 +100,18 @@ export function useWorkflowState() {
     }
   }, [defaultsLoaded, isLoadingOptions]);
 
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && formData.company_name) {
+      // Only save if we have at least a company name
+      localStorage.setItem('triangleUserData', JSON.stringify(formData));
+      console.log('Saved user data to localStorage');
+    }
+  }, [formData]);
+
   // Update form data utility
   const updateFormData = useCallback((field, value) => {
+    console.log('Updating form data:', field, '=', value);
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -137,7 +169,7 @@ export function useWorkflowState() {
         // The API returns the entire response object as the results
         // It includes: company, product, usmca, savings, certificate fields
         setResults(workflowResult);
-        setCurrentStep(3); // Results step (updated for 3-step workflow)
+        setCurrentStep(5); // Results step (updated for 5-step workflow)
       } else {
         setError(workflowResult.error || 'Processing failed');
       }
@@ -163,12 +195,13 @@ export function useWorkflowState() {
       
       if (classificationResult.success) {
         // Update form data with classification results
-        updateFormData({
+        setFormData(prev => ({
+          ...prev,
           classified_hs_code: classificationResult.classification.hs_code,
           hs_code_confidence: classificationResult.classification.confidence,
           hs_code_description: classificationResult.classification.description,
           classification_method: classificationResult.method
-        });
+        }));
 
         return classificationResult;
       } else {
@@ -183,18 +216,19 @@ export function useWorkflowState() {
     }
   }, [updateFormData]);
 
-  // Reset workflow
+  // Reset workflow but keep company data
   const resetWorkflow = useCallback(() => {
     setCurrentStep(1);
     setResults(null);
     setError(null);
     
-    // Reset to defaults
+    // Complete form reset - clear ALL fields for new analysis
     setFormData({
       company_name: '',
       business_type: '',
       supplier_country: 'CN',
       trade_volume: '',
+      destination_country: 'US',
       product_description: '',
       manufacturing_location: 'MX',
       classified_hs_code: '',
@@ -224,14 +258,14 @@ export function useWorkflowState() {
         setError(null);
         return;
       } else if (path === 'certificate') {
-        // Continue to step 2 for certificate path
-        setCurrentStep(2);
+        // Continue to step 3 for certificate path (supply chain step)
+        setCurrentStep(3);
         setError(null);
         return;
       }
     }
     
-    setCurrentStep(prev => Math.min(prev + 1, 3));
+    setCurrentStep(prev => Math.min(prev + 1, 5));
     setError(null);
   }, []);
 

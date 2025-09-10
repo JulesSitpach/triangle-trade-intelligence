@@ -1,0 +1,174 @@
+{
+  "totalPatterns": 16,
+  "totalMatches": 0,
+  "categories": {
+    "businessLogic": {
+      "category": "businessLogic",
+      "patterns": 4,
+      "matches": {
+        "usmca": {
+          "description": "USMCA compliance references",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "tariff": {
+          "description": "Tariff calculation logic",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "classification": {
+          "description": "HS code classification",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "savings": {
+          "description": "Cost savings calculations",
+          "count": 0,
+          "files": [],
+          "examples": []
+        }
+      },
+      "totalMatches": 0
+    },
+    "apiEndpoints": {
+      "category": "apiEndpoints",
+      "patterns": 3,
+      "matches": {
+        "export default.*handler": {
+          "description": "API endpoint handlers",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "res\\.status": {
+          "description": "API response patterns",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "req\\.method": {
+          "description": "HTTP method handling",
+          "count": 0,
+          "files": [],
+          "examples": []
+        }
+      },
+      "totalMatches": 0
+    },
+    "dataAccess": {
+      "category": "dataAccess",
+      "patterns": 3,
+      "matches": {
+        "supabase\\.from": {
+          "description": "Database queries",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "prisma\\..": {
+          "description": "Prisma ORM usage",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "\\.env\\..": {
+          "description": "Environment variable access",
+          "count": 0,
+          "files": [],
+          "examples": []
+        }
+      },
+      "totalMatches": 0
+    },
+    "errorHandling": {
+      "category": "errorHandling",
+      "patterns": 3,
+      "matches": {
+        "try.*catch": {
+          "description": "Error handling blocks",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "throw new Error": {
+          "description": "Error throwing",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "console\\.error": {
+          "description": "Error logging",
+          "count": 0,
+          "files": [],
+          "examples": []
+        }
+      },
+      "totalMatches": 0
+    },
+    "security": {
+      "category": "security",
+      "patterns": 3,
+      "matches": {
+        "api.*key": {
+          "description": "API key references",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "auth": {
+          "description": "Authentication logic",
+          "count": 0,
+          "files": [],
+          "examples": []
+        },
+        "jwt": {
+          "description": "JWT token usage",
+          "count": 0,
+          "files": [],
+          "examples": []
+        }
+      },
+      "totalMatches": 0
+    }
+  },
+  "evidence": [
+    {
+      "tool": "GREP",
+      "category": "businessLogic",
+      "timestamp": "2025-09-08T22:48:47.684Z",
+      "patterns": 4,
+      "matches": 0
+    },
+    {
+      "tool": "GREP",
+      "category": "apiEndpoints",
+      "timestamp": "2025-09-08T22:48:47.705Z",
+      "patterns": 3,
+      "matches": 0
+    },
+    {
+      "tool": "GREP",
+      "category": "dataAccess",
+      "timestamp": "2025-09-08T22:48:47.730Z",
+      "patterns": 3,
+      "matches": 0
+    },
+    {
+      "tool": "GREP",
+      "category": "errorHandling",
+      "timestamp": "2025-09-08T22:48:47.751Z",
+      "patterns": 3,
+      "matches": 0
+    },
+    {
+      "tool": "GREP",
+      "category": "security",
+      "timestamp": "2025-09-08T22:48:47.772Z",
+      "patterns": 3,
+      "matches": 0
+    }
+  ]
+}

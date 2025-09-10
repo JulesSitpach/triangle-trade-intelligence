@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       tables: {}
     },
     apis: {
-      classification: { status: 'unknown', endpoint: '/api/simple-classification' },
+      classification: { status: 'unknown', endpoint: '/api/ai-classification' },
       compliance: { status: 'unknown', endpoint: '/api/simple-usmca-compliance' },
       savings: { status: 'unknown', endpoint: '/api/simple-savings' },
       admin_users: { status: 'unknown', endpoint: '/api/admin/users' },
