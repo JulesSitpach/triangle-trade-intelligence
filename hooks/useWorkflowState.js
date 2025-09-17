@@ -50,6 +50,13 @@ export function useWorkflowState() {
       trade_volume: '',
       destination_country: '',
       
+      // Enhanced Company Details for Certificate Completion
+      company_address: '',
+      tax_id: '',
+      contact_person: '',
+      contact_email: '',
+      contact_phone: '',
+      
       // Product Information  
       product_description: '',
       manufacturing_location: '',
@@ -229,6 +236,11 @@ export function useWorkflowState() {
       supplier_country: 'CN',
       trade_volume: '',
       destination_country: 'US',
+      company_address: '',
+      tax_id: '',
+      contact_person: '',
+      contact_email: '',
+      contact_phone: '',
       product_description: '',
       manufacturing_location: 'MX',
       classified_hs_code: '',
@@ -263,11 +275,16 @@ export function useWorkflowState() {
         setError(null);
         return;
       }
+    } else {
+      // For default navigation, clear the workflow path to enable normal step progression
+      if (currentStep === 1) {
+        setWorkflowPath(null);
+      }
     }
     
     setCurrentStep(prev => Math.min(prev + 1, 5));
     setError(null);
-  }, []);
+  }, [currentStep]);
 
   const previousStep = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -291,7 +308,11 @@ export function useWorkflowState() {
       case 1:
         return formData.company_name.length > 2 && 
                formData.business_type && 
-               formData.trade_volume;
+               formData.trade_volume &&
+               formData.company_address &&
+               formData.contact_person &&
+               formData.contact_phone &&
+               formData.contact_email;
       case 2:
         // Product & Components step - needs product description, manufacturing location, and valid components
         return formData.product_description.length >= 10 &&

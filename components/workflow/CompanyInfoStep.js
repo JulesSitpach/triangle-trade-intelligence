@@ -40,7 +40,8 @@ const Info = ({ className }) => (
 );
 import { SAFE_ENDPOINTS, SAFE_COUNTRIES } from '../../config/safe-config.js';
 
-export default function CompanyInfoStep({ data = {}, onChange, validation = { errors: [] } }) {
+export default function CompanyInfoStep({ data = {}, onChange, updateFormData, validation = { errors: [] } }) {
+  console.log('CompanyInfoStep received data:', data);
   const [countries, setCountries] = useState([]);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
   const [addressSuggestions, setAddressSuggestions] = useState({
@@ -71,7 +72,16 @@ export default function CompanyInfoStep({ data = {}, onChange, validation = { er
   };
 
   const handleFieldChange = (field, value) => {
-    onChange({ [field]: value });
+    // Support both calling patterns:
+    // Pattern 1: updateFormData(field, value) - for field-by-field updates
+    // Pattern 2: onChange(updatedData) - for full data object updates
+    if (updateFormData) {
+      updateFormData(field, value);
+    } else if (onChange) {
+      // For the pattern that expects full data object
+      const updatedData = { ...data, [field]: value };
+      onChange(updatedData);
+    }
   };
 
   const validateTaxId = (taxId, country) => {
@@ -160,7 +170,10 @@ export default function CompanyInfoStep({ data = {}, onChange, validation = { er
           }`}
         >
           <option value="">Select country...</option>
-          {countries.map(country => (
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="MX">Mexico</option>
+          {countries.filter(country => !['US', 'CA', 'MX'].includes(country.value)).map(country => (
             <option key={country.value} value={country.value}>
               {country.label}
             </option>

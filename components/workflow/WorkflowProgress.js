@@ -14,10 +14,9 @@ export default function WorkflowProgress({
 }) {
   const steps = [
     { step: 1, label: 'Company Information', icon: 'CO' },
-    { step: 2, label: 'Product Details', icon: 'PD' },
-    { step: 3, label: 'Supply Chain', icon: 'SC' },
-    { step: 4, label: 'Authorization', icon: 'AU' },
-    { step: 5, label: 'Review & Generate', icon: 'RG' }
+    { step: 2, label: 'Product & Component Analysis', icon: 'PC' },
+    { step: 3, label: 'USMCA Results Review', icon: 'RR' },
+    { step: 4, label: 'Certificate Authorization', icon: 'CA' }
   ];
 
   const handleStepClick = (step) => {
@@ -50,13 +49,13 @@ export default function WorkflowProgress({
                   onClick={() => handleStepClick(item.step)}
                   className={`workflow-step ${status} ${isStepClickable ? 'clickable' : ''}`}
                 >
-                  {/* Step Circle */}
-                  <div className="workflow-step-indicator">
+                  {/* Step Badge - Using existing hero-badge style for consistency */}
+                  <div className={`hero-badge ${isComplete ? 'completed' : isActive ? 'active' : 'inactive'}`}>
                     {isComplete ? '✓' : item.step}
                   </div>
-                  
+
                   {/* Step Label */}
-                  <div className="workflow-step-label">
+                  <div className="text-body">
                     {item.label}
                   </div>
                 </div>

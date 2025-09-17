@@ -45,6 +45,15 @@ export const SYSTEM_CONFIG = {
     maxCacheSize: parseInt(getEnvValue('CACHE_MAX_SIZE', '10000'))
   },
 
+  // Tariff Savings Validation Configuration
+  tariff: {
+    maxSavingsPercentage: parseFloat(getEnvValue('MAX_TARIFF_SAVINGS_PERCENTAGE', '85')),
+    highSavingsThreshold: parseFloat(getEnvValue('HIGH_SAVINGS_THRESHOLD', '50')),
+    extremeSavingsThreshold: parseFloat(getEnvValue('EXTREME_SAVINGS_THRESHOLD', '75')),
+    requireValidationAbove: parseFloat(getEnvValue('REQUIRE_VALIDATION_ABOVE', '60')),
+    mexicoProcessingCostPercent: parseFloat(getEnvValue('MEXICO_PROCESSING_COST_PERCENT', '3.0'))
+  },
+
   // Classification Configuration
   classification: {
     minConfidenceThreshold: parseFloat(getEnvValue('MIN_CLASSIFICATION_CONFIDENCE', '0.3')),

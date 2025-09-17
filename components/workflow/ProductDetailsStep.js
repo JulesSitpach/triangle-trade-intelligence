@@ -48,12 +48,10 @@ export default function ProductDetailsStep({ data = {}, productInfo, onChange, v
   // Initialize with pre-classified data
   useEffect(() => {
     if (productInfo && !data.hs_code) {
-      onChange({
-        hs_code: productInfo.hs_code,
-        product_description: productInfo.description,
-        classification_confidence: productInfo.confidence,
-        classification_method: productInfo.method
-      });
+      onChange('hs_code', productInfo.hs_code);
+      onChange('product_description', productInfo.description);
+      onChange('classification_confidence', productInfo.confidence);
+      onChange('classification_method', productInfo.method);
       
       // Auto-verify if confidence is high
       if (productInfo.confidence >= 0.9) {
@@ -102,30 +100,24 @@ export default function ProductDetailsStep({ data = {}, productInfo, onChange, v
   };
 
   const handleHsCodeChange = (newHsCode) => {
-    onChange({ 
-      hs_code: newHsCode,
-      tariff_classification_verified: false,
-      verification_source: null
-    });
+    onChange('hs_code', newHsCode);
+    onChange('tariff_classification_verified', false);
+    onChange('verification_source', null);
     setHsCodeVerification(null);
     setTariffInformation(null);
   };
 
   const handleManualVerification = () => {
-    onChange({ 
-      tariff_classification_verified: true,
-      verification_method: 'manual',
-      verification_date: new Date().toISOString()
-    });
+    onChange('tariff_classification_verified', true);
+    onChange('verification_method', 'manual');
+    onChange('verification_date', new Date().toISOString());
   };
 
   const selectAlternativeHsCode = (hsCode, description) => {
-    onChange({
-      hs_code: hsCode,
-      product_description: description,
-      tariff_classification_verified: false,
-      classification_method: 'manual_selection'
-    });
+    onChange('hs_code', hsCode);
+    onChange('product_description', description);
+    onChange('tariff_classification_verified', false);
+    onChange('classification_method', 'manual_selection');
     verifyHsCode(hsCode);
   };
 
@@ -230,7 +222,7 @@ export default function ProductDetailsStep({ data = {}, productInfo, onChange, v
       
       <textarea
         value={data.product_description || ''}
-        onChange={(e) => onChange({ product_description: e.target.value })}
+        onChange={(e) => onChange('product_description', e.target.value)}
         placeholder="Enter detailed product description for certificate"
         rows={4}
         className={`form-textarea ${
@@ -255,7 +247,7 @@ export default function ProductDetailsStep({ data = {}, productInfo, onChange, v
       <input
         type="text"
         value={data.commercial_description || ''}
-        onChange={(e) => onChange({ commercial_description: e.target.value })}
+        onChange={(e) => onChange('commercial_description', e.target.value)}
         placeholder="Brand name, model number, or commercial identifier"
         className="form-input"
       />

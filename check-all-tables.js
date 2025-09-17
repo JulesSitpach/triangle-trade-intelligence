@@ -14,15 +14,12 @@ async function checkAllTables() {
   console.log('🔍 Checking ALL Tables for Tariff Data\n');
   console.log('=====================================\n');
 
-  // Check all potential tariff tables
+  // Check all potential tariff tables - cleaned up to remove empty tables
   const tables = [
-    'hs_master_rebuild',
-    'hs_codes',
-    'usmca_tariff_rates',
-    'tariff_rates',
-    'hts_codes',
-    'hs_tariff_data',
-    'us_hts_codes'
+    'hs_master_rebuild',    // PRIMARY: 34,476 records with real tariff rates
+    'usmca_tariff_rates',   // SECONDARY: 48 records (Limited but high-quality)
+    'tariff_rates'          // FALLBACK: 14,486 records (Many 0% rates - use as last resort)
+    // REMOVED EMPTY TABLES: hs_codes, hts_codes, hs_tariff_data, us_hts_codes (0 records each)
   ];
 
   for (const table of tables) {

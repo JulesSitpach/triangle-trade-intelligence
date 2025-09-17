@@ -18,17 +18,31 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
   const [crisisBannerVisible, setCrisisBannerVisible] = useState(showCrisisBanner)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false)
+  const [user, setUser] = useState(null)
   const router = useRouter()
   
   // Get alert count from context
   const { alertCount, loading } = useAlertContext()
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('triangle_user_session') || localStorage.getItem('current_user');
+    if (stored) {
+      try {
+        const userData = JSON.parse(stored);
+        setUser(userData);
+      } catch (e) {
+        console.log('Invalid stored user data');
+      }
+    }
+  }, []);
 
   // Close mobile menu and dropdown on route change
   useEffect(() => {
     setMobileMenuOpen(false)
     setUserDropdownOpen(false)
     setAdminDropdownOpen(false)
-  }, [router.pathname])
+  }, [router.pathname]) // Only track pathname changes
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,56 +68,64 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
 
   const navigationItems = [
     {
+      path: '/dashboard',
+      label: 'My Dashboard',
+      description: 'Overview and quick access',
+      public: true
+    },
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      description: 'Main dashboard view',
+      public: true
+    },
+    {
       path: '/usmca-workflow',
-      label: 'Workflow',
+      label: 'Workflows',
       description: 'Complete compliance analysis',
       public: true
     },
     {
-      path: '/trump-tariff-alerts',
+      path: '/trade-risk-alternatives',
       label: 'Alerts',
       description: 'Real-time tariff monitoring',
       badge: !loading && alertCount > 0 ? alertCount.toString() : null,
       public: true
+    },
+    {
+      path: '/certificates',
+      label: 'Certificates',
+      description: 'Generated certificates',
+      public: true
     }
   ]
 
-  // Internal admin dashboard items
+  // Professional Mexico Trade Bridge admin dashboard items
   const adminItems = [
     {
-      path: '/admin/supplier-management',
-      label: 'Supplier Management',
-      description: 'Manage suppliers and preferences'
+      path: '/admin/client-portfolio',
+      label: '🇲🇽 Jorge\'s Partnership Operations',
+      description: 'Mexico partnerships • User management • Crisis alerts • SMB matching'
     },
     {
-      path: '/admin/user-management',
-      label: 'User Management', 
-      description: 'Manage customer accounts'
+      path: '/admin/broker-dashboard',
+      label: '🚢 Cristina\'s Broker Operations',
+      description: 'Licensed customs broker #4601913 • Logistics • Crisis management'
+    },
+    {
+      path: '/admin/collaboration-workspace',
+      label: '🤝 Jorge-Cristina Collaboration',
+      description: 'Cross-team coordination • Joint client management'
     },
     {
       path: '/admin/analytics',
-      label: 'Analytics',
-      description: 'Platform usage and metrics'
+      label: '📈 Business Analytics',
+      description: 'Partnership ROI • Team performance • Revenue attribution'
     },
     {
       path: '/admin/system-config',
-      label: 'System Config',
-      description: 'Configure system settings'
-    },
-    {
-      path: '/sales/dashboard',
-      label: 'Sales Dashboard',
-      description: 'Sales team tools and metrics'
-    },
-    {
-      path: '/admin/crisis-management',
-      label: 'Crisis Management',
-      description: 'Monitor and manage tariff crises'
-    },
-    {
-      path: '/system-status',
-      label: 'System Status',
-      description: 'Real-time platform health monitoring'
+      label: '⚙️ System Management',
+      description: 'Platform configuration • Health monitoring • Performance metrics'
     }
   ]
 
@@ -116,7 +138,7 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
             <span>⚠️</span>
             <span>
               <strong>Tariff Alert:</strong> New import duties may impact your supply chain.{' '}
-              <Link href="/trump-tariff-alerts" className="nav-link">
+              <Link href="/trade-risk-alternatives" className="nav-link">
                 View Impact Assessment
               </Link>
             </span>
@@ -136,96 +158,53 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
         {/* Professional Dashboard Navigation */}
         <header className="dashboard-nav">
           <div className="dashboard-nav-container">
-            {/* Professional Brand */}
-            <Link href="/" className="dashboard-nav-brand">
-              <div className="dashboard-nav-logo">
-                TI
-              </div>
-              <div className="dashboard-nav-title">
-                Triangle Intelligence
+            <Link href="/" className="nav-logo-link">
+              <div className="nav-logo-icon">T</div>
+              <div>
+                <div className="nav-logo-text">Triangle Intelligence</div>
+                <div className="nav-logo-subtitle">My Dashboard</div>
               </div>
             </Link>
 
-            {/* Desktop Navigation Menu */}
-            <nav className="dashboard-nav-menu">
-              {navigationItems.map((item) => (
-                <Link 
-                  key={item.path} 
-                  href={item.path}
-                  className={`dashboard-nav-link ${router.pathname === item.path ? 'active' : ''}`}
-                >
-                  <span>{item.label}</span>
-                  {item.badge && <span className="badge badge-warning">{item.badge}</span>}
-                </Link>
-              ))}
-              
-              {/* Admin Dropdown - Only visible to admin/dev users */}
-              {(isAdmin || isDev) && (
-                <div className="admin-dropdown">
-                  <button 
-                    className={`dashboard-nav-link ${router.pathname.startsWith('/admin') || router.pathname.startsWith('/sales') ? 'active' : ''}`}
-                    onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
-                    aria-label="Admin menu"
-                  >
-                    <span>Admin</span>
-                    <span className="dropdown-arrow">{adminDropdownOpen ? '▲' : '▼'}</span>
-                  </button>
-                  
-                  {adminDropdownOpen && (
-                    <div className="admin-dropdown-menu">
-                      {adminItems.map((item) => (
-                        <Link
-                          key={item.path}
-                          href={item.path}
-                          className={`admin-dropdown-item ${router.pathname === item.path ? 'active' : ''}`}
-                          onClick={() => setAdminDropdownOpen(false)}
-                        >
-                          <div>
-                            <div className="admin-item-label">{item.label}</div>
-                            <div className="admin-item-description">{item.description}</div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </nav>
+            {/* Main Navigation */}
+            <div className="nav-menu">
+              <Link href="/dashboard" className="nav-menu-link">Dashboard</Link>
+              <Link href="/usmca-workflow" className="nav-menu-link">Workflows</Link>
+              <Link href="/trade-risk-alternatives" className="nav-menu-link">Alerts</Link>
+              <Link href="/certificates" className="nav-menu-link">Certificates</Link>
+            </div>
 
-            {/* Professional User Section */}
-            <div className="dashboard-nav-user">
-              <Link 
-                href="/usmca-workflow?reset=true" 
-                className="btn-primary"
-              >
-                New Analysis
-              </Link>
-              
-              {/* User Profile Dropdown */}
-              <div className="dashboard-nav-dropdown">
-                <button 
-                  className="dashboard-nav-avatar"
+            {/* Right Side Actions */}
+            <div className="nav-menu">
+              {/* User Menu */}
+              <div className="admin-dropdown">
+                <button
+                  className="user-menu-button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  aria-label="User menu"
                 >
-                  U
+                  👤 {user?.user_metadata?.company_name || user?.email?.split('@')[0] || 'User'}
                 </button>
-                
                 {userDropdownOpen && (
-                  <div className="dashboard-nav-dropdown-menu">
-                    <Link href="/admin/profile" className="dashboard-nav-dropdown-item">
-                      Profile Settings
+                  <div className="admin-dropdown-menu">
+                    <Link href="/profile" className="admin-dropdown-item">
+                      View Profile
                     </Link>
-                    <Link href="/admin/billing" className="dashboard-nav-dropdown-item">
-                      Billing & Plans
+                    <Link href="/account-settings" className="admin-dropdown-item">
+                      Account Settings
                     </Link>
-                    <Link href="/admin/preferences" className="dashboard-nav-dropdown-item">
-                      Preferences
+                    <Link href="/pricing" className="admin-dropdown-item">
+                      Subscription/Billing
                     </Link>
-                    <div className="nav-dropdown-divider"></div>
-                    <Link href="/auth/logout" className="dashboard-nav-dropdown-item">
+                    <Link href="mailto:support@triangleintelligence.com" className="admin-dropdown-item">
+                      Help
+                    </Link>
+                    <button onClick={() => {
+                      localStorage.removeItem('current_user');
+                      localStorage.removeItem('triangle_user_session');
+                      window.location.href = '/';
+                    }} className="admin-dropdown-item">
                       Sign Out
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>

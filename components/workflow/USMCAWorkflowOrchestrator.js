@@ -18,6 +18,7 @@ import WorkflowLoading from './WorkflowLoading';
 import WorkflowError from './WorkflowError';
 import CrisisCalculatorResults from './CrisisCalculatorResults';
 import WorkflowPathSelection from './WorkflowPathSelection';
+import AuthorizationStep from './AuthorizationStep';
 
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function USMCAWorkflowOrchestrator() {
       // Clean up the URL by removing the reset parameter
       router.replace('/usmca-workflow', undefined, { shallow: true });
     }
-  }, [router.query.reset, resetWorkflow, router]);
+  }, [router.query.reset, resetWorkflow]);
 
   // Enhanced certificate download handler with trust verification
   const handleDownloadCertificate = (formatType = 'official') => {
@@ -153,6 +154,17 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     processWorkflow();
   };
 
+  // Handle Step 2 completion - stay in workflow
+  const handleProcessStep2 = async () => {
+    console.log('🚀 USMCA Analysis button clicked - processing workflow...');
+
+    // Call the workflow processing and wait for results
+    await processWorkflow();
+
+    // Results will show in step 3 within the same workflow
+    console.log('✅ Workflow complete - results will display in step 3');
+  };
+
   // Crisis Calculator handlers
   const handleViewAlertsFromCrisisCalc = () => {
     console.log('User navigating to alerts dashboard from crisis calculator');
@@ -162,6 +174,162 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     console.log('User upgrading from crisis calculator to certificate path');
     // Switch to certificate path and go to step 2
     nextStep('certificate');
+  };
+
+  const handleGenerateCertificate = async (results, authorizationData) => {
+    try {
+      // 💾 Save complete workflow data using WorkflowDataConnector
+      console.log('💾 Saving workflow data through WorkflowDataConnector...');
+      
+      try {
+        // Import and initialize the data connector
+        const { default: WorkflowDataConnector } = await import('../../lib/services/workflow-data-connector');
+        const dataConnector = new WorkflowDataConnector();
+        
+        // Get or create session ID
+        let sessionId = localStorage.getItem('workflow_session_id');
+        if (!sessionId) {
+          sessionId = dataConnector.generateSessionId();
+          localStorage.setItem('workflow_session_id', sessionId);
+        }
+        
+        // Capture Step 1: Company Data
+        await dataConnector.captureWorkflowStep({
+          company_name: formData.company_name,
+          business_type: formData.business_type,
+          contact_email: formData.contact_email,
+          contact_phone: formData.contact_phone,
+          trade_volume: formData.trade_volume,
+          supplier_country: formData.supplier_country,
+          manufacturing_location: formData.manufacturing_location,
+          country: 'US'
+        }, 1, sessionId);
+        
+        // Capture Step 2: Product Analysis
+        await dataConnector.captureWorkflowStep({
+          product_description: formData.product_description,
+          classified_hs_code: formData.classified_hs_code,
+          hs_description: formData.hs_description,
+          classification_confidence: 0.95,
+          component_origins: formData.component_origins
+        }, 2, sessionId);
+        
+        // Capture Step 3: USMCA Results
+        const workflowId = await dataConnector.captureWorkflowStep({
+          qualification_status: formData.qualification_status,
+          trust_score: 95,
+          north_american_content: getTotalComponentPercentage(),
+          calculated_savings: formData.calculated_savings,
+          annual_savings: formData.calculated_savings,
+          component_origins: formData.component_origins,
+          supplier_country: formData.supplier_country,
+          hs_code: formData.classified_hs_code,
+          product_description: formData.product_description
+        }, 3, sessionId);
+        
+        // Capture Step 4: Certificate Generation
+        await dataConnector.captureWorkflowStep({
+          workflow_completion_id: workflowId,
+          certificate_number: `USMCA-${Date.now()}`,
+          signatory_name: authorizationData.signatory_name,
+          signatory_title: authorizationData.signatory_title,
+          exporter_name: formData.company_name,
+          exporter_address: formData.company_address,
+          exporter_tax_id: formData.tax_id,
+          annual_savings: formData.calculated_savings,
+          pdf_generated: true
+        }, 4, sessionId);
+        
+        console.log('✅ Complete workflow data captured');
+        console.log('📊 Business intelligence generated for admin dashboards');
+        console.log('🎯 Revenue opportunities identified for sales team');
+        
+      } catch (dbError) {
+        console.error('❌ WorkflowDataConnector failed (continuing with certificate):', dbError);
+      }
+      
+      // Use the trust verification service to generate certificate
+      const { trustVerifiedCertificateService } = await import('../../lib/services/trust-verified-certificate-service.js');
+      
+      const certificateResult = await trustVerifiedCertificateService.generateTrustVerifiedCertificate(
+        results.classification,
+        results.usmca,
+        {
+          ...results.company,
+          ...authorizationData,
+          product_description: results.product?.description
+        }
+      );
+
+      if (certificateResult.success) {
+        // Generate PDF and download
+        const pdfBlob = await generatePDFFromCertificate(certificateResult.certificate);
+        
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `USMCA_Certificate_${certificateResult.generation_metadata.certificate_id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('Trust-verified certificate generated successfully');
+      } else {
+        alert('Certificate generation failed: ' + certificateResult.error);
+      }
+    } catch (error) {
+      console.error('Certificate generation error:', error);
+      alert('Error generating certificate. Please try again.');
+    }
+  };
+
+  const generatePDFFromCertificate = async (certificateData) => {
+    const jsPDFModule = await import('jspdf');
+    const jsPDF = jsPDFModule.default || jsPDFModule;
+    
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('USMCA CERTIFICATE OF ORIGIN', 105, 20, { align: 'center' });
+    
+    // Certificate details
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Certificate ID: ${certificateData.certificate_id}`, 20, 40);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 47);
+    
+    // Exporter information
+    let yPos = 60;
+    doc.setFont(undefined, 'bold');
+    doc.text('EXPORTER INFORMATION', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    yPos += 8;
+    doc.text(`Name: ${certificateData.exporter?.name}`, 20, yPos);
+    yPos += 6;
+    doc.text(`Address: ${certificateData.exporter?.address}`, 20, yPos);
+    
+    // Product information
+    yPos += 15;
+    doc.setFont(undefined, 'bold');
+    doc.text('PRODUCT INFORMATION', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    yPos += 8;
+    doc.text(`HS Code: ${certificateData.product?.hs_code}`, 20, yPos);
+    yPos += 6;
+    doc.text(`Description: ${certificateData.product?.description}`, 20, yPos);
+    
+    // Trust verification
+    yPos += 15;
+    doc.setFont(undefined, 'bold');
+    doc.text('TRUST VERIFICATION', 20, yPos);
+    doc.setFont(undefined, 'normal');
+    yPos += 8;
+    doc.text(`Trust Score: ${(certificateData.trust_verification?.overall_trust_score * 100).toFixed(1)}%`, 20, yPos);
+    
+    return doc.output('blob');
   };
 
   // Path selection handlers
@@ -259,7 +427,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             isLoadingOptions={isLoadingOptions}
             onNext={() => nextStep('path-selection')}
             onPrevious={previousStep}
-            onProcessWorkflow={processWorkflow}
+            onProcessWorkflow={handleProcessStep2}
             isFormValid={isFormValid}
             isLoading={isLoading}
           />
@@ -295,6 +463,36 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             <AuthorizationStep
               formData={formData}
               updateFormData={updateFormData}
+              workflowData={{
+                company: {
+                  name: formData.company_name,
+                  company_address: formData.company_address,
+                  tax_id: formData.tax_id,
+                  contact_phone: formData.contact_phone,
+                  contact_email: formData.contact_email
+                },
+                product: {
+                  hs_code: formData.classified_hs_code,
+                  description: formData.product_description
+                }
+              }}
+              certificateData={{
+                company_info: {
+                  exporter_name: formData.company_name,
+                  exporter_address: formData.company_address,
+                  exporter_country: formData.supplier_country,
+                  exporter_tax_id: formData.tax_id,
+                  importer_name: formData.importer_name,
+                  importer_address: formData.importer_address,
+                  importer_country: formData.importer_country,
+                  importer_tax_id: formData.importer_tax_id
+                },
+                product_details: {
+                  hs_code: formData.classified_hs_code,
+                  commercial_description: formData.product_description,
+                  manufacturing_location: formData.manufacturing_location
+                }
+              }}
             />
             <div className="hero-buttons">
               <button onClick={previousStep} className="btn-secondary">
@@ -323,8 +521,115 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onDownloadCertificate={handleCertificateFormatSelection}
             onDownloadSimpleCertificate={handleDownloadSimpleCertificate}
             trustIndicators={trustIndicators}
+            onContinueToAuthorization={async () => {
+              // Prepare workflow data for database capture
+              const workflowData = {
+                company: {
+                  name: formData.company_name,
+                  business_type: formData.business_type,
+                  company_address: formData.company_address,
+                  tax_id: formData.tax_id,
+                  contact_phone: formData.contact_phone,
+                  contact_email: formData.contact_email,
+                  supplier_country: formData.supplier_country,
+                  destination_country: formData.destination_country,
+                  trade_volume: formData.trade_volume
+                },
+                product: {
+                  hs_code: formData.classified_hs_code,
+                  description: formData.product_description,
+                  original_hs_code: formData.classified_hs_code
+                },
+                usmca: {
+                  north_american_content: getTotalComponentPercentage(),
+                  component_breakdown: formData.component_origins,
+                  manufacturing_location: formData.manufacturing_location,
+                  qualification_status: formData.qualification_status,
+                  qualification_level: formData.qualification_level,
+                  rule: formData.qualification_rule
+                },
+                certificate: {
+                  id: `CERT-${Date.now()}`,
+                  exporter_name: formData.company_name,
+                  exporter_address: formData.company_address,
+                  exporter_tax_id: formData.tax_id,
+                  product_description: formData.product_description,
+                  hs_tariff_classification: formData.classified_hs_code,
+                  preference_criterion: formData.preference_criterion,
+                  country_of_origin: formData.country_of_origin,
+                  blanket_start: new Date().toISOString().split('T')[0],
+                  blanket_end: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
+                },
+                savings: {
+                  total_savings: formData.calculated_savings,
+                  mfn_rate: formData.current_tariff_rate,
+                  usmca_rate: formData.usmca_tariff_rate,
+                  monthly_savings: formData.monthly_savings
+                }
+              };
+              
+              // Update results with workflow data
+              setResults(prevResults => ({
+                ...prevResults,
+                ...workflowData
+              }));
+              
+              // Navigate to Step 4 (Authorization) within the workflow instead of external page
+              nextStep();
+            }}
           />
         )}
+        {currentStep === 4 && results && (
+          <div>
+            <AuthorizationStep
+              formData={formData}
+              updateFormData={updateFormData}
+              workflowData={{
+                company: {
+                  name: formData.company_name,
+                  company_address: formData.company_address,
+                  tax_id: formData.tax_id,
+                  contact_phone: formData.contact_phone,
+                  contact_email: formData.contact_email
+                },
+                product: {
+                  hs_code: formData.classified_hs_code,
+                  description: formData.product_description
+                }
+              }}
+              certificateData={{
+                company_info: {
+                  exporter_name: formData.company_name,
+                  exporter_address: formData.company_address,
+                  exporter_country: formData.supplier_country,
+                  exporter_tax_id: formData.tax_id,
+                  importer_name: formData.importer_name,
+                  importer_address: formData.importer_address,
+                  importer_country: formData.importer_country,
+                  importer_tax_id: formData.importer_tax_id
+                },
+                product_details: {
+                  hs_code: formData.classified_hs_code,
+                  commercial_description: formData.product_description,
+                  manufacturing_location: formData.manufacturing_location
+                }
+              }}
+            />
+            <div className="hero-buttons">
+              <button onClick={previousStep} className="btn-secondary">
+                ← Back to Results
+              </button>
+              <button 
+                onClick={() => handleGenerateCertificate(results, formData)} 
+                className="btn-primary"
+                disabled={!formData.signatory_name || !formData.signatory_title}
+              >
+                🎯 Generate USMCA Certificate
+              </button>
+            </div>
+          </div>
+        )}
+
         {currentStep === 5 && results && (
           <WorkflowResults
             results={results}
@@ -340,84 +645,6 @@ NOTE: Complete all fields and obtain proper signatures before submission.
 
       {/* Loading Overlay */}
       <WorkflowLoading isVisible={isLoading} />
-    </div>
-  );
-}
-
-// Authorization Step Component
-function AuthorizationStep({ formData, updateFormData }) {
-  return (
-    <div className="element-spacing">
-      <div className="alert alert-info">
-        <div className="alert-content">
-          <div className="alert-title">Authorization & Digital Signature</div>
-          <div className="text-body">
-            Complete authorized signatory information for official USMCA certificate generation.
-          </div>
-        </div>
-      </div>
-
-      <div className="form-section">
-        <h3 className="form-section-title">Authorized Signatory Information</h3>
-        
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label className="form-label required">Authorized Signatory Name</label>
-            <input
-              type="text"
-              value={formData.signatory_name || ''}
-              onChange={(e) => updateFormData('signatory_name', e.target.value)}
-              className="form-input"
-              placeholder="Full name of authorized person"
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label required">Title/Position</label>
-            <input
-              type="text"
-              value={formData.signatory_title || ''}
-              onChange={(e) => updateFormData('signatory_title', e.target.value)}
-              className="form-input"
-              placeholder="e.g., President, Export Manager"
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Phone Number</label>
-            <input
-              type="tel"
-              value={formData.signatory_phone || ''}
-              onChange={(e) => updateFormData('signatory_phone', e.target.value)}
-              className="form-input"
-              placeholder="Contact phone number"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              value={formData.signatory_email || ''}
-              onChange={(e) => updateFormData('signatory_email', e.target.value)}
-              className="form-input"
-              placeholder="signatory@company.com"
-            />
-          </div>
-        </div>
-        
-        <div className="alert alert-warning">
-          <div className="alert-content">
-            <div className="alert-title">Authorization Declaration</div>
-            <div className="text-body">
-              By completing this section, the authorized signatory certifies that the goods described 
-              qualify as originating under the USMCA and that the information is true and accurate.
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

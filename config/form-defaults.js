@@ -71,16 +71,31 @@ const getFallbackDefaults = () => {
   };
 };
 
-export const getDefaultTradeVolume = (businessType = '') => {
-  // Smart defaults based on business type
-  const volumeDefaults = {
-    'Electronics': '$1M - $5M',
-    'Automotive': '$5M - $25M', 
-    'Medical': '$500K - $2M',
-    'Manufacturing': '$1M - $5M',
-    'Textiles': '$500K - $2M',
-    'Other': 'Under $500K'
-  };
-  
-  return volumeDefaults[businessType] || 'Under $500K';
+export const getDefaultTradeVolume = async (businessType = '') => {
+  // Use centralized business type metadata for volume defaults
+  try {
+    const { getBusinessTypeDefaultVolume } = await import('./business-type-metadata.js');
+    const defaultVolume = await getBusinessTypeDefaultVolume(businessType);
+    console.log(`💰 Trade volume default: ${businessType} → ${defaultVolume} (database-driven)`);
+    return defaultVolume;
+  } catch (error) {
+    console.warn(`⚠️ Volume defaults service unavailable: ${error.message}`);
+    console.log(`💰 Using industry standards fallback for volume: ${businessType}`);
+    
+    // Transparent fallback based on industry standards and typical trade volumes
+    const industryVolumeStandards = {
+      'Electronics': '$1M - $5M',        // High-volume, competitive margins
+      'Automotive': '$5M - $25M',        // Large parts orders, OEM relationships
+      'Medical': '$500K - $2M',          // Specialty products, smaller volumes
+      'Manufacturing': '$1M - $5M',      // Standard industrial volumes
+      'Textiles': '$500K - $2M',         // Seasonal, batch production
+      'Food': '$500K - $2M',             // Perishable, regular shipments  
+      'Chemicals': '$1M - $5M',          // Bulk commodities
+      'Construction': '$1M - $5M',       // Project-based, bulk materials
+      'Energy': '$2M - $10M',            // Large infrastructure projects
+      'Other': 'Under $500K'             // Conservative default
+    };
+    
+    return industryVolumeStandards[businessType] || 'Under $500K';
+  }
 };

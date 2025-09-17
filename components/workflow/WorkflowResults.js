@@ -98,7 +98,7 @@ export default function WorkflowResults({
           <div className="alert-content">
             <div className="alert-title">Integration Complete</div>
             <p>Certificate data automatically added to crisis alerts monitoring system</p>
-            <p>Visit <a href="/trump-tariff-alerts" target="_blank">Crisis Alerts Dashboard</a> to see your personalized monitoring</p>
+            <p>Visit <a href="/trade-risk-alternatives" target="_blank">Trade Risk & Alternatives Dashboard</a> to see your personalized risk analysis</p>
           </div>
         </div>
       )}

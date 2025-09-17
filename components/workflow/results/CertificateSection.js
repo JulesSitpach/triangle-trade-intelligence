@@ -52,9 +52,11 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         <div className="hero-buttons">
           <button 
             onClick={() => {
-              // Navigate to dedicated certificate completion page
-              const certificateUrl = `/usmca-certificate-completion?data=${encodeURIComponent(JSON.stringify(results))}`;
-              window.location.href = certificateUrl;
+              // Save workflow results to localStorage instead of URL
+              localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+              
+              // Navigate with clean URL
+              window.location.href = '/usmca-certificate-completion';
             }}
             className="btn-primary"
           >

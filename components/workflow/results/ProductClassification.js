@@ -5,8 +5,32 @@
 
 import React from 'react';
 
-export default function ProductClassification({ results }) {
+export default function ProductClassification({ results, onClassificationAction }) {
   if (!results?.product) return null;
+
+  // Handle user actions from fallback options
+  const handleUserOption = (action) => {
+    console.log(`User selected fallback action: ${action}`);
+
+    if (onClassificationAction) {
+      onClassificationAction(action, results.product);
+    } else {
+      // Default behaviors
+      switch (action) {
+        case 'manual':
+          alert('Please enter your HS code manually in the product details section');
+          break;
+        case 'professional':
+          alert('Please contact a customs broker for professional classification assistance');
+          break;
+        case 'accept':
+          console.log('User accepted fallback classification');
+          break;
+        default:
+          console.log(`Unknown action: ${action}`);
+      }
+    }
+  };
 
   // Handle both new AI API format and legacy format
   const confidence = results.product.classification_confidence || results.product.confidence || 0;
@@ -53,7 +77,45 @@ export default function ProductClassification({ results }) {
             </span>
           </div>
         </div>
-        
+
+        {/* AI Fallback Information */}
+        {results.product.fallback_info && (
+          <div className="classification-fallback element-spacing">
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <h4 className="alert-title">Classification Notice</h4>
+                <p className="text-body">{results.product.fallback_info.user_message}</p>
+
+                {results.product.fallback_info.requires_user_decision && (
+                  <div className="hero-button-group element-spacing">
+                    {results.product.fallback_info.user_options?.map((option, index) => (
+                      <button
+                        key={index}
+                        className={option.recommended ? 'btn-primary' : 'btn-secondary'}
+                        onClick={() => handleUserOption(option.action)}
+                      >
+                        {option.label}
+                        {option.confidence && (
+                          <span className="confidence-indicator">
+                            ({option.confidence} confidence)
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="text-muted">
+                  Fallback method: {results.product.fallback_info.method}
+                  {results.product.fallback_info.confidence && (
+                    <> • Confidence: {results.product.fallback_info.confidence}</>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tariff Information if available */}
         {results.product.tariff_rates && (
           <div className="classification-tariffs">

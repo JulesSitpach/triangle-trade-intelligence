@@ -26,7 +26,8 @@ export default function ComponentOriginsStepEnhanced({
         origin_country: '', 
         value_percentage: '', 
         hs_code: '',
-        hs_suggestions: []
+        hs_suggestions: [],
+        manufacturing_location: formData.manufacturing_location || ''
       }
     ];
   });
@@ -38,65 +39,70 @@ export default function ComponentOriginsStepEnhanced({
     updateFormData('component_origins', components);
   }, [components]);
 
-  const updateComponent = async (index, field, value) => {
+  const updateComponent = (index, field, value) => {
     const newComponents = [...components];
     newComponents[index][field] = value;
-    
-    // Only search for HS codes when ALL 3 fields are filled by user
-    const hasAllFields = newComponents[index].description && newComponents[index].description.length > 3 && 
-                        newComponents[index].origin_country && 
-                        newComponents[index].value_percentage;
-    
-    if (hasAllFields && !newComponents[index].hs_suggestions?.length) {
-      setSearchingHS({ ...searchingHS, [index]: true });
-      try {
-        const response = await fetch('/api/ai-classification', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            productDescription: newComponents[index].description,
-            businessContext: { 
-              companyType: formData.business_type || 'Manufacturing'
-            },
-            userProfile: {}
-          })
-        });
+    setComponents(newComponents);
+  };
 
-        const result = await response.json();
-        
-        if (result.results && result.results.length > 0) {
-          // Convert AI classification results to expected format
-          const suggestions = result.results.map(item => ({
-            hsCode: item.hsCode || item.hs_code,
-            description: item.description,
-            confidence: item.confidence,
-            confidenceText: `${item.confidence}% confidence`,
-            mfnRate: item.mfnRate || item.mfn_rate || '0',
-            usmcaRate: item.usmcaRate || item.usmca_rate || '0'
-          }));
-          
-          newComponents[index].hs_suggestions = suggestions;
-          
-          // Auto-select best match if confidence is high
-          if (suggestions.length > 0 && suggestions[0].confidence >= 75) {
-            newComponents[index].hs_code = suggestions[0].hsCode;
+  // Manual HS Code lookup function
+  const lookupHSCode = async (index) => {
+    const component = components[index];
+    
+    if (!component.description || component.description.length < 3) {
+      alert('Please enter a product description first');
+      return;
+    }
+    
+    setSearchingHS({ ...searchingHS, [index]: true });
+    
+    try {
+      const response = await fetch('/api/lightweight-hs-lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productDescription: component.description,
+          businessContext: { 
+            companyType: formData.business_type || 'Manufacturing'
           }
-        } else {
-          newComponents[index].hs_suggestions = [];
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.suggestions && result.suggestions.length > 0) {
+        // Convert lightweight API results to component format
+        const suggestions = result.suggestions.map(item => ({
+          hsCode: item.hsCode,
+          description: item.description,
+          confidence: item.accuracy,
+          confidenceText: `${item.accuracy}% accuracy`,
+          reasoning: item.reasoning,
+          source: item.source
+        }));
+        
+        const newComponents = [...components];
+        newComponents[index].hs_suggestions = suggestions;
+        
+        // Auto-select best match if accuracy is high  
+        if (suggestions.length > 0 && suggestions[0].confidence >= 85) {
+          newComponents[index].hs_code = suggestions[0].hsCode;
         }
-      } catch (error) {
-        console.error('HS code search failed:', error);
+        
+        setComponents(newComponents);
+      } else {
+        // No suggestions found
+        const newComponents = [...components];
         newComponents[index].hs_suggestions = [];
+        setComponents(newComponents);
+        alert('No HS code suggestions found. Try a more specific product description.');
       }
+    } catch (error) {
+      console.error('HS code lookup failed:', error);
+      alert('HS code lookup failed. Please try again or enter the code manually.');
+    } finally {
       setSearchingHS({ ...searchingHS, [index]: false });
     }
-    
-    // If user manually entered HS code, capture it for database improvement
-    if (field === 'hs_code' && value.length >= 4) {
-      captureUserHSCode(value, newComponents[index].description);
-    }
-    
-    setComponents(newComponents);
   };
 
   // Function to capture user-contributed HS codes
@@ -134,7 +140,8 @@ export default function ComponentOriginsStepEnhanced({
       origin_country: '', 
       value_percentage: '', 
       hs_code: '',
-      hs_suggestions: []
+      hs_suggestions: [],
+      manufacturing_location: formData.manufacturing_location || ''
     }]);
   };
 
@@ -148,18 +155,78 @@ export default function ComponentOriginsStepEnhanced({
     return components.reduce((sum, c) => sum + (parseFloat(c.value_percentage) || 0), 0);
   };
 
-  const selectHSCode = (index, hsCode, description) => {
+  const selectHSCode = (index, suggestion) => {
     const newComponents = [...components];
-    newComponents[index].hs_code = hsCode;
-    newComponents[index].hs_description = description;
+    newComponents[index].hs_code = suggestion.hsCode;
+    newComponents[index].hs_description = suggestion.description;
     newComponents[index].showSuggestions = false;
     setComponents(newComponents);
+
+    // Update main formData with HS classification and tariff rates for certificate workflow
+    updateFormData('classified_hs_code', suggestion.hsCode);
+    updateFormData('current_tariff_rate', suggestion.mfnRate || 0);
+    updateFormData('usmca_tariff_rate', suggestion.usmcaRate || 0);
+    
+    // Calculate and save annual savings based on trade volume
+    // Use the same parsing logic as the API to ensure consistency
+    const parseTradeVolume = (volumeText) => {
+      if (typeof volumeText === 'number') {
+        return volumeText;
+      }
+      
+      if (typeof volumeText !== 'string') {
+        return 0;
+      }
+      
+      const input = volumeText.trim();
+      
+      // Map of known range strings to their numeric midpoint values
+      // Based on your API dropdown options - keeping this dynamic and in sync
+      const rangeMap = {
+        'Under $100K': 50000,
+        '$100K - $500K': 300000,
+        '$500K - $1M': 750000,
+        '$1M - $5M': 3000000,
+        '$5M - $25M': 15000000,
+        '$25M - $100M': 62500000,
+        'Over $100M': 500000000
+      };
+      
+      // Check if it's a known range first
+      if (rangeMap[input]) {
+        return rangeMap[input];
+      }
+      
+      // Fallback to parsing for custom values
+      return parseFloat(input.replace(/[$,]/g, '')) || 0;
+    };
+
+    const tradeVolume = parseTradeVolume(formData.trade_volume);
+    const mfnRate = parseFloat(suggestion.mfnRate || 0);
+    const usmcaRate = parseFloat(suggestion.usmcaRate || 0);
+    const tariffSavings = (mfnRate - usmcaRate) / 100; // Convert percentage to decimal
+    const annualSavings = tradeVolume * tariffSavings;
+    
+    updateFormData('calculated_savings', Math.round(annualSavings));
+    updateFormData('monthly_savings', Math.round(annualSavings / 12));
+    
+    console.log('Updated formData with HS classification results:', {
+      hsCode: suggestion.hsCode,
+      mfnRate: suggestion.mfnRate,
+      usmcaRate: suggestion.usmcaRate,
+      tradeVolumeText: formData.trade_volume,
+      tradeVolumeNumeric: tradeVolume,
+      tariffSavingsRate: tariffSavings,
+      annualSavings: Math.round(annualSavings),
+      monthlySavings: Math.round(annualSavings / 12)
+    });
   };
 
   const isValid = () => {
     const total = getTotalPercentage();
+    // HS code is now optional - will be classified during analysis if not provided
     const allFieldsFilled = components.every(c => 
-      c.description && c.origin_country && c.value_percentage > 0 && c.hs_code
+      c.description && c.origin_country && c.value_percentage > 0
     );
     return total === 100 && allFieldsFilled;
   };
@@ -228,17 +295,17 @@ export default function ComponentOriginsStepEnhanced({
           {/* Main Product Description */}
           <div className="form-group">
             <label className="form-label">
-              Main Product Description
+              Complete Product Description
             </label>
-            <input
-              type="text"
+            <textarea
               value={formData.product_description || ''}
               onChange={(e) => updateFormData('product_description', e.target.value)}
-              placeholder="Describe your complete product (e.g., Electronic device, Machinery assembly, Textile product)"
+              placeholder="Provide detailed product description including material composition, style, and specifications (e.g., '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric')"
               className="form-input"
+              rows="3"
             />
             <div className="form-help">
-              Brief description of your complete product
+              Detailed product description including materials, construction, and key features for accurate classification
             </div>
           </div>
 
@@ -304,7 +371,7 @@ export default function ComponentOriginsStepEnhanced({
                   type="text"
                   value={component.description}
                   onChange={(e) => updateComponent(index, 'description', e.target.value)}
-                  placeholder="Describe this component (system will suggest HS codes)"
+                  placeholder="Describe this component in detail"
                   className="form-input"
                 />
               </div>
@@ -350,63 +417,20 @@ export default function ComponentOriginsStepEnhanced({
                 </div>
               </div>
 
-              {/* HS Code Input with Suggestions */}
+              {/* HS Code Input - Simple Hybrid Approach */}
               <div className="form-group">
                 <label className="form-label">
-                  HS Code
-                  {searchingHS[index] && (
-                    <span className="status-info">Searching...</span>
-                  )}
-                  <span className="status-success">
-                    (Manual entries help improve our database)
-                  </span>
+                  HS Code (Optional)
                 </label>
-                <div className="form-input-container">
-                  <input
-                    type="text"
-                    value={component.hs_code}
-                    onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
-                    placeholder="Enter HS code or select from suggestions"
-                    className="form-input"
-                  />
-                  
-                  {/* HS Code Suggestions */}
-                  {component.hs_suggestions && component.hs_suggestions.length > 0 && (
-                    <div className="hs-suggestions-container">
-                      <div className="hs-suggestions-header">
-                        Suggested HS codes based on description:
-                      </div>
-                      {component.hs_suggestions.slice(0, 5).map((suggestion, sIndex) => (
-                        <button
-                          key={sIndex}
-                          type="button"
-                          onClick={() => selectHSCode(index, suggestion.hsCode, suggestion.description)}
-                          className="btn-secondary hs-suggestion-button"
-                        >
-                          <div className="hs-suggestion-content">
-                            <div className="hs-suggestion-info">
-                              <div className="hs-code-display">{suggestion.hsCode}</div>
-                              <div className="hs-description">
-                                {suggestion.description}
-                              </div>
-                            </div>
-                            <div className="hs-confidence">
-                              <span className={
-                                suggestion.confidence >= 75 ? 'status-success' :
-                                suggestion.confidence >= 50 ? 'status-warning' :
-                                'status-info'
-                              }>
-                                {suggestion.confidenceText}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="hs-rates-display">
-                            MFN: {suggestion.mfnRate}% | USMCA: {suggestion.usmcaRate}%
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <input
+                  type="text"
+                  value={component.hs_code}
+                  onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
+                  placeholder="Enter if known (e.g., 8544.42.90)"
+                  className="form-input"
+                />
+                <div className="form-help">
+                  Don't know your HS code? Leave blank - we'll classify it during analysis.
                 </div>
               </div>
             </div>
@@ -455,7 +479,7 @@ export default function ComponentOriginsStepEnhanced({
             <>Processing...</>
           ) : (
             <>
-              Process USMCA Compliance
+              Continue to USMCA Analysis
             </>
           )}
         </button>

@@ -207,7 +207,7 @@ export default function HomePage() {
                     Expert guidance on evolving trade regulations with real-time updates and implementation support for enterprise clients.
                   </p>
                   <Link 
-                    href="/trump-tariff-alerts" 
+                    href="/trade-risk-alternatives" 
                     className="content-card-link"
                     aria-label="Access real-time regulatory compliance monitoring and alerts"
                   >

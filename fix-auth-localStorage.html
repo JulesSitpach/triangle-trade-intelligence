@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Auth LocalStorage - Triangle Intelligence</title>
+    <style>
+        body {
+            font-family: system-ui;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-size: 16px;
+        }
+        button:hover { background: #1d4ed8; }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        .success { background: #d1fae5; border: 1px solid #10b981; }
+        .error { background: #fee2e2; border: 1px solid #ef4444; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; }
+        pre {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Authentication LocalStorage</h1>
+
+        <p>This tool helps fix the "Loading account..." issue by clearing invalid authentication tokens from localStorage.</p>
+
+        <div id="status-container"></div>
+
+        <div style="margin: 30px 0;">
+            <button onclick="diagnoseAuth()">🔍 Diagnose Auth State</button>
+            <button onclick="clearAuthData()">🗑️ Clear Auth Data</button>
+            <button onclick="goToLogin()">🚪 Go to Login</button>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 6px; margin: 20px 0;">
+            <h3>Quick Fix Steps:</h3>
+            <ol>
+                <li><strong>Diagnose</strong> - Check current auth state</li>
+                <li><strong>Clear Auth Data</strong> - Remove invalid tokens</li>
+                <li><strong>Go to Login</strong> - Sign in fresh</li>
+            </ol>
+        </div>
+
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const container = document.getElementById('status-container');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            container.appendChild(statusDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (statusDiv.parentNode) {
+                    statusDiv.parentNode.removeChild(statusDiv);
+                }
+            }, 5000);
+        }
+
+        function diagnoseAuth() {
+            const debugInfo = document.getElementById('debug-info');
+
+            const authKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (
+                    key.startsWith('sb-') ||
+                    key.includes('supabase') ||
+                    key.includes('auth') ||
+                    key.includes('token') ||
+                    key === 'triangleUserData' ||
+                    key === 'usmca_workflow_results'
+                )) {
+                    const value = localStorage.getItem(key);
+                    let preview = value;
+                    if (value && value.length > 100) {
+                        preview = value.substring(0, 100) + '...';
+                    }
+                    authKeys.push({ key, preview, length: value ? value.length : 0 });
+                }
+            }
+
+            const sessionKeys = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && (
+                    key.startsWith('sb-') ||
+                    key.includes('supabase') ||
+                    key.includes('auth') ||
+                    key.includes('token')
+                )) {
+                    const value = sessionStorage.getItem(key);
+                    let preview = value;
+                    if (value && value.length > 100) {
+                        preview = value.substring(0, 100) + '...';
+                    }
+                    sessionKeys.push({ key, preview, length: value ? value.length : 0 });
+                }
+            }
+
+            let diagnosis = `<h3>🔍 Authentication Diagnosis</h3>\n`;
+            diagnosis += `<strong>Found ${authKeys.length} localStorage auth keys</strong>\n`;
+            diagnosis += `<strong>Found ${sessionKeys.length} sessionStorage auth keys</strong>\n\n`;
+
+            if (authKeys.length > 0) {
+                diagnosis += `<strong>LocalStorage Keys:</strong>\n`;
+                authKeys.forEach(item => {
+                    diagnosis += `• ${item.key} (${item.length} chars)\n`;
+                });
+                diagnosis += `\n`;
+            }
+
+            if (sessionKeys.length > 0) {
+                diagnosis += `<strong>SessionStorage Keys:</strong>\n`;
+                sessionKeys.forEach(item => {
+                    diagnosis += `• ${item.key} (${item.length} chars)\n`;
+                });
+            }
+
+            if (authKeys.length === 0 && sessionKeys.length === 0) {
+                diagnosis += `<strong>✅ No auth tokens found - storage is clean!</strong>\n`;
+            }
+
+            debugInfo.innerHTML = `<pre>${diagnosis}</pre>`;
+
+            if (authKeys.length > 0 || sessionKeys.length > 0) {
+                showStatus(`Found ${authKeys.length + sessionKeys.length} auth-related storage items`, 'warning');
+            } else {
+                showStatus('No auth tokens found - storage is clean!', 'success');
+            }
+        }
+
+        function clearAuthData() {
+            let clearedCount = 0;
+            const clearedKeys = [];
+
+            // Clear localStorage
+            const localKeysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (
+                    key.startsWith('sb-') ||
+                    key.includes('supabase') ||
+                    key.includes('auth') ||
+                    key.includes('token')
+                )) {
+                    localKeysToRemove.push(key);
+                }
+            }
+
+            localKeysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+                clearedKeys.push(`localStorage: ${key}`);
+                clearedCount++;
+            });
+
+            // Clear sessionStorage
+            const sessionKeysToRemove = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && (
+                    key.startsWith('sb-') ||
+                    key.includes('supabase') ||
+                    key.includes('auth') ||
+                    key.includes('token')
+                )) {
+                    sessionKeysToRemove.push(key);
+                }
+            }
+
+            sessionKeysToRemove.forEach(key => {
+                sessionStorage.removeItem(key);
+                clearedKeys.push(`sessionStorage: ${key}`);
+                clearedCount++;
+            });
+
+            const debugInfo = document.getElementById('debug-info');
+            if (clearedCount > 0) {
+                let report = `<h3>🗑️ Cleared Authentication Data</h3>\n`;
+                report += `<strong>Removed ${clearedCount} auth-related storage items:</strong>\n\n`;
+                clearedKeys.forEach(key => {
+                    report += `• ${key}\n`;
+                });
+                report += `\n<strong>✅ Auth storage cleanup complete!</strong>`;
+                debugInfo.innerHTML = `<pre>${report}</pre>`;
+                showStatus(`Cleared ${clearedCount} auth storage items`, 'success');
+            } else {
+                debugInfo.innerHTML = `<pre><h3>🗑️ Nothing to Clear</h3>\n<strong>No auth-related storage items found.</strong></pre>`;
+                showStatus('No auth data found to clear', 'success');
+            }
+        }
+
+        function goToLogin() {
+            showStatus('Redirecting to login page...', 'success');
+            setTimeout(() => {
+                window.location.href = 'http://localhost:3000/login';
+            }, 1000);
+        }
+
+        // Auto-diagnose on page load
+        window.onload = function() {
+            diagnoseAuth();
+        };
+    </script>
+</body>
+</html>

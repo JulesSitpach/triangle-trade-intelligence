@@ -48,6 +48,7 @@ const Eye = ({ className }) => (
 import CompanyInfoStep from './CompanyInfoStep';
 import ProductDetailsStep from './ProductDetailsStep';
 import SupplyChainStep from './SupplyChainStep';
+import AuthorizationStep from './AuthorizationStep';
 
 const CERTIFICATE_STEPS = [
   {
@@ -92,7 +93,7 @@ export default function CertificateCompletionWizard({
   onComplete, 
   onCancel 
 }) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(3); // Start at step 4 (index 3) - Authorization
   const [certificateData, setCertificateData] = useState({
     // Pre-populate with classification results
     ...initialData,
@@ -101,7 +102,7 @@ export default function CertificateCompletionWizard({
       // CRITICAL FIX: Pre-populate ALL fields from workflow data where available
       exporter_name: initialData?.company?.name || '',
       exporter_address: initialData?.company?.address || '',
-      exporter_country: initialData?.usmca?.manufacturing_location || 'MX', 
+      exporter_country: initialData?.usmca?.manufacturing_location || '', 
       exporter_tax_id: initialData?.company?.tax_id || '',
       exporter_phone: initialData?.company?.phone || '',
       exporter_email: initialData?.company?.email || '',
@@ -193,10 +194,14 @@ export default function CertificateCompletionWizard({
         const auth = certificateData.authorization;
         isValid = !!(auth.signatory_name && 
                     auth.signatory_title && 
-                    auth.declaration_accepted);
+                    auth.accuracy_certification &&
+                    auth.authority_certification &&
+                    auth.importer_name);
         if (!auth.signatory_name) errors.push('Signatory name required');
         if (!auth.signatory_title) errors.push('Signatory title required');
-        if (!auth.declaration_accepted) errors.push('Declaration acceptance required');
+        if (!auth.accuracy_certification) errors.push('Accuracy certification required');
+        if (!auth.authority_certification) errors.push('Authority certification required'); 
+        if (!auth.importer_name) errors.push('Importer name required');
         break;
 
       case 'review_generate':
@@ -357,7 +362,7 @@ export default function CertificateCompletionWizard({
       doc.text(`Certificate Type: Blanket (Valid for multiple shipments)`, 18, 49);
       doc.text(`Valid From: ${certificateResult.blanket_period?.start_date || new Date().toLocaleDateString()}`, 110, 41);
       doc.text(`Valid Until: ${certificateResult.blanket_period?.end_date || new Date(Date.now() + 365*24*60*60*1000).toLocaleDateString()}`, 110, 45);
-      doc.text(`Issuing Country: ${certificateResult.country_of_origin || inputData.supply_chain?.manufacturing_location || 'MX'}`, 110, 49);
+      doc.text(`Issuing Country: ${certificateResult.country_of_origin || inputData.supply_chain?.manufacturing_location || ''}`, 110, 49);
 
       let yPos = 63;
 
@@ -373,7 +378,7 @@ export default function CertificateCompletionWizard({
       const splitExporterAddress = doc.splitTextToSize(`Address: ${exporterAddress}`, 170);
       doc.text(splitExporterAddress, 18, yPos);
       yPos += splitExporterAddress.length * 5;
-      doc.text(`Country: ${certificateResult.exporter?.country || inputData.company_info?.exporter_country || 'MX'}`, 18, yPos);
+      doc.text(`Country: ${certificateResult.exporter?.country || inputData.company_info?.exporter_country || ''}`, 18, yPos);
       yPos += 5;
       doc.text(`Tax ID: ${certificateResult.exporter?.tax_id || inputData.company_info?.exporter_tax_id || '[TO BE COMPLETED]'}`, 18, yPos);
       yPos += 5;
@@ -640,9 +645,14 @@ export default function CertificateCompletionWizard({
       
       case 'authorization':
         return <AuthorizationStep 
-          data={certificateData.authorization || {}}
-          onChange={(data) => updateCertificateData('authorization', data)}
-          validation={validation}
+          formData={certificateData.authorization || {}}
+          updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
+          workflowData={initialData}
+          certificateData={certificateData}
+          onGenerateCertificate={generateCertificate}
+          onPreviewCertificate={(authData) => console.log('Preview Certificate:', authData)}
+          onDownloadCertificate={() => console.log('Download Certificate')}
+          onEmailToImporter={(authData) => console.log('Email to Importer:', authData)}
         />;
       
       case 'review_generate':
@@ -723,7 +733,7 @@ export default function CertificateCompletionWizard({
 }
 
 // Complete Authorization Step with digital signature
-const AuthorizationStep = ({ data, onChange, validation }) => {
+const AuthorizationStepWizard = ({ data, onChange, validation }) => {
   const [signatureDrawn, setSignatureDrawn] = useState(false);
   const [showDeclaration, setShowDeclaration] = useState(false);
 

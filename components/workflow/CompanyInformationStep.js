@@ -4,7 +4,7 @@
  * Using professional enterprise design system
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
 
 // Professional SVG icons for form fields
@@ -18,9 +18,20 @@ export default function CompanyInformationStep({
   onNext,
   isStepValid
 }) {
-  const isNextDisabled = !formData.company_name || 
+  // Fix hydration mismatch by using state for client-side calculations
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  const isNextDisabled = !isClient || !formData.company_name || 
                         !formData.business_type || 
-                        !formData.trade_volume;
+                        !formData.trade_volume ||
+                        !formData.company_address ||
+                        !formData.contact_person ||
+                        !formData.contact_phone ||
+                        !formData.contact_email;
 
   const getCountryCode = (countryName) => {
     const codes = SYSTEM_CONFIG.countries.codeMappings;
@@ -87,6 +98,95 @@ export default function CompanyInformationStep({
             <div className="form-help">
               Primary business activity for accurate trade classification
             </div>
+          </div>
+        </div>
+
+        {/* Company Contact & Address Information */}
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">
+              Company Address
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.company_address || ''}
+              onChange={(e) => updateFormData('company_address', e.target.value)}
+              placeholder="Street address, City, State/Province"
+              required
+            />
+            <div className="form-help">
+              Physical business address for certificate documentation
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              Tax ID / EIN
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.tax_id || ''}
+              onChange={(e) => updateFormData('tax_id', e.target.value)}
+              placeholder="Tax identification number"
+            />
+            <div className="form-help">
+              Federal tax ID or employer identification number
+            </div>
+          </div>
+        </div>
+
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">
+              Contact Person
+            </label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.contact_person || ''}
+              onChange={(e) => updateFormData('contact_person', e.target.value)}
+              placeholder="Primary contact for trade matters"
+              required
+            />
+            <div className="form-help">
+              Person responsible for trade compliance
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">
+              Contact Phone
+            </label>
+            <input
+              type="tel"
+              className="form-input"
+              value={formData.contact_phone || ''}
+              onChange={(e) => updateFormData('contact_phone', e.target.value)}
+              placeholder="(214) 555-0147"
+              required
+            />
+            <div className="form-help">
+              Business phone number for certificate documentation
+            </div>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label required">
+            Contact Email
+          </label>
+          <input
+            type="email"
+            className="form-input"
+            value={formData.contact_email || ''}
+            onChange={(e) => updateFormData('contact_email', e.target.value)}
+            placeholder="compliance@fashionforward.com"
+            required
+          />
+          <div className="form-help">
+            Business email for official correspondence and certificate delivery
           </div>
         </div>
 
@@ -166,26 +266,20 @@ export default function CompanyInformationStep({
             Annual Trade Volume
           </label>
           <div className="professional-input-group">
-            <select
-              className="form-select"
-              value={formData.trade_volume || ''}
-              onChange={(e) => updateFormData('trade_volume', e.target.value)}
-              required
-            >
-              <option value="">Select your annual import volume</option>
-              {isLoadingOptions ? (
-                <option disabled>Loading volume options...</option>
-              ) : (
-                dropdownOptions.importVolumes?.map(volume => (
-                  <option key={volume.value} value={volume.value}>
-                    {volume.label}
-                  </option>
-                )) || []
-              )}
-            </select>
+            <div className="input-with-prefix">
+              <span className="input-prefix">$</span>
+              <input
+                type="text"
+                className="form-input"
+                value={formData.trade_volume || ''}
+                onChange={(e) => updateFormData('trade_volume', e.target.value)}
+                placeholder="4,800,000 or 4800000"
+                required
+              />
+            </div>
           </div>
           <div className="form-help">
-            Estimated annual import value for compliance assessment
+            Enter your estimated annual import value (accepts commas: $4,800,000 or plain: $4800000)
           </div>
         </div>
 
@@ -205,7 +299,7 @@ export default function CompanyInformationStep({
           </div>
           <div className="dashboard-actions-right">
             <button 
-              onClick={() => onNext('default')}
+              onClick={() => onNext()}
               className="btn-primary"
               disabled={isNextDisabled}
             >

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check localStorage Data</title>
+</head>
+<body>
+    <h1>localStorage Debug</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Check what's in localStorage
+        const workflowResults = localStorage.getItem('usmca_workflow_results');
+        const output = document.getElementById('output');
+        
+        if (workflowResults) {
+            const parsed = JSON.parse(workflowResults);
+            output.innerHTML = `
+                <h2>Found localStorage data:</h2>
+                <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                
+                <h2>Parsed Profile Data:</h2>
+                <p><strong>Company:</strong> ${parsed.results?.company?.company_name || 'NOT FOUND'}</p>
+                <p><strong>Trade Volume:</strong> ${parsed.results?.company?.trade_volume || 'NOT FOUND'}</p>
+                <p><strong>HS Code:</strong> ${parsed.results?.product?.hs_code || 'NOT FOUND'}</p>
+                <p><strong>Product:</strong> ${parsed.results?.product?.description || 'NOT FOUND'}</p>
+            `;
+        } else {
+            output.innerHTML = '<p style="color: red;">No localStorage data found!</p>';
+        }
+    </script>
+</body>
+</html>

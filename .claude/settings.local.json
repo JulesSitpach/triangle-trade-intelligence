@@ -22,7 +22,9 @@
       "Bash(sed:*)",
       "Bash(cat:*)",
       "Bash(npm run validate:discover:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
     "ask": []

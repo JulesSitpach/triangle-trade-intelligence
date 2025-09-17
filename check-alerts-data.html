@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Alerts Data</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        pre { background: white; padding: 15px; border: 1px solid #ddd; overflow: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Trade Alerts Data Diagnostic</h1>
+    
+    <button onclick="checkData()">Check Current Data</button>
+    <button onclick="fixData()">Fix Data Structure</button>
+    <button onclick="clearData()">Clear All Data</button>
+    
+    <div id="output"></div>
+    
+    <script>
+    function checkData() {
+        const output = document.getElementById('output');
+        let html = '<h2>Current localStorage Data:</h2>';
+        
+        // Check usmca_workflow_results
+        const workflowData = localStorage.getItem('usmca_workflow_results');
+        if (workflowData) {
+            try {
+                const parsed = JSON.parse(workflowData);
+                html += '<div class="success">✅ Found usmca_workflow_results</div>';
+                html += '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+                
+                // Check if it has the expected structure
+                const data = parsed.results || parsed;
+                html += '<h3>Extracted Profile:</h3>';
+                html += '<pre>';
+                html += 'Company Name: ' + (data.company?.company_name || data.company?.name || data.company_name || 'NOT FOUND') + '\n';
+                html += 'Trade Volume: ' + (data.company?.trade_volume || data.trade_volume || data.savings?.trade_volume_used || 'NOT FOUND') + '\n';
+                html += 'Business Type: ' + (data.company?.business_type || data.business_type || 'NOT FOUND') + '\n';
+                html += 'HS Code: ' + (data.product?.hs_code || data.hs_code || 'NOT FOUND') + '\n';
+                html += 'Product: ' + (data.product?.description || data.product_description || 'NOT FOUND') + '\n';
+                html += 'Origin Country: ' + (data.component_origins?.[0]?.origin_country || data.supplier_country || 'NOT FOUND') + '\n';
+                html += '</pre>';
+            } catch (e) {
+                html += '<div class="error">❌ Error parsing usmca_workflow_results: ' + e.message + '</div>';
+            }
+        } else {
+            html += '<div class="error">❌ No usmca_workflow_results found</div>';
+        }
+        
+        // Check triangleUserData
+        const triangleData = localStorage.getItem('triangleUserData');
+        if (triangleData) {
+            try {
+                const parsed = JSON.parse(triangleData);
+                html += '<div class="success">✅ Found triangleUserData</div>';
+                html += '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+            } catch (e) {
+                html += '<div class="error">❌ Error parsing triangleUserData: ' + e.message + '</div>';
+            }
+        } else {
+            html += '<div class="info">ℹ️ No triangleUserData found (optional)</div>';
+        }
+        
+        output.innerHTML = html;
+    }
+    
+    function fixData() {
+        const workflowData = localStorage.getItem('usmca_workflow_results');
+        if (!workflowData) {
+            alert('No workflow data found to fix!');
+            return;
+        }
+        
+        try {
+            const parsed = JSON.parse(workflowData);
+            
+            // If data is nested under 'results', flatten it
+            const data = parsed.results || parsed;
+            
+            // Ensure proper structure
+            const fixedData = {
+                company: {
+                    company_name: data.company?.company_name || data.company?.name || data.company_name || data.exporter_name || "Your Company",
+                    name: data.company?.name || data.company?.company_name || data.company_name || data.exporter_name || "Your Company",
+                    business_type: data.company?.business_type || data.business_type || "Manufacturing",
+                    trade_volume: data.company?.trade_volume || data.trade_volume || data.savings?.trade_volume_used || 1000000,
+                    supplier_country: data.component_origins?.[0]?.origin_country || data.supplier_country || "MX"
+                },
+                product: {
+                    hs_code: data.product?.hs_code || data.hs_code || data.hsCode || "081190",
+                    description: data.product?.description || data.product_description || data.productDescription || "Your Product"
+                },
+                savings: {
+                    annual_savings: data.savings?.annual_savings || data.annual_savings || 200000,
+                    trade_volume_used: data.savings?.trade_volume_used || data.company?.trade_volume || 1000000
+                },
+                component_origins: data.component_origins || [
+                    { origin_country: "MX", value_percentage: 70 },
+                    { origin_country: "US", value_percentage: 30 }
+                ]
+            };
+            
+            // Save the fixed structure
+            localStorage.setItem('usmca_workflow_results', JSON.stringify(fixedData));
+            
+            alert('Data structure fixed! Refresh the Trade Alerts page to see your personalized alerts.');
+            checkData(); // Re-check to show the fixed data
+            
+        } catch (e) {
+            alert('Error fixing data: ' + e.message);
+        }
+    }
+    
+    function clearData() {
+        if (confirm('This will clear all workflow data. Are you sure?')) {
+            localStorage.removeItem('usmca_workflow_results');
+            localStorage.removeItem('triangleUserData');
+            alert('Data cleared');
+            checkData();
+        }
+    }
+    
+    // Check on load
+    window.onload = checkData;
+    </script>
+</body>
+</html>

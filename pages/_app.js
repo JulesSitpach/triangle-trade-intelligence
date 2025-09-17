@@ -3,6 +3,7 @@ import Head from 'next/head'
 import '../styles/globals.css'
 import '../styles/dashboard.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
+import { AuthProvider } from '../lib/contexts/ProductionAuthContext'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 // import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
@@ -39,9 +40,11 @@ export default function App({ Component, pageProps }) {
         </div>
       )}
       
-      <AlertProvider>
-        <Component {...pageProps} />
-      </AlertProvider>
+      <AuthProvider>
+        <AlertProvider>
+          <Component {...pageProps} />
+        </AlertProvider>
+      </AuthProvider>
     </>
   )
 }
