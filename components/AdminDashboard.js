@@ -292,6 +292,67 @@ export default function AdminDashboard({ user, profile }) {
             </div>
           </div>
 
+          {/* Team Management */}
+          <div className="content-card">
+            <h2 className="content-card-title">Team Operations</h2>
+
+            <div className="grid-2-cols">
+              <div className="content-card">
+                <div className="team-member">
+                  <div className="team-member-avatar">👨‍💼</div>
+                  <div>
+                    <h3 className="content-card-title">Jorge</h3>
+                    <p className="content-card-description">Partnerships & Suppliers</p>
+                    <div className="team-status online">🟢 Available</div>
+                  </div>
+                </div>
+                <p className="text-body">
+                  Mexico partnerships specialist handling client sourcing and Latin America supplier networks.
+                </p>
+                <div className="grid-2-cols">
+                  <Link href="/admin/client-portfolio" className="nav-link">Client Portfolio →</Link>
+                  <Link href="/admin/jorge-operations" className="nav-link">Operations →</Link>
+                </div>
+              </div>
+
+              <div className="content-card">
+                <div className="team-member">
+                  <div className="team-member-avatar">👩‍💼</div>
+                  <div>
+                    <h3 className="content-card-title">Cristina</h3>
+                    <p className="content-card-description">Compliance & Logistics</p>
+                    <div className="team-status online">🟢 Available</div>
+                  </div>
+                </div>
+                <p className="text-body">
+                  USMCA compliance and logistics specialist managing broker operations and regulatory requirements.
+                </p>
+                <div className="grid-2-cols">
+                  <Link href="/admin/broker-dashboard" className="nav-link">Broker Dashboard →</Link>
+                  <Link href="/admin/cristina-operations" className="nav-link">Operations →</Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">🤝 Team Collaboration</h3>
+              <p className="content-card-description">
+                Jorge-Cristina partnership operations for comprehensive client solutions
+              </p>
+              <div className="grid-3-cols">
+                <Link href="/admin/collaboration-workspace" className="hero-secondary-button">
+                  👥 Collaboration Workspace
+                </Link>
+                <Link href="/admin/team-assignments" className="hero-secondary-button">
+                  📊 Team Performance
+                </Link>
+                <Link href="/admin/workflow-coordination" className="hero-secondary-button">
+                  🔄 Workflow Coordination
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* Quick User Actions */}
           <div className="content-card">
             <h2 className="content-card-title">Test User Features</h2>
