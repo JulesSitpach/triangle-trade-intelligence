@@ -83,36 +83,39 @@ export default function Login() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
+      {/* Clean Centered SaaS Login */}
       <div className="main-content">
         <div className="container-app">
-          <div className="content-card">
+          <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
             {/* Logo */}
             <div className="section-header">
               <Link href="/">
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-header-title">Welcome Back</h1>
+              <h1 className="section-title">Welcome Back</h1>
               <p className="text-body">Sign in to your Triangle Intelligence account</p>
             </div>
 
             {/* Success Message */}
             {message && (
-              <div className="hero-badge">
-                ✅ {message}
+              <div className="status-success">
+                <div className="badge badge-success">✓</div>
+                <div className="text-body">{message}</div>
               </div>
             )}
 
             {/* Error Message */}
             {error && (
-              <div className="hero-badge">
-                ❌ {error}
+              <div className="status-error">
+                <div className="badge badge-error">⚠</div>
+                <div className="text-body">{error}</div>
               </div>
             )}
 
             {/* Login Form */}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="text-body form-label">
+                <label className="form-label">
                   Email Address
                 </label>
                 <input
@@ -127,7 +130,7 @@ export default function Login() {
               </div>
 
               <div className="form-group">
-                <label className="text-body form-label">
+                <label className="form-label">
                   Password
                 </label>
                 <div className="password-input-container">
@@ -145,43 +148,28 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="password-toggle-btn"
                   >
-                    {showPassword ? '🙈' : '👁️'}
+                    {showPassword ? '◯' : '●'}
                   </button>
                 </div>
               </div>
 
               {/* Forgot Password Link */}
               <div className="element-spacing">
-                <Link href="/forgot-password" className="nav-link">
-                  Forgot your password?
+                <Link href="/forgot-password" className="text-body">
+                  Forgot your password? Click here
                 </Link>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="hero-primary-button"
+                className="btn-primary"
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </button>
             </form>
 
-            {/* Create Account Link */}
-            <div className="element-spacing">
-              <div className="text-body">
-                Don't have an account?{' '}
-                <Link href="/signup" className="nav-link">
-                  Start Free Trial
-                </Link>
-              </div>
-            </div>
 
-            {/* Back to Home */}
-            <div className="element-spacing">
-              <Link href="/" className="nav-link">
-                ← Back to Home
-              </Link>
-            </div>
           </div>
         </div>
       </div>

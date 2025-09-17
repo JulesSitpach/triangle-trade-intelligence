@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminDashboard from '../../components/AdminDashboard';
+import AdminNavigation from '../../components/AdminNavigation';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -63,5 +64,10 @@ export default function Dashboard() {
   }
 
   // Show admin dashboard for admin users
-  return <AdminDashboard user={user} />;
+  return (
+    <>
+      <AdminNavigation user={user} />
+      <AdminDashboard user={user} />
+    </>
+  );
 }

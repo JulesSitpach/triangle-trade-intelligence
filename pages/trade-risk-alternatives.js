@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
+import { useAuth } from '../lib/contexts/ProductionAuthContext';
 
 // Configuration - no hardcoded values
 const RISK_CONFIG = {
@@ -42,19 +43,95 @@ export default function TradeRiskAlternatives() {
   const [dynamicAlternatives, setDynamicAlternatives] = useState([]);
   const [teamRecommendations, setTeamRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasTradeProfile, setHasTradeProfile] = useState(false);
+  const [showDetailedConsent, setShowDetailedConsent] = useState(false);
+  const [hasDetailedConsent, setHasDetailedConsent] = useState(false);
+  const [expandedDetails, setExpandedDetails] = useState({});
+  const { user } = useAuth();
 
   useEffect(() => {
-    loadUserWorkflowData();
-  }, []);
+    loadUserData();
+    // Check if user has given detailed consent before
+    const consent = localStorage.getItem('detailed_alerts_consent');
+    setHasDetailedConsent(consent === 'true');
+  }, [user]);
 
-  const loadUserWorkflowData = () => {
+  const handleSeeMoreDetails = (riskIndex) => {
+    if (!hasDetailedConsent) {
+      setShowDetailedConsent(true);
+      return;
+    }
+
+    setExpandedDetails(prev => ({
+      ...prev,
+      [riskIndex]: !prev[riskIndex]
+    }));
+  };
+
+  const handleDetailedConsent = (granted) => {
+    setHasDetailedConsent(granted);
+    localStorage.setItem('detailed_alerts_consent', granted.toString());
+
+    if (granted) {
+      setShowDetailedConsent(false);
+      // Show details for all risks
+      const allExpanded = {};
+      dynamicRisks.forEach((_, index) => {
+        allExpanded[index] = true;
+      });
+      setExpandedDetails(allExpanded);
+    } else {
+      setShowDetailedConsent(false);
+    }
+  };
+
+  const loadUserData = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Try to load from database first (persistent trade profile)
+      const { data: tradeProfile } = await fetch('/api/trade-profile', {
+        headers: {
+          'Authorization': `Bearer ${user.session?.access_token}`
+        }
+      }).then(res => res.json()).catch(() => ({ data: null }));
+
+      if (tradeProfile) {
+        // User has a persistent trade profile
+        const profile = {
+          companyName: 'Your Company', // Never show company names from database
+          businessType: tradeProfile.business_types?.[0] || 'Not specified',
+          hsCode: tradeProfile.hs_codes?.[0] || 'Not classified',
+          productDescription: `${tradeProfile.business_types?.[0] || 'Products'}`,
+          tradeVolume: 'Not specified', // Never show trade volumes
+          supplierCountry: tradeProfile.origin_countries?.[0] || 'Not specified',
+          qualificationStatus: tradeProfile.usmca_qualification_status || 'NEEDS_REVIEW',
+          savings: 0 // Never show actual savings amounts
+        };
+
+        setUserProfile(profile);
+        setHasTradeProfile(true);
+        generateDynamicContent(profile);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback to localStorage (current session)
+      loadLocalStorageData();
+    } catch (error) {
+      console.error('Error loading trade profile:', error);
+      loadLocalStorageData();
+    }
+  };
+
+  const loadLocalStorageData = () => {
     // Load user data from completed workflow
     const workflowData = localStorage.getItem('usmca_workflow_data');
     const companyData = localStorage.getItem('usmca_company_data');
     const resultsData = localStorage.getItem('usmca_workflow_results');
-
-    // Debug: Log what data we're loading
-    console.log('Loading workflow data:', { workflowData, companyData, resultsData });
 
     // Clear any old test data
     const hasOldTestData = (workflowData && workflowData.includes('Tropical Harvest')) ||
@@ -66,8 +143,6 @@ export default function TradeRiskAlternatives() {
       localStorage.removeItem('usmca_workflow_data');
       localStorage.removeItem('usmca_company_data');
       localStorage.removeItem('usmca_workflow_results');
-      localStorage.removeItem('current_user');
-      localStorage.removeItem('triangle_user_session');
       setIsLoading(false);
       return;
     }
@@ -96,9 +171,37 @@ export default function TradeRiskAlternatives() {
 
       setUserProfile(profile);
       generateDynamicContent(profile);
-    } else {
-      // No workflow data found
-      setIsLoading(false);
+
+      // Save trade profile to database for future visits (if user is logged in)
+      if (user) {
+        saveTradeProfile(profile);
+      }
+    }
+
+    setIsLoading(false);
+  };
+
+  const saveTradeProfile = async (profile) => {
+    if (!user || !profile.hsCode || profile.hsCode === 'Not classified') return;
+
+    try {
+      await fetch('/api/trade-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.session?.access_token}`
+        },
+        body: JSON.stringify({
+          hs_codes: [profile.hsCode],
+          business_types: profile.businessType ? [profile.businessType] : [],
+          origin_countries: profile.supplierCountry ? [profile.supplierCountry] : [],
+          usmca_qualification_status: profile.qualificationStatus,
+          qualified_products: profile.qualificationStatus === 'QUALIFIED' ? 1 : 0,
+          total_products: 1
+        })
+      });
+    } catch (error) {
+      console.error('Error saving trade profile:', error);
     }
   };
 
@@ -122,10 +225,12 @@ export default function TradeRiskAlternatives() {
       risks.push({
         title: `Section 301 Tariffs on Chinese Imports`,
         severity: "HIGH",
-        impact: `Potential ${formatCurrency(profile.tradeVolume * RISK_CONFIG.tariffRates.section301)} annual cost increase`,
+        generalImpact: "Up to 25% additional tariffs on your imports",
+        detailedImpact: `Potential ${formatCurrency(profile.tradeVolume * RISK_CONFIG.tariffRates.section301)} annual cost increase`,
         probability: RISK_CONFIG.probabilities.section301,
         timeframe: "Next 30-60 days",
-        description: `Your HS code ${profile.hsCode} is specifically targeted in proposed Section 301 tariff expansions`
+        description: `Your HS code ${profile.hsCode} is specifically targeted in proposed Section 301 tariff expansions`,
+        detailedInfo: `Based on your annual trade volume of ${formatCurrency(profile.tradeVolume)}, a 25% tariff would cost you ${formatCurrency(profile.tradeVolume * RISK_CONFIG.tariffRates.section301)} per year. This calculation assumes your current import pattern continues.`
       });
     }
 
@@ -134,10 +239,12 @@ export default function TradeRiskAlternatives() {
       risks.push({
         title: "USMCA Qualification Gap",
         severity: "CRITICAL",
-        impact: `Missing ${formatCurrency(profile.savings)} in annual savings`,
+        generalImpact: "Missing significant USMCA savings opportunities",
+        detailedImpact: `Missing ${formatCurrency(profile.savings)} in annual savings`,
         probability: "Current",
         timeframe: "Immediate",
-        description: "Your current supply chain doesn't qualify for USMCA benefits"
+        description: "Your current supply chain doesn't qualify for USMCA benefits",
+        detailedInfo: `USMCA qualification could save you ${formatCurrency(profile.savings)} annually through duty-free access. Mexico manufacturing partnership is typically the fastest path to qualification for ${profile.businessType} companies.`
       });
     }
 
@@ -146,10 +253,12 @@ export default function TradeRiskAlternatives() {
       risks.push({
         title: "Electronics Industry Targeting",
         severity: "HIGH",
-        impact: "Additional compliance requirements",
+        generalImpact: "Additional compliance requirements and potential restrictions",
+        detailedImpact: "Additional compliance requirements and potential restrictions",
         probability: RISK_CONFIG.probabilities.electronics,
         timeframe: "Next 3-6 months",
-        description: "Electronics imports face increased scrutiny and potential new restrictions"
+        description: "Electronics imports face increased scrutiny and potential new restrictions",
+        detailedInfo: "Electronics companies are seeing increased audits, longer customs processing times, and new documentation requirements. Consider establishing USMCA-compliant manufacturing to avoid these restrictions."
       });
     }
 
@@ -157,10 +266,12 @@ export default function TradeRiskAlternatives() {
     risks.push({
       title: "Supply Chain Concentration Risk",
       severity: "MEDIUM",
-      impact: "Business continuity threat",
+      generalImpact: "Business continuity threat",
+      detailedImpact: "Business continuity threat and potential supply disruptions",
       probability: "Ongoing",
       timeframe: "Continuous",
-      description: `Heavy reliance on ${profile.supplierCountry || 'single country'} creates vulnerability to policy changes`
+      description: `Heavy reliance on ${profile.supplierCountry || 'single country'} creates vulnerability to policy changes`,
+      detailedInfo: `Single-country sourcing creates vulnerability to trade policy changes, natural disasters, and geopolitical tensions. Diversifying across multiple countries reduces these risks significantly.`
     });
 
     return risks;
@@ -333,7 +444,9 @@ export default function TradeRiskAlternatives() {
             </div>
             <div className="status-card">
               <div className="status-label">Annual Volume</div>
-              <div className="status-value">{formatCurrency(userProfile.tradeVolume)}</div>
+              <div className="status-value">
+                {hasDetailedConsent ? formatCurrency(userProfile.tradeVolume) : 'Not specified'}
+              </div>
             </div>
             <div className="status-card">
               <div className="status-label">USMCA Status</div>
@@ -360,7 +473,9 @@ export default function TradeRiskAlternatives() {
                   <div className="status-grid">
                     <div className="status-card">
                       <div className="status-label">Financial Impact</div>
-                      <div className="status-value">{risk.impact}</div>
+                      <div className="status-value">
+                        {hasDetailedConsent && expandedDetails[index] ? risk.detailedImpact : risk.generalImpact}
+                      </div>
                     </div>
                     <div className="status-card">
                       <div className="status-label">Probability</div>
@@ -371,6 +486,28 @@ export default function TradeRiskAlternatives() {
                       <div className="status-value">{risk.timeframe}</div>
                     </div>
                   </div>
+
+                  {/* See More Details Button */}
+                  <div className="element-spacing">
+                    <button
+                      onClick={() => handleSeeMoreDetails(index)}
+                      className="text-body"
+                    >
+                      {hasDetailedConsent && expandedDetails[index] ?
+                        'Show Less Details' :
+                        'See More Details 💰'
+                      }
+                    </button>
+                  </div>
+
+                  {/* Detailed Information */}
+                  {hasDetailedConsent && expandedDetails[index] && risk.detailedInfo && (
+                    <div className="card" style={{marginTop: '12px', padding: '12px'}}>
+                      <div className="text-body">
+                        <strong>Detailed Analysis:</strong> {risk.detailedInfo}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -477,6 +614,87 @@ export default function TradeRiskAlternatives() {
             🔄 Update Trade Profile
           </button>
         </div>
+
+        {/* Detailed Consent Modal */}
+        {showDetailedConsent && (
+          <div className="modal-overlay" style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div className="content-card" style={{
+              maxWidth: '500px',
+              margin: '20px',
+              maxHeight: '80vh',
+              overflow: 'auto'
+            }}>
+              <div className="section-header">
+                <h2 className="section-title">💰 See Detailed Financial Impact?</h2>
+                <p className="text-body">
+                  We can show you specific dollar amounts and volume-based recommendations, but this requires temporarily storing your business data.
+                </p>
+              </div>
+
+              <div className="card">
+                <h3 className="card-title">Our Transparency Promise</h3>
+                <div className="text-body">
+                  <p><strong>What we'll store:</strong></p>
+                  <ul>
+                    <li>Your trade volume amounts</li>
+                    <li>Calculated savings figures</li>
+                    <li>Volume-based recommendations</li>
+                  </ul>
+
+                  <p><strong>How we protect it:</strong></p>
+                  <ul>
+                    <li>🔒 Encrypted in secure database</li>
+                    <li>👤 Only you can access it</li>
+                    <li>🗑️ Delete anytime in account settings</li>
+                    <li>⏰ Auto-deleted after 90 days of inactivity</li>
+                  </ul>
+
+                  <p><strong>Your control:</strong></p>
+                  <ul>
+                    <li>✅ Say "Yes" - See detailed dollar impacts</li>
+                    <li>❌ Say "No" - Keep seeing general percentages</li>
+                    <li>🔄 Change your mind anytime</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="hero-buttons">
+                <button
+                  onClick={() => handleDetailedConsent(true)}
+                  className="btn-primary"
+                >
+                  Yes, Show Me Details
+                </button>
+                <button
+                  onClick={() => handleDetailedConsent(false)}
+                  className="btn-secondary"
+                >
+                  No Thanks, Keep It General
+                </button>
+              </div>
+
+              <div className="element-spacing">
+                <button
+                  onClick={() => setShowDetailedConsent(false)}
+                  className="text-body"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </TriangleLayout>
   );

@@ -7,9 +7,19 @@ import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+
+    // Check if user is logged in
+    const checkAuth = () => {
+      const currentUser = localStorage.getItem('current_user')
+      const userSession = localStorage.getItem('triangle_user_session')
+      setIsLoggedIn(!!(currentUser || userSession))
+    }
+
+    checkAuth()
   }, [])
 
   const toggleMobileMenu = () => {
@@ -68,9 +78,15 @@ export default function HomePage() {
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
-            <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
-              Start Analysis
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+                My Dashboard
+              </Link>
+            ) : (
+              <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       </nav>
@@ -118,15 +134,25 @@ export default function HomePage() {
           </p>
           
           <div className="hero-button-group">
-            <Link 
-              href="/usmca-workflow" 
-              className="hero-primary-button"
-              aria-label="Start comprehensive USMCA compliance analysis workflow"
-            >
-              Start USMCA Analysis
-            </Link>
-            <Link 
-              href="#calculator" 
+            {isLoggedIn ? (
+              <Link
+                href="/usmca-workflow"
+                className="hero-primary-button"
+                aria-label="Start comprehensive USMCA compliance analysis workflow"
+              >
+                Start USMCA Analysis
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className="hero-primary-button"
+                aria-label="Sign in to access USMCA compliance analysis"
+              >
+                Sign In to Start Analysis
+              </Link>
+            )}
+            <Link
+              href="#calculator"
               className="hero-secondary-button"
               aria-label="Scroll to tariff savings calculator section"
             >

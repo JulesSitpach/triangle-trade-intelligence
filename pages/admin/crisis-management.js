@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import TriangleLayout from '../../components/TriangleLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 
 const AlertTriangle = ({ className }) => (
   <span className={className}>[warning]</span>
@@ -192,19 +192,21 @@ export default function CrisisManagement() {
 
   if (isLoading) {
     return (
-      <TriangleLayout>
+      <>
+      <AdminNavigation />
         <div className="main-content">
           <div className="text-center">
             <div className="loading-spinner"></div>
             <p className="text-muted">Loading crisis management system...</p>
           </div>
         </div>
-      </TriangleLayout>
+      </>
     );
   }
 
   return (
-    <TriangleLayout>
+    <>
+      <AdminNavigation />
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
@@ -337,7 +339,7 @@ export default function CrisisManagement() {
           <AutomatedResponses responses={responses} />
         )}
       </div>
-    </TriangleLayout>
+    </>
   );
 }
 

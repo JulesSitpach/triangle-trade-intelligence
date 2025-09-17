@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
+import googleIntegrationService from '../../lib/services/google-integration-service';
 
 export default function CollaborationWorkspace() {
   const router = useRouter();
@@ -132,6 +133,37 @@ export default function CollaborationWorkspace() {
       setRevenueAttribution([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Button click handlers for collaboration actions - Real Google integrations
+  const handleJointCall = async (client) => {
+    try {
+      const result = await googleIntegrationService.scheduleCall(client, 'joint_call');
+      console.log('Joint Google Calendar call scheduled:', result);
+    } catch (error) {
+      console.error('Error scheduling joint call:', error);
+      alert(`Error scheduling joint call with ${client.client || client.company}. Please try again.`);
+    }
+  };
+
+  const handleCreateProposal = async (client) => {
+    try {
+      const result = await googleIntegrationService.createProposal(client, 'mexico_routing');
+      console.log('Google Docs joint proposal created:', result);
+    } catch (error) {
+      console.error('Error creating joint proposal:', error);
+      alert(`Error creating proposal for ${client.client || client.company}. Please try again.`);
+    }
+  };
+
+  const handleCoordinate = async (client) => {
+    try {
+      const result = await googleIntegrationService.openClientWorkspace(client);
+      console.log('Client coordination workspace opened:', result);
+    } catch (error) {
+      console.error('Error opening coordination workspace:', error);
+      alert(`Error opening workspace for ${client.client || client.company}. Please try again.`);
     }
   };
 
@@ -717,9 +749,9 @@ export default function CollaborationWorkspace() {
                         <td>{client.phase}</td>
                         <td>{client.timeline}</td>
                         <td className="action-buttons">
-                          <button className="action-btn call">📞 Joint Call</button>
-                          <button className="action-btn email">📋 Proposal</button>
-                          <button className="action-btn coordinate">🤝 Coordinate</button>
+                          <button className="action-btn call" onClick={() => handleJointCall(client)}>📞 Joint Call</button>
+                          <button className="action-btn email" onClick={() => handleCreateProposal(client)}>📋 Proposal</button>
+                          <button className="action-btn coordinate" onClick={() => handleCoordinate(client)}>🤝 Coordinate</button>
                         </td>
                       </tr>
                     ))}

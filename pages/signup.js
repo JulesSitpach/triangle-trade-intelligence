@@ -93,209 +93,140 @@ export default function Signup() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
+      {/* Clean Centered SaaS Signup - Matching Login Style */}
       <div className="main-content">
         <div className="container-app">
-          <div style={{ maxWidth: '400px', margin: '0 auto', padding: '40px 0' }}>
+          <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
             {/* Logo */}
-            <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <div className="section-header">
               <Link href="/">
-                <div className="nav-logo-icon" style={{
-                  width: '60px',
-                  height: '60px',
-                  fontSize: '24px',
-                  margin: '0 auto 16px'
-                }}>
-                  T
-                </div>
+                <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-header-title">Start Your Free Trial</h1>
-              <p className="text-body">Get started with Triangle Intelligence today</p>
-
-              {/* Trial Benefits */}
-              <div className="hero-badge" style={{ margin: '20px 0' }}>
-                7-Day Free Trial • No Credit Card Required
-              </div>
+              <h1 className="section-title">Start Free Trial</h1>
+              <p className="text-body">Get started with Triangle Intelligence</p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="hero-badge" style={{
-                backgroundColor: '#dc2626',
-                color: 'white',
-                marginBottom: '20px',
-                textAlign: 'center'
-              }}>
-                {error}
+              <div className="status-error">
+                <div className="badge badge-error">⚠</div>
+                <div className="text-body">{error}</div>
               </div>
             )}
 
             {/* Signup Form */}
-            <div className="content-card">
-              <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '20px' }}>
-                  <label className="text-body" style={{ display: 'block', marginBottom: '8px' }}>
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="John Smith"
-                  />
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label className="text-body" style={{ display: 'block', marginBottom: '8px' }}>
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="Your Company Inc."
-                  />
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  <label className="text-body" style={{ display: 'block', marginBottom: '8px' }}>
-                    Work Email Address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="form-input"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '16px',
-                      boxSizing: 'border-box'
-                    }}
-                    placeholder="you@company.com"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="text-body form-label">
-                    Password
-                  </label>
-                  <div className="password-input-container">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      minLength={6}
-                      className="form-input password-input"
-                      placeholder="At least 6 characters"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="password-toggle-btn"
-                    >
-                      {showPassword ? '🙈' : '👁️'}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="text-body form-label">
-                    Confirm Password
-                  </label>
-                  <div className="password-input-container">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                      className="form-input password-input"
-                      placeholder="Confirm your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="password-toggle-btn"
-                    >
-                      {showConfirmPassword ? '🙈' : '👁️'}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="hero-primary-button"
-                  style={{
-                    width: '100%',
-                    marginBottom: '20px',
-                    opacity: isLoading ? 0.7 : 1
-                  }}
-                >
-                  {isLoading ? 'Creating Account...' : 'Start Free Trial'}
-                </button>
-              </form>
-
-              <div style={{ textAlign: 'center' }}>
-                <p className="text-body" style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-                  By creating an account, you agree to our Terms of Service and Privacy Policy
-                </p>
-
-                <p className="text-body">
-                  Already have an account?{' '}
-                  <Link href="/login" className="nav-link">
-                    Sign in
-                  </Link>
-                </p>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="John Smith"
+                />
               </div>
-            </div>
 
-            {/* Trial Benefits */}
-            <div className="content-card" style={{ marginTop: '20px' }}>
-              <h3 className="content-card-title" style={{ fontSize: '16px', marginBottom: '12px' }}>
-                What's included in your free trial:
-              </h3>
-              <div>
-                <p className="text-body">✓ 1 free HS code classification</p>
-                <p className="text-body">✓ Basic USMCA qualification workflow</p>
-                <p className="text-body">✓ Tariff savings calculator</p>
-                <p className="text-body">✓ Email support</p>
+              <div className="form-group">
+                <label className="form-label">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="Your Company Inc."
+                />
               </div>
-            </div>
 
-            {/* Back to Home */}
-            <div style={{ textAlign: 'center', marginTop: '40px' }}>
-              <Link href="/" className="nav-link">
-                ← Back to Home
-              </Link>
+              <div className="form-group">
+                <label className="form-label">
+                  Work Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  placeholder="you@company.com"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Password
+                </label>
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    minLength={6}
+                    className="form-input password-input"
+                    placeholder="At least 6 characters"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="password-toggle-btn"
+                  >
+                    {showPassword ? '◯' : '●'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Confirm Password
+                </label>
+                <div className="password-input-container">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    className="form-input password-input"
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="password-toggle-btn"
+                  >
+                    {showConfirmPassword ? '◯' : '●'}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary"
+              >
+                {isLoading ? 'Creating Account...' : 'Start Free Trial'}
+              </button>
+            </form>
+
+            {/* Already have account */}
+            <div className="element-spacing">
+              <div className="text-body">
+                Already have an account?{' '}
+                <Link href="/login" className="text-body">
+                  Sign in here
+                </Link>
+              </div>
             </div>
           </div>
         </div>

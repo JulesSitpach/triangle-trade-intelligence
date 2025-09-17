@@ -95,7 +95,6 @@
     "node-mocks-http": "^1.17.2",
     "playwright": "^1.55.0",
     "prettier": "^3.6.2",
-    "puppeteer": "^24.19.0",
     "typescript": "5.9.2"
   }
 }

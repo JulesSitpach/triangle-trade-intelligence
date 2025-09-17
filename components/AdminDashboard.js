@@ -85,27 +85,6 @@ export default function AdminDashboard({ user, profile }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* Navigation */}
-      <nav className="nav-fixed">
-        <div className="nav-container">
-          <Link href="/" className="nav-logo-link">
-            <div className="nav-logo-icon">T</div>
-            <div>
-              <div className="nav-logo-text">Triangle Intelligence</div>
-              <div className="nav-logo-subtitle">Admin Dashboard</div>
-            </div>
-          </Link>
-
-          <div className="nav-menu">
-            <Link href="/admin/users" className="nav-menu-link">Users</Link>
-            <Link href="/admin/analytics" className="nav-menu-link">Analytics</Link>
-            <Link href="/admin/system-config" className="nav-menu-link">System</Link>
-            <button onClick={signOut} className="nav-menu-link">
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </nav>
 
       <div className="main-content">
         <div className="container-app">

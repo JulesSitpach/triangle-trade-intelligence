@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import '../styles/globals.css'
 import '../styles/dashboard.css'
+import '../styles/salesforce-tables.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
 import { AuthProvider } from '../lib/contexts/ProductionAuthContext'
 // import '../lib/i18n' // Initialize proper i18n system

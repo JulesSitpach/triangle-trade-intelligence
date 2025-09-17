@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import TriangleLayout from '../../components/TriangleLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 
 // Simple icon components
 const Plus = ({ className }) => (
@@ -194,19 +194,21 @@ export default function SupplierManagement() {
 
   if (isLoading) {
     return (
-      <TriangleLayout>
+      <>
+      <AdminNavigation />
         <div className="main-content">
           <div className="text-center">
             <div className="loading-spinner"></div>
             <p className="text-muted">Loading supplier management system...</p>
           </div>
         </div>
-      </TriangleLayout>
+      </>
     );
   }
 
   return (
-    <TriangleLayout>
+    <>
+      <AdminNavigation />
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
@@ -479,7 +481,7 @@ export default function SupplierManagement() {
           <IntroductionRequestsList requests={introductionRequests} />
         )}
       </div>
-    </TriangleLayout>
+    </>
   );
 }
 

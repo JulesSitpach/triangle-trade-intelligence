@@ -1,0 +1,64 @@
+{
+  "dashboards": {
+    "dev-dashboard": {
+      "filePath": "pages/admin/dev-dashboard.js",
+      "nonFunctionalButtons": [],
+      "emptyHandlers": [
+        {
+          "line": 293,
+          "handler": "onClick={() => console.log('Dev tools opened')}",
+          "issue": "Empty or placeholder handler"
+        }
+      ],
+      "todoItems": [],
+      "buttonCount": 4
+    },
+    "client-portfolio": {
+      "filePath": "pages/admin/client-portfolio.js",
+      "nonFunctionalButtons": [
+        {
+          "line": 676,
+          "button": "<button className=\"action-btn urgent\">...",
+          "text": "📞 Call Now",
+          "issue": "Missing onClick handler"
+        },
+        {
+          "line": 677,
+          "button": "<button className=\"action-btn email\">...",
+          "text": "📧 Email",
+          "issue": "Missing onClick handler"
+        },
+        {
+          "line": 678,
+          "button": "<button className=\"action-btn qualify\">...",
+          "text": "✅ Qualify",
+          "issue": "Missing onClick handler"
+        }
+      ],
+      "emptyHandlers": [],
+      "todoItems": [],
+      "buttonCount": 24
+    },
+    "broker-dashboard": {
+      "filePath": "pages/admin/broker-dashboard.js",
+      "nonFunctionalButtons": [],
+      "emptyHandlers": [],
+      "todoItems": [],
+      "buttonCount": 13
+    },
+    "collaboration-workspace": {
+      "filePath": "pages/admin/collaboration-workspace.js",
+      "nonFunctionalButtons": [],
+      "emptyHandlers": [],
+      "todoItems": [],
+      "buttonCount": 15
+    }
+  },
+  "summary": {
+    "totalDashboards": 4,
+    "totalButtons": 56,
+    "totalIssues": 4,
+    "successRate": "92.9",
+    "timestamp": "2025-09-17T19:24:11.449Z"
+  }
+}

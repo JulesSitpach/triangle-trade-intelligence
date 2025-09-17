@@ -47,7 +47,7 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (userDropdownOpen && !event.target.closest('.dashboard-nav-dropdown')) {
+      if (userDropdownOpen && !event.target.closest('.admin-dropdown')) {
         setUserDropdownOpen(false)
       }
       if (adminDropdownOpen && !event.target.closest('.admin-dropdown')) {
@@ -155,9 +155,9 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
 
       {/* Main App Layout */}
       <div className="app-layout">
-        {/* Professional Dashboard Navigation */}
-        <header className="dashboard-nav">
-          <div className="dashboard-nav-container">
+        {/* Fixed Navigation - Matching Landing Page Style */}
+        <nav className="nav-fixed">
+          <div className="nav-container">
             <Link href="/" className="nav-logo-link">
               <div className="nav-logo-icon">T</div>
               <div>
@@ -166,20 +166,40 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
               </div>
             </Link>
 
-            {/* Main Navigation */}
-            <div className="nav-menu">
-              <Link href="/dashboard" className="nav-menu-link">Dashboard</Link>
-              <Link href="/usmca-workflow" className="nav-menu-link">Workflows</Link>
-              <Link href="/trade-risk-alternatives" className="nav-menu-link">Alerts</Link>
-              <Link href="/certificates" className="nav-menu-link">Certificates</Link>
-            </div>
+            {/* Mobile Menu Toggle */}
+            <button
+              className="nav-menu-toggle"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              ☰
+            </button>
 
-            {/* Right Side Actions */}
-            <div className="nav-menu">
-              {/* User Menu */}
+            {/* Main Navigation */}
+            <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+              <Link href="/dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                Dashboard
+              </Link>
+              <Link href="/usmca-workflow" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                Workflows
+              </Link>
+              <Link href="/trade-risk-alternatives" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                Alerts
+                {!loading && alertCount > 0 && (
+                  <span className="badge badge-warning">
+                    {alertCount}
+                  </span>
+                )}
+              </Link>
+              <Link href="/certificates" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                Certificates
+              </Link>
+
+              {/* User Menu - Using nav-cta-button style */}
               <div className="admin-dropdown">
                 <button
-                  className="user-menu-button"
+                  className="nav-cta-button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 >
                   👤 {user?.user_metadata?.company_name || user?.email?.split('@')[0] || 'User'}
@@ -199,8 +219,19 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                       Help
                     </Link>
                     <button onClick={() => {
+                      // Clear ALL possible authentication keys
                       localStorage.removeItem('current_user');
                       localStorage.removeItem('triangle_user_session');
+                      localStorage.removeItem('triangle-dev-mode');
+                      localStorage.removeItem('usmca_workflow_data');
+                      localStorage.removeItem('usmca_company_data');
+                      localStorage.removeItem('usmca_workflow_results');
+                      localStorage.removeItem('workflow_session_id');
+
+                      // Clear any other stored user data
+                      localStorage.clear();
+
+                      // Redirect to landing page
                       window.location.href = '/';
                     }} className="admin-dropdown-item">
                       Sign Out
@@ -209,70 +240,8 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                 )}
               </div>
             </div>
-              
-            {/* Mobile Menu Toggle */}
-            <button
-              className="nav-menu-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            >
-              {mobileMenuOpen ? '✕' : '☰'}
-            </button>
           </div>
-
-          {/* Mobile Menu - Only renders when open */}
-          {mobileMenuOpen && (
-            <div className="dashboard-nav-mobile-menu open">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`dashboard-nav-link ${
-                    router.pathname === item.path ? 'active' : ''
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.label}
-                  {item.badge && (
-                    <span className="badge badge-warning">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              ))}
-              
-              {/* Admin Menu Items for Mobile - Only visible to admin/dev users */}
-              {(isAdmin || isDev) && (
-                <>
-                  <div className="mobile-section-divider">Admin Tools</div>
-                  {adminItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      href={item.path}
-                      className={`dashboard-nav-link admin-mobile-item ${
-                        router.pathname === item.path ? 'active' : ''
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <div>
-                        <div className="admin-item-label">{item.label}</div>
-                        <div className="admin-item-description">{item.description}</div>
-                      </div>
-                    </Link>
-                  ))}
-                </>
-              )}
-              
-              <Link
-                href="/usmca-workflow"
-                className="btn-primary"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                New Analysis
-              </Link>
-            </div>
-          )}
-        </header>
+        </nav>
 
         {/* Main Content */}
         <main className="main-content">

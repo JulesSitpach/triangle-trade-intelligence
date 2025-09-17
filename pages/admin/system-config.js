@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import TriangleLayout from '../../components/TriangleLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 import { SYSTEM_CONFIG } from '../../config/system-config';
 
 const Settings = ({ className }) => (
@@ -158,19 +158,21 @@ export default function SystemConfig() {
 
   if (isLoading) {
     return (
-      <TriangleLayout>
+      <>
+      <AdminNavigation />
         <div className="main-content">
           <div className="text-center">
             <div className="loading-spinner"></div>
             <p className="text-muted">Loading system configuration...</p>
           </div>
         </div>
-      </TriangleLayout>
+      </>
     );
   }
 
   return (
-    <TriangleLayout>
+    <>
+      <AdminNavigation />
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
@@ -287,7 +289,7 @@ export default function SystemConfig() {
           <ApiLimits apiLimits={apiLimits} updateConfig={updateConfig} />
         )}
       </div>
-    </TriangleLayout>
+    </>
   );
 }
 

@@ -1,0 +1,1143 @@
+{
+  "nonFunctionalButtons": [
+    {
+      "file": "pages\\admin\\analytics.js",
+      "line": 274,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 454,
+      "button": "<button className=\"action-btn call\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 455,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 456,
+      "button": "<button className=\"action-btn view\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 508,
+      "button": "<button className=\"action-btn follow\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 509,
+      "button": "<button className=\"action-btn modify\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 510,
+      "button": "<button className=\"action-btn status\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 566,
+      "button": "<button className=\"action-btn research\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 567,
+      "button": "<button className=\"action-btn target\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 568,
+      "button": "<button className=\"action-btn campaign\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 630,
+      "button": "<button className=\"action-btn urgent\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 631,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 632,
+      "button": "<button className=\"action-btn qualify\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 720,
+      "button": "<button className=\"action-btn call\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 721,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 722,
+      "button": "<button className=\"action-btn coordinate\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 393,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 397,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 400,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 456,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 460,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 463,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 508,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 511,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 241,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 296,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 297,
+      "button": "<button className=\"hero-secondary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\jorge-operations.js",
+      "line": 228,
+      "button": "<button className=\"hero-secondary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\jorge-operations.js",
+      "line": 264,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 453,
+      "button": "<button\r\n                  type=\"submit\"\r\n                  className=\"btn-primary\"\r\n               ...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 545,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 549,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 607,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 610,
+      "button": "<button className=\"btn-success\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 613,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 357,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 361,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 416,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 419,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 422,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\login.js",
+      "line": 163,
+      "button": "<button\r\n                type=\"submit\"\r\n                disabled={isLoading}\r\n                classN...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 196,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 200,
+      "button": "<button className=\"btn-success\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 204,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 271,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 275,
+      "button": "<button className=\"btn-success\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 279,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales\\dashboard.js",
+      "line": 283,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\sales-presentations.js",
+      "line": 214,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\signup.js",
+      "line": 213,
+      "button": "<button\r\n                type=\"submit\"\r\n                disabled={isLoading}\r\n                classN...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trade-risk-alternatives.js",
+      "line": 569,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trade-risk-alternatives.js",
+      "line": 570,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trade-risk-alternatives.js",
+      "line": 601,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trade-risk-alternatives.js",
+      "line": 602,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trump-tariff-alerts.js",
+      "line": 600,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trump-tariff-alerts.js",
+      "line": 603,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trump-tariff-alerts.js",
+      "line": 606,
+      "button": "<button className=\"btn-success\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\trump-tariff-alerts.js",
+      "line": 714,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "components\\SalesPresentation.js",
+      "line": 172,
+      "button": "<button className=\"px-3 py-1 bg-sage-600 hover:bg-sage-500 rounded text-sm transition-colors\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "components\\SalesPresentation.js",
+      "line": 178,
+      "button": "<button className=\"px-3 py-1 bg-orange-600 hover:bg-orange-500 rounded text-sm transition-colors\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\analytics.js",
+      "line": 274,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 454,
+      "button": "<button className=\"action-btn call\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 455,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 456,
+      "button": "<button className=\"action-btn view\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 508,
+      "button": "<button className=\"action-btn follow\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 509,
+      "button": "<button className=\"action-btn modify\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 510,
+      "button": "<button className=\"action-btn status\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 566,
+      "button": "<button className=\"action-btn research\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 567,
+      "button": "<button className=\"action-btn target\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 568,
+      "button": "<button className=\"action-btn campaign\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 630,
+      "button": "<button className=\"action-btn urgent\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 631,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\client-portfolio.js",
+      "line": 632,
+      "button": "<button className=\"action-btn qualify\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 720,
+      "button": "<button className=\"action-btn call\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 721,
+      "button": "<button className=\"action-btn email\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\collaboration-workspace.js",
+      "line": 722,
+      "button": "<button className=\"action-btn coordinate\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 393,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 397,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 400,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 456,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 460,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 463,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 508,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 511,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 241,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 296,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\cristina-operations.js",
+      "line": 297,
+      "button": "<button className=\"hero-secondary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\jorge-operations.js",
+      "line": 228,
+      "button": "<button className=\"hero-secondary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\jorge-operations.js",
+      "line": 264,
+      "button": "<button className=\"hero-primary-button\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 453,
+      "button": "<button\r\n                  type=\"submit\"\r\n                  className=\"btn-primary\"\r\n               ...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 545,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 549,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 607,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 610,
+      "button": "<button className=\"btn-success\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\supplier-management.js",
+      "line": 613,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 357,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 361,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 416,
+      "button": "<button className=\"btn-primary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 419,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 422,
+      "button": "<button className=\"btn-secondary\">...",
+      "issue": "No onClick handler",
+      "severity": "high"
+    }
+  ],
+  "emptyHandlers": [
+    {
+      "file": "pages\\admin\\dev-dashboard.js",
+      "line": 293,
+      "handler": "onClick={() => console.log(",
+      "issue": "Empty or placeholder onClick handler",
+      "severity": "medium"
+    },
+    {
+      "file": "pages\\admin\\dev-dashboard.js",
+      "line": 293,
+      "handler": "onClick={() => console.log(",
+      "issue": "Empty or placeholder onClick handler",
+      "severity": "medium"
+    }
+  ],
+  "placeholderFunctions": [
+    {
+      "file": "components\\workflow\\results\\USMCAQualification.js",
+      "line": 16,
+      "function": "const extractGapAnalysis = () => {\r\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    },
+    {
+      "file": "components\\workflow\\USMCAWorkflowOrchestrator.js",
+      "line": 169,
+      "function": "const handleViewAlertsFromCrisisCalc = () => {\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    },
+    {
+      "file": "components\\workflow\\USMCAWorkflowOrchestrator.js",
+      "line": 173,
+      "function": "const handleUpgradeToCertificate = () => {\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    },
+    {
+      "file": "components\\workflow\\USMCAWorkflowOrchestrator.js",
+      "line": 336,
+      "function": "const handleSelectFreeAnalysis = () => {\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    },
+    {
+      "file": "components\\workflow\\USMCAWorkflowOrchestrator.js",
+      "line": 341,
+      "function": "const handleSelectAlertsSubscription = () => {\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    },
+    {
+      "file": "components\\workflow\\USMCAWorkflowOrchestrator.js",
+      "line": 347,
+      "function": "const handleSelectCertificate = () => {\n    console.log(...",
+      "issue": "Placeholder function implementation",
+      "severity": "medium"
+    }
+  ],
+  "missingImplementations": [
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 172,
+      "todo": "API call to trigger manual RSS check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 62,
+      "todo": "Add to SYSTEM_CONFIG",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 64,
+      "todo": "Add maintenance mode to config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 72,
+      "todo": "Add to SYSTEM_CONFIG",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 74,
+      "todo": "Add webhook config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 75,
+      "todo": "Add API versioning config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 83,
+      "todo": "Add to database config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 84,
+      "todo": "Add cache size config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 85,
+      "todo": "Add logging retention config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 139,
+      "todo": "Implement API call to save configuration",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 115,
+      "todo": "Implement API call",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\daily-activity.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\performance-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\revenue-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 34,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 179,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 254,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\subscriptions.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers\\[id]\\verify.js",
+      "line": 27,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers.js",
+      "line": 31,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers.js",
+      "line": 250,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\user-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\users.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\workflow-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\auth\\login.js",
+      "line": 36,
+      "todo": "Add proper password validation once password_hash field is added",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\crisis-solutions.js",
+      "line": 226,
+      "todo": "Send notification to broker (email, Slack, etc.)",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\trump-tariff-alerts.js",
+      "line": 575,
+      "todo": "Get from user subscription",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\crisis-management.js",
+      "line": 172,
+      "todo": "API call to trigger manual RSS check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 62,
+      "todo": "Add to SYSTEM_CONFIG",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 64,
+      "todo": "Add maintenance mode to config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 72,
+      "todo": "Add to SYSTEM_CONFIG",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 74,
+      "todo": "Add webhook config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 75,
+      "todo": "Add API versioning config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 83,
+      "todo": "Add to database config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 84,
+      "todo": "Add cache size config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 85,
+      "todo": "Add logging retention config",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\system-config.js",
+      "line": 139,
+      "todo": "Implement API call to save configuration",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\admin\\user-management.js",
+      "line": 115,
+      "todo": "Implement API call",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\daily-activity.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\performance-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\revenue-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 34,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 179,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\rss-feeds.js",
+      "line": 254,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\subscriptions.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers\\[id]\\verify.js",
+      "line": 27,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers.js",
+      "line": 31,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\suppliers.js",
+      "line": 250,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\user-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\users.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\admin\\workflow-analytics.js",
+      "line": 21,
+      "todo": "Add admin authentication check",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\auth\\login.js",
+      "line": 36,
+      "todo": "Add proper password validation once password_hash field is added",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    },
+    {
+      "file": "pages\\api\\crisis-solutions.js",
+      "line": 226,
+      "todo": "Send notification to broker (email, Slack, etc.)",
+      "issue": "Missing implementation (TODO)",
+      "severity": "low"
+    }
+  ],
+  "summary": {
+    "filesAnalyzed": 213,
+    "buttonsFound": 335,
+    "totalIssues": 161,
+    "timestamp": "2025-09-17T19:14:14.622Z"
+  }
+}

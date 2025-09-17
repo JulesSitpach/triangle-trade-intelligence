@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import TriangleLayout from '../../components/TriangleLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 
 const Plus = ({ className }) => (
   <span className={className}>[plus]</span>
@@ -182,19 +182,21 @@ export default function UserManagement() {
 
   if (isLoading) {
     return (
-      <TriangleLayout>
+      <>
+        <AdminNavigation />
         <div className="main-content">
           <div className="text-center">
             <div className="loading-spinner"></div>
             <p className="text-muted">Loading user management system...</p>
           </div>
         </div>
-      </TriangleLayout>
+      </>
     );
   }
 
   return (
-    <TriangleLayout>
+    <>
+      <AdminNavigation />
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
@@ -280,7 +282,7 @@ export default function UserManagement() {
           <SubscriptionsList subscriptions={subscriptions} users={users} />
         )}
       </div>
-    </TriangleLayout>
+    </>
   );
 }
 

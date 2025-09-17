@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { SALES_CONFIG, GOOGLE_APPS_CONFIG, MARKET_INTELLIGENCE_CONFIG } from '../../config/sales-config';
+import googleIntegrationService from '../../lib/services/google-integration-service';
 
 export default function ClientPortfolio() {
   const router = useRouter();
@@ -118,6 +119,85 @@ export default function ClientPortfolio() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Button click handlers for client actions - Real Google integrations
+  const handleCallClient = async (client) => {
+    try {
+      const result = await googleIntegrationService.scheduleCall(client, 'follow_up');
+      console.log('Google Calendar call scheduled:', result);
+    } catch (error) {
+      console.error('Error scheduling call:', error);
+      alert(`Error scheduling call with ${client.company || client.client}. Please try again.`);
+    }
+  };
+
+  const handleEmailClient = async (client) => {
+    try {
+      const result = await googleIntegrationService.composeEmail(client, 'follow_up');
+      console.log('Gmail compose opened:', result);
+    } catch (error) {
+      console.error('Error opening Gmail:', error);
+      alert(`Error opening email for ${client.company || client.client}. Please try again.`);
+    }
+  };
+
+  const handleViewClient = async (client) => {
+    try {
+      const result = await googleIntegrationService.openClientWorkspace(client);
+      console.log('Client workspace opened:', result);
+    } catch (error) {
+      console.error('Error opening client workspace:', error);
+      alert(`Error opening workspace for ${client.company || client.client}. Please try again.`);
+    }
+  };
+
+  const handleFollowUp = async (proposal) => {
+    try {
+      const client = { company: proposal.client, email: proposal.email };
+      const result = await googleIntegrationService.composeEmail(client, 'follow_up');
+      console.log('Follow-up email composed:', result);
+    } catch (error) {
+      console.error('Error composing follow-up:', error);
+      alert(`Error creating follow-up for ${proposal.client}. Please try again.`);
+    }
+  };
+
+  const handleModifyProposal = async (proposal) => {
+    try {
+      const client = { company: proposal.client, email: proposal.email };
+      const result = await googleIntegrationService.createProposal(client, 'mexico_routing');
+      console.log('Google Docs proposal created:', result);
+    } catch (error) {
+      console.error('Error creating proposal:', error);
+      alert(`Error modifying proposal for ${proposal.client}. Please try again.`);
+    }
+  };
+
+  const handleProposalStatus = async (proposal) => {
+    try {
+      const client = { company: proposal.client, email: proposal.email };
+      const result = await googleIntegrationService.scheduleCall(client, 'proposal_presentation');
+      console.log('Proposal status call scheduled:', result);
+    } catch (error) {
+      console.error('Error scheduling status call:', error);
+      alert(`Error scheduling status call for ${proposal.client}. Please try again.`);
+    }
+  };
+
+  const handleResearchIndustry = (industry) => {
+    alert(`Researching ${industry.industry || industry.name || 'industry'}...`);
+    console.log('Research industry:', industry);
+  };
+
+  const handleTargetIndustry = (industry) => {
+    alert(`Targeting ${industry.industry || industry.name || 'industry'}...`);
+    console.log('Target industry:', industry);
+  };
+
+  const handleIndustryCampaign = (industry) => {
+    alert(`Creating campaign for ${industry.industry || industry.name || 'industry'}...`);
+    console.log('Industry campaign:', industry);
   };
 
   // Configuration-driven business logic functions
@@ -451,9 +531,9 @@ export default function ClientPortfolio() {
                           <td>{deal.nextAction}</td>
                           <td>{deal.dueDate}</td>
                           <td className="action-buttons">
-                            <button className="action-btn call">📞</button>
-                            <button className="action-btn email">📧</button>
-                            <button className="action-btn view">👁️</button>
+                            <button className="action-btn call" onClick={() => handleCallClient(deal)}>📞</button>
+                            <button className="action-btn email" onClick={() => handleEmailClient(deal)}>📧</button>
+                            <button className="action-btn view" onClick={() => handleViewClient(deal)}>👁️</button>
                           </td>
                         </tr>
                       ))
@@ -505,9 +585,9 @@ export default function ClientPortfolio() {
                           <td>{proposal.sentDate}</td>
                           <td>{proposal.responseDue}</td>
                           <td className="action-buttons">
-                            <button className="action-btn follow">📞 Follow-up</button>
-                            <button className="action-btn modify">📝 Modify</button>
-                            <button className="action-btn status">📊 Status</button>
+                            <button className="action-btn follow" onClick={() => handleFollowUp(proposal)}>📞 Follow-up</button>
+                            <button className="action-btn modify" onClick={() => handleModifyProposal(proposal)}>📝 Modify</button>
+                            <button className="action-btn status" onClick={() => handleProposalStatus(proposal)}>📊 Status</button>
                           </td>
                         </tr>
                       ))
@@ -563,9 +643,9 @@ export default function ClientPortfolio() {
                             </span>
                           </td>
                           <td className="action-buttons">
-                            <button className="action-btn research">🔍 Research</button>
-                            <button className="action-btn target">🎯 Target</button>
-                            <button className="action-btn campaign">📢 Campaign</button>
+                            <button className="action-btn research" onClick={() => handleResearchIndustry(industry)}>🔍 Research</button>
+                            <button className="action-btn target" onClick={() => handleTargetIndustry(industry)}>🎯 Target</button>
+                            <button className="action-btn campaign" onClick={() => handleIndustryCampaign(industry)}>📢 Campaign</button>
                           </td>
                         </tr>
                       ))
@@ -627,9 +707,9 @@ export default function ClientPortfolio() {
                             </span>
                           </td>
                           <td className="action-buttons">
-                            {lead.status === 'Hot Lead' && <button className="action-btn urgent">📞 Call Now</button>}
-                            <button className="action-btn email">📧 Email</button>
-                            <button className="action-btn qualify">✅ Qualify</button>
+                            {lead.status === 'Hot Lead' && <button className="action-btn urgent" onClick={() => handleCallClient(lead)}>📞 Call Now</button>}
+                            <button className="action-btn email" onClick={() => handleEmailClient(lead)}>📧 Email</button>
+                            <button className="action-btn qualify" onClick={() => handleViewClient(lead)}>✅ Qualify</button>
                           </td>
                         </tr>
                       ))

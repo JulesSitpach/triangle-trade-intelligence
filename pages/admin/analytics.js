@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import TriangleLayout from '../../components/TriangleLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 
 const TrendingUp = ({ className }) => (
   <span className={className}>[trending-up]</span>
@@ -232,19 +232,21 @@ export default function Analytics() {
 
   if (isLoading) {
     return (
-      <TriangleLayout>
+      <>
+      <AdminNavigation />
         <div className="main-content">
           <div className="text-center">
             <div className="loading-spinner"></div>
             <p className="text-muted">Loading analytics dashboard...</p>
           </div>
         </div>
-      </TriangleLayout>
+      </>
     );
   }
 
   return (
-    <TriangleLayout>
+    <>
+      <AdminNavigation />
       <div className="main-content">
         {/* Header */}
         <div className="page-header">
@@ -368,7 +370,7 @@ export default function Analytics() {
           <ActivityTab userActivity={userActivity} />
         )}
       </div>
-    </TriangleLayout>
+    </>
   );
 }
 
