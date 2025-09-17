@@ -196,22 +196,61 @@ Main orchestrator: `components/workflow/USMCAWorkflowOrchestrator.js`
 4. **Step 4A**: Certificate Generation (`/usmca-certificate-completion`) - OPTIONAL
    - Uses `AuthorizationStep` component for certificate completion
    - Includes "🚨 Go to Crisis Alerts" button after certificate generation
-4. **Step 4B**: Crisis Alerts (`/trump-tariff-alerts`) - ALTERNATIVE
-   - Personalized trade monitoring based on workflow data
-   - Data sourced from database via `/api/workflow-based-alerts`
+4. **Step 4B**: Trade Risk & Alternatives (`/trade-risk-alternatives`) - CRITICAL PATH
+   - **⚠️ NEVER USE `/trump-tariff-alerts` - DEPRECATED AND BROKEN**
+   - Personalized trade monitoring based on user's actual workflow data
+   - Data sourced from localStorage only (no automatic database storage)
+   - Dynamic team recommendations (Jorge for Latin America, Cristina for logistics)
 
-**API Endpoints Used:**
-- Primary workflow: `/api/usmca-complete`
-- Classification: `/api/ai-classification`
+**CORRECT API Endpoints:**
+- Primary workflow: `/api/simple-usmca-compliance`
+- Classification: `/api/simple-classification`
 - Certificate completion: `/api/trust/complete-certificate`
-- **Workflow persistence**: `/api/workflow-complete` (saves to database for alerts)
-- **Alerts data**: `/api/workflow-based-alerts` (reads from database)
+- **NO DATABASE STORAGE** - Users control when to share data with team
 
-**Key Navigation Flows:**
-- **Standard**: Homepage → USMCA Workflow → Results → **Choose Path**
-- **Certificate Path**: Results → Certificate Completion → PDF Generation → Alerts (optional)
-- **Alerts Path**: Results → Crisis Alerts (immediate)
-- **Data Flow**: localStorage (immediate) + Database (persistent alerts)
+**CORRECT Navigation Flows:**
+- **Standard**: Homepage → USMCA Workflow → Results (stay in orchestrator)
+- **Certificate Path**: Results → Certificate Completion → PDF Generation → Trade Risk Alerts
+- **Alerts Path**: Any "Alerts" link → `/trade-risk-alternatives` (NEVER `/trump-tariff-alerts`)
+- **Data Flow**: localStorage only → Team contact triggers data sharing
+
+**⚠️ CRITICAL ROUTING RULES:**
+- ALL alert navigation must use `/trade-risk-alternatives`
+- Workflow orchestrator must NOT redirect to separate results page
+- Certificate completion flows to trade risk alerts, not old trump alerts
+- Navigation components use trade-risk-alternatives for all alert links
+
+### 🚨 ANTI-HARDCODING RULES - STRICTLY ENFORCED
+
+**⛔ NEVER HARDCODE THESE VALUES:**
+- Company names (e.g., "Tropical Harvest Processors SA de CV")
+- Country codes (e.g., 'MX', 'US', 'CA' as fallbacks)
+- Business types (e.g., "Electronics", "Manufacturing")
+- Trade volumes (e.g., $1,000,000, $500,000)
+- HS codes (e.g., "8517.62.00", "2009110111")
+- Tariff rates (e.g., 6.8%, 0.25, 25%)
+- Company addresses, tax IDs, phone numbers
+- Product descriptions from tariff schedules
+
+**✅ CORRECT APPROACH:**
+- Use `RISK_CONFIG` objects for thresholds and percentages
+- Pull ALL data from user's actual workflow input
+- Use empty strings '' instead of hardcoded fallbacks
+- Reference user's localStorage data: `workflowData?.company?.name`
+- Configuration-driven with environment variables
+- Database-driven for legitimate defaults
+
+**🔍 HOW TO CHECK:**
+```bash
+# Search for common hardcoded patterns
+grep -r "Tropical Harvest" --include="*.js" .
+grep -r "'MX'" --include="*.js" pages/ components/
+grep -r "1000000\|500000" --include="*.js" pages/
+```
+
+**⚠️ AGENT RESPONSIBILITY:**
+Every agent MUST verify no hardcoded business values before making changes.
+The system must work for ANY user in ANY country with ANY business type.
 
 ### Environment Requirements
 
@@ -250,7 +289,7 @@ ANTHROPIC_API_KEY=
 **Enhanced**: `components/workflow/AuthorizationStep.js`
 - Added "🚨 Go to Crisis Alerts" button after certificate generation
 - Button appears alongside Download/Email actions
-- Direct navigation to `/trump-tariff-alerts`
+- Direct navigation to `/trade-risk-alternatives`
 
 #### 3. **Database Persistence for Alerts**
 **Fixed**: Data flow from workflow to alerts system
