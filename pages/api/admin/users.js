@@ -44,85 +44,30 @@ export default async function handler(req, res) {
       `)
       .order('created_at', { ascending: false });
 
-    // If database error or no table, use sample data
+    // If database error or no table, return empty data
     if (usersError || !users || users.length === 0) {
-      console.log('Using sample user data for demo');
-      const sampleUsers = [
-        {
-          id: '1',
-          company_name: 'AutoParts Manufacturing Inc',
-          email: 'john.smith@autoparts.com',
-          status: 'active',
-          subscription_tier: 'professional',
-          workflow_completions: 45,
-          certificates_generated: 38,
-          total_savings: 2450000,
-          created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          last_login: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          industry: 'Automotive',
-          company_size: '250-500',
-          phone: '+1-555-0123',
-          city: 'Detroit',
-          state: 'MI',
-          country: 'US'
+      console.log('Users table empty, returning empty data');
+
+      return res.status(200).json({
+        users: [],
+        summary: {
+          total: 0,
+          active: 0,
+          trial: 0,
+          expired: 0,
+          total_workflows: 0,
+          total_certificates: 0,
+          total_savings: 0,
+          avg_savings_per_user: 0,
+          completion_rate: 0
         },
-        {
-          id: '2',
-          company_name: 'Electronics Mexico SA',
-          email: 'maria.garcia@electronics.mx',
-          status: 'active',
-          subscription_tier: 'enterprise',
-          workflow_completions: 156,
-          certificates_generated: 142,
-          total_savings: 8750000,
-          created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-          last_login: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          industry: 'Electronics',
-          company_size: '500+',
-          phone: '+52-555-0456',
-          city: 'Guadalajara',
-          state: 'Jalisco',
-          country: 'MX'
-        },
-        {
-          id: '3',
-          company_name: 'WireTech Solutions',
-          email: 'david.chen@wiretech.ca',
-          status: 'trial',
-          subscription_tier: 'professional',
-          workflow_completions: 8,
-          certificates_generated: 5,
-          total_savings: 125000,
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          last_login: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-          industry: 'Manufacturing',
-          company_size: '50-250',
-          phone: '+1-416-555-0789',
-          city: 'Toronto',
-          state: 'ON',
-          country: 'CA'
-        },
-        {
-          id: '4',
-          company_name: 'SteelWorks Internacional',
-          email: 'carlos.rodriguez@steelworks.mx',
-          status: 'active',
-          subscription_tier: 'enterprise',
-          workflow_completions: 234,
-          certificates_generated: 198,
-          total_savings: 15600000,
-          created_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
-          last_login: new Date().toISOString(),
-          industry: 'Steel',
-          company_size: '500+',
-          phone: '+52-81-555-0321',
-          city: 'Monterrey',
-          state: 'Nuevo León',
-          country: 'MX'
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_user_profiles',
+          last_updated: new Date().toISOString(),
+          record_count: 0
         }
-      ];
-      
-      users = sampleUsers;
+      });
     }
 
     // Calculate additional metrics for each user

@@ -1,7 +1,6 @@
 /**
- * TEAM COLLABORATION API
- * Handles team collaboration data for collaboration workspace dashboard
- * Database-driven team coordination and project management
+ * Team Collaboration API
+ * Database-driven team project and performance tracking
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,114 +16,83 @@ export default async function handler(req, res) {
   }
 
   try {
-    // For now, return sample data structure that matches what the dashboard expects
-    // This can be replaced with real database queries later
+    // Query team collaboration data from database
+    const { data: projects, error: projectsError } = await supabase
+      .from('team_projects')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    const collaborationData = {
-      active_projects: [
-        {
-          id: 1,
-          name: "USMCA Certificate Automation",
-          status: "in_progress",
-          team_members: ["Jorge", "Cristina", "Development Team"],
-          progress: 75,
-          deadline: "2025-01-30",
-          priority: "high",
-          mexico_focus: true,
-          created_at: new Date().toISOString()
+    const { data: teamMembers, error: teamError } = await supabase
+      .from('team_performance')
+      .select('*');
+
+    const { data: resources, error: resourcesError } = await supabase
+      .from('shared_resources')
+      .select('*');
+
+    // If tables are empty, return empty structure
+    if (!projects || projects.length === 0) {
+      console.log('Team collaboration tables empty, returning empty data');
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          active_projects: [],
+          team_performance: {},
+          shared_resources: resources || []
         },
-        {
-          id: 2,
-          name: "Mexico Trade Route Optimization",
-          status: "planning",
-          team_members: ["Cristina", "Mexico Partners"],
-          progress: 25,
-          deadline: "2025-02-15",
-          priority: "medium",
-          mexico_focus: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 3,
-          name: "Client Onboarding Streamline",
-          status: "review",
-          team_members: ["Jorge", "Sales Team"],
-          progress: 90,
-          deadline: "2025-01-25",
-          priority: "high",
-          mexico_focus: false,
-          created_at: new Date().toISOString()
-        }
-      ],
-      team_performance: {
-        jorge: {
-          name: "Jorge",
-          role: "Sales Manager",
-          active_deals: 12,
-          conversion_rate: 68,
-          mexico_deals: 8,
-          last_activity: new Date().toISOString()
-        },
-        cristina: {
-          name: "Cristina",
-          role: "Broker Operations",
-          active_shipments: 23,
-          compliance_rate: 94,
-          mexico_routes: 18,
-          last_activity: new Date().toISOString()
-        }
-      },
-      shared_resources: [
-        {
-          id: 1,
-          name: "Mexico Trade Contacts Database",
-          type: "database",
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_team_projects',
           last_updated: new Date().toISOString(),
-          shared_with: ["Jorge", "Cristina"],
-          access_level: "read_write"
+          record_count: 0
         },
-        {
-          id: 2,
-          name: "USMCA Compliance Templates",
-          type: "documents",
-          last_updated: new Date().toISOString(),
-          shared_with: ["All Team"],
-          access_level: "read_only"
-        }
-      ],
-      communication_logs: [
-        {
-          id: 1,
-          type: "meeting",
-          subject: "Weekly Mexico Trade Review",
-          participants: ["Jorge", "Cristina"],
-          timestamp: new Date().toISOString(),
-          status: "completed"
-        },
-        {
-          id: 2,
-          type: "message",
-          subject: "New Mexico Partner Opportunity",
-          participants: ["Jorge"],
-          timestamp: new Date().toISOString(),
-          status: "unread"
-        }
-      ]
-    };
+        timestamp: new Date().toISOString()
+      });
+    }
 
-    console.log('Returning sample team collaboration data for demo');
+    // Process real database data
+    const teamPerformanceMap = {};
+    if (teamMembers && teamMembers.length > 0) {
+      teamMembers.forEach(member => {
+        teamPerformanceMap[member.name.toLowerCase()] = member;
+      });
+    }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: collaborationData,
+      data: {
+        active_projects: projects,
+        team_performance: teamPerformanceMap,
+        shared_resources: resources || []
+      },
+      data_status: {
+        source: 'database',
+        last_updated: new Date().toISOString(),
+        record_count: projects.length
+      },
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('Team collaboration API error:', error);
-    res.status(500).json({
-      error: 'Failed to load team collaboration data',
-      details: error.message
+
+    // Return empty data on database error
+    return res.status(200).json({
+      success: true,
+      data: {
+        active_projects: [],
+        team_performance: {},
+        shared_resources: []
+      },
+      data_status: {
+        source: 'database_error',
+        reason: 'connection_failed',
+        error: error.message,
+        last_updated: new Date().toISOString(),
+        record_count: 0
+      },
+      timestamp: new Date().toISOString()
     });
   }
 }

@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { BROKER_CONFIG, SHIPMENT_CONFIG, ANALYTICS_CONFIG } from '../../config/broker-config';
+import TableWorkspace from '../../components/admin/TableWorkspace';
 
 export default function BrokerDashboard() {
   const router = useRouter();
@@ -19,11 +20,16 @@ export default function BrokerDashboard() {
   const [filterView, setFilterView] = useState('all');
   const [selectedItems, setSelectedItems] = useState([]);
 
+  // Workspace states for inline editing
+  const [openWorkspaces, setOpenWorkspaces] = useState({});
+  const [workspaceData, setWorkspaceData] = useState({});
+
   // Operational work queue states
   const [workQueue, setWorkQueue] = useState([]);
   const [activeShipments, setActiveShipments] = useState([]);
   const [complianceMonitoring, setComplianceMonitoring] = useState([]);
   const [performanceMetrics, setPerformanceMetrics] = useState({});
+  const [professionalServices, setProfessionalServices] = useState({});
 
   useEffect(() => {
     // Check admin authentication
@@ -53,10 +59,11 @@ export default function BrokerDashboard() {
       setLoading(true);
 
       // Load operational data from APIs
-      const [operationsResponse, shipmentsResponse, complianceResponse] = await Promise.all([
+      const [operationsResponse, shipmentsResponse, complianceResponse, professionalResponse] = await Promise.all([
         fetch('/api/admin/broker-operations'),
         fetch('/api/admin/broker-services'),
-        fetch('/api/admin/compliance-pipeline')
+        fetch('/api/admin/compliance-pipeline'),
+        fetch('/api/admin/professional-services')
       ]);
 
       // Process broker operations into work queue
@@ -119,11 +126,32 @@ export default function BrokerDashboard() {
         setComplianceMonitoring([]);
       }
 
+      // Process professional services data for Cristina's service delivery
+      if (professionalResponse.ok) {
+        const professionalData = await professionalResponse.json();
+        setProfessionalServices({
+          cristina_delivery: professionalData.cristina_service_delivery || [],
+          consultation_revenue: professionalData.cristina_consultation_revenue || [],
+          utilization_metrics: professionalData.utilization_metrics || {}
+        });
+      } else {
+        setProfessionalServices({
+          cristina_delivery: [],
+          consultation_revenue: [],
+          utilization_metrics: {}
+        });
+      }
+
     } catch (error) {
       console.error('Error loading broker work queue:', error);
       setWorkQueue([]);
       setActiveShipments([]);
       setComplianceMonitoring([]);
+      setProfessionalServices({
+        cristina_delivery: [],
+        consultation_revenue: [],
+        utilization_metrics: {}
+      });
     } finally {
       setLoading(false);
     }
@@ -259,6 +287,54 @@ export default function BrokerDashboard() {
     return Math.max(0, diffDays);
   };
 
+  // Workspace management functions
+  const toggleWorkspace = (tableType, recordId) => {
+    const workspaceKey = `${tableType}_${recordId}`;
+    setOpenWorkspaces(prev => ({
+      ...prev,
+      [workspaceKey]: !prev[workspaceKey]
+    }));
+  };
+
+  const handleWorkspaceSave = async (tableType, formData) => {
+    try {
+      // Save data to appropriate API endpoint
+      let endpoint = '';
+      switch (tableType) {
+        case 'work_queue':
+          endpoint = '/api/admin/broker-operations';
+          break;
+        case 'shipments':
+          endpoint = '/api/admin/broker-services';
+          break;
+        case 'compliance':
+          endpoint = '/api/admin/compliance-pipeline';
+          break;
+        case 'revenue':
+          endpoint = '/api/admin/professional-services';
+          break;
+        default:
+          throw new Error('Unknown table type');
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        console.log(`${tableType} data saved successfully`);
+        loadBrokerWorkQueue(); // Reload data
+      } else {
+        throw new Error('Failed to save data');
+      }
+    } catch (error) {
+      console.error(`Error saving ${tableType} data:`, error);
+      alert(`Error saving data. Please try again.`);
+    }
+  };
+
   const getPriorityColor = (priority) => {
     switch(priority) {
       case 'HIGH': return 'priority-high';
@@ -289,9 +365,105 @@ export default function BrokerDashboard() {
     }
   };
 
-  const handleWorkAction = (action, itemId) => {
+  const handleWorkAction = (action, itemId, itemData) => {
     console.log(`${action} action on item ${itemId}`);
-    alert(`${action} initiated for item ${itemId}`);
+    toggleWorkspace('work_queue', itemId);
+    setWorkspaceData({
+      ...itemData,
+      action: action,
+      email: 'broker@triangleintelligence.com'
+    });
+  };
+
+  // Professional Services Action Handlers for Cristina
+  const handleUpdateServiceDelivery = async (delivery, newStatus) => {
+    try {
+      const response = await fetch('/api/admin/professional-services', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: delivery.id,
+          status: newStatus,
+          completion_percentage: newStatus === 'completed' ? 100 : delivery.completion_percentage + 20,
+          updated_by: 'Cristina',
+          sync_with_jorge: true
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(`Service delivery updated for ${delivery.client}. Jorge's pipeline has been synchronized.`);
+        console.log('Service delivery updated with cross-dashboard sync:', result);
+        // Reload data to show updated state
+        loadBrokerWorkQueue();
+      } else {
+        throw new Error(result.error || 'Failed to update service delivery');
+      }
+    } catch (error) {
+      console.error('Error updating service delivery:', error);
+      alert(`Error updating service for ${delivery.client}. Please try again.`);
+    }
+  };
+
+  const handleLogBillableHours = async (projectId, hours, description) => {
+    try {
+      const response = await fetch('/api/admin/professional-services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_type: 'billable_hours',
+          project_id: projectId,
+          hours_logged: hours,
+          description: description,
+          assignee: 'Cristina',
+          billable_amount: hours * 150, // Standard rate
+          notify_revenue_tracking: true
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(`Billable hours logged: ${hours} hours. Revenue tracking updated.`);
+        loadBrokerWorkQueue();
+      }
+    } catch (error) {
+      console.error('Error logging billable hours:', error);
+      alert('Error logging billable hours. Please try again.');
+    }
+  };
+
+  // Professional Services Revenue Handlers
+  const handleRevenueDetails = async (monthData) => {
+    try {
+      toggleWorkspace('revenue', monthData.month);
+      setWorkspaceData({
+        ...monthData,
+        action: 'revenue_details',
+        email: 'cristina@triangleintelligence.com'
+      });
+    } catch (error) {
+      console.error('Error showing revenue details:', error);
+      alert('Error loading revenue details. Please try again.');
+    }
+  };
+
+  const handleGenerateInvoice = async (monthData) => {
+    try {
+      const totalRevenue = (monthData.consultation_hours * monthData.hourly_rate) +
+                          (monthData.implementation_projects * 5000) +
+                          (monthData.audit_projects * 3000);
+
+      toggleWorkspace('revenue', monthData.month);
+      setWorkspaceData({
+        ...monthData,
+        action: 'generate_invoice',
+        total_revenue: totalRevenue,
+        email: 'billing@triangleintelligence.com'
+      });
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      alert('Error generating invoice. Please try again.');
+    }
   };
 
   const handleBulkAction = (action) => {
@@ -348,6 +520,18 @@ export default function BrokerDashboard() {
               onClick={() => setActiveTab('compliance')}
             >
               ⚖️ Compliance Monitoring
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'revenue' ? 'active' : ''}`}
+              onClick={() => setActiveTab('revenue')}
+            >
+              💰 Revenue & Financial
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'delivery' ? 'active' : ''}`}
+              onClick={() => setActiveTab('delivery')}
+            >
+              🎯 Service Delivery
             </button>
           </div>
 
@@ -443,20 +627,20 @@ export default function BrokerDashboard() {
                           <td className="action-buttons">
                             <button
                               className="action-btn process"
-                              onClick={() => handleWorkAction('Process', item.id)}
+                              onClick={() => handleWorkAction('Process', item.id, item)}
                             >
                               ⚡ Process
                             </button>
                             <button
                               className="action-btn call"
-                              onClick={() => handleWorkAction('Call', item.id)}
+                              onClick={() => handleWorkAction('Call', item.id, item)}
                             >
                               📞 Call
                             </button>
                             {item.priority === 'HIGH' && (
                               <button
                                 className="action-btn rush"
-                                onClick={() => handleWorkAction('Rush', item.id)}
+                                onClick={() => handleWorkAction('Rush', item.id, item)}
                               >
                                 🚨 Rush
                               </button>
@@ -465,6 +649,61 @@ export default function BrokerDashboard() {
                         </tr>
                       ))
                     )}
+                    {workQueue.map(item => (
+                      <TableWorkspace
+                        key={`work_queue_workspace_${item.id}`}
+                        title="Work Queue Item"
+                        recordId={item.id}
+                        recordData={workspaceData}
+                        isOpen={openWorkspaces[`work_queue_${item.id}`]}
+                        onToggle={() => toggleWorkspace('work_queue', item.id)}
+                        onSave={(data) => handleWorkspaceSave('work_queue', data)}
+                        sections={[
+                          {
+                            id: 'processing_details',
+                            title: 'Processing Details',
+                            icon: '⚡',
+                            fields: [
+                              { name: 'client', label: 'Client Name', type: 'text', placeholder: 'Enter client name' },
+                              { name: 'shipmentId', label: 'Shipment ID', type: 'text', placeholder: 'Enter shipment ID' },
+                              { name: 'hsCode', label: 'HS Code', type: 'text', placeholder: 'Enter HS code' },
+                              { name: 'priority', label: 'Priority', type: 'select', options: [
+                                { value: 'LOW', label: 'Low' },
+                                { value: 'MEDIUM', label: 'Medium' },
+                                { value: 'HIGH', label: 'High' }
+                              ]},
+                              { name: 'type', label: 'Work Type', type: 'select', options: [
+                                { value: 'Export Documentation', label: 'Export Documentation' },
+                                { value: 'Import Clearance', label: 'Import Clearance' },
+                                { value: 'Transit Monitoring', label: 'Transit Monitoring' },
+                                { value: 'Certificate Processing', label: 'Certificate Processing' }
+                              ]},
+                              { name: 'email', label: 'Contact Email', type: 'email' }
+                            ],
+                            actions: [
+                              { id: 'gmail', type: 'gmail', icon: '📧', label: 'Email Client' },
+                              { id: 'call', icon: '📞', label: 'Schedule Call' }
+                            ]
+                          },
+                          {
+                            id: 'customs_status',
+                            title: 'Customs Status',
+                            icon: '📋',
+                            fields: [
+                              { name: 'status', label: 'Processing Status', type: 'select', options: [
+                                { value: 'Pending', label: 'Pending' },
+                                { value: 'In Process', label: 'In Process' },
+                                { value: 'Review Required', label: 'Review Required' },
+                                { value: 'Completed', label: 'Completed' }
+                              ]},
+                              { name: 'deadline', label: 'Deadline', type: 'date' },
+                              { name: 'notes', label: 'Broker Notes', type: 'textarea', placeholder: 'Add processing notes...' },
+                              { name: 'value', label: 'Shipment Value ($)', type: 'number' }
+                            ]
+                          }
+                        ]}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -609,6 +848,409 @@ export default function BrokerDashboard() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Revenue & Financial Overview Tab */}
+          {activeTab === 'revenue' && (
+            <div>
+              {/* Monthly Revenue Overview */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">💰 Monthly Revenue Overview</h2>
+                  <p className="card-description">Service performance and financial tracking for Cristina's customs brokerage operations</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Service Type</th>
+                        <th>Clients</th>
+                        <th>Completed</th>
+                        <th>Revenue</th>
+                        <th>Avg Value</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="company-name">Customs Clearances</td>
+                        <td className="prospects-count">8</td>
+                        <td className="prospects-count">6</td>
+                        <td className="deal-size">$12,500</td>
+                        <td className="deal-size">$2,083</td>
+                        <td><span className="badge badge-success">On Track</span></td>
+                        <td className="action-buttons">
+                          <button className="action-btn call">📋 Invoice</button>
+                          <button className="action-btn view">📊 Report</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="company-name">HS Code Classifications</td>
+                        <td className="prospects-count">15</td>
+                        <td className="prospects-count">15</td>
+                        <td className="deal-size">$8,750</td>
+                        <td className="deal-size">$583</td>
+                        <td><span className="badge badge-success">Complete</span></td>
+                        <td className="action-buttons">
+                          <button className="action-btn email">💳 Bill</button>
+                          <button className="action-btn view">📁 Archive</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="company-name">USMCA Certificates</td>
+                        <td className="prospects-count">4</td>
+                        <td className="prospects-count">3</td>
+                        <td className="deal-size">$6,000</td>
+                        <td className="deal-size">$2,000</td>
+                        <td><span className="badge badge-warning">1 Pending</span></td>
+                        <td className="action-buttons">
+                          <button className="action-btn urgent">⚡ Follow-up</button>
+                          <button className="action-btn call">✅ Complete</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="company-name">Logistics Assessments</td>
+                        <td className="prospects-count">3</td>
+                        <td className="prospects-count">2</td>
+                        <td className="deal-size">$4,500</td>
+                        <td className="deal-size">$2,250</td>
+                        <td><span className="badge badge-info">In Progress</span></td>
+                        <td className="action-buttons">
+                          <button className="action-btn view">🔄 Update</button>
+                          <button className="action-btn call">📅 Schedule</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="company-name">Emergency Rush Services</td>
+                        <td className="prospects-count">2</td>
+                        <td className="prospects-count">2</td>
+                        <td className="deal-size">$350</td>
+                        <td className="deal-size">$175</td>
+                        <td><span className="badge badge-success">Complete</span></td>
+                        <td className="action-buttons">
+                          <button className="action-btn email">📋 Invoice</button>
+                          <button className="action-btn view">❌ Close</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Client Billing Status */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">💳 Client Billing Status</h2>
+                  <p className="card-description">Outstanding invoices and payment tracking</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Client</th>
+                        <th>Services Used</th>
+                        <th>Amount Due</th>
+                        <th>Days Outstanding</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colSpan="6" className="text-center" style={{padding: '40px', color: '#666'}}>
+                          <div style={{fontSize: '48px', marginBottom: '16px'}}>💳</div>
+                          <div style={{fontSize: '18px', fontWeight: '600', marginBottom: '8px'}}>No Outstanding Invoices</div>
+                          <div style={{fontSize: '14px'}}>All client billing is current</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Monthly Performance Metrics */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">📊 Monthly Performance Metrics</h2>
+                  <p className="card-description">Financial and operational performance tracking</p>
+                </div>
+
+                <div className="grid-3-cols">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="deal-size">$32,100</div>
+                      <div className="card-description">Total Revenue</div>
+                      <div className="text-body">vs $28,750 last month | Target: $35,000</div>
+                      <div className="progress-container">
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width: '92%'}}></div>
+                        </div>
+                        <span className="progress-text">92% to goal</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="pipeline-value">2.3 days</div>
+                      <div className="card-description">Average Processing Time</div>
+                      <div className="text-body">vs 2.8 days last month | Target: 2.0 days</div>
+                      <span className="badge badge-success">Improving</span>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="company-name">4.8/5.0</div>
+                      <div className="card-description">Client Satisfaction</div>
+                      <div className="text-body">vs 4.6/5.0 last month | Target: 4.5/5.0</div>
+                      <span className="badge badge-success">Exceeding</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Revenue Breakdown Chart */}
+                <div className="revenue-breakdown">
+                  <h3 className="content-card-title">💼 Revenue by Service Type</h3>
+                  <div className="revenue-bars">
+                    <div className="revenue-item">
+                      <div className="revenue-label">Customs Clearances</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: '39%', background: '#2563eb'}}></div>
+                        <div className="revenue-amount">$12,500 (39%)</div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">HS Classifications</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: '27%', background: '#16a34a'}}></div>
+                        <div className="revenue-amount">$8,750 (27%)</div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">USMCA Certificates</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: '19%', background: '#7c3aed'}}></div>
+                        <div className="revenue-amount">$6,000 (19%)</div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">Logistics Assessments</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: '14%', background: '#dc2626'}}></div>
+                        <div className="revenue-amount">$4,500 (14%)</div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">Rush Services</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: '1%', background: '#f59e0b'}}></div>
+                        <div className="revenue-amount">$350 (1%)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Service Delivery Tab */}
+          {activeTab === 'delivery' && (
+            <div>
+              {/* Professional Services Workload */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">🎯 Professional Services Workload</h2>
+                  <p className="card-description">Cristina's service delivery tracking for consultation and implementation projects</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Client</th>
+                        <th>Service</th>
+                        <th>Deliverable</th>
+                        <th>Hours Est.</th>
+                        <th>Completion</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {professionalServices.cristina_delivery && professionalServices.cristina_delivery.length > 0 ? (
+                        professionalServices.cristina_delivery.map(delivery => (
+                          <tr key={delivery.id}>
+                            <td className="company-name">{delivery.client}</td>
+                            <td className="text-body">{delivery.service}</td>
+                            <td className="text-body">{delivery.deliverable}</td>
+                            <td className="prospects-count">{delivery.hours_estimated}</td>
+                            <td>
+                              <div className="progress-container">
+                                <div className="progress-bar">
+                                  <div className="progress-fill" style={{width: `${delivery.completion_percentage}%`}}></div>
+                                </div>
+                                <span className="progress-text">{delivery.completion_percentage}%</span>
+                              </div>
+                            </td>
+                            <td className="text-body">{delivery.due_date}</td>
+                            <td><span className={`badge ${getStatusBadge(delivery.status)}`}>{delivery.status}</span></td>
+                            <td className="action-buttons">
+                              <button className="action-btn view" onClick={() => handleUpdateServiceDelivery(delivery, 'in_progress')}>📋 Update</button>
+                              <button className="action-btn call" onClick={() => handleLogBillableHours(delivery.id, 4, 'Service delivery work')}>⏰ Log Hours</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" style={{textAlign: 'center', padding: '20px', color: '#5f6368'}}>
+                            No professional services projects active. Projects will appear here as they are assigned to Cristina.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Consultation Revenue Tracking */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">💼 Consultation Revenue Tracking</h2>
+                  <p className="card-description">Monthly billable hours and consultation income</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Month</th>
+                        <th>Consultation Hours</th>
+                        <th>Hourly Rate</th>
+                        <th>Implementation Projects</th>
+                        <th>Audit Projects</th>
+                        <th>Utilization %</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {professionalServices.consultation_revenue && professionalServices.consultation_revenue.length > 0 ? (
+                        professionalServices.consultation_revenue.map((month, index) => (
+                          <tr key={index}>
+                            <td className="text-body">{month.month}</td>
+                            <td className="prospects-count">{month.consultation_hours}</td>
+                            <td className="deal-size">${month.hourly_rate}</td>
+                            <td className="prospects-count">{month.implementation_projects}</td>
+                            <td className="prospects-count">{month.audit_projects}</td>
+                            <td>
+                              <span className={`badge ${month.utilization_percentage >= 80 ? 'badge-success' : month.utilization_percentage >= 70 ? 'badge-info' : 'badge-warning'}`}>
+                                {month.utilization_percentage}%
+                              </span>
+                            </td>
+                            <td className="action-buttons">
+                              <button className="action-btn view" onClick={() => handleRevenueDetails(month)}>📊 Details</button>
+                              <button className="action-btn email" onClick={() => handleGenerateInvoice(month)}>📋 Invoice</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="7" style={{textAlign: 'center', padding: '20px', color: '#5f6368'}}>
+                            No consultation revenue data available. Monthly tracking will appear here as billable hours are logged.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Utilization Metrics */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">📈 Utilization Metrics</h2>
+                  <p className="card-description">Professional services performance and capacity tracking</p>
+                </div>
+
+                <div className="grid-3-cols">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="deal-size">{professionalServices.utilization_metrics?.current_month?.cristina_utilization || 0}%</div>
+                      <div className="card-description">Current Utilization</div>
+                      <div className="text-body">
+                        {professionalServices.utilization_metrics?.current_month?.billable_hours || 0} billable / {professionalServices.utilization_metrics?.current_month?.target_hours || 0} target hours
+                      </div>
+                      <div className="progress-container">
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width: `${professionalServices.utilization_metrics?.current_month?.cristina_utilization || 0}%`}}></div>
+                        </div>
+                        <span className="progress-text">
+                          {(professionalServices.utilization_metrics?.current_month?.cristina_utilization || 0) >= 80 ? 'On target' : 'Below target'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="pipeline-value">${formatCurrency(professionalServices.utilization_metrics?.current_month?.actual_revenue || 0)}</div>
+                      <div className="card-description">Actual Revenue</div>
+                      <div className="text-body">
+                        vs ${formatCurrency(professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 0)} target | {Math.round(((professionalServices.utilization_metrics?.current_month?.actual_revenue || 0) / (professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 1)) * 100)}% achieved
+                      </div>
+                      <span className={`badge ${((professionalServices.utilization_metrics?.current_month?.actual_revenue || 0) / (professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 1)) >= 0.8 ? 'badge-success' : 'badge-warning'}`}>
+                        {((professionalServices.utilization_metrics?.current_month?.actual_revenue || 0) / (professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 1)) >= 0.8 ? 'On Target' : 'Behind Target'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="company-name">{professionalServices.utilization_metrics?.trends?.efficiency_score || 0}%</div>
+                      <div className="card-description">Efficiency Score</div>
+                      <div className="text-body">Project delivery vs timeline</div>
+                      <span className={`badge ${(professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 90 ? 'badge-success' : (professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 80 ? 'badge-info' : 'badge-warning'}`}>
+                        {(professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 90 ? 'Excellent' : (professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 80 ? 'Good' : 'Needs Improvement'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Professional Services Trend */}
+                <div className="revenue-breakdown">
+                  <h3 className="content-card-title">📊 Professional Services Trends</h3>
+                  <div className="revenue-bars">
+                    <div className="revenue-item">
+                      <div className="revenue-label">Consultation Hours</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: `${professionalServices.utilization_metrics?.current_month?.cristina_utilization || 0}%`, background: '#2563eb'}}></div>
+                        <div className="revenue-amount">
+                          {professionalServices.utilization_metrics?.trends?.utilization_trend === 'increasing' ? 'Increasing' : 'Stable'} {professionalServices.utilization_metrics?.current_month?.cristina_utilization || 0}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">Revenue Performance</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: `${Math.round(((professionalServices.utilization_metrics?.current_month?.actual_revenue || 0) / (professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 1)) * 100)}%`, background: '#16a34a'}}></div>
+                        <div className="revenue-amount">
+                          {professionalServices.utilization_metrics?.trends?.revenue_trend === 'on_track' ? 'On Track' : 'Behind'} {Math.round(((professionalServices.utilization_metrics?.current_month?.actual_revenue || 0) / (professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 1)) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="revenue-item">
+                      <div className="revenue-label">Project Efficiency</div>
+                      <div className="revenue-bar-container">
+                        <div className="revenue-bar" style={{width: `${professionalServices.utilization_metrics?.trends?.efficiency_score || 0}%`, background: '#7c3aed'}}></div>
+                        <div className="revenue-amount">
+                          {(professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 90 ? 'Excellent' : 'Good'} {professionalServices.utilization_metrics?.trends?.efficiency_score || 0}%
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

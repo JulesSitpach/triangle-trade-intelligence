@@ -36,54 +36,23 @@ export default async function handler(req, res) {
       .gte('workflow_completions', 1) // Only users with platform activity
       .order('certificates_generated', { ascending: false });
 
-    // If no user data, use sample compliance pipeline
+    // If no user data, return empty pipeline
     if (usersError || !users || users.length === 0) {
-      console.log('Using sample compliance pipeline data for demo');
-      const samplePipeline = [
-        {
-          id: '1',
-          company: 'TechStart Manufacturing',
-          requestType: 'Full USMCA Certification',
-          priority: 'Critical',
-          estimatedValue: 18500,
-          status: 'Ready for Service',
-          timeline: '24-48 hours',
-          contactReason: 'TechStart Manufacturing needs licensed broker for USMCA certification and customs clearance'
-        },
-        {
-          id: '2',
-          company: 'AutoMex Corporation',
-          requestType: 'Certificate Validation',
-          priority: 'High',
-          estimatedValue: 15000,
-          status: 'Qualification Required',
-          timeline: '3-5 business days',
-          contactReason: 'AutoMex Corporation requires professional validation of their USMCA certificates'
-        },
-        {
-          id: '3',
-          company: 'SouthMfg Industries',
-          requestType: 'Compliance Assessment',
-          priority: 'Medium',
-          estimatedValue: 8500,
-          status: 'Initial Assessment',
-          timeline: '1-2 weeks',
-          contactReason: 'SouthMfg Industries needs comprehensive compliance review for their trade operations'
-        }
-      ];
+      console.log('Compliance pipeline table empty, returning empty data');
 
       return res.status(200).json({
-        pipeline: samplePipeline,
+        pipeline: [],
         summary: {
-          total_opportunities: samplePipeline.length,
-          total_revenue_potential: samplePipeline.reduce((sum, p) => sum + p.estimatedValue, 0),
-          critical_priority: samplePipeline.filter(p => p.priority === 'Critical').length,
-          ready_for_service: samplePipeline.filter(p => p.status === 'Ready for Service').length
+          total_opportunities: 0,
+          total_revenue_potential: 0,
+          critical_priority: 0,
+          ready_for_service: 0
         },
         data_status: {
-          source: 'sample_data',
-          table_exists: false,
-          record_count: samplePipeline.length
+          source: 'database_empty',
+          reason: 'no_user_profiles',
+          last_updated: new Date().toISOString(),
+          record_count: 0
         }
       });
     }

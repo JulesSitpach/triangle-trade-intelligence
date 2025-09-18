@@ -17,76 +17,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Real deals data focused on Mexico trade opportunities
-    const deals = [
-      {
-        id: 1,
-        client: "AutoParts Mexico SA",
-        value: 2500000,
-        status: "Negotiation",
-        last_contact: "2025-01-15",
-        route: "Canada → Mexico → USA",
-        savings_percent: 12.5,
-        contact_person: "Maria Rodriguez",
-        next_action: "Follow-up call scheduled",
-        priority: "high",
-        mexico_focus: true
-      },
-      {
-        id: 2,
-        client: "Electronics Distributors Corp",
-        value: 1800000,
-        status: "Proposal Sent",
-        last_contact: "2025-01-10",
-        route: "Asia → Mexico → North America",
-        savings_percent: 8.2,
-        contact_person: "David Kim",
-        next_action: "Awaiting proposal response",
-        priority: "high",
-        mexico_focus: true
-      },
-      {
-        id: 3,
-        client: "Textile Solutions International",
-        value: 3200000,
-        status: "Discovery",
-        last_contact: "2025-01-08",
-        route: "Global → Mexico Production → USMCA",
-        savings_percent: 18.7,
-        contact_person: "Carlos Mendez",
-        next_action: "Schedule technical call with Cristina",
-        priority: "medium",
-        mexico_focus: true
-      },
-      {
-        id: 4,
-        client: "Fresh Produce Importers",
-        value: 950000,
-        status: "Initial Contact",
-        last_contact: "2025-01-05",
-        route: "Mexico → US Border",
-        savings_percent: 6.3,
-        contact_person: "Sofia Martinez",
-        next_action: "Send USMCA benefits overview",
-        priority: "medium",
-        mexico_focus: true
-      },
-      {
-        id: 5,
-        client: "Manufacturing Solutions Ltd",
-        value: 4100000,
-        status: "Technical Review",
-        last_contact: "2025-01-03",
-        route: "Canada → Mexico Manufacturing → Global",
-        savings_percent: 15.8,
-        contact_person: "Roberto Silva",
-        next_action: "Cristina to review manufacturing requirements",
-        priority: "high",
-        mexico_focus: true,
-        needs_handoff: true,
-        handoff_reason: "Complex manufacturing compliance requirements"
-      }
-    ];
+    // Query deals from database
+    let { data: deals, error: dealsError } = await supabase
+      .from('deals')
+      .select('*')
+      .order('value', { ascending: false });
+
+    // If no deals table or no data, return empty data
+    if (dealsError || !deals || deals.length === 0) {
+      console.log('Deals table empty, returning empty data');
+
+      return res.status(200).json({
+        deals: [],
+        insights: {
+          total_value: 0,
+          avg_savings: 0,
+          deals_needing_attention: 0,
+          high_priority: 0,
+          mexico_focused: 0,
+          handoff_required: 0
+        },
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_deals',
+          last_updated: new Date().toISOString(),
+          record_count: 0
+        }
+      });
+    }
 
     // Calculate insights
     const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);

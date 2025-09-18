@@ -1,12 +1,10 @@
 /**
- * ADMIN API: Platform Leads Management
- * GET /api/admin/platform-leads - Returns qualified leads from platform usage
- * Converts workflow_completions into sales leads for Jorge
+ * Platform Leads API
+ * Database-driven lead generation from workflow completions
  */
 
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -34,153 +32,135 @@ export default async function handler(req, res) {
       .order('last_activity', { ascending: false })
       .limit(50);
 
-    // If no workflow data, use sample leads
+    // If no workflow data, return empty leads
     if (workflowsError || !workflows || workflows.length === 0) {
-      console.log('Using sample platform leads data for demo');
-      const sampleLeads = [
-        {
-          id: '1',
-          company: 'NorthTech Industries',
-          platformActivity: '15 classifications completed',
-          leadScore: 85,
-          interestLevel: 'High',
-          lastActivity: '2 hours ago',
-          status: 'Hot Lead',
-          email: 'contact@northtech.com',
-          tradeVolume: 2500000
-        },
-        {
-          id: '2',
-          company: 'SouthMfg Corporation',
-          platformActivity: '8 USMCA assessments',
-          leadScore: 72,
-          interestLevel: 'Medium',
-          lastActivity: '1 day ago',
-          status: 'Warm Lead',
-          email: 'info@southmfg.com',
-          tradeVolume: 1800000
-        },
-        {
-          id: '3',
-          company: 'EastAuto Components',
-          platformActivity: '3 workflow completions',
-          leadScore: 45,
-          interestLevel: 'Low',
-          lastActivity: '5 days ago',
-          status: 'Cold Lead',
-          email: 'procurement@eastauto.com',
-          tradeVolume: 650000
-        }
-      ];
+      console.log('Platform leads table empty, returning empty data');
 
       return res.status(200).json({
-        leads: sampleLeads,
+        leads: [],
         summary: {
-          total_leads: sampleLeads.length,
-          hot_leads: sampleLeads.filter(l => l.status === 'Hot Lead').length,
-          warm_leads: sampleLeads.filter(l => l.status === 'Warm Lead').length,
-          cold_leads: sampleLeads.filter(l => l.status === 'Cold Lead').length,
-          avg_lead_score: 67.3
+          total_leads: 0,
+          hot_leads: 0,
+          warm_leads: 0,
+          cold_leads: 0,
+          total_trade_volume: 0,
+          avg_lead_score: 0
         },
         data_status: {
-          source: 'sample_data',
-          table_exists: false,
-          record_count: sampleLeads.length
+          source: 'database_empty',
+          reason: 'no_workflow_completions',
+          last_updated: new Date().toISOString(),
+          record_count: 0
         }
       });
     }
 
-    // Convert workflow completions to sales leads
+    // Process real workflow data into leads
     const leads = workflows.map(workflow => {
-      const completionCount = workflow.completion_count || 1;
-      const tradeVolume = parseFloat(workflow.trade_volume?.replace(/[$,]/g, '') || '0');
-      const lastActivity = workflow.last_activity ? new Date(workflow.last_activity) : new Date(workflow.created_at);
-      const daysSinceActivity = Math.floor((new Date() - lastActivity) / (1000 * 60 * 60 * 24));
-
-      // Calculate lead score based on activity
-      let leadScore = 20; // Base score
-      if (completionCount >= 5) leadScore += 40;
-      else if (completionCount >= 3) leadScore += 30;
-      else if (completionCount >= 2) leadScore += 20;
-
-      if (tradeVolume > 5000000) leadScore += 25;
-      else if (tradeVolume > 1000000) leadScore += 15;
-      else if (tradeVolume > 500000) leadScore += 10;
-
-      if (daysSinceActivity <= 1) leadScore += 15;
-      else if (daysSinceActivity <= 7) leadScore += 10;
-      else if (daysSinceActivity <= 30) leadScore += 5;
-
-      leadScore = Math.min(leadScore, 100);
-
-      // Determine status and interest level
-      let status = 'Cold Lead';
-      let interestLevel = 'Low';
-
-      if (leadScore >= 80) {
-        status = 'Hot Lead';
-        interestLevel = 'High';
-      } else if (leadScore >= 60) {
-        status = 'Warm Lead';
-        interestLevel = 'Medium';
-      }
-
-      // Format activity description
-      const activityDescription = `${completionCount} workflow${completionCount > 1 ? 's' : ''} completed`;
-
-      // Format last activity time
-      let lastActivityText = '';
-      if (daysSinceActivity === 0) {
-        lastActivityText = 'Today';
-      } else if (daysSinceActivity === 1) {
-        lastActivityText = '1 day ago';
-      } else if (daysSinceActivity <= 7) {
-        lastActivityText = `${daysSinceActivity} days ago`;
-      } else {
-        lastActivityText = lastActivity.toLocaleDateString();
-      }
+      const leadScore = calculateLeadScore(workflow);
+      const interestLevel = getInterestLevel(leadScore);
+      const status = getLeadStatus(leadScore);
 
       return {
         id: workflow.id,
-        company: workflow.company_name || 'Unknown Company',
-        platformActivity: activityDescription,
+        company: workflow.company_name,
+        lastActivity: `${workflow.completion_count} workflow${workflow.completion_count > 1 ? 's' : ''} completed`,
         leadScore: leadScore,
         interestLevel: interestLevel,
-        lastActivity: lastActivityText,
+        lastAccess: formatTimeAgo(workflow.last_activity),
         status: status,
         email: workflow.user_email,
-        tradeVolume: tradeVolume
+        tradeVolume: workflow.trade_volume || 0,
+        businessType: workflow.business_type
       };
     });
 
-    // Calculate summary metrics
-    const totalLeads = leads.length;
-    const hotLeads = leads.filter(l => l.status === 'Hot Lead').length;
-    const warmLeads = leads.filter(l => l.status === 'Warm Lead').length;
-    const coldLeads = leads.filter(l => l.status === 'Cold Lead').length;
-    const avgLeadScore = totalLeads > 0 ? (leads.reduce((sum, l) => sum + l.leadScore, 0) / totalLeads).toFixed(1) : 0;
+    // Calculate summary statistics
+    const summary = {
+      total_leads: leads.length,
+      hot_leads: leads.filter(l => l.status === 'Hot Lead').length,
+      warm_leads: leads.filter(l => l.status === 'Warm Lead').length,
+      cold_leads: leads.filter(l => l.status === 'Cold Lead').length,
+      total_trade_volume: leads.reduce((sum, l) => sum + (l.tradeVolume || 0), 0),
+      avg_lead_score: Math.round(leads.reduce((sum, l) => sum + l.leadScore, 0) / leads.length)
+    };
 
     return res.status(200).json({
       leads: leads,
-      summary: {
-        total_leads: totalLeads,
-        hot_leads: hotLeads,
-        warm_leads: warmLeads,
-        cold_leads: coldLeads,
-        avg_lead_score: parseFloat(avgLeadScore)
-      },
+      summary: summary,
       data_status: {
         source: 'database',
-        table_exists: true,
-        record_count: totalLeads
+        last_updated: new Date().toISOString(),
+        record_count: leads.length
       }
     });
 
   } catch (error) {
     console.error('Platform leads API error:', error);
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
+
+    return res.status(200).json({
+      leads: [],
+      summary: {
+        total_leads: 0,
+        hot_leads: 0,
+        warm_leads: 0,
+        cold_leads: 0,
+        total_trade_volume: 0,
+        avg_lead_score: 0
+      },
+      data_status: {
+        source: 'database_error',
+        reason: 'connection_failed',
+        error: error.message,
+        last_updated: new Date().toISOString(),
+        record_count: 0
+      }
     });
   }
+}
+
+// Helper functions for lead scoring
+function calculateLeadScore(workflow) {
+  let score = 0;
+
+  // Base score from completion count
+  score += Math.min(workflow.completion_count * 15, 60);
+
+  // Trade volume bonus
+  if (workflow.trade_volume) {
+    if (workflow.trade_volume >= 1000000) score += 25;
+    else if (workflow.trade_volume >= 500000) score += 15;
+    else if (workflow.trade_volume >= 100000) score += 10;
+  }
+
+  // Recent activity bonus
+  const daysSinceActivity = (new Date() - new Date(workflow.last_activity)) / (1000 * 60 * 60 * 24);
+  if (daysSinceActivity <= 1) score += 15;
+  else if (daysSinceActivity <= 7) score += 10;
+  else if (daysSinceActivity <= 30) score += 5;
+
+  return Math.min(Math.max(score, 0), 100);
+}
+
+function getInterestLevel(score) {
+  if (score >= 75) return 'High';
+  if (score >= 50) return 'Medium';
+  return 'Low';
+}
+
+function getLeadStatus(score) {
+  if (score >= 75) return 'Hot Lead';
+  if (score >= 50) return 'Warm Lead';
+  return 'Cold Lead';
+}
+
+function formatTimeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffInHours = (now - date) / (1000 * 60 * 60);
+
+  if (diffInHours < 1) return 'Less than 1 hour ago';
+  if (diffInHours < 24) return `${Math.floor(diffInHours)} hours ago`;
+  if (diffInHours < 168) return `${Math.floor(diffInHours / 24)} days ago`;
+  return `${Math.floor(diffInHours / 168)} weeks ago`;
 }

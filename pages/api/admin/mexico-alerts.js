@@ -17,77 +17,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Real Mexico trade alerts with actionable insights
-    const today = new Date().toISOString().split('T')[0];
+    // Query Mexico-related alerts from database
+    let { data: alerts, error: alertsError } = await supabase
+      .from('mexico_trade_alerts')
+      .select('*')
+      .eq('mexico_focus', true)
+      .order('date', { ascending: false });
 
-    const alerts = [
-      {
-        id: 1,
-        type: "opportunity",
-        priority: "high",
-        title: "New USMCA Tariff Reduction - Automotive Parts",
-        description: "8708.10 automotive parts now qualify for additional 2.3% tariff reduction via Mexico routing",
-        impact: "Potential $180K annual savings for AutoParts Mexico SA deal",
-        action_required: "Update proposal with new savings calculation",
-        date: today,
-        mexico_focus: true,
-        affected_clients: ["AutoParts Mexico SA"],
-        estimated_value: 180000
-      },
-      {
-        id: 2,
-        type: "disruption",
-        priority: "medium",
-        title: "Laredo Border Crossing Delays",
-        description: "3-4 hour delays at Laredo-Nuevo Laredo crossing due to increased inspections",
-        impact: "May affect Electronics Distributors Corp shipment timeline",
-        action_required: "Contact client about potential 2-day delay",
-        date: today,
-        mexico_focus: true,
-        affected_clients: ["Electronics Distributors Corp"],
-        estimated_value: -25000
-      },
-      {
-        id: 3,
-        type: "regulatory",
-        priority: "high",
-        title: "Mexico Manufacturing Origin Requirements Update",
-        description: "New USMCA origin documentation required for textile manufacturing effective Feb 1st",
-        impact: "Affects Textile Solutions International manufacturing qualification",
-        action_required: "Schedule Cristina call to review compliance requirements",
-        date: today,
-        mexico_focus: true,
-        affected_clients: ["Textile Solutions International"],
-        estimated_value: 0,
-        needs_handoff: true
-      },
-      {
-        id: 4,
-        type: "opportunity",
-        priority: "medium",
-        title: "Mexico Fresh Produce Season Peak",
-        description: "Peak avocado and citrus season creating optimal Mexico-US routing opportunities",
-        impact: "Perfect timing for Fresh Produce Importers expansion",
-        action_required: "Send seasonal routing proposal",
-        date: today,
-        mexico_focus: true,
-        affected_clients: ["Fresh Produce Importers"],
-        estimated_value: 75000
-      },
-      {
-        id: 5,
-        type: "competitive",
-        priority: "low",
-        title: "Competitor Activity in Guadalajara",
-        description: "Major logistics competitor expanding Guadalajara operations",
-        impact: "Monitor for client retention risks in Mexico manufacturing sector",
-        action_required: "Review Manufacturing Solutions Ltd contract terms",
-        date: today,
-        mexico_focus: true,
-        affected_clients: ["Manufacturing Solutions Ltd"],
-        estimated_value: -50000
-      }
-    ];
+    // If no alerts table or no data, return empty alerts
+    if (alertsError || !alerts || alerts.length === 0) {
+      console.log('Mexico alerts table empty, returning empty data');
+
+      return res.status(200).json({
+        alerts: [],
+        alert_summary: {
+          total_alerts: 0,
+          high_priority: 0,
+          opportunities: 0,
+          disruptions: 0,
+          regulatory: 0,
+          total_impact: 0,
+          needs_immediate_action: 0
+        },
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_mexico_trade_alerts',
+          last_updated: new Date().toISOString(),
+          record_count: 0
+        }
+      });
+    }
 
     // Calculate alert summary
     const alertSummary = {

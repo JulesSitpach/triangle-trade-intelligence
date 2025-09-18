@@ -24,7 +24,9 @@
       "Bash(npm run validate:discover:*)",
       "Bash(python:*)",
       "Bash(npx playwright test:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql"
     ],
     "deny": [],
     "ask": []

@@ -17,71 +17,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Real handoff scenarios requiring Cristina's operations expertise
-    const handoffTriggers = [
-      {
-        id: 1,
-        deal_id: 5,
-        client: "Manufacturing Solutions Ltd",
-        trigger_type: "technical_complexity",
-        priority: "high",
-        reason: "Complex USMCA manufacturing origin requirements",
-        description: "Client needs detailed manufacturing compliance review for $4.1M textile operation",
-        jorge_notes: "Client has multi-stage manufacturing process across 3 Mexico facilities",
-        action_needed: "Cristina to review manufacturing flow and USMCA qualification",
-        deadline: "2025-01-20",
-        estimated_time: "2-3 hours technical review",
-        handoff_ready: true,
-        mexico_focus: true
-      },
-      {
-        id: 2,
-        deal_id: 3,
-        client: "Textile Solutions International",
-        trigger_type: "regulatory_compliance",
-        priority: "high",
-        reason: "New USMCA textile origin requirements (Feb 1st deadline)",
-        description: "Urgent compliance review needed for new textile manufacturing rules",
-        jorge_notes: "Client unaware of Feb 1st regulatory changes affecting their operation",
-        action_needed: "Cristina to explain new requirements and update compliance docs",
-        deadline: "2025-01-22",
-        estimated_time: "1 hour compliance briefing",
-        handoff_ready: true,
-        mexico_focus: true
-      },
-      {
-        id: 3,
-        deal_id: 2,
-        client: "Electronics Distributors Corp",
-        trigger_type: "documentation_review",
-        priority: "medium",
-        reason: "Complex electronics classification questions",
-        description: "Client has questions about HS code classification for new product line",
-        jorge_notes: "New IoT devices don't fit standard electronics categories",
-        action_needed: "Cristina to review product specs and determine correct HS codes",
-        deadline: "2025-01-25",
-        estimated_time: "1 hour classification review",
-        handoff_ready: false,
-        mexico_focus: true,
-        prerequisites: "Need product specifications from client first"
-      },
-      {
-        id: 4,
-        deal_id: 1,
-        client: "AutoParts Mexico SA",
-        trigger_type: "route_optimization",
-        priority: "low",
-        reason: "Client requesting alternative routing options",
-        description: "Client wants backup routing plan for supply chain resilience",
-        jorge_notes: "Main Canada→Mexico→US route working well, they want contingencies",
-        action_needed: "Cristina to design alternative routing scenarios",
-        deadline: "2025-01-30",
-        estimated_time: "30 minutes route planning",
-        handoff_ready: false,
-        mexico_focus: true,
-        prerequisites: "Complete current deal first"
-      }
-    ];
+    // Query handoff triggers from database
+    let { data: handoffTriggers, error: handoffError } = await supabase
+      .from('handoff_triggers')
+      .select('*')
+      .order('priority', { ascending: false });
+
+    // If no handoff_triggers table or no data, return empty data
+    if (handoffError || !handoffTriggers || handoffTriggers.length === 0) {
+      console.log('Handoff triggers table empty, returning empty data');
+
+      return res.status(200).json({
+        handoff_triggers: [],
+        handoff_summary: {
+          total_handoffs: 0,
+          ready_for_handoff: 0,
+          high_priority: 0,
+          total_estimated_hours: 0,
+          mexico_focused: 0,
+          urgent_deadline: 0
+        },
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_handoff_triggers',
+          last_updated: new Date().toISOString(),
+          record_count: 0
+        }
+      });
+    }
 
     // Calculate handoff metrics
     const readyForHandoff = handoffTriggers.filter(h => h.handoff_ready);

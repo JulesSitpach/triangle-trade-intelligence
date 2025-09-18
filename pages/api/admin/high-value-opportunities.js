@@ -1,7 +1,6 @@
 /**
- * HIGH VALUE OPPORTUNITIES API
- * Identifies and tracks high-value Mexico trade opportunities
- * Database-driven opportunity management for enhanced revenue
+ * High Value Opportunities API
+ * Database-driven Mexico trade opportunities tracking
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,156 +16,96 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Sample high-value opportunities focused on Mexico trade
-    const opportunities = {
-      mexico_focused: [
-        {
-          id: 1,
-          client_name: "AutoParts Mexico SA",
-          opportunity_type: "triangle_routing",
-          potential_value: 2500000,
-          savings_percentage: 12.5,
-          route: "Canada → Mexico → USA",
-          status: "negotiation",
-          probability: 75,
-          estimated_close: "2025-02-15",
-          hs_codes: ["8708.10", "8708.21"],
-          contact_person: "Maria Rodriguez",
-          last_contact: new Date().toISOString(),
-          mexico_advantages: [
-            "USMCA preferential rates",
-            "Established Mexico logistics network",
-            "15% cost reduction vs direct routing"
-          ]
-        },
-        {
-          id: 2,
-          client_name: "Electronics Distributors Corp",
-          opportunity_type: "usmca_compliance",
-          potential_value: 1800000,
-          savings_percentage: 8.2,
-          route: "Asia → Mexico → North America",
-          status: "proposal_sent",
-          probability: 60,
-          estimated_close: "2025-03-01",
-          hs_codes: ["8517.12", "8517.18"],
-          contact_person: "David Kim",
-          last_contact: new Date(Date.now() - 86400000).toISOString(),
-          mexico_advantages: [
-            "Mexico assembly qualification",
-            "Tariff rate reduction",
-            "Supply chain optimization"
-          ]
-        },
-        {
-          id: 3,
-          client_name: "Textile Solutions International",
-          opportunity_type: "mexico_manufacturing",
-          potential_value: 3200000,
-          savings_percentage: 18.7,
-          route: "Global → Mexico Production → USMCA Markets",
-          status: "discovery",
-          probability: 45,
-          estimated_close: "2025-04-30",
-          hs_codes: ["6109.10", "6204.62"],
-          contact_person: "Carlos Mendez",
-          last_contact: new Date(Date.now() - 172800000).toISOString(),
-          mexico_advantages: [
-            "Mexico manufacturing hub",
-            "USMCA origin qualification",
-            "Cost-effective production"
-          ]
-        }
-      ],
-      pipeline_summary: {
-        total_opportunities: 3,
-        total_potential_value: 7500000,
-        weighted_value: 4425000, // probability-adjusted
-        average_savings: 13.1,
-        mexico_focus_percentage: 100,
-        conversion_metrics: {
-          discovery: 1,
-          proposal_sent: 1,
-          negotiation: 1,
-          closed_won: 0
-        }
-      },
-      market_intelligence: {
-        trending_sectors: [
-          {
-            sector: "Automotive Parts",
-            growth_rate: 15.2,
-            mexico_opportunity_score: 92,
-            key_drivers: ["USMCA benefits", "Supply chain reshoring"]
-          },
-          {
-            sector: "Electronics Assembly",
-            growth_rate: 11.8,
-            mexico_opportunity_score: 88,
-            key_drivers: ["Mexico manufacturing", "Trade war mitigation"]
-          },
-          {
-            sector: "Textiles & Apparel",
-            growth_rate: 8.9,
-            mexico_opportunity_score: 85,
-            key_drivers: ["Labor cost advantages", "USMCA preferential access"]
-          }
-        ],
-        competitive_insights: {
-          mexico_positioning: "Strong - Established relationships and expertise",
-          market_share_trend: "Growing (+23% YoY)",
-          key_differentiators: [
-            "Deep Mexico trade expertise",
-            "USMCA compliance specialization",
-            "Triangle routing optimization"
-          ]
-        }
-      },
-      action_items: [
-        {
-          id: 1,
-          opportunity_id: 1,
-          action: "Schedule follow-up call with AutoParts Mexico SA",
-          assigned_to: "Jorge",
-          due_date: "2025-01-20",
-          priority: "high",
-          status: "pending"
-        },
-        {
-          id: 2,
-          opportunity_id: 2,
-          action: "Prepare detailed USMCA compliance proposal",
-          assigned_to: "Cristina",
-          due_date: "2025-01-22",
-          priority: "high",
-          status: "in_progress"
-        },
-        {
-          id: 3,
-          opportunity_id: 3,
-          action: "Research Mexico textile manufacturing capabilities",
-          assigned_to: "Jorge",
-          due_date: "2025-01-25",
-          priority: "medium",
-          status: "pending"
-        }
-      ]
-    };
+    // Query high-value opportunities from database
+    const { data: opportunities, error: opportunitiesError } = await supabase
+      .from('high_value_opportunities')
+      .select('*')
+      .order('potential_value', { ascending: false });
 
-    console.log('Returning sample high-value opportunities data for demo');
+    const { data: dealPipeline, error: pipelineError } = await supabase
+      .from('deal_pipeline')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    res.status(200).json({
+    // If tables are empty, return empty structure
+    if (!opportunities || opportunities.length === 0) {
+      console.log('High value opportunities tables empty, returning empty data');
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          mexico_focused: [],
+          quarter_pipeline: [],
+          big_deals: [],
+          priority_clients: []
+        },
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_opportunities',
+          last_updated: new Date().toISOString(),
+          record_count: 0
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Process real database data
+    const mexicoOpportunities = opportunities.filter(opp =>
+      opp.mexico_focus === true ||
+      opp.route?.includes('Mexico') ||
+      opp.opportunity_type?.includes('mexico')
+    );
+
+    const quarterPipeline = dealPipeline?.filter(deal => {
+      const closeDate = new Date(deal.estimated_close);
+      const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
+      const dealQuarter = Math.floor(closeDate.getMonth() / 3) + 1;
+      return dealQuarter === currentQuarter;
+    }) || [];
+
+    const bigDeals = opportunities.filter(opp => opp.potential_value >= 1000000);
+
+    const priorityClients = opportunities
+      .filter(opp => opp.probability >= 70)
+      .sort((a, b) => b.potential_value - a.potential_value)
+      .slice(0, 10);
+
+    return res.status(200).json({
       success: true,
-      data: opportunities,
-      timestamp: new Date().toISOString(),
-      mexico_focus: true
+      data: {
+        mexico_focused: mexicoOpportunities,
+        quarter_pipeline: quarterPipeline,
+        big_deals: bigDeals,
+        priority_clients: priorityClients
+      },
+      data_status: {
+        source: 'database',
+        last_updated: new Date().toISOString(),
+        record_count: opportunities.length
+      },
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('High-value opportunities API error:', error);
-    res.status(500).json({
-      error: 'Failed to load high-value opportunities',
-      details: error.message
+    console.error('High value opportunities API error:', error);
+
+    // Return empty data on database error
+    return res.status(200).json({
+      success: true,
+      data: {
+        mexico_focused: [],
+        quarter_pipeline: [],
+        big_deals: [],
+        priority_clients: []
+      },
+      data_status: {
+        source: 'database_error',
+        reason: 'connection_failed',
+        error: error.message,
+        last_updated: new Date().toISOString(),
+        record_count: 0
+      },
+      timestamp: new Date().toISOString()
     });
   }
 }

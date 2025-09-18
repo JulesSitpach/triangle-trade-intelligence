@@ -10,6 +10,7 @@ import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { SALES_CONFIG, GOOGLE_APPS_CONFIG, MARKET_INTELLIGENCE_CONFIG } from '../../config/sales-config';
 import googleIntegrationService from '../../lib/services/google-integration-service';
+import SimpleDetailPanel from '../../components/admin/SimpleDetailPanel';
 
 export default function ClientPortfolio() {
   const router = useRouter();
@@ -20,11 +21,16 @@ export default function ClientPortfolio() {
   const [filterView, setFilterView] = useState('all');
   const [selectedRows, setSelectedRows] = useState([]);
 
+  // Detail panel state
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+
   // Database-driven data states (NO hardcoded arrays)
   const [pipelineData, setPipelineData] = useState([]);
   const [proposalsData, setProposalsData] = useState([]);
   const [marketData, setMarketData] = useState([]);
   const [leadsData, setLeadsData] = useState([]);
+  const [professionalServices, setProfessionalServices] = useState({});
 
   useEffect(() => {
     // Check admin authentication
@@ -54,11 +60,12 @@ export default function ClientPortfolio() {
       setLoading(true);
 
       // Load data from multiple database-driven APIs in parallel
-      const [usersResponse, salesPipelineResponse, leadsResponse, marketResponse] = await Promise.all([
+      const [usersResponse, salesPipelineResponse, leadsResponse, marketResponse, professionalResponse] = await Promise.all([
         fetch('/api/admin/users'),
         fetch('/api/admin/sales-pipeline'),
         fetch('/api/admin/platform-leads'),
-        fetch('/api/admin/market-intelligence')
+        fetch('/api/admin/market-intelligence'),
+        fetch('/api/admin/professional-services')
       ]);
 
       // Process Users Data for Sales Pipeline - Database driven
@@ -109,6 +116,23 @@ export default function ClientPortfolio() {
         setMarketData([]);
       }
 
+      // Process Professional Services Data for Jorge's consultation pipeline
+      if (professionalResponse.ok) {
+        const professionalData = await professionalResponse.json();
+        setProfessionalServices({
+          jorge_pipeline: professionalData.jorge_consultation_pipeline || [],
+          jorge_integrations: professionalData.jorge_custom_integrations || [],
+          utilization_metrics: professionalData.utilization_metrics || {}
+        });
+      } else {
+        console.log('No professional services data found');
+        setProfessionalServices({
+          jorge_pipeline: [],
+          jorge_integrations: [],
+          utilization_metrics: {}
+        });
+      }
+
     } catch (error) {
       console.error('Error loading Jorge sales dashboard data:', error);
       // Set empty arrays as fallback - no hardcoded data
@@ -116,8 +140,43 @@ export default function ClientPortfolio() {
       setProposalsData([]);
       setLeadsData([]);
       setMarketData([]);
+      setProfessionalServices({
+        jorge_pipeline: [],
+        jorge_integrations: [],
+        utilization_metrics: {}
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Detail panel management
+  const openDetailPanel = (record, type = 'client') => {
+    setSelectedRecord({ ...record, recordType: type });
+    setDetailPanelOpen(true);
+  };
+
+  const closeDetailPanel = () => {
+    setDetailPanelOpen(false);
+    setSelectedRecord(null);
+  };
+
+  const handleDetailSave = async (updatedRecord) => {
+    try {
+      // Save to appropriate endpoint based on record type
+      const response = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRecord)
+      });
+
+      if (response.ok) {
+        console.log('Record updated successfully');
+        loadSalesDashboardData(); // Reload data
+        closeDetailPanel();
+      }
+    } catch (error) {
+      console.error('Error updating record:', error);
     }
   };
 
@@ -186,18 +245,75 @@ export default function ClientPortfolio() {
   };
 
   const handleResearchIndustry = (industry) => {
-    alert(`Researching ${industry.industry || industry.name || 'industry'}...`);
-    console.log('Research industry:', industry);
+    openDetailPanel(industry, 'market');
   };
 
   const handleTargetIndustry = (industry) => {
-    alert(`Targeting ${industry.industry || industry.name || 'industry'}...`);
-    console.log('Target industry:', industry);
+    openDetailPanel(industry, 'market');
   };
 
   const handleIndustryCampaign = (industry) => {
-    alert(`Creating campaign for ${industry.industry || industry.name || 'industry'}...`);
-    console.log('Industry campaign:', industry);
+    openDetailPanel(industry, 'market');
+  };
+
+  // Professional Services Action Handlers
+  const handleCreateIntegrationOpportunity = async (integration) => {
+    try {
+      const response = await fetch('/api/admin/professional-services', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_type: 'custom_integration',
+          client: integration.prospect,
+          assignee: 'Jorge',
+          status: 'scoping',
+          estimated_value: integration.estimated_value,
+          timeline: integration.timeline,
+          technical_requirements: integration.technical_requirements,
+          notify_google: true
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        alert(`Integration opportunity created for ${integration.prospect}. Cristina has been notified in the collaboration queue.`);
+        console.log('Integration created with cross-dashboard sync:', result);
+        // Reload data to show updated state
+        loadSalesDashboardData();
+      } else {
+        throw new Error(result.error || 'Failed to create opportunity');
+      }
+    } catch (error) {
+      console.error('Error creating integration opportunity:', error);
+      alert(`Error creating opportunity for ${integration.prospect}. Please try again.`);
+    }
+  };
+
+  const handleScheduleConsultation = async (project) => {
+    try {
+      // Schedule consultation and update service delivery queue
+      const response = await fetch('/api/admin/professional-services', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: project.id,
+          status: 'scheduled',
+          next_session: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          sync_calendar: true
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Also trigger Google integration
+        await googleIntegrationService.scheduleCall(project, 'consultation');
+        alert(`Consultation scheduled for ${project.client}. Updated in service delivery tracking.`);
+        loadSalesDashboardData();
+      }
+    } catch (error) {
+      console.error('Error scheduling consultation:', error);
+      alert(`Error scheduling consultation for ${project.client}. Please try again.`);
+    }
   };
 
   // Configuration-driven business logic functions
@@ -428,6 +544,12 @@ export default function ClientPortfolio() {
               🎯 Active Proposals
             </button>
             <button
+              className={`tab-button ${activeTab === 'professional' ? 'active' : ''}`}
+              onClick={() => setActiveTab('professional')}
+            >
+              💼 Professional Services
+            </button>
+            <button
               className={`tab-button ${activeTab === 'market' ? 'active' : ''}`}
               onClick={() => setActiveTab('market')}
             >
@@ -502,8 +624,13 @@ export default function ClientPortfolio() {
                       </tr>
                     ) : (
                       pipelineData.map(deal => (
-                        <tr key={deal.id} className="clickable-row">
-                          <td>
+                        <tr
+                          key={deal.id}
+                          className="clickable-row"
+                          onClick={() => openDetailPanel(deal, 'pipeline')}
+                          style={{cursor: 'pointer'}}
+                        >
+                          <td onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               checked={selectedRows.includes(deal.id)}
@@ -530,10 +657,10 @@ export default function ClientPortfolio() {
                           <td>{deal.source}</td>
                           <td>{deal.nextAction}</td>
                           <td>{deal.dueDate}</td>
-                          <td className="action-buttons">
+                          <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                             <button className="action-btn call" onClick={() => handleCallClient(deal)}>📞</button>
                             <button className="action-btn email" onClick={() => handleEmailClient(deal)}>📧</button>
-                            <button className="action-btn view" onClick={() => handleViewClient(deal)}>👁️</button>
+                            <button className="action-btn view" onClick={() => openDetailPanel(deal, 'pipeline')}>👁️</button>
                           </td>
                         </tr>
                       ))
@@ -573,7 +700,12 @@ export default function ClientPortfolio() {
                       </tr>
                     ) : (
                       proposalsData.map(proposal => (
-                        <tr key={proposal.id} className="clickable-row">
+                        <tr
+                          key={proposal.id}
+                          className="clickable-row"
+                          onClick={() => openDetailPanel(proposal, 'proposal')}
+                          style={{cursor: 'pointer'}}
+                        >
                           <td className="company-name">{proposal.company}</td>
                           <td>{proposal.proposalType}</td>
                           <td>
@@ -584,7 +716,7 @@ export default function ClientPortfolio() {
                           <td className="deal-size">{formatCurrency(proposal.value)}</td>
                           <td>{proposal.sentDate}</td>
                           <td>{proposal.responseDue}</td>
-                          <td className="action-buttons">
+                          <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                             <button className="action-btn follow" onClick={() => handleFollowUp(proposal)}>📞 Follow-up</button>
                             <button className="action-btn modify" onClick={() => handleModifyProposal(proposal)}>📝 Modify</button>
                             <button className="action-btn status" onClick={() => handleProposalStatus(proposal)}>📊 Status</button>
@@ -627,7 +759,12 @@ export default function ClientPortfolio() {
                       </tr>
                     ) : (
                       marketData.map((industry, index) => (
-                        <tr key={index} className="clickable-row">
+                        <tr
+                          key={index}
+                          className="clickable-row"
+                          onClick={() => openDetailPanel(industry, 'market')}
+                          style={{cursor: 'pointer'}}
+                        >
                           <td className="industry-name">{industry.industry}</td>
                           <td>
                             <div className="conversion-rate">
@@ -642,7 +779,7 @@ export default function ClientPortfolio() {
                               {(industry.growthRate * 100).toFixed(1)}%
                             </span>
                           </td>
-                          <td className="action-buttons">
+                          <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                             <button className="action-btn research" onClick={() => handleResearchIndustry(industry)}>🔍 Research</button>
                             <button className="action-btn target" onClick={() => handleTargetIndustry(industry)}>🎯 Target</button>
                             <button className="action-btn campaign" onClick={() => handleIndustryCampaign(industry)}>📢 Campaign</button>
@@ -685,7 +822,12 @@ export default function ClientPortfolio() {
                       </tr>
                     ) : (
                       leadsData.map(lead => (
-                        <tr key={lead.id} className="clickable-row">
+                        <tr
+                          key={lead.id}
+                          className="clickable-row"
+                          onClick={() => openDetailPanel(lead, 'lead')}
+                          style={{cursor: 'pointer'}}
+                        >
                           <td className="company-name">{lead.company}</td>
                           <td>{lead.platformActivity}</td>
                           <td>
@@ -706,7 +848,7 @@ export default function ClientPortfolio() {
                               {lead.status}
                             </span>
                           </td>
-                          <td className="action-buttons">
+                          <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
                             {lead.status === 'Hot Lead' && <button className="action-btn urgent" onClick={() => handleCallClient(lead)}>📞 Call Now</button>}
                             <button className="action-btn email" onClick={() => handleEmailClient(lead)}>📧 Email</button>
                             <button className="action-btn qualify" onClick={() => handleViewClient(lead)}>✅ Qualify</button>
@@ -719,6 +861,189 @@ export default function ClientPortfolio() {
               </div>
             </div>
           )}
+
+          {/* Professional Services Tab */}
+          {activeTab === 'professional' && (
+            <div>
+              {/* Active Consultation Projects */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">🎯 Active Consultation Projects</h2>
+                  <p className="card-description">Jorge's billable consulting projects and implementation support</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Client</th>
+                        <th>Service Type</th>
+                        <th>Hours Booked</th>
+                        <th>Rate</th>
+                        <th>Revenue</th>
+                        <th>Status</th>
+                        <th>Next Session</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {professionalServices.jorge_pipeline && professionalServices.jorge_pipeline.length > 0 ? (
+                        professionalServices.jorge_pipeline.map(project => (
+                          <tr
+                            key={project.id}
+                            className="clickable-row"
+                            onClick={() => openDetailPanel(project, 'professional')}
+                            style={{cursor: 'pointer'}}
+                          >
+                            <td className="company-name">{project.client}</td>
+                            <td className="text-body">{project.service_type}</td>
+                            <td className="prospects-count">{project.hours_booked}</td>
+                            <td className="deal-size">${project.hourly_rate}/hr</td>
+                            <td className="deal-size">${(project.hours_booked * project.hourly_rate).toLocaleString()}</td>
+                            <td><span className={`badge ${getStatusBadge(project.status)}`}>{project.status}</span></td>
+                            <td className="text-body">{project.next_session}</td>
+                            <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
+                              <button className="action-btn call" onClick={() => handleScheduleConsultation(project)}>📅 Schedule</button>
+                              <button className="action-btn email" onClick={() => handleEmailClient(project)}>📧 Follow-up</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" style={{textAlign: 'center', padding: '20px', color: '#5f6368'}}>
+                            No active consultation projects. Professional services pipeline will appear here as projects are booked.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Custom Integration Opportunities */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">🔧 Custom Integration Opportunities</h2>
+                  <p className="card-description">High-value system integration and custom development projects</p>
+                </div>
+
+                <div className="interactive-table">
+                  <table className="salesforce-table">
+                    <thead>
+                      <tr>
+                        <th>Prospect</th>
+                        <th>System Type</th>
+                        <th>Complexity</th>
+                        <th>Est. Value</th>
+                        <th>Probability</th>
+                        <th>Technical Req</th>
+                        <th>Timeline</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {professionalServices.jorge_integrations && professionalServices.jorge_integrations.length > 0 ? (
+                        professionalServices.jorge_integrations.map(integration => (
+                          <tr
+                            key={integration.id}
+                            className="clickable-row"
+                            onClick={() => openDetailPanel(integration, 'integration')}
+                            style={{cursor: 'pointer'}}
+                          >
+                            <td className="company-name">{integration.prospect}</td>
+                            <td className="text-body">{integration.system_type}</td>
+                            <td>
+                              <span className={`badge ${integration.complexity === 'high' ? 'badge-danger' : integration.complexity === 'medium' ? 'badge-warning' : 'badge-success'}`}>
+                                {integration.complexity}
+                              </span>
+                            </td>
+                            <td className="deal-size">${integration.estimated_value.toLocaleString()}</td>
+                            <td>
+                              <div className="probability-bar">
+                                <div className="probability-fill" style={{width: `${integration.probability}%`}}></div>
+                                <span>{integration.probability}%</span>
+                              </div>
+                            </td>
+                            <td className="text-body">{integration.technical_requirements}</td>
+                            <td className="text-body">{integration.timeline}</td>
+                            <td className="action-buttons" onClick={(e) => e.stopPropagation()}>
+                              <button className="action-btn call" onClick={() => handleCallClient(integration)}>📞 Contact</button>
+                              <button className="action-btn urgent" onClick={() => handleCreateIntegrationOpportunity(integration)}>🚀 Create Opportunity</button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="8" style={{textAlign: 'center', padding: '20px', color: '#5f6368'}}>
+                            No integration opportunities identified. Custom integration prospects will appear here from market analysis.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Professional Services Metrics */}
+              <div className="content-card">
+                <div className="card-header">
+                  <h2 className="card-title">📊 Professional Services Metrics</h2>
+                  <p className="card-description">Utilization and revenue tracking for consulting services</p>
+                </div>
+
+                <div className="grid-3-cols">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="deal-size">{professionalServices.utilization_metrics?.current_month?.jorge_utilization || 0}%</div>
+                      <div className="card-description">Current Utilization</div>
+                      <div className="text-body">
+                        {professionalServices.utilization_metrics?.current_month?.billable_hours || 0} billable / {professionalServices.utilization_metrics?.current_month?.target_hours || 0} target hours
+                      </div>
+                      <div className="progress-container">
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{width: `${professionalServices.utilization_metrics?.current_month?.jorge_utilization || 0}%`}}></div>
+                        </div>
+                        <span className="progress-text">
+                          {(professionalServices.utilization_metrics?.current_month?.jorge_utilization || 0) >= 80 ? 'On target' : 'Below target'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="pipeline-value">${(professionalServices.utilization_metrics?.current_month?.combined_revenue_target || 0).toLocaleString()}</div>
+                      <div className="card-description">Monthly Target</div>
+                      <div className="text-body">
+                        Professional services revenue goal for Jorge's consultation pipeline
+                      </div>
+                      <span className={`badge ${professionalServices.utilization_metrics?.trends?.revenue_trend === 'on_track' ? 'badge-success' : 'badge-warning'}`}>
+                        {professionalServices.utilization_metrics?.trends?.revenue_trend === 'on_track' ? 'On Track' : 'Behind Target'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="company-name">{professionalServices.utilization_metrics?.trends?.efficiency_score || 0}%</div>
+                      <div className="card-description">Efficiency Score</div>
+                      <div className="text-body">Project delivery vs timeline</div>
+                      <span className={`badge ${(professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 90 ? 'badge-success' : (professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 80 ? 'badge-info' : 'badge-warning'}`}>
+                        {(professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 90 ? 'Excellent' : (professionalServices.utilization_metrics?.trends?.efficiency_score || 0) >= 80 ? 'Good' : 'Needs Improvement'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Simple Detail Panel */}
+          <SimpleDetailPanel
+            isOpen={detailPanelOpen}
+            onClose={closeDetailPanel}
+            record={selectedRecord}
+            type={selectedRecord?.recordType || 'client'}
+            onSave={handleDetailSave}
+          />
 
           {/* Google Apps Integration */}
           <div className="content-card">

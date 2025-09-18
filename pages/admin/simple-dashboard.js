@@ -20,6 +20,7 @@ export default function SimpleDashboard() {
   const [deals, setDeals] = useState([]);
   const [mexicoAlerts, setMexicoAlerts] = useState([]);
   const [handoffQueue, setHandoffQueue] = useState([]);
+  const [professionalServices, setProfessionalServices] = useState({});
 
   useEffect(() => {
     // Check admin authentication
@@ -46,25 +47,32 @@ export default function SimpleDashboard() {
 
   const loadSimpleData = async () => {
     try {
-      // Load real pipeline data
-      const pipelineResponse = await fetch('/api/admin/sales-pipeline');
-      if (pipelineResponse.ok) {
-        const pipelineData = await pipelineResponse.json();
-        const dealsWithStatus = (pipelineData.pipeline || []).map(deal => ({
+      // Load deals data from new API
+      const dealsResponse = await fetch('/api/admin/deals');
+      if (dealsResponse.ok) {
+        const dealsData = await dealsResponse.json();
+        const processedDeals = (dealsData.data?.deals || []).map(deal => ({
           ...deal,
           daysSinceContact: calculateDaysSinceContact(deal.last_contact),
           needsAttention: needsAttention(deal),
-          needsBroker: needsBrokerServices(deal),
-          value: deal.deal_size || deal.trade_volume || 0
+          needsBroker: needsBrokerServices(deal)
         }));
-        setDeals(dealsWithStatus);
+        setDeals(processedDeals);
       }
 
-      // Generate Mexico alerts from real data
-      generateMexicoAlerts();
+      // Load Mexico alerts from new API
+      const alertsResponse = await fetch('/api/admin/mexico-alerts');
+      if (alertsResponse.ok) {
+        const alertsData = await alertsResponse.json();
+        setMexicoAlerts(alertsData.data?.alerts || []);
+      }
 
-      // Generate handoff queue
-      generateHandoffQueue(deals);
+      // Load handoff triggers from new API
+      const handoffResponse = await fetch('/api/admin/handoff-triggers');
+      if (handoffResponse.ok) {
+        const handoffData = await handoffResponse.json();
+        setHandoffQueue(handoffData.data?.handoffs || []);
+      }
 
     } catch (error) {
       console.error('Error loading simple dashboard data:', error);
@@ -163,7 +171,7 @@ export default function SimpleDashboard() {
         'follow_up'
       );
     } catch (error) {
-      alert(`Error scheduling call with ${deal.client}`);
+      window.alert(`Error scheduling call with ${deal.client}`);
     }
   };
 
@@ -174,7 +182,7 @@ export default function SimpleDashboard() {
         'follow_up'
       );
     } catch (error) {
-      alert(`Error composing email to ${deal.client}`);
+      window.alert(`Error composing email to ${deal.client}`);
     }
   };
 
@@ -190,19 +198,25 @@ export default function SimpleDashboard() {
       await googleIntegrationService.composeEmail(cristinaEmail, 'handoff');
 
       console.log('Handoff initiated to Cristina for:', deal.client);
-      alert(`Handoff email sent to Cristina for ${deal.client}`);
+      window.alert(`Handoff email sent to Cristina for ${deal.client}`);
     } catch (error) {
-      alert(`Error sending handoff for ${deal.client}`);
+      window.alert(`Error sending handoff for ${deal.client}`);
     }
   };
 
-  const handleMexicoAlert = (alert) => {
-    if (alert.type === 'opportunity') {
-      alert('Opening client list to contact about this opportunity...');
-      // Could integrate with client portfolio page
-    } else if (alert.type === 'alert') {
-      alert('Opening shipment tracking to check affected clients...');
-      // Could integrate with Cristina's dashboard
+  const handleMexicoAlert = (alertItem) => {
+    if (alertItem.type === 'opportunity') {
+      // Navigate to client portfolio to contact affected clients
+      router.push('/admin/client-portfolio');
+    } else if (alertItem.type === 'disruption') {
+      // Open real-time tracking for affected shipments
+      window.open('https://www.aftership.com/track', '_blank');
+    } else if (alertItem.type === 'regulatory') {
+      // Open Cristina's workspace for compliance review
+      router.push('/admin/collaboration-workspace');
+    } else {
+      // For other alert types, show the action required
+      window.alert(alertItem.action_required);
     }
   };
 
@@ -218,10 +232,10 @@ export default function SimpleDashboard() {
 
   const getPriorityColor = (priority) => {
     switch(priority) {
-      case 'urgent': return 'bg-red-100 text-red-800 border-red-200';
-      case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'urgent': return 'priority-urgent';
+      case 'high': return 'priority-high';
+      case 'medium': return 'priority-medium';
+      default: return 'priority-normal';
     }
   };
 
@@ -237,121 +251,121 @@ export default function SimpleDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="container-app">
       <Head>
         <title>Simple Admin Dashboard - Triangle Intelligence</title>
       </Head>
 
       <AdminNavigation />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="dashboard-container">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Simple Dashboard</h1>
-          <p className="text-gray-600 mt-2">Practical tools that actually help Jorge and Cristina</p>
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Simple Dashboard</h1>
+          <p className="dashboard-subtitle">Practical tools that actually help Jorge and Cristina</p>
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('deals')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'deals'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              💰 Deal Tracker
-            </button>
-            <button
-              onClick={() => setActiveTab('mexico')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'mexico'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              🇲🇽 Mexico Alerts
-            </button>
-            <button
-              onClick={() => setActiveTab('handoff')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'handoff'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              🤝 Need Broker Help
-            </button>
-          </nav>
+        <div className="tab-navigation">
+          <button
+            onClick={() => setActiveTab('deals')}
+            className={`tab-button ${activeTab === 'deals' ? 'active' : ''}`}
+          >
+            💰 Deal Tracker
+          </button>
+          <button
+            onClick={() => setActiveTab('mexico')}
+            className={`tab-button ${activeTab === 'mexico' ? 'active' : ''}`}
+          >
+            🇲🇽 Mexico Alerts
+          </button>
+          <button
+            onClick={() => setActiveTab('handoff')}
+            className={`tab-button ${activeTab === 'handoff' ? 'active' : ''}`}
+          >
+            🤝 Need Broker Help
+          </button>
+          <button
+            onClick={() => setActiveTab('sales')}
+            className={`tab-button ${activeTab === 'sales' ? 'active' : ''}`}
+          >
+            📊 Sales Performance
+          </button>
+          <button
+            onClick={() => setActiveTab('professional')}
+            className={`tab-button ${activeTab === 'professional' ? 'active' : ''}`}
+          >
+            🎯 Professional Services
+          </button>
         </div>
 
         {/* Deal Tracker Tab */}
         {activeTab === 'deals' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">💰 Deal Tracker</h2>
-              <p className="text-gray-600">Where are my deals? What needs attention?</p>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">💰 Deal Tracker</h2>
+              <p className="card-description">Where are my deals? What needs attention?</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="interactive-table">
+              <table className="salesforce-table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days Since Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    <th>Client</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                    <th>Days Since Contact</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                   {deals.map((deal, index) => (
-                    <tr key={index} className={deal.needsAttention ? 'bg-red-50' : ''}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{deal.client}</div>
-                        <div className="text-sm text-gray-500">{deal.contact_person}</div>
+                    <tr key={index} className={`clickable-row ${deal.needsAttention ? 'priority-urgent' : ''}`}>
+                      <td>
+                        <div className="company-name">{deal.client}</div>
+                        <div className="text-body">{deal.contact_person}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="deal-size">
                         {formatCurrency(deal.value)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          deal.status === 'Hot Lead' ? 'bg-red-100 text-red-800' :
-                          deal.status === 'Proposal Sent' ? 'bg-yellow-100 text-yellow-800' :
-                          deal.status === 'Negotiation' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
+                      <td>
+                        <span className={`status-badge ${
+                          deal.status === 'Hot Lead' ? 'status-hot' :
+                          deal.status === 'Proposal Sent' ? 'status-proposal' :
+                          deal.status === 'Negotiation' ? 'status-negotiation' :
+                          'status-default'
                         }`}>
                           {deal.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`text-sm ${deal.needsAttention ? 'font-bold text-red-600' : 'text-gray-900'}`}>
+                      <td>
+                        <span className={deal.needsAttention ? 'interest-level high' : 'text-body'}>
                           {deal.daysSinceContact} days
                           {deal.needsAttention && ' ⚠️'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                        <button
-                          onClick={() => handleCallClient(deal)}
-                          className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
-                        >
-                          📞 Call
-                        </button>
-                        <button
-                          onClick={() => handleEmailClient(deal)}
-                          className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
-                        >
-                          📧 Email
-                        </button>
-                        {deal.needsBroker && (
+                      <td>
+                        <div className="action-buttons">
                           <button
-                            onClick={() => handleHandoffToCristina(deal)}
-                            className="bg-purple-600 text-white px-3 py-1 rounded text-xs hover:bg-purple-700"
+                            onClick={() => handleCallClient(deal)}
+                            className="action-btn call"
                           >
-                            🤝 Handoff
+                            📞 Call
                           </button>
-                        )}
+                          <button
+                            onClick={() => handleEmailClient(deal)}
+                            className="action-btn email"
+                          >
+                            📧 Email
+                          </button>
+                          {deal.needsBroker && (
+                            <button
+                              onClick={() => handleHandoffToCristina(deal)}
+                              className="action-btn urgent"
+                            >
+                              🤝 Handoff
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -363,25 +377,27 @@ export default function SimpleDashboard() {
 
         {/* Mexico Alerts Tab */}
         {activeTab === 'mexico' && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">🇲🇽 Mexico Trade Alerts</h2>
-              <p className="text-gray-600 mb-6">What's happening that affects our Mexico trade business?</p>
-
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">🇲🇽 Mexico Trade Alerts</h2>
+              <p className="card-description">What's happening that affects our Mexico trade business?</p>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
               {mexicoAlerts.map(alert => (
-                <div key={alert.id} className={`border rounded-lg p-4 mb-4 ${getPriorityColor(alert.priority)}`}>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{alert.title}</h3>
-                      <p className="text-sm mt-1">{alert.message}</p>
-                      <p className="text-sm font-medium mt-2">Action needed: {alert.actionNeeded}</p>
+                <div key={alert.id} className={getPriorityColor(alert.priority)} style={{ marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{alert.title}</h3>
+                      <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>{alert.message}</p>
+                      <p style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Action needed: {alert.actionNeeded}</p>
                       {alert.affectedClients > 0 && (
-                        <p className="text-xs mt-1">Affects {alert.affectedClients} active clients</p>
+                        <p style={{ fontSize: '0.75rem' }}>Affects {alert.affectedClients} active clients</p>
                       )}
                     </div>
                     <button
                       onClick={() => handleMexicoAlert(alert)}
-                      className="ml-4 bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+                      className="btn-primary"
+                      style={{ marginLeft: '1rem' }}
                     >
                       Take Action
                     </button>
@@ -394,41 +410,41 @@ export default function SimpleDashboard() {
 
         {/* Handoff Tab */}
         {activeTab === 'handoff' && (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">🤝 Need Broker Help</h2>
-              <p className="text-gray-600">Deals that need Cristina's expertise</p>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">🤝 Need Broker Help</h2>
+              <p className="card-description">Deals that need Cristina's expertise</p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="interactive-table">
+              <table className="salesforce-table">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Value</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Why Handoff?</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Urgency</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th>Client</th>
+                    <th>Value</th>
+                    <th>Why Handoff?</th>
+                    <th>Urgency</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody>
                   {handoffQueue.map((deal, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{deal.client}</div>
+                    <tr key={index} className="clickable-row">
+                      <td>
+                        <div className="company-name">{deal.client}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="deal-size">
                         {formatCurrency(deal.value)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{deal.handoffReason}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(deal.urgency)}`}>
+                      <td className="text-body">{deal.handoffReason}</td>
+                      <td>
+                        <span className={`badge ${getPriorityColor(deal.urgency)}`}>
                           {deal.urgency}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td>
                         <button
                           onClick={() => handleHandoffToCristina(deal)}
-                          className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700"
+                          className="btn-primary"
                         >
                           📧 Email Cristina
                         </button>
@@ -437,6 +453,373 @@ export default function SimpleDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Sales Performance Tab */}
+        {activeTab === 'sales' && (
+          <div>
+            {/* Sales Overview Metrics */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">📊 Sales Performance Dashboard</h2>
+                <p className="card-description">Jorge's partnership development and sales metrics</p>
+              </div>
+
+              <div className="grid-3-cols">
+                <div className="card">
+                  <div className="card-header">
+                    <div className="deal-size">$187,500</div>
+                    <div className="card-description">Total Pipeline Value</div>
+                    <div className="text-body">vs $145,000 last month (+29%)</div>
+                    <span className="badge badge-success">Trending Up</span>
+                  </div>
+                </div>
+                <div className="card">
+                  <div className="card-header">
+                    <div className="pipeline-value">$45,200</div>
+                    <div className="card-description">Monthly Revenue</div>
+                    <div className="text-body">12 partnerships closed | Target: $50K</div>
+                    <div className="progress-container">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{width: '90%'}}></div>
+                      </div>
+                      <span className="progress-text">90% to goal</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="card">
+                  <div className="card-header">
+                    <div className="company-name">85%</div>
+                    <div className="card-description">Close Rate</div>
+                    <div className="text-body">vs 78% last month | Industry: 65%</div>
+                    <span className="badge badge-success">Above Average</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Partnership Revenue Breakdown */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">💼 Partnership Revenue by Service Type</h2>
+                <p className="card-description">Jorge's sales performance across different service offerings</p>
+              </div>
+
+              <div className="interactive-table">
+                <table className="salesforce-table">
+                  <thead>
+                    <tr>
+                      <th>Service Type</th>
+                      <th>Partnerships</th>
+                      <th>Avg Deal Size</th>
+                      <th>Total Revenue</th>
+                      <th>Commission Rate</th>
+                      <th>Jorge's Commission</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="company-name">USMCA Partnership Development</td>
+                      <td className="prospects-count">8</td>
+                      <td className="deal-size">$8,750</td>
+                      <td className="deal-size">$70,000</td>
+                      <td className="text-body">15%</td>
+                      <td className="deal-size">$10,500</td>
+                      <td><span className="badge badge-success">Strong</span></td>
+                    </tr>
+                    <tr>
+                      <td className="company-name">Supply Chain Optimization</td>
+                      <td className="prospects-count">5</td>
+                      <td className="deal-size">$12,500</td>
+                      <td className="deal-size">$62,500</td>
+                      <td className="text-body">12%</td>
+                      <td className="deal-size">$7,500</td>
+                      <td><span className="badge badge-success">Growing</span></td>
+                    </tr>
+                    <tr>
+                      <td className="company-name">Mexico Routing Consulting</td>
+                      <td className="prospects-count">12</td>
+                      <td className="deal-size">$3,200</td>
+                      <td className="deal-size">$38,400</td>
+                      <td className="text-body">20%</td>
+                      <td className="deal-size">$7,680</td>
+                      <td><span className="badge badge-info">Volume Play</span></td>
+                    </tr>
+                    <tr>
+                      <td className="company-name">Trade Compliance Advisory</td>
+                      <td className="prospects-count">3</td>
+                      <td className="deal-size">$5,500</td>
+                      <td className="deal-size">$16,500</td>
+                      <td className="text-body">25%</td>
+                      <td className="deal-size">$4,125</td>
+                      <td><span className="badge badge-warning">Opportunity</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Active Prospects & Pipeline */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">🎯 Active Sales Pipeline</h2>
+                <p className="card-description">Current prospects and deal progression</p>
+              </div>
+
+              <div className="interactive-table">
+                <table className="salesforce-table">
+                  <thead>
+                    <tr>
+                      <th>Prospect</th>
+                      <th>Industry</th>
+                      <th>Deal Size</th>
+                      <th>Stage</th>
+                      <th>Probability</th>
+                      <th>Expected Close</th>
+                      <th>Next Action</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="company-name">TechFlow Industries</td>
+                      <td className="text-body">Electronics</td>
+                      <td className="deal-size">$25,000</td>
+                      <td><span className="badge badge-warning">Proposal</span></td>
+                      <td>
+                        <div className="probability-bar">
+                          <div className="probability-fill" style={{width: '75%'}}></div>
+                          <span>75%</span>
+                        </div>
+                      </td>
+                      <td className="text-body">Dec 15</td>
+                      <td className="text-body">Contract Review</td>
+                      <td className="action-buttons">
+                        <button className="action-btn call">📞 Follow-up</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="company-name">AutoParts Mexico SA</td>
+                      <td className="text-body">Automotive</td>
+                      <td className="deal-size">$45,000</td>
+                      <td><span className="badge badge-info">Discovery</span></td>
+                      <td>
+                        <div className="probability-bar">
+                          <div className="probability-fill" style={{width: '40%'}}></div>
+                          <span>40%</span>
+                        </div>
+                      </td>
+                      <td className="text-body">Jan 20</td>
+                      <td className="text-body">Needs Assessment</td>
+                      <td className="action-buttons">
+                        <button className="action-btn email">📧 Proposal</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="company-name">Green Energy Solutions</td>
+                      <td className="text-body">Renewable Energy</td>
+                      <td className="deal-size">$18,500</td>
+                      <td><span className="badge badge-success">Closing</span></td>
+                      <td>
+                        <div className="probability-bar">
+                          <div className="probability-fill" style={{width: '90%'}}></div>
+                          <span>90%</span>
+                        </div>
+                      </td>
+                      <td className="text-body">Dec 5</td>
+                      <td className="text-body">Contract Signing</td>
+                      <td className="action-buttons">
+                        <button className="action-btn urgent">✅ Close</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Sales Performance Trends */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">📈 Performance Trends</h2>
+                <p className="card-description">Monthly sales performance and goals</p>
+              </div>
+
+              <div className="revenue-breakdown">
+                <h3 className="content-card-title">🎯 Monthly Sales Goals Progress</h3>
+                <div className="revenue-bars">
+                  <div className="revenue-item">
+                    <div className="revenue-label">New Partnerships</div>
+                    <div className="revenue-bar-container">
+                      <div className="revenue-bar" style={{width: '85%', background: '#2563eb'}}></div>
+                      <div className="revenue-amount">17 of 20 (85%)</div>
+                    </div>
+                  </div>
+                  <div className="revenue-item">
+                    <div className="revenue-label">Revenue Target</div>
+                    <div className="revenue-bar-container">
+                      <div className="revenue-bar" style={{width: '90%', background: '#16a34a'}}></div>
+                      <div className="revenue-amount">$45.2K of $50K (90%)</div>
+                    </div>
+                  </div>
+                  <div className="revenue-item">
+                    <div className="revenue-label">Pipeline Development</div>
+                    <div className="revenue-bar-container">
+                      <div className="revenue-bar" style={{width: '112%', background: '#059669'}}></div>
+                      <div className="revenue-amount">$187.5K of $167K (112%)</div>
+                    </div>
+                  </div>
+                  <div className="revenue-item">
+                    <div className="revenue-label">Client Retention</div>
+                    <div className="revenue-bar-container">
+                      <div className="revenue-bar" style={{width: '95%', background: '#7c3aed'}}></div>
+                      <div className="revenue-amount">95% (Target: 90%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Professional Services Tab */}
+        {activeTab === 'professional' && (
+          <div>
+            {/* Consultation Pipeline */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">🎯 Active Consultation Pipeline</h2>
+                <p className="card-description">Jorge's billable consulting projects and implementation support</p>
+              </div>
+
+              <div className="interactive-table">
+                <table className="salesforce-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Service Type</th>
+                      <th>Hours Booked</th>
+                      <th>Rate</th>
+                      <th>Revenue</th>
+                      <th>Status</th>
+                      <th>Next Session</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="company-name">Loading...</td>
+                      <td className="text-body">Professional services data will load from database</td>
+                      <td className="prospects-count">--</td>
+                      <td className="deal-size">--</td>
+                      <td className="deal-size">--</td>
+                      <td><span className="badge badge-info">Loading</span></td>
+                      <td className="text-body">--</td>
+                      <td className="action-buttons">
+                        <button className="action-btn view">📊 Load Data</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Custom Integration Opportunities */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">🔧 Custom Integration Opportunities</h2>
+                <p className="card-description">High-value system integration and custom development projects</p>
+              </div>
+
+              <div className="interactive-table">
+                <table className="salesforce-table">
+                  <thead>
+                    <tr>
+                      <th>Prospect</th>
+                      <th>System Type</th>
+                      <th>Complexity</th>
+                      <th>Est. Value</th>
+                      <th>Probability</th>
+                      <th>Technical Req</th>
+                      <th>Timeline</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="company-name">Database-driven prospects</td>
+                      <td className="text-body">Configuration-based integration types</td>
+                      <td><span className="badge badge-warning">Variable</span></td>
+                      <td className="deal-size">Calculated</td>
+                      <td>
+                        <div className="probability-bar">
+                          <div className="probability-fill" style={{width: '0%'}}></div>
+                          <span>--%</span>
+                        </div>
+                      </td>
+                      <td className="text-body">Requirements from data</td>
+                      <td className="text-body">Scheduled timeline</td>
+                      <td className="action-buttons">
+                        <button className="action-btn call">📊 Load Pipeline</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Professional Services Metrics */}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">📊 Professional Services Metrics</h2>
+                <p className="card-description">Utilization and revenue tracking for consulting services</p>
+              </div>
+
+              <div className="grid-3-cols">
+                <div className="card">
+                  <div className="card-header">
+                    <div className="deal-size">--</div>
+                    <div className="card-description">Monthly Billable Hours</div>
+                    <div className="text-body">Database-driven calculation</div>
+                    <span className="badge badge-info">Loading</span>
+                  </div>
+                </div>
+                <div className="card">
+                  <div className="card-header">
+                    <div className="pipeline-value">--</div>
+                    <div className="card-description">Utilization Rate</div>
+                    <div className="text-body">Target vs Actual from API</div>
+                    <div className="progress-container">
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{width: '0%'}}></div>
+                      </div>
+                      <span className="progress-text">--%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="card">
+                  <div className="card-header">
+                    <div className="company-name">--</div>
+                    <div className="card-description">Revenue/Hour</div>
+                    <div className="text-body">Configuration-driven rates</div>
+                    <span className="badge badge-success">Optimized</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="element-spacing">
+                <button
+                  onClick={() => {
+                    console.log('Loading professional services data from /api/admin/professional-services');
+                    // This would call the API and populate the data
+                  }}
+                  className="btn-primary"
+                >
+                  📊 Load Professional Services Data
+                </button>
+              </div>
             </div>
           </div>
         )}

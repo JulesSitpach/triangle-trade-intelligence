@@ -34,51 +34,39 @@ export default async function handler(req, res) {
       `)
       .order('created_at', { ascending: false });
 
-    // If no sales_pipeline table or no data, use sample data
+    // If no sales_pipeline table or no data, return empty data
     if (proposalsError || !proposals || proposals.length === 0) {
-      console.log('Using sample sales pipeline data for demo');
-      const sampleProposals = [
-        {
-          id: '1',
-          company: 'AutoParts Manufacturing Inc',
-          proposalType: 'Partnership Package',
-          status: 'Pending',
-          value: 125000,
-          sentDate: '2025-09-14',
-          responseDue: '2025-09-19'
+      console.log('Sales pipeline table empty, returning empty data');
+
+      return res.status(200).json({
+        proposals: [],
+        summary: {
+          total_proposals: 0,
+          total_value: 0,
+          pending_proposals: 0,
+          avg_proposal_value: 0,
+          conversion_rate: 0
         },
-        {
-          id: '2',
-          company: 'Electronics Mexico SA',
-          proposalType: 'USMCA Assessment',
-          status: 'Under Review',
-          value: 89000,
-          sentDate: '2025-09-12',
-          responseDue: '2025-09-17'
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_sales_pipeline',
+          last_updated: new Date().toISOString(),
+          record_count: 0
         },
-        {
-          id: '3',
-          company: 'WireTech Solutions',
-          proposalType: 'Market Entry Plan',
-          status: 'Draft',
-          value: 156000,
-          sentDate: null,
-          responseDue: '2025-09-20'
-        }
-      ];
-      proposals = sampleProposals;
-    } else {
-      // Format database proposals for frontend
-      proposals = proposals.map(proposal => ({
-        id: proposal.id,
-        company: proposal.company_name,
-        proposalType: proposal.proposal_type,
-        status: proposal.status,
-        value: proposal.value,
-        sentDate: proposal.sent_date,
-        responseDue: proposal.response_due
-      }));
+        timeframe: '30days'
+      });
     }
+
+    // Format database proposals for frontend
+    proposals = proposals.map(proposal => ({
+      id: proposal.id,
+      company: proposal.company_name,
+      proposalType: proposal.proposal_type,
+      status: proposal.status,
+      value: proposal.value,
+      sentDate: proposal.sent_date,
+      responseDue: proposal.response_due
+    }));
 
     // Calculate summary metrics
     const totalProposals = proposals.length;

@@ -79,117 +79,32 @@ async function handleGetSuppliers(req, res) {
       return res.status(500).json({ error: 'Failed to fetch supplier data' });
     }
 
-    // If table doesn't exist or is empty, use sample data
+    // If table doesn't exist or is empty, return empty data
     if (!suppliers || suppliers.length === 0) {
-      console.log('Using sample supplier data for demo');
-      const sampleSuppliers = [
-        {
-          id: '1',
-          name: 'Mexico Wire Solutions',
-          legal_name: 'Mexico Wire Solutions SA de CV',
-          location: 'Tijuana, Baja California',
-          country: 'Mexico',
-          specialization: 'Automotive Electrical Components',
-          verification_status: 'verified',
-          partnership_level: 'preferred',
-          created_at: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-          verified_at: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-          contact_email: 'contact@mexicowire.mx',
-          contact_phone: '+52-664-555-0123',
-          website: 'https://mexicowire.mx',
-          primary_contact_name: 'José Martinez',
-          established_year: 2015,
-          employee_count: 250,
-          annual_revenue_range: '$10M-50M',
-          manufacturing_capabilities: ['Wire Harnesses', 'Connectors', 'Assemblies'],
-          certifications: ['ISO 9001', 'TS 16949', 'USMCA'],
-          reliability_score: 98,
-          quality_score: 96,
-          communication_score: 94,
-          total_orders: 145,
-          successful_orders: 142
+      console.log('Suppliers table empty, returning empty data');
+
+      return res.status(200).json({
+        suppliers: [],
+        summary: {
+          total: 0,
+          verified: 0,
+          pending: 0,
+          rejected: 0,
+          suspended: 0,
+          avg_reliability_score: 0,
+          avg_quality_score: 0,
+          risk_distribution: { low: 0, medium: 0, high: 0 },
+          by_country: [],
+          by_specialization: [],
+          partnership_levels: { basic: 0, preferred: 0, premium: 0, exclusive: 0 }
         },
-        {
-          id: '2',
-          name: 'Canadian Auto Parts Ltd',
-          legal_name: 'Canadian Auto Parts Limited',
-          location: 'Toronto, Ontario',
-          country: 'Canada',
-          specialization: 'Automotive Components',
-          verification_status: 'verified',
-          partnership_level: 'standard',
-          created_at: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-          verified_at: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
-          contact_email: 'info@canadianparts.ca',
-          contact_phone: '+1-416-555-0456',
-          website: 'https://canadianparts.ca',
-          primary_contact_name: 'Sarah Thompson',
-          established_year: 2010,
-          employee_count: 180,
-          annual_revenue_range: '$5M-25M',
-          manufacturing_capabilities: ['Brake Components', 'Engine Parts', 'Suspension'],
-          certifications: ['ISO 9001', 'QS-9000', 'USMCA'],
-          reliability_score: 95,
-          quality_score: 93,
-          communication_score: 97,
-          total_orders: 89,
-          successful_orders: 85
-        },
-        {
-          id: '3',
-          name: 'Electronics Manufacturing SA',
-          legal_name: 'Electronics Manufacturing SA de CV',
-          location: 'Guadalajara, Jalisco',
-          country: 'Mexico',
-          specialization: 'Electronic Components',
-          verification_status: 'pending',
-          partnership_level: 'standard',
-          created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-          verified_at: null,
-          contact_email: 'sales@electronicsmfg.mx',
-          contact_phone: '+52-33-555-0789',
-          website: 'https://electronicsmfg.mx',
-          primary_contact_name: 'Roberto Flores',
-          established_year: 2018,
-          employee_count: 120,
-          annual_revenue_range: '$2M-10M',
-          manufacturing_capabilities: ['PCB Assembly', 'Testing', 'Packaging'],
-          certifications: ['ISO 9001', 'IPC-610'],
-          reliability_score: 88,
-          quality_score: 90,
-          communication_score: 85,
-          total_orders: 34,
-          successful_orders: 30
-        },
-        {
-          id: '4',
-          name: 'Steel Components MX',
-          legal_name: 'Steel Components Mexico SA de CV',
-          location: 'Mexico City, CDMX',
-          country: 'Mexico',
-          specialization: 'Steel Manufacturing',
-          verification_status: 'rejected',
-          partnership_level: 'none',
-          created_at: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-          verified_at: null,
-          contact_email: 'info@steelcomponents.mx',
-          contact_phone: '+52-55-555-0321',
-          website: 'https://steelcomponents.mx',
-          primary_contact_name: 'Miguel Rodriguez',
-          established_year: 2012,
-          employee_count: 450,
-          annual_revenue_range: '$25M-100M',
-          manufacturing_capabilities: ['Sheet Metal', 'Structural Steel', 'Machining'],
-          certifications: ['ISO 9001'],
-          reliability_score: 78,
-          quality_score: 82,
-          communication_score: 75,
-          total_orders: 12,
-          successful_orders: 8
+        data_status: {
+          source: 'database_empty',
+          reason: 'no_suppliers',
+          last_updated: new Date().toISOString(),
+          record_count: 0
         }
-      ];
-      
-      suppliers = sampleSuppliers;
+      });
     }
 
     // Enrich supplier data
