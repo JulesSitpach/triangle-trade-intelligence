@@ -26,7 +26,8 @@
       "Bash(npx playwright test:*)",
       "Bash(cp:*)",
       "mcp__supabase__apply_migration",
-      "mcp__supabase__execute_sql"
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__list_tables"
     ],
     "deny": [],
     "ask": []

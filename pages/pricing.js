@@ -16,55 +16,54 @@ export default function Pricing() {
 
   const plans = [
     {
-      name: 'Professional',
-      price: '$299',
+      name: 'Starter',
+      price: '$99',
       period: 'per month',
-      description: 'Perfect for growing businesses with regular compliance needs',
+      description: 'Basic Mexico routing calculator for testing and small scale use',
       features: [
-        'Unlimited HS code classifications',
-        'Basic compliance checking',
-        'Standard certificate generation',
-        'Email support',
-        'API access (1000 calls/month)',
-        'Basic reporting dashboard'
+        'Basic Mexico routing calculator',
+        '5 HS code lookups per month',
+        'Basic tariff alerts (email only)',
+        'Certificate templates (you complete yourself)',
+        'Email support (no phone)',
+        'Limited lookups force upgrade when you get serious'
       ],
-      cta: 'Start Professional Trial',
+      cta: 'Start Starter Trial',
       popular: false
     },
     {
-      name: 'Enterprise',
-      price: '$799',
+      name: 'Professional',
+      price: '$299',
       period: 'per month',
-      description: 'Advanced features for large-scale operations and integrations',
+      description: 'Advanced Mexico routing analysis with real-time alerts',
       features: [
-        'Priority API access (unlimited)',
-        'Advanced analytics dashboard',
-        'Custom integration support',
-        'Dedicated phone support',
-        'White-label certificates',
-        'Advanced reporting & analytics',
-        'Multi-user team management',
-        'SLA guarantees'
+        'Advanced Mexico routing analysis',
+        '25 HS code lookups per month',
+        'Real-time crisis alerts (email + SMS)',
+        'Certificate wizard (guidance but you complete)',
+        'Priority email support (24hr response)',
+        'Canada-Mexico partnership intelligence alerts',
+        'You still need help completing certificates → services'
       ],
-      cta: 'Contact Sales',
+      cta: 'Start Professional Trial',
       popular: true
     },
     {
-      name: 'Enterprise+',
-      price: 'Custom',
-      period: 'pricing',
-      description: 'Fully customized solution for enterprise-scale deployments',
+      name: 'Business',
+      price: '$599',
+      period: 'per month',
+      description: 'Unlimited lookups with completed certificates included',
       features: [
-        'White-label deployment',
-        'On-premise installation',
-        'Custom API development',
-        'Dedicated account management',
-        'Priority feature development',
-        'Custom compliance workflows',
-        'Advanced security options',
-        '24/7 priority support'
+        'Unlimited HS code lookups',
+        'Real-time alerts (all channels)',
+        'Certificate wizard + validation',
+        'Email support (4hr response)',
+        '2 completed certificates included per month',
+        'Monthly partnership intelligence report',
+        'Crisis response playbook',
+        'Includes some certificates to get you hooked'
       ],
-      cta: 'Schedule Consultation',
+      cta: 'Start Business Trial',
       popular: false
     }
   ]
