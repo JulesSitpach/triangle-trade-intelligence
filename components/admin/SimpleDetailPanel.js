@@ -750,7 +750,7 @@ const SimpleDetailPanel = ({
             </div>
 
             {/* Simple Actions using existing button classes */}
-            <div className="action-buttons" style={{marginTop: '20px'}}>
+            <div className="action-buttons">
               <button
                 onClick={() => {
                   console.log('🔧 Button clicked, about to call handleDiagnostics');

@@ -1,7 +1,0 @@
-{
-  "action": "classify_product",
-  "data": {
-    "product_description": "Women's leather handbags made from cowhide exterior with fabric cotton lining",
-    "business_type": "Fashion Accessories"
-  }
-}

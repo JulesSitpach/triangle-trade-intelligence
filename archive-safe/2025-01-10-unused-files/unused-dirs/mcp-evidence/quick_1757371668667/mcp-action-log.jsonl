@@ -1,6 +1,0 @@
-{"timestamp":"2025-09-08T22:47:48.678Z","auditId":"quick_1757371668667","action":"INIT","message":"MCP Integration system initialized"}
-{"timestamp":"2025-09-08T22:47:49.849Z","auditId":"quick_1757371668667","action":"READ_COMPLETE","message":"Analyzed 71 files with 26512 total lines"}
-{"timestamp":"2025-09-08T22:48:04.014Z","auditId":"quick_1757371668667","action":"GLOB_COMPLETE","message":"Discovered 31539 files across 5 categories"}
-{"timestamp":"2025-09-08T22:49:48.172Z","auditId":"quick_1757371668667","action":"GREP_COMPLETE","message":"Analyzed 16 patterns with 26497 total matches"}
-{"timestamp":"2025-09-08T22:49:48.275Z","auditId":"quick_1757371668667","action":"BASH_COMPLETE","message":"Executed 12 commands with 0 successes"}
-{"timestamp":"2025-09-08T22:49:48.279Z","auditId":"quick_1757371668667","action":"AUDIT_COMPLETE","message":"MCP audit completed in 119610ms"}
