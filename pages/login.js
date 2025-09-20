@@ -18,7 +18,7 @@ export default function Login() {
     if (user) {
       console.log('User already logged in, redirecting...');
       if (user.isAdmin) {
-        router.replace('/admin/collaboration-workspace');
+        router.replace('/admin/dashboard');
       } else {
         router.replace('/dashboard');
       }
@@ -69,7 +69,7 @@ export default function Login() {
 
       <div className="main-content">
         <div className="container-app">
-          <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
+          <div className="content-card">
 
             {/* Logo */}
             <div className="section-header">
@@ -82,21 +82,14 @@ export default function Login() {
 
             {/* Error Message */}
             {error && (
-              <div className="error-message" style={{
-                background: '#fee',
-                border: '1px solid #fcc',
-                padding: '10px',
-                borderRadius: '4px',
-                marginBottom: '20px',
-                color: '#c00'
-              }}>
+              <div className="error-message">
                 {error}
               </div>
             )}
 
             {/* Login Form */}
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
+              <div>
                 <label htmlFor="email">Email</label>
                 <input
                   type="email"
@@ -104,37 +97,27 @@ export default function Login() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="form-input"
                   required
                   autoComplete="email"
                 />
               </div>
 
-              <div className="form-group">
+              <div>
                 <label htmlFor="password">Password</label>
-                <div style={{position: 'relative'}}>
+                <div>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className="form-input"
                     required
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
+                    className="btn-secondary"
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
@@ -143,19 +126,18 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="hero-cta-button"
+                className="hero-primary-button"
                 disabled={isLoading}
-                style={{width: '100%', marginTop: '20px'}}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
 
             {/* Footer Links */}
-            <div style={{textAlign: 'center', marginTop: '20px'}}>
+            <div>
               <p>
                 Don't have an account?{' '}
-                <Link href="/signup" style={{color: '#007bff'}}>
+                <Link href="/signup" className="nav-link">
                   Sign up
                 </Link>
               </p>
