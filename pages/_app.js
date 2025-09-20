@@ -4,12 +4,12 @@ import '../styles/globals.css'
 import '../styles/dashboard.css'
 import '../styles/salesforce-tables.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
-import { AuthProvider } from '../lib/contexts/ProductionAuthContext'
+import { SimpleAuthProvider } from '../lib/contexts/SimpleAuthContext'
+import ErrorBoundary from '../components/ErrorBoundary'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 // import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
 // import { TriangleStateProvider } from '../lib/state/TriangleStateContext'
-// import ErrorBoundary from '../components/ErrorBoundary'
 
 export default function App({ Component, pageProps }) {
   const [showLoading, setShowLoading] = useState(true)
@@ -41,11 +41,13 @@ export default function App({ Component, pageProps }) {
         </div>
       )}
       
-      <AuthProvider>
-        <AlertProvider>
-          <Component {...pageProps} />
-        </AlertProvider>
-      </AuthProvider>
+      <ErrorBoundary>
+        <SimpleAuthProvider>
+          <AlertProvider>
+            <Component {...pageProps} />
+          </AlertProvider>
+        </SimpleAuthProvider>
+      </ErrorBoundary>
     </>
   )
 }

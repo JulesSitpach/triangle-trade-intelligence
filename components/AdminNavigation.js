@@ -50,7 +50,7 @@ export default function AdminNavigation({ user }) {
           <Link href="/admin/dev-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Development
           </Link>
-          <Link href="/admin/client-portfolio" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="/admin/jorge-dashboard-clean" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Jorge
           </Link>
           <Link href="/admin/broker-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>

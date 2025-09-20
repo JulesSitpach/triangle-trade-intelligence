@@ -8,34 +8,14 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
 import { useAuth } from '../lib/contexts/ProductionAuthContext';
 
-// Configuration - no hardcoded values
-const RISK_CONFIG = {
-  tariffRates: {
-    section301: 0.25, // 25% tariff rate
-    defaultTariff: 0.10
-  },
-  probabilities: {
-    section301: "85%",
-    electronics: "70%",
-    usmcaChanges: "40%"
-  },
-  riskReduction: {
-    mexicoManufacturing: "75%",
-    latinAmericaNetwork: "60%",
-    multiRouteLogistics: "45%",
-    canadaRouting: "50%"
-  },
-  thresholds: {
-    highVolumeTrader: 500000, // $500K threshold for diversification recommendations
-    minimumImpact: 50000 // Minimum $ impact to show risk
-  },
-  timelines: {
-    mexico: "3-6 months",
-    latinAmerica: "4-8 months",
-    logistics: "2-4 months",
-    canada: "2-3 months"
-  }
-};
+// Import configuration from centralized config file
+import TRADE_RISK_CONFIG, {
+  calculateRiskImpact,
+  getSeverityLevel,
+  getIndustryRiskMultiplier,
+  formatCurrency,
+  formatPercentage
+} from '../config/trade-risk-config';
 
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
@@ -226,11 +206,11 @@ export default function TradeRiskAlternatives() {
         title: `Section 301 Tariffs on Chinese Imports`,
         severity: "HIGH",
         generalImpact: "Up to 25% additional tariffs on your imports",
-        detailedImpact: `Potential ${formatCurrency(profile.tradeVolume * RISK_CONFIG.tariffRates.section301)} annual cost increase`,
-        probability: RISK_CONFIG.probabilities.section301,
+        detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, TRADE_TRADE_RISK_CONFIG.tariffRates.section301))} annual cost increase`,
+        probability: TRADE_TRADE_RISK_CONFIG.probabilities.section301,
         timeframe: "Next 30-60 days",
         description: `Your HS code ${profile.hsCode} is specifically targeted in proposed Section 301 tariff expansions`,
-        detailedInfo: `Based on your annual trade volume of ${formatCurrency(profile.tradeVolume)}, a 25% tariff would cost you ${formatCurrency(profile.tradeVolume * RISK_CONFIG.tariffRates.section301)} per year. This calculation assumes your current import pattern continues.`
+        detailedInfo: `Based on your annual trade volume of ${formatCurrency(profile.tradeVolume)}, a 25% tariff would cost you ${formatCurrency(profile.tradeVolume * TRADE_RISK_CONFIG.tariffRates.section301)} per year. This calculation assumes your current import pattern continues.`
       });
     }
 
@@ -255,7 +235,7 @@ export default function TradeRiskAlternatives() {
         severity: "HIGH",
         generalImpact: "Additional compliance requirements and potential restrictions",
         detailedImpact: "Additional compliance requirements and potential restrictions",
-        probability: RISK_CONFIG.probabilities.electronics,
+        probability: TRADE_RISK_CONFIG.probabilities.electronics,
         timeframe: "Next 3-6 months",
         description: "Electronics imports face increased scrutiny and potential new restrictions",
         detailedInfo: "Electronics companies are seeing increased audits, longer customs processing times, and new documentation requirements. Consider establishing USMCA-compliant manufacturing to avoid these restrictions."
@@ -286,20 +266,20 @@ export default function TradeRiskAlternatives() {
         strategy: "Mexico Manufacturing Partnership",
         benefit: "USMCA-protected production with duty-free access",
         implementation: `Jorge specializes in Mexico partnerships for ${profile.businessType} companies`,
-        timeline: RISK_CONFIG.timelines.mexico,
-        riskReduction: RISK_CONFIG.riskReduction.mexicoManufacturing,
+        timeline: TRADE_RISK_CONFIG.timelines.mexico,
+        riskReduction: TRADE_RISK_CONFIG.riskReduction.mexicoManufacturing,
         relevantTeam: "Jorge"
       });
     }
 
     // Latin America diversification (Jorge's specialty)
-    if (profile.tradeVolume > RISK_CONFIG.thresholds.highVolumeTrader) {
+    if (profile.tradeVolume > TRADE_RISK_CONFIG.thresholds.highVolumeTrader) {
       alternatives.push({
         strategy: "Latin America Supply Network",
         benefit: "Diversify across Mexico, Colombia, Brazil to reduce single-country risk",
         implementation: "Jorge has established supplier networks throughout Latin America",
-        timeline: RISK_CONFIG.timelines.latinAmerica,
-        riskReduction: RISK_CONFIG.riskReduction.latinAmericaNetwork,
+        timeline: TRADE_RISK_CONFIG.timelines.latinAmerica,
+        riskReduction: TRADE_RISK_CONFIG.riskReduction.latinAmericaNetwork,
         relevantTeam: "Jorge"
       });
     }
@@ -309,8 +289,8 @@ export default function TradeRiskAlternatives() {
       strategy: "Multi-Route Logistics Strategy",
       benefit: "Backup shipping routes and customs procedures",
       implementation: "Cristina designs complex routing strategies for business continuity",
-      timeline: RISK_CONFIG.timelines.logistics,
-      riskReduction: RISK_CONFIG.riskReduction.multiRouteLogistics,
+      timeline: TRADE_RISK_CONFIG.timelines.logistics,
+      riskReduction: TRADE_RISK_CONFIG.riskReduction.multiRouteLogistics,
       relevantTeam: "Cristina"
     });
 
@@ -320,8 +300,8 @@ export default function TradeRiskAlternatives() {
         strategy: "Canada USMCA Entry Point",
         benefit: "Alternative USMCA qualification route",
         implementation: "Cristina handles Canada-Mexico-US triangle routing setup",
-        timeline: RISK_CONFIG.timelines.canada,
-        riskReduction: RISK_CONFIG.riskReduction.canadaRouting,
+        timeline: TRADE_RISK_CONFIG.timelines.canada,
+        riskReduction: TRADE_RISK_CONFIG.riskReduction.canadaRouting,
         relevantTeam: "Cristina"
       });
     }
@@ -335,7 +315,7 @@ export default function TradeRiskAlternatives() {
     // Jorge recommendations (Latin America focus)
     const needsLatinAmerica = profile.supplierCountry === 'CN' ||
                              profile.qualificationStatus === 'NOT_QUALIFIED' ||
-                             profile.tradeVolume > RISK_CONFIG.thresholds.highVolumeTrader;
+                             profile.tradeVolume > TRADE_RISK_CONFIG.thresholds.highVolumeTrader;
 
     if (needsLatinAmerica) {
       recommendations.push({
@@ -421,6 +401,27 @@ export default function TradeRiskAlternatives() {
   return (
     <TriangleLayout>
       <div className="dashboard-container">
+        {/* Alert Access Gate */}
+        <div className="alert alert-info">
+          <div className="alert-content">
+            <div className="alert-title">📊 Trade Risk Alert Dashboard</div>
+            <div className="text-body">
+              Monitor your personalized trade risk alerts and crisis notifications.
+              <br />• Real-time tariff change alerts based on your trade profile
+              <br />• Supply chain disruption notifications
+              <br />• Alternative routing recommendations
+            </div>
+            <div className="hero-buttons">
+              <button
+                onClick={() => window.location.href = '/pricing'}
+                className="btn-primary"
+              >
+                Upgrade for Full Alert Access
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="dashboard-header">
           <h1 className="dashboard-title">Trade Risk & Alternatives Dashboard</h1>
           <p className="dashboard-subtitle">
@@ -566,8 +567,27 @@ export default function TradeRiskAlternatives() {
                       <p><strong>How {rec.teamMember} can help:</strong> {rec.contactReason}</p>
                     </div>
                     <div className="hero-buttons">
-                      <button className="btn-primary">📞 Schedule Call with {rec.teamMember}</button>
-                      <button className="btn-secondary">📧 Email {rec.teamMember}</button>
+                      {rec.teamMember === 'Jorge' ? (
+                        <button
+                          className="btn-primary"
+                          onClick={() => window.location.href = '/services/mexico-trade-services'}
+                        >
+                          🇲🇽 Request Jorge Consultation
+                        </button>
+                      ) : (
+                        <button
+                          className="btn-primary"
+                          onClick={() => window.location.href = '/services/logistics-support'}
+                        >
+                          📦 Request Cristina Consultation
+                        </button>
+                      )}
+                      <button
+                        className="btn-secondary"
+                        onClick={() => window.location.href = `mailto:${rec.teamMember.toLowerCase()}@triangleintelligence.com`}
+                      >
+                        📧 Email {rec.teamMember}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -598,7 +618,12 @@ export default function TradeRiskAlternatives() {
                 </ol>
               </div>
               <div className="hero-buttons">
-                <button className="btn-primary">🚀 Start Diversification Plan</button>
+                <button
+                  className="btn-primary"
+                  onClick={() => window.location.href = '/services/mexico-trade-services'}
+                >
+                  🇲🇽 Get Jorge's Help Now
+                </button>
                 <button className="btn-secondary">📋 Download Risk Assessment</button>
               </div>
             </div>

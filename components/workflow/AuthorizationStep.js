@@ -524,9 +524,16 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
                 <button
                   className="btn-primary"
-                  onClick={() => window.location.href = '/trade-risk-alternatives'}
+                  onClick={() => window.location.href = '/pricing'}
                 >
-                  🚨 Go to Crisis Alerts
+                  🚨 Subscribe for Crisis Alerts
+                </button>
+
+                <button
+                  className="btn-secondary"
+                  onClick={() => window.location.href = '/services/mexico-trade-services'}
+                >
+                  🇲🇽 Need Mexico Suppliers?
                 </button>
               </div>
             )}

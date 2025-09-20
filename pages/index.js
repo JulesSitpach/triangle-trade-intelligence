@@ -267,6 +267,9 @@ export default function HomePage() {
                     <Link href="#calculator" className="btn-secondary">
                       Calculate Your Savings
                     </Link>
+                    <Link href="/services/mexico-trade-services" className="btn-secondary">
+                      🇲🇽 Talk to Jorge
+                    </Link>
                   </div>
                 </div>
                 

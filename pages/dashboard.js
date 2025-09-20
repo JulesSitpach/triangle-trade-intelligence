@@ -16,11 +16,8 @@ export default function Dashboard() {
         const userData = JSON.parse(stored);
         setUser(userData);
 
-        // If admin user accidentally comes here, redirect to admin dashboard
-        if (userData.isAdmin) {
-          router.push('/admin/dashboard');
-          return;
-        }
+        // Allow both admin and regular users to access this dashboard
+        console.log('Dashboard access granted for:', userData.isAdmin ? 'admin' : 'user');
       } catch (e) {
         console.log('Invalid stored user data');
         router.push('/login');

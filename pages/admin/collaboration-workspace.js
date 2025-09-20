@@ -1,7 +1,8 @@
 /**
- * Jorge-Cristina Collaboration Workspace - Production-Quality Implementation
- * Complete UI + API + Database integration following Jorge's proven dashboard standard
- * 100% functional: Salesforce-style tables, Google Apps integration, real data flow
+ * USMCA Transition & Latin America Strategy Workspace
+ * Dual Strategy Management: Current USMCA benefits + Future Latin America partnerships
+ * Critical Function: Help clients maximize 6-month USMCA window while building post-USMCA routes
+ * Jorge + Cristina coordination for seamless client transitions
  */
 
 import { useState, useEffect } from 'react';
@@ -11,12 +12,13 @@ import Head from 'next/head';
 import googleIntegrationService from '../../lib/services/google-integration-service';
 import SimpleDetailPanel from '../../components/admin/SimpleDetailPanel';
 import TeamChatWidget from '../../components/admin/TeamChatWidget';
+import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 
 export default function CollaborationWorkspace() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user, loading: authLoading, isAdmin } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dual-strategy-management');
   const [sortConfig, setSortConfig] = useState({ key: 'priority', direction: 'desc' });
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -24,25 +26,43 @@ export default function CollaborationWorkspace() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
 
-  // Database-driven data states - NO hardcoded arrays
+  // Dual Strategy Management States - NO hardcoded arrays
+  const [usmcaTransitionClients, setUsmcaTransitionClients] = useState([]);
+  const [latinAmericaOpportunities, setLatinAmericaOpportunities] = useState([]);
+  const [urgentTransitions, setUrgentTransitions] = useState([]);
+  const [strategyMetrics, setStrategyMetrics] = useState({});
+  const [clientTransitionPipeline, setClientTransitionPipeline] = useState([]);
+
+  // USMCA Maximization tab states
+  const [usmcaWindowTracking, setUsmcaWindowTracking] = useState(null);
+  const [urgentCertificates, setUrgentCertificates] = useState([]);
+  const [expiringBenefits, setExpiringBenefits] = useState([]);
+  const [lastChanceClients, setLastChanceClients] = useState([]);
+  const [transitionTimeframe, setTransitionTimeframe] = useState('6months');
+
+  // Latin America Future Strategy tab states
+  const [latinAmericaData, setLatinAmericaData] = useState({
+    mexico_canada_routes: [],
+    mexico_latin_partnerships: [],
+    post_usmca_opportunities: [],
+    alternative_trade_routes: []
+  });
+
+  // Collaboration items state - missing declarations
   const [collaborationItems, setCollaborationItems] = useState([]);
   const [jointProjects, setJointProjects] = useState([]);
   const [revenueOpportunities, setRevenueOpportunities] = useState([]);
   const [teamMetrics, setTeamMetrics] = useState({});
-
-  // Mexico Intelligence tab states
-  const [mexicoAnalytics, setMexicoAnalytics] = useState(null);
   const [usmcaCertificates, setUsmcaCertificates] = useState([]);
   const [triangleRoutes, setTriangleRoutes] = useState([]);
   const [tariffAnalysis, setTariffAnalysis] = useState([]);
-  const [mexicoTimeframe, setMexicoTimeframe] = useState('30days');
 
-  // Canada-Mexico Partnership tab states
-  const [partnershipData, setPartnershipData] = useState({
-    opportunities: [],
-    executives: [],
-    railRoutes: [],
-    minerals: []
+  // Client Transition Coordination
+  const [transitionCoordination, setTransitionCoordination] = useState({
+    jorge_handoffs: [],
+    cristina_preparations: [],
+    joint_client_meetings: [],
+    strategy_sessions: []
   });
 
   // Filtering states
@@ -51,25 +71,30 @@ export default function CollaborationWorkspace() {
   const [assigneeFilter, setAssigneeFilter] = useState('all');
 
   useEffect(() => {
-    // Check admin authentication
-    const stored = localStorage.getItem('triangle_user_session') || localStorage.getItem('current_user');
-    if (!stored) {
+    // Use new auth system instead of localStorage checks
+    if (authLoading) {
+      // Still loading auth state
+      return;
+    }
+
+    if (!user) {
+      // Not logged in
+      console.log('No user found, redirecting to login');
       router.push('/login');
       return;
     }
 
-    try {
-      const userData = JSON.parse(stored);
-      if (!userData.isAdmin) {
-        router.push('/dashboard');
-        return;
-      }
-      setUser(userData);
-      loadCollaborationDashboardData();
-    } catch (e) {
+    if (!isAdmin) {
+      // Not an admin
+      console.log('User is not admin, redirecting to login');
       router.push('/login');
+      return;
     }
-  }, []);
+
+    // User is authenticated and admin - load data
+    console.log('Admin user authenticated, loading dashboard data');
+    loadCollaborationDashboardData();
+  }, [user, isAdmin, authLoading, router]);
 
   // Load partnership data when tab changes
   useEffect(() => {
@@ -464,7 +489,7 @@ export default function CollaborationWorkspace() {
   return (
     <>
       <Head>
-        <title>Jorge-Cristina Collaboration Workspace - Triangle Intelligence</title>
+        <title>USMCA Transition Strategy - Triangle Intelligence</title>
       </Head>
 
       <AdminNavigation user={user} />
@@ -473,12 +498,12 @@ export default function CollaborationWorkspace() {
         <div className="container-app">
           {/* Standardized Header */}
           <div className="admin-header">
-            <h1 className="admin-title">🤝 Jorge-Cristina Collaboration Workspace</h1>
+            <h1 className="admin-title">🚨 USMCA Transition & Latin America Strategy</h1>
             <p className="admin-subtitle">
-              Production-quality team coordination • Complete UI+API+Database integration • Real Google Apps functionality
+              Critical 6-Month Window • Maximize Current USMCA Benefits • Build Future Latin America Partnerships
             </p>
-            <div className="credentials-badge">
-              <span>Joint Operations Team</span>
+            <div className="credentials-badge urgent">
+              <span>URGENT: Trump May Dissolve USMCA</span>
               <span className="license-number">COLLAB-2024</span>
             </div>
           </div>
@@ -487,34 +512,34 @@ export default function CollaborationWorkspace() {
           {/* Tab Navigation */}
           <div className="admin-nav-tabs">
             <button
-              className={`admin-btn joint ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('overview')}
+              className={`admin-btn joint ${activeTab === 'dual-strategy-management' ? 'active urgent' : ''}`}
+              onClick={() => setActiveTab('dual-strategy-management')}
             >
-              📋 Collaboration Queue
+              🚨 Dual Strategy Management
             </button>
             <button
-              className={`admin-btn joint ${activeTab === 'joint-projects' ? 'active' : ''}`}
-              onClick={() => setActiveTab('joint-projects')}
+              className={`admin-btn joint ${activeTab === 'usmca-window-maximization' ? 'active' : ''}`}
+              onClick={() => setActiveTab('usmca-window-maximization')}
             >
-              🤝 Joint Projects
+              ⏰ USMCA Window (6 months left)
             </button>
             <button
-              className={`admin-btn joint ${activeTab === 'revenue-ops' ? 'active' : ''}`}
-              onClick={() => setActiveTab('revenue-ops')}
+              className={`admin-btn joint ${activeTab === 'client-transition-pipeline' ? 'active' : ''}`}
+              onClick={() => setActiveTab('client-transition-pipeline')}
             >
-              💰 Revenue Opportunities
+              🔄 Client Transition Pipeline
             </button>
             <button
-              className={`admin-btn joint ${activeTab === 'mexico-intelligence' ? 'active' : ''}`}
-              onClick={() => setActiveTab('mexico-intelligence')}
+              className={`admin-btn joint ${activeTab === 'latin-america-future' ? 'active' : ''}`}
+              onClick={() => setActiveTab('latin-america-future')}
             >
-              🇲🇽 Mexico Intelligence
+              🌎 Latin America Future Strategy
             </button>
             <button
-              className={`admin-btn joint ${activeTab === 'canada-mexico-partnership' ? 'active' : ''}`}
-              onClick={() => setActiveTab('canada-mexico-partnership')}
+              className={`admin-btn joint ${activeTab === 'jorge-cristina-coordination' ? 'active' : ''}`}
+              onClick={() => setActiveTab('jorge-cristina-coordination')}
             >
-              🍁🇲🇽 Canada Partnership
+              👥 Jorge ↔ Cristina Coordination
             </button>
           </div>
 
