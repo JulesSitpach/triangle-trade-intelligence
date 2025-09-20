@@ -16,7 +16,7 @@ export default function BrokerDashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('work-queue');
+  const [activeTab, setActiveTab] = useState('service-tools');
   const [sortConfig, setSortConfig] = useState({ key: 'priority', direction: 'desc' });
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -47,6 +47,58 @@ export default function BrokerDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [clientFilter, setClientFilter] = useState('all');
   const [selectedWorkItems, setSelectedWorkItems] = useState([]);
+
+  // Service Delivery Tools states
+  const [serviceToolsData, setServiceToolsData] = useState({
+    usmcaCertificates: [],
+    hsClassifications: [],
+    customsClearance: [],
+    crisisResponse: []
+  });
+  const [activeServiceType, setActiveServiceType] = useState('usmca-certificates');
+  const [capacityMetrics, setCapacityMetrics] = useState({
+    certificates: { current: 32, monthly_target: 40, rate: 200 },
+    classifications: { current: 45, monthly_target: 60, rate: 150 },
+    clearance: { current: 22, monthly_target: 30, rate: 300 },
+    crisis: { current: 8, monthly_target: 15, rate: 500 }
+  });
+
+  // Service Delivery Tool Handlers
+  const handleUSMCACertificateWorkflow = (step) => {
+    const workflows = {
+      1: '📋 Product Data Intake\n\n✓ Company information verification\n✓ Product description and specifications\n✓ Manufacturing location confirmation\n✓ Component origin documentation\n✓ Regional value content calculation\n✓ Auto-populate certificate fields\n\nNext: Validate USMCA qualification criteria',
+      2: '🧮 USMCA Rules Calculator\n\n✓ Select appropriate rule of origin\n✓ Regional value content (RVC) computation\n✓ Tariff shift analysis if applicable\n✓ Producer certification requirements\n✓ Supporting documentation checklist\n✓ Qualification status determination\n\nNext: Generate certificate template',
+      3: '📄 Certificate Generation\n\n✓ Complete all required fields\n✓ Field validation and error checking\n✓ Quality control checklist review\n✓ Client review and approval\n✓ Final certificate preparation\n✓ Submit to appropriate authorities\n\nDeliverable: USMCA Certificate ($200) - 3-5 day timeline'
+    };
+    alert(workflows[step]);
+  };
+
+  const handleHSCodeClassification = (step) => {
+    const workflows = {
+      1: '🔍 Product Analysis\n\n✓ Product analysis questionnaire\n✓ Materials composition breakdown\n✓ Function and intended use determination\n✓ Construction and manufacturing process\n✓ Similar product reference search\n✓ Initial HS code candidates identification\n\nNext: Database search and verification',
+      2: '📊 Classification & Research\n\n✓ HS code database search with tariff rates\n✓ Classification decision tree navigation\n✓ Cross-reference with customs rulings\n✓ Tariff rate comparison analysis\n✓ Justification documentation preparation\n✓ Appeal template preparation if needed\n\nNext: Final classification decision',
+      3: '📋 Classification Report\n\n✓ Final HS code determination\n✓ Justification report generation\n✓ Tariff rate impact analysis\n✓ Alternative classification options\n✓ Documentation for customs compliance\n✓ Client training on proper usage\n\nDeliverable: HS Classification Report ($150) - Same day'
+    };
+    alert(workflows[step]);
+  };
+
+  const handleCustomsClearance = (step) => {
+    const workflows = {
+      1: '📦 Document Review\n\n✓ Shipment documentation checklist\n✓ Commercial invoice verification\n✓ Packing list accuracy check\n✓ Certificate of origin validation\n✓ Import/export permits review\n✓ Duty and tax calculation verification\n\nNext: Issue identification and resolution',
+      2: '🔧 Issue Resolution\n\n✓ Common clearance issue database search\n✓ Resolution protocol implementation\n✓ Broker communication coordination\n✓ Additional documentation requests\n✓ Examination scheduling if needed\n✓ Status tracking and client updates\n\nNext: Clearance finalization',
+      3: '✅ Clearance Support\n\n✓ Final clearance status confirmation\n✓ Duty and fee payment coordination\n✓ Release documentation provision\n✓ Client notification of completion\n✓ Post-clearance compliance advice\n✓ Emergency escalation if needed ($500 same-day)\n\nDeliverable: Customs Clearance Support ($300)'
+    };
+    alert(workflows[step]);
+  };
+
+  const handleCrisisResponse = (step) => {
+    const workflows = {
+      1: '🚨 Crisis Assessment\n\n✓ Tariff change monitoring alert review\n✓ Impact analysis calculation setup\n✓ Client portfolio affected identification\n✓ Urgency level determination\n✓ Same-day vs 24-hour service selection\n✓ Initial client notification preparation\n\nNext: Action plan development',
+      2: '📋 Action Plan Development\n\n✓ Action plan generator template selection\n✓ Cost mitigation strategy identification\n✓ Alternative compliance options research\n✓ Timeline and milestone establishment\n✓ Resource allocation planning\n✓ Communication strategy finalization\n\nNext: Implementation and monitoring',
+      3: '⚡ Crisis Implementation\n\n✓ Same-day or 24-hour service execution\n✓ Client notification system activation\n✓ Real-time status updates provision\n✓ Issue resolution coordination\n✓ Cost impact minimization efforts\n✓ Follow-up and prevention planning\n\nDeliverable: Crisis Response Service ($500) - Same day to 24 hours'
+    };
+    alert(workflows[step]);
+  };
 
   useEffect(() => {
     // Check admin authentication
@@ -641,39 +693,281 @@ export default function BrokerDashboard() {
             </div>
           </div>
 
-          {/* Standardized Tab Navigation */}
+          {/* Streamlined Tab Navigation - Cristina's Essentials Only */}
           <div className="tab-navigation">
+            <button
+              className={`tab-button ${activeTab === 'service-tools' ? 'active' : ''}`}
+              onClick={() => setActiveTab('service-tools')}
+            >
+              🛠️ Service Delivery Tools
+            </button>
             <button
               className={`tab-button ${activeTab === 'work-queue' ? 'active' : ''}`}
               onClick={() => setActiveTab('work-queue')}
             >
-              📋 Work Queue
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'active-shipments' ? 'active' : ''}`}
-              onClick={() => setActiveTab('active-shipments')}
-            >
-              🚢 Active Shipments
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'compliance' ? 'active' : ''}`}
-              onClick={() => setActiveTab('compliance')}
-            >
-              ⚖️ Compliance Monitoring
-            </button>
-            <button
-              className={`tab-button ${activeTab === 'supplier-network' ? 'active' : ''}`}
-              onClick={() => setActiveTab('supplier-network')}
-            >
-              🏭 Supplier Network
+              📋 Active Work Queue
             </button>
             <button
               className={`tab-button ${activeTab === 'crisis-monitoring' ? 'active' : ''}`}
               onClick={() => setActiveTab('crisis-monitoring')}
             >
-              🚨 Crisis Monitoring
+              🚨 Crisis Response Queue
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'revenue-tracking' ? 'active' : ''}`}
+              onClick={() => setActiveTab('revenue-tracking')}
+            >
+              💰 Revenue Tracking
             </button>
           </div>
+
+          {/* Service Delivery Tools Tab */}
+          {activeTab === 'service-tools' && (
+            <div className="admin-card">
+              <div className="card-header">
+                <h2 className="card-title">🛠️ Cristina's Service Delivery Tools</h2>
+                <div className="text-body">
+                  Complete workflow management for all four core compliance services
+                </div>
+
+                {/* Capacity Overview Cards */}
+                <div className="revenue-cards">
+                  <div className="revenue-card cristina">
+                    <div className="revenue-amount">{capacityMetrics.certificates.current}/{capacityMetrics.certificates.monthly_target}</div>
+                    <div className="revenue-label">📄 USMCA Certificates</div>
+                    <div className="text-muted">${capacityMetrics.certificates.rate} each</div>
+                  </div>
+                  <div className="revenue-card jorge">
+                    <div className="revenue-amount">{capacityMetrics.classifications.current}/{capacityMetrics.classifications.monthly_target}</div>
+                    <div className="revenue-label">🔍 HS Classifications</div>
+                    <div className="text-muted">${capacityMetrics.classifications.rate} each</div>
+                  </div>
+                  <div className="revenue-card joint">
+                    <div className="revenue-amount">{capacityMetrics.clearance.current}/{capacityMetrics.clearance.monthly_target}</div>
+                    <div className="revenue-label">📦 Customs Clearance</div>
+                    <div className="text-muted">${capacityMetrics.clearance.rate} each</div>
+                  </div>
+                  <div className="revenue-card dev">
+                    <div className="revenue-amount">{capacityMetrics.crisis.current}/{capacityMetrics.crisis.monthly_target}</div>
+                    <div className="revenue-label">🚨 Crisis Response</div>
+                    <div className="text-muted">${capacityMetrics.crisis.rate} each</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Type Selection */}
+              <div className="tab-navigation">
+                <button
+                  className={`tab-button ${activeServiceType === 'usmca-certificates' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceType('usmca-certificates')}
+                >
+                  📄 USMCA Certificates
+                </button>
+                <button
+                  className={`tab-button ${activeServiceType === 'hs-classifications' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceType('hs-classifications')}
+                >
+                  🔍 HS Classifications
+                </button>
+                <button
+                  className={`tab-button ${activeServiceType === 'customs-clearance' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceType('customs-clearance')}
+                >
+                  📦 Customs Clearance
+                </button>
+                <button
+                  className={`tab-button ${activeServiceType === 'crisis-response' ? 'active' : ''}`}
+                  onClick={() => setActiveServiceType('crisis-response')}
+                >
+                  🚨 Crisis Response
+                </button>
+              </div>
+
+              {/* USMCA Certificate Tools */}
+              {activeServiceType === 'usmca-certificates' && (
+                <div className="admin-table-container">
+                  <div className="card-header">
+                    <h3 className="content-card-title">USMCA Certificate Completion Workflow</h3>
+                    <p className="card-description">40/month target • $200 each • 3-5 day timeline with client notifications</p>
+                  </div>
+
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Step</th>
+                        <th>Process</th>
+                        <th>Tools</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">1</span></td>
+                        <td>
+                          <strong>Product Data Intake</strong><br/>
+                          <span className="text-muted">Auto-population, regional value content calculation</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleUSMCACertificateWorkflow(1)}>Start Intake</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">2</span></td>
+                        <td>
+                          <strong>USMCA Rules Calculator</strong><br/>
+                          <span className="text-muted">RVC computation, qualification determination</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleUSMCACertificateWorkflow(2)}>Calculate RVC</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-success">3</span></td>
+                        <td>
+                          <strong>Certificate Generation</strong><br/>
+                          <span className="text-muted">Template completion, validation, submission</span>
+                        </td>
+                        <td><button className="admin-btn success" onClick={() => handleUSMCACertificateWorkflow(3)}>Generate Certificate</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* HS Code Classification Tools */}
+              {activeServiceType === 'hs-classifications' && (
+                <div className="admin-table-container">
+                  <div className="card-header">
+                    <h3 className="content-card-title">HS Code Classification Workflow</h3>
+                    <p className="card-description">60/month target • $150 each • Same-day delivery</p>
+                  </div>
+
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Step</th>
+                        <th>Process</th>
+                        <th>Tools</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">1</span></td>
+                        <td>
+                          <strong>Product Analysis</strong><br/>
+                          <span className="text-muted">Materials, function, construction analysis</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleHSCodeClassification(1)}>Start Analysis</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">2</span></td>
+                        <td>
+                          <strong>Database Search & Verification</strong><br/>
+                          <span className="text-muted">HS code database, decision tree navigation</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleHSCodeClassification(2)}>Search Database</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-success">3</span></td>
+                        <td>
+                          <strong>Classification Report</strong><br/>
+                          <span className="text-muted">Final determination, justification documentation</span>
+                        </td>
+                        <td><button className="admin-btn success" onClick={() => handleHSCodeClassification(3)}>Generate Report</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Customs Clearance Tools */}
+              {activeServiceType === 'customs-clearance' && (
+                <div className="admin-table-container">
+                  <div className="card-header">
+                    <h3 className="content-card-title">Customs Clearance Support Workflow</h3>
+                    <p className="card-description">30/month target • $300 each • Emergency escalation $500 same-day</p>
+                  </div>
+
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Step</th>
+                        <th>Process</th>
+                        <th>Tools</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">1</span></td>
+                        <td>
+                          <strong>Document Review</strong><br/>
+                          <span className="text-muted">Shipment checklist, invoice verification</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleCustomsClearance(1)}>Review Documents</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">2</span></td>
+                        <td>
+                          <strong>Issue Resolution</strong><br/>
+                          <span className="text-muted">Common issues database, broker communication</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleCustomsClearance(2)}>Resolve Issues</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-success">3</span></td>
+                        <td>
+                          <strong>Clearance Completion</strong><br/>
+                          <span className="text-muted">Status confirmation, client notifications</span>
+                        </td>
+                        <td><button className="admin-btn success" onClick={() => handleCustomsClearance(3)}>Complete Clearance</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Crisis Response Tools */}
+              {activeServiceType === 'crisis-response' && (
+                <div className="admin-table-container">
+                  <div className="card-header">
+                    <h3 className="content-card-title">Crisis Response Workflow</h3>
+                    <p className="card-description">15/month target • $500 each • Same-day to 24-hour service</p>
+                  </div>
+
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Step</th>
+                        <th>Process</th>
+                        <th>Tools</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">1</span></td>
+                        <td>
+                          <strong>Crisis Assessment</strong><br/>
+                          <span className="text-muted">Impact analysis, urgency determination</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleCrisisResponse(1)}>Assess Crisis</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-info">2</span></td>
+                        <td>
+                          <strong>Action Plan Development</strong><br/>
+                          <span className="text-muted">Mitigation strategies, timeline planning</span>
+                        </td>
+                        <td><button className="admin-btn primary" onClick={() => handleCrisisResponse(2)}>Develop Plan</button></td>
+                      </tr>
+                      <tr className="admin-row">
+                        <td><span className="badge badge-success">3</span></td>
+                        <td>
+                          <strong>Crisis Implementation</strong><br/>
+                          <span className="text-muted">Execution, monitoring, prevention planning</span>
+                        </td>
+                        <td><button className="admin-btn success" onClick={() => handleCrisisResponse(3)}>Implement Response</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Work Queue Tab */}
           {activeTab === 'work-queue' && (
@@ -1298,6 +1592,76 @@ export default function BrokerDashboard() {
           )}
 
           {/* Simple Detail Panel - matches Jorge's dashboard */}
+          {/* Revenue Tracking Tab */}
+          {activeTab === 'revenue-tracking' && (
+            <div className="admin-card">
+              <div className="card-header">
+                <h2 className="card-title">💰 Cristina's Revenue Tracking</h2>
+                <div className="text-body">Monthly capacity and earnings for all four core services</div>
+              </div>
+
+              {/* Monthly Performance Overview */}
+              <div className="revenue-cards">
+                <div className="revenue-card cristina">
+                  <div className="revenue-amount">
+                    ${(capacityMetrics.certificates.current * capacityMetrics.certificates.rate).toLocaleString()}
+                  </div>
+                  <div className="revenue-label">📄 Certificates Revenue</div>
+                  <div className="text-muted">{capacityMetrics.certificates.current} completed</div>
+                </div>
+                <div className="revenue-card jorge">
+                  <div className="revenue-amount">
+                    ${(capacityMetrics.classifications.current * capacityMetrics.classifications.rate).toLocaleString()}
+                  </div>
+                  <div className="revenue-label">🔍 Classifications Revenue</div>
+                  <div className="text-muted">{capacityMetrics.classifications.current} completed</div>
+                </div>
+                <div className="revenue-card joint">
+                  <div className="revenue-amount">
+                    ${(capacityMetrics.clearance.current * capacityMetrics.clearance.rate).toLocaleString()}
+                  </div>
+                  <div className="revenue-label">📦 Clearance Revenue</div>
+                  <div className="text-muted">{capacityMetrics.clearance.current} completed</div>
+                </div>
+                <div className="revenue-card dev">
+                  <div className="revenue-amount">
+                    ${(capacityMetrics.crisis.current * capacityMetrics.crisis.rate).toLocaleString()}
+                  </div>
+                  <div className="revenue-label">🚨 Crisis Revenue</div>
+                  <div className="text-muted">{capacityMetrics.crisis.current} completed</div>
+                </div>
+              </div>
+
+              {/* Monthly Summary */}
+              <div className="card-header">
+                <div className="revenue-cards">
+                  <div className="revenue-card cristina">
+                    <div className="revenue-amount">
+                      ${(
+                        capacityMetrics.certificates.current * capacityMetrics.certificates.rate +
+                        capacityMetrics.classifications.current * capacityMetrics.classifications.rate +
+                        capacityMetrics.clearance.current * capacityMetrics.clearance.rate +
+                        capacityMetrics.crisis.current * capacityMetrics.crisis.rate
+                      ).toLocaleString()}
+                    </div>
+                    <div className="revenue-label">💰 Total Monthly Revenue</div>
+                  </div>
+                  <div className="revenue-card jorge">
+                    <div className="revenue-amount">
+                      ${(
+                        capacityMetrics.certificates.monthly_target * capacityMetrics.certificates.rate +
+                        capacityMetrics.classifications.monthly_target * capacityMetrics.classifications.rate +
+                        capacityMetrics.clearance.monthly_target * capacityMetrics.clearance.rate +
+                        capacityMetrics.crisis.monthly_target * capacityMetrics.crisis.rate
+                      ).toLocaleString()}
+                    </div>
+                    <div className="revenue-label">🏆 Maximum Monthly Capacity</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <SimpleDetailPanel
             isOpen={detailPanelOpen}
             onClose={closeDetailPanel}
