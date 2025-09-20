@@ -16,7 +16,7 @@ export default function BrokerDashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('service-tools');
+  const [activeTab, setActiveTab] = useState('service-queue');
   const [sortConfig, setSortConfig] = useState({ key: 'priority', direction: 'desc' });
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -29,6 +29,19 @@ export default function BrokerDashboard() {
   const [activeShipments, setActiveShipments] = useState([]);
   const [complianceMonitoring, setComplianceMonitoring] = useState([]);
   const [brokerMetrics, setBrokerMetrics] = useState({});
+  const [serviceRequests, setServiceRequests] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [classifications, setClassifications] = useState([]);
+  const [crisisResponse, setCrisisResponse] = useState([]);
+  const [activeServiceType, setActiveServiceType] = useState('usmca-certificates');
+
+  // Capacity metrics for Cristina's services
+  const [capacityMetrics, setCapacityMetrics] = useState({
+    certificates: { current: 12, monthly_target: 15, rate: 200 },
+    classifications: { current: 16, monthly_target: 20, rate: 150 },
+    clearance: { current: 8, monthly_target: 10, rate: 300 },
+    crisis: { current: 3, monthly_target: 5, rate: 650 }
+  });
 
   // Supplier Network tab states
   const [suppliers, setSuppliers] = useState([]);
@@ -54,13 +67,6 @@ export default function BrokerDashboard() {
     hsClassifications: [],
     customsClearance: [],
     crisisResponse: []
-  });
-  const [activeServiceType, setActiveServiceType] = useState('usmca-certificates');
-  const [capacityMetrics, setCapacityMetrics] = useState({
-    certificates: { current: 32, monthly_target: 40, rate: 200 },
-    classifications: { current: 45, monthly_target: 60, rate: 150 },
-    clearance: { current: 22, monthly_target: 30, rate: 300 },
-    crisis: { current: 8, monthly_target: 15, rate: 500 }
   });
 
   // Service Delivery Tool Handlers
@@ -95,7 +101,7 @@ export default function BrokerDashboard() {
     const workflows = {
       1: '🚨 Crisis Assessment\n\n✓ Tariff change monitoring alert review\n✓ Impact analysis calculation setup\n✓ Client portfolio affected identification\n✓ Urgency level determination\n✓ Same-day vs 24-hour service selection\n✓ Initial client notification preparation\n\nNext: Action plan development',
       2: '📋 Action Plan Development\n\n✓ Action plan generator template selection\n✓ Cost mitigation strategy identification\n✓ Alternative compliance options research\n✓ Timeline and milestone establishment\n✓ Resource allocation planning\n✓ Communication strategy finalization\n\nNext: Implementation and monitoring',
-      3: '⚡ Crisis Implementation\n\n✓ Same-day or 24-hour service execution\n✓ Client notification system activation\n✓ Real-time status updates provision\n✓ Issue resolution coordination\n✓ Cost impact minimization efforts\n✓ Follow-up and prevention planning\n\nDeliverable: Crisis Response Service ($500) - Same day to 24 hours'
+      3: '⚡ Crisis Implementation\n\n✓ Same-day or 24-hour service execution\n✓ Client notification system activation\n✓ Real-time status updates provision\n✓ Issue resolution coordination\n✓ Cost impact minimization efforts\n✓ Follow-up and prevention planning\n\nDeliverable: Crisis Response Service ($650) - Same day to 24 hours'
     };
     alert(workflows[step]);
   };
@@ -127,12 +133,13 @@ export default function BrokerDashboard() {
       console.log('🚛 Loading Cristina\'s broker dashboard with complete integration...');
 
       // Load data from multiple database-driven APIs in parallel - Jorge's pattern
-      const [brokerResponse, collaborationResponse, salesResponse, suppliersResponse, crisisResponse] = await Promise.all([
+      const [brokerResponse, collaborationResponse, salesResponse, suppliersResponse, crisisResponse, serviceRequestsResponse] = await Promise.all([
         fetch('/api/admin/broker-operations'),
         fetch('/api/admin/collaboration-mcp?assigned_to=Cristina'),
         fetch('/api/admin/sales-pipeline'),
         fetch('/api/admin/suppliers'),
-        fetch('/api/admin/rss-feeds')
+        fetch('/api/admin/rss-feeds'),
+        fetch('/api/admin/service-requests?assigned_to=Cristina')
       ]);
 
       // Process Broker Operations Data
@@ -206,6 +213,28 @@ export default function BrokerDashboard() {
         setSuppliers([]);
       }
 
+      // Process Cristina's Service Requests Data
+      if (serviceRequestsResponse.ok) {
+        const serviceRequestsData = await serviceRequestsResponse.json();
+        const requests = serviceRequestsData.requests || [];
+
+        // Transform service requests into Cristina's service categories
+        setServiceRequests(requests);
+
+        // Separate by service type for specific tabs - Aligned with Cristina's 4 services
+        setCertificates(requests.filter(r => r.service_type === 'usmca-certificate' || r.service_type === 'certificate-generation'));
+        setClassifications(requests.filter(r => r.service_type === 'hs-classification' || r.service_type === 'classification'));
+        setCrisisResponse(requests.filter(r => r.service_type === 'crisis-response' || r.service_type === 'customs-clearance'));
+
+        console.log(`Loaded ${requests.length} service requests for Cristina`);
+      } else {
+        console.log('Service requests API unavailable, showing empty state');
+        setServiceRequests([]);
+        setCertificates([]);
+        setClassifications([]);
+        setCrisisResponse([]);
+      }
+
       // Process Crisis/RSS Feeds Data
       if (crisisResponse.ok) {
         const crisisData = await crisisResponse.json();
@@ -237,6 +266,10 @@ export default function BrokerDashboard() {
       setBrokerMetrics({});
       setSuppliers([]);
       setCrisisAlerts([]);
+      setServiceRequests([]);
+      setCertificates([]);
+      setClassifications([]);
+      setCrisisResponse([]);
     } finally {
       setLoading(false);
     }
@@ -696,62 +729,259 @@ export default function BrokerDashboard() {
           {/* Streamlined Tab Navigation - Cristina's Essentials Only */}
           <div className="tab-navigation">
             <button
-              className={`tab-button ${activeTab === 'service-tools' ? 'active' : ''}`}
-              onClick={() => setActiveTab('service-tools')}
+              className={`tab-button ${activeTab === 'service-queue' ? 'active' : ''}`}
+              onClick={() => setActiveTab('service-queue')}
             >
-              🛠️ Service Delivery Tools
+              📋 Service Queue ({serviceRequests.length})
             </button>
             <button
-              className={`tab-button ${activeTab === 'work-queue' ? 'active' : ''}`}
-              onClick={() => setActiveTab('work-queue')}
+              className={`tab-button ${activeTab === 'certificate-generation' ? 'active' : ''}`}
+              onClick={() => setActiveTab('certificate-generation')}
             >
-              📋 Active Work Queue
+              📜 Certificate Generation ({certificates.length})
             </button>
             <button
-              className={`tab-button ${activeTab === 'crisis-monitoring' ? 'active' : ''}`}
-              onClick={() => setActiveTab('crisis-monitoring')}
+              className={`tab-button ${activeTab === 'hs-classification' ? 'active' : ''}`}
+              onClick={() => setActiveTab('hs-classification')}
             >
-              🚨 Crisis Response Queue
+              🔍 HS Code Classification ({classifications.length})
             </button>
             <button
-              className={`tab-button ${activeTab === 'revenue-tracking' ? 'active' : ''}`}
-              onClick={() => setActiveTab('revenue-tracking')}
+              className={`tab-button ${activeTab === 'crisis-response' ? 'active' : ''}`}
+              onClick={() => setActiveTab('crisis-response')}
             >
-              💰 Revenue Tracking
+              🚨 Crisis Response ({crisisResponse.length})
             </button>
           </div>
 
-          {/* Service Delivery Tools Tab */}
-          {activeTab === 'service-tools' && (
+          {/* Service Queue Tab */}
+          {activeTab === 'service-queue' && (
             <div className="admin-card">
               <div className="card-header">
-                <h2 className="card-title">🛠️ Cristina's Service Delivery Tools</h2>
+                <h2 className="card-title">📋 Cristina's Service Queue</h2>
                 <div className="text-body">
-                  Complete workflow management for all four core compliance services
+                  Showing {serviceRequests.length} service requests requiring Cristina's attention
                 </div>
 
-                {/* Capacity Overview Cards */}
-                <div className="revenue-cards">
-                  <div className="revenue-card cristina">
-                    <div className="revenue-amount">{capacityMetrics.certificates.current}/{capacityMetrics.certificates.monthly_target}</div>
-                    <div className="revenue-label">📄 USMCA Certificates</div>
-                    <div className="text-muted">${capacityMetrics.certificates.rate} each</div>
-                  </div>
-                  <div className="revenue-card jorge">
-                    <div className="revenue-amount">{capacityMetrics.classifications.current}/{capacityMetrics.classifications.monthly_target}</div>
-                    <div className="revenue-label">🔍 HS Classifications</div>
-                    <div className="text-muted">${capacityMetrics.classifications.rate} each</div>
-                  </div>
-                  <div className="revenue-card joint">
-                    <div className="revenue-amount">{capacityMetrics.clearance.current}/{capacityMetrics.clearance.monthly_target}</div>
-                    <div className="revenue-label">📦 Customs Clearance</div>
-                    <div className="text-muted">${capacityMetrics.clearance.rate} each</div>
-                  </div>
-                  <div className="revenue-card dev">
-                    <div className="revenue-amount">{capacityMetrics.crisis.current}/{capacityMetrics.crisis.monthly_target}</div>
-                    <div className="revenue-label">🚨 Crisis Response</div>
-                    <div className="text-muted">${capacityMetrics.crisis.rate} each</div>
-                  </div>
+                <div className="admin-actions">
+                  <button
+                    className="admin-btn primary"
+                    onClick={() => loadBrokerDashboardData()}
+                  >
+                    🔄 Refresh Queue
+                  </button>
+                  <button
+                    className="btn-small"
+                    onClick={() => {
+                      const queueReport = `# Cristina's Service Queue Report\n\nTotal Requests: ${serviceRequests.length}\nCertificates: ${certificates.length}\nClassifications: ${classifications.length}\nCrisis Response: ${crisisResponse.length}\n\nDate: ${new Date().toLocaleDateString()}\n\n## Service Breakdown\n${serviceRequests.map(r => `- ${r.company_name}: ${r.service_type} (${r.status})`).join('\n')}`;
+                      const blob = new Blob([queueReport], { type: 'text/markdown' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `cristina-service-queue-${new Date().toISOString().split('T')[0]}.md`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      window.URL.revokeObjectURL(url);
+                    }}
+                  >
+                    📊 Export Queue Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Service Queue Table */}
+              <div className="admin-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Client Name</th>
+                      <th>Service Type</th>
+                      <th>Request Date</th>
+                      <th>Status</th>
+                      <th>Due Date</th>
+                      <th>Urgency</th>
+                      <th>Documents</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {serviceRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="text-center p-20">
+                          <div className="text-muted">No service requests in queue</div>
+                          <p className="text-body">New requests will appear here when assigned to Cristina</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      serviceRequests.map((request) => {
+                        const getServiceTypeDisplay = (type) => {
+                          switch(type) {
+                            case 'usmca-certificate':
+                            case 'certificate-generation':
+                              return '📜 USMCA Certificate';
+                            case 'hs-classification':
+                            case 'classification':
+                              return '🔍 HS Classification';
+                            case 'customs-clearance':
+                            case 'shipment-tracking':
+                              return '🚢 Customs Clearance';
+                            case 'crisis-response':
+                              return '🚨 Crisis Response';
+                            default:
+                              return type?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Service Request';
+                          }
+                        };
+
+                        const getStatusBadge = (status) => {
+                          switch(status) {
+                            case 'consultation_scheduled':
+                            case 'new':
+                              return 'badge-info';
+                            case 'research_in_progress':
+                            case 'in_progress':
+                              return 'badge-warning';
+                            case 'proposal_sent':
+                            case 'client_review':
+                              return 'badge-secondary';
+                            case 'completed':
+                              return 'badge-success';
+                            default:
+                              return 'badge-info';
+                          }
+                        };
+
+                        const getUrgencyBadge = (timeline, priority) => {
+                          if (timeline === 'immediate' || priority === 'urgent') return 'badge-danger';
+                          if (timeline === 'short' || priority === 'high') return 'badge-warning';
+                          return 'badge-info';
+                        };
+
+                        const getDueDate = (createdAt, timeline) => {
+                          const created = new Date(createdAt);
+                          let daysToAdd = 14; // Default 2 weeks
+
+                          switch(timeline) {
+                            case 'immediate': daysToAdd = 3; break;
+                            case 'short': daysToAdd = 7; break;
+                            case 'medium': daysToAdd = 14; break;
+                            case 'long': daysToAdd = 30; break;
+                          }
+
+                          const dueDate = new Date(created);
+                          dueDate.setDate(dueDate.getDate() + daysToAdd);
+                          return dueDate.toLocaleDateString();
+                        };
+
+                        return (
+                          <tr key={request.id}>
+                            <td>
+                              <div>
+                                <div className="company-name">{request.company_name}</div>
+                                <div className="text-body">{request.contact_name}</div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="text-body">
+                                {getServiceTypeDisplay(request.service_type)}
+                              </div>
+                            </td>
+                            <td className="text-body">
+                              {new Date(request.created_at).toLocaleDateString()}
+                            </td>
+                            <td>
+                              <span className={`badge ${getStatusBadge(request.status)}`}>
+                                {request.status?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'New'}
+                              </span>
+                            </td>
+                            <td className="text-body">
+                              {getDueDate(request.created_at, request.timeline)}
+                            </td>
+                            <td>
+                              <span className={`badge ${getUrgencyBadge(request.timeline, request.priority)}`}>
+                                {request.timeline === 'immediate' ? 'Emergency' :
+                                 request.timeline === 'short' ? 'Rush' : 'Standard'}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="badge badge-success">
+                                {request.service_details ? 'Complete' : 'Partial'}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="admin-actions">
+                                <button
+                                  className="btn-small"
+                                  onClick={() => {
+                                    const serviceReport = `# Service Report: ${request.company_name}\n\n**Service Type:** ${getServiceTypeDisplay(request.service_type)}\n**Status:** ${request.status}\n**Timeline:** ${request.timeline}\n**Contact:** ${request.contact_name} (${request.email})\n\n## Service Details\n${JSON.stringify(request.service_details, null, 2)}\n\n## Next Steps\n- ${request.status === 'consultation_scheduled' ? 'Complete consultation' : 'Begin work'}\n- Update client on progress\n- Generate deliverable\n\nReport generated: ${new Date().toLocaleDateString()}`;
+                                    const blob = new Blob([serviceReport], { type: 'text/markdown' });
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `service-${request.company_name.replace(/\s+/g, '-')}-${request.id}.md`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                  }}
+                                >
+                                  📋 Report
+                                </button>
+                                <button
+                                  className="btn-small"
+                                  onClick={() => {
+                                    if (request.email) {
+                                      window.location.href = `mailto:${request.email}?subject=Service Update - ${request.company_name}&body=Dear ${request.contact_name},%0D%0A%0D%0AThank you for your ${getServiceTypeDisplay(request.service_type)} request. I wanted to provide you with an update on your project.%0D%0A%0D%0ABest regards,%0D%0ACristina`;
+                                    } else {
+                                      alert('No email available for this client');
+                                    }
+                                  }}
+                                >
+                                  📧 Contact
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Capacity Overview Cards */}
+              <div className="revenue-cards">
+                <div className="revenue-card cristina">
+                  <div className="revenue-amount">{capacityMetrics.certificates.current + '/' + capacityMetrics.certificates.monthly_target}</div>
+                  <div className="revenue-label">USMCA Certificates</div>
+                  <div className="text-muted">${capacityMetrics.certificates.rate} each</div>
+                </div>
+                <div className="revenue-card jorge">
+                  <div className="revenue-amount">{capacityMetrics.classifications.current + '/' + capacityMetrics.classifications.monthly_target}</div>
+                  <div className="revenue-label">HS Classifications</div>
+                  <div className="text-muted">${capacityMetrics.classifications.rate} each</div>
+                </div>
+                <div className="revenue-card joint">
+                  <div className="revenue-amount">{capacityMetrics.clearance.current + '/' + capacityMetrics.clearance.monthly_target}</div>
+                  <div className="revenue-label">Customs Clearance</div>
+                  <div className="text-muted">${capacityMetrics.clearance.rate} each</div>
+                </div>
+                <div className="revenue-card dev">
+                  <div className="revenue-amount">{capacityMetrics.crisis.current + '/' + capacityMetrics.crisis.monthly_target}</div>
+                  <div className="revenue-label">Crisis Response</div>
+                  <div className="text-muted">${capacityMetrics.crisis.rate} each</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Certificate Generation Tab */}
+          {activeTab === 'certificate-generation' && (
+            <div className="admin-card">
+              <div className="card-header">
+                <h2 className="card-title">📄 Certificate Generation</h2>
+                <div className="text-body">
+                  USMCA certificate generation and workflow management
                 </div>
               </div>
 
