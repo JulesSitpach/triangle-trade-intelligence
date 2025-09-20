@@ -142,11 +142,11 @@ export default function TradeIntelligence() {
           
           <div className="hero-button-group">
             <Link 
-              href="/trump-tariff-alerts" 
+              href="/pricing" 
               className="hero-primary-button"
               aria-label="View live trade intelligence alerts"
             >
-              View Live Alerts
+              Subscribe for Alerts
             </Link>
             <Link 
               href="#intelligence" 
@@ -184,7 +184,7 @@ export default function TradeIntelligence() {
                   ))}
                 </div>
                 
-                <Link href="/trump-tariff-alerts" className="content-card-link">
+                <Link href="/pricing" className="content-card-link">
                   Access Service
                 </Link>
               </div>
@@ -261,7 +261,7 @@ export default function TradeIntelligence() {
             </p>
             <div className="hero-button-group">
               <Link 
-                href="/trump-tariff-alerts" 
+                href="/pricing" 
                 className="hero-primary-button"
                 aria-label="Access trade intelligence platform"
               >

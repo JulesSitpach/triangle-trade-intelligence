@@ -1,56 +1,33 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useAuth } from '../lib/contexts/ProductionAuthContext';
 import { useRouter } from 'next/router';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user } = useAuth();
+
+  const { user, login } = useSimpleAuth();
   const router = useRouter();
 
+  // If already logged in, redirect immediately
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
     if (user) {
-      router.push('/dashboard');
+      console.log('User already logged in, redirecting...');
+      if (user.isAdmin) {
+        router.replace('/admin/collaboration-workspace');
+      } else {
+        router.replace('/dashboard');
+      }
     }
-
-    // Check for URL parameters for messages and email pre-fill
-    if (router.query.message) {
-      setMessage(router.query.message);
-    }
-    if (router.query.error) {
-      setError(router.query.error);
-    }
-    if (router.query.verified === 'true') {
-      setMessage('✅ Email verified successfully! Please sign in with your password.');
-    }
-    if (router.query.email) {
-      setFormData(prev => ({
-        ...prev,
-        email: decodeURIComponent(router.query.email)
-      }));
-    }
-  }, [user]); // Only track user changes to prevent infinite loops
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  }, [user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setMessage('');
 
     if (!formData.email || !formData.password) {
       setError('Email and password are required');
@@ -60,13 +37,13 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await signIn(formData.email, formData.password);
+      const result = await login(formData.email, formData.password);
 
-      if (error) {
-        setError(error);
+      if (result.error) {
+        setError(result.error);
       } else {
-        // Login successful, ProductionAuthContext handles redirect
-        console.log('Login successful, redirecting...');
+        // Success - redirect will happen via useEffect when user state updates
+        console.log('Login successful, waiting for redirect...');
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -75,18 +52,25 @@ export default function Login() {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (error) setError('');
+  };
+
   return (
     <>
       <Head>
         <title>Sign In - Triangle Intelligence</title>
-        <meta name="description" content="Sign in to Triangle Intelligence" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      {/* Clean Centered SaaS Login */}
       <div className="main-content">
         <div className="container-app">
           <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
+
             {/* Logo */}
             <div className="section-header">
               <Link href="/">
@@ -96,80 +80,86 @@ export default function Login() {
               <p className="text-body">Sign in to your Triangle Intelligence account</p>
             </div>
 
-            {/* Success Message */}
-            {message && (
-              <div className="status-success">
-                <div className="badge badge-success">✓</div>
-                <div className="text-body">{message}</div>
-              </div>
-            )}
-
             {/* Error Message */}
             {error && (
-              <div className="status-error">
-                <div className="badge badge-error">⚠</div>
-                <div className="text-body">{error}</div>
+              <div className="error-message" style={{
+                background: '#fee',
+                border: '1px solid #fcc',
+                padding: '10px',
+                borderRadius: '4px',
+                marginBottom: '20px',
+                color: '#c00'
+              }}>
+                {error}
               </div>
             )}
 
             {/* Login Form */}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label">
-                  Email Address
-                </label>
+                <label htmlFor="email">Email</label>
                 <input
                   type="email"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required
                   className="form-input"
-                  placeholder="you@company.com"
+                  required
+                  autoComplete="email"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">
-                  Password
-                </label>
-                <div className="password-input-container">
+                <label htmlFor="password">Password</label>
+                <div style={{position: 'relative'}}>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    className="form-input"
                     required
-                    className="form-input password-input"
-                    placeholder="Your password"
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="password-toggle-btn"
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
                   >
-                    {showPassword ? '◯' : '●'}
+                    {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
               </div>
 
-              {/* Forgot Password Link */}
-              <div className="element-spacing">
-                <Link href="/forgot-password" className="text-body">
-                  Forgot your password? Click here
-                </Link>
-              </div>
-
               <button
                 type="submit"
+                className="hero-cta-button"
                 disabled={isLoading}
-                className="btn-primary"
+                style={{width: '100%', marginTop: '20px'}}
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
 
-
+            {/* Footer Links */}
+            <div style={{textAlign: 'center', marginTop: '20px'}}>
+              <p>
+                Don't have an account?{' '}
+                <Link href="/signup" style={{color: '#007bff'}}>
+                  Sign up
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

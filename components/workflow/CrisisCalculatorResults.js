@@ -131,7 +131,7 @@ export default function CrisisCalculatorResults({
 
   const handleViewAlertsClick = () => {
     // Open alerts dashboard in new tab with user's data
-    window.open('/trump-tariff-alerts', '_blank');
+    window.open('/pricing', '_blank');
     if (onViewAlerts) onViewAlerts();
   };
 
@@ -143,7 +143,7 @@ export default function CrisisCalculatorResults({
     console.log('Alerts subscription completed:', subscriptionRecord);
     setShowSubscriptionFlow(false);
     // Redirect to alerts dashboard with active subscription
-    window.open('/trump-tariff-alerts', '_blank');
+    window.open('/pricing', '_blank');
   };
 
   const handleSubscriptionCancel = () => {

@@ -40,7 +40,7 @@ export default function Pricing() {
         'Advanced Mexico routing analysis',
         '25 HS code lookups per month',
         'Real-time crisis alerts (email + SMS)',
-        'Certificate wizard (guidance but you complete)',
+        'Certificate wizard (guided but you complete)',
         'Priority email support (24hr response)',
         'Canada-Mexico partnership intelligence alerts',
         'You still need help completing certificates → services'
@@ -61,7 +61,7 @@ export default function Pricing() {
         '2 completed certificates included per month',
         'Monthly partnership intelligence report',
         'Crisis response playbook',
-        'Includes some certificates to get you hooked'
+        'Includes some certificates to get you hooked, you\'ll need more'
       ],
       cta: 'Start Business Trial',
       popular: false
@@ -70,24 +70,39 @@ export default function Pricing() {
 
   const addOns = [
     {
-      name: 'Expert Consultation',
-      price: '$150/hour',
-      description: 'One-on-one sessions with certified trade experts'
+      name: 'USMCA Certificate Completion',
+      price: '$200 per certificate',
+      description: 'Professional completion of your USMCA certificate from your product data'
     },
     {
-      name: 'Custom Integration',
-      price: 'From $2,500',
-      description: 'Custom API integration with your existing systems'
+      name: 'HS Code Classification & Verification',
+      price: '$150 per product',
+      description: 'Professional HS code research and verification with documentation'
     },
     {
-      name: 'Team Training',
-      price: '$1,200/session',
-      description: 'USMCA compliance training for up to 20 team members'
+      name: 'Mexico Supplier Vetting & Introduction',
+      price: '$750 per supplier',
+      description: 'Research, vet, and introduce verified Mexico/Latin America suppliers'
     },
     {
-      name: 'Audit Preparation',
-      price: '$3,000',
-      description: 'Complete documentation review and customs audit prep'
+      name: 'Mexico Market Entry Strategy',
+      price: '$400/hour (2-hour minimum)',
+      description: 'Strategic consultation for entering Mexico/Latin America markets'
+    },
+    {
+      name: 'Partnership Intelligence Briefing',
+      price: '$300/month',
+      description: 'Monthly report on Canada-Mexico partnership opportunities'
+    },
+    {
+      name: 'Customs Clearance Support',
+      price: '$300 per shipment',
+      description: 'Document review, customs issue resolution, expedited clearance'
+    },
+    {
+      name: 'Crisis Response (Tariff Changes)',
+      price: '$500 per incident',
+      description: 'Emergency tariff analysis + action plan when regulations change'
     }
   ]
 
@@ -225,17 +240,17 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Add-on Services */}
+      {/* Professional Services */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Professional Services Add-Ons</h2>
+            <h2 className="section-header-title">Professional Services</h2>
             <p className="section-header-subtitle">
-              Enhance your compliance program with expert consulting and custom implementation services
+              Expert Latin America trade services and customs brokerage support
             </p>
           </div>
 
-          <div className="grid-2-cols">
+          <div className="grid-3-cols">
             {addOns.map((addon, index) => (
               <div key={index} className="content-card">
                 <h3 className="content-card-title">{addon.name}</h3>
@@ -266,53 +281,68 @@ export default function Pricing() {
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Can I upgrade or downgrade anytime?</h3>
+              <h3 className="content-card-title">What service capacity do you have?</h3>
               <p className="content-card-description">
-                Absolutely. You can change plans at any time, and we'll prorate the billing automatically.
+                We're transparent about being a 3-person team. Certificate completion: 40/month, Supplier vetting: 8-10/month, Crisis response: 15 incidents/month.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">What's included in API access?</h3>
+              <h3 className="content-card-title">Why use professional services?</h3>
               <p className="content-card-description">
-                All 42 specialized endpoints, including HS classification, USMCA qualification, and certificate generation APIs.
+                SMBs can't complete certificates themselves without costly mistakes. Our experts prevent disasters and save months of research.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Do you offer custom enterprise pricing?</h3>
+              <h3 className="content-card-title">How does the app → services funnel work?</h3>
               <p className="content-card-description">
-                Yes, we offer volume discounts and custom pricing for large enterprises. Contact our sales team for details.
+                Start with $99 app trial, then pay for suppliers ($750 each), certificates ($200 each), and ongoing intelligence ($300/month) as you grow.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Value Proposition */}
+      {/* Honest Strategy */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">ROI Calculator: See Your Savings</h2>
+            <h2 className="section-header-title">The Honest Strategy</h2>
             <p className="section-header-subtitle">
-              Most clients save 10-25% on their total import costs, typically paying for the platform within the first month
+              Low-risk start, pay as you grow, expert help prevents disasters
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">Average Annual Savings</h3>
-              <p className="content-card-description">$250K+ for $5M+ import volume with professional optimization</p>
+              <h3 className="content-card-title">Month 1-2: Try the App</h3>
+              <p className="content-card-description">Start with $99-$299 app, attempt everything yourself and learn the basics</p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Typical ROI Timeline</h3>
-              <p className="content-card-description">30 days - platform pays for itself within first month of use</p>
+              <h3 className="content-card-title">Month 2-3: Need Suppliers?</h3>
+              <p className="content-card-description">Pay $750 × 3 suppliers = $2,250 to get vetted Mexico partners</p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Customer Satisfaction</h3>
-              <p className="content-card-description">95% enterprise client retention with proven results</p>
+              <h3 className="content-card-title">Month 3+: Need Certificates?</h3>
+              <p className="content-card-description">Pay $200 × 5 certificates = $1,000 for professional completion</p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Month 4: Customs Issues?</h3>
+              <p className="content-card-description">Pay $300 per shipment for clearance support when problems arise</p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Month 6+: Ongoing Intelligence</h3>
+              <p className="content-card-description">Pay $300/month for partnership intelligence and market insights</p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">No Long Contracts</h3>
+              <p className="content-card-description">Transparent capacity limits, pay as you grow, no hidden fees</p>
             </div>
           </div>
         </div>

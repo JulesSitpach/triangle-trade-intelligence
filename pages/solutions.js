@@ -41,7 +41,7 @@ export default function ComplianceSolutions() {
       title: 'Trade Compliance Monitoring',
       description: 'Real-time tariff alerts and regulatory change notifications for proactive compliance management.',
       features: ['Real-time monitoring', 'Tariff change alerts', 'Regulatory updates', 'Risk notifications'],
-      link: '/trump-tariff-alerts'
+      link: '/pricing'
     }
   ]
 

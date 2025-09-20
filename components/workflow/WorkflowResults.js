@@ -97,8 +97,8 @@ export default function WorkflowResults({
           <div className="alert-icon">✅</div>
           <div className="alert-content">
             <div className="alert-title">Integration Complete</div>
-            <p>Certificate data automatically added to crisis alerts monitoring system</p>
-            <p>Visit <a href="/trade-risk-alternatives" target="_blank">Trade Risk & Alternatives Dashboard</a> to see your personalized risk analysis</p>
+            <p>Get ongoing crisis alerts and unlimited analysis with a paid subscription</p>
+            <p>Choose from <a href="/pricing" target="_blank">Starter ($99/month), Professional ($299/month), or Business ($599/month)</a> plans</p>
           </div>
         </div>
       )}

@@ -16,79 +16,118 @@ export default function ProfessionalServices() {
 
   const serviceTiers = [
     {
-      name: 'Compliance Consultation',
-      price: '$150/hour',
-      description: 'Expert trade classification review and optimization strategies with certified customs professionals.',
+      name: 'USMCA Certificate Completion',
+      price: '$200 per certificate',
+      description: 'Professional completion of your USMCA certificate from your product data.',
       features: [
-        'One-on-one expert consultation',
-        'Trade classification review',
-        'USMCA optimization strategies',
-        'Customs compliance guidance',
-        'Documentation review',
-        'Strategic planning support'
+        'Expert completes your USMCA certificate',
+        'Turnaround: 3-5 business days',
+        'Capacity: 40 certificates/month',
+        'Prevents costly mistakes',
+        'Professional documentation',
+        'Compliance verification'
       ]
     },
     {
-      name: 'Implementation Support',
-      price: 'From $2,500',
-      description: 'Custom workflow integration and system deployment with dedicated technical support.',
+      name: 'HS Code Classification & Verification',
+      price: '$150 per product',
+      description: 'Professional HS code research and verification with complete documentation.',
       features: [
-        'Custom API integration',
-        'Workflow configuration',
-        'System deployment',
-        'Technical documentation',
-        'User training sessions',
-        'Go-live support'
+        'Professional HS code research',
+        'Verification with documentation',
+        'Justification documentation',
+        'Capacity: 60 classifications/month',
+        'Prevents thousands in penalties',
+        'Expert validation'
       ]
     },
     {
-      name: 'Team Training Programs',
-      price: '$1,200/session',
-      description: 'USMCA compliance certification for internal teams with comprehensive training materials.',
+      name: 'Mexico Supplier Vetting & Introduction',
+      price: '$750 per supplier',
+      description: 'Research, vet, and introduce verified Mexico/Latin America suppliers.',
       features: [
-        'Up to 20 participants',
-        'USMCA compliance certification',
-        'Interactive workshops',
-        'Training materials included',
-        'Progress assessments',
-        'Ongoing support access'
+        'Supplier research and vetting',
+        'Verified supplier profiles',
+        'Introduction call included',
+        'Capacity: 8-10 suppliers/month',
+        'Saves months of research',
+        'Prevents bad partnerships'
       ]
     },
     {
-      name: 'Audit Preparation',
-      price: 'From $3,000',
-      description: 'Complete documentation review and customs compliance validation for audit readiness.',
+      name: 'Mexico Market Entry Strategy',
+      price: '$400/hour (2-hour minimum)',
+      description: 'Strategic consultation for entering Mexico/Latin America markets.',
       features: [
-        'Documentation audit',
-        'Compliance gap analysis',
-        'Risk assessment',
-        'Remediation planning',
-        'Mock audit sessions',
-        'CBP interaction support'
+        'Market entry strategy consultation',
+        'Written market entry plan',
+        'Supplier recommendations',
+        'Capacity: 15 hours/month available',
+        'Premium strategy work',
+        'Latin America specialist'
+      ]
+    },
+    {
+      name: 'Partnership Intelligence Briefing',
+      price: '$300/month',
+      description: 'Monthly report on Canada-Mexico partnership opportunities.',
+      features: [
+        'Monthly partnership opportunities report',
+        '2-page actionable briefings',
+        'CPKC and TC Energy deal tracking',
+        'Capacity: Scalable to 20+ clients',
+        'Real-time intelligence',
+        '$60B+ in tracked partnerships'
+      ]
+    },
+    {
+      name: 'Customs Clearance Support',
+      price: '$300 per shipment',
+      description: 'Document review, customs issue resolution, expedited clearance.',
+      features: [
+        'Document review and validation',
+        'Customs issue resolution',
+        'Expedited clearance support',
+        'Emergency rate: $500 same-day',
+        'Capacity: 30 shipments/month',
+        'Prevents costly delays'
+      ]
+    },
+    {
+      name: 'Crisis Response (Tariff Changes)',
+      price: '$500 per incident',
+      description: 'Emergency tariff analysis + action plan when regulations change.',
+      features: [
+        'Emergency tariff analysis',
+        'Action plan development',
+        'Same day for subscribers',
+        '24hrs for others',
+        'Capacity: 15 incidents/month',
+        'Premium crisis response'
       ]
     }
   ]
 
   const expertise = [
     {
-      icon: 'CE',
-      title: 'Certified Experts',
-      description: 'Licensed customs brokers and trade compliance professionals with decades of experience in USMCA regulations.'
+      icon: 'TT',
+      title: 'Transparent Team',
+      description: '3-person team with clear capacity limits. No overselling, no false promises - just honest service delivery.'
     },
     {
-      icon: 'CS',
-      title: 'Custom Solutions',
-      description: 'Tailored compliance strategies designed specifically for your industry, products, and business requirements.'
+      icon: 'MX',
+      title: 'Mexico Specialist',
+      description: 'Focus on Mexico routing and Latin America partnerships. Specialized knowledge in USMCA triangle routing opportunities.'
     },
     {
-      icon: 'ES',
-      title: 'Enterprise Support',
-      description: 'Dedicated account management and priority support for large-scale implementations and ongoing operations.'
+      icon: 'CB',
+      title: 'Customs Brokerage',
+      description: 'Licensed customs clearance support with real capacity for 30 shipments/month and emergency same-day service.'
     },
     {
-      icon: 'PI',
-      title: 'Proven Implementation',
-      description: 'Successfully deployed compliance solutions for Fortune 500 manufacturers across diverse industries.'
+      icon: 'PA',
+      title: 'Pay As You Grow',
+      description: 'Start with $99 app trial, pay for services as needed. No long contracts, transparent pricing structure.'
     }
   ]
 
@@ -196,19 +235,19 @@ export default function ProfessionalServices() {
       <section className="main-content" id="services">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Professional Service Offerings</h2>
+            <h2 className="section-header-title">Latin America Trade Services & Customs Brokerage</h2>
             <p className="section-header-subtitle">
-              Comprehensive consulting and implementation services tailored to your compliance needs and business objectives
+              Expert Mexico routing services with transparent capacity limits - honest about being a 3-person team
             </p>
           </div>
 
-          <div className="grid-2-cols">
+          <div className="grid-3-cols">
             {serviceTiers.map((service, index) => (
               <div key={index} className="content-card">
                 <h3 className="content-card-title">{service.name}</h3>
                 <p className="text-body">{service.price}</p>
                 <p className="content-card-description">{service.description}</p>
-                
+
                 <div>
                   {service.features.map((feature, idx) => (
                     <p key={idx} className="text-body">
@@ -216,7 +255,7 @@ export default function ProfessionalServices() {
                     </p>
                   ))}
                 </div>
-                
+
                 <Link href="/usmca-workflow" className="content-card-link">
                   Learn More
                 </Link>
@@ -230,9 +269,9 @@ export default function ProfessionalServices() {
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Our Expertise</h2>
+            <h2 className="section-header-title">Why Choose Our Services</h2>
             <p className="section-header-subtitle">
-              Professional credentials and proven experience delivering enterprise-grade compliance solutions
+              Honest about our capacity, focused on Mexico expertise, transparent pricing with no hidden fees
             </p>
           </div>
 
@@ -248,61 +287,64 @@ export default function ProfessionalServices() {
         </div>
       </section>
 
-      {/* Success Stories */}
+      {/* Honest Business Reality */}
       <section className="main-content">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Client Success Metrics</h2>
-          </div>
-          
-          <div className="grid-3-cols">
-            <div className="content-card">
-              <h3 className="content-card-title">Clients Served</h3>
-              <p className="content-card-description">500+ enterprise manufacturers and importers successfully served</p>
-            </div>
-            
-            <div className="content-card">
-              <h3 className="content-card-title">Savings Generated</h3>
-              <p className="content-card-description">$50M+ total client tariff savings achieved through expert guidance</p>
-            </div>
-            
-            <div className="content-card">
-              <h3 className="content-card-title">Success Rate</h3>
-              <p className="content-card-description">98% successful implementations with 25+ years combined team expertise</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Implementation Process */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Our Implementation Process</h2>
+            <h2 className="section-header-title">Honest Business Reality</h2>
             <p className="section-header-subtitle">
-              Structured approach to ensure successful deployment and adoption of compliance solutions
+              Transparent about being a 3-person team targeting ~$89K/month = $1.07M/year revenue
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">1. Discovery & Assessment</h3>
+              <h3 className="content-card-title">App Revenue (Lead Generation)</h3>
+              <p className="content-card-description">~$37K/month from Mexico routing app subscriptions</p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Services Revenue (High Margin)</h3>
+              <p className="content-card-description">~$52K/month from Latin America trade services and customs brokerage</p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">What We Don't Offer</h3>
+              <p className="content-card-description">No training programs, 24/7 support, custom development, or on-site visits</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Service Approach */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Our Service Approach</h2>
+            <p className="section-header-subtitle">
+              Low-risk start, transparent capacity, pay-as-you-grow with expert Mexico routing guidance
+            </p>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">1. Start with App Trial</h3>
               <p className="content-card-description">
-                Comprehensive analysis of your current processes, compliance requirements, and optimization opportunities.
+                Begin with $99-$299 Mexico routing app to test our platform and understand your needs before committing to services.
               </p>
             </div>
-            
+
             <div className="content-card">
-              <h3 className="content-card-title">2. Custom Configuration</h3>
+              <h3 className="content-card-title">2. Pay for What You Need</h3>
               <p className="content-card-description">
-                Platform customization and workflow configuration tailored to your specific business requirements and industry needs.
+                As you grow, pay for specific services: suppliers ($750), certificates ($200), clearance support ($300), intelligence ($300/month).
               </p>
             </div>
-            
+
             <div className="content-card">
-              <h3 className="content-card-title">3. Training & Go-Live</h3>
+              <h3 className="content-card-title">3. Transparent Limits</h3>
               <p className="content-card-description">
-                Comprehensive team training, system deployment, and ongoing support to ensure successful adoption and operation.
+                We're honest about capacity: 40 certificates/month, 8-10 suppliers/month, 30 shipments/month, 15 crisis responses/month.
               </p>
             </div>
           </div>
