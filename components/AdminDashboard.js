@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useAuth } from '../lib/contexts/ProductionAuthContext';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import { SYSTEM_CONFIG } from '../config/system-config';
 
 export default function AdminDashboard({ user, profile }) {
-  const { signOut } = useAuth();
+  const { signOut } = useSimpleAuth();
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -314,13 +314,13 @@ export default function AdminDashboard({ user, profile }) {
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">🤝 Team Collaboration</h3>
+              <h3 className="content-card-title">🚨 USMCA Transition Strategy</h3>
               <p className="content-card-description">
-                Jorge-Cristina partnership operations for comprehensive client solutions
+                Critical 6-month window management: Maximize USMCA benefits while building Latin America partnerships
               </p>
               <div className="grid-3-cols">
-                <Link href="/admin/collaboration-workspace" className="hero-secondary-button">
-                  👥 Collaboration Workspace
+                <Link href="/admin/collaboration-workspace" className="hero-secondary-button urgent">
+                  🚨 USMCA Strategy Hub
                 </Link>
                 <Link href="/admin/team-assignments" className="hero-secondary-button">
                   📊 Team Performance

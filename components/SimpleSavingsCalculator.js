@@ -152,11 +152,11 @@ export default function SimpleSavingsCalculator() {
         const baseVolume = getVolumeAmount(importVolume) || 3500000;
         const estimatedRate = 0.08; // Default 8% savings rate
         const annualSavings = Math.round(baseVolume * estimatedRate);
-        
+
         setEstimatedSavings({
           annual: annualSavings,
           monthly: Math.round(annualSavings / 12),
-          percentage: effectiveRate * 100
+          percentage: estimatedRate * 100
         });
       }
     } catch (error) {
