@@ -1346,6 +1346,10 @@ export default function JorgeDashboardClean() {
             </div>
           </div>
         );
+      default:
+        return <div>Select a tab to view data</div>;
+    }
+  };
 
   if (loading) {
     return (
