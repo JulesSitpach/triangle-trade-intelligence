@@ -165,66 +165,8 @@ async function handleGetServiceRequests(req, res) {
         throw new Error('No database records');
       }
     } catch (dbError) {
-      console.log('📋 Database unavailable - using sample service requests for testing');
-      requests = [
-        {
-          id: 'SR001',
-          service_type: 'supplier-vetting',
-          company_name: 'ABC Manufacturing Corp',
-          contact_name: 'John Smith',
-          email: 'john@abcmfg.com',
-          phone: '+1 (555) 123-4567',
-          industry: 'Electronics',
-          timeline: 'immediate',
-          status: 'consultation_scheduled',
-          priority: 'urgent',
-          service_details: {
-            project_description: 'Need verified Mexico suppliers for electronic components and circuit boards',
-            volume: '10,000 units/month',
-            quality_standards: 'ISO 9001, UL certified'
-          },
-          created_at: new Date().toISOString(),
-          assigned_to: 'Jorge'
-        },
-        {
-          id: 'SR002',
-          service_type: 'market-entry',
-          company_name: 'TechStart Solutions',
-          contact_name: 'Sarah Williams',
-          email: 'sarah@techstart.com',
-          phone: '+1 (555) 987-6543',
-          industry: 'Technology',
-          timeline: 'short',
-          status: 'consultation_scheduled',
-          priority: 'high',
-          service_details: {
-            project_description: 'Expand SaaS platform to Mexico market, need regulatory guidance',
-            target_regions: 'Mexico City, Guadalajara',
-            investment_budget: '100k-500k'
-          },
-          created_at: new Date().toISOString(),
-          assigned_to: 'Jorge'
-        },
-        {
-          id: 'SR003',
-          service_type: 'partnership-intelligence',
-          company_name: 'Global Trade Partners',
-          contact_name: 'Mike Rodriguez',
-          email: 'mike@globaltp.com',
-          phone: '+1 (555) 456-7890',
-          industry: 'Import/Export',
-          timeline: 'medium',
-          status: 'consultation_scheduled',
-          priority: 'medium',
-          service_details: {
-            project_description: 'Monthly briefings on Mexico partnership opportunities in logistics sector',
-            intelligence_frequency: 'Monthly',
-            geographic_focus: 'Border regions, Mexico City'
-          },
-          created_at: new Date().toISOString(),
-          assigned_to: 'Jorge'
-        }
-      ];
+      console.log('📋 Database unavailable - no service requests to display');
+      requests = []; // Empty array when no database connection
     }
 
     const summary = {

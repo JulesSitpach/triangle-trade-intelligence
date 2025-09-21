@@ -247,7 +247,7 @@ export default function USMCATrustResultsStep({ certificateData }) {
         <div className="status-grid">
           <div className="status-card">
             <div className="status-label">Exporter</div>
-            <div className="status-value">{certificateData.company_info?.exporter_name || workflowData?.company?.name || company?.name || 'To be completed'}</div>
+            <div className="status-value">{certificateData.company_info?.exporter_name || 'To be completed'}</div>
           </div>
           <div className="status-card">
             <div className="status-label">Importer</div>
@@ -255,11 +255,11 @@ export default function USMCATrustResultsStep({ certificateData }) {
           </div>
           <div className="status-card">
             <div className="status-label">Product</div>
-            <div className="status-value">{certificateData.product_details?.commercial_description || workflowData?.product?.description || product?.description || 'Product classification verified'}</div>
+            <div className="status-value">{certificateData.product_details?.commercial_description || 'Product classification verified'}</div>
           </div>
           <div className="status-card">
             <div className="status-label">Origin Criterion</div>
-            <div className="status-value">{certificateData.product_details?.preference_criterion || workflowData?.usmca?.criterion || 'B - Regional Value Content'}</div>
+            <div className="status-value">{certificateData.product_details?.preference_criterion || 'B - Regional Value Content'}</div>
           </div>
         </div>
       </div>

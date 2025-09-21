@@ -140,3 +140,6 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+# Google Service Account (keep secure)
+google-service-account.json
