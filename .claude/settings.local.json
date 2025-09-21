@@ -29,7 +29,9 @@
       "mcp__supabase__execute_sql",
       "mcp__supabase__list_tables",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(rm:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": [],
     "ask": []

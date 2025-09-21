@@ -1,9 +1,0 @@
-{
-  "timestamp": "2025-09-17T06:06:20.931Z",
-  "steps": [],
-  "errors": [],
-  "completedSteps": 1,
-  "reachedCertificateCompletion": false,
-  "finalUrl": "http://localhost:3000/usmca-workflow",
-  "success": false
-}

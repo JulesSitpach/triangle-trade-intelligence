@@ -1021,9 +1021,10 @@ export default function JorgeDashboardClean() {
       case 'supplier-intel':
         return (
           <div className="tab-content">
-            <div className="section-header">
-              <h2 className="section-title">Client Intelligence Briefings ($500/month)</h2>
-              <div className="filter-controls">
+            <div className="content-card">
+              <div className="card-header">
+                <h3 className="content-card-title">🎯 Intelligence Subscribers ($500/month)</h3>
+                <div className="filter-controls">
                 <select
                   value={intelFilter}
                   onChange={(e) => setIntelFilter(e.target.value)}
@@ -1050,8 +1051,8 @@ export default function JorgeDashboardClean() {
                 >
                   📋 Generate Monthly Briefing
                 </button>
+                </div>
               </div>
-            </div>
 
             {/* Client Subscriptions Summary */}
             <div className="uploaded-files-summary">
@@ -1072,8 +1073,8 @@ export default function JorgeDashboardClean() {
               </div>
             </div>
 
-            {/* Intelligence Entries Table */}
-            <table className="admin-table">
+            <div className="admin-table-container">
+              <table className="admin-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -1136,6 +1137,13 @@ export default function JorgeDashboardClean() {
                         >
                           📤 Include in Briefing
                         </button>
+                        <button
+                          className="btn-action btn-ai"
+                          onClick={() => generateAIBriefing(intel)}
+                          disabled={aiReportModal.loading}
+                        >
+                          🤖 AI Report ($500)
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -1195,10 +1203,11 @@ export default function JorgeDashboardClean() {
                           📋 Manual Briefing
                         </button>
                         <button
-                          className="btn-action btn-success"
+                          className="btn-action btn-ai"
                           onClick={() => generateAIBriefing(subscriber)}
+                          disabled={aiReportModal.loading}
                         >
-                          🤖 AI Assistant
+                          🤖 AI Report ($500)
                         </button>
                         <button
                           className="btn-action btn-success"
@@ -1253,12 +1262,13 @@ export default function JorgeDashboardClean() {
                     <th>Success Rate</th>
                     <th>Timeline</th>
                     <th>Executive Summary</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {canadaMexicoPartnerships.triangle_opportunities.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="empty-state">
+                      <td colSpan="7" className="empty-state">
                         No triangle routing opportunities found. Data will appear when partnership analysis is complete.
                       </td>
                     </tr>
@@ -1276,6 +1286,17 @@ export default function JorgeDashboardClean() {
                       </td>
                       <td>{opportunity.implementation_timeline} months</td>
                       <td className="description-cell">{opportunity.executive_summary}</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-action btn-ai"
+                            onClick={() => generateAIPartnershipAnalysis(opportunity)}
+                            disabled={aiReportModal.loading}
+                          >
+                            🤖 AI Report ($1,500)
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1325,11 +1346,6 @@ export default function JorgeDashboardClean() {
             </div>
           </div>
         );
-
-      default:
-        return null;
-    }
-  };
 
   if (loading) {
     return (
@@ -1926,24 +1942,6 @@ export default function JorgeDashboardClean() {
                       ></textarea>
                     </div>
 
-                    <div className="report-generation">
-                      <div className="deliverable-info">
-                        <h4>🎯 $950 Professional Deliverable</h4>
-                        <p><strong>Comprehensive Supplier Verification Report</strong></p>
-                        <p>✓ Executive Summary with Recommendations</p>
-                        <p>✓ Complete Documentation Analysis</p>
-                        <p>✓ Risk Assessment Matrix</p>
-                        <p>✓ Partnership Suitability Evaluation</p>
-                        <p>✓ Professional PDF Format (8-12 pages)</p>
-                      </div>
-                      <button
-                        className="btn-action btn-success"
-                        onClick={() => generateVerificationReport(verificationModal.supplier?.id)}
-                        disabled={!verificationModal.formData?.final_assessment}
-                      >
-                        🚀 Generate Final Report ($950)
-                      </button>
-                    </div>
                   </div>
                 )}
               </div>
@@ -1955,6 +1953,22 @@ export default function JorgeDashboardClean() {
                 >
                   Save & Close
                 </button>
+
+                {/* AI Generation Button - Always available on Stage 4 */}
+                {verificationModal.currentStage === 4 && (
+                  <button
+                    className="btn-action btn-ai"
+                    onClick={() => generateAISupplierReport(verificationModal.supplier)}
+                    disabled={aiReportModal.loading}
+                    title="Generate professional $950 supplier verification report"
+                  >
+                    {aiReportModal.loading ? (
+                      <>🔄 AI Generating...</>
+                    ) : (
+                      <>🤖 Generate AI Report ($950)</>
+                    )}
+                  </button>
+                )}
                 {verificationModal.currentStage < 4 && (
                   <button
                     className="btn-action btn-primary"

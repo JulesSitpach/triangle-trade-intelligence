@@ -2718,9 +2718,8 @@ export default function ClientPortfolio() {
                       pipelineData.map(deal => (
                         <tr
                           key={deal.id}
-                          className="clickable-row"
+                          className="clickable-row cursor-pointer"
                           onClick={() => openDetailPanel(deal, 'pipeline')}
-                          className="cursor-pointer"
                         >
                           <td onClick={(e) => e.stopPropagation()}>
                             <input

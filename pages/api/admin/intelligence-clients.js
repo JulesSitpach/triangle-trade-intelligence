@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       .from('intelligence_subscriptions')
       .select(`
         *,
-        user_profiles!inner(
+        user_profiles!intelligence_subscriptions_user_profile_id_fkey(
           id,
           email,
           company_name,

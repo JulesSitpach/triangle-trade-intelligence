@@ -50,17 +50,11 @@ export default function AdminNavigation({ user }) {
           <Link href="/admin/dev-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Development
           </Link>
-          <Link href="/admin/jorge-service-queue" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="/admin/jorge-dashboard-clean" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Jorge
           </Link>
           <Link href="/admin/broker-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Cristina
-          </Link>
-          <Link href="/admin/collaboration-workspace" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-            Collaboration Hub
-          </Link>
-          <Link href="/admin/users" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-            Users
           </Link>
           <button onClick={signOut} className="nav-cta-button">
             Sign Out

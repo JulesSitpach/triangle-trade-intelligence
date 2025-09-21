@@ -42,8 +42,11 @@ async function getIntelligenceEntries(req, res) {
     .select(`
       *,
       assigned_clients:intelligence_client_assignments(
-        intelligence_subscriptions(
-          user_profiles(company_name, business_type)
+        intelligence_subscriptions!intelligence_client_assignments_subscription_id_fkey(
+          user_profiles!intelligence_subscriptions_user_profile_id_fkey(
+            company_name,
+            business_type
+          )
         )
       )
     `)

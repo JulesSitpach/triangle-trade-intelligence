@@ -16,8 +16,6 @@ export default function CanadaMexicoPartnership() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('opportunities');
-  const [sortConfig, setSortConfig] = useState({ key: 'priority', direction: 'desc' });
-
   // Detail panel state
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
@@ -25,15 +23,11 @@ export default function CanadaMexicoPartnership() {
   // Partnership data states
   const [partnershipOpportunities, setPartnershipOpportunities] = useState([]);
   const [executiveConnections, setExecutiveConnections] = useState([]);
-  const [tradeCorridors, setTradeCorridors] = useState([]);
   const [criticalMinerals, setCriticalMinerals] = useState([]);
-  const [usmcaUpdates, setUsmcaUpdates] = useState([]);
   const [railOpportunities, setRailOpportunities] = useState([]);
 
   // Filtering states
-  const [opportunityFilter, setOpportunityFilter] = useState('all');
   const [sectorFilter, setSectorFilter] = useState('all');
-  const [timelineFilter, setTimelineFilter] = useState('all');
 
   useEffect(() => {
     // Check admin authentication
@@ -51,7 +45,7 @@ export default function CanadaMexicoPartnership() {
       }
       setUser(userData);
       loadPartnershipData();
-    } catch (e) {
+    } catch {
       router.push('/login');
     }
   }, []);

@@ -40,10 +40,11 @@ export default async function handler(req, res) {
     }
 
     // Get trade flows data for Canada-Mexico volume analysis
+    // Note: Using trade_flows table since usmca_trade_flows may not have origin_country column
     const { data: tradeFlows, error: flowsError } = await supabase
-      .from('usmca_trade_flows')
+      .from('trade_flows')
       .select('*')
-      .or('origin_country.eq.Canada,origin_country.eq.Mexico,destination_country.eq.Canada,destination_country.eq.Mexico')
+      .or('export_country.eq.CA,export_country.eq.MX,import_country.eq.CA,import_country.eq.MX')
       .limit(20);
 
     if (flowsError && flowsError.code !== 'PGRST116') {
@@ -72,10 +73,11 @@ export default async function handler(req, res) {
       })),
 
       trade_volume_insights: (tradeFlows || []).map(flow => ({
-        product_category: flow.product_category,
-        trade_value: flow.trade_value_usd,
-        growth_rate: flow.yoy_growth_percentage,
-        market_share: flow.market_share_percentage
+        product_category: flow.product_category || flow.commodity_code,
+        trade_value: flow.trade_value_usd || flow.value,
+        growth_rate: flow.yoy_growth_percentage || 0,
+        market_share: flow.market_share_percentage || 0,
+        route: `${flow.export_country || 'Unknown'} → ${flow.import_country || 'Unknown'}`
       }))
     };
 
