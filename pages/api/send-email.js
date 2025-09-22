@@ -34,49 +34,135 @@ export default async function handler(req, res) {
   try {
     // Generate professional email content
     const emailContent = generateEmailContent(template_type, {
-      message,
-      client_name,
-      service_type,
+      message: message || '',
+      client_name: client_name || '',
+      service_type: service_type || '',
       recipient: to
     });
 
-    // Test Mode - Always works and shows what would be sent
-    const testEmail = {
-      timestamp: new Date().toISOString(),
-      from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
-      to: to,
-      subject: subject,
-      message: message,
-      template_type: template_type,
-      client_name: client_name,
-      service_type: service_type,
-      html_preview: emailContent.substring(0, 300) + '...'
-    };
+    // Check if we have Gmail credentials for real email sending
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPassword = process.env.GMAIL_PASSWORD;
 
-    console.log('📧 EMAIL WOULD BE SENT:');
-    console.log(JSON.stringify(testEmail, null, 2));
-
-    // Simulate successful email delivery
-    const mockMessageId = `test-${Date.now()}@triangle-intelligence.local`;
-
-    res.json({
-      success: true,
-      message: 'Email processed successfully (Test Mode)',
-      messageId: mockMessageId,
-      to: to,
-      subject: subject,
-      authMethod: 'test_mode',
-      note: 'Email was logged to server console. To enable real delivery, configure SENDGRID_API_KEY or fix Gmail credentials.',
-      testData: testEmail,
-      instructions: {
-        sendgrid: 'Set SENDGRID_API_KEY in .env.local for real email delivery',
-        gmail: 'Fix Gmail app password authentication for Gmail delivery',
-        mailgun: 'Set MAILGUN_SMTP_PASSWORD for Mailgun delivery'
+    if (gmailUser && gmailPassword) {
+      // Real email sending with Gmail
+      let nodemailer;
+      try {
+        nodemailer = require('nodemailer');
+      } catch (requireError) {
+        console.error('📧 Nodemailer not available:', requireError.message);
+        throw new Error('Email service not configured - nodemailer missing');
       }
-    });
+
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: gmailUser,
+          pass: gmailPassword
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
+
+      const mailOptions = {
+        from: `Jorge Martinez - Triangle Intelligence <${gmailUser}>`,
+        to: to,
+        subject: subject,
+        html: emailContent,
+        text: message
+      };
+
+      console.log('📧 Sending real email via Gmail...');
+      const info = await transporter.sendMail(mailOptions);
+
+      console.log('✅ Email sent successfully:', info.messageId);
+
+      res.json({
+        success: true,
+        message: 'Email sent successfully via Gmail',
+        messageId: info.messageId,
+        to: to,
+        subject: subject,
+        authMethod: 'gmail',
+        deliveryTime: new Date().toISOString()
+      });
+
+    } else {
+      // Test Mode - No real credentials
+      const testEmail = {
+        timestamp: new Date().toISOString(),
+        from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
+        to: to,
+        subject: subject,
+        message: message,
+        template_type: template_type,
+        client_name: client_name,
+        service_type: service_type,
+        html_preview: emailContent.substring(0, 300) + '...'
+      };
+
+      console.log('📧 EMAIL WOULD BE SENT (Test Mode):');
+      console.log(JSON.stringify(testEmail, null, 2));
+
+      const mockMessageId = `test-${Date.now()}@triangle-intelligence.local`;
+
+      res.json({
+        success: true,
+        message: 'Email processed successfully (Test Mode)',
+        messageId: mockMessageId,
+        to: to,
+        subject: subject,
+        authMethod: 'test_mode',
+        note: 'Email was logged to server console. Gmail credentials not found.',
+        testData: testEmail,
+        instructions: {
+          gmail: 'Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local for real email delivery'
+        }
+      });
+    }
 
   } catch (error) {
     console.error('📧 Email API error:', error);
+
+    // Handle Gmail auth errors gracefully
+    if (error.code === 'EAUTH') {
+      console.log('📧 Gmail authentication failed - switching to test mode');
+
+      // Fall back to test mode
+      const testEmail = {
+        timestamp: new Date().toISOString(),
+        from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
+        to: to,
+        subject: subject,
+        message: message,
+        template_type: template_type,
+        client_name: client_name,
+        service_type: service_type,
+        html_preview: emailContent.substring(0, 300) + '...'
+      };
+
+      console.log('📧 EMAIL LOGGED (Gmail Auth Failed):');
+      console.log(JSON.stringify(testEmail, null, 2));
+
+      const mockMessageId = `test-${Date.now()}@triangle-intelligence.local`;
+
+      return res.json({
+        success: true,
+        message: 'Email logged successfully (Gmail auth failed, using test mode)',
+        messageId: mockMessageId,
+        to: to,
+        subject: subject,
+        authMethod: 'test_mode_fallback',
+        note: 'Gmail authentication failed. Email was logged to server console.',
+        testData: testEmail,
+        instructions: {
+          gmail: 'Gmail requires App Password. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local for real email delivery'
+        }
+      });
+    }
 
     res.status(500).json({
       success: false,
@@ -114,8 +200,8 @@ function generateEmailContent(templateType, data) {
 
   const messageBody = `
     <div style="padding: 30px; font-family: Arial, sans-serif; line-height: 1.6; color: #374151;">
-      ${message.split('\n').map(paragraph =>
-        paragraph.trim() ? `<p style="margin: 0 0 15px 0;">${paragraph}</p>` : ''
+      ${(message || '').split('\n').map(paragraph =>
+        paragraph.trim() ? `<p style="margin: 0 0 15px 0;">${paragraph.trim()}</p>` : ''
       ).join('')}
     </div>
   `;

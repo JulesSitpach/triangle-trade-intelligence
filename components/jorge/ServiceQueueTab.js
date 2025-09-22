@@ -84,6 +84,11 @@ export default function ServiceQueueTab() {
         })
       });
 
+      // Check if response is OK before parsing JSON
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
 
       if (result.success) {
@@ -285,69 +290,107 @@ export default function ServiceQueueTab() {
               </button>
             </div>
 
-            <div className="communication-form">
+            <div className="verification-form">
+              <div className="report-generation">
+                <p><strong>📤 Email Composition</strong></p>
+                <div style={{display: 'flex', gap: '2rem', marginBottom: '1rem'}}>
+                  <div><strong>From:</strong> Jorge Martinez (triangleintel@gmail.com)</div>
+                  <div><strong>To:</strong> Client Email Below</div>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label>Email Address</label>
+                <label><strong>📧 TO: Client Email Address</strong></label>
                 <input
                   type="email"
-                  className="form-input"
                   placeholder="client@company.com"
                   id="clientEmail"
                   defaultValue={communicationModal.request?.email || ''}
+                  style={{border: '2px solid #2563eb', backgroundColor: '#f0f9ff'}}
                 />
               </div>
 
               <div className="form-group">
-                <label>Message Type</label>
+                <label>📋 Message Type</label>
                 <select
-                  className="form-select"
                   value={communicationModal.messageType}
                   onChange={(e) => setCommunicationModal({
                     ...communicationModal,
                     messageType: e.target.value
                   })}
                 >
-                  <option value="update">Progress Update</option>
-                  <option value="request">Information Request</option>
-                  <option value="completion">Service Completion</option>
-                  <option value="delay">Delay Notification</option>
+                  <option value="update">📈 Progress Update</option>
+                  <option value="request">❓ Information Request</option>
+                  <option value="completion">✅ Service Completion</option>
+                  <option value="delay">⏰ Delay Notification</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Message Content</label>
+                <label>✍️ Message Content</label>
                 <textarea
-                  className="communication-textarea"
-                  placeholder="Enter your message to the client..."
-                  rows="6"
+                  placeholder="Enter your professional message to the client..."
+                  rows="8"
                   id="clientMessage"
                 />
               </div>
 
-              <div className="template-options">
-                <h4>Quick Templates</h4>
-                <div className="template-buttons">
+              <div className="stage-content">
+                <h3>⚡ Quick Templates</h3>
+                <div className="action-buttons">
                   <button
-                    className="btn-template"
+                    className="btn-action btn-primary"
                     onClick={() => {
-                      document.getElementById('clientMessage').value = `Hi ${communicationModal.request?.company_name}, your ${communicationModal.request?.service_type} service is progressing well. We're currently on schedule and will update you with results soon.`;
+                      document.getElementById('clientMessage').value = `Dear ${communicationModal.request?.company_name} team,
+
+I hope this message finds you well. I wanted to provide you with an update on your ${communicationModal.request?.service_type} service.
+
+Your project is progressing well and we're currently on schedule. Our team has completed the initial assessment phase and we will be moving forward with the next steps shortly.
+
+I will keep you updated with our progress and reach out if we need any additional information from your side.
+
+Best regards,
+Jorge Martinez
+Triangle Intelligence - Latin America Partnerships`;
                     }}
                   >
-                    Progress Update
+                    📈 Progress Update
                   </button>
                   <button
-                    className="btn-template"
+                    className="btn-action btn-secondary"
                     onClick={() => {
-                      document.getElementById('clientMessage').value = `Hi ${communicationModal.request?.company_name}, we need some additional information to complete your ${communicationModal.request?.service_type} service. Please reply with the requested details.`;
+                      document.getElementById('clientMessage').value = `Dear ${communicationModal.request?.company_name} team,
+
+Thank you for working with Triangle Intelligence on your ${communicationModal.request?.service_type} service.
+
+To ensure we provide you with the most accurate and comprehensive results, we need some additional information from your side:
+
+• [Specify required information]
+• [Additional details needed]
+• [Documentation required]
+
+Please reply to this email with the requested information at your earliest convenience. This will help us maintain our timeline and deliver exceptional results.
+
+Thank you for your cooperation.
+
+Best regards,
+Jorge Martinez
+Triangle Intelligence - Latin America Partnerships`;
                     }}
                   >
-                    Info Request
+                    ❓ Info Request
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="modal-actions">
+              <button
+                className="btn-action btn-secondary"
+                onClick={() => setCommunicationModal({ isOpen: false, request: null, messageType: 'update' })}
+              >
+                Cancel
+              </button>
               <button
                 className="btn-action btn-primary"
                 onClick={() => {
@@ -360,13 +403,7 @@ export default function ServiceQueueTab() {
                   }
                 }}
               >
-                Send Message
-              </button>
-              <button
-                className="btn-action btn-secondary"
-                onClick={() => setCommunicationModal({ isOpen: false, request: null, messageType: 'update' })}
-              >
-                Cancel
+                📤 Send Message
               </button>
             </div>
           </div>

@@ -143,3 +143,8 @@ temp/
 
 # Google Service Account (keep secure)
 google-service-account.json
+
+# KEEP .next FOLDER SAFE - Add protection
+!.next/
+!.next/cache/
+.next/trace
