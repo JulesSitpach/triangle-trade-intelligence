@@ -17,12 +17,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Query real database for partnership opportunities
+    // Query triangle routing opportunities for Canada-Mexico focus
     const { data: opportunities, error: oppError } = await supabase
-      .from('canada_mexico_opportunities')
+      .from('triangle_routing_opportunities')
       .select('*')
-      .order('priority', { ascending: false })
-      .order('estimated_value_usd', { ascending: false });
+      .contains('countries', ['CA', 'MX'])
+      .order('cost_savings_percent', { ascending: false });
 
     if (oppError) {
       console.error('Database error fetching opportunities:', oppError);
@@ -34,15 +34,15 @@ export default async function handler(req, res) {
 
     // Query CPKC rail routes for trade corridors
     const { data: railRoutes, error: railError } = await supabase
-      .from('cpkc_rail_routes')
+      .from('trade_routes')
       .select('*')
-      .order('volume_2024_usd', { ascending: false });
+      .order('created_at', { ascending: false });
 
     // Query USMCA timeline
     const { data: usmcaTimeline, error: timelineError } = await supabase
-      .from('usmca_review_timeline')
+      .from('trade_policy_calendar')
       .select('*')
-      .order('event_date', { ascending: true });
+      .order('created_at', { ascending: true });
 
     // Transform rail routes into trade corridors format
     const trade_corridors = railRoutes?.map(route => ({
@@ -70,10 +70,10 @@ export default async function handler(req, res) {
       triangle_implications: event.triangle_implications
     })) || [];
 
-    // Calculate summary from database data
-    const totalValue = opportunities?.reduce((sum, opp) => sum + (opp.estimated_value_usd || 0), 0) || 0;
-    const activeOpportunities = opportunities?.filter(o => o.status === 'active').length || 0;
-    const highPriorityOpportunities = opportunities?.filter(o => o.priority === 'high' || o.priority === 'critical').length || 0;
+    // Calculate summary from triangle routing data
+    const totalValue = opportunities?.reduce((sum, opp) => sum + (opp.estimated_annual_savings || 0), 0) || 0;
+    const activeOpportunities = opportunities?.filter(o => o.implementation_status === 'active' || o.implementation_status === 'ready').length || 0;
+    const highPriorityOpportunities = opportunities?.filter(o => o.cost_savings_percent >= 15).length || 0;
 
     res.status(200).json({
       success: true,

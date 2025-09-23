@@ -78,6 +78,49 @@ export default function ProductClassification({ results, onClassificationAction 
           </div>
         </div>
 
+        {/* Comtrade Market Insights */}
+        {results.product.comtrade_insights && (
+          <div className="classification-insights element-spacing">
+            <h4 className="section-subtitle">📊 Market Intelligence</h4>
+            <div className="classification-grid">
+              {results.product.comtrade_insights.trade_volume_usd && (
+                <div className="classification-item">
+                  <span className="classification-label">Global Trade Volume:</span>
+                  <span className="classification-value">
+                    ${(results.product.comtrade_insights.trade_volume_usd / 1000000000).toFixed(1)}B USD
+                  </span>
+                </div>
+              )}
+              {results.product.comtrade_insights.growth_trend && (
+                <div className="classification-item">
+                  <span className="classification-label">Growth Trend:</span>
+                  <span className={`classification-value ${results.product.comtrade_insights.growth_trend > 0 ? 'status-success' : 'status-warning'}`}>
+                    {results.product.comtrade_insights.growth_trend > 0 ? '+' : ''}{results.product.comtrade_insights.growth_trend}%
+                  </span>
+                </div>
+              )}
+              {results.product.comtrade_insights.primary_exporters && (
+                <div className="classification-item">
+                  <span className="classification-label">Primary Exporters:</span>
+                  <span className="classification-value">
+                    {Array.isArray(results.product.comtrade_insights.primary_exporters)
+                      ? results.product.comtrade_insights.primary_exporters.slice(0, 3).join(', ')
+                      : results.product.comtrade_insights.primary_exporters}
+                  </span>
+                </div>
+              )}
+              {results.product.comtrade_insights.market_share && (
+                <div className="classification-item">
+                  <span className="classification-label">Market Share:</span>
+                  <span className="classification-value">
+                    {results.product.comtrade_insights.market_share}%
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* AI Fallback Information */}
         {results.product.fallback_info && (
           <div className="classification-fallback element-spacing">

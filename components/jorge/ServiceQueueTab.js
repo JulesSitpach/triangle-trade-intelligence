@@ -128,9 +128,9 @@ export default function ServiceQueueTab() {
             className="filter-select"
           >
             <option value="all">All Service Types</option>
-            <option value="supplier-vetting">Supplier Verification</option>
-            <option value="market-entry">Market Entry</option>
-            <option value="partnership-intelligence">Intelligence</option>
+            <option value="mexico-supplier-sourcing">🔍 Supplier Sourcing</option>
+            <option value="mexico-manufacturing-feasibility">🏭 Manufacturing Feasibility</option>
+            <option value="mexico-market-entry">🚀 Market Entry</option>
           </select>
         </div>
       </div>

@@ -47,6 +47,8 @@ export default async function handler(req, res) {
       },
       recent_activity: [],
       notifications: [],
+      business_intelligence: [],
+      triangle_opportunities: [],
       data_status: { source: 'database' }
     };
 
@@ -136,6 +138,43 @@ export default async function handler(req, res) {
               workflows_found: completedCount
             }
           };
+
+          // Enhance with business intelligence and triangle opportunities
+          try {
+            // Get business intelligence recommendations
+            const { data: businessIntel } = await supabase
+              .from('usmca_business_intelligence')
+              .select('*')
+              .limit(4);
+
+            if (businessIntel && businessIntel.length > 0) {
+              dashboardData.business_intelligence = businessIntel.map(intel => ({
+                recommendation: intel.strategic_recommendation,
+                priority: intel.priority_level,
+                savings_potential: intel.estimated_annual_savings,
+                timeline: intel.timeline_to_implementation
+              }));
+            }
+
+            // Get triangle routing opportunities
+            const { data: triangleOpps } = await supabase
+              .from('triangle_routing_opportunities')
+              .select('*')
+              .order('cost_savings_percent', { ascending: false })
+              .limit(2);
+
+            if (triangleOpps && triangleOpps.length > 0) {
+              dashboardData.triangle_opportunities = triangleOpps.map(opp => ({
+                route: opp.route_description,
+                savings_percent: opp.cost_savings_percent,
+                annual_savings: opp.estimated_annual_savings,
+                benefits: opp.usmca_benefits
+              }));
+            }
+          } catch (enhanceError) {
+            console.error('Error enhancing dashboard data:', enhanceError);
+            // Continue with basic dashboard data if enhancement fails
+          }
         }
       } catch (dbError) {
         console.error('Database query error:', dbError);

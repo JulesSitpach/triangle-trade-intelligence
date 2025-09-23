@@ -245,6 +245,52 @@ export default function UserDashboard({ user, profile }) {
               </div>
             </div>
 
+            {/* Business Intelligence Recommendations */}
+            {dashboardData.business_intelligence && dashboardData.business_intelligence.length > 0 && (
+              <div className="element-spacing">
+                <h3 className="section-subtitle">💡 Strategic Recommendations</h3>
+                <div className="grid-2-cols">
+                  {dashboardData.business_intelligence.slice(0, 4).map((intel, index) => (
+                    <div key={index} className={`status-card ${intel.priority === 'high' ? 'urgent' : 'info'}`}>
+                      <div className="header-actions">
+                        <div>
+                          <div className="text-bold">{intel.recommendation}</div>
+                          <div className="text-body">
+                            {intel.savings_potential && `Potential: $${intel.savings_potential.toLocaleString()}`}
+                          </div>
+                          {intel.timeline && (
+                            <div className="text-small">Timeline: {intel.timeline}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Triangle Routing Opportunities */}
+            {dashboardData.triangle_opportunities && dashboardData.triangle_opportunities.length > 0 && (
+              <div className="element-spacing">
+                <h3 className="section-subtitle">🍁🇲🇽 Triangle Routing Opportunities</h3>
+                <div className="grid-2-cols">
+                  {dashboardData.triangle_opportunities.slice(0, 2).map((opportunity, index) => (
+                    <div key={index} className="status-card success">
+                      <div className="header-actions">
+                        <div>
+                          <div className="text-bold">{opportunity.route}</div>
+                          <div className="text-body">
+                            {opportunity.savings_percent}% savings • ${opportunity.annual_savings?.toLocaleString() || 'TBD'}
+                          </div>
+                          <div className="text-small">{opportunity.benefits}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Usage warnings and upgrade prompts */}
             {usageStats?.limit_reached && (
               <div className="alert alert-warning" style={{marginTop: '1rem'}}>

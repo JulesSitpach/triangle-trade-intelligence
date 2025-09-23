@@ -19,9 +19,9 @@ export default async function handler(req, res) {
   try {
     // Query real database for Canadian executives in Mexico
     const { data: executives, error: execError } = await supabase
-      .from('canadian_executives_mexico')
+      .from('partner_suppliers')
       .select('*')
-      .order('investment_value_usd', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (execError) {
       console.error('Database error fetching executives:', execError);

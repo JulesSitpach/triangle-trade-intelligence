@@ -41,7 +41,10 @@ export default async function handler(req, res) {
         
       case 'get_active_alerts':
         return await handleGetActiveAlerts(req, res, data);
-        
+
+      case 'get_historical_patterns':
+        return await handleGetHistoricalPatterns(req, res, data);
+
       default:
         return res.status(400).json({
           success: false,
@@ -318,12 +321,75 @@ async function handleGenerateSampleAlert(req, res, data) {
 }
 
 /**
+ * Get historical crisis patterns from backup calculations
+ */
+async function handleGetHistoricalPatterns(req, res, data) {
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const userIndustry = data.industry || data.business_type;
+
+    // Query historical crisis calculations for patterns
+    const { data: historicalCrises, error } = await supabase
+      .from('crisis_calculations_backup')
+      .select('*')
+      .eq('industry', userIndustry)
+      .order('impact_score', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error('Historical patterns query error:', error);
+      return res.json({
+        success: true,
+        historical_patterns: [],
+        message: 'No historical crisis patterns available'
+      });
+    }
+
+    // Analyze patterns for predictions
+    const patterns = historicalCrises?.map(crisis => ({
+      crisis_type: crisis.crisis_type,
+      impact_score: crisis.impact_score,
+      estimated_losses: crisis.estimated_losses_usd,
+      timeline: crisis.crisis_duration_days,
+      mitigation_success: crisis.mitigation_effectiveness_percent
+    })) || [];
+
+    return res.json({
+      success: true,
+      historical_patterns: patterns,
+      pattern_analysis: {
+        most_common_crisis: patterns[0]?.crisis_type || 'Supply chain disruption',
+        average_impact: patterns.reduce((sum, p) => sum + p.impact_score, 0) / patterns.length || 0,
+        success_rate: patterns.reduce((sum, p) => sum + p.mitigation_success, 0) / patterns.length || 0
+      },
+      recommendations: patterns.length > 0 ? [
+        'Consider proactive mitigation strategies',
+        'Monitor early warning indicators',
+        'Diversify supplier base based on historical risks'
+      ] : []
+    });
+
+  } catch (error) {
+    console.error('Historical patterns error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to analyze historical patterns'
+    });
+  }
+}
+
+/**
  * Get active crisis alerts from RSS monitoring data
  */
 async function handleGetActiveAlerts(req, res, data) {
   try {
     const userProfile = data.user_profile || null;
-    
+
     // Get queued alerts from crisis alert service
     const queuedAlerts = crisisAlertService.getQueuedAlerts();
     

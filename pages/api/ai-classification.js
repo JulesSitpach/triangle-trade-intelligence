@@ -241,12 +241,35 @@ async function lookupHSCode(hsCode) {
     
     // Use intelligent tariff bridging to get real rates
     const tariffRates = await getTariffRates(data.hs_code);
-    
+
+    // Enhance with comtrade reference insights
+    let comtradeInsights = null;
+    try {
+      const { data: comtradeData } = await supabase
+        .from('comtrade_reference')
+        .select('*')
+        .or(`hs_code.eq.${data.hs_code},hs_code.like.${data.hs_code.substring(0,6)}%`)
+        .limit(1)
+        .single();
+
+      if (comtradeData) {
+        comtradeInsights = {
+          trade_volume_usd: comtradeData.trade_value_usd,
+          primary_exporters: comtradeData.top_exporters,
+          growth_trend: comtradeData.year_over_year_change,
+          market_share: comtradeData.market_share_percent
+        };
+      }
+    } catch (error) {
+      console.log('No comtrade insights available for', data.hs_code);
+    }
+
     return {
       hsCode: data.hs_code,
       description: data.description,
       chapter: data.chapter || data.hs_code.substring(0, 2),
       confidence: 95, // High confidence for exact database matches
+      comtrade_insights: comtradeInsights,
       ...tariffRates
     };
     

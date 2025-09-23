@@ -202,14 +202,61 @@ async function handleUSMCAQualification(req, res) {
   const normalizedHSCode = validation.normalized;
   
   const result = await usmcaClassifier.checkUSMCAQualification(
-    normalizedHSCode, 
-    component_origins, 
+    normalizedHSCode,
+    component_origins,
     manufacturing_location
   );
-  
+
+  // Enhance with triangle routing opportunities
+  let triangleOpportunities = [];
+  try {
+    const { data: opportunities } = await supabase
+      .from('triangle_routing_opportunities')
+      .select('*')
+      .or(`hs_code.eq.${normalizedHSCode},hs_code.like.${normalizedHSCode.substring(0,6)}%`)
+      .limit(3);
+
+    if (opportunities && opportunities.length > 0) {
+      triangleOpportunities = opportunities.map(opp => ({
+        route: opp.route_description,
+        savings_percent: opp.cost_savings_percent,
+        annual_savings: opp.estimated_annual_savings,
+        benefits: opp.usmca_benefits,
+        timeline: opp.implementation_timeline
+      }));
+    }
+  } catch (error) {
+    console.error('Error fetching triangle opportunities:', error);
+  }
+
+  // Add USMCA business intelligence recommendations
+  let businessIntelligence = [];
+  try {
+    const userIndustry = component_origins?.industry || manufacturing_location;
+    const { data: intelligence } = await supabase
+      .from('usmca_business_intelligence')
+      .select('*')
+      .or(`industry.ilike.%${userIndustry}%,applicable_sectors.cs.{${userIndustry}}`)
+      .limit(3);
+
+    if (intelligence && intelligence.length > 0) {
+      businessIntelligence = intelligence.map(intel => ({
+        recommendation: intel.strategic_recommendation,
+        priority: intel.priority_level,
+        savings_potential: intel.estimated_annual_savings,
+        implementation_steps: intel.implementation_steps,
+        timeline: intel.timeline_to_implementation
+      }));
+    }
+  } catch (error) {
+    console.error('Error fetching business intelligence:', error);
+  }
+
   return res.json({
     success: true,
     qualification: result,
+    triangle_opportunities: triangleOpportunities,
+    business_intelligence: businessIntelligence,
     hsCode: {
       original: hs_code,
       normalized: normalizedHSCode,

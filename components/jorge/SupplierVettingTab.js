@@ -266,7 +266,7 @@ Overall Risk Level: LOW
     <>
       <div className="tab-content">
         <div className="section-header">
-          <h2 className="section-title">Supplier Vetting</h2>
+          <h2 className="section-title">🔍 Supplier Sourcing</h2>
         </div>
 
         <table className="admin-table">

@@ -9,16 +9,16 @@ import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 
-// Import Jorge's modular tab components
+// Import Jorge's specialized tab components
 import ServiceQueueTab from '../../components/jorge/ServiceQueueTab';
-import SupplierVettingTab from '../../components/jorge/SupplierVettingTab';
+import SupplierSourcingTab from '../../components/jorge/SupplierSourcingTab';
+import ManufacturingFeasibilityTab from '../../components/jorge/ManufacturingFeasibilityTab';
 import MarketEntryTab from '../../components/jorge/MarketEntryTab';
-import SupplierIntelTab from '../../components/jorge/SupplierIntelTab';
 
 export default function JorgeDashboardCleanModular() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('service-queue');
+  const [activeTab, setActiveTab] = useState('supplier-sourcing');
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -50,12 +50,12 @@ export default function JorgeDashboardCleanModular() {
     switch (activeTab) {
       case 'service-queue':
         return <ServiceQueueTab />;
-      case 'supplier-vetting':
-        return <SupplierVettingTab />;
+      case 'supplier-sourcing':
+        return <SupplierSourcingTab />;
+      case 'manufacturing-feasibility':
+        return <ManufacturingFeasibilityTab />;
       case 'market-entry':
         return <MarketEntryTab />;
-      case 'supplier-intel':
-        return <SupplierIntelTab />;
       default:
         return <ServiceQueueTab />;
     }
@@ -114,22 +114,22 @@ export default function JorgeDashboardCleanModular() {
                 📋 Service Queue
               </button>
               <button
-                className={`tab-button ${activeTab === 'supplier-vetting' ? 'active' : ''}`}
-                onClick={() => setActiveTab('supplier-vetting')}
+                className={`tab-button ${activeTab === 'supplier-sourcing' ? 'active' : ''}`}
+                onClick={() => setActiveTab('supplier-sourcing')}
               >
-                🔍 Supplier Vetting
+                🔍 Supplier Sourcing
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'manufacturing-feasibility' ? 'active' : ''}`}
+                onClick={() => setActiveTab('manufacturing-feasibility')}
+              >
+                🏭 Manufacturing Feasibility
               </button>
               <button
                 className={`tab-button ${activeTab === 'market-entry' ? 'active' : ''}`}
                 onClick={() => setActiveTab('market-entry')}
               >
                 🚀 Market Entry
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'supplier-intel' ? 'active' : ''}`}
-                onClick={() => setActiveTab('supplier-intel')}
-              >
-                📊 Supplier Intel
               </button>
             </div>
 

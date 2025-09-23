@@ -1,37 +1,30 @@
 /**
- * Cristina's Broker Dashboard - Streamlined Implementation
- * Uses modular tab components for better maintainability
+ * Cristina's Dashboard - Modular Component Version
+ * Five tabs: Service Queue, USMCA Certificates, HS Classification, Document Review, Monthly Support, Crisis Response
+ * Uses modular components for maintainability (following Jorge's pattern)
  */
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import AdminNavigation from '../../components/AdminNavigation';
-import SimpleDetailPanel from '../../components/admin/SimpleDetailPanel';
-import TeamChatWidget from '../../components/admin/TeamChatWidget';
+import Head from 'next/head';
 
-// Import tab components
+// Import Cristina's modular tab components
 import ServiceQueueTab from '../../components/broker/ServiceQueueTab';
-import CertificateGenerationTab from '../../components/broker/CertificateGenerationTab';
-import HSCodeClassificationTab from '../../components/broker/HSCodeClassificationTab';
-import ShipmentTrackingTab from '../../components/broker/ShipmentTrackingTab';
+import ServiceWorkflowTab from '../../components/shared/ServiceWorkflowTab';
+import { getServiceConfig } from '../../config/service-configurations';
 
-import { CRISTINA_SERVICE_CAPACITY } from '../../config/service-capacity-config';
-
-export default function BrokerDashboard() {
+export default function CristinaDashboardModular() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('service-queue');
-
-  // Detail panel state
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+  const [serviceRequests, setServiceRequests] = useState([]);
+  const [cristinaServices, setCristinaServices] = useState([]);
 
   useEffect(() => {
     const initializeDashboard = async () => {
       try {
-        // Check authentication using correct session key
+        // Check authentication
         const stored = localStorage.getItem('triangle_user_session');
         if (!stored) {
           router.push('/login');
@@ -44,67 +37,70 @@ export default function BrokerDashboard() {
           return;
         }
 
-        setUser(authUser);
+        // Load service configurations and requests (no hardcoding)
+        const { getServicesForTeamMember } = await import('../../config/service-configurations');
+        const services = getServicesForTeamMember('cristina');
+        const serviceConfigs = services.map(serviceType => getServiceConfig(serviceType));
+        setCristinaServices(serviceConfigs);
+
+        // Load actual service requests from database
+        const response = await fetch('/api/admin/service-requests');
+        const data = await response.json();
+        if (data.success && data.requests) {
+          const cristinaRequests = data.requests.filter(req =>
+            services.includes(req.service_type) || req.assigned_to === 'Cristina'
+          );
+          setServiceRequests(cristinaRequests);
+        }
+
+        setLoading(false);
       } catch (error) {
         console.error('Dashboard initialization error:', error);
         router.push('/login');
-      } finally {
-        setLoading(false);
       }
     };
 
     initializeDashboard();
   }, [router]);
 
-  const calculateTotalRevenue = () => {
-    return (
-      CRISTINA_SERVICE_CAPACITY.certificates.current * CRISTINA_SERVICE_CAPACITY.certificates.rate +
-      CRISTINA_SERVICE_CAPACITY.classifications.current * CRISTINA_SERVICE_CAPACITY.classifications.rate +
-      CRISTINA_SERVICE_CAPACITY.clearance.current * CRISTINA_SERVICE_CAPACITY.clearance.rate +
-      CRISTINA_SERVICE_CAPACITY.crisis.current * CRISTINA_SERVICE_CAPACITY.crisis.rate
-    );
+  // Calculate metrics from actual data (no hardcoding)
+  const calculateRevenue = () => {
+    return cristinaServices.reduce((total, service) => {
+      const requests = serviceRequests.filter(req => req.service_type === service.type);
+      return total + (requests.length * service.price);
+    }, 0);
   };
 
   const calculateCapacityUtilization = () => {
-    const totalCurrent =
-      CRISTINA_SERVICE_CAPACITY.certificates.current +
-      CRISTINA_SERVICE_CAPACITY.classifications.current +
-      CRISTINA_SERVICE_CAPACITY.clearance.current +
-      CRISTINA_SERVICE_CAPACITY.crisis.current;
-
-    const totalTarget =
-      CRISTINA_SERVICE_CAPACITY.certificates.monthly_target +
-      CRISTINA_SERVICE_CAPACITY.classifications.monthly_target +
-      CRISTINA_SERVICE_CAPACITY.clearance.monthly_target +
-      CRISTINA_SERVICE_CAPACITY.crisis.monthly_target;
-
-    return Math.round((totalCurrent / totalTarget) * 100);
+    if (cristinaServices.length === 0) return 0;
+    const totalCurrent = serviceRequests.length;
+    const totalCapacity = cristinaServices.reduce((sum, service) => sum + service.monthlyCapacity, 0);
+    return totalCapacity > 0 ? Math.round((totalCurrent / totalCapacity) * 100) : 0;
   };
 
   const renderTabContent = () => {
-    const tabProps = {
-      setSelectedRecord,
-      setDetailPanelOpen
-    };
-
     switch (activeTab) {
       case 'service-queue':
-        return <ServiceQueueTab {...tabProps} />;
-      case 'certificate-generation':
-        return <CertificateGenerationTab {...tabProps} />;
-      case 'hs-code-classification':
-        return <HSCodeClassificationTab {...tabProps} />;
-      case 'shipment-tracking':
-        return <ShipmentTrackingTab {...tabProps} />;
+        return <ServiceQueueTab />;
+      case 'usmca-certificate':
+        return <ServiceWorkflowTab serviceConfig={getServiceConfig('usmca-certificate')} teamMember="cristina" />;
+      case 'hs-classification':
+        return <ServiceWorkflowTab serviceConfig={getServiceConfig('hs-classification')} teamMember="cristina" />;
+      case 'document-review':
+        return <ServiceWorkflowTab serviceConfig={getServiceConfig('document-review')} teamMember="cristina" />;
+      case 'monthly-compliance-support':
+        return <ServiceWorkflowTab serviceConfig={getServiceConfig('monthly-compliance-support')} teamMember="cristina" />;
+      case 'compliance-crisis-response':
+        return <ServiceWorkflowTab serviceConfig={getServiceConfig('compliance-crisis-response')} teamMember="cristina" />;
       default:
-        return <ServiceQueueTab {...tabProps} />;
+        return <ServiceQueueTab />;
     }
   };
 
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="loading-spinner">Loading Broker Dashboard...</div>
+        <div className="loading-spinner">Loading Cristina's Dashboard...</div>
       </div>
     );
   }
@@ -112,8 +108,8 @@ export default function BrokerDashboard() {
   return (
     <>
       <Head>
-        <title>Cristina's Broker Dashboard - Triangle Intelligence</title>
-        <meta name="description" content="Professional USMCA compliance and logistics dashboard" />
+        <title>Cristina's Compliance Dashboard - Triangle Intelligence</title>
+        <meta name="description" content="SMB Compliance & Document Validation Services" />
       </Head>
 
       <div className="admin-layout">
@@ -122,17 +118,17 @@ export default function BrokerDashboard() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Cristina's Broker Dashboard</h1>
+              <h1 className="dashboard-title">Cristina's Compliance Services</h1>
               <div className="user-info">
-                <span className="user-name">{user?.name || 'Cristina Martinez'}</span>
-                <span className="user-role">USMCA Compliance Specialist</span>
+                <span className="user-name">Cristina Martinez</span>
+                <span className="user-role">SMB Compliance Specialist</span>
               </div>
             </div>
 
             <div className="dashboard-metrics">
               <div className="metric-card">
                 <h3 className="metric-title">Monthly Revenue</h3>
-                <div className="metric-value">${calculateTotalRevenue().toLocaleString()}</div>
+                <div className="metric-value">${calculateRevenue().toLocaleString()}</div>
               </div>
               <div className="metric-card">
                 <h3 className="metric-title">Capacity Utilization</h3>
@@ -140,12 +136,7 @@ export default function BrokerDashboard() {
               </div>
               <div className="metric-card">
                 <h3 className="metric-title">Active Services</h3>
-                <div className="metric-value">
-                  {CRISTINA_SERVICE_CAPACITY.certificates.current +
-                   CRISTINA_SERVICE_CAPACITY.classifications.current +
-                   CRISTINA_SERVICE_CAPACITY.clearance.current +
-                   CRISTINA_SERVICE_CAPACITY.crisis.current}
-                </div>
+                <div className="metric-value">{serviceRequests.length}</div>
               </div>
             </div>
           </div>
@@ -159,22 +150,34 @@ export default function BrokerDashboard() {
                 📋 Service Queue
               </button>
               <button
-                className={`tab-button ${activeTab === 'certificate-generation' ? 'active' : ''}`}
-                onClick={() => setActiveTab('certificate-generation')}
+                className={`tab-button ${activeTab === 'usmca-certificate' ? 'active' : ''}`}
+                onClick={() => setActiveTab('usmca-certificate')}
               >
-                📜 Certificate Generation
+                📜 USMCA Certificates
               </button>
               <button
-                className={`tab-button ${activeTab === 'hs-code-classification' ? 'active' : ''}`}
-                onClick={() => setActiveTab('hs-code-classification')}
+                className={`tab-button ${activeTab === 'hs-classification' ? 'active' : ''}`}
+                onClick={() => setActiveTab('hs-classification')}
               >
-                🔍 HS Code Classification
+                🔍 HS Classification
               </button>
               <button
-                className={`tab-button ${activeTab === 'shipment-tracking' ? 'active' : ''}`}
-                onClick={() => setActiveTab('shipment-tracking')}
+                className={`tab-button ${activeTab === 'document-review' ? 'active' : ''}`}
+                onClick={() => setActiveTab('document-review')}
               >
-                🚢 Shipment Tracking
+                📋 Document Review
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'monthly-compliance-support' ? 'active' : ''}`}
+                onClick={() => setActiveTab('monthly-compliance-support')}
+              >
+                📞 Monthly Support
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'compliance-crisis-response' ? 'active' : ''}`}
+                onClick={() => setActiveTab('compliance-crisis-response')}
+              >
+                🆘 Crisis Response
               </button>
             </div>
 
@@ -183,18 +186,6 @@ export default function BrokerDashboard() {
             </div>
           </div>
         </main>
-
-        {detailPanelOpen && (
-          <SimpleDetailPanel
-            record={selectedRecord}
-            onClose={() => {
-              setDetailPanelOpen(false);
-              setSelectedRecord(null);
-            }}
-          />
-        )}
-
-        <TeamChatWidget />
       </div>
     </>
   );

@@ -22,7 +22,7 @@ export default function ProfessionalServices() {
       features: [
         'Expert completes your USMCA certificate',
         'Turnaround: 3-5 business days',
-        'Capacity: 40 certificates/month',
+        'Capacity: 15 certificates/month',
         'Prevents costly mistakes',
         'Professional documentation',
         'Compliance verification'
@@ -36,7 +36,7 @@ export default function ProfessionalServices() {
         'Professional HS code research',
         'Verification with documentation',
         'Justification documentation',
-        'Capacity: 60 classifications/month',
+        'Capacity: 20 classifications/month',
         'Prevents thousands in penalties',
         'Expert validation'
       ]
@@ -89,20 +89,20 @@ export default function ProfessionalServices() {
         'Customs issue resolution',
         'Expedited clearance support',
         'Emergency rate: $500 same-day',
-        'Capacity: 30 shipments/month',
+        'Capacity: 10 shipments/month',
         'Prevents costly delays'
       ]
     },
     {
       name: 'Crisis Response (Tariff Changes)',
-      price: '$500 per incident',
+      price: '$650 per incident',
       description: 'Emergency tariff analysis + action plan when regulations change.',
       features: [
         'Emergency tariff analysis',
         'Action plan development',
         'Same day for subscribers',
         '24hrs for others',
-        'Capacity: 15 incidents/month',
+        'Capacity: 5 incidents/month',
         'Premium crisis response'
       ]
     }
@@ -344,7 +344,7 @@ export default function ProfessionalServices() {
             <div className="content-card">
               <h3 className="content-card-title">3. Transparent Limits</h3>
               <p className="content-card-description">
-                We're honest about capacity: 40 certificates/month, 8-10 suppliers/month, 30 shipments/month, 15 crisis responses/month.
+                We're honest about capacity: 15 certificates/month, 8-10 suppliers/month, 10 shipments/month, 5 crisis responses/month.
               </p>
             </div>
           </div>
