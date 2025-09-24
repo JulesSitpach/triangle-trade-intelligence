@@ -68,13 +68,19 @@ export default function ComponentOriginsStepEnhanced({
       });
 
       const result = await response.json();
+      console.log('🤖 Agent Classification Result:', result);
+
       if (result.success && result.data) {
-        setProductHSSuggestion({
+        const suggestion = {
           hsCode: result.data.hsCode,
           confidence: result.data.confidence || result.data.adjustedConfidence,
           explanation: result.data.reasoning || result.data.explanation,
           source: 'AI Classification Agent'
-        });
+        };
+        console.log('✅ Setting productHSSuggestion:', suggestion);
+        setProductHSSuggestion(suggestion);
+      } else {
+        console.log('❌ No valid suggestion returned');
       }
     } catch (error) {
       console.error('Agent classification error:', error);
@@ -361,7 +367,8 @@ export default function ComponentOriginsStepEnhanced({
                 suggestion={{
                   success: true,
                   data: {
-                    suggestedValue: `HS Code: ${productHSSuggestion.hsCode}`,
+                    hsCode: productHSSuggestion.hsCode,
+                    value: `HS Code: ${productHSSuggestion.hsCode}`,
                     confidence: productHSSuggestion.confidence,
                     explanation: productHSSuggestion.explanation,
                     source: productHSSuggestion.source
