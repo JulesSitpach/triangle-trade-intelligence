@@ -1,9 +1,13 @@
 /**
  * Authorization Step - Step 4: Authorization and Certificate Generation
  * Collects authorized signatory information and importer details
+ * Enhanced with AI agent validation at submission point
  */
 
 import React, { useState, useEffect } from 'react';
+import useAgentOrchestration from '../../hooks/useAgentOrchestration';
+import ValidationStatusPanel from '../agents/ValidationStatusPanel';
+import OrchestrationStatusBar from '../agents/OrchestrationStatusBar';
 
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF }) {
   const [authData, setAuthData] = useState({
@@ -12,11 +16,25 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     signatory_title: '',
     signatory_email: '',
     signatory_phone: '',
-    
+
     // Authorization checkboxes
     accuracy_certification: false,
     authority_certification: false,
     ...formData
+  });
+
+  // AI Agent Orchestration - validate at submission point
+  const {
+    isOrchestrating,
+    overallConfidence,
+    readyToSubmit,
+    userGuidance,
+    agentSuggestions,
+    expertRecommendation
+  } = useAgentOrchestration(workflowData || certificateData, {
+    userId: 'workflow-user',
+    certificateHistory: [],
+    userProfile: {}
   });
 
   // Update parent when authData changes
@@ -236,7 +254,25 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               Review the information that will appear on your USMCA Certificate of Origin
             </div>
           </div>
-          <button 
+
+          {/* AI Agent Validation - Shows confidence and issues before submission */}
+          <div className="element-spacing">
+            <OrchestrationStatusBar
+              isOrchestrating={isOrchestrating}
+              overallConfidence={overallConfidence}
+              readyToSubmit={readyToSubmit}
+              userGuidance={userGuidance}
+            />
+
+            {agentSuggestions.validation && (
+              <ValidationStatusPanel
+                validationResult={agentSuggestions.validation}
+                expertRecommendation={expertRecommendation}
+              />
+            )}
+          </div>
+
+          <button
             className="btn-primary"
             disabled={!authData.importer_name}
             onClick={() => onPreviewCertificate && onPreviewCertificate(authData)}
