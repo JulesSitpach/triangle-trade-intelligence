@@ -2,9 +2,11 @@
  * ComponentOriginsStepEnhanced - Step 2 of USMCA workflow
  * Includes component descriptions and HS code lookup
  * Real-world approach to multi-component products
+ * Enhanced with real-time AI agent assistance
  */
 
 import React, { useState, useEffect } from 'react';
+import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -21,18 +23,20 @@ export default function ComponentOriginsStepEnhanced({
   const [components, setComponents] = useState(() => {
     // FORCE EMPTY DEFAULTS - ignore any existing data
     return [
-      { 
-        description: '', 
-        origin_country: '', 
-        value_percentage: '', 
+      {
+        description: '',
+        origin_country: '',
+        value_percentage: '',
         hs_code: '',
         hs_suggestions: [],
         manufacturing_location: formData.manufacturing_location || ''
       }
     ];
   });
-  
+
   const [searchingHS, setSearchingHS] = useState({});
+  const [agentSuggestions, setAgentSuggestions] = useState({});
+  const [productHSSuggestion, setProductHSSuggestion] = useState(null);
 
   // Update parent form data when components change
   useEffect(() => {
@@ -44,6 +48,50 @@ export default function ComponentOriginsStepEnhanced({
     newComponents[index][field] = value;
     setComponents(newComponents);
   };
+
+  // Get AI agent suggestion for product description
+  const getProductHSSuggestion = async (description) => {
+    if (!description || description.length < 20) {
+      setProductHSSuggestion(null);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/agents/classification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          certificateData: {
+            product_description: description,
+            component_origins: components
+          }
+        })
+      });
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        setProductHSSuggestion({
+          hsCode: result.data.hsCode,
+          confidence: result.data.adjustedConfidence,
+          explanation: result.data.explanation,
+          source: 'AI Classification Agent'
+        });
+      }
+    } catch (error) {
+      console.error('Agent classification error:', error);
+    }
+  };
+
+  // Debounced product description change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.product_description) {
+        getProductHSSuggestion(formData.product_description);
+      }
+    }, 1000); // 1 second debounce
+
+    return () => clearTimeout(timer);
+  }, [formData.product_description]);
 
   // Manual HS Code lookup function
   const lookupHSCode = async (index) => {
@@ -307,6 +355,31 @@ export default function ComponentOriginsStepEnhanced({
             <div className="form-help">
               Detailed product description including materials, construction, and key features for accurate classification
             </div>
+
+            {/* AI Agent HS Code Suggestion */}
+            {productHSSuggestion && (
+              <AgentSuggestionBadge
+                suggestion={{
+                  success: true,
+                  data: {
+                    suggestedValue: `HS Code: ${productHSSuggestion.hsCode}`,
+                    confidence: productHSSuggestion.confidence,
+                    explanation: productHSSuggestion.explanation,
+                    source: productHSSuggestion.source
+                  }
+                }}
+                onAccept={() => {
+                  // Auto-fill HS code for all components if they don't have one
+                  const newComponents = components.map(c => ({
+                    ...c,
+                    hs_code: c.hs_code || productHSSuggestion.hsCode
+                  }));
+                  setComponents(newComponents);
+                  setProductHSSuggestion(null);
+                }}
+                onDismiss={() => setProductHSSuggestion(null)}
+              />
+            )}
           </div>
 
           {/* Manufacturing Location */}
