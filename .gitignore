@@ -148,3 +148,6 @@ google-service-account.json
 !.next/
 !.next/cache/
 .next/trace
+# Build artifacts
+.next/
+*.log
