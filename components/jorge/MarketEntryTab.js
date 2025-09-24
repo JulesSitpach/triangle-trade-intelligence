@@ -380,10 +380,10 @@ export default function MarketEntryTab() {
             {/* Progress Steps */}
             <div className="verification-progress">
               <div className="progress-steps">
-                <div className={`step ${consultationModal.currentStage >= 1 ? 'active' : ''}`}>1. Planning</div>
-                <div className={`step ${consultationModal.currentStage >= 2 ? 'active' : ''}`}>2. Research</div>
-                <div className={`step ${consultationModal.currentStage >= 3 ? 'active' : ''}`}>3. Strategy</div>
-                <div className={`step ${consultationModal.currentStage >= 4 ? 'active' : ''}`}>4. Delivery</div>
+                <div className={`step ${consultationModal.currentStage >= 1 ? 'active' : ''}`}>1. Client Context</div>
+                <div className={`step ${consultationModal.currentStage >= 2 ? 'active' : ''}`}>2. Network Intelligence</div>
+                <div className={`step ${consultationModal.currentStage >= 3 ? 'active' : ''}`}>3. Partnership Validation</div>
+                <div className={`step ${consultationModal.currentStage >= 4 ? 'active' : ''}`}>4. Network Introductions</div>
               </div>
             </div>
 
@@ -722,19 +722,41 @@ export default function MarketEntryTab() {
                       </div>
                     </div>
 
+                    <div className="deliverable-info">
+                      <h4>Jorge's Network Connection Deliverables</h4>
+                      <div className="checklist">
+                        <div className="checklist-item">
+                          <input type="checkbox" />
+                          <span>Specific partner introduction commitments</span>
+                        </div>
+                        <div className="checklist-item">
+                          <input type="checkbox" />
+                          <span>Regulatory contact referrals with relationship context</span>
+                        </div>
+                        <div className="checklist-item">
+                          <input type="checkbox" />
+                          <span>Business association membership recommendations</span>
+                        </div>
+                        <div className="checklist-item">
+                          <input type="checkbox" />
+                          <span>Cultural mentoring and relationship-building guidance</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="consultation-summary">
                       <h4>Consultation Summary</h4>
                       <div className="summary-grid">
-                        <div className="summary-item">
+                        <div className="summary-stat">
                           <label>Total Time:</label>
                           <span>{formatTime(consultationModal.timer.totalSeconds)}</span>
                         </div>
-                        <div className="summary-item">
+                        <div className="summary-stat">
                           <label>Total Fee:</label>
                           <span>${calculateConsultationFee().toFixed(2)}</span>
                         </div>
-                        <div className="summary-item">
-                          <label>Completed Sections:</label>
+                        <div className="summary-stat">
+                          <label>Network Intelligence Sections:</label>
                           <span>{Object.keys(consultationModal.formData).length}/7</span>
                         </div>
                       </div>
@@ -788,27 +810,125 @@ export default function MarketEntryTab() {
               <button className="modal-close" onClick={closeForm}>×</button>
             </div>
 
-            <div className="form-content">
-              <div className="form-group">
-                <label>Details</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder="Enter details for this section..."
-                  rows="6"
-                  value={formModal.formData.details || ''}
-                  onChange={(e) => setFormModal(prev => ({
-                    ...prev,
-                    formData: { ...prev.formData, details: e.target.value }
-                  }))}
-                />
-              </div>
+            <div className="verification-form">
+              {formModal.formType === 'requirements' && (
+                <div className="form-group">
+                  <label>Client Business Context</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Target market size, business model, budget range, entry timeline..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'market_definition' && (
+                <div className="form-group">
+                  <label>Jorge's Research Contact Strategy</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Which business associations, local partners, regulatory contacts Jorge will consult..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'competitive_analysis' && (
+                <div className="form-group">
+                  <label>Network Intelligence Findings</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Real market dynamics from Jorge's contacts: who's succeeding, pricing reality, business culture..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'regulatory_requirements' && (
+                <div className="form-group">
+                  <label>Local Business Practice Reality</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="How business actually gets done: real timelines, relationship requirements, cultural expectations..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'gtm_strategy' && (
+                <div className="form-group">
+                  <label>Strategy Validation Through Network</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Jorge validates database insights with real business experience: what actually works vs. theoretical..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'partnership_recs' && (
+                <div className="form-group">
+                  <label>Jorge's Partnership Network Assessment</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Direct access to Jorge's relationships: reliable partners, track records, introduction possibilities..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
+
+              {formModal.formType === 'final_report' && (
+                <div className="form-group">
+                  <label>Implementation Roadmap with Network Support</label>
+                  <textarea
+                    className="consultation-textarea"
+                    placeholder="Step-by-step entry plan: specific contacts, introduction timelines, relationship-building strategy..."
+                    rows="4"
+                    value={formModal.formData.details || ''}
+                    onChange={(e) => setFormModal(prev => ({
+                      ...prev,
+                      formData: { ...prev.formData, details: e.target.value }
+                    }))}
+                  />
+                </div>
+              )}
 
               <div className="form-group">
-                <label>Notes</label>
+                <label>Jorge's Network Notes</label>
                 <textarea
-                  className="form-textarea"
-                  placeholder="Additional notes..."
-                  rows="4"
+                  className="consultation-textarea"
+                  placeholder="Key contacts consulted, relationship insights, follow-up commitments..."
+                  rows="3"
                   value={formModal.formData.notes || ''}
                   onChange={(e) => setFormModal(prev => ({
                     ...prev,

@@ -74,24 +74,32 @@ export default function LogisticsSupport() {
       console.log("📋 Using Cristina service configurations");
       setServiceTypes([
         {
+          id: "usmca-certificate",
+          name: "📋 USMCA Certificate Generation",
+          price: 200,
+          description: "Professional USMCA certificate generation with compliance validation",
+          capacity: "40 per month",
+          license: "Licensed Customs Broker"
+        },
+        {
           id: "hs-code-classification",
-          name: "HS Code Classification & Verification",
+          name: "🔢 HS Code Classification",
           price: 150,
           description: "Professional product classification and HTS code verification",
           capacity: "60 per month",
-          license: "Licensed Customs Broker #12345"
+          license: "Licensed Customs Broker"
         },
         {
           id: "customs-clearance",
-          name: "Customs Clearance Support",
+          name: "🚢 Customs Clearance Support",
           price: 300,
           description: "End-to-end customs clearance assistance and documentation",
           capacity: "30 per month",
-          license: "Licensed Customs Broker #12345"
+          license: "Licensed Customs Broker"
         },
         {
           id: "crisis-response",
-          name: "Crisis Response - Tariff Changes",
+          name: "🚨 Crisis Response Management",
           price: 500,
           description: "Emergency response for sudden tariff changes and regulatory shifts",
           capacity: "15 per month",
@@ -133,6 +141,9 @@ export default function LogisticsSupport() {
     if (!formData.email) errors.email = 'Email is required';
 
     // Service-specific validation
+    if (formData.service_type === 'usmca-certificate' && !formData.product_description) {
+      errors.product_description = 'Product description is required for USMCA certificate';
+    }
     if (formData.service_type === 'hs-code-classification' && !formData.product_description) {
       errors.product_description = 'Product description is required for HS code classification';
     }
@@ -391,6 +402,91 @@ export default function LogisticsSupport() {
               </div>
 
               {/* Service-Specific Questions */}
+              {selectedService === 'usmca-certificate' && (
+                <div className="admin-table-container">
+                  <div className="card-header">
+                    <h3 className="content-card-title">USMCA Certificate Information</h3>
+                    <p className="card-description">Help Cristina prepare for your USMCA certificate generation</p>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="font-label">Product Description <span className="text-danger">*</span></label>
+                    <textarea
+                      className={`filter-select ${formErrors.product_description ? 'border-danger' : ''}`}
+                      rows="3"
+                      value={formData.product_description}
+                      onChange={(e) => handleInputChange('product_description', e.target.value)}
+                      placeholder="Detailed description of the product for USMCA qualification..."
+                    />
+                    {formErrors.product_description && <div className="badge-danger">{formErrors.product_description}</div>}
+                  </div>
+
+                  <div className="grid-2-cols">
+                    <div className="form-group">
+                      <label className="font-label">Manufacturing location</label>
+                      <select
+                        className="filter-select"
+                        value={formData.shipment_origin}
+                        onChange={(e) => handleInputChange('shipment_origin', e.target.value)}
+                      >
+                        <option value="">Select country</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="MX">Mexico</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="font-label">Product materials/components</label>
+                      <input
+                        type="text"
+                        className="filter-select"
+                        value={formData.product_materials}
+                        onChange={(e) => handleInputChange('product_materials', e.target.value)}
+                        placeholder="e.g., Steel parts from Mexico, US electronics"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="font-label">Estimated product value</label>
+                      <select
+                        className="filter-select"
+                        value={formData.product_value}
+                        onChange={(e) => handleInputChange('product_value', e.target.value)}
+                      >
+                        <option value="">Select value range</option>
+                        <option value="under-1000">Under $1,000 per unit</option>
+                        <option value="1000-10000">$1,000 - $10,000 per unit</option>
+                        <option value="10000-50000">$10,000 - $50,000 per unit</option>
+                        <option value="over-50000">Over $50,000 per unit</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="font-label">Current HS Code (if known)</label>
+                      <input
+                        type="text"
+                        className="filter-select"
+                        value={formData.current_hs_code}
+                        onChange={(e) => handleInputChange('current_hs_code', e.target.value)}
+                        placeholder="e.g., 8517.12.0000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="font-label">Component origins and percentages</label>
+                    <textarea
+                      className="filter-select"
+                      rows="2"
+                      value={formData.additional_info}
+                      onChange={(e) => handleInputChange('additional_info', e.target.value)}
+                      placeholder="e.g., 60% Mexico parts, 30% US components, 10% Canada materials..."
+                    />
+                  </div>
+                </div>
+              )}
+
               {selectedService === 'hs-code-classification' && (
                 <div className="admin-table-container">
                   <div className="card-header">

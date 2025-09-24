@@ -37,30 +37,41 @@ Tiered subscription platform that lets users start with templates and self-servi
 
 #### Cristina's Compliance Services
 **Competitive Advantage**: USMCA compliance expertise, document accuracy, crisis response
-- **USMCA Certificate Generation**: $200/certificate (40/month capacity)
+- **📜 USMCA Certificates**: $200/certificate (40/month capacity)
   - *Premium quality*: Thorough expert review vs. rushed completion
   - *Efficient delivery*: Pre-populated from user's app data
   - *Risk mitigation*: Professional completion vs. costly mistakes
-- **HS Code Classification**: $150/product (60/month capacity)
-- **Document Review & Validation**: $250/review (25/month capacity)
+- **🔍 HS Classification**: $150/product (60/month capacity)
+  - *Accurate classification*: Expert review for complex products
+  - *Tariff optimization*: Find best HS codes for duty savings
+  - *Audit protection*: Defend classifications with documentation
+- **📋 Document Review**: $250/review (25/month capacity)
   - *Pre-audit confidence*: Expert review before customer audits
   - *Error prevention*: Catch issues before submission
   - *Professional polish*: Clean documentation packages
-- **Monthly Compliance Support**: $99/month (50 client capacity)
+- **📞 Monthly Support**: $99/month (50 client capacity)
   - *Ongoing guidance*: 2 hours monthly Q&A time with expert
   - *Priority support*: Fast response to compliance questions
   - *Virtual team member*: Affordable access to trade expertise
-- **Compliance Crisis Response**: $450/incident (15/month capacity)
+- **🆘 Crisis Response**: $450/incident (15/month capacity)
   - *Emergency resolution*: 24-48 hour response to rejected certificates
   - *Root cause analysis*: Fix problems and prevent recurrence
   - *Cost savings*: Avoid demurrage fees and customer relationship damage
 
 #### Jorge's Mexico/Latin America Services
 **Competitive Advantage**: Based in Mexico, native Spanish speaker, local contacts and cultural expertise
-- **Mexico Supplier Sourcing Report**: $500 (5-7 pre-screened supplier contacts with capabilities analysis)
-- **Mexico Manufacturing Feasibility Report**: $650 (Location recommendations, regulatory overview, cost analysis)
-- **Compliance Crisis Assessment Report**: $400 (Emergency response for rejected certificates, audit preparation)
-- **Mexico Market Entry Report**: $400 (Regulatory requirements, cultural guidance, market entry strategy)
+- **🔍 Supplier Sourcing**: $500 (5-7 pre-screened supplier contacts with capabilities analysis)
+  - *On-ground expertise*: Mexico-based vetting and verification
+  - *Quality assurance*: Pre-screened suppliers meeting your standards
+  - *Actionable contacts*: Direct introductions to qualified suppliers
+- **🏭 Manufacturing Feasibility**: $650 (Location recommendations, regulatory overview, cost analysis)
+  - *Location analysis*: Best Mexico regions for your manufacturing needs
+  - *Cost modeling*: Labor, logistics, and regulatory cost breakdown
+  - *Risk assessment*: Regulatory requirements and compliance roadmap
+- **🚀 Market Entry**: $400 (Regulatory requirements, cultural guidance, market entry strategy)
+  - *Market intelligence*: Entry strategy and partnership opportunities
+  - *Cultural expertise*: Navigate Mexico business culture effectively
+  - *Partnership introductions*: Connect with qualified local partners
 
 ### Revenue Model Logic
 ```
@@ -173,20 +184,68 @@ Certificate Attempt → Complexity/Error → "Need Expert Help?" → Service Req
 
 ## Team Service Delivery Standards
 
-### Cristina's Service KPIs
-- **USMCA Certificate Generation**: 24-hour turnaround, 99%+ accuracy (40/month capacity)
-- **Document Review & Validation**: 1-2 day turnaround, pre-audit confidence (25/month capacity)
-- **Monthly Compliance Support**: Ongoing Q&A support (50 client capacity)
-- **Crisis Response**: 24-48 hour emergency resolution (15/month capacity)
-- **Monthly Revenue Potential**: $34,950/month from all services (quality-focused delivery)
-- **Quality Standard**: Zero customs rejections on expert-completed certificates
+### Cristina's Compliance Services (3-Stage Expert Validation Pattern)
+**Workflow**: Client Docs → Expert Review → Deliverable Generation
 
-### Jorge's Mexico/Latin America Service KPIs
-- **Mexico Supplier Sourcing Reports**: $500 each, 3-5 day delivery, 8 reports/month capacity
-- **Mexico Manufacturing Feasibility Reports**: $650 each, 5-7 day delivery, 4 reports/month capacity
-- **Compliance Crisis Assessment Reports**: $400 each, 24-48 hour emergency delivery, 6 reports/month capacity
-- **Mexico Market Entry Reports**: $400 each, 3-5 day delivery, 6 reports/month capacity
-- **Quality Standard**: Professional PDF reports with actionable recommendations and contact lists
+#### Service Delivery KPIs
+- **📜 USMCA Certificates** (3-Stage Validation)
+  - Capacity: 40/month | Revenue: $8,000/month
+  - Turnaround: 24 hours | Pattern: Doc Collection → Expert Validation → Certificate PDF
+  - Quality: 99%+ accuracy, zero customs rejections
+
+- **🔍 HS Classification** (3-Stage Validation)
+  - Capacity: 60/month | Revenue: $9,000/month
+  - Turnaround: 1-2 days | Pattern: Product Docs → Classification Analysis → Validated Report
+  - Quality: Audit-proof classifications with supporting documentation
+
+- **📋 Document Review** (3-Stage Validation)
+  - Capacity: 25/month | Revenue: $6,250/month
+  - Turnaround: 1-2 days | Pattern: Doc Upload → Expert Review → Gap Analysis Report
+  - Quality: Pre-audit confidence, error prevention
+
+- **📞 Monthly Support** (2-Stage Direct Service)
+  - Capacity: 50 clients | Revenue: $4,950/month
+  - Delivery: 2 hours monthly | Pattern: Live Session → Summary Report
+  - Quality: Ongoing guidance, priority support
+
+- **🆘 Crisis Response** (2-Stage Direct Service)
+  - Capacity: 15/month | Revenue: $6,750/month
+  - Turnaround: 24-48 hours | Pattern: Emergency Resolution → Prevention Plan
+  - Quality: Root cause fixes, recurrence prevention
+
+**Monthly Revenue Potential**: $34,950 (quality-focused SMB delivery)
+
+### Jorge's Mexico Services (4-Stage Complex Research Pattern)
+**Workflow**: Client Intake → AI Discovery → Jorge Validation → AI Report
+
+#### Service Delivery KPIs
+- **🔍 Supplier Sourcing** (4-Stage Complex) ✅ Working
+  - Capacity: 8/month | Revenue: $4,000/month
+  - Turnaround: 3-5 days | Pattern: Requirements → AI Discovery → Network Validation → Report
+  - Quality: 5-7 pre-screened contacts with direct introductions
+
+- **🏭 Manufacturing Feasibility** (4-Stage Complex)
+  - Capacity: 4/month | Revenue: $2,600/month
+  - Turnaround: 5-7 days | Pattern: Requirements → Facility Discovery → Analysis → Feasibility Report
+  - Quality: Location recommendations, cost analysis, regulatory overview
+
+- **🚀 Market Entry** (4-Stage Complex)
+  - Capacity: 6/month | Revenue: $2,400/month
+  - Turnaround: 3-5 days | Pattern: Market Goals → Partner Discovery → Evaluation → Entry Strategy
+  - Quality: Partnership intros, market intelligence, cultural guidance
+
+**Monthly Revenue Potential**: $9,000 (Mexico-focused research services)
+
+### Workflow Efficiency Improvements
+**Information Procurement Model** (vs Manual Data Entry):
+- Stage 1: Client completes intake forms (not Jorge/Cristina typing)
+- Stage 2: AI discovers contacts/experts (automated research)
+- Stage 3: Expert validates findings (value-add review, not recreation)
+- Stage 4: AI generates reports (professional deliverables)
+
+**Time Savings**: 67% reduction per service (15 min → 5 min delivery time)
+**Quality Improvement**: Uploaded docs > manual typing (higher accuracy)
+**Capacity Increase**: 3x services with same staff (automation leverage)
 
 ## Revenue Targets & Metrics
 
@@ -195,33 +254,53 @@ Certificate Attempt → Complexity/Error → "Need Expert Help?" → Service Req
 - **Current Gap**: Need stronger trial conversion and plan upgrades
 - **Key Metrics**: Trial-to-paid conversion, plan upgrade rates, churn
 
-### Service Revenue (SMB-Focused Quality)
-- **Cristina's Services**: $34,950/month potential (SMB compliance expertise)
-- **Jorge's Services**: $12,000/month potential (Mexico market intelligence)
-- **Combined Service Potential**: $46,950/month from expert services
-- **Growth Strategy**: SMB-focused pricing with scalable capacity management
+### Service Revenue (Workflow-Optimized Delivery)
+- **Cristina's Services**: $34,950/month potential (3-stage validation + 2-stage direct)
+- **Jorge's Services**: $9,000/month potential (4-stage complex research)
+- **Combined Service Potential**: $43,950/month from expert services
+- **Efficiency Model**: AI discovery + automated workflows = 3x capacity vs manual
+- **Growth Strategy**: Proven supplier sourcing pattern applied to all services
 
-### Combined Target: $96,950 MRR
+### Combined Target: $93,950 MRR
 - **Subscription Base**: 167 customers at $299 avg = $50K MRR
-- **Service Layer**: SMB-optimized expert services = $47K MRR
+- **Service Layer**: Workflow-optimized expert services = $44K MRR
+- **Efficiency Multiplier**: Same team, 3x output via automation
 
 ## Development Priorities
 
-### Phase 1: Subscription Foundation (Current Gap)
+### Phase 1: Complete Service Dashboard Implementations (In Progress)
+**Reference**: Working Supplier Sourcing dashboard pattern
+- **✅ Supplier Sourcing** - 4-stage complex research (COMPLETE)
+- **🔄 USMCA Certificates** - 3-stage expert validation (HIGH PRIORITY)
+- **🔄 HS Classification** - 3-stage expert validation (HIGH PRIORITY)
+- **Crisis Response** - 2-stage direct service (QUICK WIN)
+- **Monthly Support** - 2-stage direct service (QUICK WIN)
+- **Manufacturing Feasibility** - 4-stage complex research
+- **Market Entry** - 4-stage complex research
+- **Document Review** - 3-stage expert validation
+
+### Phase 2: Subscription Foundation
 - **Plan Selection UI**: Clear tier comparison and signup flow
-- **Usage Tracking**: Certificate limits and usage dashboards  
+- **Usage Tracking**: Certificate limits and usage dashboards
 - **Billing Integration**: Stripe/payment processing
 - **Trial Management**: 14-day trial with conversion optimization
 
-### Phase 2: Service Integration Enhancement
+### Phase 3: Service Integration Enhancement
 - **In-App Service Requests**: One-click upgrade from DIY to expert
 - **Team Assignment Logic**: Route requests to Cristina vs Jorge automatically
 - **Service Delivery Tracking**: Status updates and completion notifications
 
-### Phase 3: Conversion Optimization
+### Phase 4: Conversion Optimization
 - **Smart Upgrade Prompts**: Context-aware service recommendations
 - **Usage Analytics**: Track where users struggle and offer help
 - **Success Metrics**: Certificate acceptance rates, user satisfaction scores
+
+### Implementation Strategy
+**Copy Working Pattern**: Use Supplier Sourcing dashboard as template
+- 4-Stage Complex → Manufacturing Feasibility, Market Entry
+- 3-Stage Validation → USMCA Certs, HS Classification, Doc Review
+- 2-Stage Direct → Monthly Support, Crisis Response
+- **Time to Build**: 1-2 days per dashboard (pattern reuse)
 
 ## Quality Standards (SLC v25.0.1)
 
@@ -245,4 +324,49 @@ Certificate Attempt → Complexity/Error → "Need Expert Help?" → Service Req
 
 ---
 
+## Service Workflow Architecture (Technical Implementation)
+
+### Workflow Pattern Categories
+
+#### **Pattern 1: Complex Research (4 Stages)**
+**Services**: Manufacturing Feasibility, Market Entry, Supplier Sourcing ✅
+```
+Stage 1: Client Requirements → IntakeFormModal
+Stage 2: AI Contact Discovery → /api/ai-[service]-discovery
+Stage 3: Expert Validation → Jorge's network + analysis
+Stage 4: AI Report Generation → Professional deliverable
+```
+
+#### **Pattern 2: Expert Validation (3 Stages)**
+**Services**: USMCA Certificates, HS Classification, Document Review
+```
+Stage 1: Client Documentation → Document upload modal
+Stage 2: Expert Review → Cristina's validation workflow
+Stage 3: Deliverable Generation → Certificate/Report PDF
+```
+
+#### **Pattern 3: Direct Service (2 Stages)**
+**Services**: Monthly Support, Crisis Response
+```
+Stage 1: Service Delivery → Live session/crisis resolution
+Stage 2: Summary & Follow-up → AI-generated summary
+```
+
+### Technical Components (Reusable)
+- **IntakeFormModal**: All client data collection
+- **AI Discovery APIs**: Contact/expert finding
+- **WorkflowModal**: 2/3/4 stage progression tracking
+- **Report Generator**: AI deliverable creation
+- **Document Upload**: Client evidence collection
+
+### Efficiency Architecture
+**Information Procurement vs Data Entry:**
+- ❌ Old Way: Jorge/Cristina type everything manually
+- ✅ New Way: Clients upload forms, AI discovers contacts, experts validate
+- **Result**: 67% time reduction, 3x capacity increase
+
+---
+
 **Key Insight**: This is a sophisticated hybrid model where the SaaS platform creates qualified leads for high-value expert services. Users start with self-service and naturally graduate to expert completion when they encounter complexity or risk. The $200 certificate pricing makes perfect sense as an upgrade from DIY attempts, especially when the platform pre-populates all the user's data to make expert delivery efficient.
+
+**Technical Advantage**: Working supplier sourcing pattern (4-stage complex research) serves as proven template for all other services. Simple copy-paste with service-specific field changes = rapid dashboard deployment.

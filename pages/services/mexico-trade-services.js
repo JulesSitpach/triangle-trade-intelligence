@@ -41,6 +41,9 @@ export default function MexicoTradeServices() {
     market_presence: '',
     target_regions: '',
     concerns: '',
+    // Manufacturing feasibility fields
+    preferred_locations: '',
+    setup_timeline: '',
     // Partnership intelligence fields
     focus_areas: '',
     company_size: '',
@@ -64,30 +67,28 @@ export default function MexicoTradeServices() {
       // Load consultation options for Jorge's services
       setServiceTypes([
         {
-          id: 'supplier-vetting',
-          name: 'Mexico Supplier Vetting & Introduction',
-          price: 750,
-          description: 'Professional vetting and introduction to verified Mexico suppliers',
+          id: 'Supplier Sourcing',
+          name: '🔍 Supplier Sourcing',
+          price: 450,
+          description: 'Find and vet qualified Mexico suppliers for your product needs',
           duration: '2-3 weeks',
-          consultation_focus: 'Understanding your supplier needs and product requirements'
+          consultation_focus: 'Understanding your supplier requirements and quality standards'
         },
         {
-          id: 'market-entry',
-          name: 'Mexico Market Entry Strategy',
-          price: 400,
-          pricing_type: 'hourly',
-          description: 'Strategic consultation for entering Mexico market',
-          duration: 'As needed',
-          consultation_focus: 'Assessing your market entry readiness and strategy'
+          id: 'Manufacturing Feasibility',
+          name: '🏭 Manufacturing Feasibility',
+          price: 650,
+          description: 'Location recommendations, regulatory overview, and cost analysis for Mexico manufacturing',
+          duration: '3-4 weeks',
+          consultation_focus: 'Assessing your manufacturing needs and investment capacity'
         },
         {
-          id: 'partnership-intelligence',
-          name: 'Partnership Intelligence Briefing',
-          price: 300,
-          pricing_type: 'monthly',
-          description: 'Monthly intelligence reports on Mexico trade opportunities',
-          duration: 'Ongoing subscription',
-          consultation_focus: 'Understanding your intelligence needs and business goals'
+          id: 'Market Entry',
+          name: '🚀 Market Entry',
+          price: 550,
+          description: 'Strategic market entry planning with partnership introductions',
+          duration: '2-3 weeks',
+          consultation_focus: 'Understanding your market entry goals and partnership needs'
         }
       ]);
 
@@ -176,7 +177,8 @@ export default function MexicoTradeServices() {
           country: '', industry: '', project_description: '', timeline: '', budget_range: '',
           priority: 'medium', referral_source: '', requirements: '',
           volume: '', quality_standards: '', challenges: '', market_presence: '', target_regions: '',
-          concerns: '', focus_areas: '', company_size: '', frequency: '', geographic_focus: '',
+          concerns: '', preferred_locations: '', setup_timeline: '',
+          focus_areas: '', company_size: '', frequency: '', geographic_focus: '',
           intelligence_priorities: ''
         });
         setSelectedService('');
@@ -362,11 +364,11 @@ export default function MexicoTradeServices() {
               </div>
 
               {/* Service-Specific Questions */}
-              {selectedService === 'supplier-vetting' && (
+              {selectedService === 'Supplier Sourcing' && (
                 <div className="admin-table-container">
                   <div className="card-header">
-                    <h3 className="content-card-title">Supplier Vetting Information</h3>
-                    <p className="card-description">Help Jorge prepare for your supplier vetting consultation</p>
+                    <h3 className="content-card-title">Supplier Sourcing Information</h3>
+                    <p className="card-description">Help Jorge prepare for your supplier sourcing consultation</p>
                   </div>
 
                   <div className="form-group">
@@ -448,7 +450,7 @@ export default function MexicoTradeServices() {
                 </div>
               )}
 
-              {selectedService === 'market-entry' && (
+              {selectedService === 'Market Entry' && (
                 <div className="admin-table-container">
                   <div className="card-header">
                     <h3 className="content-card-title">Market Entry Strategy Information</h3>
@@ -538,76 +540,76 @@ export default function MexicoTradeServices() {
                 </div>
               )}
 
-              {selectedService === 'partnership-intelligence' && (
+              {selectedService === 'Manufacturing Feasibility' && (
                 <div className="admin-table-container">
                   <div className="card-header">
-                    <h3 className="content-card-title">Partnership Intelligence Information</h3>
-                    <p className="card-description">Help Jorge prepare for your Mexico partnership intelligence consultation</p>
+                    <h3 className="content-card-title">Manufacturing Feasibility Information</h3>
+                    <p className="card-description">Help Jorge prepare for your Mexico manufacturing feasibility consultation</p>
                   </div>
 
                   <div className="form-group">
-                    <label className="font-label">What type of Mexico partnerships are you seeking? <span className="text-danger">*</span></label>
+                    <label className="font-label">What product(s) are you considering manufacturing in Mexico? <span className="text-danger">*</span></label>
                     <textarea
                       className={`filter-select ${formErrors.project_description ? 'border-danger' : ''}`}
                       rows="3"
                       value={formData.project_description}
                       onChange={(e) => handleInputChange('project_description', e.target.value)}
-                      placeholder="Describe the types of business partnerships, joint ventures, or collaborations you're interested in..."
+                      placeholder="Describe the product(s), manufacturing requirements, and any specific technical considerations..."
                     />
                     {formErrors.project_description && <div className="badge-danger">{formErrors.project_description}</div>}
                   </div>
 
                   <div className="grid-2-cols">
                     <div className="form-group">
-                      <label className="font-label">Business focus areas</label>
+                      <label className="font-label">Production volume</label>
                       <input
                         type="text"
                         className="filter-select"
-                        value={formData.focus_areas}
-                        onChange={(e) => handleInputChange('focus_areas', e.target.value)}
-                        placeholder="e.g., Manufacturing, Distribution, Technology"
+                        value={formData.volume}
+                        onChange={(e) => handleInputChange('volume', e.target.value)}
+                        placeholder="e.g., 50,000 units/month"
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="font-label">Company size preference</label>
+                      <label className="font-label">Investment budget range</label>
                       <select
                         className="filter-select"
-                        value={formData.company_size}
-                        onChange={(e) => handleInputChange('company_size', e.target.value)}
+                        value={formData.budget_range}
+                        onChange={(e) => handleInputChange('budget_range', e.target.value)}
                       >
-                        <option value="">Select company size</option>
-                        <option value="startup">Startups/Small business</option>
-                        <option value="mid">Mid-size companies</option>
-                        <option value="large">Large enterprises</option>
-                        <option value="any">Any size</option>
+                        <option value="">Select budget range</option>
+                        <option value="under-500k">Under $500K</option>
+                        <option value="500k-1m">$500K - $1M</option>
+                        <option value="1m-5m">$1M - $5M</option>
+                        <option value="over-5m">Over $5M</option>
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label className="font-label">Intelligence frequency needed</label>
-                      <select
-                        className="filter-select"
-                        value={formData.frequency}
-                        onChange={(e) => handleInputChange('frequency', e.target.value)}
-                      >
-                        <option value="">Select frequency</option>
-                        <option value="weekly">Weekly updates</option>
-                        <option value="biweekly">Bi-weekly updates</option>
-                        <option value="monthly">Monthly reports</option>
-                        <option value="quarterly">Quarterly briefings</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="font-label">Geographic focus in Mexico</label>
+                      <label className="font-label">Preferred manufacturing locations</label>
                       <input
                         type="text"
                         className="filter-select"
-                        value={formData.geographic_focus}
-                        onChange={(e) => handleInputChange('geographic_focus', e.target.value)}
-                        placeholder="e.g., Border regions, Mexico City, Nationwide"
+                        value={formData.preferred_locations}
+                        onChange={(e) => handleInputChange('preferred_locations', e.target.value)}
+                        placeholder="e.g., Border regions, Guadalajara, Mexico City"
                       />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="font-label">Timeline for manufacturing setup</label>
+                      <select
+                        className="filter-select"
+                        value={formData.setup_timeline}
+                        onChange={(e) => handleInputChange('setup_timeline', e.target.value)}
+                      >
+                        <option value="">Select timeline</option>
+                        <option value="immediate">Immediate (1-3 months)</option>
+                        <option value="short-term">Short-term (3-6 months)</option>
+                        <option value="medium-term">Medium-term (6-12 months)</option>
+                        <option value="long-term">Long-term (12+ months)</option>
+                      </select>
                     </div>
                   </div>
 

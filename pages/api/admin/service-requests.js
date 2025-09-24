@@ -37,7 +37,11 @@ async function handleCreateServiceRequest(req, res) {
       goals,
       timeline,
       budget_range,
-      // Service-specific fields
+      // Service-specific fields (from form)
+      project_description,
+      volume,
+      quality_standards,
+      challenges,
       product_description,
       target_regions,
       concerns,
@@ -49,7 +53,15 @@ async function handleCreateServiceRequest(req, res) {
       company_size_preference,
       geographic_focus,
       intelligence_frequency,
-      specific_priorities
+      specific_priorities,
+      requirements,
+      market_presence,
+      focus_areas,
+      company_size,
+      frequency,
+      intelligence_priorities,
+      preferred_locations,
+      setup_timeline
     } = req.body;
 
     // Auto-assign to Jorge (Mexico Trade Specialist)
@@ -77,20 +89,25 @@ async function handleCreateServiceRequest(req, res) {
 
       // Service-specific data stored as JSON
       service_details: {
-        current_challenges,
+        current_challenges: current_challenges || challenges,
         goals,
-        product_description,
-        target_regions,
+        product_description: product_description || project_description,
+        volume,
+        quality_standards,
+        target_regions: target_regions || preferred_locations,
         concerns,
         products_for_mexico,
-        current_presence,
+        current_presence: current_presence || market_presence,
         investment_budget,
         partnership_types,
-        business_focus,
-        company_size_preference,
+        business_focus: business_focus || focus_areas,
+        company_size_preference: company_size_preference || company_size,
         geographic_focus,
-        intelligence_frequency,
-        specific_priorities
+        intelligence_frequency: intelligence_frequency || frequency,
+        specific_priorities: specific_priorities || intelligence_priorities,
+        requirements,
+        preferred_locations,
+        setup_timeline
       },
 
       // Consultation scheduling info
@@ -160,6 +177,13 @@ async function handleGetServiceRequests(req, res) {
 
       if (data && data.length > 0) {
         requests = data;
+
+        // Filter Jorge's services to only his 3 services
+        if (assigned_to === 'Jorge') {
+          const jorgeServices = ['Supplier Sourcing', 'Manufacturing Feasibility', 'Market Entry'];
+          requests = requests.filter(r => jorgeServices.includes(r.service_type));
+        }
+
         console.log(`📊 Loaded ${requests.length} service requests from database`);
       } else {
         throw new Error('No database records');

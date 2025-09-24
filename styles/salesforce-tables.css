@@ -94,6 +94,10 @@
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #f3f4f6;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
 }
 
 .admin-table tr:hover {
@@ -201,6 +205,11 @@
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.prefilled-field {
+  background: #f0fdf4;
+  border-color: #86efac !important;
 }
 
 .checklist {
