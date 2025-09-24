@@ -171,11 +171,25 @@ export function useWorkflowState() {
 
     try {
       const workflowResult = await workflowService.processCompleteWorkflow(formData);
-      
+
       if (workflowResult.success) {
         // The API returns the entire response object as the results
         // It includes: company, product, usmca, savings, certificate fields
         setResults(workflowResult);
+
+        // Save to localStorage for certificate completion page
+        const workflowData = {
+          company: workflowResult.company,
+          product: workflowResult.product,
+          usmca: workflowResult.usmca,
+          trust: workflowResult.trust,
+          components: formData.component_origins,
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
+        console.log('✅ Workflow data saved to localStorage for certificate page');
+
         setCurrentStep(5); // Results step (updated for 5-step workflow)
       } else {
         setError(workflowResult.error || 'Processing failed');
