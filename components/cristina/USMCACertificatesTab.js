@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { richDataConnector } from '../../lib/utils/rich-data-connector.js';
-import { ManufacturingFeasibilityAIButton } from '../../components/shared/DynamicAIReportButton';
+import { USMCACertificateAIButton } from '../../components/shared/DynamicAIReportButton';
 import IntakeFormModal from '../shared/IntakeFormModal';
 import { getIntakeFormByService } from '../../config/service-intake-forms';
 
-export default function ManufacturingFeasibilityTab() {
-  const [feasibilityRequests, setFeasibilityRequests] = useState([]);
+export default function USMCACertificatesTab() {
+  const [certificateRequests, setCertificateRequests] = useState([]);
   const [intakeFormModal, setIntakeFormModal] = useState({
     isOpen: false,
     clientInfo: null
   });
 
-  // Feasibility Workflow Modal State
-  const [feasibilityModal, setFeasibilityModal] = useState({
+  // Certificate Workflow Modal State
+  const [certificateModal, setCertificateModal] = useState({
     isOpen: false,
     request: null,
     currentStage: 1,
@@ -48,39 +48,39 @@ export default function ManufacturingFeasibilityTab() {
   });
 
   useEffect(() => {
-    loadFeasibilityRequests();
+    loadCertificateRequests();
   }, []);
 
-  const loadFeasibilityRequests = async () => {
+  const loadCertificateRequests = async () => {
     try {
-      console.log('📊 Loading manufacturing feasibility data using RichDataConnector...');
+      console.log('📊 Loading USMCA certificate data using RichDataConnector...');
 
-      // Get comprehensive Jorge dashboard data with intelligent categorization
-      const jorgeData = await richDataConnector.getJorgesDashboardData();
+      // Get comprehensive Cristina dashboard data with intelligent categorization
+      const cristinaData = await richDataConnector.getCristinasDashboardData();
 
-      if (jorgeData && jorgeData.service_requests) {
-        // Use intelligent categorization for manufacturing feasibility
-        const feasibilityRequests = jorgeData.service_requests.manufacturing_feasibility || [];
+      if (cristinaData && cristinaData.service_requests) {
+        // Use intelligent categorization for USMCA certificates
+        const certificateRequests = cristinaData.service_requests.usmca_certificates || [];
 
         // Enhance data with normalized display properties
-        const enhancedRequests = feasibilityRequests.map(request => ({
+        const enhancedRequests = certificateRequests.map(request => ({
           ...request,
           clientName: request.company_name || request.client_name || 'Unknown Client',
-          displayTitle: request.service_details?.goals || request.service_type || 'Manufacturing feasibility request',
+          displayTitle: request.service_details?.goals || request.service_type || 'USMCA certificate request',
           displayStatus: request.status || 'pending',
           displayTimeline: request.target_completion || request.urgency || 'Standard delivery',
-          feasibility_score: request.feasibility_score || (request.status === 'completed' ? `${Math.floor(Math.random() * 20) + 70}%` : 'Pending')
+          certificate_status: request.certificate_status || (request.status === 'completed' ? 'Certified' : 'Pending')
         }));
 
-        setFeasibilityRequests(enhancedRequests);
-        console.log(`✅ Loaded ${enhancedRequests.length} manufacturing feasibility requests from rich data connector`);
+        setCertificateRequests(enhancedRequests);
+        console.log(`✅ Loaded ${enhancedRequests.length} USMCA certificate requests from rich data connector`);
       } else {
-        console.log('📋 No manufacturing feasibility requests found in comprehensive data');
-        setFeasibilityRequests([]);
+        console.log('📋 No USMCA certificate requests found in comprehensive data');
+        setCertificateRequests([]);
       }
     } catch (error) {
-      console.error('❌ Error loading manufacturing feasibility requests:', error);
-      setFeasibilityRequests([]);
+      console.error('❌ Error loading USMCA certificate requests:', error);
+      setCertificateRequests([]);
     }
   };
 
@@ -92,17 +92,17 @@ export default function ManufacturingFeasibilityTab() {
         body: JSON.stringify({ id: requestId, status: newStatus })
       });
       if (response.ok) {
-        loadFeasibilityRequests();
+        loadCertificateRequests();
       }
     } catch (error) {
       console.error('Error updating status:', error);
     }
   };
 
-  const startFeasibilityWorkflow = (request) => {
+  const startCertificateWorkflow = (request) => {
     const isFormCompleted = request.status === 'Stage 1: Form Completed' || request.intake_form_completed;
 
-    setFeasibilityModal({
+    setSourcingModal({
       isOpen: true,
       request: request,
       currentStage: 1,
@@ -110,53 +110,53 @@ export default function ManufacturingFeasibilityTab() {
       collectedData: {
         clientForm: isFormCompleted ? 'completed' : null,
         clientFormData: request.intake_form_data || null,
-        locationAnalysis: [],
-        costAnalysis: '',
+        contactResponses: [],
+        validationNotes: '',
         reportGenerated: false
       }
     });
   };
 
-  const nextFeasibilityStage = () => {
-    if (feasibilityModal.currentStage < 4) {
-      setFeasibilityModal({
-        ...feasibilityModal,
-        currentStage: feasibilityModal.currentStage + 1
+  const nextCertificateStage = () => {
+    if (certificateModal.currentStage < 3) {
+      setSourcingModal({
+        ...certificateModal,
+        currentStage: certificateModal.currentStage + 1
       });
     }
   };
 
-  const prevFeasibilityStage = () => {
-    if (feasibilityModal.currentStage > 1) {
-      setFeasibilityModal({
-        ...feasibilityModal,
-        currentStage: feasibilityModal.currentStage - 1
+  const prevCertificateStage = () => {
+    if (certificateModal.currentStage > 1) {
+      setSourcingModal({
+        ...certificateModal,
+        currentStage: certificateModal.currentStage - 1
       });
     }
   };
 
-  const updateFeasibilityFormData = (field, value) => {
-    setFeasibilityModal({
-      ...feasibilityModal,
+  const updateCertificateFormData = (field, value) => {
+    setSourcingModal({
+      ...certificateModal,
       formData: {
-        ...feasibilityModal.formData,
+        ...certificateModal.formData,
         [field]: value
       }
     });
   };
 
-  const completeFeasibility = () => {
-    console.log('Completing feasibility for:', feasibilityModal.request?.company_name);
-    handleUpdateStatus(feasibilityModal.request?.id, 'completed');
-    setFeasibilityModal({
+  const completeCertificate = () => {
+    console.log('Completing sourcing for:', certificateModal.request?.company_name);
+    handleUpdateStatus(certificateModal.request?.id, 'completed');
+    setSourcingModal({
       isOpen: false,
       request: null,
       currentStage: 1,
       formData: {},
       collectedData: {
         clientForm: null,
-        locationAnalysis: [],
-        costAnalysis: '',
+        contactResponses: [],
+        validationNotes: '',
         reportGenerated: false
       }
     });
@@ -164,15 +164,15 @@ export default function ManufacturingFeasibilityTab() {
 
   // Information Procurement Helper Functions
   const sendClientForm = async () => {
-    console.log('📧 Opening detailed manufacturing feasibility intake form for client...');
+    console.log('📧 Opening detailed supplier sourcing intake form for client...');
     setIntakeFormModal({
       isOpen: true,
-      clientInfo: feasibilityModal.request
+      clientInfo: certificateModal.request
     });
   };
 
   const handleSendFormToClient = async (formInfo) => {
-    console.log('📧 Sending manufacturing feasibility intake form to client:', formInfo);
+    console.log('📧 Sending supplier sourcing intake form to client:', formInfo);
 
     try {
       const response = await fetch('/api/email-intake-form', {
@@ -183,7 +183,7 @@ export default function ManufacturingFeasibilityTab() {
           clientName: formInfo.clientName,
           formType: formInfo.formType,
           formData: formInfo.formData,
-          requestId: feasibilityModal.request?.id
+          requestId: certificateModal.request?.id
         })
       });
 
@@ -213,7 +213,7 @@ export default function ManufacturingFeasibilityTab() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: feasibilityModal.request?.id,
+          id: certificateModal.request?.id,
           stage1_intake_data: responseInfo.responseData,
           current_stage: 2,
           status: 'stage_2_supplier_search'
@@ -240,11 +240,11 @@ export default function ManufacturingFeasibilityTab() {
     setIntakeFormModal({ isOpen: false, clientInfo: null });
   };
 
-  const generateFeasibilityReport = async (request, pricing = null) => {
+  const generateCertificateReport = async (request, pricing = null) => {
     setAiReportModal({
       isOpen: true,
       loading: true,
-      type: 'manufacturing_feasibility',
+      type: 'usmca_certificate',
       report: null,
       request: request
     });
@@ -253,106 +253,89 @@ export default function ManufacturingFeasibilityTab() {
       // Simulate AI report generation
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      const reportContent = `# Mexico Manufacturing Feasibility Report - ${request.company_name}
+      const reportContent = `# USMCA Certificate of Origin - ${request.company_name}
 
-## Executive Summary
-Comprehensive manufacturing feasibility analysis completed for ${request.company_name} Mexico operations.
+## Certificate Status
+**USMCA Qualification:** ✅ APPROVED
+**Certification Date:** ${new Date().toLocaleDateString()}
+**Certificate Number:** ${request.id || 'USMCA-2025-' + Math.floor(Math.random() * 10000)}
 
-## Feasibility Assessment: ${request.status?.toUpperCase()}
+## Product Information
+**Product Description:** ${request.displayTitle || 'Electronic Components'}
+**HS Code:** 8517.62.00
+**Country of Origin:** Mexico
+**Exporter:** ${request.company_name}
 
-## Recommended Locations Identified: 3 regions
+## USMCA Compliance Analysis
+**Regional Value Content (RVC):** 68% ✅ (Meets 62.5% threshold)
+**Production Wholly Obtained:** Qualified components verified
+**De Minimis Rule:** All non-originating materials <10% of transaction value
 
-### Primary Recommendation: Monterrey, Nuevo León
-**Feasibility Score: 92/100**
-- **Infrastructure**: World-class industrial parks with existing facilities
-- **Labor Pool**: 500,000+ skilled manufacturing workers
-- **Logistics**: Direct highway access to US border (3-4 hours)
-- **Utilities**: Reliable power, water, natural gas infrastructure
-- **Investment Incentives**: State tax breaks, federal IMMEX program benefits
+### Component Origin Breakdown:
+- **Mexico-sourced materials:** 48% (Primary compliance driver)
+- **US-sourced materials:** 20% (USMCA qualifying)
+- **Canada-sourced materials:** 0%
+- **Non-originating materials:** 32% (Below de minimis threshold)
 
-### Secondary Option: Querétaro
-**Feasibility Score: 88/100**
-- **Infrastructure**: Modern aerospace and automotive clusters
-- **Labor Pool**: Highly educated workforce, technical universities nearby
-- **Logistics**: Central Mexico location, 2 hours to Mexico City airport
-- **Utilities**: Stable infrastructure, renewable energy options available
-- **Investment Incentives**: Competitive incentive packages
+## Tariff Benefits
+**Duty Savings:** $24,500 annually (based on $500K shipment value)
+**MFN Tariff Rate Avoided:** 4.9%
+**USMCA Preferential Rate:** 0% (Duty-free)
 
-### Backup Option: Tijuana, Baja California
-**Feasibility Score: 85/100**
-- **Infrastructure**: Established maquiladora zones
-- **Labor Pool**: Experienced cross-border workforce
-- **Logistics**: Same-day US border crossing capability
-- **Utilities**: US-grade infrastructure standards
-- **Investment Incentives**: Border region special programs
+## Certificate Validation
+**Cristina's Expert Review:** ✅ Compliant
+**HS Classification Verified:** ✅ Accurate
+**Origin Documentation:** ✅ Complete
+**Production Process Review:** ✅ Qualifies under USMCA
 
-## Setup Cost Analysis
-**Total Investment Range: $2.5M - $4.8M**
-- **Land/Facility Lease**: $350K-600K annually
-- **Equipment & Machinery**: $1.2M-2.5M
-- **Initial Inventory**: $400K-800K
-- **Working Capital**: $500K-900K
+## Supporting Documentation Verified
+1. ✅ Bill of Materials (BOM) with origin breakdown
+2. ✅ Manufacturing process flowchart
+3. ✅ Supplier declarations for non-originating materials
+4. ✅ Production cost breakdown (labor, materials, overhead)
+5. ✅ Quality certifications (ISO 9001)
 
-## Operating Cost Projections (Annual)
-- **Labor Costs**: 60% lower than US equivalent
-- **Utilities**: $180K-250K (competitive energy rates)
-- **Compliance/Permits**: $50K-80K
-- **Total Operating Savings vs US**: 40-50% reduction
+## Certificate Deliverables
+**Format:** PDF Certificate of Origin (USMCA compliant)
+**Validity Period:** 4 years from certification date
+**Blanket Certificate:** Approved for multiple shipments
+**Language:** English & Spanish versions included
 
-## USMCA Benefits Analysis
-**Duty-Free Qualification**: YES (100% compliance achievable)
-- **Local Content Requirements**: 60% achievable with local suppliers
-- **Labor Value Content**: 40% achievable with Mexico manufacturing
-- **Annual Tariff Savings**: Estimated $400K-750K
-
-## Risk Assessment
-**Overall Feasibility Risk**: LOW-MEDIUM
-- **Political/Regulatory Risk**: Low (stable USMCA framework)
-- **Infrastructure Risk**: Low (proven industrial corridors)
-- **Labor Availability Risk**: Low (abundant skilled workforce)
-- **Supply Chain Risk**: Medium (manageable with proper planning)
-
-## Implementation Timeline
-**Phase 1 (Months 1-3):** Site selection, legal entity formation, permits
-**Phase 2 (Months 4-6):** Facility setup, equipment installation
-**Phase 3 (Months 7-9):** Workforce hiring and training
-**Phase 4 (Month 10+):** Production ramp-up and optimization
+## Customs Usage Instructions
+1. Present certificate at time of importation
+2. Valid for all shipments matching certified product description
+3. Importer must maintain certificate for 5 years
+4. No additional origin verification required at border
 
 ## Recommended Next Steps
-1. ✅ PRIORITY: Site visit to Monterrey industrial parks
-2. Engage legal counsel for entity formation
-3. Begin supplier relationship development
-4. Initiate IMMEX program application
-5. Develop detailed workforce hiring plan
-
-## Financial Projections
-- **Year 1 ROI**: Break-even achievable
-- **Year 2-3 ROI**: 25-35% cost savings realized
-- **5-Year NPV**: Positive $3.2M-5.8M vs US manufacturing
-- **Payback Period**: 18-24 months
+1. ✅ PRIORITY: Distribute certificate to US/Canadian importers
+2. Train logistics team on proper certificate usage
+3. Establish quarterly compliance review process
+4. Monitor regulatory changes to USMCA rules
+5. Renew certificate 6 months before expiration
 
 ---
-*Generated by Jorge's AI Assistant on ${new Date().toLocaleDateString()}*
-*Report Value: ${pricing?.formatted || '$650'} - Mexico Manufacturing Feasibility Analysis*
-*Locations Analyzed: ${new Date().toLocaleDateString()}*
+*Certified by Cristina Rodriguez, Licensed Customs Broker on ${new Date().toLocaleDateString()}*
+*Service Value: ${pricing?.formatted || '$200'} - USMCA Certificate Generation*
+*Certificate Valid Through: ${new Date(new Date().setFullYear(new Date().getFullYear() + 4)).toLocaleDateString()}*
 ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` : ''}*`;
 
       setAiReportModal(prev => ({
         ...prev,
         loading: false,
         report: {
-          deliverable_type: 'Mexico Manufacturing Feasibility Report',
-          billable_value: pricing?.price || 650,
+          deliverable_type: 'USMCA Certificate of Origin',
+          billable_value: pricing?.price || 200,
           content: reportContent,
           generated_at: new Date().toISOString(),
-          locations_analyzed: 3,
-          primary_recommendation: 'Monterrey',
+          certificate_number: request.id || 'USMCA-2025-' + Math.floor(Math.random() * 10000),
+          qualification_status: 'APPROVED',
           pricing_info: pricing
         }
       }));
 
     } catch (error) {
-      console.error('AI feasibility report error:', error);
+      console.error('AI certificate report error:', error);
       setAiReportModal(prev => ({
         ...prev,
         loading: false
@@ -368,9 +351,9 @@ ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` 
   //   const formData = new FormData();
   //   formData.append('file', file);
   //   formData.append('field', field);
-  //   formData.append('request_id', feasibilityModal.request?.id || 'temp');
+  //   formData.append('request_id', certificateModal.request?.id || 'temp');
   //   formData.append('stage', stage);
-  //   formData.append('service_type', 'Manufacturing Feasibility');
+  //   formData.append('service_type', 'Supplier Sourcing');
 
   //   try {
   //     const response = await fetch('/api/upload-document', {
@@ -435,7 +418,7 @@ ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` 
   };
 
   const createGmailDraft = (supplier) => {
-    const clientReqs = feasibilityModal?.collectedData?.clientFormData || {};
+    const clientReqs = certificateModal?.collectedData?.clientFormData || {};
 
     const volumeText = clientReqs.annual_volume
       ? `${clientReqs.annual_volume} (annual)`
@@ -445,7 +428,7 @@ ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` 
 
     const emailBody = `Dear ${supplier.name} Team,
 
-I am Jorge Martinez, a Mexico trade specialist working with ${feasibilityModal.request?.company_name}. We are seeking a reliable supplier for the following requirements:
+I am Jorge Martinez, a Mexico trade specialist working with ${certificateModal.request?.company_name}. We are seeking a reliable supplier for the following requirements:
 
 **Product Needed:** ${clientReqs.product_description || 'As discussed'}
 **Volume Requirements:** ${volumeText}
@@ -470,7 +453,7 @@ Triangle Intelligence Platform
 Email: triangleintel@gmail.com`;
 
     // Create Gmail draft URL
-    const gmailDraftUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(`Supplier Capability Inquiry - ${feasibilityModal.request?.company_name}`)}&body=${encodeURIComponent(emailBody)}`;
+    const gmailDraftUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${encodeURIComponent(`Supplier Capability Inquiry - ${certificateModal.request?.company_name}`)}&body=${encodeURIComponent(emailBody)}`;
 
     window.open(gmailDraftUrl, '_blank');
 
@@ -522,7 +505,7 @@ Email: triangleintel@gmail.com`;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('supplier_name', supplier.name);
-    formData.append('request_id', feasibilityModal.request?.id);
+    formData.append('request_id', certificateModal.request?.id);
 
     try {
       const response = await fetch('/api/upload-supplier-response', {
@@ -552,28 +535,28 @@ Email: triangleintel@gmail.com`;
     <>
       <div className="tab-content">
         <div className="section-header">
-          <h2 className="section-title">🔍 Manufacturing Feasibility</h2>
+          <h2 className="section-title">📋 USMCA Certificates</h2>
         </div>
 
         <table className="admin-table">
           <thead>
             <tr>
               <th>Client Name</th>
-              <th>Product Requirements</th>
+              <th>Product/Service</th>
               <th>Status</th>
-              <th>Feasibility Score</th>
+              <th>Certificate Status</th>
               <th>Timeline</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {feasibilityRequests.length === 0 ? (
+            {certificateRequests.length === 0 ? (
               <tr>
                 <td colSpan="6" className="empty-state">
-                  No manufacturing feasibility requests found. Requests will appear here when clients need Mexico manufacturing feasibility analysis.
+                  No USMCA certificate requests found. Requests will appear here when clients need certificate generation.
                 </td>
               </tr>
-            ) : feasibilityRequests.map(request => (
+            ) : certificateRequests.map(request => (
               <tr key={request.id}>
                 <td>{request.clientName}</td>
                 <td>{request.displayTitle}</td>
@@ -582,19 +565,19 @@ Email: triangleintel@gmail.com`;
                     {request.displayStatus}
                   </span>
                 </td>
-                <td>{request.feasibility_score || 'Pending'}</td>
+                <td>{request.certificate_status || 'Pending'}</td>
                 <td>{request.displayTimeline}</td>
                 <td>
                   <div className="action-buttons">
                     <button
                       className="btn-action btn-primary"
-                      onClick={() => startFeasibilityWorkflow(request)}
+                      onClick={() => startCertificateWorkflow(request)}
                     >
                       {request.displayStatus === 'completed' ? '👁️ View Workflow' : '🚀 Start Workflow'}
                     </button>
-                    <ManufacturingFeasibilityAIButton
+                    <USMCACertificateAIButton
                       request={request}
-                      onClick={generateFeasibilityReport}
+                      onClick={generateCertificateReport}
                     />
                   </div>
                 </td>
@@ -604,15 +587,15 @@ Email: triangleintel@gmail.com`;
         </table>
       </div>
 
-      {/* Manufacturing Feasibility Workflow Modal */}
-      {feasibilityModal.isOpen && (
+      {/* Supplier Sourcing Workflow Modal */}
+      {certificateModal.isOpen && (
         <div className="modal-overlay">
           <div className="modal-content sourcing-modal">
             <div className="modal-header">
-              <h2>🔍 Mexico Manufacturing Feasibility Workflow</h2>
+              <h2>📋 USMCA Certificate Generation Workflow</h2>
               <button
                 className="modal-close"
-                onClick={() => setFeasibilityModal({ isOpen: false, request: null, currentStage: 1, formData: {} })}
+                onClick={() => setCertificateModal({ isOpen: false, request: null, currentStage: 1, formData: {} })}
               >
                 ×
               </button>
@@ -620,22 +603,20 @@ Email: triangleintel@gmail.com`;
 
             <div className="verification-progress">
               <div className="progress-steps">
-                <div className={`step ${feasibilityModal.currentStage >= 1 ? 'active' : ''}`}>1. Requirements Collection</div>
-                <div className={`step ${feasibilityModal.currentStage >= 2 ? 'active' : ''}`}>2. Location Analysis</div>
-                <div className={`step ${feasibilityModal.currentStage >= 3 ? 'active' : ''}`}>3. Cost Analysis</div>
-                <div className={`step ${feasibilityModal.currentStage >= 4 ? 'active' : ''}`}>4. Feasibility Report</div>
+                <div className={`step ${certificateModal.currentStage >= 1 ? 'active' : ''}`}>1. Product Documentation</div>
+                <div className={`step ${certificateModal.currentStage >= 2 ? 'active' : ''}`}>2. Expert Validation</div>
+                <div className={`step ${certificateModal.currentStage >= 3 ? 'active' : ''}`}>3. Certificate Generation</div>
               </div>
             </div>
 
             <div className="verification-form">
-              <h3>Stage {feasibilityModal.currentStage}: {
-                feasibilityModal.currentStage === 1 ? 'Requirements Collection & Investment Goals' :
-                feasibilityModal.currentStage === 2 ? 'Mexico Location Analysis & Infrastructure' :
-                feasibilityModal.currentStage === 3 ? 'Cost Analysis & Financial Projections' :
-                'Final Feasibility Report & Recommendations'
+              <h3>Stage {certificateModal.currentStage}: {
+                certificateModal.currentStage === 1 ? 'Product Documentation & USMCA Requirements' :
+                certificateModal.currentStage === 2 ? 'Cristina\'s Expert Validation & Compliance Check' :
+                'Final Certificate Generation & Delivery'
               }</h3>
 
-              {feasibilityModal.currentStage === 1 && (
+              {certificateModal.currentStage === 1 && (
                 <div className="document-collection-grid">
                   <h4>📧 Stage 1 - Client Requirements Collection</h4>
                   <p style={{color: '#6b7280', marginBottom: '1rem'}}>
@@ -646,7 +627,7 @@ Email: triangleintel@gmail.com`;
                     <button
                       className="btn-action btn-primary"
                       onClick={sendClientForm}
-                      disabled={feasibilityModal?.collectedData?.clientForm}
+                      disabled={certificateModal?.collectedData?.clientForm}
                     >
                       👁️ Preview & Send Form
                     </button>
@@ -655,17 +636,17 @@ Email: triangleintel@gmail.com`;
                   <div className="summary-grid">
                     <div className="summary-stat">
                       <div className="stat-number">
-                        {feasibilityModal?.collectedData?.clientForm === 'completed' ? '✅' :
-                         feasibilityModal?.collectedData?.clientForm === 'sent' ? '📧' : '⏳'}
+                        {certificateModal?.collectedData?.clientForm === 'completed' ? '✅' :
+                         certificateModal?.collectedData?.clientForm === 'sent' ? '📧' : '⏳'}
                       </div>
                       <div className="stat-label">
-                        {feasibilityModal?.collectedData?.clientForm === 'completed' ? 'Response Uploaded' :
-                         feasibilityModal?.collectedData?.clientForm === 'sent' ? 'Form Sent' : 'Not Started'}
+                        {certificateModal?.collectedData?.clientForm === 'completed' ? 'Response Uploaded' :
+                         certificateModal?.collectedData?.clientForm === 'sent' ? 'Form Sent' : 'Not Started'}
                       </div>
                     </div>
                   </div>
 
-                  {feasibilityModal?.collectedData?.clientForm === 'completed' && (
+                  {certificateModal?.collectedData?.clientForm === 'completed' && (
                     <div className="form-group">
                       <label>📋 Client&apos;s Completed Form Responses</label>
                       <div style={{padding: '1rem', background: '#f3f4f6', borderRadius: '8px', marginBottom: '1rem'}}>
@@ -674,7 +655,7 @@ Email: triangleintel@gmail.com`;
                       </div>
                       <textarea
                         className="consultation-textarea"
-                        value={JSON.stringify(feasibilityModal?.collectedData?.clientFormData || {}, null, 2)}
+                        value={JSON.stringify(certificateModal?.collectedData?.clientFormData || {}, null, 2)}
                         readOnly
                         rows={10}
                         style={{fontFamily: 'monospace', fontSize: '0.85rem'}}
@@ -692,19 +673,19 @@ Email: triangleintel@gmail.com`;
                 </div>
               )}
 
-              {feasibilityModal.currentStage === 2 && (
+              {certificateModal.currentStage === 2 && (
                 <div className="document-collection-grid">
                   <h4>🔍 Stage 2 - Contact Discovery & Information Requests</h4>
                   <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>AI-powered supplier discovery based on client requirements</p>
 
-                  {feasibilityModal?.collectedData?.clientFormData && (
+                  {certificateModal?.collectedData?.clientFormData && (
                     <div className="form-group">
                       <label>📋 Client Requirements</label>
                       <div style={{padding: '1rem', background: '#f0f9ff', borderRadius: '8px'}}>
                         <div style={{fontSize: '0.9rem', color: '#374151'}}>
-                          <p style={{margin: '0.25rem 0'}}><strong>Product:</strong> {feasibilityModal.collectedData.clientFormData.product_description || 'Not specified'}</p>
-                          <p style={{margin: '0.25rem 0'}}><strong>Volume:</strong> {feasibilityModal.collectedData.clientFormData.volume || 'Not specified'}</p>
-                          <p style={{margin: '0.25rem 0'}}><strong>Quality:</strong> {feasibilityModal.collectedData.clientFormData.quality_standards || 'Not specified'}</p>
+                          <p style={{margin: '0.25rem 0'}}><strong>Product:</strong> {certificateModal.collectedData.clientFormData.product_description || 'Not specified'}</p>
+                          <p style={{margin: '0.25rem 0'}}><strong>Volume:</strong> {certificateModal.collectedData.clientFormData.volume || 'Not specified'}</p>
+                          <p style={{margin: '0.25rem 0'}}><strong>Quality:</strong> {certificateModal.collectedData.clientFormData.quality_standards || 'Not specified'}</p>
                         </div>
                       </div>
                     </div>
@@ -718,16 +699,16 @@ Email: triangleintel@gmail.com`;
                       onClick={async () => {
                         try {
                           console.log('🔍 Starting AI supplier discovery...');
-                          console.log('Client form data:', feasibilityModal?.collectedData?.clientFormData);
+                          console.log('Client form data:', certificateModal?.collectedData?.clientFormData);
 
-                          const clientReqs = feasibilityModal?.collectedData?.clientFormData || {};
+                          const clientReqs = certificateModal?.collectedData?.clientFormData || {};
 
                           // Map actual form fields to AI requirements
                           const requirements = {
                             product_description: clientReqs.product_description || 'Industrial manufacturing components',
                             quality_standards: clientReqs.quality_standards || 'ISO 9001 certification required',
                             volume: clientReqs.annual_volume || clientReqs.minimum_order_quantity || '10,000-50,000 units annually',
-                            industry: feasibilityModal.request?.industry || 'Manufacturing',
+                            industry: certificateModal.request?.industry || 'Manufacturing',
                             timeline: clientReqs.delivery_timeline || 'Medium term (2-3 months)',
                             requirements: `Target price: ${clientReqs.target_price_range || '$10-25 per unit'}. ` +
                                         `MOQ: ${clientReqs.minimum_order_quantity || '1,000-5,000 units'}. ` +
@@ -777,18 +758,18 @@ Email: triangleintel@gmail.com`;
                           setSourcingModal(prev => ({...prev, aiSearching: false}));
                         }
                       }}
-                      disabled={feasibilityModal.aiSearching}
+                      disabled={certificateModal.aiSearching}
                     >
-                      {feasibilityModal.aiSearching ? '🔄 AI Searching...' : '🤖 AI Supplier Discovery'}
+                      {certificateModal.aiSearching ? '🔄 AI Searching...' : '🤖 AI Supplier Discovery'}
                     </button>
                   </div>
 
                   <div className="form-group">
-                    <label>📇 Suppliers Found: {feasibilityModal.discoveredSuppliers?.length || 0}</label>
-                    {feasibilityModal.discoveredSuppliers && feasibilityModal.discoveredSuppliers.length > 0 ? (
+                    <label>📇 Suppliers Found: {certificateModal.discoveredSuppliers?.length || 0}</label>
+                    {certificateModal.discoveredSuppliers && certificateModal.discoveredSuppliers.length > 0 ? (
                       <div style={{padding: '0.75rem', background: '#dcfce7', borderRadius: '6px', marginBottom: '1rem'}}>
                         <p style={{color: '#059669', margin: 0}}>
-                          ✅ {feasibilityModal.discoveredSuppliers.length} suppliers discovered! Contact them below.
+                          ✅ {certificateModal.discoveredSuppliers.length} suppliers discovered! Contact them below.
                         </p>
                       </div>
                     ) : (
@@ -800,10 +781,10 @@ Email: triangleintel@gmail.com`;
                     )}
                   </div>
 
-                  {feasibilityModal.discoveredSuppliers && feasibilityModal.discoveredSuppliers.length > 0 && (
+                  {certificateModal.discoveredSuppliers && certificateModal.discoveredSuppliers.length > 0 && (
                     <div className="form-group">
                       <label>📧 Contact Suppliers</label>
-                      {feasibilityModal.discoveredSuppliers.map((supplier, idx) => (
+                      {certificateModal.discoveredSuppliers.map((supplier, idx) => (
                         <div key={idx} style={{
                           padding: '1rem',
                           background: '#f9fafb',
@@ -827,9 +808,9 @@ Email: triangleintel@gmail.com`;
                                   ✓ {supplier.matchReason}
                                 </p>
                               )}
-                              {feasibilityModal.requestsSent?.find(s => s.name === supplier.name) && (
+                              {certificateModal.requestsSent?.find(s => s.name === supplier.name) && (
                                 <p style={{fontSize: '0.8rem', color: '#059669', margin: '0.25rem 0'}}>
-                                  ✅ Email sent - {feasibilityModal.requestsSent.find(s => s.name === supplier.name)?.status === 'response_received' ? 'Response received' : 'Awaiting response'}
+                                  ✅ Email sent - {certificateModal.requestsSent.find(s => s.name === supplier.name)?.status === 'response_received' ? 'Response received' : 'Awaiting response'}
                                 </p>
                               )}
                             </div>
@@ -837,11 +818,11 @@ Email: triangleintel@gmail.com`;
                               <button
                                 className="btn-action btn-primary"
                                 onClick={() => openCompanyInfo(supplier)}
-                                disabled={feasibilityModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent)}
+                                disabled={certificateModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent)}
                               >
-                                {feasibilityModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent) ? '✓ Draft Created' : '👁️ View Company Info'}
+                                {certificateModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent) ? '✓ Draft Created' : '👁️ View Company Info'}
                               </button>
-                              {feasibilityModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent) && (
+                              {certificateModal.requestsSent?.some(s => s.name === supplier.name && s.emailSent) && (
                                 <label className="btn-action btn-secondary" style={{cursor: 'pointer', margin: '0'}}>
                                   📁 Upload
                                   <input
@@ -870,7 +851,7 @@ Email: triangleintel@gmail.com`;
                         type="text"
                         className="form-input"
                         placeholder="Supplier name..."
-                        value={feasibilityModal.newSupplierName || ''}
+                        value={certificateModal.newSupplierName || ''}
                         onChange={(e) => setSourcingModal(prev => ({...prev, newSupplierName: e.target.value}))}
                         style={{flex: 1}}
                       />
@@ -878,7 +859,7 @@ Email: triangleintel@gmail.com`;
                         type="text"
                         className="form-input"
                         placeholder="Location..."
-                        value={feasibilityModal.newSupplierLocation || ''}
+                        value={certificateModal.newSupplierLocation || ''}
                         onChange={(e) => setSourcingModal(prev => ({...prev, newSupplierLocation: e.target.value}))}
                         style={{flex: 1}}
                       />
@@ -886,8 +867,8 @@ Email: triangleintel@gmail.com`;
                         className="btn-action btn-secondary"
                         onClick={() => {
                           const newSupplier = {
-                            name: feasibilityModal.newSupplierName || 'Unnamed Supplier',
-                            location: feasibilityModal.newSupplierLocation || 'Mexico',
+                            name: certificateModal.newSupplierName || 'Unnamed Supplier',
+                            location: certificateModal.newSupplierLocation || 'Mexico',
                             addedAt: new Date().toISOString()
                           };
                           setSourcingModal(prev => ({
@@ -908,7 +889,7 @@ Email: triangleintel@gmail.com`;
                       className="btn-action btn-primary"
                       style={{width: '100%'}}
                       onClick={() => setSourcingModal(prev => ({...prev, currentStage: 3}))}
-                      disabled={!feasibilityModal.requestsSent?.length}
+                      disabled={!certificateModal.requestsSent?.length}
                     >
                       Continue to Analysis →
                     </button>
@@ -916,12 +897,12 @@ Email: triangleintel@gmail.com`;
                 </div>
               )}
 
-              {feasibilityModal.currentStage === 3 && (
+              {certificateModal.currentStage === 3 && (
                 <div className="document-collection-grid">
                   <h4>⚖️ Stage 3 - Supplier Comparison & Validation</h4>
                   <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>Score and compare suppliers based on responses received</p>
 
-                  {feasibilityModal.requestsSent?.filter(s => s.status === 'response_received').length > 0 ? (
+                  {certificateModal.requestsSent?.filter(s => s.status === 'response_received').length > 0 ? (
                     <>
                       <div className="form-group">
                         <label>📊 Supplier Comparison Matrix</label>
@@ -939,8 +920,8 @@ Email: triangleintel@gmail.com`;
                               </tr>
                             </thead>
                             <tbody>
-                              {feasibilityModal.requestsSent.filter(s => s.status === 'response_received').map((supplier, idx) => {
-                                const scores = feasibilityModal.formData[`scores_${supplier.name}`] || {};
+                              {certificateModal.requestsSent.filter(s => s.status === 'response_received').map((supplier, idx) => {
+                                const scores = certificateModal.formData[`scores_${supplier.name}`] || {};
                                 const totalScore = ((scores.price || 0) + (scores.quality || 0) + (scores.delivery || 0)) / 3;
 
                                 return (
@@ -1036,7 +1017,7 @@ Email: triangleintel@gmail.com`;
                         <textarea
                           className="consultation-textarea"
                           placeholder="Add insights from your Mexico network: Which suppliers you know personally, reputation feedback, red flags, financial stability info..."
-                          value={feasibilityModal.formData.network_validation || ''}
+                          value={certificateModal.formData.network_validation || ''}
                           onChange={(e) => updateSourcingFormData('network_validation', e.target.value)}
                           rows={6}
                         />
@@ -1047,7 +1028,7 @@ Email: triangleintel@gmail.com`;
                         <textarea
                           className="consultation-textarea"
                           placeholder="Risk analysis: Financial stability, delivery reliability, quality consistency, payment terms concerns..."
-                          value={feasibilityModal.formData.risk_assessment || ''}
+                          value={certificateModal.formData.risk_assessment || ''}
                           onChange={(e) => updateSourcingFormData('risk_assessment', e.target.value)}
                           rows={4}
                         />
@@ -1063,7 +1044,7 @@ Email: triangleintel@gmail.com`;
                 </div>
               )}
 
-              {feasibilityModal.currentStage === 4 && (
+              {certificateModal.currentStage === 4 && (
                 <div className="document-collection-grid">
                   <h4>📋 Stage 4 - Final Report & Client Handoff</h4>
                   <p style={{color: '#6b7280', marginBottom: '1.5rem'}}>Create final recommendations and make supplier introductions</p>
@@ -1071,13 +1052,13 @@ Email: triangleintel@gmail.com`;
                   <div className="form-group">
                     <label>🏆 Top Suppliers (Ranked by Score)</label>
                     <div style={{background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1rem'}}>
-                      {feasibilityModal.requestsSent
+                      {certificateModal.requestsSent
                         ?.filter(s => s.status === 'response_received')
                         .map(s => ({
                           ...s,
-                          totalScore: ((feasibilityModal.formData[`scores_${s.name}`]?.price || 0) +
-                                      (feasibilityModal.formData[`scores_${s.name}`]?.quality || 0) +
-                                      (feasibilityModal.formData[`scores_${s.name}`]?.delivery || 0)) / 3
+                          totalScore: ((certificateModal.formData[`scores_${s.name}`]?.price || 0) +
+                                      (certificateModal.formData[`scores_${s.name}`]?.quality || 0) +
+                                      (certificateModal.formData[`scores_${s.name}`]?.delivery || 0)) / 3
                         }))
                         .sort((a, b) => b.totalScore - a.totalScore)
                         .slice(0, 3)
@@ -1102,7 +1083,7 @@ Email: triangleintel@gmail.com`;
                                 <label style={{cursor: 'pointer'}}>
                                   <input
                                     type="checkbox"
-                                    checked={feasibilityModal.formData[`introduce_${supplier.name}`] || false}
+                                    checked={certificateModal.formData[`introduce_${supplier.name}`] || false}
                                     onChange={(e) => updateSourcingFormData(`introduce_${supplier.name}`, e.target.checked)}
                                   />
                                   <span style={{marginLeft: '0.5rem'}}>Make Introduction</span>
@@ -1119,7 +1100,7 @@ Email: triangleintel@gmail.com`;
                     <textarea
                       className="consultation-textarea"
                       placeholder="Executive summary for client: Top 3 supplier recommendations, key differentiators, pricing insights, next steps..."
-                      value={feasibilityModal.formData.final_report || ''}
+                      value={certificateModal.formData.final_report || ''}
                       onChange={(e) => updateSourcingFormData('final_report', e.target.value)}
                       rows={8}
                     />
@@ -1130,24 +1111,24 @@ Email: triangleintel@gmail.com`;
                     <div className="summary-grid" style={{marginBottom: '1rem'}}>
                       <div className="summary-stat">
                         <div className="stat-number">
-                          {Object.keys(feasibilityModal.formData).filter(k => k.startsWith('introduce_') && feasibilityModal.formData[k]).length}
+                          {Object.keys(certificateModal.formData).filter(k => k.startsWith('introduce_') && certificateModal.formData[k]).length}
                         </div>
                         <div className="stat-label">Introductions to Make</div>
                       </div>
                       <div className="summary-stat">
                         <div className="stat-number">
-                          {feasibilityModal.formData.introductions_sent || 0}
+                          {certificateModal.formData.introductions_sent || 0}
                         </div>
                         <div className="stat-label">Introductions Completed</div>
                       </div>
                     </div>
 
-                    {Object.keys(feasibilityModal.formData)
-                      .filter(k => k.startsWith('introduce_') && feasibilityModal.formData[k])
+                    {Object.keys(certificateModal.formData)
+                      .filter(k => k.startsWith('introduce_') && certificateModal.formData[k])
                       .map((key, idx) => {
                         const supplierName = key.replace('introduce_', '');
-                        // const supplier = feasibilityModal.requestsSent?.find(s => s.name === supplierName);
-                        const introduced = feasibilityModal.formData[`introduced_${supplierName}`];
+                        // const supplier = certificateModal.requestsSent?.find(s => s.name === supplierName);
+                        const introduced = certificateModal.formData[`introduced_${supplierName}`];
 
                         return (
                           <div key={idx} style={{
@@ -1170,8 +1151,8 @@ Email: triangleintel@gmail.com`;
                                   onClick={() => {
                                     // Simulate sending introduction emails
                                     updateSourcingFormData(`introduced_${supplierName}`, true);
-                                    updateSourcingFormData('introductions_sent', (feasibilityModal.formData.introductions_sent || 0) + 1);
-                                    alert(`✅ Introduction emails sent:\n\n1. To ${supplierName}: Introduced ${feasibilityModal.request?.company_name}\n2. To ${feasibilityModal.request?.company_name}: Introduced ${supplierName} contact`);
+                                    updateSourcingFormData('introductions_sent', (certificateModal.formData.introductions_sent || 0) + 1);
+                                    alert(`✅ Introduction emails sent:\n\n1. To ${supplierName}: Introduced ${certificateModal.request?.company_name}\n2. To ${certificateModal.request?.company_name}: Introduced ${supplierName} contact`);
                                   }}
                                 >
                                   📧 Send Introduction
@@ -1189,18 +1170,18 @@ Email: triangleintel@gmail.com`;
                       className="btn-action btn-primary"
                       style={{width: '100%', marginBottom: '1rem'}}
                       onClick={() => {
-                        const topSuppliers = feasibilityModal.requestsSent
+                        const topSuppliers = certificateModal.requestsSent
                           ?.filter(s => s.status === 'response_received')
                           .map(s => ({
                             ...s,
-                            scores: feasibilityModal.formData[`scores_${s.name}`] || {},
-                            totalScore: ((feasibilityModal.formData[`scores_${s.name}`]?.price || 0) +
-                                        (feasibilityModal.formData[`scores_${s.name}`]?.quality || 0) +
-                                        (feasibilityModal.formData[`scores_${s.name}`]?.delivery || 0)) / 3
+                            scores: certificateModal.formData[`scores_${s.name}`] || {},
+                            totalScore: ((certificateModal.formData[`scores_${s.name}`]?.price || 0) +
+                                        (certificateModal.formData[`scores_${s.name}`]?.quality || 0) +
+                                        (certificateModal.formData[`scores_${s.name}`]?.delivery || 0)) / 3
                           }))
                           .sort((a, b) => b.totalScore - a.totalScore) || [];
 
-                        const clientReqs = feasibilityModal?.collectedData?.clientFormData || {};
+                        const clientReqs = certificateModal?.collectedData?.clientFormData || {};
 
                         const report = `# SUPPLIER SOURCING REPORT
 **Mexico Manufacturing Partner Recommendations**
@@ -1209,7 +1190,7 @@ Email: triangleintel@gmail.com`;
 
 ## Executive Summary
 
-**Client:** ${feasibilityModal.request?.company_name}
+**Client:** ${certificateModal.request?.company_name}
 **Project:** ${clientReqs.product_description || 'Manufacturing Partnership'}
 **Volume:** ${clientReqs.annual_volume || 'TBD'}
 **Budget Target:** ${clientReqs.target_price_range || 'TBD'}
@@ -1239,7 +1220,7 @@ ${topSuppliers.map((supplier, idx) => `
 - ${idx === 0 ? 'Highest overall assessment score' : 'Strong alternative option'}
 
 **Validation Results:**
-${feasibilityModal.formData.network_validation || 'Supplier validated through Mexico trade network. Financial stability and quality systems verified.'}
+${certificateModal.formData.network_validation || 'Supplier validated through Mexico trade network. Financial stability and quality systems verified.'}
 
 ---
 `).join('')}
@@ -1257,7 +1238,7 @@ ${feasibilityModal.formData.network_validation || 'Supplier validated through Me
 
 ${topSuppliers.map(s => `**${s.name}:** ${s.totalScore >= 4 ? 'Low risk' : s.totalScore >= 3 ? 'Low-medium risk' : 'Medium risk'} profile. ${s.matchReason}`).join('\n\n')}
 
-${feasibilityModal.formData.risk_assessment ? `\n**Additional Risk Analysis:**\n${feasibilityModal.formData.risk_assessment}` : ''}
+${certificateModal.formData.risk_assessment ? `\n**Additional Risk Analysis:**\n${certificateModal.formData.risk_assessment}` : ''}
 
 ---
 
@@ -1294,7 +1275,7 @@ ${feasibilityModal.formData.risk_assessment ? `\n**Additional Risk Analysis:**\n
 ${topSuppliers.map(s => `**${s.name}**
 Location: ${s.location}
 Assessment Score: ${s.totalScore.toFixed(1)}/5
-Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' : '⏳ Ready for Introduction'}
+Status: ${certificateModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' : '⏳ Ready for Introduction'}
 `).join('\n')}
 
 ---
@@ -1309,7 +1290,7 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `Supplier_Sourcing_Report_${feasibilityModal.request?.company_name?.replace(/\s+/g, '_')}_${Date.now()}.md`;
+                        a.download = `Supplier_Sourcing_Report_${certificateModal.request?.company_name?.replace(/\s+/g, '_')}_${Date.now()}.md`;
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -1340,12 +1321,12 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
             </div>
 
             <div className="modal-actions">
-              {feasibilityModal.currentStage > 1 && (
+              {certificateModal.currentStage > 1 && (
                 <button className="btn-action btn-secondary" onClick={prevSourcingStage}>
                   Previous Stage
                 </button>
               )}
-              {feasibilityModal.currentStage < 4 ? (
+              {certificateModal.currentStage < 4 ? (
                 <button className="btn-action btn-primary" onClick={nextSourcingStage}>
                   Next Stage
                 </button>
@@ -1354,7 +1335,7 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
                   <button className="btn-action btn-success" onClick={completeSourcing}>
                     Complete Sourcing
                   </button>
-                  <button className="btn-action btn-info" onClick={() => generateSourcingReport(feasibilityModal.request)}>
+                  <button className="btn-action btn-info" onClick={() => generateSourcingReport(certificateModal.request)}>
                     Generate Report
                   </button>
                 </>
@@ -1370,7 +1351,7 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
           <div className="modal-content large-modal">
             <div className="modal-header">
               <h2>
-                🤖 AI Assistant - Mexico Manufacturing Feasibility Report
+                🤖 AI Assistant - Mexico Supplier Sourcing Report
               </h2>
               <button
                 className="modal-close"
@@ -1385,7 +1366,7 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
                 <div className="ai-loading">
                   <div className="loading-spinner">
                     <div className="spinner"></div>
-                    <p>🤖 Claude AI is generating your Mexico manufacturing feasibility report...</p>
+                    <p>🤖 Claude AI is generating your Mexico supplier sourcing report...</p>
                     <p className="loading-note">This may take 30-60 seconds for comprehensive supplier analysis</p>
                   </div>
                 </div>
@@ -1474,7 +1455,7 @@ Status: ${feasibilityModal.formData[`introduced_${s.name}`] ? '✅ Introduction 
       <IntakeFormModal
         isOpen={intakeFormModal.isOpen}
         onClose={() => setIntakeFormModal({ isOpen: false, clientInfo: null })}
-        formConfig={getIntakeFormByService('manufacturing-feasibility')}
+        formConfig={getIntakeFormByService('usmca-certificate')}
         clientInfo={intakeFormModal.clientInfo}
         onSendForm={handleSendFormToClient}
         onUploadResponse={handleUploadClientResponse}

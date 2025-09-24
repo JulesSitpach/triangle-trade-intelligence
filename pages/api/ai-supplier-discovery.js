@@ -21,6 +21,30 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Client requirements are required' });
   }
 
+  async function callAnthropicWithRetry(prompt, maxRetries = 3) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const message = await anthropic.messages.create({
+          model: 'claude-3-haiku-20240307',
+          max_tokens: 2000,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        });
+        return message;
+      } catch (error) {
+        if (error.status === 529 && attempt < maxRetries) {
+          const waitTime = Math.pow(2, attempt) * 1000;
+          console.log(`Attempt ${attempt} failed with 529. Retrying in ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        throw error;
+      }
+    }
+  }
+
   try {
     const prompt = `You are an AI research assistant helping Jorge Martinez find REAL Mexican suppliers.
 
@@ -62,14 +86,7 @@ Format as JSON array with these exact fields:
 
 Respond ONLY with the JSON array.`;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2000,
-      messages: [{
-        role: 'user',
-        content: prompt
-      }]
-    });
+    const message = await callAnthropicWithRetry(prompt);
 
     const responseText = message.content[0].text;
 
