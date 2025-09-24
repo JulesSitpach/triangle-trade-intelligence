@@ -61,10 +61,9 @@ export default function ComponentOriginsStepEnhanced({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          certificateData: {
-            product_description: description,
-            component_origins: components
-          }
+          action: 'suggest_hs_code',
+          productDescription: description,
+          componentOrigins: components
         })
       });
 
@@ -72,8 +71,8 @@ export default function ComponentOriginsStepEnhanced({
       if (result.success && result.data) {
         setProductHSSuggestion({
           hsCode: result.data.hsCode,
-          confidence: result.data.adjustedConfidence,
-          explanation: result.data.explanation,
+          confidence: result.data.confidence || result.data.adjustedConfidence,
+          explanation: result.data.reasoning || result.data.explanation,
           source: 'AI Classification Agent'
         });
       }
