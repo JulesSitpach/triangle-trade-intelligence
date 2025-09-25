@@ -1,4 +1,4 @@
-# PRD.md - TradeFlow Intelligence Platform
+# PRD.md - Triangle Intelligence Platform
 
 **This PRD defines an SLC (Simple, Lovable, Complete) v25.0.1, not an MVP.**
 
@@ -6,7 +6,7 @@ The release has to feel complete, polished, and delightful. Even if the scope is
 
 ## Project Overview
 
-**TradeFlow Intelligence Platform** - A professional USMCA compliance and certificate generation platform with hybrid SaaS + expert services model.
+**Triangle Intelligence Platform** - A professional USMCA compliance and certificate generation platform with hybrid SaaS + expert services model.
 
 **Core Value Proposition**: 
 - **Self-Service Certificate Creation**: DIY USMCA certificates through guided workflows
@@ -88,35 +88,82 @@ Annual value: $7,188 subscription + $2,400 avg services = $9,588/customer
    - 14-day trial available for all plans
    - Clear feature comparison showing what's included
 
-2. **USMCA Certificate Workflow** 
-   - **Step 1**: Company Information (pre-populated from account)
-   - **Step 2**: Product & Component Analysis (AI-assisted classification)
-   - **Step 3**: Certificate Generation (PDF creation with templates)
+2. **USMCA Analysis Workflow** (`/usmca-workflow`)
+   - **Step 1**: Company Information (auto-populated from localStorage/account)
+   - **Step 2**: Product & Component Analysis (AI-enhanced classification with web search)
+   - **Step 3**: USMCA Qualification Results (analysis + basic certificate generation)
+   - **Step 4**: Professional Certificate Completion (optional upgrade via `/usmca-certificate-completion`)
 
-3. **Usage Tracking & Limits**
-   - Plan-based limits (5/25/unlimited certificates per month)
-   - Usage dashboard showing remaining allowances
-   - Clear upgrade prompts when approaching limits
+3. **Hybrid Self-Service + Professional Model** (No Usage Limits During Trial)
+   - **Self-Service Path**: Complete analysis and generate basic certificates
+   - **Professional Upgrade**: Expert-completed certificates with trust verification
+   - **Data Pre-Population**: Workflow results auto-fill professional completion forms
+   - **Conversion Points**: Trade risk alerts → team service requests
 
-### Expert Service Upgrade Path
-4. **"Need Help?" Conversion Points**
-   - During complex product classification
-   - After failed validation attempts  
-   - When certificates are rejected by customs
-   - Volume needs exceed plan limits
+### Conversion Funnel (Implemented)
+4. **Analysis → Risk Alerts → Team Services**
+   ```
+   USMCA Workflow → Results → "Get Crisis Alerts" → /trade-risk-alternatives
+                                                    ↓
+   Personalized Risks → Team Recommendations → Service Requests
+   ```
 
-5. **Service Request Flow**
-   - One-click request for expert completion
-   - Team assignment (Cristina for compliance reports, Jorge for Mexico market reports)
-   - Professional delivery with quality guarantees
+5. **Trade Risk Alerts Page** ✅ **IMPLEMENTED** (`/trade-risk-alternatives`)
+   - **Data Source**: User's completed workflow (localStorage with privacy controls)
+   - **Personalization**: Dynamic risks based on actual company profile
+   - **Team Matching**: Jorge (Latin America expertise) | Cristina (logistics/compliance)
+   - **Privacy Model**: Progressive disclosure - detailed impacts require opt-in consent
+   - **Conversion**: Risk alerts → direct team consultation requests
+
+6. **Service Request Integration** ✅ **IMPLEMENTED**
+   - **Jorge Services**: Mexico/Latin America (supplier sourcing, market entry, manufacturing feasibility)
+   - **Cristina Services**: Compliance/logistics (USMCA certificates, HS classification, document review)
+   - **Direct Contact**: One-click email and service request buttons
+   - **Professional Delivery**: Expert completion with quality guarantees
 
 ## Technical Architecture
 
 ### Platform Foundation
 - **Stack**: Next.js 14 (Pages Router), React 18, PostgreSQL via Supabase
 - **Database**: 34,476+ HS code records, comprehensive tariff data
-- **AI Integration**: Anthropic Claude for intelligent classification
+- **AI Integration**: Anthropic Claude for intelligent classification + web search verification
 - **Performance**: 54+ API endpoints, <400ms response time target
+
+### ✅ Enhanced Agent Architecture (IMPLEMENTED - Sept 2025)
+**Web Search + Database Integration**: Real-time verification and freshness tracking
+
+**Core Implementation Files:**
+- `lib/agents/enhanced-classification-agent.js` - 6-step workflow with web search
+- `lib/services/automated-trade-research.js` - Policy monitoring & research automation
+- `components/AdminNavigation.js` - Agent performance dashboard access
+- `pages/api/agents/classification-upgraded.js` - Enhanced API endpoints
+
+```javascript
+// Enhanced Classification Agent Workflow (6 Steps) ✅ WORKING
+Step 1: Database First → Query 34K+ HS codes (hs_master_rebuild table)
+Step 2: Web Verification → Real-time tariff rate validation via web search
+Step 3: Compare & Flag → Database vs web discrepancy analysis
+Step 4: Update Database → tariff_rates_staging table for review
+Step 5: Context-Aware Response → User-friendly vs Admin-technical responses
+Step 6: Proactive Maintenance → Automated data freshness monitoring
+
+// Enhanced API Response Structure ✅ IMPLEMENTED
+classification: {
+  hs_code: "8517.62.00.00",
+  description: "Set-top boxes...",
+  confidence: "95%"
+},
+enhanced_features: {
+  web_verification: { performed: true, sources_consulted: 4 },
+  data_quality: { verification_status: "web_verified", freshness: "current" }
+}
+```
+
+**✅ Admin Intelligence Dashboard Integration**:
+- 🤖 **Agent Performance** (`/admin/agent-performance`) - Web search metrics, confidence scores
+- 🔬 **Research Automation** (`/admin/research-automation-dashboard`) - Policy monitoring dashboard
+- **Auto-Context Detection** - User vs Admin mode responses (no manual switching required)
+- **Database Health** - Automated freshness scoring, staging table management
 
 ### Subscription Management System
 ```javascript
@@ -169,12 +216,19 @@ Homepage → Pricing → Plan Selection → Payment → Account Setup → First 
 
 ### Certificate Creation Flow (By Plan)
 **Starter**: Basic template → User completes → Download
-**Professional**: Guided wizard → Validation → Download  
+**Professional**: Guided wizard → Validation → Download
 **Business**: Full wizard → Expert validation → Download + 2 expert completions available
+
+### Primary Conversion Flow (Trade Risk Alerts)
+```
+Trial USMCA Analysis → Results → "Get Crisis Alerts" → /trade-risk-alternatives → Team Service Requests
+```
 
 ### Service Upgrade Flow
 ```
 Certificate Attempt → Complexity/Error → "Need Expert Help?" → Service Request → Expert Completion
+OR
+Risk Alerts Page → Personalized Threats → Team Recommendations → Service Consultation
 ```
 
 ### Error States (Must Convert to Services)
@@ -271,6 +325,8 @@ Certificate Attempt → Complexity/Error → "Need Expert Help?" → Service Req
 ### Phase 1: Complete Service Dashboard Implementations (In Progress)
 **Reference**: Working Supplier Sourcing dashboard pattern
 - **✅ Supplier Sourcing** - 4-stage complex research (COMPLETE)
+- **✅ Admin UI Integration** - Agent dashboards fully accessible (COMPLETE)
+- **✅ Enhanced Classification Agent** - Web search + database updates (COMPLETE)
 - **🔄 USMCA Certificates** - 3-stage expert validation (HIGH PRIORITY)
 - **🔄 HS Classification** - 3-stage expert validation (HIGH PRIORITY)
 - **Crisis Response** - 2-stage direct service (QUICK WIN)
@@ -367,6 +423,156 @@ Stage 2: Summary & Follow-up → AI-generated summary
 
 ---
 
+## Recent Technical Achievements (Sept 2025)
+
+### ✅ Admin UI Integration Complete
+**Problem Solved**: Enhanced backend agents weren't accessible to admins, limiting visibility into system intelligence.
+
+**Solution Implemented**:
+1. **Navigation Enhancement**: Added 🤖 Agent Performance and 🔬 Research Automation links to admin navigation
+2. **API Upgrade**: Enhanced classification endpoint now uses web search + database updates
+3. **Response Enrichment**: API responses include enhanced features visible to UI
+4. **Context Awareness**: System automatically detects User vs Admin mode
+
+**Impact**:
+- **Admins** now have full visibility into agent performance and research automation
+- **Users** receive web-verified classifications with higher confidence scores
+- **System** maintains database freshness through automated verification
+- **Platform** delivers on promise of intelligent, up-to-date trade information
+
+### Enhanced Feature Visibility
+```javascript
+// Before: Basic classification response
+{ hsCode: "8517.62.00", confidence: 0.85 }
+
+// After: Enhanced response with intelligence metadata
+{
+  classification: { hsCode: "8517.62.00", confidence: "95%" },
+  enhanced_features: {
+    web_verification: { performed: true, sources_consulted: 4 },
+    data_quality: { verification_status: "web_verified" },
+    usmca_analysis: { annual_savings: "$12,450" }
+  },
+  agent_metadata: {
+    processing_time_ms: 1247,
+    web_searches_performed: 4,
+    agent_version: "enhanced_with_web_search"
+  }
+}
+```
+
+**Business Value**:
+- Higher confidence in platform reliability
+- Visible differentiation from basic classification tools
+- Admin dashboards show real system intelligence
+- Foundation for AI-powered service differentiation
+
+---
+
 **Key Insight**: This is a sophisticated hybrid model where the SaaS platform creates qualified leads for high-value expert services. Users start with self-service and naturally graduate to expert completion when they encounter complexity or risk. The $200 certificate pricing makes perfect sense as an upgrade from DIY attempts, especially when the platform pre-populates all the user's data to make expert delivery efficient.
 
 **Technical Advantage**: Working supplier sourcing pattern (4-stage complex research) serves as proven template for all other services. Simple copy-paste with service-specific field changes = rapid dashboard deployment.
+
+**Intelligence Advantage**: Enhanced agents with web search verification provide real-time accuracy and freshness that traditional classification tools can't match, justifying premium positioning and expert service pricing.
+
+## Trade Risk Alerts System (Primary Conversion Engine)
+
+### ✅ `/trade-risk-alternatives` - The Conversion Powerhouse
+**Strategic Purpose**: Convert trial USMCA workflow users into paying subscribers through personalized trade risk alerts.
+
+#### **Smart Data Collection & Personalization**
+```javascript
+// Data Flow: Trial Analysis → Risk Alerts → Subscription Conversion
+const userProfile = {
+  // From completed USMCA workflow
+  companyName: userData.company?.name,
+  businessType: userData.company?.business_type,
+  hsCode: userData.product?.hs_code,
+  tradeVolume: userData.company?.annual_trade_volume,
+  supplierCountry: userData.company?.supplier_country,
+  qualificationStatus: userData.certificate?.qualification_result
+}
+
+// Generate personalized risks
+const risks = generateRisksFromProfile(profile);
+- China sourcing → Section 301 tariff alerts
+- Non-USMCA qualified → Missing savings alerts
+- Electronics → Industry targeting alerts
+- High volume → Supply chain concentration alerts
+```
+
+#### **Dynamic Risk Generation Engine**
+**Problem-Specific Alert Matching**:
+- **China Suppliers** → "Section 301 Tariffs on Chinese Imports" (HIGH severity)
+- **Non-USMCA Qualified** → "USMCA Qualification Gap" (CRITICAL severity)
+- **Electronics Companies** → "Electronics Industry Targeting" (HIGH severity)
+- **All Users** → "Supply Chain Concentration Risk" (MEDIUM severity)
+
+**Financial Impact Calculation**:
+```javascript
+// Real dollar impact for user's trade volume
+detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, 0.25))} annual cost increase`
+
+// Before: Generic "Up to 25% additional tariffs"
+// After: "Potential $127,500 annual cost increase" (based on $510K trade volume)
+```
+
+#### **Team Service Matching Algorithm**
+**Jorge Recommendations** (Latin America Specialist):
+- China suppliers → "Reduce China dependency through Latin America sourcing"
+- Non-USMCA qualified → "Establish USMCA-qualifying Mexico manufacturing"
+- High trade volume → "Diversify supply chain across Latin America"
+
+**Cristina Recommendations** (Logistics/Broker):
+- All users → "Multi-Route Logistics Strategy"
+- Non-USMCA qualified → "Canada USMCA Entry Point"
+- Complex routing needs → "Complex routing, customs compliance"
+
+#### **Privacy-First Conversion Strategy**
+**Detailed Consent Modal**:
+- **General View**: "Up to 25% additional tariffs on your imports"
+- **Detailed View**: "$127,500 annual cost increase based on your $510K trade volume"
+- **User Control**: Opt-in for detailed financial impacts
+- **Data Protection**: 90-day auto-deletion, encryption, user control
+
+#### **Conversion Funnel Optimization**
+```
+Trial USMCA Analysis → Completion → "Get Crisis Alerts" → Trade Risk Page
+(14-day trial access)                ↓
+Personalized Risks → Financial Impact → Team Recommendations → Service Requests
+                                     ↓
+Jorge: Mexico/Latin America Services | Cristina: Logistics/Compliance Services
+```
+
+#### **Service Integration Buttons**
+**Direct Team Contact**:
+- 🇲🇽 "Request Jorge Consultation" → `/services/mexico-trade-services`
+- 📦 "Request Cristina Consultation" → `/services/logistics-support`
+- 📧 Direct email links to team members
+- 📋 "Download Risk Assessment" (lead magnet)
+
+#### **Persistent Trade Profile System**
+**Data Flow Architecture**:
+1. **Session Storage**: localStorage during workflow completion
+2. **Database Persistence**: Save to user profile after risk alerts access
+3. **Return User Experience**: Load personalized risks from database
+4. **Profile Updates**: "Update Trade Profile" → return to workflow
+
+#### **Business Intelligence Features**
+**Risk Severity Classification**:
+- **CRITICAL** → Red alerts, immediate action required
+- **HIGH** → Yellow alerts, near-term planning needed
+- **MEDIUM** → Blue alerts, ongoing monitoring suggested
+
+**Timeline-Based Urgency**:
+- "Next 30-60 days" → Section 301 tariffs
+- "Immediate" → USMCA qualification gaps
+- "Continuous" → Supply chain concentration
+
+### **Conversion Metrics & KPIs**
+- **Primary Goal**: Free workflow users → paid service requests
+- **Conversion Points**: Team consultation requests, email contacts
+- **Retention Strategy**: Personalized ongoing risk monitoring
+- **Upgrade Path**: Basic alerts → detailed financial impact → premium services
+
+**Key Insight**: This page transforms the platform from a "one-and-done" certificate tool into a relationship-building, revenue-generating conversion engine that guides users toward high-value expert services.

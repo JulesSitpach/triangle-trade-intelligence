@@ -36,7 +36,8 @@ export default function ComponentOriginsStepEnhanced({
 
   const [searchingHS, setSearchingHS] = useState({});
   const [agentSuggestions, setAgentSuggestions] = useState({});
-  const [productHSSuggestion, setProductHSSuggestion] = useState(null);
+  const [validationResult, setValidationResult] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   // Update parent form data when components change
   useEffect(() => {
@@ -49,10 +50,12 @@ export default function ComponentOriginsStepEnhanced({
     setComponents(newComponents);
   };
 
-  // Get AI agent suggestion for product description
-  const getProductHSSuggestion = async (description) => {
-    if (!description || description.length < 20) {
-      setProductHSSuggestion(null);
+  // Get AI agent suggestion for specific component
+  const getComponentHSSuggestion = async (index, componentDescription) => {
+    if (!componentDescription || componentDescription.length < 10) {
+      const newSuggestions = { ...agentSuggestions };
+      delete newSuggestions[index];
+      setAgentSuggestions(newSuggestions);
       return;
     }
 
@@ -62,13 +65,13 @@ export default function ComponentOriginsStepEnhanced({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'suggest_hs_code',
-          productDescription: description,
-          componentOrigins: components
+          productDescription: componentDescription,
+          componentOrigins: []
         })
       });
 
       const result = await response.json();
-      console.log('🤖 Agent Classification Result:', result);
+      console.log(`🤖 Agent Classification Result for Component ${index + 1}:`, result);
 
       if (result.success && result.data) {
         const suggestion = {
@@ -77,26 +80,15 @@ export default function ComponentOriginsStepEnhanced({
           explanation: result.data.reasoning || result.data.explanation,
           source: 'AI Classification Agent'
         };
-        console.log('✅ Setting productHSSuggestion:', suggestion);
-        setProductHSSuggestion(suggestion);
+        console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
+        setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
       } else {
-        console.log('❌ No valid suggestion returned');
+        console.log(`❌ No valid suggestion returned for component ${index + 1}`);
       }
     } catch (error) {
-      console.error('Agent classification error:', error);
+      console.error(`Agent classification error for component ${index + 1}:`, error);
     }
   };
-
-  // Debounced product description change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (formData.product_description) {
-        getProductHSSuggestion(formData.product_description);
-      }
-    }, 1000); // 1 second debounce
-
-    return () => clearTimeout(timer);
-  }, [formData.product_description]);
 
   // Manual HS Code lookup function
   const lookupHSCode = async (index) => {
@@ -278,10 +270,44 @@ export default function ComponentOriginsStepEnhanced({
   const isValid = () => {
     const total = getTotalPercentage();
     // HS code is now optional - will be classified during analysis if not provided
-    const allFieldsFilled = components.every(c => 
+    const allFieldsFilled = components.every(c =>
       c.description && c.origin_country && c.value_percentage > 0
     );
     return total === 100 && allFieldsFilled;
+  };
+
+  // Validate workflow data before proceeding
+  const handleValidateAndProceed = async () => {
+    if (!isValid()) return;
+
+    // Basic workflow validation (not certificate validation)
+    const workflowValidation = {
+      hasCompanyInfo: !!formData.company_name && !!formData.business_type,
+      hasComponents: components.length > 0 && components.every(c => c.description && c.origin_country),
+      totalIs100: getTotalPercentage() === 100
+    };
+
+    const workflowValid = workflowValidation.hasCompanyInfo &&
+                         workflowValidation.hasComponents &&
+                         workflowValidation.totalIs100;
+
+    if (!workflowValid) {
+      setValidationResult({
+        success: true,
+        data: {
+          valid: false,
+          errors: [
+            !workflowValidation.hasCompanyInfo && { message: 'Company information incomplete' },
+            !workflowValidation.hasComponents && { message: 'Component information incomplete' },
+            !workflowValidation.totalIs100 && { message: 'Components must total 100%' }
+          ].filter(Boolean)
+        }
+      });
+      return;
+    }
+
+    // If workflow is valid, proceed directly
+    onProcessWorkflow();
   };
 
   // Educational template - shows format without specific compliance data
@@ -361,31 +387,6 @@ export default function ComponentOriginsStepEnhanced({
               Detailed product description including materials, construction, and key features for accurate classification
             </div>
 
-            {/* AI Agent HS Code Suggestion */}
-            {productHSSuggestion && (
-              <AgentSuggestionBadge
-                suggestion={{
-                  success: true,
-                  data: {
-                    hsCode: productHSSuggestion.hsCode,
-                    value: `HS Code: ${productHSSuggestion.hsCode}`,
-                    confidence: productHSSuggestion.confidence,
-                    explanation: productHSSuggestion.explanation,
-                    source: productHSSuggestion.source
-                  }
-                }}
-                onAccept={() => {
-                  // Auto-fill HS code for all components if they don't have one
-                  const newComponents = components.map(c => ({
-                    ...c,
-                    hs_code: c.hs_code || productHSSuggestion.hsCode
-                  }));
-                  setComponents(newComponents);
-                  setProductHSSuggestion(null);
-                }}
-                onDismiss={() => setProductHSSuggestion(null)}
-              />
-            )}
           </div>
 
           {/* Manufacturing Location */}
@@ -449,7 +450,13 @@ export default function ComponentOriginsStepEnhanced({
                 <input
                   type="text"
                   value={component.description}
-                  onChange={(e) => updateComponent(index, 'description', e.target.value)}
+                  onChange={(e) => {
+                    updateComponent(index, 'description', e.target.value);
+                    const timer = setTimeout(() => {
+                      getComponentHSSuggestion(index, e.target.value);
+                    }, 1500);
+                    return () => clearTimeout(timer);
+                  }}
                   placeholder="Describe this component in detail"
                   className="form-input"
                 />
@@ -511,6 +518,33 @@ export default function ComponentOriginsStepEnhanced({
                 <div className="form-help">
                   Don't know your HS code? Leave blank - we'll classify it during analysis.
                 </div>
+
+                {/* AI Agent HS Code Suggestion for this component */}
+                {agentSuggestions[index] && (
+                  <AgentSuggestionBadge
+                    suggestion={{
+                      success: true,
+                      data: {
+                        hsCode: agentSuggestions[index].hsCode,
+                        value: `HS Code: ${agentSuggestions[index].hsCode}`,
+                        confidence: agentSuggestions[index].confidence,
+                        explanation: agentSuggestions[index].explanation,
+                        source: agentSuggestions[index].source
+                      }
+                    }}
+                    onAccept={() => {
+                      updateComponent(index, 'hs_code', agentSuggestions[index].hsCode);
+                      const newSuggestions = { ...agentSuggestions };
+                      delete newSuggestions[index];
+                      setAgentSuggestions(newSuggestions);
+                    }}
+                    onDismiss={() => {
+                      const newSuggestions = { ...agentSuggestions };
+                      delete newSuggestions[index];
+                      setAgentSuggestions(newSuggestions);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -541,6 +575,29 @@ export default function ComponentOriginsStepEnhanced({
         </div>
       </div>
 
+      {/* Validation Results */}
+      {validationResult && !validationResult.data?.valid && (
+        <div className="alert alert-warning">
+          <div className="alert-content">
+            <h3>⚠️ Validation Issues Detected</h3>
+            <ul>
+              {validationResult.data?.errors?.map((error, idx) => (
+                <li key={idx}>{error.message}</li>
+              ))}
+            </ul>
+            <button
+              onClick={() => {
+                setValidationResult(null);
+                onProcessWorkflow();
+              }}
+              className="btn-primary"
+            >
+              Continue Anyway
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Navigation Buttons */}
       <div className="dashboard-actions section-spacing">
         <button
@@ -550,12 +607,12 @@ export default function ComponentOriginsStepEnhanced({
           ← Previous
         </button>
         <button
-          onClick={onProcessWorkflow}
-          disabled={!isValid() || isLoading}
-          className={`${isValid() && !isLoading ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading ? 'disabled' : ''}`}
+          onClick={handleValidateAndProceed}
+          disabled={!isValid() || isLoading || isValidating}
+          className={`${isValid() && !isLoading && !isValidating ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading || isValidating ? 'disabled' : ''}`}
         >
-          {isLoading ? (
-            <>Processing...</>
+          {isLoading || isValidating ? (
+            <>{isValidating ? 'Validating...' : 'Processing...'}</>
           ) : (
             <>
               Continue to USMCA Analysis

@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
+import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 
 // Professional SVG icons for form fields
 // Icons removed - no longer using icon placeholders
@@ -20,10 +21,44 @@ export default function CompanyInformationStep({
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
-  
+  const [formSuggestions, setFormSuggestions] = useState({});
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Get FormAssistant suggestions when component mounts
+  useEffect(() => {
+    const getFormSuggestions = async () => {
+      if (!formData.company_name || formData.company_name.length < 3) return;
+
+      setLoadingSuggestions(true);
+      try {
+        const response = await fetch('/api/agents/form-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'suggest_completion',
+            partialData: formData,
+            userContext: {}
+          })
+        });
+
+        const result = await response.json();
+        if (result.success && result.data?.suggestions) {
+          setFormSuggestions(result.data.suggestions);
+        }
+      } catch (error) {
+        console.error('FormAssistant error:', error);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    };
+
+    const timer = setTimeout(getFormSuggestions, 1000);
+    return () => clearTimeout(timer);
+  }, [formData.company_name]);
   
   const isNextDisabled = !isClient || !formData.company_name || 
                         !formData.business_type || 
@@ -98,6 +133,28 @@ export default function CompanyInformationStep({
             <div className="form-help">
               Primary business activity for accurate trade classification
             </div>
+
+            {/* FormAssistant Auto-populate Suggestion */}
+            {Object.keys(formSuggestions).length > 0 && (
+              <AgentSuggestionBadge
+                suggestion={{
+                  success: true,
+                  data: {
+                    value: 'Auto-populate form from history',
+                    confidence: 85,
+                    explanation: `Found previous data: ${Object.keys(formSuggestions).join(', ')}`,
+                    source: 'Form Assistant Agent'
+                  }
+                }}
+                onAccept={() => {
+                  Object.entries(formSuggestions).forEach(([field, value]) => {
+                    updateFormData(field, value);
+                  });
+                  setFormSuggestions({});
+                }}
+                onDismiss={() => setFormSuggestions({})}
+              />
+            )}
           </div>
         </div>
 

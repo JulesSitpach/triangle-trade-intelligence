@@ -1,3 +1,8 @@
+---
+name: iterative-loop-controller
+description: Continuous Design Improvement Controller orchestrating multiple design review cycles
+---
+
 # Iterative Agentic Loop Controller
 
 ## 🔄 Mission: Continuous Design Improvement Until Perfect

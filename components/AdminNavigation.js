@@ -56,6 +56,12 @@ export default function AdminNavigation({ user }) {
           <Link href="/admin/broker-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
             Cristina
           </Link>
+          <Link href="/admin/agent-performance" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+            🤖 Agent Performance
+          </Link>
+          <Link href="/admin/research-automation-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+            🔬 Research Automation
+          </Link>
           <button onClick={signOut} className="nav-cta-button">
             Sign Out
           </button>

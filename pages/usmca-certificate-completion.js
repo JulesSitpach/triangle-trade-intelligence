@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import TriangleLayout from '../components/TriangleLayout';
 import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
+import { useAgentOrchestration } from '../hooks/useAgentOrchestration';
 
 export default function USMCACertificateCompletion() {
   const router = useRouter();

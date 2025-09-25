@@ -12,6 +12,7 @@ import USMCAQualification from './results/USMCAQualification';
 import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
+import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 
 export default function WorkflowResults({
   results,
@@ -73,9 +74,27 @@ export default function WorkflowResults({
       </div>
       
       <CompanyProfile results={results} />
-      
+
+      {/* Subscription Context and Agent Intelligence */}
+      {results.subscription_context && (
+        <SubscriptionContext
+          subscriptionContext={results.subscription_context}
+          agentIntelligence={results.enhanced_features}
+          className="workflow-subscription-context"
+        />
+      )}
+
       <ProductClassification results={results} />
-      
+
+      {/* Agent Intelligence Badges */}
+      {results.enhanced_features && results.subscription_context && (
+        <AgentIntelligenceBadges
+          agentIntelligence={results.enhanced_features}
+          subscriptionContext={results.subscription_context}
+          className="workflow-intelligence-badges"
+        />
+      )}
+
       <DataSourceAttribution results={results} trustIndicators={trustIndicators} />
       
       <USMCAQualification results={results} />

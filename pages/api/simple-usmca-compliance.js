@@ -2,11 +2,13 @@
  * Simple USMCA Compliance API
  * Direct, focused approach - handles all core USMCA functions
  * Enhanced with accurate HS code normalization
+ * SUBSCRIPTION-AWARE: Integrates subscription validation and usage tracking
  */
 
 import { usmcaClassifier } from '../../lib/core/simple-usmca-classifier.js';
 import { normalizeHSCode, validateHSCodeFormat } from '../../lib/utils/hs-code-normalizer.js';
 import { createClient } from '@supabase/supabase-js';
+import { addSubscriptionContext } from '../../lib/services/subscription-service.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -109,7 +111,7 @@ export default async function handler(req, res) {
   try {
     // Support both action/data format and direct format for backward compatibility
     let action, data;
-    
+
     if (req.body.action) {
       // New format: { action, data }
       action = req.body.action;
@@ -129,6 +131,10 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Unable to determine action from request' });
       }
     }
+
+    // Add user context for subscription validation
+    const userId = req.body.userId || data.userId;
+    req.user = { id: userId };
 
     // Store data in req.body.data for handlers
     req.body.data = data;
@@ -328,38 +334,40 @@ async function handleCompleteWorkflow(req, res) {
   } = req.body.data;
 
   try {
-    // Step 1: Classify product using working classification API
-    console.log('🔍 Step 1: Classifying product...');
-    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/ai-classification`, {
+    // Step 1: Classify product using NEW agent system
+    console.log('🔍 Step 1: Classifying product with AI agent...');
+    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/agents/classification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        product_description,
-        business_type: 'Manufacturing'
+        action: 'suggest_hs_code',
+        productDescription: product_description,
+        componentOrigins: component_origins || []
       })
     });
-    
+
     if (!classificationResponse.ok) {
       return res.json({
         success: false,
-        error: 'Classification API failed',
-        step: 'classification'
-      });
-    }
-    
-    const classificationResult = await classificationResponse.json();
-    
-    if (!classificationResult.success || !classificationResult.results || classificationResult.results.length === 0) {
-      return res.json({
-        success: false,
-        error: 'Could not classify product',
+        error: 'Classification agent failed',
         step: 'classification'
       });
     }
 
-    const bestMatch = classificationResult.results[0];
-    const hsCode = bestMatch.hs_code;
-    console.log(`✅ Product classified as: ${hsCode} (confidence: ${bestMatch.confidence})`);
+    const classificationResult = await classificationResponse.json();
+
+    if (!classificationResult.success || !classificationResult.data || !classificationResult.data.hsCode) {
+      return res.json({
+        success: false,
+        error: 'Could not classify product',
+        step: 'classification',
+        details: classificationResult.error || 'No HS code returned'
+      });
+    }
+
+    const hsCode = classificationResult.data.hsCode;
+    const confidence = classificationResult.data.adjustedConfidence || classificationResult.data.confidence || 0;
+    console.log(`✅ Product classified as: ${hsCode} (confidence: ${confidence}%)`);
 
     // Step 2: Check USMCA qualification
     console.log('🌎 Step 2: Checking USMCA qualification...');
@@ -407,13 +415,13 @@ async function handleCompleteWorkflow(req, res) {
           product_description: product_description,
           hs_code: hsCode,
           classified_hs_code: hsCode,
-          confidence: bestMatch.confidence,
-          classification_confidence: bestMatch.confidence,
+          confidence: confidence,
+          classification_confidence: confidence,
           classification_method: 'ai_enhanced',
           tariff_rates: {
-            mfn_rate: bestMatch.mfn_rate || bestMatch.mfn_tariff_rate,
-            usmca_rate: bestMatch.usmca_rate || bestMatch.usmca_tariff_rate,
-            savings_percent: bestMatch.savings_percent
+            mfn_rate: classificationResult.data.mfnRate || 0,
+            usmca_rate: classificationResult.data.usmcaRate || 0,
+            savings_percent: ((classificationResult.data.mfnRate || 0) - (classificationResult.data.usmcaRate || 0)).toFixed(3)
           }
         },
         usmca: {
@@ -436,7 +444,10 @@ async function handleCompleteWorkflow(req, res) {
     // Store in workflow_sessions for tracking
     // (This would use existing table structure)
 
-    return res.json(result);
+    // Add subscription context to the response
+    const resultWithSubscription = await addSubscriptionContext(req, result, 'classification');
+
+    return res.json(resultWithSubscription);
 
   } catch (error) {
     console.error('Complete workflow error:', error);

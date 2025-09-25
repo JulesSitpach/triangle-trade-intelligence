@@ -130,8 +130,8 @@ export default function CrisisCalculatorResults({
   };
 
   const handleViewAlertsClick = () => {
-    // Open alerts dashboard in new tab with user's data
-    window.open('/pricing', '_blank');
+    // Navigate to trade-risk-alternatives page with user's data
+    console.log('Navigating to crisis alerts dashboard...');
     if (onViewAlerts) onViewAlerts();
   };
 
@@ -259,6 +259,29 @@ export default function CrisisCalculatorResults({
                 </div>
               </div>
             )}
+
+            {/* Primary Conversion Call-to-Action */}
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">🚨 Get Your Personalized Trade Risk Alerts</div>
+                <div className="text-body">
+                  See exactly which trade policies could impact <strong>{formData.company_name}</strong>.
+                  Get personalized risk alerts based on your specific trade profile:
+                  {formData.product_description} from {formData.supplier_country || 'your suppliers'}.
+                </div>
+                <div className="hero-buttons">
+                  <button
+                    onClick={handleViewAlertsClick}
+                    className="btn-primary"
+                  >
+                    🚨 Get Crisis Alerts Now
+                  </button>
+                  <div className="small-text" style={{marginTop: '8px'}}>
+                    FREE personalized risk analysis • See threats specific to your business
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Consultation Cliff - Strategic Limitation */}
             <div className="alert alert-warning">

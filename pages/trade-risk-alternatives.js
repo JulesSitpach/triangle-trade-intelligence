@@ -11,10 +11,7 @@ import { useAuth } from '../lib/contexts/ProductionAuthContext';
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
   calculateRiskImpact,
-  getSeverityLevel,
-  getIndustryRiskMultiplier,
-  formatCurrency,
-  formatPercentage
+  formatCurrency
 } from '../config/trade-risk-config';
 
 export default function TradeRiskAlternatives() {
@@ -23,7 +20,6 @@ export default function TradeRiskAlternatives() {
   const [dynamicAlternatives, setDynamicAlternatives] = useState([]);
   const [teamRecommendations, setTeamRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasTradeProfile, setHasTradeProfile] = useState(false);
   const [showDetailedConsent, setShowDetailedConsent] = useState(false);
   const [hasDetailedConsent, setHasDetailedConsent] = useState(false);
   const [expandedDetails, setExpandedDetails] = useState({});
@@ -34,7 +30,7 @@ export default function TradeRiskAlternatives() {
     // Check if user has given detailed consent before
     const consent = localStorage.getItem('detailed_alerts_consent');
     setHasDetailedConsent(consent === 'true');
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSeeMoreDetails = (riskIndex) => {
     if (!hasDetailedConsent) {
@@ -93,7 +89,6 @@ export default function TradeRiskAlternatives() {
         };
 
         setUserProfile(profile);
-        setHasTradeProfile(true);
         generateDynamicContent(profile);
         setIsLoading(false);
         return;
@@ -106,6 +101,7 @@ export default function TradeRiskAlternatives() {
       loadLocalStorageData();
     }
   };
+
 
   const loadLocalStorageData = () => {
     // Load user data from completed workflow
@@ -206,8 +202,8 @@ export default function TradeRiskAlternatives() {
         title: `Section 301 Tariffs on Chinese Imports`,
         severity: "HIGH",
         generalImpact: "Up to 25% additional tariffs on your imports",
-        detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, TRADE_TRADE_RISK_CONFIG.tariffRates.section301))} annual cost increase`,
-        probability: TRADE_TRADE_RISK_CONFIG.probabilities.section301,
+        detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, TRADE_RISK_CONFIG.tariffRates.section301))} annual cost increase`,
+        probability: TRADE_RISK_CONFIG.probabilities.section301,
         timeframe: "Next 30-60 days",
         description: `Your HS code ${profile.hsCode} is specifically targeted in proposed Section 301 tariff expansions`,
         detailedInfo: `Based on your annual trade volume of ${formatCurrency(profile.tradeVolume)}, a 25% tariff would cost you ${formatCurrency(profile.tradeVolume * TRADE_RISK_CONFIG.tariffRates.section301)} per year. This calculation assumes your current import pattern continues.`
@@ -353,15 +349,6 @@ export default function TradeRiskAlternatives() {
     return `Cristina can design backup logistics strategies for your ${formatCurrency(profile.tradeVolume)} annual trade volume`;
   };
 
-  const formatCurrency = (amount) => {
-    if (!amount) return '$0';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
 
   if (isLoading) {
     return (
@@ -518,7 +505,7 @@ export default function TradeRiskAlternatives() {
         {/* Dynamic Alternative Strategies */}
         <div className="card">
           <div className="card-header">
-            <h3 className="card-title">🛡️ Recommended Alternatives - Don't Put All Eggs in One Basket</h3>
+            <h3 className="card-title">🛡️ Recommended Alternatives - Don&apos;t Put All Eggs in One Basket</h3>
             <p className="card-subtitle">Strategic options tailored to your trade profile</p>
           </div>
 
@@ -622,7 +609,7 @@ export default function TradeRiskAlternatives() {
                   className="btn-primary"
                   onClick={() => window.location.href = '/services/mexico-trade-services'}
                 >
-                  🇲🇽 Get Jorge's Help Now
+                  🇲🇽 Get Jorge&apos;s Help Now
                 </button>
                 <button className="btn-secondary">📋 Download Risk Assessment</button>
               </div>
@@ -670,7 +657,7 @@ export default function TradeRiskAlternatives() {
               <div className="card">
                 <h3 className="card-title">Our Transparency Promise</h3>
                 <div className="text-body">
-                  <p><strong>What we'll store:</strong></p>
+                  <p><strong>What we&apos;ll store:</strong></p>
                   <ul>
                     <li>Your trade volume amounts</li>
                     <li>Calculated savings figures</li>
@@ -687,8 +674,8 @@ export default function TradeRiskAlternatives() {
 
                   <p><strong>Your control:</strong></p>
                   <ul>
-                    <li>✅ Say "Yes" - See detailed dollar impacts</li>
-                    <li>❌ Say "No" - Keep seeing general percentages</li>
+                    <li>✅ Say &quot;Yes&quot; - See detailed dollar impacts</li>
+                    <li>❌ Say &quot;No&quot; - Keep seeing general percentages</li>
                     <li>🔄 Change your mind anytime</li>
                   </ul>
                 </div>

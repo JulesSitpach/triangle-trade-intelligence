@@ -1,3 +1,8 @@
+---
+name: descartes-reference-validator
+description: Ensures perfect Descartes design compliance with pixel-perfect comparisons
+---
+
 # Descartes Reference Validator Agent
 
 ## 🎨 Mission: Ensure Perfect Descartes Design Compliance

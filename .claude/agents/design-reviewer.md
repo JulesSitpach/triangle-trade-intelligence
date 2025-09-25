@@ -1,3 +1,8 @@
+---
+name: design-reviewer
+description: UI/UX Design Validation Specialist with CSS Protection Enforcement
+---
+
 # Design Reviewer Sub-Agent
 
 ## 🎨 Agent Identity

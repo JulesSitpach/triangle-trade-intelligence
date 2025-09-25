@@ -165,9 +165,64 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     console.log('✅ Workflow complete - results will display in step 3');
   };
 
+  // Helper function to get numeric trade volume from selection
+  const getTradeVolumeValue = (volumeSelection) => {
+    const volumeMap = {
+      'under_100k': 75000,
+      '100k_500k': 300000,
+      '500k_1m': 750000,
+      '1m_5m': 2500000,
+      '5m_10m': 7500000,
+      'over_10m': 15000000
+    };
+    return volumeMap[volumeSelection] || 1000000;
+  };
+
   // Crisis Calculator handlers
   const handleViewAlertsFromCrisisCalc = () => {
     console.log('User navigating to alerts dashboard from crisis calculator');
+
+    // Save workflow data to localStorage for trade-risk-alternatives page
+    const workflowDataForAlerts = {
+      company: {
+        name: formData.company_name,
+        business_type: formData.business_type,
+        company_address: formData.company_address,
+        tax_id: formData.tax_id,
+        contact_phone: formData.contact_phone,
+        contact_email: formData.contact_email,
+        annual_trade_volume: getTradeVolumeValue(formData.trade_volume),
+        trade_volume: formData.trade_volume,
+        supplier_country: formData.supplier_country || 'CN',
+        manufacturing_location: formData.manufacturing_location
+      },
+      product: {
+        hs_code: formData.classified_hs_code || formData.hs_code,
+        description: formData.product_description,
+        original_hs_code: formData.classified_hs_code
+      },
+      classification: {
+        hs_code: formData.classified_hs_code || formData.hs_code,
+        description: formData.product_description,
+        confidence: formData.classification_confidence || 0.95
+      },
+      certificate: {
+        qualification_result: formData.qualification_status || 'NEEDS_REVIEW',
+        savings: formData.calculated_savings || 0,
+        qualification_status: formData.qualification_status
+      },
+      usmca: {
+        qualification_status: formData.qualification_status || 'NEEDS_REVIEW',
+        north_american_content: getTotalComponentPercentage(),
+        component_breakdown: formData.component_origins
+      }
+    };
+
+    // Store in localStorage for trade-risk-alternatives page
+    localStorage.setItem('usmca_workflow_data', JSON.stringify(workflowDataForAlerts));
+
+    // Navigate to trade-risk-alternatives page
+    window.location.href = '/trade-risk-alternatives';
   };
 
   const handleUpgradeToCertificate = () => {
