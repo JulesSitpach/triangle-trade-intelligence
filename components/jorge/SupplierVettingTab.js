@@ -1,7 +1,20 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { SimpleAuthContext } from '../../lib/contexts/SimpleAuthContext';
 
 export default function SupplierVettingTab() {
+  const { user } = React.useContext(SimpleAuthContext);
+
   const [suppliers, setSuppliers] = useState([]);
+
+  // Enhanced Agent Intelligence State
+  const [agentIntelligence, setAgentIntelligence] = useState({
+    confidence_score: null,
+    web_verification: null,
+    data_freshness: null,
+    sources_count: 0
+  });
+
+  const [subscriptionContext, setSubscriptionContext] = useState(null);
 
   // Verification Workflow Modal State
   const [verificationModal, setVerificationModal] = useState({
@@ -195,6 +208,7 @@ export default function SupplierVettingTab() {
   };
 
   const generateAIReport = async (supplier, reportType = 'supplier') => {
+    console.log('Generating enhanced supplier verification report for:', supplier.name);
     setAiReportModal({
       isOpen: true,
       loading: true,
@@ -204,8 +218,42 @@ export default function SupplierVettingTab() {
     });
 
     try {
-      // Simulate AI report generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Use Enhanced Classification Agent for supplier verification analysis
+      const response = await fetch('/api/agents/enhanced-classification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_description: `Supplier verification and risk assessment for ${supplier.name}`,
+          origin_country: 'MX',
+          destination_country: 'US',
+          trade_volume: supplier.trade_volume || 1000000,
+          userId: user?.id,
+          context: {
+            service: 'supplier_verification',
+            company_name: supplier.name,
+            analysis_type: 'supplier_risk_assessment',
+            business_type: supplier.business_type,
+            verification_stage: reportType
+          }
+        })
+      });
+
+      const agentData = await response.json();
+
+      // Extract agent intelligence metadata
+      if (agentData.agent_metadata) {
+        setAgentIntelligence({
+          confidence_score: agentData.agent_metadata.confidence_score,
+          web_verification: agentData.agent_metadata.web_search_performed,
+          data_freshness: agentData.agent_metadata.processing_date,
+          sources_count: agentData.agent_metadata.sources_consulted || 0
+        });
+      }
+
+      // Store subscription context
+      if (agentData.subscription_context) {
+        setSubscriptionContext(agentData.subscription_context);
+      }
 
       const reportContent = `# Supplier Verification Report - ${supplier.name}
 
@@ -289,7 +337,16 @@ Overall Risk Level: LOW
               </tr>
             ) : suppliers.map(supplier => (
               <tr key={supplier.id}>
-                <td>{supplier.name}</td>
+                <td>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                    <span>{supplier.name}</span>
+                    {supplier.ai_verified && (
+                      <span className="hero-badge" style={{ background: '#8b5cf6', color: 'white', fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}>
+                        🤖 VERIFIED
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td>{supplier.location}</td>
                 <td>
                   <span className={`status-badge status-${supplier.verification_status}`}>
@@ -972,6 +1029,56 @@ Overall Risk Level: LOW
                 ×
               </button>
             </div>
+
+            {/* User Intelligence Display - Subscription Context & Agent Intelligence */}
+            {(subscriptionContext || agentIntelligence.confidence_score) && (
+              <div className="content-card" style={{ margin: '1rem', padding: '1rem', background: '#f0f9ff' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0 }}>🎯 Agent Intelligence & Subscription Status</h3>
+                  {subscriptionContext && (
+                    <div className="hero-badge" style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+                      {subscriptionContext.plan_name} Plan
+                    </div>
+                  )}
+                </div>
+
+                {/* Agent Intelligence Badges */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  {agentIntelligence.confidence_score && (
+                    <span className="hero-badge" style={{ background: '#22c55e', color: 'white' }}>
+                      🎯 {agentIntelligence.confidence_score}% Confidence
+                    </span>
+                  )}
+                  {agentIntelligence.web_verification && (
+                    <span className="hero-badge" style={{ background: '#3b82f6', color: 'white' }}>
+                      🔍 Web Verified
+                    </span>
+                  )}
+                  {agentIntelligence.sources_count > 0 && (
+                    <span className="hero-badge" style={{ background: '#8b5cf6', color: 'white' }}>
+                      📊 {agentIntelligence.sources_count} Sources
+                    </span>
+                  )}
+                  {agentIntelligence.data_freshness && (
+                    <span className="hero-badge" style={{ background: '#f59e0b', color: 'white' }}>
+                      ⏱️ Fresh Data
+                    </span>
+                  )}
+                </div>
+
+                {/* Subscription Context Display */}
+                {subscriptionContext && (
+                  <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                    <span style={{ color: '#059669' }}>✅ {subscriptionContext.usage_remaining || 'Usage tracking enabled'}</span>
+                    {subscriptionContext.upgrade_needed && (
+                      <span style={{ color: '#dc2626', marginLeft: '1rem' }}>
+                        ⚠️ Upgrade to {subscriptionContext.next_tier} for enhanced features
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="ai-report-content">
               {aiReportModal.loading ? (

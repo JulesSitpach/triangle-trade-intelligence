@@ -1,15 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { richDataConnector } from '../../lib/utils/rich-data-connector.js';
 import { MarketEntryAIButton } from '../../components/shared/DynamicAIReportButton';
 import IntakeFormModal from '../shared/IntakeFormModal';
 import { getIntakeFormByService } from '../../config/service-intake-forms';
+import { SimpleAuthContext } from '../../lib/contexts/SimpleAuthContext';
 
 export default function MarketEntryTab() {
+  const { user } = React.useContext(SimpleAuthContext);
+
   const [entryRequests, setEntryRequests] = useState([]);
   const [intakeFormModal, setIntakeFormModal] = useState({
     isOpen: false,
     clientInfo: null
   });
+
+  // Enhanced Agent Intelligence State
+  const [agentIntelligence, setAgentIntelligence] = useState({
+    confidence_score: null,
+    web_verification: null,
+    data_freshness: null,
+    sources_count: 0
+  });
+
+  const [subscriptionContext, setSubscriptionContext] = useState(null);
 
   // Market Entry Workflow Modal State
   const [entryModal, setEntryModal] = useState({
@@ -102,7 +115,7 @@ export default function MarketEntryTab() {
   const startEntryWorkflow = (request) => {
     const isFormCompleted = request.status === 'Stage 1: Form Completed' || request.intake_form_completed;
 
-    setFeasibilityModal({
+    setEntryModal({
       isOpen: true,
       request: request,
       currentStage: 1,
@@ -119,7 +132,7 @@ export default function MarketEntryTab() {
 
   const nextEntryStage = () => {
     if (entryModal.currentStage < 4) {
-      setFeasibilityModal({
+      setEntryModal({
         ...entryModal,
         currentStage: entryModal.currentStage + 1
       });
@@ -128,7 +141,7 @@ export default function MarketEntryTab() {
 
   const prevEntryStage = () => {
     if (entryModal.currentStage > 1) {
-      setFeasibilityModal({
+      setEntryModal({
         ...entryModal,
         currentStage: entryModal.currentStage - 1
       });
@@ -136,7 +149,7 @@ export default function MarketEntryTab() {
   };
 
   const updateEntryFormData = (field, value) => {
-    setFeasibilityModal({
+    setEntryModal({
       ...entryModal,
       formData: {
         ...entryModal.formData,
@@ -146,9 +159,9 @@ export default function MarketEntryTab() {
   };
 
   const completeEntry = () => {
-    console.log('Completing feasibility for:', entryModal.request?.company_name);
+    console.log('Completing market entry for:', entryModal.request?.company_name);
     handleUpdateStatus(entryModal.request?.id, 'completed');
-    setFeasibilityModal({
+    setEntryModal({
       isOpen: false,
       request: null,
       currentStage: 1,
@@ -194,7 +207,7 @@ export default function MarketEntryTab() {
       console.error('Error sending email:', error);
     }
 
-    setSourcingModal(prev => ({
+    setEntryModal(prev => ({
       ...prev,
       collectedData: {
         ...prev.collectedData,
@@ -227,7 +240,7 @@ export default function MarketEntryTab() {
       console.error('Error saving intake form:', error);
     }
 
-    setSourcingModal(prev => ({
+    setEntryModal(prev => ({
       ...prev,
       collectedData: {
         ...prev.collectedData,
@@ -241,6 +254,7 @@ export default function MarketEntryTab() {
   };
 
   const generateEntryReport = async (request, pricing = null) => {
+    console.log('Generating enhanced market entry report for:', request.company_name);
     setAiReportModal({
       isOpen: true,
       loading: true,
@@ -250,8 +264,40 @@ export default function MarketEntryTab() {
     });
 
     try {
-      // Simulate AI report generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Use Enhanced Classification Agent for market entry analysis
+      const response = await fetch('/api/agents/enhanced-classification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_description: request.service_details?.product_description || request.displayTitle,
+          origin_country: 'MX',
+          destination_country: 'US',
+          trade_volume: request.service_details?.expected_volume || 1000000,
+          userId: user?.id,
+          context: {
+            service: 'market_entry',
+            company_name: request.company_name,
+            analysis_type: 'market_entry_feasibility'
+          }
+        })
+      });
+
+      const agentData = await response.json();
+
+      // Extract agent intelligence metadata
+      if (agentData.agent_metadata) {
+        setAgentIntelligence({
+          confidence_score: agentData.agent_metadata.confidence_score,
+          web_verification: agentData.agent_metadata.web_search_performed,
+          data_freshness: agentData.agent_metadata.processing_date,
+          sources_count: agentData.agent_metadata.sources_consulted || 0
+        });
+      }
+
+      // Store subscription context
+      if (agentData.subscription_context) {
+        setSubscriptionContext(agentData.subscription_context);
+      }
 
       const reportContent = `# Mexico Market Entry Strategy Report - ${request.company_name}
 
@@ -407,7 +453,7 @@ ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` 
         ...prev,
         loading: false
       }));
-      alert('Error generating AI sourcing report. Please try again.');
+      alert('Error generating AI entry report. Please try again.');
     }
   };
 
@@ -453,13 +499,13 @@ ${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` 
   //     const response = await fetch('/api/extract-pdf-content', {
   //       method: 'POST',
   //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ file_path: filePath, field, context_type: 'supplier_sourcing' })
+  //       body: JSON.stringify({ file_path: filePath, field, context_type: 'market_entry' })
   //     });
 
   //     const extracted = await response.json();
   //     if (extracted.success) {
   //       // Auto-populate the textarea with extracted content
-  //       updateSourcingFormData(field, extracted.content);
+  //       updateEntryFormData(field, extracted.content);
   //     } else {
   //       alert('Content extraction failed: ' + extracted.error);
   //     }
@@ -525,7 +571,7 @@ Email: triangleintel@gmail.com`;
     window.open(gmailDraftUrl, '_blank');
 
     // Mark as draft created
-    setSourcingModal(prev => ({
+    setEntryModal(prev => ({
       ...prev,
       requestsSent: [...(prev.requestsSent || []), {
         ...supplier,
@@ -547,7 +593,7 @@ Email: triangleintel@gmail.com`;
     window.open(gmailComposeUrl, '_blank');
 
     // Mark as sent in the system
-    setSourcingModal(prev => ({
+    setEntryModal(prev => ({
       ...prev,
       requestsSent: [...(prev.requestsSent || []), {
         ...emailModal.supplier,
@@ -582,7 +628,7 @@ Email: triangleintel@gmail.com`;
 
       const result = await response.json();
       if (result.success) {
-        setSourcingModal(prev => ({
+        setEntryModal(prev => ({
           ...prev,
           requestsSent: prev.requestsSent.map(s =>
             s.name === supplier.name
@@ -617,13 +663,13 @@ Email: triangleintel@gmail.com`;
             </tr>
           </thead>
           <tbody>
-            {feasibilityRequests.length === 0 ? (
+            {entryRequests.length === 0 ? (
               <tr>
                 <td colSpan="6" className="empty-state">
                   No market entry requests found. Requests will appear here when clients need Mexico market entry analysis.
                 </td>
               </tr>
-            ) : feasibilityRequests.map(request => (
+            ) : entryRequests.map(request => (
               <tr key={request.id}>
                 <td>{request.clientName}</td>
                 <td>{request.displayTitle}</td>
@@ -657,12 +703,12 @@ Email: triangleintel@gmail.com`;
       {/* Market Entry Workflow Modal */}
       {entryModal.isOpen && (
         <div className="modal-overlay">
-          <div className="modal-content sourcing-modal">
+          <div className="modal-content entry-modal">
             <div className="modal-header">
               <h2>🔍 Mexico Market Entry Workflow</h2>
               <button
                 className="modal-close"
-                onClick={() => setFeasibilityModal({ isOpen: false, request: null, currentStage: 1, formData: {} })}
+                onClick={() => setEntryModal({ isOpen: false, request: null, currentStage: 1, formData: {} })}
               >
                 ×
               </button>
@@ -732,7 +778,7 @@ Email: triangleintel@gmail.com`;
                       <div className="action-buttons">
                         <button
                           className="btn-action btn-primary"
-                          onClick={() => setSourcingModal(prev => ({...prev, currentStage: 2}))}
+                          onClick={() => setEntryModal(prev => ({...prev, currentStage: 2}))}
                         >
                           ✅ Review Complete - Proceed to Stage 2 →
                         </button>
@@ -786,45 +832,69 @@ Email: triangleintel@gmail.com`;
                           };
 
                           console.log('Sending requirements to AI:', requirements);
-                          setSourcingModal(prev => ({...prev, aiSearching: true}));
+                          setEntryModal(prev => ({...prev, aiSearching: true}));
 
-                          const response = await fetch('/api/ai-supplier-discovery', {
+                          const response = await fetch('/api/agents/enhanced-classification', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                              clientRequirements: requirements,
-                              saveToDatabase: true
+                              product_description: requirements.product_description,
+                              origin_country: 'MX',
+                              destination_country: 'US',
+                              trade_volume: 1000000,
+                              userId: user?.id,
+                              context: {
+                                service: 'supplier_discovery',
+                                client_requirements: requirements,
+                                saveToDatabase: true
+                              }
                             })
                           });
 
                           const data = await response.json();
-                          console.log('📊 AI Discovery Response:', data);
+                          console.log('📊 Enhanced Agent Response:', data);
 
-                          if (data.success && data.suppliers) {
-                            console.log('✅ Found suppliers:', data.suppliers.length);
+                          // Extract agent intelligence
+                          if (data.agent_metadata) {
+                            setAgentIntelligence({
+                              confidence_score: data.agent_metadata.confidence_score,
+                              web_verification: data.agent_metadata.web_search_performed,
+                              data_freshness: data.agent_metadata.processing_date,
+                              sources_count: data.agent_metadata.sources_consulted || 0
+                            });
+                          }
 
-                            // Map API response to UI format
-                            const mappedSuppliers = data.suppliers.map(s => ({
-                              name: s.company_name,
-                              location: s.location,
-                              capabilities: s.capabilities,
-                              matchReason: s.match_reason,
-                              contactMethod: s.next_step,
-                              business_type: s.business_type
+                          // Store subscription context
+                          if (data.subscription_context) {
+                            setSubscriptionContext(data.subscription_context);
+                          }
+
+                          // Handle supplier data from enhanced agent response
+                          if (data.suggestions && data.suggestions.length > 0) {
+                            console.log('✅ Found supplier suggestions:', data.suggestions.length);
+
+                            // Map enhanced agent suggestions to UI format
+                            const mappedSuppliers = data.suggestions.map((suggestion, index) => ({
+                              name: `Supplier Option ${index + 1}`,
+                              location: suggestion.location || 'Mexico',
+                              capabilities: suggestion.description || suggestion,
+                              matchReason: suggestion.reasoning || 'AI Recommended',
+                              contactMethod: 'Research needed - enhance with Jorge',
+                              business_type: suggestion.business_type || 'Manufacturing'
                             }));
 
-                            setSourcingModal(prev => ({
+                            setEntryModal(prev => ({
                               ...prev,
                               discoveredSuppliers: mappedSuppliers,
                               aiSearching: false
                             }));
                           } else {
                             console.error('❌ No suppliers in response');
-                            setSourcingModal(prev => ({...prev, aiSearching: false}));
+                            setEntryModal(prev => ({...prev, aiSearching: false}));
                           }
                         } catch (error) {
                           console.error('❌ AI discovery error:', error);
-                          setSourcingModal(prev => ({...prev, aiSearching: false}));
+                          setEntryModal(prev => ({...prev, aiSearching: false}));
                         }
                       }}
                       disabled={entryModal.aiSearching}
@@ -853,6 +923,29 @@ Email: triangleintel@gmail.com`;
                   {entryModal.discoveredSuppliers && entryModal.discoveredSuppliers.length > 0 && (
                     <div className="form-group">
                       <label>📧 Contact Suppliers</label>
+
+                      {/* Agent Intelligence Display */}
+                      {agentIntelligence.confidence_score && (
+                        <div className="content-card" style={{ margin: '0.5rem 0', padding: '0.75rem', background: '#f0f9ff' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>🤖 AI Discovery Results:</span>
+                            <span className="hero-badge" style={{ background: '#22c55e', color: 'white', fontSize: '0.8rem' }}>
+                              🎯 {agentIntelligence.confidence_score}% Confidence
+                            </span>
+                            {agentIntelligence.web_verification && (
+                              <span className="hero-badge" style={{ background: '#3b82f6', color: 'white', fontSize: '0.8rem' }}>
+                                🔍 Web Verified
+                              </span>
+                            )}
+                            {agentIntelligence.sources_count > 0 && (
+                              <span className="hero-badge" style={{ background: '#8b5cf6', color: 'white', fontSize: '0.8rem' }}>
+                                📊 {agentIntelligence.sources_count} Sources
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {entryModal.discoveredSuppliers.map((supplier, idx) => (
                         <div key={idx} style={{
                           padding: '1rem',
@@ -863,7 +956,12 @@ Email: triangleintel@gmail.com`;
                         }}>
                           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem'}}>
                             <div style={{flex: 1}}>
-                              <strong style={{display: 'block', marginBottom: '0.25rem'}}>{supplier.name}</strong>
+                              <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem'}}>
+                                <strong>{supplier.name}</strong>
+                                <span className="hero-badge" style={{ background: '#8b5cf6', color: 'white', fontSize: '0.7rem', padding: '0.2rem 0.4rem' }}>
+                                  🤖 AI-ENHANCED
+                                </span>
+                              </div>
                               <p style={{fontSize: '0.85rem', color: '#6b7280', margin: '0.25rem 0'}}>
                                 📍 {supplier.location}
                               </p>
@@ -921,7 +1019,7 @@ Email: triangleintel@gmail.com`;
                         className="form-input"
                         placeholder="Supplier name..."
                         value={entryModal.newSupplierName || ''}
-                        onChange={(e) => setSourcingModal(prev => ({...prev, newSupplierName: e.target.value}))}
+                        onChange={(e) => setEntryModal(prev => ({...prev, newSupplierName: e.target.value}))}
                         style={{flex: 1}}
                       />
                       <input
@@ -929,7 +1027,7 @@ Email: triangleintel@gmail.com`;
                         className="form-input"
                         placeholder="Location..."
                         value={entryModal.newSupplierLocation || ''}
-                        onChange={(e) => setSourcingModal(prev => ({...prev, newSupplierLocation: e.target.value}))}
+                        onChange={(e) => setEntryModal(prev => ({...prev, newSupplierLocation: e.target.value}))}
                         style={{flex: 1}}
                       />
                       <button
@@ -940,7 +1038,7 @@ Email: triangleintel@gmail.com`;
                             location: entryModal.newSupplierLocation || 'Mexico',
                             addedAt: new Date().toISOString()
                           };
-                          setSourcingModal(prev => ({
+                          setEntryModal(prev => ({
                             ...prev,
                             discoveredSuppliers: [...(prev.discoveredSuppliers || []), newSupplier],
                             newSupplierName: '',
@@ -957,7 +1055,7 @@ Email: triangleintel@gmail.com`;
                     <button
                       className="btn-action btn-primary"
                       style={{width: '100%'}}
-                      onClick={() => setSourcingModal(prev => ({...prev, currentStage: 3}))}
+                      onClick={() => setEntryModal(prev => ({...prev, currentStage: 3}))}
                       disabled={!entryModal.requestsSent?.length}
                     >
                       Continue to Analysis →
@@ -1001,7 +1099,7 @@ Email: triangleintel@gmail.com`;
                                         value={scores.price || ''}
                                         onChange={(e) => {
                                           const newScores = {...scores, price: parseInt(e.target.value)};
-                                          updateSourcingFormData(`scores_${supplier.name}`, newScores);
+                                          updateEntryFormData(`scores_${supplier.name}`, newScores);
                                         }}
                                         className="form-input"
                                       >
@@ -1018,7 +1116,7 @@ Email: triangleintel@gmail.com`;
                                         value={scores.quality || ''}
                                         onChange={(e) => {
                                           const newScores = {...scores, quality: parseInt(e.target.value)};
-                                          updateSourcingFormData(`scores_${supplier.name}`, newScores);
+                                          updateEntryFormData(`scores_${supplier.name}`, newScores);
                                         }}
                                         className="form-input"
                                       >
@@ -1035,7 +1133,7 @@ Email: triangleintel@gmail.com`;
                                         value={scores.delivery || ''}
                                         onChange={(e) => {
                                           const newScores = {...scores, delivery: parseInt(e.target.value)};
-                                          updateSourcingFormData(`scores_${supplier.name}`, newScores);
+                                          updateEntryFormData(`scores_${supplier.name}`, newScores);
                                         }}
                                         className="form-input"
                                       >
@@ -1055,7 +1153,7 @@ Email: triangleintel@gmail.com`;
                                         value={scores.certifications || ''}
                                         onChange={(e) => {
                                           const newScores = {...scores, certifications: e.target.value};
-                                          updateSourcingFormData(`scores_${supplier.name}`, newScores);
+                                          updateEntryFormData(`scores_${supplier.name}`, newScores);
                                         }}
                                       />
                                     </td>
@@ -1087,7 +1185,7 @@ Email: triangleintel@gmail.com`;
                           className="consultation-textarea"
                           placeholder="Add insights from your Mexico network: Which suppliers you know personally, reputation feedback, red flags, financial stability info..."
                           value={entryModal.formData.network_validation || ''}
-                          onChange={(e) => updateSourcingFormData('network_validation', e.target.value)}
+                          onChange={(e) => updateEntryFormData('network_validation', e.target.value)}
                           rows={6}
                         />
                       </div>
@@ -1098,7 +1196,7 @@ Email: triangleintel@gmail.com`;
                           className="consultation-textarea"
                           placeholder="Risk analysis: Financial stability, delivery reliability, quality consistency, payment terms concerns..."
                           value={entryModal.formData.risk_assessment || ''}
-                          onChange={(e) => updateSourcingFormData('risk_assessment', e.target.value)}
+                          onChange={(e) => updateEntryFormData('risk_assessment', e.target.value)}
                           rows={4}
                         />
                       </div>
@@ -1153,7 +1251,7 @@ Email: triangleintel@gmail.com`;
                                   <input
                                     type="checkbox"
                                     checked={entryModal.formData[`introduce_${supplier.name}`] || false}
-                                    onChange={(e) => updateSourcingFormData(`introduce_${supplier.name}`, e.target.checked)}
+                                    onChange={(e) => updateEntryFormData(`introduce_${supplier.name}`, e.target.checked)}
                                   />
                                   <span style={{marginLeft: '0.5rem'}}>Make Introduction</span>
                                 </label>
@@ -1170,7 +1268,7 @@ Email: triangleintel@gmail.com`;
                       className="consultation-textarea"
                       placeholder="Executive summary for client: Top 3 supplier recommendations, key differentiators, pricing insights, next steps..."
                       value={entryModal.formData.final_report || ''}
-                      onChange={(e) => updateSourcingFormData('final_report', e.target.value)}
+                      onChange={(e) => updateEntryFormData('final_report', e.target.value)}
                       rows={8}
                     />
                   </div>
@@ -1219,8 +1317,8 @@ Email: triangleintel@gmail.com`;
                                   className="btn-action btn-primary"
                                   onClick={() => {
                                     // Simulate sending introduction emails
-                                    updateSourcingFormData(`introduced_${supplierName}`, true);
-                                    updateSourcingFormData('introductions_sent', (entryModal.formData.introductions_sent || 0) + 1);
+                                    updateEntryFormData(`introduced_${supplierName}`, true);
+                                    updateEntryFormData('introductions_sent', (entryModal.formData.introductions_sent || 0) + 1);
                                     alert(`✅ Introduction emails sent:\n\n1. To ${supplierName}: Introduced ${entryModal.request?.company_name}\n2. To ${entryModal.request?.company_name}: Introduced ${supplierName} contact`);
                                   }}
                                 >
@@ -1252,7 +1350,7 @@ Email: triangleintel@gmail.com`;
 
                         const clientReqs = entryModal?.collectedData?.clientFormData || {};
 
-                        const report = `# SUPPLIER SOURCING REPORT
+                        const report = `# MARKET ENTRY REPORT
 **Mexico Manufacturing Partner Recommendations**
 
 ---
@@ -1359,7 +1457,7 @@ Status: ${entryModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' 
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `Supplier_Sourcing_Report_${entryModal.request?.company_name?.replace(/\s+/g, '_')}_${Date.now()}.md`;
+                        a.download = `Market_Entry_Report_${entryModal.request?.company_name?.replace(/\s+/g, '_')}_${Date.now()}.md`;
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -1391,20 +1489,20 @@ Status: ${entryModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' 
 
             <div className="modal-actions">
               {entryModal.currentStage > 1 && (
-                <button className="btn-action btn-secondary" onClick={prevSourcingStage}>
+                <button className="btn-action btn-secondary" onClick={prevEntryStage}>
                   Previous Stage
                 </button>
               )}
               {entryModal.currentStage < 4 ? (
-                <button className="btn-action btn-primary" onClick={nextSourcingStage}>
+                <button className="btn-action btn-primary" onClick={nextEntryStage}>
                   Next Stage
                 </button>
               ) : (
                 <>
-                  <button className="btn-action btn-success" onClick={completeSourcing}>
-                    Complete Sourcing
+                  <button className="btn-action btn-success" onClick={completeEntry}>
+                    Complete Entry
                   </button>
-                  <button className="btn-action btn-info" onClick={() => generateSourcingReport(entryModal.request)}>
+                  <button className="btn-action btn-info" onClick={() => generateEntryReport(entryModal.request)}>
                     Generate Report
                   </button>
                 </>
@@ -1414,7 +1512,7 @@ Status: ${entryModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' 
         </div>
       )}
 
-      {/* AI Generated Sourcing Report Modal */}
+      {/* AI Generated Market Entry Report Modal */}
       {aiReportModal.isOpen && (
         <div className="modal-overlay">
           <div className="modal-content large-modal">
@@ -1429,6 +1527,56 @@ Status: ${entryModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' 
                 ×
               </button>
             </div>
+
+            {/* User Intelligence Display - Subscription Context & Agent Intelligence */}
+            {(subscriptionContext || agentIntelligence.confidence_score) && (
+              <div className="content-card" style={{ margin: '1rem', padding: '1rem', background: '#f0f9ff' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <h3 style={{ margin: 0 }}>🎯 Agent Intelligence & Subscription Status</h3>
+                  {subscriptionContext && (
+                    <div className="hero-badge" style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}>
+                      {subscriptionContext.plan_name} Plan
+                    </div>
+                  )}
+                </div>
+
+                {/* Agent Intelligence Badges */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                  {agentIntelligence.confidence_score && (
+                    <span className="hero-badge" style={{ background: '#22c55e', color: 'white' }}>
+                      🎯 {agentIntelligence.confidence_score}% Confidence
+                    </span>
+                  )}
+                  {agentIntelligence.web_verification && (
+                    <span className="hero-badge" style={{ background: '#3b82f6', color: 'white' }}>
+                      🔍 Web Verified
+                    </span>
+                  )}
+                  {agentIntelligence.sources_count > 0 && (
+                    <span className="hero-badge" style={{ background: '#8b5cf6', color: 'white' }}>
+                      📊 {agentIntelligence.sources_count} Sources
+                    </span>
+                  )}
+                  {agentIntelligence.data_freshness && (
+                    <span className="hero-badge" style={{ background: '#f59e0b', color: 'white' }}>
+                      ⏱️ Fresh Data
+                    </span>
+                  )}
+                </div>
+
+                {/* Subscription Context Display */}
+                {subscriptionContext && (
+                  <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+                    <span style={{ color: '#059669' }}>✅ {subscriptionContext.usage_remaining || 'Usage tracking enabled'}</span>
+                    {subscriptionContext.upgrade_needed && (
+                      <span style={{ color: '#dc2626', marginLeft: '1rem' }}>
+                        ⚠️ Upgrade to {subscriptionContext.next_tier} for enhanced features
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="ai-report-content">
               {aiReportModal.loading ? (
@@ -1465,7 +1613,7 @@ Status: ${entryModal.formData[`introduced_${s.name}`] ? '✅ Introduction Made' 
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `Mexico_Supplier_Sourcing_Report_${new Date().toISOString().split('T')[0]}.md`;
+                        a.download = `Mexico_Market_Entry_Report_${new Date().toISOString().split('T')[0]}.md`;
                         a.click();
                         URL.revokeObjectURL(url);
                       }}
