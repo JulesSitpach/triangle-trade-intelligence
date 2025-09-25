@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "semgrep": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        ".:/code",
+        "ghcr.io/semgrep/mcp:latest",
+        "-t",
+        "stdio"
+      ],
+      "env": {
+        "SEMGREP_RULES": ".semgrep-rules.yml"
+      }
+    }
+  },
+  "triangle-intelligence-rules": {
+    "anti-hardcoding": [
+      "hardcoded-country-codes",
+      "hardcoded-tariff-rates",
+      "hardcoded-company-names",
+      "hardcoded-trade-volumes",
+      "hardcoded-hs-codes"
+    ],
+    "css-protection": [
+      "inline-styles-react",
+      "tailwind-classes"
+    ],
+    "security-rules": [
+      "javascript.lang.security",
+      "typescript.lang.security"
+    ]
+  }
+}
