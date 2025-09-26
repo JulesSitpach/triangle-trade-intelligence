@@ -19,6 +19,7 @@ export default function JorgeDashboardCleanModular() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('supplier-sourcing');
+  const [serviceRequests, setServiceRequests] = useState([]);
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -36,6 +37,8 @@ export default function JorgeDashboardCleanModular() {
           return;
         }
 
+        // Load service requests
+        await loadServiceRequests();
         setLoading(false);
       } catch (error) {
         console.error('Dashboard initialization error:', error);
@@ -46,16 +49,44 @@ export default function JorgeDashboardCleanModular() {
     initializeDashboard();
   }, [router]);
 
+  const loadServiceRequests = async () => {
+    try {
+      const response = await fetch('/api/admin/service-requests?assigned_to=Jorge');
+      const data = await response.json();
+      if (data.success) {
+        setServiceRequests(data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error loading service requests:', error);
+      setServiceRequests([]);
+    }
+  };
+
+  const handleRequestUpdate = async (requestId, updateData) => {
+    try {
+      const response = await fetch('/api/admin/service-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: requestId, ...updateData })
+      });
+      if (response.ok) {
+        await loadServiceRequests();
+      }
+    } catch (error) {
+      console.error('Error updating request:', error);
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'service-queue':
         return <ServiceQueueTab />;
       case 'supplier-sourcing':
-        return <SupplierSourcingTab />;
+        return <SupplierSourcingTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'manufacturing-feasibility':
-        return <ManufacturingFeasibilityTab />;
+        return <ManufacturingFeasibilityTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'market-entry':
-        return <MarketEntryTab />;
+        return <MarketEntryTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       default:
         return <ServiceQueueTab />;
     }

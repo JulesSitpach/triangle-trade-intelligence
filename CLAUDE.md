@@ -1,118 +1,237 @@
-# CLAUDE.md
+# CLAUDE.md - Triangle Intelligence Platform
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 📋 Project Overview
 
-## Project Overview
+**Triangle Intelligence Platform** - A professional USMCA compliance and certificate generation platform with hybrid SaaS + expert services model.
 
-Triangle Intelligence is a database-driven USMCA compliance platform for trade classification, tariff calculation, and certificate generation. Built with Next.js 14 (Pages Router), React 18, and Supabase PostgreSQL with 34,476+ HS code records.
+**Core Value**: AI-enhanced expert services for Mexico/Latin America trade bridge serving North American importers/exporters.
 
-### Triangle Intelligence SaaS - Top Level Overview
+**Business Model**: Tiered subscriptions ($99-599/month) + Professional services ($200-650 per service) with AI acceleration.
 
-**What It Is**: USMCA Trade Compliance Platform - Helps any industry in US, Canada, or Mexico optimize trade routes and compliance across all three USMCA countries.
+---
 
-**Core Value**:
-- **Triangle Routing**: US ↔ Canada ↔ Mexico optimization
-- **All USMCA Benefits**: Not just Mexico routing, but full three-country trade advantages
-- **Industry-Agnostic**: Works for any business importing/exporting in North America
+## 🏗️ Architecture Overview
 
-**Core User Journey**:
-1. **Paid Analysis** ($99-599/month) → USMCA compliance analysis
-2. **Three-Country Optimization**: Find best routes between US/Canada/Mexico
-3. **Professional Services** → Expert help for any USMCA country combination
+### Tech Stack
+- **Frontend**: Next.js 14 (Pages Router), React 18
+- **Database**: Supabase PostgreSQL (34,476+ HS codes)
+- **AI Integration**: Enhanced Classification Agent with web search, Claude API for content generation
+- **Styling**: Existing CSS classes only (NO Tailwind, NO inline styles)
 
-**Three Main Components**:
+### Core Principles
+- **Enhanced Classification Agent**: Web search verification + database validation
+- **AI + Human Hybrid**: AI research/drafts → Human validation/relationships
+- **Mexico Trade Bridge**: Bilingual team advantage, cultural understanding
+- **Database-Driven**: NO hardcoded data, configuration-driven
 
-1. **User Platform**
-   - USMCA workflow (all three countries)
-   - Certificate generation
-   - Crisis monitoring
-   - Trade route optimization
+---
 
-2. **Professional Services**
-   - **Jorge**: Latin America/Mexico expertise
-   - **Cristina**: US/Canada/Mexico logistics & customs
+## 👤 User Experience & Workflow
 
-3. **Admin System**
-   - Complete USMCA trade intelligence
-   - Canada-Mexico partnership opportunities
-   - Service delivery management
-
-**Business Model**: USMCA Trade Bridge - Optimize trade across all three USMCA countries, not just Mexico-centric.
-
-## Essential Commands
-
-⚠️ **CRITICAL WARNING FOR AI AGENTS**:
-- NEVER use `npm run clean` - it kills ALL Node processes including Claude Code!
-- Use `npm run clean:safe` or `npm run clean:port` instead
-- Always use port 3001+ for testing to avoid conflicts with user's port 3000
-
-```bash
-# Development
-npm run dev                    # Start dev server on port 3000 (USER ONLY)
-npm run dev:3001              # Start dev server on port 3001 (AGENTS USE THIS)
-npm run build                  # Production build (skips lint)
-npm run start                  # Start production server
-
-# Safe Cleanup (AGENTS USE THESE)
-npm run clean:safe            # Safe cleanup - only kills port processes
-npm run clean:port            # Kill processes on port 3000 only
-npm run dev:safe              # Clean port 3000 and start dev server
-
-# DANGEROUS - AGENTS AVOID
-npm run clean                 # ⚠️ KILLS ALL NODE PROCESSES INCLUDING CLAUDE CODE!
-
-# Testing
-npm test                       # Run all Jest tests
-npm run test:watch            # TDD watch mode
-npm run test:coverage         # Coverage report (75% threshold)
-npm run test:playwright       # E2E tests
-
-# Validation & Quality
-npm run lint                  # ESLint check
-npm run type-check           # TypeScript validation
-npm run check-hardcoding     # Verify no hardcoded values
-npm run validate-enterprise  # Full enterprise validation
-npm run css:check           # Check CSS violations (blocks commits)
-npm run protection:full     # Full protection check
-
-# Database
-npm run ingest:all          # Populate HS codes database
-
-# Windows Process Management
-npm run clean               # Kill node processes
-npm run clean:port         # Free port 3000
-npm run dev:fresh          # Clean restart
+### Main User Journey
+```
+1. Homepage → USMCA Workflow (2 steps)
+2. Company Info + Product Analysis → Results
+3. Two paths: Certificate Generation OR Trade Alerts
+4. Professional Services: /services/logistics-support
 ```
 
-## High-Level Architecture
+### Key User Pages
+- **`/`** - Homepage with value proposition
+- **`/usmca-workflow`** - Main 2-step compliance analysis
+- **`/usmca-results`** - Analysis results with dual paths
+- **`/usmca-certificate-completion`** - Optional certificate generation
+- **`/trade-risk-alternatives`** - Crisis monitoring and alerts
+- **`/services/logistics-support`** - Professional services selection
 
-### API Structure (54 endpoints)
+### User Workflow Components
 ```
-pages/api/
-├── simple-*.js              # Core workflow APIs (<400ms response)
-│   ├── simple-classification.js    # AI-enhanced HS classification
-│   ├── simple-usmca-compliance.js  # Compliance checking (complex routing)
-│   └── simple-savings.js           # Tariff savings calculator
-├── admin/                   # Admin management (11 endpoints)
-│   ├── users.js            # Falls back to sample data if empty
-│   ├── suppliers.js        # Supplier management
-│   ├── rss-feeds.js        # Crisis monitoring feeds
-│   ├── business-opportunity-analytics.js
-│   ├── performance-analytics.js
-│   └── workflow-analytics.js
-├── trust/                   # Trust microservices (12 endpoints)
-│   ├── complete-workflow.js
-│   ├── complete-certificate.js
-│   ├── trust-metrics.js
-│   └── verify-hs-code.js
-└── database-driven-*.js    # Enterprise APIs
+components/workflow/
+├── USMCAWorkflowOrchestrator.js    # Main workflow controller
+├── CompanyInformationStep.js       # Step 1: Company data
+├── ComponentOriginsStepEnhanced.js # Step 2: Product analysis
+├── WorkflowResults.js              # Results display
+└── AuthorizationStep.js            # Certificate completion
 ```
 
-### Key Architectural Patterns
+### Critical User Data Flow
+- **Step 1-2**: localStorage (immediate storage)
+- **Results**: User chooses Certificate OR Alerts path
+- **Database**: Only saves when user selects professional services
+- **No automatic tracking**: Users control data sharing
 
-#### 1. Database Connection & Fallback Pattern
-All admin APIs intelligently fall back to sample data when tables are empty:
+---
+
+## 👨‍💼 Admin Dashboard Architecture
+
+### Dashboard Access
+- **Cristina**: `/admin/broker-dashboard` - Compliance Services (3 services)
+- **Jorge**: `/admin/jorge-dashboard` - Mexico/Latin America Services (3 services)
+
+### Service Implementation Patterns
+
+#### Pattern 1: 2-Stage Quick Validation (Cristina - Same Day)
 ```javascript
+// For: USMCA Certificates, HS Classification
+const workflowStages = {
+  1: 'Data Review',           // Review subscriber workflow data
+  2: 'AI + Expert Validation' // Generate/validate + deliver
+};
+```
+
+#### Pattern 2: 3-Stage Research Services (Multi-Day)
+```javascript
+// For: Crisis Response, Manufacturing Feasibility, Market Entry, Supplier Sourcing
+const workflowStages = {
+  1: 'Requirements Collection', // Minimal 3-5 question intake
+  2: 'AI Analysis',            // Automated research + drafts
+  3: 'Expert Validation'       // Human review + final deliverable
+};
+```
+
+### Service Definitions (6 Total)
+
+#### Cristina's Services (3)
+**🔄 USMCA Certificates ($250) - 2-Stage Workflow**
+- **Stage 1**: Data Review - Display existing subscriber data, no new forms
+- **Stage 2**: Certificate Generation - Enhanced Classification Agent + PDF generation
+- **Component**: `components/cristina/USMCACertificateTab.js`
+- **API**: `/api/generate-usmca-certificate.js`
+
+**🔄 HS Classification ($200) - 2-Stage Workflow**
+- **Stage 1**: Product Review - Display subscriber product + component data
+- **Stage 2**: Expert Validation - Enhanced Classification Agent web search + validation
+- **Component**: `components/cristina/HSClassificationTab.js`
+- **API**: `/api/validate-hs-classification.js`
+
+**🔄 Crisis Response ($500) - 3-Stage Workflow**
+- **Stage 1**: Crisis Description - 4 question intake form
+- **Stage 2**: Analysis - AI impact analysis using subscriber trade profile
+- **Stage 3**: Action Plan - Cristina creates specific action plan + prevention
+- **Component**: `components/cristina/CrisisResponseTab.js`
+- **API**: `/api/crisis-response-analysis.js`
+
+#### Jorge's Services (3)
+**✅ Supplier Sourcing ($500) - 3-Stage Workflow** (IMPLEMENTED)
+- **Stage 1**: Sourcing Requirements - 5 question intake
+- **Stage 2**: AI Supplier Discovery - Automated supplier research
+- **Stage 3**: Network Validation - Jorge validates + adds Mexico contacts
+- **Component**: `components/jorge/SupplierSourcingTab.js` ✅
+- **API**: `/api/supplier-sourcing-discovery.js` ✅
+
+**🔄 Manufacturing Feasibility ($650) - 3-Stage Workflow**
+- **Stage 1**: Manufacturing Context - 5 question intake
+- **Stage 2**: AI Analysis - Location analysis + cost estimates
+- **Stage 3**: Jorge's Recommendation - Go/No-Go + location + next steps
+- **Component**: `components/jorge/ManufacturingFeasibilityTab.js`
+- **API**: `/api/manufacturing-feasibility-analysis.js`
+
+**🔄 Market Entry ($450) - 3-Stage Workflow**
+- **Stage 1**: Market Goals - 4 question intake
+- **Stage 2**: Market Analysis - AI market research + opportunities
+- **Stage 3**: Jorge's Strategy - Partnership recommendations + contacts
+- **Component**: `components/jorge/MarketEntryTab.js`
+- **API**: `/api/market-entry-analysis.js`
+
+### Service Status Summary
+**✅ Implemented:**
+- Supplier Sourcing (Jorge) - Complete 3-stage workflow
+- Enhanced Classification Agent - Web search + database validation
+
+**🔄 Priority Build Order:**
+1. **USMCA Certificates** (Cristina) - Highest volume, uses Enhanced Classification Agent
+2. **HS Classification** (Cristina) - Uses existing web search agent
+3. **Crisis Response** (Cristina) - New workflow
+4. **Manufacturing Feasibility** (Jorge) - Copy supplier sourcing pattern
+5. **Market Entry** (Jorge) - Copy supplier sourcing pattern
+
+### Shared Components
+```
+components/shared/
+└── ServiceWorkflowModal.js    # Reusable modal for all 6 services
+```
+
+### Data Flow Architecture
+**All services use existing subscriber workflow data:**
+- No duplicate data entry
+- Pre-populated analysis from user's comprehensive profile
+- Minimal new data collection (3-5 questions max per service)
+- Professional delivery with subscriber context
+
+### Expert Capacity Management
+**Cristina's Services (Same Day):**
+- USMCA Certificates: 40/month at $250 = $10,000 potential
+- HS Classification: 60/month at $200 = $12,000 potential
+- Crisis Response: 15/month at $500 = $7,500 potential
+
+**Jorge's Services (2-5 Days):**
+- Supplier Sourcing: 8/month at $500 = $4,000 potential
+- Manufacturing Feasibility: 4/month at $650 = $2,600 potential
+- Market Entry: 6/month at $450 = $2,700 potential
+
+**Total Monthly Potential**: $38,800
+
+---
+
+## 🤖 AI Integration Strategy
+
+### Enhanced Classification Agent (Competitive Advantage)
+**6-Step Workflow with Web Search Verification:**
+1. **Database First** → Query 34K+ HS codes (hs_master_rebuild table)
+2. **Web Verification** → Real-time tariff rate validation via web search
+3. **Compare & Flag** → Database vs web discrepancy analysis
+4. **Update Database** → tariff_rates_staging table for review
+5. **Context-Aware Response** → User-friendly vs Admin-technical responses
+6. **Proactive Maintenance** → Automated data freshness monitoring
+
+### Technology Choices by Service
+
+**Enhanced Classification Agent (Primary):**
+- USMCA certificate generation
+- HS Code classification with web verification
+- Real-time tariff rate validation
+- Database learning and improvement
+
+**AI Content Generation ($0.05-0.15):**
+- Crisis analysis reports
+- Supplier discovery research
+- Manufacturing feasibility reports
+- Market entry strategies
+
+### AI API Endpoints
+```
+/api/generate-usmca-certificate.js     # USMCA certificate generation
+/api/validate-hs-classification.js     # HS classification validation
+/api/crisis-response-analysis.js       # Crisis analysis
+/api/supplier-sourcing-discovery.js    # ✅ Supplier research (implemented)
+/api/manufacturing-feasibility-analysis.js # Location analysis
+/api/market-entry-analysis.js          # Market intelligence
+```
+
+### AI + Human Value Proposition
+- **67% time reduction**: AI handles research, humans provide validation
+- **Professional liability**: Licensed expert backing for all deliverables
+- **Cultural bridge**: Mexico-based bilingual team advantage
+- **Learning through service**: Jorge builds expertise with each project
+
+---
+
+## 🗄️ Database Schema
+
+### Primary Tables
+```
+hs_master_rebuild          # 34,476 HS codes (PRIMARY tariff source)
+tariff_rates              # 14,486 records (fallback - many 0% rates)
+usmca_tariff_rates        # 48 records (limited but high-quality)
+service_requests          # Professional service bookings
+workflow_completions      # Completed user workflows
+partner_suppliers         # AI-discovered suppliers for Jorge
+user_profiles            # User accounts (empty = sample data mode)
+```
+
+### Database Connection Pattern
+```javascript
+// All admin APIs intelligently fall back to sample data
 const { data, error } = await supabase.from('table').select('*');
 if (error || !data || data.length === 0) {
   console.log('Using sample data for demo');
@@ -120,732 +239,164 @@ if (error || !data || data.length === 0) {
 }
 ```
 
-#### 2. API Response Structure
-Admin APIs return standardized responses:
-```javascript
-{
-  [main_data]: [...],        // Primary data (e.g., users, feeds)
-  summary: { ... },          // Aggregate metrics
-  data_status: { ... },      // Metadata
-  timeframe: "30days"        // Query parameters
-}
+---
+
+## 🎨 Styling Rules (CRITICAL)
+
+### CSS Compliance (STRICTLY ENFORCED)
+- **❌ FORBIDDEN**: Inline styles (`style={{}}` or `style=""`)
+- **❌ FORBIDDEN**: Tailwind CSS classes
+- **❌ FORBIDDEN**: New CSS files without approval
+- **❌ FORBIDDEN**: Modifying `styles/globals.css`
+
+### Available CSS Classes
+```css
+/* Use these existing classes */
+.card, .card-title, .card-description
+.btn-primary, .btn-secondary
+.text-body, .nav-link
+.dashboard-header, .dashboard-tabs
+.form-group, .form-input
+.service-request-card
+.hero-content, .section-header
 ```
 
-#### 3. HS Code Normalization
-Critical for classification - handles multiple formats:
-```javascript
-// User input: "8544.42.90" → Database: "85444290"
-const normalized = input.replace(/[\.\s\-]/g, '');
-// Progressive fallback matching with 8, 6, 4 digit patterns
-```
-
-#### 4. AI Classification Integration
-Two-phase approach:
-- Phase 1: AI provides context once per company
-- Phase 2: Database handles all runtime queries
-
-### Critical Configuration Files
-
-- `config/system-config.js` - Central system configuration
-- `config/table-constants.js` - Database table names (never hardcode)
-- `config/trust-config.js` - Trust system settings
-- `config/usmca-thresholds.js` - Industry-specific USMCA thresholds
-- `.env.local` - Environment variables (Supabase, Anthropic, etc.)
-
-### Critical USMCA Threshold Configuration
-
-**IMPORTANT**: Electronics industry uses 65% threshold, NOT 75%:
-- Electronics/Electronics & Technology: **65.0%** (not 75%)
-- Automotive: **75.0%** ✓
-- Textiles/Textiles & Apparel: **62.5%** ✓
-- General Manufacturing: **62.5%** ✓
-
-**Fixed Issue**: `config/usmca-thresholds.js` previously had Electronics set to 75% instead of the correct 65% threshold. This caused incorrect USMCA qualification results for electronics companies.
-
-### CSS Architecture Rules (STRICTLY ENFORCED)
-
-**NEVER modify `styles/globals.css` or `styles/dashboard.css`**
-- NO inline styles (`style={{}}` or `style=""`)
-- NO Tailwind CSS classes
-- Use existing CSS classes only
-- Run `npm run css:check` before commits
-
-### Database Schema
-
-Primary tables (Supabase PostgreSQL):
-- `hs_master_rebuild` - 34,476 HS codes (critical - MAIN tariff data source)
-- `tariff_rates` - 14,486 records (WARNING: Many 0% rates - use as fallback only)
-- `usmca_tariff_rates` - 48 records (Limited coverage)
-- `user_profiles` - User accounts (empty = sample data)
-- `workflow_completions` - Completed workflows
-- `rss_feeds` - Crisis monitoring feeds
-- `usmca_qualification_rules` - Qualification logic
-
-**CRITICAL TARIFF TABLE PRIORITY:**
-1. **hs_master_rebuild** (PRIMARY): 34,476 codes with real tariff rates
-2. **usmca_tariff_rates** (SECONDARY): Limited but high-quality data  
-3. **tariff_rates** (FALLBACK): Many records have 0% rates - use only as last resort
-
-**KNOWN ISSUE RESOLVED:** Previous versions incorrectly prioritized `tariff_rates` table first, causing electrical components to return 0% rates. Fixed 2025-09-10 to use `hs_master_rebuild` as primary source.
-
-### Testing Strategy
-
-Tests located in `__tests__/` directory:
-- Unit tests: 75% coverage required
-- Integration tests: API endpoint testing
-- E2E tests: Playwright for visual validation
-
-Run specific test:
+### CSS Validation
 ```bash
-npm test -- __tests__/api/simple-classification.test.js
+npm run css:check          # Validate CSS compliance
+npm run protection:full    # Full protection check
 ```
 
-### Common Issues & Solutions
+---
 
-#### "Database connected but using sample data"
-- `user_profiles` table is empty (0 records)
-- APIs correctly fall back to demo data
-- Add real users to switch from sample data
+## 📊 Business Intelligence
 
-#### "405 Method Not Allowed"
-- Check HTTP method in API handler
-- Admin APIs expect GET, not POST
+### Mexico Team Advantage
+- **Bilingual communication** (English/Spanish)
+- **Cultural bridge** for North American companies
+- **Local Mexico expertise** and ground access
+- **Time zone alignment** with North American clients
+- **Cost advantage** while maintaining professional quality
 
-#### "HS Code not found"
-- Format mismatch between input and database
-- Use normalization utilities in `lib/utils/hs-code-normalizer.js`
+---
 
-#### "CSS violation detected"
-- Remove inline styles
-- Use existing classes from `styles/globals.css`
-- Never add new styles without approval
+## 🚀 Development Workflow
 
-### Performance Targets
+### Essential Commands
+```bash
+# Development (AGENTS USE 3001+)
+npm run dev:3001              # Safe development server
+npm run build                 # Production build
+npm run clean:safe           # Safe cleanup (no process killing)
+
+# Testing & Validation
+npm test                     # Run all tests
+npm run lint                 # ESLint validation
+npm run css:check           # CSS compliance check
+npm run protection:full     # Complete validation
+
+# Database
+npm run ingest:all          # Populate HS codes database
+```
+
+### Git Workflow
+```bash
+# Current branches
+main                        # Main branch (use for PRs)
+agent-orchestration-phase1  # Current development branch
+```
+
+### Implementation Priority
+1. **Phase 1**: Complete Cristina's services (high ROI)
+2. **Phase 2**: Complete Jorge's services (market expansion)
+3. **Phase 3**: Optimization and analytics
+
+---
+
+## 🔧 Configuration Files
+
+### Critical Configuration
+- **`config/system-config.js`** - Central system configuration
+- **`config/table-constants.js`** - Database table names
+- **`config/usmca-thresholds.js`** - Industry USMCA thresholds
+- **`.env.local`** - Environment variables (Supabase, Anthropic)
+
+### Anti-Hardcoding Rules (CRITICAL)
+**⛔ NEVER HARDCODE:**
+- Company names, country codes, business types
+- Trade volumes, HS codes, tariff rates
+- Product descriptions, addresses, phone numbers
+- Any business data that should come from user input
+
+**✅ CORRECT APPROACH:**
+- Use configuration objects for thresholds
+- Pull data from user's workflow input
+- Reference localStorage: `workflowData?.company?.name`
+- Database-driven for legitimate defaults
+
+---
+
+## 📈 Success Metrics
+
+### Technical KPIs
 - API Response: <400ms
 - Database Queries: <200ms
 - Page Load: <3s
 - Classification Accuracy: 85%+
+- CSS Compliance: 100%
 
-### Workflow Components
+### Business KPIs
+- Service Completion Rate: 99%+
+- Expert Capacity Utilization: 70%+
+- Client Satisfaction: 4.5/5+
+- Revenue Per Service: Target margins maintained
 
-Main orchestrator: `components/workflow/USMCAWorkflowOrchestrator.js`
+---
 
-**✅ CURRENT USER WORKFLOW (UPDATED 2025-09-14):**
-1. **Step 1**: USMCA Compliance Analysis (`CompanyInformationStep.js`)
-   - Fields: company_name, business_type, trade_volume, manufacturing_location
-2. **Step 2**: Product & Component Analysis (`ComponentOriginsStepEnhanced.js`)
-   - Fields: product_description, component_origins
-3. **Step 3**: USMCA Qualification Results (standalone `/usmca-results`)
-   - Shows qualification status and analysis results
-   - **TWO USER PATHS AVAILABLE:**
-     - **Path A**: "📋 Continue to Certificate →" → Certificate completion
-     - **Path B**: "🚨 Get Crisis Alerts" → Direct to alerts (saves data to database)
-4. **Step 4A**: Certificate Generation (`/usmca-certificate-completion`) - OPTIONAL
-   - Uses `AuthorizationStep` component for certificate completion
-   - Includes "🚨 Go to Crisis Alerts" button after certificate generation
-4. **Step 4B**: Trade Risk & Alternatives (`/trade-risk-alternatives`) - CRITICAL PATH
-   - **⚠️ NEVER USE `/trump-tariff-alerts` - DEPRECATED AND BROKEN**
-   - Personalized trade monitoring based on user's actual workflow data
-   - Data sourced from localStorage only (no automatic database storage)
-   - Dynamic team recommendations (Jorge for Latin America, Cristina for logistics)
+## 🚨 Common Issues & Solutions
 
-**CORRECT API Endpoints:**
-- Primary workflow: `/api/simple-usmca-compliance`
-- Classification: `/api/simple-classification`
-- Certificate completion: `/api/trust/complete-certificate`
-- **NO DATABASE STORAGE** - Users control when to share data with team
+### "Database connected but using sample data"
+- `user_profiles` table is empty (0 records)
+- Normal behavior - APIs fall back to demo data
+- Add real users to switch from sample data
 
-**CORRECT Navigation Flows:**
-- **Standard**: Homepage → USMCA Workflow → Results (stay in orchestrator)
-- **Certificate Path**: Results → Certificate Completion → PDF Generation → Trade Risk Alerts
-- **Alerts Path**: Any "Alerts" link → `/trade-risk-alternatives` (NEVER `/trump-tariff-alerts`)
-- **Data Flow**: localStorage only → Team contact triggers data sharing
+### "CSS violation detected"
+- Remove inline styles immediately
+- Use existing classes from `styles/globals.css`
+- Never add new styles without approval
 
-**⚠️ CRITICAL ROUTING RULES:**
-- ALL alert navigation must use `/trade-risk-alternatives`
-- Workflow orchestrator must NOT redirect to separate results page
-- Certificate completion flows to trade risk alerts, not old trump alerts
-- Navigation components use trade-risk-alternatives for all alert links
+### "HS Code not found"
+- Format mismatch between input and database
+- Use normalization utilities in `lib/utils/hs-code-normalizer.js`
+- Priority: `hs_master_rebuild` → `usmca_tariff_rates` → `tariff_rates`
 
-### 🚨 ANTI-HARDCODING RULES - STRICTLY ENFORCED
+---
 
-**⛔ NEVER HARDCODE THESE VALUES:**
-- Company names (e.g., "Tropical Harvest Processors SA de CV")
-- Country codes (e.g., 'MX', 'US', 'CA' as fallbacks)
-- Business types (e.g., "Electronics", "Manufacturing")
-- Trade volumes (e.g., $1,000,000, $500,000)
-- HS codes (e.g., "8517.62.00", "2009110111")
-- Tariff rates (e.g., 6.8%, 0.25, 25%)
-- Company addresses, tax IDs, phone numbers
-- Product descriptions from tariff schedules
+## 📚 Implementation Templates
 
-**✅ CORRECT APPROACH:**
-- Use `RISK_CONFIG` objects for thresholds and percentages
-- Pull ALL data from user's actual workflow input
-- Use empty strings '' instead of hardcoded fallbacks
-- Reference user's localStorage data: `workflowData?.company?.name`
-- Configuration-driven with environment variables
-- Database-driven for legitimate defaults
+### Adding New Service Dashboard
+1. **Copy appropriate pattern** (2-stage or 3-stage)
+2. **Create intake form** in `config/service-intake-forms.js`
+3. **Create AI endpoint** `/api/[service]-[action].js`
+4. **Add to navigation** in admin dashboard
+5. **Test workflow** end-to-end
 
-**🔍 HOW TO CHECK:**
-```bash
-# Search for common hardcoded patterns
-grep -r "Tropical Harvest" --include="*.js" .
-grep -r "'MX'" --include="*.js" pages/ components/
-grep -r "1000000\|500000" --include="*.js" pages/
-```
-
-**⚠️ AGENT RESPONSIBILITY:**
-Every agent MUST verify no hardcoded business values before making changes.
-The system must work for ANY user in ANY country with ANY business type.
-
-### Environment Requirements
-
-Required in `.env.local`:
-```
-NEXT_PUBLIC_SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-ANTHROPIC_API_KEY=
-```
-
-### Monitoring & Status
-
-- System Status API: `/api/system-status`
-- Visual Dashboard: `/system-status`
-- Health check shows database connectivity, table records, API status
-
-### Development Workflow
-
-1. Check database connection: `node test-database-connection.js`
-2. Start dev server: `npm run dev`
-3. Monitor status: http://localhost:3000/system-status
-4. Test APIs: Use curl or browser dev tools
-5. Before commit: `npm run protection:full`
-
-## USMCA Workflow & Alerts Integration - Latest Updates (2025-09-14)
-
-### Enhanced User Experience & Data Flow
-
-#### 1. **Dual Path Architecture**
-**Added**: Two user paths from USMCA Results page
-- **Certificate Path**: For users needing official documentation
-- **Alerts Path**: For users wanting immediate trade monitoring
-- **Choice Point**: USMCA Results page now offers both options
-
-#### 2. **Crisis Alerts Integration**
-**Enhanced**: `components/workflow/AuthorizationStep.js`
-- Added "🚨 Go to Crisis Alerts" button after certificate generation
-- Button appears alongside Download/Email actions
-- Direct navigation to `/trade-risk-alternatives`
-
-#### 3. **Database Persistence for Alerts**
-**Fixed**: Data flow from workflow to alerts system
-- **Issue**: Alerts showed `$NaNM` and `$0` due to missing database integration
-- **Solution**: Added `/api/workflow-complete` calls to persist workflow data
-- **Files Modified**:
-  - `pages/usmca-certificate-completion.js` - Saves certificate data to database
-  - `pages/usmca-results.js` - Saves analysis data when going to alerts
-- **Result**: Alerts now display real trade volumes, savings, and metrics
-
-#### 4. **Flexible Workflow Navigation**
-**Enhanced**: `pages/usmca-results.js`
-- Added choice buttons: "📋 Continue to Certificate →" and "🚨 Get Crisis Alerts"
-- Smart data saving based on user path selection
-- Improved conversion funnel for alerts subscription
-
-### Technical Implementation Details
-
-#### Data Flow Architecture:
-```
-Step 1-2: Workflow → localStorage (immediate)
-Step 3: Results Page → User chooses path
-Path A: Certificate → Database via certificate_generation step
-Path B: Alerts → Database via qualification_results step
-Both paths → Alerts system reads from workflow_completions table
-```
-
-#### API Integration:
-- `POST /api/workflow-complete` - Persists workflow data to database
-- `GET /api/workflow-based-alerts` - Retrieves personalized alerts from database
-- Dual storage: localStorage (session) + PostgreSQL (persistent)
-
-#### Authentication Context:
-- **Issue Identified**: Admin users can't access regular workflow (authentication conflict)
-- **Solution**: Use regular user account for workflow testing
-- **Workflow Access**: Requires non-admin authentication for proper data flow
-
-### Business Value Delivered:
-- ✅ **Increased conversion**: Easier path to alerts without forcing certificate
-- ✅ **Better UX**: Users choose their preferred outcome
-- ✅ **Data accuracy**: Real metrics instead of placeholder values
-- ✅ **Retention**: Personalized alerts based on actual workflow data
-
-## USMCA Certificate Workflow - Previous Fixes & Improvements (2025-09-11)
-
-### Critical Issues Resolved
-
-#### 1. Server Killing Bug Fixed
-**Problem**: The `clean` script was killing ALL node processes including the dev server
-**Solution**: Fixed `package.json` clean script to target only port 3000
-```json
-// Before (BROKEN)
-"clean": "taskkill /F /IM node.exe"
-
-// After (FIXED)  
-"clean": "for /f \"tokens=5\" %a in ('netstat -aon ^| findstr :3000') do taskkill /F /PID %a 2>nul || echo No process on port 3000"
-```
-
-#### 2. Input Fields Non-Functional Bug Fixed
-**Problem**: Certificate completion form input fields couldn't accept any text
-**Root Cause**: onChange parameter mismatch between components
-**Solution**: Standardized all onChange handlers to use `(field, value)` pattern
-
-**Files Fixed**:
-- `components/workflow/CompanyInfoStep.js:130` - Fixed onChange to `handleFieldChange(field, e.target.value)`
-- `components/workflow/ProductDetailsStep.js` - Fixed multiple onChange calls
-- `pages/usmca-certificate-completion.js:457` - Fixed onChange parameter handling
-
-#### 3. Navigation Buttons Not Working Fixed
-**Problem**: "Continue to Product Details" button crashed workflow  
-**Root Cause**: `nextStep` function didn't handle 'default' parameter properly
-**Solution**: Fixed navigation logic in `hooks/useWorkflowState.js:608`
-
+### Service Request Flow
 ```javascript
-// Fixed nextStep function logic
-} else {
-  if (currentStep === 1) {
-    setWorkflowPath(null); // Clear workflow path for normal progression
-  }
-}
+// Standard service request card
+<div className="service-request-card">
+  <div className="request-header">
+    <h3>{service.title}</h3>
+    <span className="request-price">${service.price}</span>
+  </div>
+  <div className="request-actions">
+    <button onClick={() => startWorkflow(request)}>
+      Start Service Delivery
+    </button>
+  </div>
+</div>
 ```
 
-#### 4. Hydration Mismatch Error Fixed
-**Problem**: Button disabled states caused SSR/client mismatch
-**Solution**: Added client-side state tracking in `CompanyInformationStep.js`
-```javascript
-const [isClient, setIsClient] = useState(false);
-const isNextDisabled = !isClient || !formData.company_name || ...
-```
+---
 
-### Streamlined Certificate Workflow Implementation
-
-#### New 4-Step Process
-**Old**: Confusing 5-step certificate completion with redundant steps
-**New**: Streamlined 4-step flow with integrated trust verification
-
-1. **Company Information** (Step 1) - Auto-populated from main workflow
-2. **Product & Component Analysis** (Step 2) - Pre-filled classifications  
-3. **USMCA Results + Trust Verification** (Step 3) - Combined display
-4. **Authorization + Certificate Generation** (Step 4) - PDF generation
-
-#### Trust Verification Integration
-**Enhanced WorkflowResults.js** with:
-- Trust score display with percentage indicators
-- Expert validation status badges
-- "Continue to Authorization" button integration
-- Automatic trust verification API calls
-
-#### Comprehensive Data Auto-Population System
-**Enhanced** `pages/usmca-certificate-completion.js` with intelligent data loading:
-
-```javascript
-// Priority order for data loading:
-1. localStorage 'usmca_workflow_results' (primary)
-2. localStorage 'triangleUserData' (secondary with full mapping)  
-3. URL parameters (backward compatibility fallback)
-
-// Smart data mapping from workflow to certificate format
-exporter_name: initialData.certificate?.exporter_name || initialData.company?.name
-exporter_address: initialData.company?.company_address
-exporter_tax_id: initialData.company?.tax_id
-// ... comprehensive mapping for all fields
-```
-
-#### PDF Certificate Generation with Trust Verification
-**Enhanced** `components/workflow/USMCAWorkflowOrchestrator.js:167` with:
-- Trust verification service integration
-- PDF generation with trust scores and validation status
-- Professional certificate formatting with trust indicators
-
-```javascript
-const handleGenerateCertificate = async (results, authorizationData) => {
-  const certificateResult = await trustVerifiedCertificateService.generateTrustVerifiedCertificate(
-    results, authorizationData, trustIndicators
-  );
-  // PDF generation with trust metrics included
-}
-```
-
-### Key Files Modified
-
-#### Core Workflow Components
-- **`hooks/useWorkflowState.js`** - Fixed navigation logic and workflow progression
-- **`components/workflow/USMCAWorkflowOrchestrator.js`** - Added Authorization step and trust integration
-- **`components/workflow/WorkflowResults.js`** - Added trust verification display and "Continue to Authorization"
-- **`components/workflow/CompanyInfoStep.js`** - Fixed onChange patterns and added USMCA countries
-- **`components/workflow/ProductDetailsStep.js`** - Fixed input field onChange handlers
-
-#### Certificate Completion System
-- **`pages/usmca-certificate-completion.js`** - Complete overhaul with data auto-population
-- **`components/workflow/CompanyInformationStep.js`** - Fixed hydration and onChange issues
-
-#### Configuration & Utils
-- **`package.json`** - Fixed clean script to prevent server killing
-- **Trust verification service integration** - Throughout workflow components
-
-### Testing Results - All Issues Resolved ✅
-
-**Current Workflow Testing Status:**
-1. **✅ Complete 2-step USMCA workflow end-to-end** - Navigation working properly
-2. **✅ Input field functionality** - All forms accept text input correctly
-3. **✅ Data auto-population** - localStorage system transfers data to certificate completion
-4. **✅ Certificate generation** - Standalone page with trust verification integration
-
-**Test Alignment Updates (2025-01-13):**
-- Tests updated to match current Company Info → Product Analysis → Certificate flow
-- API endpoint tests now use `/api/usmca-complete` instead of outdated trust endpoints
-- Form validation tests include all current fields: company_name, business_type, trade_volume, manufacturing_location, product_description, component_origins
-- Workflow service tests aligned with actual implementation
-
-### Business Value Delivered
-
-- **Eliminated user frustration**: No more re-entering data multiple times
-- **Streamlined UX**: Reduced from confusing 5-step to clean 4-step process  
-- **Professional output**: PDF certificates with trust verification scores
-- **Production ready**: All critical bugs resolved, workflow stable
-
-### Key Implementation Notes
-
-- Platform uses Pages Router, not App Router
-- All data configuration-driven (no hardcoding)
-- Admin dashboards gracefully handle empty tables
-- AI classification caches context per company
-- PDF certificates generated with jsPDF and trust verification
-- Crisis monitoring via RSS feed integration
-- Sample data ensures platform demos well
-- Certificate workflow now fully functional with auto-population
-
-## Testing Infrastructure
-
-### E2E Testing with Playwright
-- Configuration: `playwright.config.js`
-- Main test suites in `tests/e2e/`
-- Visual regression testing enabled
-- Mobile and desktop viewport testing
-
-Run E2E tests:
-```bash
-npm run test:e2e          # Run focused certificate test
-npm run test:e2e:full     # Run full workflow test
-npm run test:visual       # Visual regression testing
-npm run test:mobile       # Mobile viewport testing
-```
-
-### Current Project State (as of 2025-09-24)
-
-#### Active Development Branch
-- **Current branch**: `enterprise-restoration-phase1`
-- **Main branch**: `main` (use for PRs)
-
-#### Recently Completed (September 2025)
-
-**✅ Service Dashboard Architecture (2025-09-24):**
-- **Supplier Sourcing Dashboard**: Complete 4-stage workflow (AI discovery → validation → report)
-  - AI discovers real suppliers (Jabil, Foxconn, Sanmina, Benchmark Electronics)
-  - Saves to database for Jorge's verification
-  - Working end-to-end with proper data mapping
-  - Reference: `components/jorge/SupplierSourcingTab.js`
-
-**✅ Workflow Pattern Framework:**
-- **3 Proven Patterns Defined**:
-  - 4-Stage Complex Research (Manufacturing, Market Entry, Supplier Sourcing ✅)
-  - 3-Stage Expert Validation (USMCA Certs, HS Classification, Doc Review)
-  - 2-Stage Direct Service (Monthly Support, Crisis Response)
-- **Implementation Guide**: `Efficient Service Dashboard Implementation.md`
-- **67% efficiency gain**: Information procurement vs manual data entry
-
-**✅ AI Supplier Discovery Integration:**
-- API: `/api/ai-supplier-discovery` - Discovers real suppliers or search strategies
-- Saves to `partner_suppliers` table with `status: "pending_research"`
-- Jorge verification page: `/admin/supplier-verification`
-- Maps AI response fields correctly to UI format
-
-**✅ Application Stability Fixes:**
-- Fixed undefined variable `effectiveRate` in SimpleSavingsCalculator.js
-- Fixed authentication context imports (SimpleAuthContext)
-- Removed all ESLint errors (unused variables, React entity escaping)
-- Jorge dashboard modularized: 3,746 lines → 120 lines with component extraction
-
-#### Current Working Components
-- **Core USMCA Workflow**: 2-step process (Company Info → Product Analysis → Results)
-- **Certificate Generation**: Standalone completion wizard with auto-population
-- **Crisis Monitoring**: Trade risk alerts with personalized recommendations
-- **Service Dashboards**:
-  - ✅ **Supplier Sourcing** (Jorge) - 4-stage workflow complete
-  - 🔄 **USMCA Certificates** (Cristina) - 3-stage validation (next priority)
-  - 🔄 **HS Classification** (Cristina) - 3-stage validation (next priority)
-  - **Manufacturing Feasibility** (Jorge) - 4-stage complex (pending)
-  - **Market Entry** (Jorge) - 4-stage complex (pending)
-  - **Document Review** (Cristina) - 3-stage validation (pending)
-  - **Monthly Support** (Cristina) - 2-stage direct (pending)
-  - **Crisis Response** (Cristina) - 2-stage direct (pending)
-
-#### Modified Files (Recent Sessions)
-
-**2025-09-24 Session:**
-- `pages/api/ai-supplier-discovery.js` - Enhanced to save discoveries to database
-- `components/jorge/SupplierSourcingTab.js` - Fixed data mapping (company_name → name)
-- `pages/admin/supplier-verification.js` - NEW: Jorge's supplier verification page
-- `Efficient Service Dashboard Implementation.md` - Complete workflow pattern guide
-- `Triangle Intelligence Platform PRD.md` - Updated with workflow patterns and efficiency metrics
-- Fixed ESLint errors: unused variables, React entity escaping
-
-**2025-09-21 Session:**
-- `pages/admin/jorge-dashboard-clean.js` - Modularized from 3,746 lines to 120 lines
-- `components/jorge/` - Created 4 specialized tab components (ServiceQueue, SupplierSourcing, MarketEntry, SupplierIntel)
-
-#### Jorge Dashboard Modularization (2025-09-21)
-**✅ Successfully Modularized Jorge's Dashboard:**
-- **Original Issue**: 3,746-line monolithic file was difficult to maintain
-- **Solution**: Extracted functionality into separate component files while preserving rich features
-- **Architecture Change**:
-  - Main file: `pages/admin/jorge-dashboard-clean.js` (120 lines - clean navigation & state)
-  - Components: `components/jorge/` directory with 4 specialized tab components
-- **Rich Functionality Preserved**: Multi-stage supplier verification, comprehensive workflows, professional modals
-- **Components Created**:
-  - `ServiceQueueTab.js` - Service request management with filtering
-  - `SupplierVettingTab.js` - 4-stage verification workflow with document collection, legal/financial review, production assessment, and final reporting
-  - `MarketEntryTab.js` - Market entry consultation tracking
-  - `SupplierIntelTab.js` - RSS feed monitoring and intelligence
-- **Backup**: Original 3,746-line file preserved as `jorge-dashboard-clean-backup.js`
-
-#### Current Architecture Status
-- **Authentication**: Uses SimpleAuthContext consistently across all components
-- **CSS Compliance**: All inline styles removed, uses existing classes from globals.css
-- **Database Integration**: Falls back to sample data when tables empty
-- **API Endpoints**: 54+ endpoints operational with <400ms response times
-- **Revenue Tracking**: Real capacity and earnings metrics for service delivery
-
-## Project File Organization & Cleanup Guide
-
-### 🗂️ Core Files to PRESERVE (Essential)
-```
-├── CLAUDE.md                           # This documentation file
-├── package.json                        # Dependencies and scripts
-├── next.config.js                      # Next.js configuration
-├── .env.local                          # Environment variables
-├── .gitignore                          # Git ignore rules
-│
-├── components/                         # React components
-│   ├── AdminDashboard.js              # Fixed authentication context
-│   ├── SimpleSavingsCalculator.js     # Fixed webpack error
-│   ├── AdminNavigation.js             # Navigation component
-│   ├── UserDashboard.js               # User dashboard
-│   ├── TriangleLayout.js              # Main layout
-│   ├── jorge/                         # Jorge's modular tab components
-│   │   ├── ServiceQueueTab.js         # Service request management
-│   │   ├── SupplierVettingTab.js      # 4-stage verification workflow
-│   │   ├── MarketEntryTab.js          # Market entry consultation
-│   │   └── SupplierIntelTab.js        # Intelligence monitoring
-│   ├── broker/                        # Cristina's service components
-│   │   ├── ServiceQueueTab.js         # Service delivery tracking
-│   │   ├── CertificateGenerationTab.js
-│   │   ├── HSCodeClassificationTab.js
-│   │   └── ShipmentTrackingTab.js
-│   └── workflow/                      # Workflow components
-│       ├── USMCAWorkflowOrchestrator.js
-│       ├── AuthorizationStep.js
-│       └── [other workflow files]
-│
-├── pages/                             # Next.js pages
-│   ├── _app.js                        # App configuration
-│   ├── index.js                       # Homepage
-│   ├── dashboard.js                   # User dashboard page
-│   ├── login.js                       # Authentication
-│   ├── admin/                         # Admin dashboards
-│   │   ├── broker-dashboard.js        # Cristina's enhanced dashboard
-│   │   ├── jorge-dashboard-clean.js   # Jorge's fixed dashboard
-│   │   └── collaboration-workspace.js
-│   └── api/                           # API endpoints (54+ files)
-│       ├── simple-*.js                # Core workflow APIs
-│       ├── admin/                     # Admin management APIs
-│       └── trust/                     # Trust verification APIs
-│
-├── lib/                               # Utility libraries
-│   ├── contexts/                      # React contexts
-│   │   └── SimpleAuthContext.js       # Fixed authentication
-│   └── [other lib files]
-│
-├── styles/                            # CSS files
-│   ├── globals.css                    # Protected main styles
-│   └── dashboard.css                  # Dashboard styles
-│
-├── config/                            # Configuration files
-│   ├── system-config.js               # System configuration
-│   ├── usmca-thresholds.js            # USMCA industry thresholds
-│   └── [other config files]
-│
-└── __tests__/                         # Test files (optional preserve)
-```
-
-### 🗑️ Files Safe to CLEAN (Archive/Temporary)
-```
-├── archive/                           # Old admin dashboards and backups
-├── components/workflows/              # Duplicate workflow components
-├── components/TriangleLayout-old.js   # Old layout backup
-├── pages/login-old.js                 # Old login backup
-├── pages/trump-tariff-alerts.js       # Deprecated alerts page
-├── pages/admin-services/              # Duplicate admin services
-├── lib/services/google-drive-folders.js # Deleted Google Drive integration
-├── scripts/                           # Data ingestion scripts (optional)
-├── nul                                # Temp file
-├── *.md files                         # Documentation files (except CLAUDE.md)
-└── screenshots/                       # Test screenshots
-```
-
-### 🔍 Recently Fixed Issues Summary
-**Critical Errors Resolved:**
-1. `effectiveRate` undefined variable → Fixed webpack module loading
-2. Authentication context mismatch → Fixed admin dashboard access
-3. Inline styles violations → Removed for CSS compliance
-4. Service delivery tools → Added comprehensive workflow management
-
-**Enhanced Features:**
-1. Cristina's service delivery dashboard with capacity tracking
-2. Jorge's clean partnership dashboard
-3. Revenue tracking ($23,750 monthly with capacity metrics)
-4. Streamlined navigation (6 tabs → 4 essential tabs)
-
-### Validation Commands
-
-```bash
-# Comprehensive validation suite
-npm run validate:all      # Run all validation checks
-npm run validate:smart    # Smart validation framework
-npm run validate:discover # Auto-discovery validator
-```
-
-## Service Dashboard Workflow Patterns (NEW - 2025-09-24)
-
-### Proven Architecture Patterns
-
-The platform uses **3 standardized workflow patterns** based on service complexity. All dashboards follow these proven templates for consistency and rapid development.
-
-#### **Pattern 1: Complex Research (4 Stages)**
-**Use for:** Manufacturing Feasibility, Market Entry, Supplier Sourcing ✅
-
-**Reference Implementation:** `components/jorge/SupplierSourcingTab.js` (WORKING)
-
-```javascript
-// Stage progression
-Stage 1: Client Requirements → IntakeFormModal
-Stage 2: AI Contact Discovery → /api/ai-[service]-discovery
-Stage 3: Expert Validation → Jorge/Cristina network + analysis
-Stage 4: AI Report Generation → Professional PDF deliverable
-
-// Modal state structure
-const [workflowModal, setWorkflowModal] = useState({
-  isOpen: false,
-  request: null,
-  currentStage: 1,
-  formData: {},
-  collectedData: {
-    clientForm: null,
-    discoveredContacts: [],
-    validationNotes: '',
-    reportGenerated: false
-  }
-});
-```
-
-**Key Components:**
-- IntakeFormModal for client data collection
-- AI Discovery API saves to database (`saveToDatabase: true`)
-- Expert validation workflow
-- AI-generated report
-
-#### **Pattern 2: Expert Validation (3 Stages)**
-**Use for:** USMCA Certificates, HS Classification, Document Review
-
-```javascript
-// Stage progression
-Stage 1: Client Documentation → Document upload modal
-Stage 2: Expert Review → Cristina's validation workflow
-Stage 3: Deliverable Generation → Certificate/Report PDF
-
-// Modal state structure
-const [workflowModal, setWorkflowModal] = useState({
-  isOpen: false,
-  request: null,
-  currentStage: 1,
-  formData: {},
-  collectedData: {
-    clientDocuments: null,
-    expertValidations: [],
-    deliverableGenerated: false
-  }
-});
-```
-
-**Key Components:**
-- Document upload/collection
-- Expert review forms
-- Certificate/report generator
-
-#### **Pattern 3: Direct Service (2 Stages)**
-**Use for:** Monthly Support, Crisis Response
-
-```javascript
-// Stage progression
-Stage 1: Service Delivery → Live session/crisis resolution
-Stage 2: Summary & Follow-up → AI-generated summary
-
-// Modal state structure
-const [workflowModal, setWorkflowModal] = useState({
-  isOpen: false,
-  request: null,
-  currentStage: 1,
-  formData: {},
-  collectedData: {
-    sessionCompleted: false,
-    summaryGenerated: false
-  }
-});
-```
-
-**Key Components:**
-- Service delivery interface
-- Summary generator
-
-### Implementation Strategy
-
-**Copy Working Pattern** → Adjust Fields → Deploy
-
-1. **Start with template** from `SupplierSourcingTab.js` (4-stage)
-2. **Adjust service-specific fields** (intake form, discovery API, validation)
-3. **Reuse components** (IntakeFormModal, AI Discovery, Report Generator)
-4. **Deploy in 1-2 days** per dashboard
-
-### Efficiency Architecture
-
-**Information Procurement Model:**
-- ❌ Old: Jorge/Cristina manually type all data
-- ✅ New: Clients upload forms → AI discovers contacts → Experts validate
-
-**Results:**
-- 67% time reduction per service (15 min → 5 min)
-- 3x capacity increase with same staff
-- Higher accuracy (uploaded docs > manual typing)
-
-### Implementation Checklist
-
-For each new service dashboard:
-- [ ] Copy appropriate template (2/3/4 stage)
-- [ ] Create intake form config in `config/service-intake-forms.js`
-- [ ] Create AI discovery API `/api/ai-[service]-discovery.js`
-- [ ] Add to navigation in Jorge/Cristina dashboard
-- [ ] Test workflow end-to-end
-
-**Reference Documentation:**
-- Full guide: `Efficient Service Dashboard Implementation.md`
-- PRD alignment: `Triangle Intelligence Platform PRD.md`
+**This CLAUDE.md provides the complete reference for both user experience and admin service delivery architecture, reflecting the current Triangle Intelligence Platform implementation.**

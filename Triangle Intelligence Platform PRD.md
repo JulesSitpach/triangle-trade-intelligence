@@ -37,38 +37,34 @@ Tiered subscription platform that lets users start with templates and self-servi
 
 #### Cristina's Compliance Services
 **Competitive Advantage**: USMCA compliance expertise, document accuracy, crisis response
-- **📜 USMCA Certificates**: $200/certificate (40/month capacity)
-  - *Premium quality*: Thorough expert review vs. rushed completion
-  - *Efficient delivery*: Pre-populated from user's app data
+- **📜 USMCA Certificates**: $250/certificate (40/month capacity)
+  - *Premium quality*: Same-day expert completion using subscriber workflow data
+  - *Efficient delivery*: Pre-populated from user's comprehensive profile
   - *Risk mitigation*: Professional completion vs. costly mistakes
-- **🔍 HS Classification**: $150/product (60/month capacity)
-  - *Accurate classification*: Expert review for complex products
+
+- **🔍 HS Classification**: $200/product (60/month capacity)
+  - *Accurate classification*: Web search verification + expert validation
   - *Tariff optimization*: Find best HS codes for duty savings
   - *Audit protection*: Defend classifications with documentation
-- **📋 Document Review**: $250/review (25/month capacity)
-  - *Pre-audit confidence*: Expert review before customer audits
-  - *Error prevention*: Catch issues before submission
-  - *Professional polish*: Clean documentation packages
-- **📞 Monthly Support**: $99/month (50 client capacity)
-  - *Ongoing guidance*: 2 hours monthly Q&A time with expert
-  - *Priority support*: Fast response to compliance questions
-  - *Virtual team member*: Affordable access to trade expertise
-- **🆘 Crisis Response**: $450/incident (15/month capacity)
-  - *Emergency resolution*: 24-48 hour response to rejected certificates
-  - *Root cause analysis*: Fix problems and prevent recurrence
-  - *Cost savings*: Avoid demurrage fees and customer relationship damage
+
+- **🆘 Crisis Response**: $400/incident (15/month capacity)
+  - *Emergency resolution*: 24-48 hour response to trade crises
+  - *Impact analysis*: Using subscriber's complete trade profile
+  - *Action plan*: Specific steps to resolve and prevent recurrence
 
 #### Jorge's Mexico/Latin America Services
 **Competitive Advantage**: Based in Mexico, native Spanish speaker, local contacts and cultural expertise
-- **🔍 Supplier Sourcing**: $500 (5-7 pre-screened supplier contacts with capabilities analysis)
+- **🔍 Supplier Sourcing**: $500 (2-3 pre-screened supplier contacts with capabilities analysis)
   - *On-ground expertise*: Mexico-based vetting and verification
   - *Quality assurance*: Pre-screened suppliers meeting your standards
   - *Actionable contacts*: Direct introductions to qualified suppliers
-- **🏭 Manufacturing Feasibility**: $650 (Location recommendations, regulatory overview, cost analysis)
+
+- **🏭 Manufacturing Feasibility**: $650 (Location recommendations, cost analysis, go/no-go decision)
   - *Location analysis*: Best Mexico regions for your manufacturing needs
-  - *Cost modeling*: Labor, logistics, and regulatory cost breakdown
-  - *Risk assessment*: Regulatory requirements and compliance roadmap
-- **🚀 Market Entry**: $400 (Regulatory requirements, cultural guidance, market entry strategy)
+  - *Cost modeling*: Rough setup costs and annual savings estimates
+  - *Risk assessment*: Top 3 risks with simple mitigation approaches
+
+- **🚀 Market Entry**: $450 (Market viability assessment, partnership introductions)
   - *Market intelligence*: Entry strategy and partnership opportunities
   - *Cultural expertise*: Navigate Mexico business culture effectively
   - *Partnership introductions*: Connect with qualified local partners
@@ -76,8 +72,8 @@ Tiered subscription platform that lets users start with templates and self-servi
 ### Revenue Model Logic
 ```
 Business Plan User: $599/month + 2 free certificates = $799 value
-Additional certificates: $200 each (efficient delivery via platform)
-Annual value: $7,188 subscription + $2,400 avg services = $9,588/customer
+Additional certificates: $250 each (efficient delivery via platform)
+Annual value: $7,188 subscription + $3,000 avg services = $10,188/customer
 ```
 
 ## Core User Journey (SLC v25.0.1)
@@ -117,7 +113,7 @@ Annual value: $7,188 subscription + $2,400 avg services = $9,588/customer
 
 6. **Service Request Integration** ✅ **IMPLEMENTED**
    - **Jorge Services**: Mexico/Latin America (supplier sourcing, market entry, manufacturing feasibility)
-   - **Cristina Services**: Compliance/logistics (USMCA certificates, HS classification, document review)
+   - **Cristina Services**: Compliance/logistics (USMCA certificates, HS classification, crisis response)
    - **Direct Contact**: One-click email and service request buttons
    - **Professional Delivery**: Expert completion with quality guarantees
 
@@ -184,8 +180,8 @@ const serviceRequest = {
   type: 'certificate_completion',
   user_data: workflowData, // Pre-populated from app
   assigned_expert: 'cristina',
-  price: 200,
-  estimated_delivery: '24-48 hours'
+  price: 250,
+  estimated_delivery: 'same-day'
 }
 ```
 
@@ -232,114 +228,85 @@ Risk Alerts Page → Personalized Threats → Team Recommendations → Service C
 ```
 
 ### Error States (Must Convert to Services)
-- **Complex Classification**: "This looks complex. Want expert help for $150?"
-- **Validation Failures**: "Certificate has issues. Get expert completion for $200?"
+- **Complex Classification**: "This looks complex. Want expert help for $200?"
+- **Validation Failures**: "Certificate has issues. Get expert completion for $250?"
 - **Plan Limits Hit**: "You've used your monthly certificates. Upgrade plan or request expert completion?"
 
 ## Team Service Delivery Standards
 
-### Cristina's Compliance Services (3-Stage Expert Validation Pattern)
-**Workflow**: Client Docs → Expert Review → Deliverable Generation
+### Cristina's Compliance Services (Simplified SMB-Focused Workflows)
+**Workflow**: Subscriber Data Review → AI Processing → Expert Validation → Delivery
 
 #### Service Delivery KPIs
-- **📜 USMCA Certificates** (3-Stage Validation)
-  - Capacity: 40/month | Revenue: $8,000/month
-  - Turnaround: 24 hours | Pattern: Doc Collection → Expert Validation → Certificate PDF
+- **📜 USMCA Certificates** ($250) - 2-Stage Workflow
+  - Capacity: 40/month | Revenue: $10,000/month
+  - Turnaround: Same day | Pattern: Data Review → AI Certificate Generation + Expert Validation
   - Quality: 99%+ accuracy, zero customs rejections
 
-- **🔍 HS Classification** (3-Stage Validation)
-  - Capacity: 60/month | Revenue: $9,000/month
-  - Turnaround: 1-2 days | Pattern: Product Docs → Classification Analysis → Validated Report
+- **🔍 HS Classification** ($200) - 2-Stage Workflow
+  - Capacity: 60/month | Revenue: $12,000/month
+  - Turnaround: Same day | Pattern: Product Review → Web Search Classification + Expert Validation
   - Quality: Audit-proof classifications with supporting documentation
 
-- **📋 Document Review** (3-Stage Validation)
-  - Capacity: 25/month | Revenue: $6,250/month
-  - Turnaround: 1-2 days | Pattern: Doc Upload → Expert Review → Gap Analysis Report
-  - Quality: Pre-audit confidence, error prevention
-
-- **📞 Monthly Support** (2-Stage Direct Service)
-  - Capacity: 50 clients | Revenue: $4,950/month
-  - Delivery: 2 hours monthly | Pattern: Live Session → Summary Report
-  - Quality: Ongoing guidance, priority support
-
-- **🆘 Crisis Response** (2-Stage Direct Service)
-  - Capacity: 15/month | Revenue: $6,750/month
-  - Turnaround: 24-48 hours | Pattern: Emergency Resolution → Prevention Plan
+- **🆘 Crisis Response** ($400) - 3-Stage Workflow
+  - Capacity: 15/month | Revenue: $6,000/month
+  - Turnaround: 24-48 hours | Pattern: Crisis Description → Impact Analysis → Action Plan Creation
   - Quality: Root cause fixes, recurrence prevention
 
-**Monthly Revenue Potential**: $34,950 (quality-focused SMB delivery)
+**Monthly Revenue Potential**: $28,000 (SMB-focused delivery)
 
-### Jorge's Mexico Services (4-Stage Complex Research Pattern)
-**Workflow**: Client Intake → AI Discovery → Jorge Validation → AI Report
+### Jorge's Mexico Services (Simplified Research Workflows)
+**Workflow**: Subscriber Data + Requirements → AI Discovery → Jorge Validation → Focused Recommendation
 
 #### Service Delivery KPIs
-- **🔍 Supplier Sourcing** (4-Stage Complex) ✅ Working
+- **🔍 Supplier Sourcing** ($500) - 3-Stage Research ✅ Working
   - Capacity: 8/month | Revenue: $4,000/month
-  - Turnaround: 3-5 days | Pattern: Requirements → AI Discovery → Network Validation → Report
-  - Quality: 5-7 pre-screened contacts with direct introductions
+  - Turnaround: 3-5 days | Pattern: Requirements → AI Discovery → Network Validation + Recommendation
+  - Quality: 2-3 best supplier contacts with direct introductions
 
-- **🏭 Manufacturing Feasibility** (4-Stage Complex)
+- **🏭 Manufacturing Feasibility** ($650) - 3-Stage Research
   - Capacity: 4/month | Revenue: $2,600/month
-  - Turnaround: 5-7 days | Pattern: Requirements → Facility Discovery → Analysis → Feasibility Report
-  - Quality: Location recommendations, cost analysis, regulatory overview
+  - Turnaround: 2-3 days | Pattern: Context Collection → Location Analysis → Go/No-Go Recommendation
+  - Quality: Location recommendation, rough cost estimate, top 3 risks + next steps
 
-- **🚀 Market Entry** (4-Stage Complex)
-  - Capacity: 6/month | Revenue: $2,400/month
-  - Turnaround: 3-5 days | Pattern: Market Goals → Partner Discovery → Evaluation → Entry Strategy
-  - Quality: Partnership intros, market intelligence, cultural guidance
+- **🚀 Market Entry** ($450) - 3-Stage Research
+  - Capacity: 6/month | Revenue: $2,700/month
+  - Turnaround: 3-5 days | Pattern: Market Goals → Market Research → Strategy + Partnership Contacts
+  - Quality: Market viability assessment, partnership introductions, entry approach
 
-**Monthly Revenue Potential**: $9,000 (Mexico-focused research services)
+**Monthly Revenue Potential**: $9,300 (Mexico-focused research services)
 
-### Workflow Efficiency Improvements
-**Information Procurement Model** (vs Manual Data Entry):
-- Stage 1: Client completes intake forms (not Jorge/Cristina typing)
-- Stage 2: AI discovers contacts/experts (automated research)
-- Stage 3: Expert validates findings (value-add review, not recreation)
-- Stage 4: AI generates reports (professional deliverables)
+### Final 6 Services (3 Cristina + 3 Jorge)
+- **USMCA Certificates** ($250) - Same day delivery
+- **HS Classification** ($200) - Same day delivery
+- **Crisis Response** ($400) - 24-48 hours
+- **Supplier Sourcing** ($500) - 3-5 days  
+- **Manufacturing Feasibility** ($650) - 2-3 days
+- **Market Entry** ($450) - 3-5 days
 
-**Time Savings**: 67% reduction per service (15 min → 5 min delivery time)
-**Quality Improvement**: Uploaded docs > manual typing (higher accuracy)
-**Capacity Increase**: 3x services with same staff (automation leverage)
-
-## Revenue Targets & Metrics
-
-### Subscription Revenue (Primary)
-- **Target**: $50,000 MRR from subscriptions
-- **Current Gap**: Need stronger trial conversion and plan upgrades
-- **Key Metrics**: Trial-to-paid conversion, plan upgrade rates, churn
-
-### Service Revenue (Workflow-Optimized Delivery)
-- **Cristina's Services**: $34,950/month potential (3-stage validation + 2-stage direct)
-- **Jorge's Services**: $9,000/month potential (4-stage complex research)
-- **Combined Service Potential**: $43,950/month from expert services
-- **Efficiency Model**: AI discovery + automated workflows = 3x capacity vs manual
-- **Growth Strategy**: Proven supplier sourcing pattern applied to all services
-
-### Combined Target: $93,950 MRR
+### Combined Target: $37,300 MRR
 - **Subscription Base**: 167 customers at $299 avg = $50K MRR
-- **Service Layer**: Workflow-optimized expert services = $44K MRR
-- **Efficiency Multiplier**: Same team, 3x output via automation
+- **Service Layer**: Streamlined expert services = $37K MRR
+- **Total Platform Potential**: $87K MRR with optimized delivery
 
 ## Development Priorities
 
 ### Phase 1: Complete Service Dashboard Implementations (In Progress)
 **Reference**: Working Supplier Sourcing dashboard pattern
-- **✅ Supplier Sourcing** - 4-stage complex research (COMPLETE)
+- **✅ Supplier Sourcing** - 3-stage research workflow (COMPLETE)
 - **✅ Admin UI Integration** - Agent dashboards fully accessible (COMPLETE)
 - **✅ Enhanced Classification Agent** - Web search + database updates (COMPLETE)
-- **🔄 USMCA Certificates** - 3-stage expert validation (HIGH PRIORITY)
-- **🔄 HS Classification** - 3-stage expert validation (HIGH PRIORITY)
-- **Crisis Response** - 2-stage direct service (QUICK WIN)
-- **Monthly Support** - 2-stage direct service (QUICK WIN)
-- **Manufacturing Feasibility** - 4-stage complex research
-- **Market Entry** - 4-stage complex research
-- **Document Review** - 3-stage expert validation
+- **🔄 USMCA Certificates** - 2-stage validation (HIGH PRIORITY)
+- **🔄 HS Classification** - 2-stage validation (HIGH PRIORITY)
+- **🔄 Crisis Response** - 3-stage crisis workflow (HIGH PRIORITY)
+- **Manufacturing Feasibility** - 3-stage research workflow
+- **Market Entry** - 3-stage research workflow
 
 ### Phase 2: Subscription Foundation
 - **Plan Selection UI**: Clear tier comparison and signup flow
 - **Usage Tracking**: Certificate limits and usage dashboards
 - **Billing Integration**: Stripe/payment processing
-- **Trial Management**: 14-day trial with conversion optimization
+- **Trial Management**: 14-day trials with conversion optimization
 
 ### Phase 3: Service Integration Enhancement
 - **In-App Service Requests**: One-click upgrade from DIY to expert
@@ -353,9 +320,9 @@ Risk Alerts Page → Personalized Threats → Team Recommendations → Service C
 
 ### Implementation Strategy
 **Copy Working Pattern**: Use Supplier Sourcing dashboard as template
-- 4-Stage Complex → Manufacturing Feasibility, Market Entry
-- 3-Stage Validation → USMCA Certs, HS Classification, Doc Review
-- 2-Stage Direct → Monthly Support, Crisis Response
+- 3-Stage Research → Manufacturing Feasibility, Market Entry
+- 2-Stage Validation → USMCA Certs, HS Classification
+- 3-Stage Crisis → Crisis Response
 - **Time to Build**: 1-2 days per dashboard (pattern reuse)
 
 ## Quality Standards (SLC v25.0.1)
@@ -380,199 +347,8 @@ Risk Alerts Page → Personalized Threats → Team Recommendations → Service C
 
 ---
 
-## Service Workflow Architecture (Technical Implementation)
+**Key Insight**: This is a sophisticated hybrid model where the SaaS platform creates qualified leads for high-value expert services. Users start with self-service and naturally graduate to expert completion when they encounter complexity or risk. The pricing makes perfect sense as an upgrade from DIY attempts, especially when the platform pre-populates all the user's data to make expert delivery efficient.
 
-### Workflow Pattern Categories
-
-#### **Pattern 1: Complex Research (4 Stages)**
-**Services**: Manufacturing Feasibility, Market Entry, Supplier Sourcing ✅
-```
-Stage 1: Client Requirements → IntakeFormModal
-Stage 2: AI Contact Discovery → /api/ai-[service]-discovery
-Stage 3: Expert Validation → Jorge's network + analysis
-Stage 4: AI Report Generation → Professional deliverable
-```
-
-#### **Pattern 2: Expert Validation (3 Stages)**
-**Services**: USMCA Certificates, HS Classification, Document Review
-```
-Stage 1: Client Documentation → Document upload modal
-Stage 2: Expert Review → Cristina's validation workflow
-Stage 3: Deliverable Generation → Certificate/Report PDF
-```
-
-#### **Pattern 3: Direct Service (2 Stages)**
-**Services**: Monthly Support, Crisis Response
-```
-Stage 1: Service Delivery → Live session/crisis resolution
-Stage 2: Summary & Follow-up → AI-generated summary
-```
-
-### Technical Components (Reusable)
-- **IntakeFormModal**: All client data collection
-- **AI Discovery APIs**: Contact/expert finding
-- **WorkflowModal**: 2/3/4 stage progression tracking
-- **Report Generator**: AI deliverable creation
-- **Document Upload**: Client evidence collection
-
-### Efficiency Architecture
-**Information Procurement vs Data Entry:**
-- ❌ Old Way: Jorge/Cristina type everything manually
-- ✅ New Way: Clients upload forms, AI discovers contacts, experts validate
-- **Result**: 67% time reduction, 3x capacity increase
-
----
-
-## Recent Technical Achievements (Sept 2025)
-
-### ✅ Admin UI Integration Complete
-**Problem Solved**: Enhanced backend agents weren't accessible to admins, limiting visibility into system intelligence.
-
-**Solution Implemented**:
-1. **Navigation Enhancement**: Added 🤖 Agent Performance and 🔬 Research Automation links to admin navigation
-2. **API Upgrade**: Enhanced classification endpoint now uses web search + database updates
-3. **Response Enrichment**: API responses include enhanced features visible to UI
-4. **Context Awareness**: System automatically detects User vs Admin mode
-
-**Impact**:
-- **Admins** now have full visibility into agent performance and research automation
-- **Users** receive web-verified classifications with higher confidence scores
-- **System** maintains database freshness through automated verification
-- **Platform** delivers on promise of intelligent, up-to-date trade information
-
-### Enhanced Feature Visibility
-```javascript
-// Before: Basic classification response
-{ hsCode: "8517.62.00", confidence: 0.85 }
-
-// After: Enhanced response with intelligence metadata
-{
-  classification: { hsCode: "8517.62.00", confidence: "95%" },
-  enhanced_features: {
-    web_verification: { performed: true, sources_consulted: 4 },
-    data_quality: { verification_status: "web_verified" },
-    usmca_analysis: { annual_savings: "$12,450" }
-  },
-  agent_metadata: {
-    processing_time_ms: 1247,
-    web_searches_performed: 4,
-    agent_version: "enhanced_with_web_search"
-  }
-}
-```
-
-**Business Value**:
-- Higher confidence in platform reliability
-- Visible differentiation from basic classification tools
-- Admin dashboards show real system intelligence
-- Foundation for AI-powered service differentiation
-
----
-
-**Key Insight**: This is a sophisticated hybrid model where the SaaS platform creates qualified leads for high-value expert services. Users start with self-service and naturally graduate to expert completion when they encounter complexity or risk. The $200 certificate pricing makes perfect sense as an upgrade from DIY attempts, especially when the platform pre-populates all the user's data to make expert delivery efficient.
-
-**Technical Advantage**: Working supplier sourcing pattern (4-stage complex research) serves as proven template for all other services. Simple copy-paste with service-specific field changes = rapid dashboard deployment.
+**Technical Advantage**: Working supplier sourcing pattern serves as proven template for all other services. Simple copy-paste with service-specific field changes = rapid dashboard deployment.
 
 **Intelligence Advantage**: Enhanced agents with web search verification provide real-time accuracy and freshness that traditional classification tools can't match, justifying premium positioning and expert service pricing.
-
-## Trade Risk Alerts System (Primary Conversion Engine)
-
-### ✅ `/trade-risk-alternatives` - The Conversion Powerhouse
-**Strategic Purpose**: Convert trial USMCA workflow users into paying subscribers through personalized trade risk alerts.
-
-#### **Smart Data Collection & Personalization**
-```javascript
-// Data Flow: Trial Analysis → Risk Alerts → Subscription Conversion
-const userProfile = {
-  // From completed USMCA workflow
-  companyName: userData.company?.name,
-  businessType: userData.company?.business_type,
-  hsCode: userData.product?.hs_code,
-  tradeVolume: userData.company?.annual_trade_volume,
-  supplierCountry: userData.company?.supplier_country,
-  qualificationStatus: userData.certificate?.qualification_result
-}
-
-// Generate personalized risks
-const risks = generateRisksFromProfile(profile);
-- China sourcing → Section 301 tariff alerts
-- Non-USMCA qualified → Missing savings alerts
-- Electronics → Industry targeting alerts
-- High volume → Supply chain concentration alerts
-```
-
-#### **Dynamic Risk Generation Engine**
-**Problem-Specific Alert Matching**:
-- **China Suppliers** → "Section 301 Tariffs on Chinese Imports" (HIGH severity)
-- **Non-USMCA Qualified** → "USMCA Qualification Gap" (CRITICAL severity)
-- **Electronics Companies** → "Electronics Industry Targeting" (HIGH severity)
-- **All Users** → "Supply Chain Concentration Risk" (MEDIUM severity)
-
-**Financial Impact Calculation**:
-```javascript
-// Real dollar impact for user's trade volume
-detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, 0.25))} annual cost increase`
-
-// Before: Generic "Up to 25% additional tariffs"
-// After: "Potential $127,500 annual cost increase" (based on $510K trade volume)
-```
-
-#### **Team Service Matching Algorithm**
-**Jorge Recommendations** (Latin America Specialist):
-- China suppliers → "Reduce China dependency through Latin America sourcing"
-- Non-USMCA qualified → "Establish USMCA-qualifying Mexico manufacturing"
-- High trade volume → "Diversify supply chain across Latin America"
-
-**Cristina Recommendations** (Logistics/Broker):
-- All users → "Multi-Route Logistics Strategy"
-- Non-USMCA qualified → "Canada USMCA Entry Point"
-- Complex routing needs → "Complex routing, customs compliance"
-
-#### **Privacy-First Conversion Strategy**
-**Detailed Consent Modal**:
-- **General View**: "Up to 25% additional tariffs on your imports"
-- **Detailed View**: "$127,500 annual cost increase based on your $510K trade volume"
-- **User Control**: Opt-in for detailed financial impacts
-- **Data Protection**: 90-day auto-deletion, encryption, user control
-
-#### **Conversion Funnel Optimization**
-```
-Trial USMCA Analysis → Completion → "Get Crisis Alerts" → Trade Risk Page
-(14-day trial access)                ↓
-Personalized Risks → Financial Impact → Team Recommendations → Service Requests
-                                     ↓
-Jorge: Mexico/Latin America Services | Cristina: Logistics/Compliance Services
-```
-
-#### **Service Integration Buttons**
-**Direct Team Contact**:
-- 🇲🇽 "Request Jorge Consultation" → `/services/mexico-trade-services`
-- 📦 "Request Cristina Consultation" → `/services/logistics-support`
-- 📧 Direct email links to team members
-- 📋 "Download Risk Assessment" (lead magnet)
-
-#### **Persistent Trade Profile System**
-**Data Flow Architecture**:
-1. **Session Storage**: localStorage during workflow completion
-2. **Database Persistence**: Save to user profile after risk alerts access
-3. **Return User Experience**: Load personalized risks from database
-4. **Profile Updates**: "Update Trade Profile" → return to workflow
-
-#### **Business Intelligence Features**
-**Risk Severity Classification**:
-- **CRITICAL** → Red alerts, immediate action required
-- **HIGH** → Yellow alerts, near-term planning needed
-- **MEDIUM** → Blue alerts, ongoing monitoring suggested
-
-**Timeline-Based Urgency**:
-- "Next 30-60 days" → Section 301 tariffs
-- "Immediate" → USMCA qualification gaps
-- "Continuous" → Supply chain concentration
-
-### **Conversion Metrics & KPIs**
-- **Primary Goal**: Free workflow users → paid service requests
-- **Conversion Points**: Team consultation requests, email contacts
-- **Retention Strategy**: Personalized ongoing risk monitoring
-- **Upgrade Path**: Basic alerts → detailed financial impact → premium services
-
-**Key Insight**: This page transforms the platform from a "one-and-done" certificate tool into a relationship-building, revenue-generating conversion engine that guides users toward high-value expert services.

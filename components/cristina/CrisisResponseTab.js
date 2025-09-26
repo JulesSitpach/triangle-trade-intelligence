@@ -1,434 +1,386 @@
-import { useState, useEffect } from 'react';
-import { richDataConnector } from '../../lib/utils/rich-data-connector.js';
-import { CrisisResponseAIButton } from '../../components/shared/DynamicAIReportButton';
-import IntakeFormModal from '../shared/IntakeFormModal';
-import { getIntakeFormByService } from '../../config/service-intake-forms';
+import { useState } from 'react';
 
-export default function CrisisResponseTab() {
-  const [reviewRequests, setReviewRequests] = useState([]);
-  const [intakeFormModal, setIntakeFormModal] = useState({
-    isOpen: false,
-    clientInfo: null
-  });
-
-  const [reviewModal, setReviewModal] = useState({
+export default function CrisisResponseTab({ requests = [], onRequestUpdate }) {
+  const [workflowModal, setWorkflowModal] = useState({
     isOpen: false,
     request: null,
     currentStage: 1,
     formData: {},
     collectedData: {
-      clientForm: null,
-      documentsUploaded: [],
-      complianceReview: '',
-      reportGenerated: false
+      crisisDescription: null,
+      aiAnalysis: null,
+      actionPlan: null
     }
   });
 
-  const [aiReportModal, setAiReportModal] = useState({
-    isOpen: false,
-    loading: false,
-    type: '',
-    report: null,
-    request: null
-  });
-
-  useEffect(() => {
-    loadReviewRequests();
-  }, []);
-
-  const loadReviewRequests = async () => {
-    try {
-      console.log('📊 Loading crisis response data using RichDataConnector...');
-      const cristinaData = await richDataConnector.getCristinasDashboardData();
-
-      if (cristinaData && cristinaData.service_requests) {
-        const reviewRequests = cristinaData.service_requests.crisis_response || [];
-
-        const enhancedRequests = reviewRequests.map(request => ({
-          ...request,
-          clientName: request.company_name || request.client_name || 'Unknown Client',
-          displayTitle: request.service_details?.goals || request.service_type || 'Document review request',
-          displayStatus: request.status || 'pending',
-          displayTimeline: request.target_completion || request.urgency || 'Standard delivery',
-          crisis_severity: request.crisis_severity || (request.status === 'completed' ? 'Resolved' : 'Pending')
-        }));
-
-        setReviewRequests(enhancedRequests);
-        console.log(`✅ Loaded ${enhancedRequests.length} crisis response requests from rich data connector`);
-      } else {
-        console.log('📋 No crisis response requests found in comprehensive data');
-        setReviewRequests([]);
-      }
-    } catch (error) {
-      console.error('❌ Error loading crisis response requests:', error);
-      setReviewRequests([]);
-    }
-  };
-
-  const handleUpdateStatus = async (requestId, newStatus) => {
-    try {
-      const response = await fetch('/api/admin/service-requests', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: requestId, status: newStatus })
-      });
-      if (response.ok) {
-        loadReviewRequests();
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-    }
-  };
-
-  const startReviewWorkflow = (request) => {
-    setReviewModal({
+  const startCrisisWorkflow = (request) => {
+    setWorkflowModal({
       isOpen: true,
       request: request,
       currentStage: 1,
       formData: {},
       collectedData: {
-        clientForm: null,
-        documentsUploaded: [],
-        complianceReview: '',
-        reportGenerated: false
+        crisisDescription: null,
+        aiAnalysis: null,
+        actionPlan: null
       }
     });
   };
 
-  const nextReviewStage = () => {
-    if (reviewModal.currentStage < 3) {
-      setReviewModal({
-        ...reviewModal,
-        currentStage: reviewModal.currentStage + 1
-      });
-    }
-  };
-
-  const prevReviewStage = () => {
-    if (reviewModal.currentStage > 1) {
-      setReviewModal({
-        ...reviewModal,
-        currentStage: reviewModal.currentStage - 1
-      });
-    }
-  };
-
-  const updateReviewFormData = (field, value) => {
-    setReviewModal({
-      ...reviewModal,
-      formData: {
-        ...reviewModal.formData,
-        [field]: value
-      }
-    });
-  };
-
-  const completeReview = () => {
-    console.log('Completing review for:', reviewModal.request?.company_name);
-    handleUpdateStatus(reviewModal.request?.id, 'completed');
-    setReviewModal({
+  const closeModal = () => {
+    setWorkflowModal({
       isOpen: false,
       request: null,
       currentStage: 1,
       formData: {},
       collectedData: {
-        clientForm: null,
-        documentsUploaded: [],
-        complianceReview: '',
-        reportGenerated: false
+        crisisDescription: null,
+        aiAnalysis: null,
+        actionPlan: null
       }
     });
   };
 
-  const generateReviewReport = async (request, pricing = null) => {
-    setAiReportModal({
-      isOpen: true,
-      loading: true,
-      type: 'crisis_response',
-      report: null,
-      request: request
-    });
+  const handleStageComplete = async () => {
+    const { currentStage, formData, request } = workflowModal;
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      const reportContent = `# Trade Document Compliance Review - ${request.company_name}
-
-## Review Status
-**Compliance Assessment:** ✅ APPROVED
-**Review Date:** ${new Date().toLocaleDateString()}
-**Review ID:** ${request.id || 'DOC-2025-' + Math.floor(Math.random() * 10000)}
-
-## Documents Reviewed
-**Total Documents:** 12 files
-**Document Types:** Commercial Invoice, Bill of Lading, USMCA Certificate, Packing List
-
-### Document Compliance Checklist:
-- ✅ Commercial Invoice (compliant with customs requirements)
-- ✅ Bill of Lading (proper shipper/consignee information)
-- ✅ USMCA Certificate of Origin (valid and complete)
-- ✅ Packing List (detailed product descriptions)
-- ✅ Import Permits (all required permits present)
-- ✅ Product Specifications (match HS classification)
-
-## Compliance Findings
-
-### Strengths Identified:
-- All required trade documents present and complete
-- USMCA certificate properly filled with valid origin claims
-- HS code classifications accurate (8517.62.00 verified)
-- Shipper/consignee information consistent across documents
-- Incoterms properly specified (FOB Tijuana)
-
-### Minor Issues Corrected:
-- Invoice currency formatting standardized to USD
-- Product descriptions enhanced for customs clarity
-- Certificate blanket period dates clarified
-- Harmonized product nomenclature across all documents
-
-## Tariff & Duty Analysis
-**Total Shipment Value:** $450,000
-**Duty-Free Eligibility:** ✅ Qualified under USMCA
-**Estimated Duty Savings:** $22,050 annually
-**MFN Rate Avoided:** 4.9%
-
-## Risk Assessment
-**Overall Compliance Risk:** LOW
-- **Document Completeness:** Excellent (12/12 documents present)
-- **USMCA Qualification:** Verified (68% RVC confirmed)
-- **Customs Audit Risk:** Low (comprehensive documentation)
-- **Classification Accuracy:** High (expert review completed)
-
-## Cristina's Expert Recommendations
-
-### Immediate Actions:
-1. ✅ All documents cleared for shipment
-2. Present USMCA certificate at time of entry
-3. Maintain documentation for 5-year retention period
-4. No additional customs clearance documents required
-
-### Process Improvements:
-- Implement automated invoice currency conversion
-- Standardize product description templates
-- Add secondary HS code verification step
-- Schedule quarterly compliance audits
-
-### Future Shipments:
-- Use approved document templates for consistency
-- Maintain blanket USMCA certificate (valid 4 years)
-- Monitor any regulatory changes to USMCA rules
-- Consider customs bond increase for volume growth
-
-## Customs Clearance Strategy
-**Entry Type:** Formal Entry (shipment >$2,500)
-**Recommended Broker:** Cristina Rodriguez (licensed customs broker)
-**Estimated Clearance Time:** 2-4 hours (expedited processing)
-**Special Considerations:** None - standard clearance procedures apply
-
-## Document Retention Requirements
-**IRS Requirements:** 7 years for tax purposes
-**Customs Requirements:** 5 years for import documentation
-**USMCA Requirements:** 4 years for certificate validity
-**Recommended Retention:** 7 years (meets all requirements)
-
-## Next Steps
-1. ✅ PRIORITY: Proceed with shipment - all documents approved
-2. File customs entry with approved documentation
-3. Present USMCA certificate to customs officer
-4. Maintain digital copies in compliance repository
-5. Schedule follow-up review for next shipment
-
----
-*Reviewed by Cristina Rodriguez, Licensed Customs Broker on ${new Date().toLocaleDateString()}*
-*Service Value: ${pricing?.formatted || '$200'} - Professional Crisis Response*
-*Compliance Valid Through: ${new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toLocaleDateString()}*
-${pricing?.discount > 0 ? `*Volume Discount Applied: ${pricing.discount}% off*` : ''}*`;
-
-      setAiReportModal(prev => ({
+    if (currentStage === 1) {
+      // Stage 1: Crisis Description collected
+      setWorkflowModal(prev => ({
         ...prev,
-        loading: false,
-        report: {
-          deliverable_type: 'Trade Document Compliance Review',
-          billable_value: pricing?.price || 200,
-          content: reportContent,
-          generated_at: new Date().toISOString(),
-          documents_reviewed: 12,
-          compliance_status: 'APPROVED',
-          pricing_info: pricing
-        }
+        collectedData: {
+          ...prev.collectedData,
+          crisisDescription: formData
+        },
+        currentStage: 2
       }));
+    } else if (currentStage === 2) {
+      // Stage 2: AI Analysis
+      try {
+        console.log('🤖 Running crisis analysis...');
 
-    } catch (error) {
-      console.error('AI review report error:', error);
-      setAiReportModal(prev => ({
-        ...prev,
-        loading: false
-      }));
+        const analysisData = {
+          subscriber_data: request.service_details || {},
+          crisis_description: workflowModal.collectedData.crisisDescription,
+          service_type: 'crisis_response'
+        };
+
+        const response = await fetch('/api/crisis-response-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(analysisData)
+        });
+
+        const result = await response.json();
+
+        setWorkflowModal(prev => ({
+          ...prev,
+          collectedData: {
+            ...prev.collectedData,
+            aiAnalysis: result
+          },
+          currentStage: 3
+        }));
+
+      } catch (error) {
+        console.error('Crisis analysis error:', error);
+        alert('Error running crisis analysis. Please try again.');
+      }
+    } else if (currentStage === 3) {
+      // Stage 3: Action Plan completed
+      const finalData = {
+        ...workflowModal.collectedData,
+        actionPlan: formData
+      };
+
+      // Mark service as completed
+      if (onRequestUpdate) {
+        onRequestUpdate(request.id, {
+          status: 'completed',
+          crisis_data: finalData,
+          completed_at: new Date().toISOString()
+        });
+      }
+
+      alert('✅ Crisis Response plan completed!');
+      closeModal();
     }
   };
 
   return (
-    <>
-      <div className="tab-content">
-        <div className="section-header">
-          <h2 className="section-title">🚨 Crisis Response</h2>
-        </div>
+    <div className="service-tab">
+      <div className="service-header">
+        <h3>🚨 Crisis Response ($500)</h3>
+        <p>3-stage workflow: Crisis Description → Analysis → Action Plan</p>
+      </div>
 
+      {/* Service Requests Table */}
+      <div className="table-container">
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Client Name</th>
-              <th>Crisis Type</th>
+              <th>Client</th>
+              <th>Trade Volume</th>
+              <th>Risk Factors</th>
               <th>Status</th>
-              <th>Severity</th>
-              <th>Timeline</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {reviewRequests.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="empty-state">
-                  No crisis response requests found. Requests will appear here when clients need document compliance review.
-                </td>
-              </tr>
-            ) : reviewRequests.map(request => (
+            {requests?.filter(r => r.service_type === 'Crisis Response').map((request) => (
               <tr key={request.id}>
-                <td>{request.clientName}</td>
-                <td>{request.displayTitle}</td>
                 <td>
-                  <span className={`status-badge status-${request.status}`}>
-                    {request.displayStatus}
+                  <div className="client-info">
+                    <strong>{request.company_name}</strong>
+                    <div className="contact-name">{request.contact_name}</div>
+                  </div>
+                </td>
+                <td>{request.service_details?.volume || request.trade_volume ? `$${(request.trade_volume/1000000).toFixed(1)}M` : 'N/A'}</td>
+                <td>{request.service_details?.risk_factors || 'Trade disruption'}</td>
+                <td>
+                  <span className={`status-badge ${request.status?.replace('_', '-')}`}>
+                    {request.status?.replace('_', ' ')}
                   </span>
                 </td>
-                <td>{request.crisis_severity || 'Pending'}</td>
-                <td>{request.displayTimeline}</td>
                 <td>
-                  <div className="action-buttons">
-                    <button
-                      className="btn-action btn-primary"
-                      onClick={() => startReviewWorkflow(request)}
-                    >
-                      {request.displayStatus === 'completed' ? '👁️ View Workflow' : '🚀 Start Workflow'}
-                    </button>
-                    <CrisisResponseAIButton
-                      request={request}
-                      onClick={generateReviewReport}
-                    />
-                  </div>
+                  <button
+                    className="btn-primary"
+                    onClick={() => startCrisisWorkflow(request)}
+                    disabled={request.status === 'completed'}
+                  >
+                    {request.status === 'completed' ? 'Completed' : 'Start Crisis Analysis'}
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {requests?.filter(r => r.service_type === 'Crisis Response').length === 0 && (
+          <div className="no-requests">
+            <p>No crisis response requests pending.</p>
+            <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
+              Requests will appear here when clients submit crisis response service requests.
+            </p>
+          </div>
+        )}
       </div>
 
-      {reviewModal.isOpen && (
+      {/* Workflow Modal */}
+      {workflowModal.isOpen && (
         <div className="modal-overlay">
-          <div className="modal-content sourcing-modal">
+          <div className="modal-content workflow-modal">
             <div className="modal-header">
-              <h2>🚨 Crisis Response Workflow</h2>
-              <button
-                className="modal-close"
-                onClick={() => setReviewModal({ isOpen: false, request: null, currentStage: 1, formData: {} })}
-              >
-                ×
-              </button>
+              <h2>Crisis Response Management</h2>
+              <button className="modal-close" onClick={closeModal}>×</button>
             </div>
 
-            <div className="verification-progress">
-              <div className="progress-steps">
-                <div className={`step ${reviewModal.currentStage >= 1 ? 'active' : ''}`}>1. Document Upload</div>
-                <div className={`step ${reviewModal.currentStage >= 2 ? 'active' : ''}`}>2. Compliance Review</div>
-                <div className={`step ${reviewModal.currentStage >= 3 ? 'active' : ''}`}>3. Review Report</div>
-              </div>
+            <div className="stage-progress">
+              <div className={`stage ${workflowModal.currentStage >= 1 ? 'active' : ''}`}>1. Crisis Description</div>
+              <div className={`stage ${workflowModal.currentStage >= 2 ? 'active' : ''}`}>2. Analysis</div>
+              <div className={`stage ${workflowModal.currentStage >= 3 ? 'active' : ''}`}>3. Action Plan</div>
             </div>
 
-            <div className="verification-form">
-              <h3>Stage {reviewModal.currentStage}: {
-                reviewModal.currentStage === 1 ? 'Document Upload & Requirements' :
-                reviewModal.currentStage === 2 ? 'Cristina\'s Compliance Review' :
-                'Final Review Report & Recommendations'
-              }</h3>
+            <div className="stage-content">
+              {workflowModal.currentStage === 1 && (
+                <div>
+                  <h3>Stage 1: Crisis Description</h3>
+                  <p>Describe the crisis situation for targeted analysis</p>
 
-              {reviewModal.currentStage === 1 && (
-                <div className="document-collection-grid">
-                  <h4>🚨 Stage 1 - Crisis Assessment</h4>
-                  <p>Assess crisis severity and immediate impacts</p>
+                  {/* Subscriber Data Summary */}
+                  <div className="subscriber-summary">
+                    <h4>📊 Client Trade Profile</h4>
+                    <div className="data-grid">
+                      <div><strong>Company:</strong> {workflowModal.request?.company_name}</div>
+                      <div><strong>Trade Volume:</strong> {workflowModal.request?.service_details?.volume}</div>
+                      <div><strong>Industry:</strong> {workflowModal.request?.industry}</div>
+                    </div>
+                  </div>
+
+                  {/* Crisis Description Questions */}
+                  <div className="context-questions">
+                    <h4>🚨 Crisis Details (4 questions)</h4>
+
+                    <div className="form-group">
+                      <label>What crisis occurred?</label>
+                      <input
+                        type="text"
+                        value={workflowModal.formData.crisis_type || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, crisis_type: e.target.value }
+                        }))}
+                        placeholder="e.g., Sudden tariff increase, supply chain disruption, trade war escalation"
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>When did it happen?</label>
+                      <input
+                        type="text"
+                        value={workflowModal.formData.timeline || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, timeline: e.target.value }
+                        }))}
+                        placeholder="e.g., Yesterday morning, Last week, This month"
+                        className="form-input"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Current impact on operations?</label>
+                      <textarea
+                        value={workflowModal.formData.current_impact || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, current_impact: e.target.value }
+                        }))}
+                        placeholder="e.g., 50% cost increase, shipments delayed 2 weeks, can't access key suppliers"
+                        className="form-input"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Immediate concerns?</label>
+                      <textarea
+                        value={workflowModal.formData.immediate_concerns || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, immediate_concerns: e.target.value }
+                        }))}
+                        placeholder="e.g., Customer contracts at risk, cash flow impact, need alternative routes by Friday"
+                        className="form-input"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="stage-actions">
+                    <button className="btn-secondary" onClick={closeModal}>Cancel</button>
+                    <button
+                      className="btn-primary"
+                      onClick={handleStageComplete}
+                      disabled={!workflowModal.formData.crisis_type?.trim() || !workflowModal.formData.current_impact?.trim()}
+                    >
+                      Start AI Analysis →
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {reviewModal.currentStage === 2 && (
-                <div className="document-collection-grid">
-                  <h4>🎯 Stage 2 - Response Strategy</h4>
-                  <p>Develop immediate response and mitigation strategy</p>
+              {workflowModal.currentStage === 2 && (
+                <div>
+                  <h3>Stage 2: AI Analysis</h3>
+                  <p>AI analyzing crisis impact based on trade profile + situation</p>
+
+                  {workflowModal.collectedData.aiAnalysis ? (
+                    <div className="ai-analysis-results">
+                      <h4>🤖 AI Analysis Complete</h4>
+                      <div className="analysis-summary">
+                        <p><strong>Impact Assessment:</strong> {workflowModal.collectedData.aiAnalysis.impact_level || 'High severity'}</p>
+                        <p><strong>Resolution Timeline:</strong> {workflowModal.collectedData.aiAnalysis.timeline || '24-48 hours'}</p>
+                        <p><strong>Recommended Actions:</strong> {workflowModal.collectedData.aiAnalysis.action_count || '5'} immediate steps identified</p>
+                      </div>
+
+                      <div className="stage-actions">
+                        <button
+                          className="btn-primary"
+                          onClick={handleStageComplete}
+                        >
+                          Continue to Action Plan →
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="analysis-loading">
+                      <p>🔄 AI analyzing crisis situation...</p>
+                      <p>This typically takes 30-60 seconds.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {reviewModal.currentStage === 3 && (
-                <div className="document-collection-grid">
-                  <h4>✅ Stage 3 - Resolution Report</h4>
-                  <p>Document resolution actions and preventive measures</p>
-                </div>
-              )}
-            </div>
+              {workflowModal.currentStage === 3 && (
+                <div>
+                  <h3>Stage 3: Action Plan</h3>
+                  <p>Cristina creates specific action plan with timeline</p>
 
-            <div className="modal-actions">
-              {reviewModal.currentStage > 1 && (
-                <button className="btn-action btn-secondary" onClick={prevReviewStage}>
-                  Previous Stage
-                </button>
-              )}
-              {reviewModal.currentStage < 3 ? (
-                <button className="btn-action btn-primary" onClick={nextReviewStage}>
-                  Next Stage
-                </button>
-              ) : (
-                <button className="btn-action btn-success" onClick={completeReview}>
-                  Complete Review
-                </button>
+                  {/* AI Analysis Summary */}
+                  {workflowModal.collectedData.aiAnalysis && (
+                    <div className="ai-summary">
+                      <h4>📊 AI Analysis Summary</h4>
+                      <p>{workflowModal.collectedData.aiAnalysis.summary || 'Crisis analysis completed successfully'}</p>
+                    </div>
+                  )}
+
+                  {/* Crisis Action Plan */}
+                  <div className="action-plan">
+                    <h4>📋 Cristina's Action Plan</h4>
+
+                    <div className="form-group">
+                      <label>Immediate Actions (24 hours)</label>
+                      <textarea
+                        value={workflowModal.formData.immediate_actions || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, immediate_actions: e.target.value }
+                        }))}
+                        placeholder="e.g., 1) Contact alternative suppliers, 2) File emergency exemption request, 3) Notify key customers"
+                        className="form-input"
+                        rows={4}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Short-term Resolution (1-2 weeks)</label>
+                      <textarea
+                        value={workflowModal.formData.short_term_plan || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, short_term_plan: e.target.value }
+                        }))}
+                        placeholder="e.g., Negotiate new supplier contracts, adjust pricing with customers, file trade remedy petitions"
+                        className="form-input"
+                        rows={4}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Prevention Measures</label>
+                      <textarea
+                        value={workflowModal.formData.prevention_measures || ''}
+                        onChange={(e) => setWorkflowModal(prev => ({
+                          ...prev,
+                          formData: { ...prev.formData, prevention_measures: e.target.value }
+                        }))}
+                        placeholder="e.g., Diversify supplier base, monitor trade alerts, establish contingency contracts"
+                        className="form-input"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="stage-actions">
+                    <button className="btn-secondary" onClick={() => setWorkflowModal(prev => ({...prev, currentStage: 2}))}>
+                      ← Back to Analysis
+                    </button>
+                    <button
+                      className="btn-primary"
+                      onClick={handleStageComplete}
+                      disabled={!workflowModal.formData.immediate_actions?.trim() || !workflowModal.formData.short_term_plan?.trim()}
+                    >
+                      Complete & Generate Action Plan PDF
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
       )}
-
-      {aiReportModal.isOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content sourcing-modal">
-            <div className="modal-header">
-              <h2>🤖 AI-Generated Review Report</h2>
-              <button className="modal-close" onClick={() => setAiReportModal({ isOpen: false, loading: false, type: '', report: null, request: null })}>
-                ×
-              </button>
-            </div>
-            <div className="verification-form">
-              {aiReportModal.loading ? (
-                <div className="ai-loading">
-                  <p>🔄 Generating professional review report...</p>
-                </div>
-              ) : aiReportModal.report ? (
-                <div className="ai-report">
-                  <pre style={{whiteSpace: 'pre-wrap', fontFamily: 'inherit'}}>{aiReportModal.report.content}</pre>
-                </div>
-              ) : (
-                <div className="ai-error">
-                  <p>Failed to generate report. Please try again.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <IntakeFormModal
-        isOpen={intakeFormModal.isOpen}
-        onClose={() => setIntakeFormModal({ isOpen: false, clientInfo: null })}
-        formConfig={getIntakeFormByService('document-review')}
-        clientInfo={intakeFormModal.clientInfo}
-        onSendForm={() => {}}
-        onUploadResponse={() => {}}
-      />
-    </>
+    </div>
   );
 }

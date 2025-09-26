@@ -1,6 +1,6 @@
 /**
  * Cristina's Dashboard - Modular Component Version
- * Five tabs: Service Queue, USMCA Certificates, HS Classification, Document Review, Monthly Support, Crisis Response
+ * 4 tabs: Service Queue, USMCA Certificates, HS Classification, Crisis Response
  * Uses modular components for maintainability (following Jorge's pattern)
  */
 
@@ -11,8 +11,9 @@ import Head from 'next/head';
 
 // Import Cristina's modular tab components
 import ServiceQueueTab from '../../components/broker/ServiceQueueTab';
-import ServiceWorkflowTab from '../../components/shared/ServiceWorkflowTab';
-import { getServiceConfig } from '../../config/service-configurations';
+import USMCACertificateTab from '../../components/cristina/USMCACertificateTab';
+import HSClassificationTab from '../../components/cristina/HSClassificationTab';
+import CrisisResponseTab from '../../components/cristina/CrisisResponseTab';
 
 export default function CristinaDashboardModular() {
   const router = useRouter();
@@ -37,22 +38,8 @@ export default function CristinaDashboardModular() {
           return;
         }
 
-        // Load service configurations and requests (no hardcoding)
-        const { getServicesForTeamMember } = await import('../../config/service-configurations');
-        const services = getServicesForTeamMember('cristina');
-        const serviceConfigs = services.map(serviceType => getServiceConfig(serviceType));
-        setCristinaServices(serviceConfigs);
-
-        // Load actual service requests from database
-        const response = await fetch('/api/admin/service-requests');
-        const data = await response.json();
-        if (data.success && data.requests) {
-          const cristinaRequests = data.requests.filter(req =>
-            services.includes(req.service_type) || req.assigned_to === 'Cristina'
-          );
-          setServiceRequests(cristinaRequests);
-        }
-
+        // Load service requests for Cristina
+        await loadServiceRequests();
         setLoading(false);
       } catch (error) {
         console.error('Dashboard initialization error:', error);
@@ -62,6 +49,34 @@ export default function CristinaDashboardModular() {
 
     initializeDashboard();
   }, [router]);
+
+  const loadServiceRequests = async () => {
+    try {
+      const response = await fetch('/api/admin/service-requests?assigned_to=Cristina');
+      const data = await response.json();
+      if (data.success) {
+        setServiceRequests(data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error loading service requests:', error);
+      setServiceRequests([]);
+    }
+  };
+
+  const handleRequestUpdate = async (requestId, updateData) => {
+    try {
+      const response = await fetch('/api/admin/service-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: requestId, ...updateData })
+      });
+      if (response.ok) {
+        await loadServiceRequests();
+      }
+    } catch (error) {
+      console.error('Error updating request:', error);
+    }
+  };
 
   // Calculate metrics from actual data (no hardcoding)
   const calculateRevenue = () => {
@@ -83,15 +98,11 @@ export default function CristinaDashboardModular() {
       case 'service-queue':
         return <ServiceQueueTab />;
       case 'usmca-certificate':
-        return <ServiceWorkflowTab serviceConfig={getServiceConfig('usmca-certificate')} teamMember="cristina" />;
+        return <USMCACertificateTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'hs-classification':
-        return <ServiceWorkflowTab serviceConfig={getServiceConfig('hs-classification')} teamMember="cristina" />;
-      case 'document-review':
-        return <ServiceWorkflowTab serviceConfig={getServiceConfig('document-review')} teamMember="cristina" />;
-      case 'monthly-compliance-support':
-        return <ServiceWorkflowTab serviceConfig={getServiceConfig('monthly-compliance-support')} teamMember="cristina" />;
+        return <HSClassificationTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'compliance-crisis-response':
-        return <ServiceWorkflowTab serviceConfig={getServiceConfig('compliance-crisis-response')} teamMember="cristina" />;
+        return <CrisisResponseTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       default:
         return <ServiceQueueTab />;
     }
@@ -100,7 +111,7 @@ export default function CristinaDashboardModular() {
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="loading-spinner">Loading Cristina's Dashboard...</div>
+        <div className="loading-spinner">Loading Cristina&apos;s Dashboard...</div>
       </div>
     );
   }
@@ -108,7 +119,7 @@ export default function CristinaDashboardModular() {
   return (
     <>
       <Head>
-        <title>Cristina's Compliance Dashboard - Triangle Intelligence</title>
+        <title>Cristina&apos;s Compliance Dashboard - Triangle Intelligence</title>
         <meta name="description" content="SMB Compliance & Document Validation Services" />
       </Head>
 
@@ -118,7 +129,7 @@ export default function CristinaDashboardModular() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Cristina's Compliance Services</h1>
+              <h1 className="dashboard-title">Cristina&apos;s Compliance Services</h1>
               <div className="user-info">
                 <span className="user-name">Cristina Martinez</span>
                 <span className="user-role">SMB Compliance Specialist</span>
@@ -146,36 +157,28 @@ export default function CristinaDashboardModular() {
               <button
                 className={`tab-button ${activeTab === 'service-queue' ? 'active' : ''}`}
                 onClick={() => setActiveTab('service-queue')}
+                data-tab="service-queue"
               >
                 📋 Service Queue
               </button>
               <button
                 className={`tab-button ${activeTab === 'usmca-certificate' ? 'active' : ''}`}
                 onClick={() => setActiveTab('usmca-certificate')}
+                data-tab="usmca-certificate"
               >
                 📜 USMCA Certificates
               </button>
               <button
                 className={`tab-button ${activeTab === 'hs-classification' ? 'active' : ''}`}
                 onClick={() => setActiveTab('hs-classification')}
+                data-tab="hs-classification"
               >
                 🔍 HS Classification
               </button>
               <button
-                className={`tab-button ${activeTab === 'document-review' ? 'active' : ''}`}
-                onClick={() => setActiveTab('document-review')}
-              >
-                📋 Document Review
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'monthly-compliance-support' ? 'active' : ''}`}
-                onClick={() => setActiveTab('monthly-compliance-support')}
-              >
-                📞 Monthly Support
-              </button>
-              <button
                 className={`tab-button ${activeTab === 'compliance-crisis-response' ? 'active' : ''}`}
                 onClick={() => setActiveTab('compliance-crisis-response')}
+                data-tab="crisis-response"
               >
                 🆘 Crisis Response
               </button>

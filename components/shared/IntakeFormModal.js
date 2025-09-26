@@ -10,8 +10,23 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
   const [formData, setFormData] = useState({});
   const [mode, setMode] = useState(initialMode);
 
+  // Editable client contact fields
+  const [clientContact, setClientContact] = useState({
+    email: '',
+    name: '',
+    company_name: ''
+  });
+
   useEffect(() => {
     if (clientInfo && isOpen) {
+      // Initialize client contact info
+      setClientContact({
+        email: clientInfo.email || 'triangleintel@gmail.com',
+        name: clientInfo.contact_name || clientInfo.client_name || 'Client Contact',
+        company_name: clientInfo.company_name || clientInfo.client_name || ''
+      });
+
+      // Pre-fill form data
       const preFilledData = {
         company_name: clientInfo.company_name || clientInfo.client_name || '',
         contact_name: clientInfo.contact_name || '',
@@ -43,10 +58,35 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
         ...clientInfo.service_details
       };
       setFormData(preFilledData);
+    } else if (isOpen) {
+      // Initialize with defaults when no clientInfo
+      setClientContact({
+        email: 'triangleintel@gmail.com',
+        name: 'Client Contact',
+        company_name: ''
+      });
     }
   }, [clientInfo, isOpen]);
 
-  if (!isOpen || !formConfig) return null;
+  if (!isOpen) return null;
+
+  if (!formConfig) {
+    console.error('IntakeFormModal: No formConfig provided');
+    return (
+      <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2>Form Not Found</h2>
+            <button className="modal-close" onClick={onClose}>×</button>
+          </div>
+          <div style={{ padding: '20px' }}>
+            <p>The requested intake form could not be found.</p>
+            <button onClick={onClose} style={{ padding: '8px 16px', marginTop: '10px' }}>Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleInputChange = (fieldId, value) => {
     setFormData({ ...formData, [fieldId]: value });
@@ -57,10 +97,18 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
       onSendForm({
         formType: formConfig.title,
         formData: formConfig,
-        clientEmail: clientInfo?.email,
-        clientName: clientInfo?.company_name || clientInfo?.client_name
+        clientEmail: clientContact.email,
+        clientName: clientContact.name,
+        companyName: clientContact.company_name
       });
     }
+  };
+
+  const handleClientContactChange = (field, value) => {
+    setClientContact(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleUploadClientResponse = () => {
@@ -84,8 +132,9 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
               value={formData[field.id] || ''}
               onChange={(e) => handleInputChange(field.id, e.target.value)}
               placeholder={field.placeholder}
-              disabled={mode === 'preview'}
+              disabled={false}
               className={hasExistingValue ? 'prefilled-field' : ''}
+              style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px' }}
             />
             {hasExistingValue && mode === 'preview' && (
               <small style={{color: '#059669', fontSize: '0.75rem'}}>✓ From consultation form</small>
@@ -100,7 +149,8 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
             value={formData[field.id] || ''}
             onChange={(e) => handleInputChange(field.id, e.target.value)}
             placeholder={field.placeholder}
-            disabled={mode === 'preview'}
+            disabled={false}
+            style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', resize: 'vertical' }}
           />
         );
 
@@ -112,8 +162,9 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
             <select
               value={selectValue}
               onChange={(e) => handleInputChange(field.id, e.target.value)}
-              disabled={mode === 'preview'}
+              disabled={false}
               className={hasSelectValue ? 'prefilled-field' : ''}
+              style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px' }}
             >
               {field.options?.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -133,7 +184,8 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
             type="date"
             value={formData[field.id] || ''}
             onChange={(e) => handleInputChange(field.id, e.target.value)}
-            disabled={mode === 'preview'}
+            disabled={false}
+            style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px' }}
           />
         );
 
@@ -145,7 +197,7 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
   const currentSection = formConfig.sections?.[activeSection];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" style={{ zIndex: 10000 }} onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
@@ -162,12 +214,28 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
 
         <div className="tab-content">
 
-          <div className="tab-navigation" style={{flexWrap: 'wrap'}}>
+          <div className="tab-navigation" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px', borderBottom: '1px solid #e5e7eb', paddingBottom: '10px' }}>
             {formConfig.sections?.map((section, index) => (
               <button
                 key={index}
                 className={`tab-button ${activeSection === index ? 'active' : ''}`}
-                onClick={() => setActiveSection(index)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Tab clicked:', index, section.title);
+                  setActiveSection(index);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px 6px 0 0',
+                  backgroundColor: activeSection === index ? '#2563eb' : '#ffffff',
+                  color: activeSection === index ? '#ffffff' : '#374151',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 {section.title}
               </button>
@@ -191,41 +259,154 @@ export default function IntakeFormModal({ isOpen, onClose, formConfig, clientInf
           )}
         </div>
 
-        <div className="modal-actions">
+        <div className="modal-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: '1px solid #e5e7eb' }}>
           <button
             className="btn-action btn-secondary"
-            onClick={() => setActiveSection(Math.max(0, activeSection - 1))}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Previous clicked, current section:', activeSection);
+              setActiveSection(Math.max(0, activeSection - 1));
+            }}
             disabled={activeSection === 0}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: activeSection === 0 ? '#f3f4f6' : '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              cursor: activeSection === 0 ? 'not-allowed' : 'pointer'
+            }}
           >
             ← Previous
           </button>
-          <span>
+          <span style={{ fontSize: '0.9rem', color: '#6b7280', fontWeight: '500' }}>
             Section {activeSection + 1} of {formConfig.sections?.length || 0}
           </span>
           <button
             className="btn-action btn-secondary"
-            onClick={() => setActiveSection(Math.min((formConfig.sections?.length || 1) - 1, activeSection + 1))}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const maxSection = (formConfig.sections?.length || 1) - 1;
+              console.log('Next clicked, current section:', activeSection, 'max:', maxSection);
+              setActiveSection(Math.min(maxSection, activeSection + 1));
+            }}
             disabled={activeSection === (formConfig.sections?.length || 1) - 1}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: activeSection === (formConfig.sections?.length || 1) - 1 ? '#f3f4f6' : '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '4px',
+              cursor: activeSection === (formConfig.sections?.length || 1) - 1 ? 'not-allowed' : 'pointer'
+            }}
           >
             Next →
           </button>
         </div>
 
         <div className="modal-actions">
-          <button className="btn-action btn-primary" onClick={handleSendToClient}>
-            📧 Send Form to Client
-          </button>
-          <button className="btn-action btn-secondary" onClick={() => setMode('upload')}>
-            📁 Upload Client Response
-          </button>
-          {mode === 'upload' && (
-            <button className="btn-action btn-primary" onClick={handleUploadClientResponse}>
-              ✅ Save Response & Continue
+          <div style={{ marginBottom: '15px', padding: '15px', backgroundColor: '#f3f4f6', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', fontWeight: '600', color: '#374151' }}>
+              📧 Send Form To:
+            </h4>
+            <div className="form-group" style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: '#4b5563', marginBottom: '4px' }}>
+                Email Address:
+              </label>
+              <input
+                type="email"
+                value={clientContact.email}
+                onChange={(e) => handleClientContactChange('email', e.target.value)}
+                style={{
+                  width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px',
+                  fontSize: '0.9rem', backgroundColor: '#ffffff'
+                }}
+                placeholder="client@company.com"
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: '10px' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: '#4b5563', marginBottom: '4px' }}>
+                Contact Name:
+              </label>
+              <input
+                type="text"
+                value={clientContact.name}
+                onChange={(e) => handleClientContactChange('name', e.target.value)}
+                style={{
+                  width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px',
+                  fontSize: '0.9rem', backgroundColor: '#ffffff'
+                }}
+                placeholder="Contact Name"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: '#4b5563', marginBottom: '4px' }}>
+                Company Name:
+              </label>
+              <input
+                type="text"
+                value={clientContact.company_name}
+                onChange={(e) => handleClientContactChange('company_name', e.target.value)}
+                style={{
+                  width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px',
+                  fontSize: '0.9rem', backgroundColor: '#ffffff'
+                }}
+                placeholder="Company Name"
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'flex-start' }}>
+            <button
+              className="btn-action btn-primary"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Send form clicked');
+                handleSendToClient();
+              }}
+              style={{ padding: '10px 20px', fontSize: '0.9rem', fontWeight: '500' }}
+            >
+              📧 Send Form to Client
             </button>
-          )}
-          <button className="btn-action btn-secondary" onClick={onClose}>
-            Close
-          </button>
+            <button
+              className="btn-action btn-secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Upload mode clicked, current mode:', mode);
+                setMode('upload');
+              }}
+              style={{ padding: '10px 20px', fontSize: '0.9rem' }}
+            >
+              📁 Upload Client Response
+            </button>
+            {mode === 'upload' && (
+              <button
+                className="btn-action btn-primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Save response clicked');
+                  handleUploadClientResponse();
+                }}
+                style={{ padding: '10px 20px', fontSize: '0.9rem', fontWeight: '500', backgroundColor: '#16a34a' }}
+              >
+                ✅ Save Response & Continue
+              </button>
+            )}
+            <button
+              className="btn-action btn-secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close clicked');
+                onClose();
+              }}
+              style={{ padding: '10px 20px', fontSize: '0.9rem' }}
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>

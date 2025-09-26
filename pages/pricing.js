@@ -19,14 +19,12 @@ export default function Pricing() {
       name: 'Starter',
       price: '$99',
       period: 'per month',
-      description: 'Basic Mexico routing calculator for testing and small scale use',
+      description: 'Essential USMCA tools for small importers avoiding 35% tariffs',
       features: [
         'Basic Mexico routing calculator',
         '5 HS code lookups per month',
-        'Basic tariff alerts (email only)',
-        'Certificate templates (you complete yourself)',
-        'Email support (no phone)',
-        'Limited lookups force upgrade when you get serious'
+        'Basic email alerts',
+        'Certificate templates (self-complete)'
       ],
       cta: 'Start Starter Trial',
       popular: false
@@ -35,15 +33,12 @@ export default function Pricing() {
       name: 'Professional',
       price: '$299',
       period: 'per month',
-      description: 'Advanced Mexico routing analysis with real-time alerts',
+      description: 'Advanced routing analysis with real-time tariff alerts',
       features: [
-        'Advanced Mexico routing analysis',
+        'Advanced routing analysis',
         '25 HS code lookups per month',
-        'Real-time crisis alerts (email + SMS)',
-        'Certificate wizard (guided but you complete)',
-        'Priority email support (24hr response)',
-        'Canada-Mexico partnership intelligence alerts',
-        'You still need help completing certificates → services'
+        'Real-time alerts (email + SMS)',
+        'Certificate wizard (guided self-complete)'
       ],
       cta: 'Start Professional Trial',
       popular: true
@@ -52,16 +47,11 @@ export default function Pricing() {
       name: 'Business',
       price: '$599',
       period: 'per month',
-      description: 'Unlimited lookups with completed certificates included',
+      description: 'Complete USMCA compliance solution for high-volume importers',
       features: [
         'Unlimited HS code lookups',
-        'Real-time alerts (all channels)',
-        'Certificate wizard + validation',
-        'Email support (4hr response)',
-        '2 completed certificates included per month',
-        'Monthly partnership intelligence report',
-        'Crisis response playbook',
-        'Includes some certificates to get you hooked, you\'ll need more'
+        'All alert channels',
+        'Certificate wizard + validation'
       ],
       cta: 'Start Business Trial',
       popular: false
@@ -70,39 +60,34 @@ export default function Pricing() {
 
   const addOns = [
     {
-      name: 'USMCA Certificate Completion',
-      price: '$200 per certificate',
-      description: 'Professional completion of your USMCA certificate from your product data'
+      name: '📜 USMCA Certificate',
+      price: '$250',
+      description: 'Professional certificate completion by licensed customs broker'
     },
     {
-      name: 'HS Code Classification & Verification',
-      price: '$150 per product',
-      description: 'Professional HS code research and verification with documentation'
+      name: '🔍 HS Classification',
+      price: '$200',
+      description: 'Professional HS code verification with documentation'
     },
     {
-      name: 'Mexico Supplier Vetting & Introduction',
-      price: '$750 per supplier',
-      description: 'Research, vet, and introduce verified Mexico/Latin America suppliers'
+      name: '🚨 Crisis Response',
+      price: '$400',
+      description: 'Emergency response for sudden tariff changes and regulatory shifts'
     },
     {
-      name: 'Mexico Market Entry Strategy',
-      price: '$400/hour (2-hour minimum)',
-      description: 'Strategic consultation for entering Mexico/Latin America markets'
+      name: '🔍 Supplier Sourcing',
+      price: '$500',
+      description: '5-7 pre-screened supplier contacts with capabilities analysis'
     },
     {
-      name: 'Partnership Intelligence Briefing',
-      price: '$300/month',
-      description: 'Monthly report on Canada-Mexico partnership opportunities'
+      name: '🏭 Manufacturing Feasibility',
+      price: '$500',
+      description: 'Location recommendations, regulatory overview, cost analysis'
     },
     {
-      name: 'Customs Clearance Support',
-      price: '$300 per shipment',
-      description: 'Document review, customs issue resolution, expedited clearance'
-    },
-    {
-      name: 'Crisis Response (Tariff Changes)',
-      price: '$500 per incident',
-      description: 'Emergency tariff analysis + action plan when regulations change'
+      name: '🚀 Market Entry',
+      price: '$450',
+      description: 'Regulatory requirements, cultural guidance, market entry strategy'
     }
   ]
 

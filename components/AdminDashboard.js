@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
-import { SYSTEM_CONFIG } from '../config/system-config';
-
-export default function AdminDashboard({ user, profile }) {
-  const { signOut } = useSimpleAuth();
+// import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
+export default function AdminDashboard({ user }) {
   const [adminData, setAdminData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -308,7 +305,7 @@ export default function AdminDashboard({ user, profile }) {
                 </p>
                 <div className="grid-2-cols">
                   <Link href="/admin/broker-dashboard" className="nav-link">Broker Dashboard →</Link>
-                  <Link href="/admin/cristina-operations" className="nav-link">Operations →</Link>
+                  <Link href="/admin/broker-dashboard" className="nav-link">Operations →</Link>
                 </div>
               </div>
             </div>

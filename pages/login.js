@@ -18,7 +18,7 @@ export default function Login() {
     if (user) {
       console.log('User already logged in, redirecting...');
       if (user.isAdmin) {
-        router.replace('/admin/dashboard');
+        router.replace('/admin/broker-dashboard');
       } else {
         router.replace('/dashboard');
       }
@@ -45,7 +45,7 @@ export default function Login() {
         // Success - redirect will happen via useEffect when user state updates
         console.log('Login successful, waiting for redirect...');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -136,7 +136,7 @@ export default function Login() {
             {/* Footer Links */}
             <div>
               <p>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/signup" className="nav-link">
                   Sign up
                 </Link>

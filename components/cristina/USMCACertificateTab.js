@@ -1,26 +1,26 @@
 import { useState } from 'react';
 
-export default function HSClassificationTab({ requests = [], onRequestUpdate }) {
+export default function USMCACertificateTab({ requests = [], onRequestUpdate }) {
   const [workflowModal, setWorkflowModal] = useState({
     isOpen: false,
     request: null,
     currentStage: 1,
     formData: {},
     collectedData: {
-      productReview: null,
-      classificationResult: null
+      dataReview: null,
+      certificateGenerated: null
     }
   });
 
-  const startClassificationWorkflow = (request) => {
+  const startCertificateWorkflow = (request) => {
     setWorkflowModal({
       isOpen: true,
       request: request,
       currentStage: 1,
       formData: {},
       collectedData: {
-        productReview: null,
-        classificationResult: null
+        dataReview: null,
+        certificateGenerated: null
       }
     });
   };
@@ -32,8 +32,8 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
       currentStage: 1,
       formData: {},
       collectedData: {
-        productReview: null,
-        classificationResult: null
+        dataReview: null,
+        certificateGenerated: null
       }
     });
   };
@@ -42,29 +42,29 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
     const { currentStage, request } = workflowModal;
 
     if (currentStage === 1) {
-      // Stage 1: Product Review completed
+      // Stage 1: Data Review completed
       setWorkflowModal(prev => ({
         ...prev,
         collectedData: {
           ...prev.collectedData,
-          productReview: 'confirmed'
+          dataReview: 'confirmed'
         },
         currentStage: 2
       }));
     } else if (currentStage === 2) {
-      // Stage 2: Expert Validation & Classification
+      // Stage 2: Certificate Generation
       try {
-        console.log('🤖 Running HS classification analysis...');
+        console.log('🤖 Generating USMCA certificate...');
 
-        const classificationData = {
+        const certificateData = {
           subscriber_data: request.service_details || {},
-          service_type: 'hs_classification'
+          service_type: 'usmca_certificate'
         };
 
-        const response = await fetch('/api/validate-hs-classification', {
+        const response = await fetch('/api/generate-usmca-certificate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(classificationData)
+          body: JSON.stringify(certificateData)
         });
 
         const result = await response.json();
@@ -74,20 +74,20 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
           if (onRequestUpdate) {
             onRequestUpdate(request.id, {
               status: 'completed',
-              classification_data: result,
+              certificate_data: result,
               completed_at: new Date().toISOString()
             });
           }
 
-          alert('✅ HS Classification completed successfully!');
+          alert('✅ USMCA Certificate generated successfully!');
           closeModal();
         } else {
-          alert('❌ Classification failed: ' + (result.error || 'Unknown error'));
+          alert('❌ Certificate generation failed: ' + (result.error || 'Unknown error'));
         }
 
       } catch (error) {
-        console.error('HS Classification error:', error);
-        alert('Error running classification. Please try again.');
+        console.error('Certificate generation error:', error);
+        alert('Error generating certificate. Please try again.');
       }
     }
   };
@@ -95,8 +95,8 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
   return (
     <div className="service-tab">
       <div className="service-header">
-        <h3>🔍 HS Classification ($200)</h3>
-        <p>2-stage workflow: Product Review → Expert Validation</p>
+        <h3>📜 USMCA Certificates ($250)</h3>
+        <p>2-stage workflow: Data Review → Certificate Generation</p>
       </div>
 
       {/* Service Requests Table */}
@@ -106,13 +106,13 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
             <tr>
               <th>Client</th>
               <th>Product</th>
-              <th>Components</th>
+              <th>Origin</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {requests?.filter(r => r.service_type === 'HS Classification' || r.service_type === 'hs-classification').map((request) => (
+            {requests?.filter(r => r.service_type === 'USMCA Certificates' || r.service_type === 'usmca-certificate').map((request) => (
               <tr key={request.id}>
                 <td>
                   <div className="client-info">
@@ -121,7 +121,7 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
                   </div>
                 </td>
                 <td>{request.service_details?.product_description || 'Product details'}</td>
-                <td>{request.service_details?.component_count || 'Multiple'}</td>
+                <td>{request.service_details?.manufacturing_location || 'Location'}</td>
                 <td>
                   <span className={`status-badge ${request.status?.replace('_', '-')}`}>
                     {request.status?.replace('_', ' ')}
@@ -130,10 +130,10 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
                 <td>
                   <button
                     className="btn-primary"
-                    onClick={() => startClassificationWorkflow(request)}
+                    onClick={() => startCertificateWorkflow(request)}
                     disabled={request.status === 'completed'}
                   >
-                    {request.status === 'completed' ? 'Completed' : 'Start Classification'}
+                    {request.status === 'completed' ? 'Completed' : 'Start Certificate'}
                   </button>
                 </td>
               </tr>
@@ -141,11 +141,11 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
           </tbody>
         </table>
 
-        {requests?.filter(r => r.service_type === 'HS Classification' || r.service_type === 'hs-classification').length === 0 && (
+        {requests?.filter(r => r.service_type === 'USMCA Certificates' || r.service_type === 'usmca-certificate').length === 0 && (
           <div className="no-requests">
-            <p>No HS classification requests pending.</p>
+            <p>No USMCA certificate requests pending.</p>
             <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-              Requests will appear here when clients submit HS classification service requests.
+              Requests will appear here when clients submit USMCA certificate service requests.
             </p>
           </div>
         )}
@@ -156,29 +156,29 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
         <div className="modal-overlay">
           <div className="modal-content workflow-modal">
             <div className="modal-header">
-              <h2>HS Code Classification</h2>
+              <h2>USMCA Certificate Generation</h2>
               <button className="modal-close" onClick={closeModal}>×</button>
             </div>
 
             <div className="stage-progress">
-              <div className={`stage ${workflowModal.currentStage >= 1 ? 'active' : ''}`}>1. Product Review</div>
-              <div className={`stage ${workflowModal.currentStage >= 2 ? 'active' : ''}`}>2. Expert Validation</div>
+              <div className={`stage ${workflowModal.currentStage >= 1 ? 'active' : ''}`}>1. Data Review</div>
+              <div className={`stage ${workflowModal.currentStage >= 2 ? 'active' : ''}`}>2. Certificate</div>
             </div>
 
             <div className="stage-content">
               {workflowModal.currentStage === 1 && (
                 <div>
-                  <h3>Stage 1: Product Review</h3>
-                  <p>Review subscriber product data and component breakdown</p>
+                  <h3>Stage 1: Data Review</h3>
+                  <p>Review existing subscriber data - no new forms needed</p>
 
-                  {/* Product Data Summary */}
+                  {/* Subscriber Data Summary */}
                   <div className="subscriber-summary">
-                    <h4>📦 Product Information</h4>
+                    <h4>📊 Client Business Profile</h4>
                     <div className="data-grid">
                       <div><strong>Company:</strong> {workflowModal.request?.company_name}</div>
                       <div><strong>Product:</strong> {workflowModal.request?.service_details?.product_description}</div>
-                      <div><strong>Industry:</strong> {workflowModal.request?.industry}</div>
-                      <div><strong>Current HS Code:</strong> {workflowModal.request?.service_details?.current_hs_code || 'To be determined'}</div>
+                      <div><strong>Trade Volume:</strong> {workflowModal.request?.service_details?.volume}</div>
+                      <div><strong>Origin:</strong> {workflowModal.request?.service_details?.manufacturing_location}</div>
                     </div>
                   </div>
 
@@ -188,7 +188,7 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
                       className="btn-primary"
                       onClick={handleStageComplete}
                     >
-                      Verify Classification →
+                      Data looks good - Generate Certificate →
                     </button>
                   </div>
                 </div>
@@ -196,18 +196,18 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
 
               {workflowModal.currentStage === 2 && (
                 <div>
-                  <h3>Stage 2: Expert Validation</h3>
-                  <p>Enhanced Classification Agent web search + Cristina's approval</p>
+                  <h3>Stage 2: Certificate Generation</h3>
+                  <p>Enhanced Classification Agent processing subscriber data...</p>
 
-                  <div className="classification-analysis">
-                    <p>🔄 Running Enhanced Classification Agent...</p>
+                  <div className="certificate-generation">
+                    <p>🔄 Generating USMCA Certificate of Origin...</p>
                     <p>This typically takes 30-60 seconds.</p>
 
-                    <div className="analysis-steps">
-                      <p>✓ Searching tariff schedules and trade databases</p>
-                      <p>✓ Analyzing product composition and use</p>
-                      <p>✓ Checking classification precedents</p>
-                      <p>🔄 Generating confidence scores and alternatives...</p>
+                    <div className="generation-steps">
+                      <p>✓ Validating product classification</p>
+                      <p>✓ Checking North American content rules</p>
+                      <p>✓ Generating compliance documentation</p>
+                      <p>🔄 Creating PDF certificate...</p>
                     </div>
                   </div>
 
@@ -216,7 +216,7 @@ export default function HSClassificationTab({ requests = [], onRequestUpdate }) 
                       className="btn-primary"
                       onClick={handleStageComplete}
                     >
-                      Complete & Generate Report
+                      Complete & Download Certificate
                     </button>
                   </div>
                 </div>
