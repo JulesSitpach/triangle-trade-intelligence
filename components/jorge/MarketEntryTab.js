@@ -656,40 +656,52 @@ function MarketGoalsStage({ request, subscriberData, serviceDetails, onComplete,
           )}
 
           {/* Compliance Gaps */}
-          {serviceDetails?.compliance_gaps && serviceDetails.compliance_gaps.length > 0 && (
-            <div className="data-section compliance-section">
-              <h6>⚠️ Market Entry Compliance Gaps</h6>
-              <ul className="compliance-list">
-                {serviceDetails.compliance_gaps.map((gap, idx) => (
-                  <li key={idx}>{gap}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const items = serviceDetails?.compliance_gaps;
+            const itemsArray = Array.isArray(items) ? items : [];
+            return itemsArray.length > 0 && (
+              <div className="data-section compliance-section">
+                <h6>⚠️ Market Entry Compliance Gaps</h6>
+                <ul className="compliance-list">
+                  {itemsArray.map((gap, idx) => (
+                    <li key={idx}>{gap}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Vulnerability Factors - Market Entry Risks */}
-          {serviceDetails?.vulnerability_factors && serviceDetails.vulnerability_factors.length > 0 && (
-            <div className="data-section vulnerability-section">
-              <h6>🚨 Market Entry Vulnerability Factors</h6>
-              <ul className="vulnerability-list">
-                {serviceDetails.vulnerability_factors.map((factor, idx) => (
-                  <li key={idx}>{factor}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const items = serviceDetails?.vulnerability_factors;
+            const itemsArray = Array.isArray(items) ? items : [];
+            return itemsArray.length > 0 && (
+              <div className="data-section vulnerability-section">
+                <h6>🚨 Market Entry Vulnerability Factors</h6>
+                <ul className="vulnerability-list">
+                  {itemsArray.map((factor, idx) => (
+                    <li key={idx}>{factor}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Regulatory Requirements for Target Markets */}
-          {serviceDetails?.regulatory_requirements && serviceDetails.regulatory_requirements.length > 0 && (
-            <div className="data-section regulatory-section">
-              <h6>📋 Regulatory Requirements for Target Markets</h6>
-              <ul className="regulatory-list">
-                {serviceDetails.regulatory_requirements.map((req, idx) => (
-                  <li key={idx}>{req}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const items = serviceDetails?.regulatory_requirements;
+            const itemsArray = Array.isArray(items) ? items : [];
+            return itemsArray.length > 0 && (
+              <div className="data-section regulatory-section">
+                <h6>📋 Regulatory Requirements for Target Markets</h6>
+                <ul className="regulatory-list">
+                  {itemsArray.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

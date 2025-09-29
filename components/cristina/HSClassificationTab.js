@@ -596,40 +596,52 @@ function ProductReviewStage({ request, subscriberData, serviceDetails, onComplet
           )}
 
           {/* Compliance Gaps */}
-          {serviceDetails?.compliance_gaps && serviceDetails.compliance_gaps.length > 0 && (
-            <div className="compliance-gaps-section">
-              <h5>⚠️ Compliance Gaps Identified</h5>
-              <ul className="compliance-list">
-                {serviceDetails.compliance_gaps.map((gap, idx) => (
-                  <li key={idx}>{gap}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const gaps = serviceDetails?.compliance_gaps;
+            const gapsArray = Array.isArray(gaps) ? gaps : [];
+            return gapsArray.length > 0 && (
+              <div className="compliance-gaps-section">
+                <h5>⚠️ Compliance Gaps Identified</h5>
+                <ul className="compliance-list">
+                  {gapsArray.map((gap, idx) => (
+                    <li key={idx}>{gap}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Vulnerability Factors */}
-          {serviceDetails?.vulnerability_factors && serviceDetails.vulnerability_factors.length > 0 && (
-            <div className="vulnerability-section">
-              <h5>🚨 Vulnerability Factors</h5>
-              <ul className="vulnerability-list">
-                {serviceDetails.vulnerability_factors.map((factor, idx) => (
-                  <li key={idx}>{factor}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const factors = serviceDetails?.vulnerability_factors;
+            const factorsArray = Array.isArray(factors) ? factors : [];
+            return factorsArray.length > 0 && (
+              <div className="vulnerability-section">
+                <h5>🚨 Vulnerability Factors</h5>
+                <ul className="vulnerability-list">
+                  {factorsArray.map((factor, idx) => (
+                    <li key={idx}>{factor}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Regulatory Requirements */}
-          {serviceDetails?.regulatory_requirements && serviceDetails.regulatory_requirements.length > 0 && (
-            <div className="regulatory-section">
-              <h5>📋 Regulatory Requirements</h5>
-              <ul className="regulatory-list">
-                {serviceDetails.regulatory_requirements.map((req, idx) => (
-                  <li key={idx}>{req}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {(() => {
+            const reqs = serviceDetails?.regulatory_requirements;
+            const reqsArray = Array.isArray(reqs) ? reqs : [];
+            return reqsArray.length > 0 && (
+              <div className="regulatory-section">
+                <h5>📋 Regulatory Requirements</h5>
+                <ul className="regulatory-list">
+                  {reqsArray.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
