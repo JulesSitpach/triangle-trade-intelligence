@@ -695,13 +695,12 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
 
         <div className="certificate-actions">
           <button
-            className="btn-secondary"
+            className="btn-secondary certificate-toggle-btn"
             onClick={() => setShowOriginalCertificate(!showOriginalCertificate)}
-            style={{ marginBottom: '20px' }}
           >
             📄 {showOriginalCertificate ? 'Hide' : 'View'} Client's Original Certificate
           </button>
-          <span style={{ marginLeft: '10px', fontSize: '14px', color: '#666' }}>
+          <span className="helper-text">
             Review what the client received from AI before professional validation
           </span>
         </div>
@@ -822,6 +821,97 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
                 )}
               </div>
             )}
+          </div>
+
+          {/* Financial Impact Analysis - CRITICAL FOR PROFESSIONAL VALUE */}
+          <div className="data-section financial-impact-section">
+            <h6>💰 Financial Impact Analysis</h6>
+            <div className="financial-highlight">
+              <div className="data-row">
+                <span><strong>Annual Tariff Cost:</strong></span>
+                <span className="financial-amount">
+                  ${(workflowData?.annual_tariff_cost || workflowData?.cost_analysis?.annual_tariff_cost || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="data-row">
+                <span><strong>Potential USMCA Savings:</strong></span>
+                <span className="financial-savings">
+                  ${(workflowData?.potential_usmca_savings || workflowData?.cost_analysis?.potential_savings || 0).toLocaleString()} annually
+                </span>
+              </div>
+              <div className="data-row">
+                <span><strong>ROI on Certificate ($250):</strong></span>
+                <span className="roi-highlight">
+                  {((workflowData?.potential_usmca_savings || 0) / 250).toFixed(0)}x return on investment
+                </span>
+              </div>
+            </div>
+            <p className="professional-note">
+              💡 <strong>Professional Value:</strong> Cristina's validation ensures these savings are realized compliantly.
+            </p>
+          </div>
+
+          {/* Risk Assessment - CRITICAL FOR PROFESSIONAL REVIEW */}
+          <div className="data-section risk-assessment-section">
+            <h6>⚠️ Compliance Risk Assessment</h6>
+
+            {(workflowData?.compliance_gaps?.length > 0 || workflowData?.risk_analysis?.compliance_gaps?.length > 0) && (
+              <div className="risk-category">
+                <div className="data-row"><strong>Compliance Gaps Identified:</strong></div>
+                <ul className="risk-list">
+                  {(workflowData?.compliance_gaps || workflowData?.risk_analysis?.compliance_gaps || []).map((gap, idx) => (
+                    <li key={idx} className="risk-item gap-item">❌ {gap}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(workflowData?.vulnerability_factors?.length > 0 || workflowData?.risk_analysis?.vulnerability_factors?.length > 0) && (
+              <div className="risk-category">
+                <div className="data-row"><strong>Vulnerability Factors:</strong></div>
+                <ul className="risk-list">
+                  {(workflowData?.vulnerability_factors || workflowData?.risk_analysis?.vulnerability_factors || []).map((factor, idx) => (
+                    <li key={idx} className="risk-item vulnerability-item">⚠️ {factor}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <p className="professional-note">
+              ⚖️ <strong>Professional Assessment Required:</strong> Cristina reviews each gap and vulnerability with 17 years customs experience.
+            </p>
+          </div>
+
+          {/* Regulatory Context */}
+          <div className="data-section regulatory-section">
+            <h6>📋 Regulatory Requirements</h6>
+
+            {(workflowData?.regulatory_requirements?.length > 0 || workflowData?.compliance_requirements?.length > 0) && (
+              <ul className="regulatory-list">
+                {(workflowData?.regulatory_requirements || workflowData?.compliance_requirements || []).map((req, idx) => (
+                  <li key={idx} className="regulatory-item">✓ {req}</li>
+                ))}
+              </ul>
+            )}
+
+            <div className="data-row">
+              <span><strong>Import Frequency:</strong></span>
+              <span>{workflowData?.import_frequency || workflowData?.trade_details?.import_frequency || 'Not specified'}</span>
+            </div>
+            <div className="data-row">
+              <span><strong>Product Category:</strong></span>
+              <span>{workflowData?.product_category || workflowData?.classification?.product_category || 'Electronics/Telecom'}</span>
+            </div>
+            {workflowData?.target_markets && (
+              <div className="data-row">
+                <span><strong>Target Markets:</strong></span>
+                <span>{Array.isArray(workflowData.target_markets) ? workflowData.target_markets.join(', ') : workflowData.target_markets}</span>
+              </div>
+            )}
+
+            <p className="professional-note">
+              📜 <strong>License Backing:</strong> Certificate backed by Customs Broker License #4601913 and professional liability insurance.
+            </p>
           </div>
         </div>
       </div>
