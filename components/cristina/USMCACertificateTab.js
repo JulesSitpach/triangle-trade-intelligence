@@ -855,27 +855,35 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
           <div className="data-section risk-assessment-section">
             <h6>⚠️ Compliance Risk Assessment</h6>
 
-            {(workflowData?.compliance_gaps?.length > 0 || workflowData?.risk_analysis?.compliance_gaps?.length > 0) && (
-              <div className="risk-category">
-                <div className="data-row"><strong>Compliance Gaps Identified:</strong></div>
-                <ul className="risk-list">
-                  {(workflowData?.compliance_gaps || workflowData?.risk_analysis?.compliance_gaps || []).map((gap, idx) => (
-                    <li key={idx} className="risk-item gap-item">❌ {gap}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {(() => {
+              const gaps = workflowData?.compliance_gaps || workflowData?.risk_analysis?.compliance_gaps;
+              const gapsArray = Array.isArray(gaps) ? gaps : [];
+              return gapsArray.length > 0 && (
+                <div className="risk-category">
+                  <div className="data-row"><strong>Compliance Gaps Identified:</strong></div>
+                  <ul className="risk-list">
+                    {gapsArray.map((gap, idx) => (
+                      <li key={idx} className="risk-item gap-item">❌ {gap}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
 
-            {(workflowData?.vulnerability_factors?.length > 0 || workflowData?.risk_analysis?.vulnerability_factors?.length > 0) && (
-              <div className="risk-category">
-                <div className="data-row"><strong>Vulnerability Factors:</strong></div>
-                <ul className="risk-list">
-                  {(workflowData?.vulnerability_factors || workflowData?.risk_analysis?.vulnerability_factors || []).map((factor, idx) => (
-                    <li key={idx} className="risk-item vulnerability-item">⚠️ {factor}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {(() => {
+              const factors = workflowData?.vulnerability_factors || workflowData?.risk_analysis?.vulnerability_factors;
+              const factorsArray = Array.isArray(factors) ? factors : [];
+              return factorsArray.length > 0 && (
+                <div className="risk-category">
+                  <div className="data-row"><strong>Vulnerability Factors:</strong></div>
+                  <ul className="risk-list">
+                    {factorsArray.map((factor, idx) => (
+                      <li key={idx} className="risk-item vulnerability-item">⚠️ {factor}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
 
             <p className="professional-note">
               ⚖️ <strong>Professional Assessment Required:</strong> Cristina reviews each gap and vulnerability with 17 years customs experience.
@@ -886,13 +894,17 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
           <div className="data-section regulatory-section">
             <h6>📋 Regulatory Requirements</h6>
 
-            {(workflowData?.regulatory_requirements?.length > 0 || workflowData?.compliance_requirements?.length > 0) && (
-              <ul className="regulatory-list">
-                {(workflowData?.regulatory_requirements || workflowData?.compliance_requirements || []).map((req, idx) => (
-                  <li key={idx} className="regulatory-item">✓ {req}</li>
-                ))}
-              </ul>
-            )}
+            {(() => {
+              const reqs = workflowData?.regulatory_requirements || workflowData?.compliance_requirements;
+              const reqsArray = Array.isArray(reqs) ? reqs : [];
+              return reqsArray.length > 0 && (
+                <ul className="regulatory-list">
+                  {reqsArray.map((req, idx) => (
+                    <li key={idx} className="regulatory-item">✓ {req}</li>
+                  ))}
+                </ul>
+              );
+            })()}
 
             <div className="data-row">
               <span><strong>Import Frequency:</strong></span>
