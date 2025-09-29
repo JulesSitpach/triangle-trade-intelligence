@@ -1452,6 +1452,93 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
             <div className="regeneration-complete">
               <span className="success-message">✅ Certificate successfully regenerated with professional corrections</span>
 
+              {/* DISPLAY CORRECTED CERTIFICATE FOR REVIEW */}
+              {corrections.corrected_certificate_data && (
+                <div className="certificate-preview-section">
+                  <h5>📋 Corrected Certificate Preview</h5>
+                  <p className="professional-note">
+                    <strong>Review Required:</strong> Verify all corrections are accurate before approving for client delivery.
+                  </p>
+
+                  <div className="certificate-display">
+                    <div className="certificate-header">
+                      <h6>USMCA Certificate of Origin (Professional)</h6>
+                      <div className="cert-meta">
+                        <span>Certificate #: {corrections.corrected_certificate_data.certificate_number}</span>
+                        <span>Issue Date: {corrections.corrected_certificate_data.issue_date}</span>
+                        <span>Valid Until: {corrections.corrected_certificate_data.valid_until}</span>
+                      </div>
+                    </div>
+
+                    <div className="certificate-body">
+                      <div className="cert-section">
+                        <h6>Exporter Information</h6>
+                        <div className="data-row"><span>Name:</span> <span>{corrections.corrected_certificate_data.exporter_name}</span></div>
+                        <div className="data-row"><span>Address:</span> <span>{corrections.corrected_certificate_data.exporter_address}</span></div>
+                        <div className="data-row"><span>Tax ID:</span> <span>{corrections.corrected_certificate_data.exporter_tax_id}</span></div>
+                      </div>
+
+                      <div className="cert-section">
+                        <h6>Product Information</h6>
+                        <div className="data-row"><span>Description:</span> <span>{corrections.corrected_certificate_data.product_description}</span></div>
+                        <div className="data-row"><span>HS Code:</span> <span>{corrections.corrected_certificate_data.hs_tariff_classification}</span></div>
+                        <div className="data-row"><span>Origin:</span> <span>{corrections.corrected_certificate_data.country_of_origin}</span></div>
+                      </div>
+
+                      <div className="cert-section">
+                        <h6>USMCA Qualification</h6>
+                        <div className="data-row"><span>Preference Criterion:</span> <span>{corrections.corrected_certificate_data.preference_criterion}</span></div>
+                        <div className="data-row"><span>Justification:</span> <span>{corrections.corrected_certificate_data.preference_criterion_justification}</span></div>
+                        <div className="data-row"><span>RVC Method:</span> <span>{corrections.corrected_certificate_data.regional_value_content}</span></div>
+                        <div className="data-row"><span>Status:</span> <span>{corrections.corrected_certificate_data.qualification_status}</span></div>
+                      </div>
+
+                      {corrections.corrected_certificate_data.audit_defense_notes?.length > 0 && (
+                        <div className="cert-section">
+                          <h6>Audit Defense Preparation</h6>
+                          <ul className="cert-list">
+                            {corrections.corrected_certificate_data.audit_defense_notes.map((note, idx) => (
+                              <li key={idx}>{note}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {corrections.corrected_certificate_data.ongoing_monitoring?.length > 0 && (
+                        <div className="cert-section">
+                          <h6>Ongoing Monitoring Requirements</h6>
+                          <ul className="cert-list">
+                            {corrections.corrected_certificate_data.ongoing_monitoring.map((item, idx) => (
+                              <li key={idx}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      <div className="cert-section professional-backing">
+                        <h6>Professional Validation</h6>
+                        <div className="data-row"><span>Customs Broker License:</span> <span className="license-number">{corrections.corrected_certificate_data.customs_broker_license}</span></div>
+                        <div className="data-row"><span>Professional Guarantee:</span> <span>{corrections.corrected_certificate_data.professional_guarantee}</span></div>
+                        {corrections.corrected_certificate_data.cristina_professional_enhancements && (
+                          <div className="enhancements-list">
+                            <strong>Professional Enhancements:</strong>
+                            <ul>
+                              <li>✓ Risk Assessment Completed</li>
+                              <li>✓ Regulatory Compliance Verified</li>
+                              <li>✓ Audit Defense Preparation Included</li>
+                              <li>✓ Ongoing Monitoring Setup</li>
+                              {corrections.corrected_certificate_data.cristina_professional_enhancements.ai_analysis_performed && (
+                                <li>✓ AI-Enhanced Regulatory Analysis</li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="form-group">
                 <label><strong>Validation of Corrected Certificate</strong></label>
                 <div className="validation-options">
@@ -1583,6 +1670,35 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
 
       <div className="final-delivery-section">
         <h4>📋 Certificate Delivery Package</h4>
+
+        {/* DISPLAY FINAL CERTIFICATE FOR DELIVERY */}
+        {stage2Data?.corrected_certificate && (
+          <div className="final-certificate-display">
+            <h5>📄 Final Certificate for Client Delivery</h5>
+            <p className="professional-note">
+              <strong>Final Review:</strong> This is the certificate that will be delivered to the client.
+            </p>
+
+            <div className="certificate-summary-box">
+              <div className="cert-header-info">
+                <div className="data-row"><strong>Certificate Number:</strong> {stage2Data.corrected_certificate.certificate_number}</div>
+                <div className="data-row"><strong>Client:</strong> {stage2Data.corrected_certificate.exporter_name}</div>
+                <div className="data-row"><strong>Product:</strong> {stage2Data.corrected_certificate.product_description}</div>
+                <div className="data-row"><strong>HS Code:</strong> {stage2Data.corrected_certificate.hs_tariff_classification}</div>
+                <div className="data-row"><strong>USMCA Status:</strong> {stage2Data.corrected_certificate.qualification_status}</div>
+              </div>
+
+              <div className="professional-backing-box">
+                <div className="data-row"><strong>Professional Validation:</strong></div>
+                <div className="data-row">✓ Licensed Customs Broker: {stage2Data.corrected_certificate.customs_broker_license}</div>
+                <div className="data-row">✓ Professional Guarantee: {stage2Data.corrected_certificate.professional_guarantee}</div>
+                {stage2Data.corrected_certificate.cristina_professional_enhancements?.ai_analysis_performed && (
+                  <div className="data-row">✓ AI-Enhanced Regulatory Analysis Completed</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="form-group">
           <label>
