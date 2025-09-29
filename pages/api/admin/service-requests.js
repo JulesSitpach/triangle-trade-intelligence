@@ -61,8 +61,23 @@ async function handleCreateServiceRequest(req, res) {
       frequency,
       intelligence_priorities,
       preferred_locations,
-      setup_timeline
+      setup_timeline,
+      // Comprehensive workflow data (when user consents to professional service)
+      workflow_data,
+      // Client consent fields
+      data_storage_consent,
+      consent_timestamp,
+      privacy_policy_version
     } = req.body;
+
+    // Validate client consent for database storage
+    if (!data_storage_consent) {
+      return res.status(400).json({
+        success: false,
+        error: 'Database storage consent required',
+        message: 'You must consent to data storage to proceed with professional services'
+      });
+    }
 
     // Auto-assign to Jorge (Mexico Trade Specialist)
     const assigned_to = 'Jorge';
@@ -87,6 +102,13 @@ async function handleCreateServiceRequest(req, res) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
 
+      // Client consent tracking
+      data_storage_consent,
+      consent_timestamp,
+      privacy_policy_version,
+      consent_ip_address: req.ip || req.connection.remoteAddress,
+      consent_user_agent: req.headers['user-agent'],
+
       // Service-specific data stored as JSON
       service_details: {
         current_challenges: current_challenges || challenges,
@@ -110,25 +132,33 @@ async function handleCreateServiceRequest(req, res) {
         setup_timeline
       },
 
+      // Complete USMCA workflow data (for professional certificate services)
+      workflow_data: workflow_data || null,
+
       // Consultation scheduling info
       consultation_status: 'pending_schedule',
       consultation_duration: '15 minutes',
       next_steps: 'Schedule 15-minute consultation call'
     };
 
-    // Try to save to database
-    try {
-      const { data, error } = await supabase
-        .from('service_requests')
-        .insert([serviceRequest])
-        .select();
+    // Only store in database if client has explicitly consented
+    if (data_storage_consent) {
+      try {
+        const { error } = await supabase
+          .from('service_requests')
+          .insert([serviceRequest])
+          .select();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      console.log(`✅ Service request created for ${company_name} - assigned to Jorge`);
-    } catch (dbError) {
-      console.log('📋 Database unavailable, request logged locally');
-      // Continue with response even if database fails
+        console.log(`✅ Service request created for ${company_name} - assigned to Jorge (with client consent)`);
+      } catch {
+        console.log('📋 Database unavailable, request logged locally');
+        // Continue with response even if database fails
+      }
+    } else {
+      console.log(`📋 Service request for ${company_name} processed without database storage (no consent)`);
+      // Note: This should not happen due to validation above, but included for safety
     }
 
     // Send success response
@@ -173,7 +203,7 @@ async function handleGetServiceRequests(req, res) {
         query.eq('assigned_to', assigned_to);
       }
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data } = await query.order('created_at', { ascending: false });
 
       if (data && data.length > 0) {
         requests = data;
@@ -188,7 +218,7 @@ async function handleGetServiceRequests(req, res) {
       } else {
         throw new Error('No database records');
       }
-    } catch (dbError) {
+    } catch {
       console.log('📋 Database unavailable - no service requests to display');
       requests = []; // Empty array when no database connection
     }
@@ -267,7 +297,7 @@ async function handleUpdateServiceRequest(req, res) {
         message: 'Service request updated successfully',
         updated_record: data[0]
       });
-    } catch (dbError) {
+    } catch {
       console.log('📋 Database unavailable - update logged locally');
       res.status(200).json({
         success: true,

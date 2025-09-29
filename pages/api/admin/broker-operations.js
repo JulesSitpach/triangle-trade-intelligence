@@ -2,11 +2,9 @@
  * ADMIN API: Broker Operations Management
  * GET /api/admin/broker-operations - Returns active broker operations and shipments
  * Database-driven operations tracking for Cristina's daily work
- * Enhanced with AfterShip logistics tracking integration
  */
 
 import { createClient } from '@supabase/supabase-js';
-import AfterShipService from '../../../lib/services/aftership-service.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -20,9 +18,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Initialize AfterShip service for real-time tracking
-    const afterShipService = new AfterShipService();
-
     // Query active operations and shipments
     let { data: operations, error: operationsError } = await supabase
       .from('broker_operations')
@@ -41,35 +36,12 @@ export default async function handler(req, res) {
       `)
       .order('created_at', { ascending: false });
 
-    // Try to get live tracking data from AfterShip
-    let liveTrackingData = [];
-    try {
-      liveTrackingData = await afterShipService.getAllTrackings({ limit: 50 });
-      console.log(`Fetched ${liveTrackingData.length} live shipments from AfterShip`);
-    } catch (error) {
-      console.log('AfterShip API unavailable, using fallback data');
-    }
-
-    // If no broker_operations table or no data, use AfterShip + sample data
+    // If no broker_operations table or no data, use sample data
     if (operationsError || !operations || operations.length === 0) {
-      console.log('Using AfterShip tracking data + sample broker operations for demo');
+      console.log('Using sample broker operations for demo');
 
-      // Merge live AfterShip data with sample operations for comprehensive demo
-      const allOperations = [
-        ...liveTrackingData.map(tracking => ({
-          ...tracking,
-          shipmentValue: estimateShipmentValue(tracking.shipmentType),
-          documentation: getDocumentationStatus(tracking.status),
-          usmcaStatus: getUsmcaStatus(tracking.customsStatus),
-          expectedClearance: tracking.expectedDelivery || getEstimatedClearanceDate(tracking.status),
-          source: 'aftership_live'
-        })),
-        // Add database-driven operations from user workflow completions
-        ...(await getWorkflowBasedOperations(supabase))
-      ];
-
-      // Get live analytics from AfterShip if available
-      const liveAnalytics = await afterShipService.getShipmentAnalytics();
+      // Use sample operations and workflow-based operations
+      const allOperations = await getWorkflowBasedOperations(supabase);
 
       return res.status(200).json({
         operations: allOperations,
@@ -78,35 +50,23 @@ export default async function handler(req, res) {
           in_transit: allOperations.filter(op => op.status === 'In Transit').length,
           customs_pending: allOperations.filter(op => op.customsStatus === 'Pending' || op.customsStatus === 'Review Required').length,
           total_shipment_value: allOperations.reduce((sum, op) => sum + (op.shipmentValue || 0), 0),
-          avg_clearance_time: liveAnalytics.avg_transit_time || '2.8 days',
-          success_rate: liveAnalytics.success_rate || 98.5,
-          live_shipments: liveTrackingData.length
+          avg_clearance_time: '2.8 days',
+          success_rate: 98.5
         },
         data_status: {
-          source: liveTrackingData.length > 0 ? 'aftership_live_hybrid' : 'sample_data',
+          source: 'sample_data',
           table_exists: false,
-          record_count: allOperations.length,
-          aftership_status: liveTrackingData.length > 0 ? 'connected' : 'fallback'
+          record_count: allOperations.length
         }
       });
     }
 
-    // Enhance database operations with live tracking data
-    const formattedOperations = await Promise.all(operations.map(async operation => {
+    // Format database operations
+    const formattedOperations = operations.map(operation => {
       const route = `${operation.origin_country} → ${operation.destination_country}`;
       const expectedDate = operation.expected_clearance
         ? new Date(operation.expected_clearance).toISOString().split('T')[0]
         : getEstimatedClearanceDate(operation.status);
-
-      // Try to get live tracking for this operation
-      let liveTrackingInfo = null;
-      if (operation.tracking_number) {
-        try {
-          liveTrackingInfo = await afterShipService.getTracking(operation.tracking_number);
-        } catch (error) {
-          console.log(`No live tracking for ${operation.tracking_number}`);
-        }
-      }
 
       return {
         id: operation.id,
@@ -114,30 +74,25 @@ export default async function handler(req, res) {
         shipmentType: operation.shipment_type,
         route: route,
         shipmentValue: operation.shipment_value,
-        status: liveTrackingInfo?.status || operation.status,
-        customsStatus: liveTrackingInfo?.customs_status || operation.customs_status,
-        expectedClearance: liveTrackingInfo?.expected_delivery || expectedDate,
-        documentation: getDocumentationStatus(liveTrackingInfo?.status || operation.status),
-        usmcaStatus: getUsmcaStatus(liveTrackingInfo?.customs_status || operation.customs_status),
-        brokerNotes: liveTrackingInfo?.broker_notes || generateBrokerNotes(operation),
+        status: operation.status,
+        customsStatus: operation.customs_status,
+        expectedClearance: expectedDate,
+        documentation: getDocumentationStatus(operation.status),
+        usmcaStatus: getUsmcaStatus(operation.customs_status),
+        brokerNotes: generateBrokerNotes(operation),
         tracking_number: operation.tracking_number,
-        last_update: liveTrackingInfo?.checkpoints?.[0]?.time || operation.created_at,
-        carrier: liveTrackingInfo?.carrier,
-        source: liveTrackingInfo ? 'database_live' : 'database_only'
+        last_update: operation.created_at,
+        source: 'database'
       };
-    }));
+    });
 
-    // Calculate summary metrics with live data
+    // Calculate summary metrics
     const totalOperations = formattedOperations.length;
     const inTransit = formattedOperations.filter(op => op.status === 'In Transit').length;
     const customsPending = formattedOperations.filter(op =>
       op.customsStatus === 'Pending' || op.customsStatus === 'Review Required'
     ).length;
     const totalShipmentValue = formattedOperations.reduce((sum, op) => sum + (op.shipmentValue || 0), 0);
-    const liveTracked = formattedOperations.filter(op => op.source === 'database_live').length;
-
-    // Get live analytics
-    const liveAnalytics = await afterShipService.getShipmentAnalytics();
 
     return res.status(200).json({
       operations: formattedOperations,
@@ -146,15 +101,13 @@ export default async function handler(req, res) {
         in_transit: inTransit,
         customs_pending: customsPending,
         total_shipment_value: totalShipmentValue,
-        avg_clearance_time: liveAnalytics.avg_transit_time || '2.8 days',
-        success_rate: liveAnalytics.success_rate || 98.5,
-        live_tracked: liveTracked
+        avg_clearance_time: '2.8 days',
+        success_rate: 98.5
       },
       data_status: {
-        source: liveTracked > 0 ? 'database_enhanced_live' : 'database',
+        source: 'database',
         table_exists: true,
-        record_count: totalOperations,
-        aftership_status: liveTracked > 0 ? 'enhanced' : 'unavailable'
+        record_count: totalOperations
       }
     });
 

@@ -29,7 +29,30 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    logInfo('Crisis calculator API called', { action, data: Object.keys(data) });
+    logInfo('Crisis calculator API called', {
+      action,
+      data: typeof data === 'object' ? Object.keys(data) : data,
+      raw_body: req.body,
+      body_type: typeof req.body,
+      data_type: typeof data
+    });
+
+    // Validate that action is provided
+    if (!action) {
+      return res.status(400).json({
+        success: false,
+        error: 'Action parameter is required',
+        received_body: req.body,
+        available_actions: [
+          'calculate_crisis_penalty',
+          'get_usmca_rate',
+          'calculate_roi_analysis',
+          'batch_calculate',
+          'quick_estimate',
+          'health_check'
+        ]
+      });
+    }
 
     switch (action) {
       case 'calculate_crisis_penalty':

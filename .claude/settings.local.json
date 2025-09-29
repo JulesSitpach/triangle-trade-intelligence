@@ -4,7 +4,16 @@
       "Bash(git add:*)",
       "Bash(npm run dev:*)",
       "Bash(git commit:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(touch components/jorge/ServiceQueueTab.js)",
+      "mcp__supabase__apply_migration",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "mcp__supabase__execute_sql"
     ],
     "deny": [],
     "ask": []

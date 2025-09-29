@@ -49,6 +49,16 @@
   --amber-500: #f59e0b;
   --amber-600: #d97706;
   --amber-700: #b45309;
+
+  /* Red Scale - Errors */
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
   
   /* Gray Scale - Professional Neutrals */
   --gray-50: #f4f5f6;
@@ -734,5 +744,790 @@ a:hover {
   }
 }
 
+/* ================== 13. TOAST NOTIFICATIONS ================== */
+
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast-notification {
+  pointer-events: auto;
+  background: white;
+  border-radius: var(--radius-base);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--gray-200);
+  animation: toast-slide-in 0.3s ease-out;
+  max-width: 100%;
+  min-width: 300px;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.toast-close:hover {
+  color: var(--gray-600);
+  background: var(--gray-100);
+}
+
+/* Toast Types */
+.toast-success {
+  border-left: 4px solid var(--green-500);
+}
+
+.toast-success .toast-icon {
+  color: var(--green-500);
+}
+
+.toast-error {
+  border-left: 4px solid var(--red-500);
+}
+
+.toast-error .toast-icon {
+  color: var(--red-500);
+}
+
+.toast-warning {
+  border-left: 4px solid var(--amber-500);
+}
+
+.toast-warning .toast-icon {
+  color: var(--amber-500);
+}
+
+.toast-info {
+  border-left: 4px solid var(--blue-500);
+}
+
+.toast-info .toast-icon {
+  color: var(--blue-500);
+}
+
+/* Toast Animation */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Loading States */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: 50%;
+  border-top: 2px solid var(--blue-500);
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner-large {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Button Loading States */
+.btn-primary.loading,
+.btn-secondary.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn-primary.loading::after,
+.btn-secondary.loading::after {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top: 2px solid transparent;
+  animation: spin 1s linear infinite;
+}
+
+/* ================== 14. MOBILE RESPONSIVE TOAST ================== */
+
+@media (max-width: 768px) {
+  .toast-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+
+  .toast-notification {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ================== 15. TABLE CONTROLS - SEARCH, FILTER, SORT ================== */
+
+.table-controls {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+}
+
+.search-section {
+  margin-bottom: var(--space-4);
+}
+
+.search-input-group {
+  position: relative;
+  max-width: 400px;
+}
+
+.search-input {
+  padding-right: var(--space-10);
+}
+
+.search-icon {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  pointer-events: none;
+}
+
+.filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  margin-bottom: var(--space-3);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 120px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+
+.filter-select {
+  min-width: 140px;
+}
+
+.sort-direction-btn {
+  min-width: 40px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.clear-filters-btn {
+  height: 38px;
+  padding: 0 var(--space-4);
+}
+
+.results-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--gray-200);
+}
+
+.results-count {
+  font-size: 13px;
+  color: var(--gray-600);
+}
+
+/* Sortable Table Headers */
+.admin-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.admin-table th.sortable:hover {
+  background-color: var(--gray-100);
+}
+
+.admin-table th.sortable.sorted {
+  background-color: var(--blue-50);
+  color: var(--blue-700);
+}
+
+/* No Results Message */
+.no-results {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--gray-600);
+}
+
+.no-results p {
+  margin-bottom: var(--space-4);
+}
+
+/* Responsive Design for Table Controls */
+@media (max-width: 768px) {
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    min-width: auto;
+  }
+
+  .search-input-group {
+    max-width: none;
+  }
+
+  /* Mobile table improvements */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -var(--space-4);
+    padding: 0 var(--space-4);
+  }
+
+  .admin-table {
+    min-width: 600px;
+    font-size: 14px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .client-info {
+    min-width: 120px;
+  }
+
+  .service-tab {
+    padding: var(--space-3);
+  }
+
+  .service-value-proposition {
+    flex-direction: column;
+  }
+
+  .value-point {
+    font-size: 13px;
+    padding: var(--space-2);
+  }
+}
+
+/* ================== 16. PAGINATION CONTROLS ================== */
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.pagination-info span {
+  font-size: 13px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pagination-btn {
+  padding: var(--space-1) var(--space-3);
+  font-size: 13px;
+  border: 1px solid var(--gray-300);
+  background: white;
+  min-width: auto;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--blue-50);
+  border-color: var(--blue-300);
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0 var(--space-2);
+}
+
+.pagination-number {
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+  border: 1px solid var(--gray-300);
+  background: white;
+  min-width: 32px;
+  text-align: center;
+}
+
+.pagination-number.active {
+  background: var(--blue-500);
+  color: white;
+  border-color: var(--blue-500);
+}
+
+.pagination-number:hover:not(.active) {
+  background: var(--blue-50);
+  border-color: var(--blue-300);
+}
+
+.pagination-page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pagination-page-size label {
+  font-size: 13px;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.page-size-select {
+  min-width: 120px;
+  font-size: 13px;
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Responsive Pagination */
+@media (max-width: 768px) {
+  .pagination-controls {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: stretch;
+  }
+
+  .pagination-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pagination-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: 12px;
+  }
+
+  .pagination-number {
+    padding: var(--space-2);
+    font-size: 12px;
+    min-width: 28px;
+  }
+
+  .pagination-page-size {
+    justify-content: center;
+  }
+}
+
+/* Extra Mobile Optimizations */
+@media (max-width: 640px) {
+  .service-header h3 {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .service-credentials {
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
+  }
+
+  .broker-license,
+  .experience {
+    font-size: 12px;
+  }
+
+  .table-controls {
+    padding: var(--space-3);
+    margin: var(--space-3) 0;
+  }
+
+  .results-summary {
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Workflow Modal Mobile */
+  .workflow-modal-content {
+    width: 95vw;
+    max-width: none;
+    margin: var(--space-2);
+    max-height: calc(100vh - var(--space-4));
+    overflow-y: auto;
+  }
+
+  .workflow-modal-header h2 {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .workflow-progress-steps {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .workflow-step {
+    font-size: 12px;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .workflow-client-context {
+    padding: var(--space-3);
+  }
+
+  .workflow-client-context-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .workflow-client-context-label {
+    font-weight: 600;
+    color: var(--blue-600);
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-buttons {
+    gap: 2px;
+  }
+
+  .pagination-numbers {
+    margin: 0 var(--space-1);
+  }
+
+  .pagination-btn {
+    padding: var(--space-1) var(--space-2);
+    font-size: 11px;
+  }
+
+  .pagination-number {
+    padding: var(--space-1);
+    font-size: 11px;
+    min-width: 24px;
+  }
+
+  /* Touch-friendly button improvements */
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    font-size: 14px;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .admin-table th.sortable {
+    min-height: 44px;
+    line-height: 1.2;
+  }
+
+  .form-input,
+  .filter-select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .search-input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  /* Modal improvements for small screens */
+  .workflow-modal-overlay {
+    padding: var(--space-2);
+  }
+
+  .workflow-modal-close {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 20px;
+  }
+
+  .workflow-modal-actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .workflow-action-group {
+    width: 100%;
+  }
+
+  .workflow-action-group button {
+    width: 100%;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .service-header {
+    padding: var(--space-2);
+  }
+
+  .value-point {
+    font-size: 12px;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .table-controls {
+    padding: var(--space-2);
+  }
+
+  .pagination-controls {
+    padding: var(--space-2);
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: var(--space-2) var(--space-3);
+    font-size: 13px;
+  }
+}
+
+/* Landscape orientation mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .workflow-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .service-header {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .table-controls {
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
+/* ================== 17. ERROR BOUNDARY - PRODUCTION SAFETY ================== */
+
+.error-boundary {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  margin: var(--space-4);
+}
+
+.error-boundary-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+
+.error-title {
+  color: var(--red-600);
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.error-message {
+  color: var(--gray-700);
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: var(--space-6);
+}
+
+.error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.error-retry-btn {
+  background: var(--red-500);
+  border-color: var(--red-500);
+}
+
+.error-retry-btn:hover {
+  background: var(--red-600);
+  border-color: var(--red-600);
+}
+
+.error-reload-btn,
+.error-back-btn {
+  min-width: 120px;
+}
+
+.error-details {
+  margin: var(--space-6) 0;
+  text-align: left;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--space-3);
+}
+
+.error-stack {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.error-stack h4 {
+  color: var(--gray-800);
+  margin: var(--space-3) 0 var(--space-2) 0;
+}
+
+.error-stack pre {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-help {
+  border-top: 1px solid var(--gray-200);
+  padding-top: var(--space-4);
+  color: var(--gray-600);
+  font-size: 14px;
+}
+
+.error-contact-link {
+  color: var(--blue-600);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.error-contact-link:hover {
+  color: var(--blue-700);
+  text-decoration: underline;
+}
+
+/* Mobile error boundary */
+@media (max-width: 640px) {
+  .error-boundary {
+    padding: var(--space-4);
+    margin: var(--space-2);
+  }
+
+  .error-icon {
+    font-size: 36px;
+  }
+
+  .error-title {
+    font-size: 20px;
+  }
+
+  .error-actions {
+    gap: var(--space-2);
+  }
+
+  .error-actions button {
+    width: 100%;
+  }
+}
+
 /* ================== END OF MINIMAL GLOBALS CSS ================== */
-/* Total: ~400 lines - Focused on pre-signin pages only */
+/* Total: ~900 lines - Focused on pre-signin pages + toast system + table controls + pagination + mobile optimizations + error handling */

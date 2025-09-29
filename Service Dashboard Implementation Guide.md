@@ -1,11 +1,4 @@
-# 6 Service Dashboards - Build Specification
-**For Subscription Users Only - Using Existing Workflow Data**
-
-**All 6 Services Follow: AI Agent + Human Expert Pattern**
-- AI handles web scraping, data analysis, and draft generation
-- Human expert adds professional judgment, validation, and recommendations
-- Subscriber workflow data pre-populates analysis
-- Minimal new data collection (3-5 questions per service)
+: product_description
 
 ---
 
@@ -115,11 +108,11 @@
 **Stage 1: Manufacturing Context (5 questions)**
 ```javascript
 const contextQuestions = [
-  "Why considering Mexico move?",
-  "Current manufacturing challenges?", 
-  "Timeline expectations?",
-  "Quality certifications required?",
-  "Budget range for setup?"
+  "What's driving the Mexico manufacturing consideration? (USMCA compliance, cost reduction, supply chain risk management)",
+  "What's your manufacturing setup budget range and timeline for decision?", 
+  "What are your current manufacturing challenges and costs per unit?",
+  "What certifications or labor skills does your product require?",
+  "How urgent is this move considering potential trade policy changes?"
 ];
 ```
 
@@ -211,15 +204,85 @@ const crisisForm = [
 **Workflow Modal: 3 Stages**
 
 **Stage 1: Sourcing Requirements (5 questions)**
+
+**UX Implementation:**
+- **Progressive disclosure**: 2 questions per screen maximum
+- **Screen 1**: Questions 1-2 (driving factors + quality certs)
+- **Screen 2**: Questions 3-4 (volume/MOQ + payment terms)  
+- **Screen 3**: Question 5 (timeline urgency)
+- **Progress indicator**: "Question 1-2 of 5" at top
+
+**Input Type Specifications:**
 ```javascript
 const sourcingQuestions = [
-  "Why looking for new suppliers?",
-  "Quality requirements/certifications?", 
-  "Volume requirements (monthly)?",
-  "Budget constraints?",
-  "Timeline for supplier transition?"
+  {
+    id: "driving_factors",
+    question: "What's driving this supplier search?",
+    type: "checkbox", // Multiple selection allowed
+    options: [
+      "USMCA compliance gaps",
+      "Current supplier quality problems", 
+      "Current supplier delivery issues",
+      "Cost reduction needs",
+      "Supply chain risk management",
+      "Other (specify)"
+    ],
+    required: true,
+    helpText: "Select all that apply. This helps Jorge prioritize suppliers."
+  },
+  {
+    id: "quality_certs", 
+    question: "What quality certifications do you actually need?",
+    type: "select",
+    options: ["ISO 9001", "ISO 14001", "IATF 16949", "FDA registered", "None required", "Other (specify)"],
+    required: true,
+    helpText: "Only certifications you actually require, not nice-to-haves."
+  },
+  {
+    id: "volume_commitment",
+    question: "What's your realistic monthly volume and minimum order quantities?",
+    type: "structured_input",
+    fields: [
+      { label: "Monthly volume", type: "number", unit: "units" },
+      { label: "Minimum order quantity you can commit to", type: "number", unit: "units" }
+    ],
+    required: true,
+    validation: "Must be realistic numbers you can actually commit to"
+  },
+  {
+    id: "payment_terms",
+    question: "What payment terms can you handle and what's your per-unit cost target?",
+    type: "structured_input", 
+    fields: [
+      { 
+        label: "Payment terms", 
+        type: "select", 
+        options: ["Cash on delivery", "NET 15", "NET 30", "NET 60", "50% deposit + NET 30", "Other"]
+      },
+      { label: "Target cost per unit", type: "currency", currency: "USD" }
+    ],
+    required: true
+  },
+  {
+    id: "timeline_urgency",
+    question: "What's your timeline urgency?", 
+    type: "radio",
+    options: [
+      { value: "immediate", label: "Immediate (1-2 weeks) - Crisis mode", urgency: "high" },
+      { value: "short", label: "3 months - Normal planning", urgency: "medium" },
+      { value: "long", label: "6+ months - Strategic planning", urgency: "low" }
+    ],
+    required: true,
+    helpText: "Consider potential tariff changes when setting timeline"
+  }
 ];
 ```
+
+**Form Behavior:**
+- Auto-save answers as user progresses
+- "Previous" and "Next" buttons (no "Submit" until final screen)
+- Validation before advancing to next screen
+- Maximum 2 minutes completion time target
 
 **Stage 2: AI Supplier Discovery**
 - Use subscriber product data + sourcing requirements
@@ -260,13 +323,13 @@ const sourcingQuestions = [
 
 **Workflow Modal: 3 Stages**
 
-**Stage 1: Market Goals**
+**Stage 1: Market Goals (4 questions)**
 ```javascript
 const marketQuestions = [
-  "Target market (Mexico/Canada/both)?",
-  "Timeline for market entry?",
-  "Sales approach (direct/distributor/partner)?",
-  "Budget for market entry?"
+  "What's your target market? (Mexico/Canada/both) and why now?",
+  "What's your timeline for market entry and budget range?",
+  "What's your preferred sales approach? (direct sales/distributor/local partner)",
+  "What's your current international sales experience and USMCA compliance readiness?"
 ];
 ```
 

@@ -15,13 +15,13 @@
 ### Tech Stack
 - **Frontend**: Next.js 14 (Pages Router), React 18
 - **Database**: Supabase PostgreSQL (34,476+ HS codes)
-- **AI Integration**: Enhanced Classification Agent with web search, Claude API for content generation
+- **AI Integration**: OpenRouter API with Claude models for all AI functionality
 - **Styling**: Existing CSS classes only (NO Tailwind, NO inline styles)
 
 ### Core Principles
-- **Enhanced Classification Agent**: Web search verification + database validation
-- **AI + Human Hybrid**: AI research/drafts → Human validation/relationships
-- **Mexico Trade Bridge**: Bilingual team advantage, cultural understanding
+- **USMCA Optimization Focus**: Help North American companies maximize USMCA benefits and prepare for potential agreement changes
+- **AI + Human Hybrid**: AI strategic analysis → Human execution and relationship building
+- **Mexico Trade Bridge**: Bilingual team advantage, cultural understanding, B2B sales expertise
 - **Database-Driven**: NO hardcoded data, configuration-driven
 
 ---
@@ -33,7 +33,7 @@
 1. Homepage → USMCA Workflow (2 steps)
 2. Company Info + Product Analysis → Results
 3. Two paths: Certificate Generation OR Trade Alerts
-4. Professional Services: /services/logistics-support
+4. Professional Services: /services/mexico-trade-services
 ```
 
 ### Key User Pages
@@ -42,7 +42,12 @@
 - **`/usmca-results`** - Analysis results with dual paths
 - **`/usmca-certificate-completion`** - Optional certificate generation
 - **`/trade-risk-alternatives`** - Crisis monitoring and alerts
-- **`/services/logistics-support`** - Professional services selection
+- **`/services/mexico-trade-services`** - Professional services selection
+
+### Service Selection Pricing (Current Reality)
+- **Supplier Sourcing**: $450
+- **Manufacturing Feasibility**: $650  
+- **Market Entry**: $550
 
 ### User Workflow Components
 ```
@@ -68,24 +73,29 @@ components/workflow/
 - **Cristina**: `/admin/broker-dashboard` - Compliance Services (3 services)
 - **Jorge**: `/admin/jorge-dashboard` - Mexico/Latin America Services (3 services)
 
+### Team Expertise
+**Jorge Ochoa**: B2B sales expert with 4+ years at CCVIAL, proven track record exceeding sales targets, consultative selling approach, bilingual (Spanish/English), experience in industrial/manufacturing sectors.
+
+**Cristina Escalante**: Licensed customs broker (License #4601913) with 17 years logistics experience, specializing in electronics/telecom industries, international logistics director experience, HTS code expertise.
+
 ### Service Implementation Patterns
 
-#### Pattern 1: 2-Stage Quick Validation (Cristina - Same Day)
+#### Pattern 1: 2-Stage Professional Validation (Cristina - Same Day)
 ```javascript
 // For: USMCA Certificates, HS Classification
 const workflowStages = {
-  1: 'Data Review',           // Review subscriber workflow data
-  2: 'AI + Expert Validation' // Generate/validate + deliver
+  1: 'Expert Review',          // Professional review of subscriber data
+  2: 'Professional Validation' // Licensed customs broker validation + delivery
 };
 ```
 
-#### Pattern 2: 3-Stage Research Services (Multi-Day)
+#### Pattern 2: 3-Stage Strategic Services (Multi-Day)
 ```javascript
 // For: Crisis Response, Manufacturing Feasibility, Market Entry, Supplier Sourcing
 const workflowStages = {
-  1: 'Requirements Collection', // Minimal 3-5 question intake
-  2: 'AI Analysis',            // Automated research + drafts
-  3: 'Expert Validation'       // Human review + final deliverable
+  1: 'Strategic Preferences', // Leverage business intelligence for strategic questions
+  2: 'AI Analysis',          // OpenRouter API analysis with complete business context
+  3: 'Expert Execution'      // Human relationship building and implementation
 };
 ```
 
@@ -93,149 +103,192 @@ const workflowStages = {
 
 #### Cristina's Services (3)
 **🔄 USMCA Certificates ($250) - 2-Stage Workflow**
-- **Stage 1**: Data Review - Display existing subscriber data, no new forms
-- **Stage 2**: Certificate Generation - Enhanced Classification Agent + PDF generation
-- **Component**: `components/cristina/USMCACertificateTab.js`
-- **API**: `/api/generate-usmca-certificate.js`
+- **Stage 1**: Expert Review - Cristina reviews subscriber data for accuracy and compliance
+- **Stage 2**: Professional Validation - Licensed customs broker validation + PDF generation
+- **Component**: `components/cristina/USMCACertificateTab.js` (NEEDS BUILD)
+- **API**: `/api/generate-usmca-certificate.js` (NEEDS BUILD)
 
 **🔄 HS Classification ($200) - 2-Stage Workflow**
-- **Stage 1**: Product Review - Display subscriber product + component data
-- **Stage 2**: Expert Validation - Enhanced Classification Agent web search + validation
-- **Component**: `components/cristina/HSClassificationTab.js`
-- **API**: `/api/validate-hs-classification.js`
+- **Stage 1**: Professional Review - Cristina reviews AI-suggested classifications
+- **Stage 2**: Expert Validation - Professional customs broker validation with regulatory notes
+- **Component**: `components/cristina/HSClassificationTab.js` (NEEDS BUILD)
+- **API**: `/api/validate-hs-classification.js` (NEEDS BUILD)
 
 **🔄 Crisis Response ($500) - 3-Stage Workflow**
-- **Stage 1**: Crisis Description - 4 question intake form
-- **Stage 2**: Analysis - AI impact analysis using subscriber trade profile
-- **Stage 3**: Action Plan - Cristina creates specific action plan + prevention
-- **Component**: `components/cristina/CrisisResponseTab.js`
-- **API**: `/api/crisis-response-analysis.js`
+- **Stage 1**: Crisis Assessment - Professional evaluation using logistics management experience
+- **Stage 2**: Impact Analysis - AI analysis + Cristina's supply chain expertise
+- **Stage 3**: Professional Action Plan - Expert crisis management plan with timeline
+- **Component**: `components/cristina/CrisisResponseTab.js` (NEEDS BUILD)
+- **API**: `/api/crisis-response-analysis.js` (NEEDS BUILD)
 
 #### Jorge's Services (3)
-**✅ Supplier Sourcing ($500) - 3-Stage Workflow** (IMPLEMENTED)
-- **Stage 1**: Sourcing Requirements - 5 question intake
-- **Stage 2**: AI Supplier Discovery - Automated supplier research
-- **Stage 3**: Network Validation - Jorge validates + adds Mexico contacts
-- **Component**: `components/jorge/SupplierSourcingTab.js` ✅
-- **API**: `/api/supplier-sourcing-discovery.js` ✅
+**🔄 Supplier Sourcing ($450) - 3-Stage Workflow**
+- **Stage 1**: USMCA Strategy Preferences - Strategic questions leveraging business intelligence
+- **Stage 2**: AI Supplier Discovery - OpenRouter API finds Mexico suppliers
+- **Stage 3**: B2B Execution - Jorge contacts suppliers in Spanish, verifies capabilities, builds relationships
+- **Component**: `components/jorge/SupplierSourcingTab.js` (NEEDS BUILD)
+- **API**: `/api/supplier-sourcing-discovery.js` (NEEDS BUILD)
 
 **🔄 Manufacturing Feasibility ($650) - 3-Stage Workflow**
-- **Stage 1**: Manufacturing Context - 5 question intake
+- **Stage 1**: Strategic Context - Manufacturing strategy preferences
 - **Stage 2**: AI Analysis - Location analysis + cost estimates
-- **Stage 3**: Jorge's Recommendation - Go/No-Go + location + next steps
-- **Component**: `components/jorge/ManufacturingFeasibilityTab.js`
-- **API**: `/api/manufacturing-feasibility-analysis.js`
+- **Stage 3**: Professional Validation - Jorge validates recommendations using B2B experience
+- **Component**: `components/jorge/ManufacturingFeasibilityTab.js` (NEEDS BUILD)
+- **API**: `/api/manufacturing-feasibility-analysis.js` (NEEDS BUILD)
 
-**🔄 Market Entry ($450) - 3-Stage Workflow**
-- **Stage 1**: Market Goals - 4 question intake
+**🔄 Market Entry ($550) - 3-Stage Workflow**
+- **Stage 1**: Mexico Market Strategy - Market entry approach for Mexico focus
 - **Stage 2**: Market Analysis - AI market research + opportunities
-- **Stage 3**: Jorge's Strategy - Partnership recommendations + contacts
-- **Component**: `components/jorge/MarketEntryTab.js`
-- **API**: `/api/market-entry-analysis.js`
+- **Stage 3**: Relationship Building - Jorge builds Mexico market relationships using sales expertise
+- **Component**: `components/jorge/MarketEntryTab.js` (NEEDS BUILD)
+- **API**: `/api/market-entry-analysis.js` (NEEDS BUILD)
 
 ### Service Status Summary
-**✅ Implemented:**
-- Supplier Sourcing (Jorge) - Complete 3-stage workflow
-- Enhanced Classification Agent - Web search + database validation
+**🔄 ALL COMPONENTS NEED TO BE BUILT:**
+All 6 dashboard components and supporting API endpoints need implementation from scratch.
 
 **🔄 Priority Build Order:**
-1. **USMCA Certificates** (Cristina) - Highest volume, uses Enhanced Classification Agent
-2. **HS Classification** (Cristina) - Uses existing web search agent
-3. **Crisis Response** (Cristina) - New workflow
-4. **Manufacturing Feasibility** (Jorge) - Copy supplier sourcing pattern
-5. **Market Entry** (Jorge) - Copy supplier sourcing pattern
+1. **ServiceWorkflowModal.js** (Shared component for all services)
+2. **USMCACertificateTab.js** (Cristina) - Highest volume, simplest 2-stage
+3. **SupplierSourcingTab.js** (Jorge) - Most important revenue service
+4. **HSClassificationTab.js** (Cristina) - Second Cristina service
+5. **ManufacturingFeasibilityTab.js** (Jorge) - Second Jorge service
+6. **CrisisResponseTab.js** (Cristina) - Third Cristina service
+7. **MarketEntryTab.js** (Jorge) - Third Jorge service
 
-### Shared Components
+### Required Shared Components
 ```
 components/shared/
-└── ServiceWorkflowModal.js    # Reusable modal for all 6 services
+└── ServiceWorkflowModal.js    # Reusable modal for all 6 services (NEEDS BUILD)
 ```
 
 ### Data Flow Architecture
-**All services use existing subscriber workflow data:**
+**All services leverage existing subscriber workflow data:**
+- Complete business intelligence profile from USMCA workflow
 - No duplicate data entry
-- Pre-populated analysis from user's comprehensive profile
-- Minimal new data collection (3-5 questions max per service)
-- Professional delivery with subscriber context
+- Minimal new strategic questions (3-5 per service)
+- Professional delivery with full business context
 
-### Expert Capacity Management
-**Cristina's Services (Same Day):**
-- USMCA Certificates: 40/month at $250 = $10,000 potential
-- HS Classification: 60/month at $200 = $12,000 potential
-- Crisis Response: 15/month at $500 = $7,500 potential
+### Expert Value Proposition
+**Jorge's Real Value:**
+- B2B sales execution using proven consultative methodology
+- Spanish-language supplier relationship building
+- Professional verification of AI recommendations
+- Implementation support and ongoing relationship management
 
-**Jorge's Services (2-5 Days):**
-- Supplier Sourcing: 8/month at $500 = $4,000 potential
-- Manufacturing Feasibility: 4/month at $650 = $2,600 potential
-- Market Entry: 6/month at $450 = $2,700 potential
-
-**Total Monthly Potential**: $38,800
+**Cristina's Real Value:**
+- Licensed customs broker validation (Legal weight)
+- 17 years electronics/telecom logistics experience
+- Professional regulatory compliance expertise
+- HTS code classification with professional backing
 
 ---
 
 ## 🤖 AI Integration Strategy
 
-### Enhanced Classification Agent (Competitive Advantage)
-**6-Step Workflow with Web Search Verification:**
-1. **Database First** → Query 34K+ HS codes (hs_master_rebuild table)
-2. **Web Verification** → Real-time tariff rate validation via web search
-3. **Compare & Flag** → Database vs web discrepancy analysis
-4. **Update Database** → tariff_rates_staging table for review
-5. **Context-Aware Response** → User-friendly vs Admin-technical responses
-6. **Proactive Maintenance** → Automated data freshness monitoring
+### OpenRouter API Integration (Current Reality)
+**All AI functionality uses OpenRouter API with Claude models:**
 
-### Technology Choices by Service
+```javascript
+// Standard API pattern for all services
+const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    model: "anthropic/claude-3-haiku",
+    messages: [{
+      role: "user", 
+      content: `BUSINESS CONTEXT:
+Company: ${subscriberData.company_name}
+Product: ${subscriberData.product_description}
+Current USMCA Qualification: ${subscriberData.qualification_status}
+Annual Trade Volume: $${subscriberData.trade_volume}
 
-**Enhanced Classification Agent (Primary):**
-- USMCA certificate generation
-- HS Code classification with web verification
-- Real-time tariff rate validation
-- Database learning and improvement
-
-**AI Content Generation ($0.05-0.15):**
-- Crisis analysis reports
-- Supplier discovery research
-- Manufacturing feasibility reports
-- Market entry strategies
-
-### AI API Endpoints
+TASK: ${serviceSpecificPrompt}`
+    }]
+  })
+});
 ```
-/api/generate-usmca-certificate.js     # USMCA certificate generation
-/api/validate-hs-classification.js     # HS classification validation
-/api/crisis-response-analysis.js       # Crisis analysis
-/api/supplier-sourcing-discovery.js    # ✅ Supplier research (implemented)
-/api/manufacturing-feasibility-analysis.js # Location analysis
-/api/market-entry-analysis.js          # Market intelligence
-```
+
+### AI Service Applications
+**USMCA Certificate Generation**: OpenRouter API for classification verification
+**HS Code Validation**: OpenRouter API for regulatory compliance analysis
+**Crisis Response**: OpenRouter API for impact analysis and resolution strategies
+**Supplier Sourcing**: OpenRouter API for Mexico supplier research and analysis
+**Manufacturing Feasibility**: OpenRouter API for location analysis and cost estimates
+**Market Entry**: OpenRouter API for Mexico market research and opportunity analysis
 
 ### AI + Human Value Proposition
-- **67% time reduction**: AI handles research, humans provide validation
-- **Professional liability**: Licensed expert backing for all deliverables
-- **Cultural bridge**: Mexico-based bilingual team advantage
-- **Learning through service**: Jorge builds expertise with each project
+- **Strategic AI Analysis**: Comprehensive research and recommendations using complete business context
+- **Professional Human Execution**: Licensed expertise and relationship building AI cannot provide
+- **Cultural Bridge**: Mexico-based bilingual team advantage for North American companies
+- **Implementation Focus**: AI provides strategy, humans ensure execution and results
 
 ---
 
 ## 🗄️ Database Schema
 
 ### Primary Tables
+```sql
+-- Service requests table (CONFIRMED EXISTS)
+CREATE TABLE service_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  client_company TEXT NOT NULL,
+  service_type TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  price DECIMAL(10,2),
+  subscriber_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Service completions table (NEEDS CREATION)
+CREATE TABLE service_completions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  service_request_id UUID REFERENCES service_requests(id),
+  completion_data JSONB,
+  report_url TEXT,
+  completed_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
-hs_master_rebuild          # 34,476 HS codes (PRIMARY tariff source)
-tariff_rates              # 14,486 records (fallback - many 0% rates)
-usmca_tariff_rates        # 48 records (limited but high-quality)
-service_requests          # Professional service bookings
-workflow_completions      # Completed user workflows
-partner_suppliers         # AI-discovered suppliers for Jorge
-user_profiles            # User accounts (empty = sample data mode)
+
+### Subscriber Data Structure (From USMCA Workflow)
+```javascript
+// Expected structure in subscriber_data JSONB field
+const subscriberDataStructure = {
+  company_name: "string",
+  business_type: "string",
+  trade_volume: "string",
+  manufacturing_location: "string",
+  product_description: "string",
+  component_origins: [{ 
+    country: "string", 
+    percentage: "number",
+    component_type: "string" 
+  }],
+  qualification_status: "QUALIFIED" | "NOT_QUALIFIED" | "PARTIAL",
+  annual_tariff_cost: "number",
+  potential_usmca_savings: "number",
+  compliance_gaps: "array",
+  vulnerability_factors: "array"
+};
 ```
 
 ### Database Connection Pattern
 ```javascript
-// All admin APIs intelligently fall back to sample data
-const { data, error } = await supabase.from('table').select('*');
+// All admin APIs fall back to sample data if no real data
+const { data, error } = await supabase
+  .from('service_requests')
+  .select('*')
+  .eq('service_type', serviceType)
+  .eq('status', 'pending');
+
 if (error || !data || data.length === 0) {
   console.log('Using sample data for demo');
-  return sampleData;
+  return generateSampleServiceRequests();
 }
 ```
 
@@ -246,12 +299,12 @@ if (error || !data || data.length === 0) {
 ### CSS Compliance (STRICTLY ENFORCED)
 - **❌ FORBIDDEN**: Inline styles (`style={{}}` or `style=""`)
 - **❌ FORBIDDEN**: Tailwind CSS classes
-- **❌ FORBIDDEN**: New CSS files without approval
-- **❌ FORBIDDEN**: Modifying `styles/globals.css`
+- **❌ FORBIDDEN**: Creating new CSS files without approval
+- **✅ REQUIRED**: Use existing classes from `styles/globals.css` and `styles/admin-workflows.css`
 
 ### Available CSS Classes
 ```css
-/* Use these existing classes */
+/* Use these existing classes from styles/globals.css and styles/admin-workflows.css */
 .card, .card-title, .card-description
 .btn-primary, .btn-secondary
 .text-body, .nav-link
@@ -259,6 +312,8 @@ if (error || !data || data.length === 0) {
 .form-group, .form-input
 .service-request-card
 .hero-content, .section-header
+.modal-overlay, .modal-content
+.stage-progress, .workflow-actions
 ```
 
 ### CSS Validation
@@ -269,14 +324,20 @@ npm run protection:full    # Full protection check
 
 ---
 
-## 📊 Business Intelligence
+## 📊 Business Intelligence Focus
+
+### USMCA Optimization Strategy
+**Current USMCA Benefits**: Maximize existing trade agreement advantages
+**Renegotiation Preparation**: Build Mexico relationships for post-USMCA scenarios
+**Geographic Advantage**: Mexico proximity benefits regardless of trade agreements
+**Supply Chain Resilience**: Reduce dependency on distant suppliers
 
 ### Mexico Team Advantage
-- **Bilingual communication** (English/Spanish)
-- **Cultural bridge** for North American companies
-- **Local Mexico expertise** and ground access
-- **Time zone alignment** with North American clients
-- **Cost advantage** while maintaining professional quality
+- **Jorge**: Proven B2B sales methodology, Spanish fluency, industrial sector experience
+- **Cristina**: Licensed customs broker, 17 years logistics experience, electronics expertise
+- **Cultural Bridge**: Direct access to Mexico business networks and practices
+- **Time Zone Alignment**: Same business hours as North American clients
+- **Cost Advantage**: Professional quality at competitive Mexico rates
 
 ---
 
@@ -284,119 +345,128 @@ npm run protection:full    # Full protection check
 
 ### Essential Commands
 ```bash
-# Development (AGENTS USE 3001+)
-npm run dev:3001              # Safe development server
-npm run build                 # Production build
-npm run clean:safe           # Safe cleanup (no process killing)
+# Development
+npm run dev                 # Development server (use port 3000)
+npm run build              # Production build
+npm run start              # Production server
 
 # Testing & Validation
-npm test                     # Run all tests
-npm run lint                 # ESLint validation
-npm run css:check           # CSS compliance check
-npm run protection:full     # Complete validation
-
-# Database
-npm run ingest:all          # Populate HS codes database
-```
-
-### Git Workflow
-```bash
-# Current branches
-main                        # Main branch (use for PRs)
-agent-orchestration-phase1  # Current development branch
+npm test                   # Run all tests
+npm run lint              # ESLint validation
+npm run css:check         # CSS compliance check
 ```
 
 ### Implementation Priority
-1. **Phase 1**: Complete Cristina's services (high ROI)
-2. **Phase 2**: Complete Jorge's services (market expansion)
-3. **Phase 3**: Optimization and analytics
+1. **Phase 1**: Build all 6 dashboard components and shared modal
+2. **Phase 2**: Implement all 6 supporting API endpoints
+3. **Phase 3**: Integration testing and optimization
 
 ---
 
 ## 🔧 Configuration Files
 
 ### Critical Configuration
-- **`config/system-config.js`** - Central system configuration
-- **`config/table-constants.js`** - Database table names
-- **`config/usmca-thresholds.js`** - Industry USMCA thresholds
-- **`.env.local`** - Environment variables (Supabase, Anthropic)
+- **`.env.local`** - Environment variables (Supabase, OpenRouter)
+- **`styles/globals.css`** - Global styles
+- **`styles/admin-workflows.css`** - Admin dashboard styles
 
 ### Anti-Hardcoding Rules (CRITICAL)
 **⛔ NEVER HARDCODE:**
 - Company names, country codes, business types
 - Trade volumes, HS codes, tariff rates
 - Product descriptions, addresses, phone numbers
-- Any business data that should come from user input
+- Any business data that should come from subscriber workflow
 
 **✅ CORRECT APPROACH:**
-- Use configuration objects for thresholds
-- Pull data from user's workflow input
-- Reference localStorage: `workflowData?.company?.name`
-- Database-driven for legitimate defaults
+- Use subscriber_data from service requests
+- Pull data from localStorage: `workflowData?.company?.name`
+- Configuration-driven defaults only
 
 ---
 
 ## 📈 Success Metrics
 
 ### Technical KPIs
+- Component Rendering: No errors
 - API Response: <400ms
 - Database Queries: <200ms
-- Page Load: <3s
-- Classification Accuracy: 85%+
+- OpenRouter Integration: Successful responses
 - CSS Compliance: 100%
 
 ### Business KPIs
-- Service Completion Rate: 99%+
-- Expert Capacity Utilization: 70%+
-- Client Satisfaction: 4.5/5+
-- Revenue Per Service: Target margins maintained
+- Service Request Processing: All 6 services functional
+- Expert Workflow Completion: End-to-end functionality
+- Data Integration: Subscriber context properly utilized
+- Professional Delivery: Expert validation working
 
 ---
 
-## 🚨 Common Issues & Solutions
+## 🚨 Implementation Requirements
 
-### "Database connected but using sample data"
-- `user_profiles` table is empty (0 records)
-- Normal behavior - APIs fall back to demo data
-- Add real users to switch from sample data
+### Dashboard Components Must:
+1. **Load service requests** from Supabase without errors
+2. **Display subscriber data** correctly from JSONB field
+3. **Open modal workflows** when service buttons clicked
+4. **Navigate between stages** successfully
+5. **Make OpenRouter API calls** with business context
+6. **Update service status** in database on completion
+7. **Handle loading states** and errors gracefully
+8. **Use existing CSS classes** only (no inline styles)
 
-### "CSS violation detected"
-- Remove inline styles immediately
-- Use existing classes from `styles/globals.css`
-- Never add new styles without approval
-
-### "HS Code not found"
-- Format mismatch between input and database
-- Use normalization utilities in `lib/utils/hs-code-normalizer.js`
-- Priority: `hs_master_rebuild` → `usmca_tariff_rates` → `tariff_rates`
+### API Endpoints Must:
+1. **Accept service request data** with subscriber context
+2. **Make OpenRouter API calls** with structured prompts
+3. **Process AI responses** appropriately
+4. **Return structured data** for dashboard display
+5. **Update database records** on completion
+6. **Handle errors gracefully** with meaningful messages
 
 ---
 
 ## 📚 Implementation Templates
 
-### Adding New Service Dashboard
-1. **Copy appropriate pattern** (2-stage or 3-stage)
-2. **Create intake form** in `config/service-intake-forms.js`
-3. **Create AI endpoint** `/api/[service]-[action].js`
-4. **Add to navigation** in admin dashboard
-5. **Test workflow** end-to-end
-
-### Service Request Flow
+### Service Request Card Template
 ```javascript
-// Standard service request card
 <div className="service-request-card">
-  <div className="request-header">
-    <h3>{service.title}</h3>
-    <span className="request-price">${service.price}</span>
-  </div>
-  <div className="request-actions">
-    <button onClick={() => startWorkflow(request)}>
-      Start Service Delivery
-    </button>
-  </div>
+  <h3>{serviceType} - {request.client_company}</h3>
+  <p>Product: {request.subscriber_data.product_description}</p>
+  <p>USMCA Status: {request.subscriber_data.qualification_status}</p>
+  <p>Trade Volume: ${request.subscriber_data.trade_volume}</p>
+  <button onClick={() => startWorkflow(request)} className="btn-primary">
+    Start {serviceType}
+  </button>
 </div>
+```
+
+### OpenRouter API Call Template
+```javascript
+const analyzeWithAI = async (subscriberData, serviceContext) => {
+  const prompt = `BUSINESS CONTEXT:
+Company: ${subscriberData.company_name}
+Product: ${subscriberData.product_description}
+Current USMCA Status: ${subscriberData.qualification_status}
+Annual Trade Volume: $${subscriberData.trade_volume}
+
+SERVICE REQUEST: ${serviceContext}
+
+Provide strategic analysis and recommendations.`;
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "anthropic/claude-3-haiku",
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  return await response.json();
+};
 ```
 
 ---
 
-**This CLAUDE.md provides the complete reference for both user experience and admin service delivery architecture, reflecting the current Triangle Intelligence Platform implementation.**
+**This CLAUDE.md reflects the current reality of the Triangle Intelligence Platform and provides accurate guidance for building the dashboard components and supporting infrastructure.**

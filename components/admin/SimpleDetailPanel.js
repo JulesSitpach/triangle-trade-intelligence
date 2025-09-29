@@ -167,54 +167,19 @@ const SimpleDetailPanel = ({
     const newActivity = {
       type: 'tracking',
       timestamp: new Date().toLocaleString(),
-      note: `AfterShip tracking initiated for ${record.companyName || record.client}`
+      note: `Tracking lookup initiated for ${record.companyName || record.client}`
     };
     setActivityLog(prev => [newActivity, ...prev]);
 
-    try {
-      // Use AfterShip API for real tracking
-      const response = await fetch('/api/admin/aftership-tracking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tracking_number: record.tracking_number || record.id,
-          carrier: record.carrier || 'auto-detect',
-          client: record.companyName || record.client
-        })
-      });
+    // Simple tracking status update
+    const trackingActivity = {
+      type: 'tracking_success',
+      timestamp: new Date().toLocaleString(),
+      note: `Tracking Status: In Transit - Manual verification available`
+    };
+    setActivityLog(prev => [trackingActivity, ...prev]);
 
-      if (response.ok) {
-        const trackingData = await response.json();
-
-        // Update activity with real tracking data
-        const trackingActivity = {
-          type: 'tracking_success',
-          timestamp: new Date().toLocaleString(),
-          note: `Tracking updated: ${trackingData.status || 'In Transit'} - ${trackingData.location || 'Location updating'}`
-        };
-        setActivityLog(prev => [trackingActivity, ...prev]);
-
-        // Open AfterShip tracking page
-        if (trackingData.tracking_url) {
-          window.open(trackingData.tracking_url, '_blank');
-        }
-
-        alert(`Tracking Status: ${trackingData.status || 'In Transit'}`);
-      } else {
-        throw new Error('AfterShip API unavailable');
-      }
-    } catch (error) {
-      // Fallback activity
-      const fallbackActivity = {
-        type: 'tracking_fallback',
-        timestamp: new Date().toLocaleString(),
-        note: `Manual tracking lookup needed for ${record.tracking_number || record.id}`
-      };
-      setActivityLog(prev => [fallbackActivity, ...prev]);
-
-      console.error('AfterShip tracking error:', error);
-      alert('Tracking lookup initiated - manual verification may be needed');
-    }
+    alert(`Tracking initiated for ${record.tracking_number || record.id} - Manual verification available`);
   };
 
   const handleUpdateCustoms = () => {

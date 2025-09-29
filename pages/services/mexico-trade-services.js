@@ -54,6 +54,7 @@ export default function MexicoTradeServices() {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [dataStorageConsent, setDataStorageConsent] = useState(false);
 
   useEffect(() => {
     loadFormConfiguration();
@@ -136,6 +137,11 @@ export default function MexicoTradeServices() {
     if (!formData.email) errors.email = 'Email is required';
     if (!formData.project_description) errors.project_description = 'Project description is required';
 
+    // Client consent validation - REQUIRED for database storage
+    if (!dataStorageConsent) {
+      errors.consent = 'You must consent to data storage to proceed with professional services';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -157,7 +163,11 @@ export default function MexicoTradeServices() {
           status: 'pending',
           source: 'mexico_trade_services_portal',
           created_at: new Date().toISOString(),
-          user_id: user?.id || null
+          user_id: user?.id || null,
+          // Client consent data for database storage compliance
+          data_storage_consent: dataStorageConsent,
+          consent_timestamp: new Date().toISOString(),
+          privacy_policy_version: 'v1.0'
         })
       });
 
@@ -182,6 +192,7 @@ export default function MexicoTradeServices() {
           intelligence_priorities: ''
         });
         setSelectedService('');
+        setDataStorageConsent(false);
       } else {
         const error = await response.json();
         setSubmitStatus({
@@ -625,6 +636,30 @@ export default function MexicoTradeServices() {
                   </div>
                 </div>
               )}
+
+              {/* Client Consent Section - REQUIRED for database storage */}
+              <div className="form-group">
+                <div className="consent-section">
+                  <label className="consent-label">
+                    <input
+                      type="checkbox"
+                      checked={dataStorageConsent}
+                      onChange={(e) => setDataStorageConsent(e.target.checked)}
+                      className="consent-checkbox"
+                      required
+                    />
+                    <span className="consent-text">
+                      I consent to Triangle Intelligence storing my company information and project details in our secure database for professional service delivery. This enables our Mexico trade specialists to provide personalized consultation and maintain project continuity.
+                    </span>
+                  </label>
+                  {formErrors.consent && (
+                    <div className="error-message">{formErrors.consent}</div>
+                  )}
+                  <div className="consent-note">
+                    <small>Your data will only be used for service delivery and will not be shared with third parties. You may request data deletion at any time.</small>
+                  </div>
+                </div>
+              </div>
 
               <div className="card-header">
                 <div className="admin-actions">
