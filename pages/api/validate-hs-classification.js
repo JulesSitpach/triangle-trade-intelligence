@@ -17,6 +17,26 @@ export default async function handler(req, res) {
     const serviceDetails = original_request?.service_details || {};
     const classificationContext = classification_data || {};
 
+    // Parse trade volume from string if needed
+    const parseTradeVolume = (volume) => {
+      if (!volume) return 0;
+      if (typeof volume === 'number') return volume;
+      // Extract numeric value from strings like "$2,100,000", "2.1M", "$2.1 million"
+      const numericMatch = String(volume).match(/[\d,\.]+/);
+      if (!numericMatch) return 0;
+      const numeric = numericMatch[0].replace(/,/g, '');
+
+      // Handle M, K suffixes
+      if (String(volume).toLowerCase().includes('m')) {
+        return parseFloat(numeric) * 1000000;
+      } else if (String(volume).toLowerCase().includes('k')) {
+        return parseFloat(numeric) * 1000;
+      }
+      return parseFloat(numeric);
+    };
+
+    const tradeVolume = parseTradeVolume(serviceDetails?.trade_volume || original_request?.trade_volume);
+
     // Build comprehensive business context for AI analysis
     const businessContext = {
       company: {
@@ -35,7 +55,7 @@ export default async function handler(req, res) {
         component_origins: serviceDetails?.component_origins || subscriberData?.component_origins || []
       },
       trade: {
-        annual_volume: serviceDetails?.trade_volume || original_request?.trade_volume,
+        annual_volume: tradeVolume,
         supplier_country: serviceDetails?.supplier_country,
         target_markets: serviceDetails?.target_markets || [],
         import_frequency: serviceDetails?.import_frequency,
@@ -110,8 +130,10 @@ Provide a comprehensive HS classification analysis that Cristina can review and 
 2. Tariff Impact Analysis:
    - Current MFN duty rate for recommended HS code
    - USMCA preferential rate (if applicable)
-   - Annual duty cost calculation based on $${Number(businessContext.trade.annual_volume || 0).toLocaleString()} trade volume
-   - Potential savings with USMCA qualification
+   - Annual duty cost calculation: MUST calculate ${businessContext.trade.annual_volume.toLocaleString()} × duty_rate%. Show your math.
+   - Potential savings with USMCA qualification (current tariff cost - USMCA tariff cost)
+
+   CRITICAL: The annual trade volume is $${businessContext.trade.annual_volume.toLocaleString()}. DO NOT say "if trade volume is $0" or return $0 calculations. Calculate actual tariff costs.
 
 3. Regulatory Compliance:
    - CBP classification requirements specific to this product category
@@ -133,11 +155,19 @@ Provide a comprehensive HS classification analysis that Cristina can review and 
 
 6. Component Origin Considerations:
    - How component origins affect final classification
-   - USMCA regional value content implications
+   - USMCA regional value content (RVC) implications
    - Substantial transformation analysis
    - Country-specific duty implications
 
-Format as JSON with these exact keys: recommended_hs_code, confidence_level, classification_justification, alternative_codes (array of objects with code and reasoning), tariff_analysis (object with mfn_rate, usmca_rate, annual_duty_cost, potential_savings), regulatory_requirements (array), risk_factors (array), audit_defense_recommendations (array), implementation_steps (array), component_origin_impact (string).`;
+   CRITICAL RVC CALCULATION INSTRUCTIONS:
+   Component breakdown:
+${businessContext.product.component_origins.map(c => `   - ${c.country}: ${c.percentage}%`).join('\n')}
+
+   Calculate current RVC: Sum only US, Canada, and Mexico percentages. Do NOT include China, Taiwan, or other non-USMCA countries.
+   USMCA requires 75% RVC minimum for most electronics.
+   Show your math: Mexico ${businessContext.product.component_origins.find(c => c.country === 'MX' || c.country === 'Mexico')?.percentage || 0}% + US ${businessContext.product.component_origins.find(c => c.country === 'US' || c.country === 'United States')?.percentage || 0}% + Canada ${businessContext.product.component_origins.find(c => c.country === 'CA' || c.country === 'Canada')?.percentage || 0}% = X% current RVC.
+
+Format as JSON with these exact keys: recommended_hs_code, confidence_level, classification_justification, alternative_codes (array of objects with code and reasoning), tariff_analysis (object with mfn_rate, usmca_rate, annual_duty_cost, potential_savings), regulatory_requirements (array), risk_factors (array), audit_defense_recommendations (array), implementation_steps (array), component_origin_impact (string), current_rvc_percentage (number), required_rvc_percentage (number).`;
 
     console.log('[HS CLASSIFICATION] Calling OpenRouter API with comprehensive business context...');
 

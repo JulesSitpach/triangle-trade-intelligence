@@ -76,7 +76,7 @@ Product & Supply Chain:
 - Category: ${businessContext.product.category}
 - Current Manufacturing: ${businessContext.product.manufacturing_location}
 - Current Component Origins:
-${businessContext.product.component_origins.map(c => `  • ${c.country} (${c.percentage}%): ${c.description || c.component_type}`).join('\n')}
+${Array.isArray(businessContext.product.component_origins) ? businessContext.product.component_origins.map(c => `  • ${c.country} (${c.percentage}%): ${c.description || c.component_type}`).join('\n') : '  • No component data available'}
 
 Trade Profile:
 - Annual Trade Volume: $${Number(businessContext.trade.annual_volume || 0).toLocaleString()}
@@ -90,10 +90,10 @@ Financial Impact:
 - Potential USMCA Savings: $${Number(businessContext.financial_impact.potential_usmca_savings || 0).toLocaleString()}/year
 
 Known Compliance Gaps:
-${businessContext.risk_assessment.compliance_gaps.map(g => `- ${g}`).join('\n')}
+${Array.isArray(businessContext.risk_assessment.compliance_gaps) ? businessContext.risk_assessment.compliance_gaps.map(g => `- ${g}`).join('\n') : '- None identified'}
 
 Known Vulnerability Factors:
-${businessContext.risk_assessment.vulnerability_factors.map(v => `- ${v}`).join('\n')}
+${Array.isArray(businessContext.risk_assessment.vulnerability_factors) ? businessContext.risk_assessment.vulnerability_factors.map(v => `- ${v}`).join('\n') : '- None identified'}
 
 MANUFACTURING REQUIREMENTS:
 - Why Mexico: ${businessContext.manufacturing_requirements.why_mexico || 'USMCA benefits, cost reduction, supply chain optimization'}

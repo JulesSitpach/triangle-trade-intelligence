@@ -118,12 +118,11 @@ async function handleGetProfessionalServices(req, res) {
 
     // Process real database data
     const jorgeServices = services.filter(s => s.assignee === 'Jorge' || s.assignee === 'jorge');
-    const cristinaServices = services.filter(s => s.assignee === 'Cristina' || s.assignee === 'cristina');
 
     return res.status(200).json({
       jorge_consultation_pipeline: jorgeServices,
       jorge_custom_integrations: opportunities || [],
-      cristina_service_delivery: cristinaServices,
+      cristina_service_delivery: services.filter(s => s.assignee === 'Cristina' || s.assignee === 'cristina'),
       cristina_consultation_revenue: consultations || [],
       utilization_metrics: calculateRealUtilizationMetrics(services),
       data_status: {

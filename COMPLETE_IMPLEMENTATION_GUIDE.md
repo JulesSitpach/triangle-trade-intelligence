@@ -1,704 +1,271 @@
-# 🎯 TRIANGLE INTELLIGENCE PLATFORM - HONEST IMPLEMENTATION STATUS
+# 🎯 DASHBOARD SERVICE COMPLETION GUIDE
 
-## ✅ **IMPLEMENTATION STATUS - NOW COMPLETE**
+## Critical Understanding
 
-**🎉 CONFIRMED: All 6 components now have production-ready UI consistency**
-**✅ STATUS UPDATE: 100% complete with unified advanced features across all dashboards**
+You have **TWO COMPLETELY DIFFERENT types of services** that require different implementations:
 
-### **🎯 FINAL COMPONENT STATUS (As of Sep 29, 2025)**
+### TYPE A: CRISTINA'S COMPLIANCE SERVICES (Validation & Risk Assessment)
+- **Purpose**: Review automated outputs for professional compliance risks
+- **AI Output**: Classification analysis, regulatory compliance, risk assessment
+- **Expert Adds**: Professional validation, audit defense, compliance recommendations  
+- **Report**: Compliance validation report with customs broker license backing
 
-#### **✅ ALL COMPONENTS PRODUCTION-READY (6/6 components):**
+### TYPE B: JORGE'S MEXICO BUSINESS SERVICES (Discovery & Relationship Building)
+- **Purpose**: Find Mexico business contacts and build relationships
+- **AI Output**: Supplier lists, manufacturing locations, market partner contacts
+- **Expert Adds**: Specific Mexico contacts from his network, relationship strategy, introduction plans
+- **Report**: Business contact list with introduction strategy and relationship building plan
 
-**Cristina's Services:**
-- **`components/cristina/USMCACertificateTab.js`** ✅ **COMPLETE**
-  - Advanced search, filter, sort, pagination
-  - Toast notifications integrated
-  - Professional value proposition highlighting licensed broker credentials
-  - Production-ready table with smart pagination
-  - Risk level assessment with complexity filtering
-
-- **`components/cristina/HSClassificationTab.js`** ✅ **UPGRADED TO PRODUCTION**
-  - Complete search/filter/pagination functionality
-  - Professional value proposition emphasizing electronics/telecom expertise
-  - Classification complexity determination
-  - Toast notifications for workflow feedback
-  - Enhanced Classification Agent integration
-
-- **`components/cristina/CrisisResponseTab.js`** ✅ **UPGRADED TO PRODUCTION**
-  - Advanced search with crisis type filtering
-  - Crisis urgency level assessment (Critical/High/Medium/Standard)
-  - Professional value proposition highlighting emergency response expertise
-  - Complete pagination and sorting controls
-  - Toast notifications for crisis management workflow
-
-**Jorge's Services:**
-- **`components/jorge/SupplierSourcingTab.js`** ✅ **UPGRADED TO PRODUCTION**
-  - Complete search/filter/pagination system
-  - Supplier complexity assessment
-  - Professional value proposition highlighting Mexico B2B expertise
-  - Toast notifications integrated
-  - Market focus filtering (Mexico/Latin America priority)
-
-- **`components/jorge/ManufacturingFeasibilityTab.js`** ✅ **UPGRADED TO PRODUCTION**
-  - Advanced UI matching other components
-  - Manufacturing complexity determination
-  - Professional value proposition emphasizing Mexico manufacturing knowledge
-  - Complete search, filter, sort, pagination
-  - Toast notifications for workflow completion
-
-- **`components/jorge/MarketEntryTab.js`** ✅ **UPGRADED TO PRODUCTION**
-  - Market opportunity level assessment (High Priority/Medium/Standard)
-  - Target market filtering with Mexico focus
-  - Professional value proposition highlighting cultural bridge advantage
-  - Complete advanced UI feature set
-  - Toast notifications integrated
-
-**✅ ALL COMPONENTS NOW FEATURE:**
-- ✅ Advanced search/filter functionality
-- ✅ Smart pagination controls (5/10/25/50 items per page)
-- ✅ Toast notifications for user feedback
-- ✅ Professional value propositions highlighting expert credentials
-- ✅ Advanced sorting with visual indicators
-- ✅ Complexity/urgency/opportunity level assessments
-- ✅ Consistent production-ready UI/UX
-
-## 📋 **PROJECT OVERVIEW - KNOWN FACTS**
-
-**Business Model**: Hybrid SaaS + Expert Services Platform
-**Core Value**: AI-enhanced expert services for Mexico/Latin America trade bridge
-**Revenue Target**: $87K MRR ($50K subscriptions + $37K services)
-
-### **Expert Team**
-- **Cristina Escalante**: Licensed Customs Broker #4601913, 17 years logistics experience, electronics/telecom specialization
-- **Jorge Ochoa**: B2B sales expert, 4+ years CCVIAL, bilingual (Spanish/English), Mexico-based with local network
+**DO NOT copy Cristina's validation pattern to Jorge's services. They serve different business functions.**
 
 ---
 
-## 🏗️ **TECHNICAL ARCHITECTURE - EXACT SPECIFICATIONS**
+## CRISTINA'S SERVICES (3 Total)
 
-### **Stack & Database**
-- **Frontend**: Next.js 14 (Pages Router), React 18
-- **Database**: Supabase PostgreSQL (34,476+ HS codes)
-- **AI Integration**: OpenRouter API with Claude models
-- **Styling**: Existing CSS classes ONLY (NO Tailwind, NO inline styles)
+### Service 1: HS Classification ($200)
 
-### **Environment Variables**
-```
-NEXT_PUBLIC_SUPABASE_URL=https://mrwitpgbcaxgnirqtavt.supabase.co
-SUPABASE_ANON_KEY=[anon key]
-OPENROUTER_API_KEY=[api key]
-```
+**What it does**: Validates automated HS code classification with customs broker expertise
 
----
+**Stage 1**: Display client product and component data
+**Stage 2**: AI validates HS code, Cristina adds professional input
+**Report Output**: HS Classification Report with tariff calculations and audit defense
 
-## 💰 **SERVICE SPECIFICATIONS - EXACT PRICING & WORKFLOWS**
+**Cristina's Expert Input Fields (5)**:
+1. **Validated HS Code** - Confirm or correct AI suggestion
+2. **Confidence Level (%)** - Professional confidence in classification (e.g., 94%)
+3. **Professional Broker Notes** - Why this classification is correct based on YOUR 17 years experience
+4. **Specific Risks for THIS Client** - Based on their component origins and trade volume
+5. **Compliance Recommendations** - Specific actions they should take this quarter
+6. **Audit Defense Strategy** - What documentation they need if customs audits
 
-### **AUDIT-READY REQUIREMENTS FOR ALL SERVICES**
-
-**Each service component MUST display comprehensive business intelligence from subscriber workflow:**
-
-#### **Required Data Display in Stage 1 (All Services):**
-1. **Company Information**
-   - Company name, contact, email, phone
-   - Business type, industry
-   - Trade volume (formatted as currency)
-
-2. **Product Context**
-   - Product description
-   - Manufacturing location
-   - Current HS code (if available)
-   - Component origins with detailed breakdown:
-     - Country, percentage, description
-     - Display as: "China (55%): Microcontrollers and circuit boards"
-
-3. **Financial Impact Analysis** (Critical for Professional Value)
-   - Annual tariff cost (formatted as currency)
-   - Potential USMCA savings (formatted as currency)
-   - Display savings opportunity clearly
-
-4. **Risk Assessment**
-   - USMCA qualification status
-   - Compliance gaps (bulleted list)
-   - Vulnerability factors (bulleted list)
-
-5. **Regulatory Context**
-   - Regulatory requirements (bulleted list)
-   - Import frequency
-   - Product category
-   - Target markets
-
-**Why This Matters:**
-- Cristina needs complete context to stake her professional license on recommendations
-- Jorge needs full business intelligence to make credible B2B introductions
-- Incomplete data = unprofessional service delivery = failed audit
+**Report Must Include**:
+- Validated HS code with confidence level
+- Tariff cost calculations using actual trade volume
+- Component origin analysis showing USMCA qualification gaps
+- Cristina's professional validation in first person
+- Specific audit defense documentation requirements
 
 ---
 
-### **CRISTINA'S SERVICES (Licensed Broker #4601913)**
+### Service 2: USMCA Certificates ($250)
 
-#### 1. **USMCA Certificates** ($250) - ✅ **COMPLETE**
-- **Component**: `components/cristina/USMCACertificateTab.js`
-- **API**: `/api/regenerate-usmca-certificate.js`
-- **Workflow**: 3-Stage Professional (Expert Review → Certificate Correction → Professional Delivery)
-- **Value**: Same-day professional validation with license backing
-- **Required Data**: Full component origins with USMCA qualification per component, cost analysis, risk factors
+**What it does**: Professional review of automated USMCA certificate with compliance risk assessment
 
-#### 2. **HS Classification** ($200) - ⚠️ **NEEDS BUSINESS INTELLIGENCE DISPLAY**
-- **Component**: `components/cristina/HSClassificationTab.js`
-- **API**: `/api/validate-hs-classification.js`
-- **Workflow**: 2-Stage Professional (Product Analysis → Professional Validation)
-- **Value**: Professional classification with audit defense preparation
-- **Critical Requirements**:
-  - Display annual_tariff_cost, potential_usmca_savings
-  - Show compliance_gaps (3+ items)
-  - Show vulnerability_factors (3+ items)
-  - Display regulatory_requirements list
-  - Component origins with detailed descriptions
-  - **Status**: Basic display exists, needs enhancement to match USMCACertificateTab detail level
+**Stage 1**: Display client certificate and component origins
+**Stage 2**: Cristina reviews for compliance risks
+**Stage 3**: Certificate correction and professional validation
+**Report Output**: Validated USMCA Certificate with professional backing
 
-#### 3. **Crisis Response** ($500) - ⚠️ **NEEDS BUSINESS INTELLIGENCE DISPLAY**
-- **Component**: `components/cristina/CrisisResponseTab.js`
-- **API**: `/api/crisis-response-analysis.js`
-- **Workflow**: 3-Stage Professional (Crisis Assessment → Impact Analysis → Action Plan)
-- **Value**: 24-48 hour crisis resolution with professional expertise
-- **Critical Requirements**:
-  - Display crisis_type, crisis_timeline, business_impact
-  - Show annual_tariff_cost and potential_usmca_savings
-  - Display vulnerability_factors (4+ for crisis situations)
-  - Show compliance_gaps
-  - Component origins showing concentration risk
-  - **Status**: Component exists but missing comprehensive business intelligence display
+**Cristina's Expert Input Fields (3)**:
+1. **Certificate Accuracy Validation** - Review automated certificate for errors based on 17 years experience
+2. **Compliance Risk Assessment** - Specific risks you see (e.g., "China 45% sourcing creates tariff exposure")
+3. **Audit Defense Strategy** - Documentation client needs for customs audit
 
-### **JORGE'S SERVICES (B2B Sales Expert)**
-
-#### 1. **Supplier Sourcing** ($450) - ⚠️ **NEEDS BUSINESS INTELLIGENCE DISPLAY**
-- **Component**: `components/jorge/SupplierSourcingTab.js`
-- **API**: `/api/supplier-sourcing-discovery.js`
-- **Workflow**: 3-Stage Research (Strategic Preferences → AI Discovery → B2B Execution)
-- **Value**: Mexico supplier contacts with direct introductions
-- **Critical Requirements**:
-  - Display current_supplier_countries clearly
-  - Show annual_tariff_cost and potential_usmca_savings
-  - Display sourcing_requirements, quality_standards
-  - Show vulnerability_factors related to supply chain
-  - Display regulatory_requirements for target products
-  - **Status**: Component exists but missing comprehensive business intelligence display
-
-#### 2. **Manufacturing Feasibility** ($650) - ⚠️ **NEEDS BUSINESS INTELLIGENCE DISPLAY**
-- **Component**: `components/jorge/ManufacturingFeasibilityTab.js`
-- **API**: `/api/manufacturing-feasibility-analysis.js`
-- **Workflow**: 3-Stage Research (Strategic Context → AI Analysis → Professional Validation)
-- **Value**: Mexico manufacturing location analysis with cost estimates
-- **Critical Requirements**:
-  - Display manufacturing_requirements, production_volume
-  - Show annual_tariff_cost and potential_usmca_savings (usually highest amounts)
-  - Display quality_certifications needed
-  - Show vulnerability_factors related to current manufacturing
-  - Display timeline_requirement
-  - Component origins showing current vs desired state
-  - **Status**: Component exists but missing comprehensive business intelligence display
-
-#### 3. **Market Entry** ($550) - ⚠️ **NEEDS BUSINESS INTELLIGENCE DISPLAY**
-- **Component**: `components/jorge/MarketEntryTab.js`
-- **API**: `/api/market-entry-analysis.js`
-- **Workflow**: 3-Stage Research (Market Strategy → Market Analysis → Relationship Building)
-- **Value**: Mexico market entry strategy with partnership introductions
-- **Critical Requirements**:
-  - Display target_markets, market_entry_goals, target_revenue
-  - Show annual_tariff_cost and potential_usmca_savings
-  - Display competitive_landscape information
-  - Show vulnerability_factors for market entry
-  - Display regulatory_requirements for target markets
-  - **Status**: Component exists but missing comprehensive business intelligence display
+**Report Must Include**:
+- Certificate validation results
+- Component origin compliance analysis
+- Risk factors specific to their sourcing
+- Recommended actions with timeline
 
 ---
 
-## 🔧 **COMPONENT ARCHITECTURE - PROVEN PATTERNS**
+### Service 3: Crisis Response ($500)
 
-### **Shared Foundation**
-```
-components/shared/ServiceWorkflowModal.js ✅ EXISTS & WORKING
-pages/api/admin/service-requests.js ✅ EXISTS & WORKING
-```
+**What it does**: Professional crisis management plan based on logistics experience
 
-### **Service Request Table Pattern (from USMCACertificateTab)**
+**Stage 1**: Review crisis details and business impact
+**Stage 2**: AI analyzes crisis impact
+**Stage 3**: Cristina creates action plan
+**Report Output**: Crisis Management Action Plan with 24-48 hour response strategy
+
+**Cristina's Expert Input Fields (4)**:
+1. **Crisis Severity Assessment** - Based on logistics management experience, crisis is [Critical/High/Medium] because...
+2. **Immediate Actions (24-48 hours)** - Hour 1: [action]. Hour 6: [action]. Day 2: [action]
+3. **Recovery Timeline** - Week 1: [milestone]. Week 2: [milestone]. Full resolution: [date]
+4. **Risk Mitigation Strategy** - To prevent recurrence: [specific supply chain changes]
+
+**Report Must Include**:
+- Crisis severity assessment with business impact
+- Hour-by-hour action plan for first 48 hours
+- Week-by-week recovery timeline
+- Long-term prevention measures
+
+---
+
+## JORGE'S SERVICES (3 Total)
+
+### Service 1: Supplier Sourcing ($450)
+
+**What it does**: Finds Mexico suppliers and builds relationships using Jorge's B2B network
+
+**Stage 1**: Display client product and current sourcing breakdown
+**Stage 2**: AI discovers Mexico suppliers that match requirements
+**Stage 3**: Jorge adds his network contacts and relationship strategy
+**Report Output**: Mexico Supplier Contact List with Introduction Strategy
+
+**AI Must Output in Stage 2**:
+- 5-10 Mexico supplier names with locations
+- Each supplier's capabilities and specializations
+- USMCA qualification potential
+- Contact information or discovery method
+
+**Jorge's Expert Input Fields (4)**:
+1. **Mexico Suppliers Identified** - From my CCVIAL network: 1) [Company] in [City] - specializes in [capability], contact: [person]. 2) [Company]...
+2. **Relationship Building Strategy** - Using B2B sales methodology: Week 1: Initial Spanish contact. Week 2: Plant visit to [city]. Week 3: Sample orders
+3. **USMCA Optimization Plan** - Current RVC: 30%. Shift [component] from China to [Mexico supplier] increases to 68%. Then shift [component]
+4. **Implementation Timeline** - Month 1: Supplier qualification. Month 2: First production run. Month 3: USMCA certification. ROI: [months]
+
+**Report Must Include**:
+- List of 5-10 specific Mexico suppliers with contact details
+- Jorge's relationship building approach in first person
+- USMCA qualification strategy with RVC calculations
+- Implementation timeline with ROI analysis
+
+---
+
+### Service 2: Manufacturing Feasibility ($650)
+
+**What it does**: Recommends Mexico manufacturing locations with cost analysis
+
+**Stage 1**: Display current manufacturing setup and requirements
+**Stage 2**: AI analyzes Mexico manufacturing locations
+**Stage 3**: Jorge provides location recommendations and cost analysis
+**Report Output**: Mexico Manufacturing Location Strategy with Cost Analysis
+
+**AI Must Output in Stage 2**:
+- 3-5 recommended Mexico cities for manufacturing
+- Each location's infrastructure, labor, and supplier ecosystem
+- Cost estimates for setup and operations
+- USMCA benefits analysis
+
+**Jorge's Expert Input Fields (3)**:
+1. **Recommended Mexico Locations** - Top choice: [Monterrey/Guadalajara/Querétaro] because [infrastructure, labor]. Second: [city] because...
+2. **Cost Analysis** - Setup: $[amount]. Monthly operational: $[amount]. Current: $[amount]/month. Annual savings: $[amount]
+3. **Implementation Roadmap** - Phase 1 (Months 1-2): [steps]. Phase 2 (Months 3-6): [milestones]. Phase 3: [target]
+
+**Report Must Include**:
+- Location comparison with specific cities
+- Detailed cost breakdown and ROI calculations
+- Implementation roadmap with phases
+- Jorge's professional recommendation in first person
+
+---
+
+### Service 3: Market Entry ($550)
+
+**What it does**: Mexico market entry strategy with partnership contacts
+
+**Stage 1**: Display product and target market goals
+**Stage 2**: AI analyzes Mexico market opportunity
+**Stage 3**: Jorge provides market strategy and key contacts
+**Report Output**: Mexico Market Entry Strategy with Partnership Contacts
+
+**AI Must Output in Stage 2**:
+- Mexico market size and opportunity analysis
+- Competitive landscape
+- Distribution channels and partnership opportunities
+- Entry barriers and requirements
+
+**Jorge's Expert Input Fields (3)**:
+1. **Mexico Market Assessment** - Market size: $[amount]. Competition: [analysis]. Entry barriers: [challenges]. Opportunity: [advantage]
+2. **Key Relationships to Build** - Priority 1: [Distributor] in [city] - my contact: [person]. Priority 2: [Partner company]...
+3. **Entry Strategy** - Q1: [actions]. Q2: [milestones]. Expected revenue: $[amount] by Month 12
+
+**Report Must Include**:
+- Market opportunity analysis with revenue projections
+- List of specific partnership contacts with introduction approach
+- Quarter-by-quarter entry strategy
+- Jorge's relationship building plan in first person
+
+---
+
+## Implementation Steps for Each Service
+
+### Step 1: Verify AI Output Stage (20 mins)
+
+Check what Stage 2 currently displays. Does it show:
+- **For Cristina**: Classification results, compliance analysis, risk assessment?
+- **For Jorge**: Supplier lists, location recommendations, market contacts?
+
+If Jorge's services show classification validation instead of supplier discovery, the AI API call is wrong.
+
+### Step 2: Add Expert Input Form (30 mins)
+
+Add the specific fields listed above for each service. Use the exact placeholders shown.
+
+### Step 3: Fix Report API Prompts (30 mins)
+
+**For Cristina's reports**:
 ```javascript
-<table className="admin-table">
-  <thead>
-    <tr>
-      <th>Client</th>
-      <th>Product Type</th>
-      <th>Risk Level / Complexity</th>
-      <th>Status</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {requests.map(request => (
-      <tr key={request.id}>
-        <td>
-          <div className="client-info">
-            <strong>{request.company_name}</strong>
-            <div className="contact-name">{request.contact_name}</div>
-          </div>
-        </td>
-        <td>{request.service_details?.product_description}</td>
-        <td>
-          <span className={`risk-badge ${riskLevel.toLowerCase()}`}>
-            {calculateRiskLevel(request)}
-          </span>
-        </td>
-        <td>
-          <span className={`status-badge ${request.status?.replace('_', '-')}`}>
-            {request.status?.replace('_', ' ')}
-          </span>
-        </td>
-        <td>
-          <button
-            className="btn-primary"
-            onClick={() => startWorkflow(request)}
-          >
-            Start {serviceType}
-          </button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+const prompt = `You are Cristina, Licensed Customs Broker #4601913 with 17 years experience.
+
+CLIENT DATA:
+Company: ${companyName}
+Product: ${productDescription}
+Trade Volume: $${tradeVolume}
+Component Origins: ${componentOrigins}
+
+YOUR PROFESSIONAL ANALYSIS:
+${expertInput}
+
+Generate compliance validation report with:
+- Actual tariff calculations
+- USMCA qualification analysis
+- Specific audit defense requirements
+- Your professional validation in first person`;
 ```
 
-### **Service Configuration Pattern**
+**For Jorge's reports**:
 ```javascript
-const serviceConfig = {
-  title: 'Service Name with Professional Value',
-  totalStages: 2, // or 3
-  stageNames: ['Stage 1 Name', 'Stage 2 Name', 'Stage 3 Name'],
+const prompt = `You are Jorge, B2B sales expert with 4+ years at CCVIAL and Mexico business network.
 
-  renderStage: (stageNumber, request, stageData, onStageComplete, loading) => {
-    const subscriberData = request?.subscriber_data || {};
-    const serviceDetails = request?.service_details || {};
+CLIENT NEEDS:
+Company: ${companyName}
+Product: ${productDescription}
+Current Sourcing: ${currentSourcing}
 
-    switch (stageNumber) {
-      case 1: return <Stage1Component {...props} />;
-      case 2: return <Stage2Component {...props} />;
-      case 3: return <Stage3Component {...props} />; // if 3-stage
-      default: return <div>Invalid stage</div>;
-    }
-  }
-};
+SUPPLIERS/LOCATIONS YOU IDENTIFIED:
+${expertInput}
+
+Generate business contact report with:
+- Specific supplier/partner contact information
+- Your relationship building strategy in first person
+- USMCA optimization plan with calculations
+- Implementation timeline with ROI`;
 ```
+
+### Step 4: Test End-to-End (10 mins)
+
+1. Open dashboard
+2. Start service workflow  
+3. Fill expert input fields
+4. Generate report
+5. Check email for report
+6. Verify report contains specific contacts/recommendations, not generic advice
 
 ---
 
-## 📊 **DATABASE SCHEMA - CONFIRMED WORKING**
+## Critical Rules
 
-### **Service Requests Table Structure**
-```sql
-service_requests (
-  id TEXT PRIMARY KEY,
-  service_type TEXT, -- 'USMCA Certificates', 'HS Classification', etc.
-  company_name TEXT,
-  contact_name TEXT,
-  email TEXT,
-  assigned_to TEXT, -- 'Cristina' or 'Jorge'
-  status TEXT, -- 'pending', 'in_progress', 'completed'
-  trade_volume NUMERIC,
-  subscriber_data JSONB, -- Complete USMCA workflow data
-  service_details JSONB, -- Service-specific requirements
-  created_at TIMESTAMPTZ,
-  updated_at TIMESTAMPTZ
-)
-```
+**DO**:
+- Keep Cristina's services focused on compliance validation
+- Keep Jorge's services focused on business contact discovery
+- Include expert input verbatim in reports
+- Use actual client data in calculations
+- Write expert sections in first person
 
-### **Sample Data (Already in Database)**
-```bash
-# Current database contains:
-- 12+ service requests for Cristina (USMCA Certs, HS Classification, Crisis Response)
-- 8+ service requests for Jorge (Supplier Sourcing, Manufacturing, Market Entry)
-- Complete workflow data with component origins, HS codes, certificates
-```
+**DON'T**:
+- Copy Cristina's validation pattern to Jorge's services
+- Let Jorge's services output compliance reports instead of supplier lists
+- Allow generic "comprehensive strategy" without specifics
+- Let reports say "undefined" or "cannot be determined"
 
 ---
 
-## 🚀 **API PATTERNS - OPENROUTER INTEGRATION**
+## Success Criteria
 
-### **Standard API Template**
-```javascript
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+**Cristina's reports should read like**: Professional customs broker validation with specific compliance risks and audit defense strategy
 
-  try {
-    const { original_request, stage_data, professional_input } = req.body;
-    const subscriberData = original_request?.subscriber_data || {};
+**Jorge's reports should read like**: B2B sales executive providing specific Mexico supplier contacts and relationship building plans
 
-    // OpenRouter API Call
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "anthropic/claude-3-haiku",
-        messages: [{
-          role: "user",
-          content: `BUSINESS CONTEXT:
-Company: ${subscriberData.company_name}
-Product: ${subscriberData.product_description}
-USMCA Status: ${subscriberData.qualification_status}
-Trade Volume: $${subscriberData.trade_volume}
-
-EXPERT TASK: ${serviceSpecificPrompt}`
-        }]
-      })
-    });
-
-    const aiResult = await response.json();
-
-    // Professional enhancement based on expert (Cristina vs Jorge)
-    const professionalResult = {
-      ai_analysis: aiResult.choices[0].message.content,
-      expert_validation: {
-        [expert_name]: {
-          license_or_expertise: 'Specific credentials',
-          professional_opinion: 'Expert enhancement',
-          validation_timestamp: new Date().toISOString()
-        }
-      }
-    };
-
-    res.status(200).json({
-      success: true,
-      professional_result: professionalResult,
-      service_value_delivered: 'Specific value proposition'
-    });
-
-  } catch (error) {
-    res.status(500).json({ error: 'Service failed', message: error.message });
-  }
-}
-```
-
----
-
-## 🎨 **STYLING REQUIREMENTS - CRITICAL RULES**
-
-### **❌ FORBIDDEN**
-- Inline styles (`style={{}}` or `style=""`)
-- Tailwind CSS classes (`bg-blue-500`, `text-center`, etc.)
-- Creating new CSS files without approval
-
-### **✅ ALLOWED CSS CLASSES**
-```css
-/* From styles/globals.css and styles/admin-workflows.css */
-.service-tab, .service-header, .service-value-proposition
-.table-container, .admin-table, .loading-cell, .error-cell
-.client-info, .contact-name, .product-summary
-.status-badge, .risk-badge, .complexity-badge
-.btn-primary, .btn-secondary, .form-input, .form-group
-.workflow-stage, .workflow-stage-header, .workflow-stage-actions
-.value-point, .expert-credentials, .professional-note
-.card, .card-title, .text-body, .nav-link
-```
-
----
-
-## 👥 **EXPERT DIFFERENTIATION - PROFESSIONAL VALUE**
-
-### **Cristina's Professional Credentials**
-```javascript
-const cristinaCredentials = {
-  license: 'Licensed Customs Broker #4601913',
-  experience: '17 years logistics/customs experience',
-  specialization: 'Electronics/telecom industry expertise',
-  liability: 'Professional errors & omissions coverage',
-  value: 'Licensed professional backing for regulatory compliance'
-};
-```
-
-### **Jorge's Professional Credentials**
-```javascript
-const jorgeCredentials = {
-  experience: '4+ years B2B sales at CCVIAL, proven track record',
-  location: 'Mexico-based with local business network',
-  language: 'Native Spanish speaker with cultural expertise',
-  methodology: 'Consultative B2B sales approach',
-  value: 'Direct Mexico market access and relationship building'
-};
-```
-
----
-
-## 🔄 **WORKFLOW PATTERNS - 2-STAGE vs 3-STAGE**
-
-### **2-Stage Professional Services (Cristina - Simple)**
-```
-Stage 1: Expert Review → Stage 2: Professional Validation
-Examples: USMCA Certificates, HS Classification
-```
-
-### **3-Stage Strategic Services (Complex)**
-```
-Stage 1: Strategic Input → Stage 2: AI Analysis → Stage 3: Expert Execution
-Examples: Crisis Response, Supplier Sourcing, Manufacturing Feasibility, Market Entry
-```
-
----
-
-## 🧪 **TESTING & VALIDATION**
-
-### **Dashboard URLs**
-```
-Cristina: http://localhost:3000/admin/broker-dashboard
-Jorge: http://localhost:3000/admin/jorge-dashboard
-```
-
-### **API Testing**
-```bash
-# Test service requests
-curl "http://localhost:3000/api/admin/service-requests?assigned_to=Cristina&service_type=USMCA%20Certificates"
-
-# Test database population
-node scripts/populate-sample-data.js
-```
-
-### **Development Commands**
-```bash
-npm run dev          # Start development server
-npm run build        # Production build
-npm run lint         # ESLint validation
-npm run css:check    # CSS compliance (if available)
-```
-
----
-
-## 📈 **COMPLETION STATUS**
-
-### **✅ COMPLETED - ALL 6 COMPONENTS**
-1. **USMCACertificateTab.js** ✅ Complete 3-stage workflow with production UI
-2. **HSClassificationTab.js** ✅ Complete 2-stage workflow with production UI
-3. **CrisisResponseTab.js** ✅ Complete 3-stage workflow with production UI
-4. **SupplierSourcingTab.js** ✅ Complete 3-stage workflow with production UI
-5. **ManufacturingFeasibilityTab.js** ✅ Complete 3-stage workflow with production UI
-6. **MarketEntryTab.js** ✅ Complete 3-stage workflow with production UI
-7. **ServiceWorkflowModal.js** ✅ Shared component working
-8. **ToastNotification.js** ✅ Shared toast system integrated across all components
-9. **Database** ✅ Populated with realistic test data
-10. **Service-requests API** ✅ Working with database integration
-
-### **🎯 PRODUCTION-READY FEATURES IMPLEMENTED**
-- **Advanced Search**: Multi-field search across company, contact, product, industry
-- **Smart Filtering**: Status, industry, complexity/urgency/opportunity levels
-- **Professional Pagination**: 5/10/25/50 items per page with smart navigation
-- **Column Sorting**: Clickable headers with visual sort indicators
-- **Toast Notifications**: Success/error feedback throughout workflows
-- **Value Propositions**: Expert credentials prominently displayed
-- **Responsive Design**: Mobile-friendly layouts using existing CSS classes
-- **Loading States**: Professional loading indicators and error handling
-
----
-
-## 🎯 **BUILD STRATEGY - PROVEN APPROACH**
-
-### **Component Template (Copy USMCACertificateTab)**
-1. Copy USMCACertificateTab.js structure
-2. Update service name, pricing, expert credentials
-3. Modify stages for 2-stage vs 3-stage workflow
-4. Update risk/complexity assessment function
-5. Create matching API endpoint with OpenRouter integration
-
-### **⚠️ CRITICAL IMPLEMENTATION GAPS IDENTIFIED**
-
-**ALL 5 COMPONENTS NEED COMPREHENSIVE BUSINESS INTELLIGENCE DISPLAY**
-
-Components exist but are showing MINIMAL data - need to display ALL business intelligence fields to be audit-ready:
-
-1. **HSClassificationTab** - ⚠️ Partially Fixed
-   - ✅ Added Financial Impact, Compliance Gaps, Vulnerability Factors sections
-   - ⚠️ Needs verification of complete data display matching USMCACertificateTab detail level
-
-2. **CrisisResponseTab** - ❌ Missing Business Intelligence
-   - Need to add crisis_timeline, business_impact display
-   - Need Financial Impact section (annual_tariff_cost, potential_usmca_savings)
-   - Need Vulnerability Factors section (4+ items for crisis situations)
-   - Need Compliance Gaps section
-
-3. **SupplierSourcingTab** - ❌ Missing Business Intelligence
-   - Need current_supplier_countries display
-   - Need Financial Impact section
-   - Need sourcing_requirements, quality_standards display
-   - Need Vulnerability Factors section (supply chain focus)
-   - Need Regulatory Requirements section
-
-4. **ManufacturingFeasibilityTab** - ❌ Missing Business Intelligence
-   - Need manufacturing_requirements, production_volume display
-   - Need Financial Impact section (usually highest savings amounts)
-   - Need quality_certifications display
-   - Need Vulnerability Factors section (current manufacturing risks)
-   - Need timeline_requirement display
-
-5. **MarketEntryTab** - ❌ Missing Business Intelligence
-   - Need target_markets, market_entry_goals, target_revenue display
-   - Need Financial Impact section
-   - Need competitive_landscape display
-   - Need Vulnerability Factors section (market entry risks)
-   - Need Regulatory Requirements section (target market regulations)
-
----
-
-## ✅ **AUDIT-READY IMPLEMENTATION CHECKLIST**
-
-### **Component Stage 1 Data Display Requirements**
-
-For EACH component, Stage 1 MUST show:
-
-#### **Section 1: Company & Product Context** ✅ (All components have this)
-```javascript
-<div className="workflow-subscriber-summary">
-  <h4>📦 Product Information</h4>
-  <strong>Company:</strong> {request?.company_name}
-  <strong>Product:</strong> {serviceDetails?.product_description}
-  <strong>Industry:</strong> {request?.industry}
-  <strong>Manufacturing:</strong> {serviceDetails?.manufacturing_location}
-</div>
-```
-
-#### **Section 2: Component Origins** ✅ (All components have this)
-```javascript
-<div className="component-origins-summary">
-  <p><strong>Component Origins:</strong></p>
-  <ul className="component-list">
-    {serviceDetails?.component_origins?.map((component, idx) => (
-      <li key={idx}>
-        <strong>{component.country} ({component.percentage}%):</strong> {component.description}
-      </li>
-    ))}
-  </ul>
-</div>
-```
-
-#### **Section 3: Financial Impact** ⚠️ (ONLY HSClassificationTab has this)
-```javascript
-{(serviceDetails?.annual_tariff_cost || serviceDetails?.potential_usmca_savings) && (
-  <div className="business-intelligence-section">
-    <h5>💰 Financial Impact Analysis</h5>
-    {serviceDetails?.annual_tariff_cost && (
-      <p><strong>Annual Tariff Cost:</strong> ${Number(serviceDetails.annual_tariff_cost).toLocaleString()}</p>
-    )}
-    {serviceDetails?.potential_usmca_savings && (
-      <p><strong>Potential USMCA Savings:</strong> ${Number(serviceDetails.potential_usmca_savings).toLocaleString()}/year</p>
-    )}
-  </div>
-)}
-```
-
-#### **Section 4: Compliance Gaps** ⚠️ (ONLY HSClassificationTab has this)
-```javascript
-{serviceDetails?.compliance_gaps && serviceDetails.compliance_gaps.length > 0 && (
-  <div className="compliance-gaps-section">
-    <h5>⚠️ Compliance Gaps Identified</h5>
-    <ul className="compliance-list">
-      {serviceDetails.compliance_gaps.map((gap, idx) => (
-        <li key={idx}>{gap}</li>
-      ))}
-    </ul>
-  </div>
-)}
-```
-
-#### **Section 5: Vulnerability Factors** ⚠️ (ONLY HSClassificationTab has this)
-```javascript
-{serviceDetails?.vulnerability_factors && serviceDetails.vulnerability_factors.length > 0 && (
-  <div className="vulnerability-section">
-    <h5>🚨 Vulnerability Factors</h5>
-    <ul className="vulnerability-list">
-      {serviceDetails.vulnerability_factors.map((factor, idx) => (
-        <li key={idx}>{factor}</li>
-      ))}
-    </ul>
-  </div>
-)}
-```
-
-#### **Section 6: Regulatory Requirements** ⚠️ (ONLY HSClassificationTab has this)
-```javascript
-{serviceDetails?.regulatory_requirements && serviceDetails.regulatory_requirements.length > 0 && (
-  <div className="regulatory-section">
-    <h5>📋 Regulatory Requirements</h5>
-    <ul className="regulatory-list">
-      {serviceDetails.regulatory_requirements.map((req, idx) => (
-        <li key={idx}>{req}</li>
-      ))}
-    </ul>
-  </div>
-)}
-```
-
-#### **Service-Specific Additional Fields**
-
-**CrisisResponseTab needs:**
-```javascript
-<p><strong>Crisis Type:</strong> {serviceDetails?.crisis_type}</p>
-<p><strong>Timeline:</strong> {serviceDetails?.crisis_timeline}</p>
-<p><strong>Business Impact:</strong> {serviceDetails?.business_impact}</p>
-```
-
-**SupplierSourcingTab needs:**
-```javascript
-<p><strong>Current Suppliers:</strong> {serviceDetails?.current_supplier_countries?.join(', ')}</p>
-<p><strong>Quality Standards:</strong> {serviceDetails?.quality_standards}</p>
-<p><strong>Sourcing Requirements:</strong> {serviceDetails?.sourcing_requirements}</p>
-```
-
-**ManufacturingFeasibilityTab needs:**
-```javascript
-<p><strong>Production Volume:</strong> {serviceDetails?.production_volume}</p>
-<p><strong>Manufacturing Requirements:</strong> {serviceDetails?.manufacturing_requirements}</p>
-<p><strong>Timeline Requirement:</strong> {serviceDetails?.timeline_requirement}</p>
-<ul className="certifications-list">
-  {serviceDetails?.quality_certifications?.map((cert, idx) => (
-    <li key={idx}>{cert}</li>
-  ))}
-</ul>
-```
-
-**MarketEntryTab needs:**
-```javascript
-<p><strong>Target Markets:</strong> {serviceDetails?.target_markets?.join(', ')}</p>
-<p><strong>Target Revenue:</strong> {serviceDetails?.target_revenue}</p>
-<p><strong>Market Entry Goals:</strong> {serviceDetails?.market_entry_goals}</p>
-<p><strong>Competitive Landscape:</strong> {serviceDetails?.competitive_landscape}</p>
-```
-
----
-
-### **✅ IMPLEMENTATION COMPLETED**
-- **Shared components**: ToastNotification system integrated
-- **Expert differentiation**: Professional value propositions implemented
-- **Advanced features**: Search, filter, pagination, sorting across all components
-- **Database**: Comprehensive test data with all business intelligence fields
-
-### **⚠️ IMPLEMENTATION IN PROGRESS**
-- **Business Intelligence Display**: HSClassificationTab updated, 4 components remaining
-- **Audit Readiness**: Components need comprehensive data display to be production-ready
-
----
-
-## 🔗 **QUICK REFERENCE LINKS**
-
-### **Key Files**
-- **Working Template**: `components/cristina/USMCACertificateTab.js`
-- **API Template**: `pages/api/regenerate-usmca-certificate.js`
-- **Database Script**: `scripts/populate-sample-data.js`
-- **Shared Modal**: `components/shared/ServiceWorkflowModal.js`
-
-### **Documentation**
-- **PRD**: `Triangle Intelligence Platform PRD.md`
-- **Universal Protocol**: `Universal Development Protocol.md`
-- **UX Standards**: `UX Design Standards for All Service Workflows.md`
-
----
-
-**This guide contains everything needed to complete the Triangle Intelligence Platform implementation. No guesswork required - all patterns, APIs, database structure, and business logic are documented and proven to work.**
+If Jorge's reports look like compliance validation, you've applied the wrong pattern.

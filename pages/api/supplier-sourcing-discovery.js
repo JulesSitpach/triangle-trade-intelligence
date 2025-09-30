@@ -62,8 +62,9 @@ export default async function handler(req, res) {
       for (const query of contextualSearchQueries.slice(0, 2)) { // Search first 2 queries
         console.log(`[SUPPLIER DISCOVERY] Searching: ${query}`);
 
-        // Call the working OpenRouter supplier search API
-        const searchResponse = await fetch('http://localhost:3001/api/openrouter-supplier-search', {
+        // Call the OpenRouter supplier search API (relative path for production compatibility)
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const searchResponse = await fetch(`${baseUrl}/api/openrouter-supplier-search`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

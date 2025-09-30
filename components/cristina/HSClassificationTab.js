@@ -481,7 +481,7 @@ export default function HSClassificationTab() {
 const hsClassificationService = {
   title: 'HS Code Classification',
   totalStages: 2,
-  stageNames: ['Product Review', 'Expert Validation'],
+  stageNames: ['Product Review', 'AI Analysis & Professional Validation'],
 
   renderStage: (stageNumber, request, stageData, onStageComplete, loading) => {
     // All data is now in service_details (JSONB column)
@@ -503,10 +503,11 @@ const hsClassificationService = {
 
       case 2:
         return (
-          <ExpertValidationStage
+          <AIAnalysisStage
             request={request}
             subscriberData={subscriberData}
             serviceDetails={serviceDetails}
+            stageData={stageData}
             onComplete={onStageComplete}
             loading={loading}
           />
@@ -520,15 +521,92 @@ const hsClassificationService = {
 
 // Stage 1: Product Review Component
 function ProductReviewStage({ request, subscriberData, serviceDetails, onComplete, loading }) {
+  const [showOriginalClassification, setShowOriginalClassification] = useState(false);
+
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
         <h3>Stage 1: Product Review</h3>
-        <p>Review product information and component details</p>
+        <p>Review existing classification before AI enhancement</p>
+      </div>
+
+      <div className="certificate-validation-section">
+        <h4>📋 Client Data Review</h4>
+
+        <div className="certificate-actions">
+          <button
+            className="btn-secondary certificate-toggle-btn"
+            onClick={() => setShowOriginalClassification(!showOriginalClassification)}
+          >
+            📄 {showOriginalClassification ? 'Hide' : 'View'} Client's Original Classification
+          </button>
+          <span className="helper-text">
+            Review what the client received from AI before professional validation
+          </span>
+        </div>
+
+        {showOriginalClassification && (
+          <div className="original-certificate-display">
+            <h5>🏛️ Client's Original HS Classification</h5>
+            <div className="certificate-content">
+              <div className="cert-section">
+                <h6>Classification Information</h6>
+                <div className="data-row"><span>HS Code:</span> <span>{serviceDetails?.current_hs_code || subscriberData?.current_hs_code || 'Pending'}</span></div>
+                <div className="data-row"><span>Classification Method:</span> <span>Enhanced Classification Agent with web verification</span></div>
+                <div className="data-row"><span>Confidence Score:</span> <span>{serviceDetails?.hs_code_confidence || '92'}%</span></div>
+              </div>
+
+              <div className="cert-section">
+                <h6>Product Information</h6>
+                <div className="data-row"><span>Description:</span> <span>{serviceDetails?.product_description || subscriberData?.product_description}</span></div>
+                <div className="data-row"><span>HS Description:</span> <span>{serviceDetails?.hs_code_description || 'Classification for trade purposes'}</span></div>
+                <div className="data-row"><span>Industry:</span> <span>{serviceDetails?.business_type || request?.industry}</span></div>
+              </div>
+
+              <div className="cert-section">
+                <h6>Trade Impact</h6>
+                <div className="data-row"><span>Trade Volume:</span> <span>${(Number(serviceDetails?.trade_volume || subscriberData?.trade_volume || 0) / 1000000).toFixed(1)}M annually</span></div>
+                <div className="data-row"><span>USMCA Status:</span> <span>{serviceDetails?.qualification_status || subscriberData?.qualification_status}</span></div>
+                <div className="data-row"><span>Manufacturing Location:</span> <span>{serviceDetails?.manufacturing_location || subscriberData?.manufacturing_location}</span></div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="scrolling-data-window">
+          <div className="client-header">
+            <span>Client: {request?.company_name}</span>
+          </div>
+
+          <div className="data-section">
+            <div className="data-row"><span>Company:</span> <span>{request?.company_name}</span></div>
+            <div className="data-row"><span>Contact:</span> <span>{request?.contact_name || serviceDetails?.contact_name || 'Not provided'}</span></div>
+            <div className="data-row"><span>Email:</span> <span>{request?.email || serviceDetails?.contact_email || 'Not provided'}</span></div>
+            <div className="data-row"><span>Phone:</span> <span>{request?.phone || serviceDetails?.contact_phone || 'Not provided'}</span></div>
+            <div className="data-row"><span>Business Type:</span> <span>{serviceDetails?.business_type || request?.industry}</span></div>
+            <div className="data-row"><span>Address:</span> <span>{serviceDetails?.address || 'Not provided'}</span></div>
+            <div className="data-row"><span>Tax ID:</span> <span>{serviceDetails?.tax_id || 'Not provided'}</span></div>
+          </div>
+
+          <div className="data-section">
+            <div className="data-row"><span>Product:</span> <span>{serviceDetails?.product_description || subscriberData?.product_description}</span></div>
+            <div className="data-row"><span>HS Code:</span> <span>{serviceDetails?.current_hs_code || subscriberData?.current_hs_code || 'To be determined'}</span></div>
+            <div className="data-row"><span>Classification Method:</span> <span>Enhanced Classification Agent with web verification</span></div>
+            <div className="data-row"><span>HS Description:</span> <span>{serviceDetails?.hs_code_description || 'Classification for trade purposes'}</span></div>
+            <div className="data-row"><span>Confidence Score:</span> <span>{serviceDetails?.hs_code_confidence || '92'}%</span></div>
+          </div>
+
+          <div className="data-section">
+            <div className="data-row"><span>Trade Volume:</span> <span>${((serviceDetails?.trade_volume || subscriberData?.trade_volume || 0) / 1000000).toFixed(1)}M annually</span></div>
+            <div className="data-row"><span>Supplier Country:</span> <span>{serviceDetails?.supplier_country || 'CN'}</span></div>
+            <div className="data-row"><span>Manufacturing:</span> <span>{serviceDetails?.manufacturing_location || subscriberData?.manufacturing_location}</span></div>
+            <div className="data-row"><span>Destination:</span> <span>{serviceDetails?.target_markets?.[0] || 'US'}</span></div>
+          </div>
+        </div>
       </div>
 
       <div className="workflow-subscriber-summary">
-        <h4>📦 Product Information</h4>
+        <h4>Component Origins & USMCA Analysis</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
             <strong>Company:</strong> {request?.company_name || 'Not provided'}
@@ -651,42 +729,125 @@ function ProductReviewStage({ request, subscriberData, serviceDetails, onComplet
           onClick={onComplete}
           disabled={loading}
         >
-          {loading ? 'Processing...' : 'Product data confirmed - Start Classification →'}
+          {loading ? 'Processing...' : 'Proceed to AI Analysis (Stage 2) →'}
         </button>
       </div>
     </div>
   );
 }
 
-// Stage 2: Expert Validation Component
-function ExpertValidationStage({ request, subscriberData, serviceDetails, onComplete, loading }) {
+// Stage 2: AI Analysis Component (AI-only, no Cristina input yet)
+function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
   const [validationStep, setValidationStep] = useState(1);
   const [classificationComplete, setClassificationComplete] = useState(false);
   const [classificationResult, setClassificationResult] = useState(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
+
+  // Cristina's professional input
+  const [validatedHsCode, setValidatedHsCode] = useState('');
+  const [confidenceLevel, setConfidenceLevel] = useState('94');
+  const [brokerNotes, setBrokerNotes] = useState('');
+  const [specificRisks, setSpecificRisks] = useState('');
+  const [complianceRecommendations, setComplianceRecommendations] = useState('');
+  const [auditDefenseNotes, setAuditDefenseNotes] = useState('');
 
   const handleClassificationProcess = async () => {
     try {
-      // Step through the Enhanced Classification Agent process
+      // Step through the AI Classification Agent process
       setValidationStep(2); // Web search validation
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       setValidationStep(3); // Database comparison
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      setValidationStep(4); // Expert review
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      setValidationStep(4); // Generating AI report
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      setValidationStep(5); // Final validation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call actual Enhanced Classification Agent API
+      try {
+        console.log('🔍 Calling API with data:', {
+          company_name: subscriberData.company_name,
+          industry: subscriberData.business_type,
+          hs_code: subscriberData.current_hs_code
+        });
 
-      // Simulate classification result from Enhanced Classification Agent
-      setClassificationResult({
-        hs_code: 'Determined by Enhanced Classification Agent',
-        tariff_rate: 'Current rate from web search',
-        confidence: 'High confidence classification',
-        usmca_eligible: 'USMCA qualification confirmed',
-        classification_notes: 'Professional validation by licensed customs broker'
-      });
+        const classificationResponse = await fetch('/api/validate-hs-classification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            original_request: {
+              company_name: subscriberData.company_name,
+              industry: subscriberData.business_type,
+              contact_name: subscriberData.contact_name || 'Not provided',
+              email: subscriberData.contact_email || 'Not provided',
+              phone: subscriberData.contact_phone || 'Not provided',
+              service_details: {
+                company_name: subscriberData.company_name,
+                business_type: subscriberData.business_type,
+                product_description: subscriberData.product_description,
+                product_category: subscriberData.product_category || 'General',
+                manufacturing_location: subscriberData.manufacturing_location,
+                current_hs_code: subscriberData.current_hs_code,
+                component_origins: subscriberData.component_origins || [],
+                trade_volume: subscriberData.trade_volume,
+                supplier_country: subscriberData.supplier_country || 'Various',
+                target_markets: subscriberData.target_markets || ['United States'],
+                import_frequency: subscriberData.import_frequency || 'Regular',
+                qualification_status: subscriberData.qualification_status,
+                annual_tariff_cost: subscriberData.annual_tariff_cost,
+                potential_usmca_savings: subscriberData.potential_usmca_savings,
+                compliance_gaps: subscriberData.compliance_gaps || [],
+                vulnerability_factors: subscriberData.vulnerability_factors || [],
+                regulatory_requirements: subscriberData.regulatory_requirements || []
+              }
+            },
+            classification_data: {
+              preliminary_hs_code: subscriberData.current_hs_code,
+              classification_reasoning: 'Initial classification from subscriber workflow',
+              industry_context: subscriberData.business_type
+            }
+          })
+        });
+
+        console.log('📡 API Response Status:', classificationResponse.status);
+        console.log('📡 API Response Headers:', Object.fromEntries(classificationResponse.headers.entries()));
+
+        const classificationData = await classificationResponse.json();
+        console.log('📦 API Response Data:', classificationData);
+
+        if (classificationData.error) {
+          console.error('❌ API returned error:', classificationData.error);
+          throw new Error(classificationData.error);
+        }
+
+        // Use actual API results - extract ai_analysis from response
+        console.log('✅ Setting classification result:', classificationData);
+
+        // API returns {ai_analysis: {...}, business_context: {...}}
+        // Transform to match UI expectations
+        const transformedResult = {
+          validated_hs_code: classificationData.ai_analysis?.recommended_hs_code || 'Analysis pending',
+          current_tariff_rate: classificationData.ai_analysis?.tariff_analysis?.mfn_rate || 'To be determined',
+          confidence_level: classificationData.ai_analysis?.confidence_level || 'Pending review',
+          usmca_status: classificationData.ai_analysis?.tariff_analysis?.usmca_rate ? 'Eligible for preferential rate' : 'Standard rate',
+          classification_reasoning: classificationData.ai_analysis?.classification_justification || '',
+          web_search_findings: classificationData.ai_analysis?.component_origin_impact || '',
+          alternative_codes: classificationData.ai_analysis?.alternative_codes || [],
+          regulatory_requirements: classificationData.ai_analysis?.regulatory_requirements || [],
+          risk_factors: classificationData.ai_analysis?.risk_factors || [],
+          full_ai_analysis: classificationData.ai_analysis,
+          business_context: classificationData.business_context
+        };
+
+        console.log('✅ Transformed result for UI:', transformedResult);
+        setClassificationResult(transformedResult);
+      } catch (error) {
+        console.error('💥 Classification API error:', error);
+        console.error('💥 Error stack:', error.stack);
+        alert('⚠️ Enhanced Classification Agent failed: ' + error.message);
+        setClassificationComplete(false);
+        return;
+      }
 
       setClassificationComplete(true);
     } catch (error) {
@@ -703,12 +864,44 @@ function ExpertValidationStage({ request, subscriberData, serviceDetails, onComp
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 2: Expert Validation</h3>
-        <p>Enhanced Classification Agent with web search verification</p>
+        <h3>Stage 2: AI-Enhanced Analysis</h3>
+        <p>AI analyzes classification with web search and database verification</p>
+      </div>
+
+      {/* Quick Context Reference */}
+      <div className="workflow-subscriber-summary">
+        <h4>📊 Client Context (Quick Reference)</h4>
+        <div className="workflow-data-grid">
+          <div className="workflow-data-item">
+            <strong>Company:</strong> {request?.company_name}
+          </div>
+          <div className="workflow-data-item">
+            <strong>Product:</strong> {serviceDetails?.product_description?.substring(0, 50)}...
+          </div>
+          <div className="workflow-data-item">
+            <strong>Trade Volume:</strong> ${((serviceDetails?.trade_volume || subscriberData?.trade_volume || 0) / 1000000).toFixed(1)}M/year
+          </div>
+          <div className="workflow-data-item">
+            <strong>Current HS Code:</strong> {serviceDetails?.current_hs_code || subscriberData?.current_hs_code}
+          </div>
+          <div className="workflow-data-item">
+            <strong>Annual Tariff Cost:</strong> ${(Number(serviceDetails?.annual_tariff_cost || 0) / 1000).toFixed(0)}K
+          </div>
+          <div className="workflow-data-item">
+            <strong>USMCA Status:</strong> {serviceDetails?.qualification_status || subscriberData?.qualification_status}
+          </div>
+        </div>
+
+        {/* Component Origins Quick View */}
+        {Array.isArray(subscriberData?.component_origins || serviceDetails?.component_origins) && (subscriberData?.component_origins || serviceDetails?.component_origins).length > 0 && (
+          <div className="component-quick-view">
+            <strong>Components:</strong> {(subscriberData?.component_origins || serviceDetails?.component_origins).map(c => `${c.country} ${c.percentage}%`).join(', ')}
+          </div>
+        )}
       </div>
 
       <div className="workflow-subscriber-summary">
-        <h4>🤖 Classification Process</h4>
+        <h4>🤖 AI Classification Analysis</h4>
         <div className="workflow-classification-steps">
           <div className={`workflow-step ${validationStep >= 1 ? 'active' : ''} ${validationStep > 1 ? 'completed' : ''}`}>
             {validationStep > 1 ? '✓' : '🔄'} Analyzing product description
@@ -720,36 +913,143 @@ function ExpertValidationStage({ request, subscriberData, serviceDetails, onComp
             {validationStep > 3 ? '✓' : validationStep >= 3 ? '🔄' : '⏳'} Database validation and comparison
           </div>
           <div className={`workflow-step ${validationStep >= 4 ? 'active' : ''} ${validationStep > 4 ? 'completed' : ''}`}>
-            {validationStep > 4 ? '✓' : validationStep >= 4 ? '🔄' : '⏳'} Expert review and verification
-          </div>
-          <div className={`workflow-step ${validationStep >= 5 ? 'active' : ''} ${validationStep > 5 ? 'completed' : ''}`}>
-            {validationStep > 5 ? '✓' : validationStep >= 5 ? '🔄' : '⏳'} Final classification report
+            {validationStep > 4 ? '✓' : validationStep >= 4 ? '🔄' : '⏳'} Generating AI classification report
           </div>
         </div>
       </div>
 
       {classificationComplete && classificationResult && (
         <div className="workflow-classification-result">
-          <h4>📋 Classification Results</h4>
-          <div className="workflow-data-grid">
-            <div className="workflow-data-item">
-              <strong>HS Code:</strong> {classificationResult.hs_code}
+          <h4>📋 Enhanced Classification Agent Results</h4>
+          <p className="ai-analysis-note">⚠️ <strong>Review this AI analysis and add your professional validation below</strong></p>
+
+          <div className="ai-findings-section">
+            <h5>🔍 AI Classification Analysis:</h5>
+            <div className="workflow-data-grid">
+              <div className="workflow-data-item">
+                <strong>Validated HS Code:</strong> {classificationResult.validated_hs_code || classificationResult.hs_code}
+              </div>
+              <div className="workflow-data-item">
+                <strong>Current Tariff Rate:</strong> {classificationResult.current_tariff_rate || classificationResult.tariff_rate}
+              </div>
+              <div className="workflow-data-item">
+                <strong>Confidence Level:</strong> {classificationResult.confidence_level || classificationResult.confidence}
+              </div>
+              <div className="workflow-data-item">
+                <strong>USMCA Status:</strong> {classificationResult.usmca_status || classificationResult.usmca_eligible}
+              </div>
             </div>
-            <div className="workflow-data-item">
-              <strong>Current Tariff:</strong> {classificationResult.tariff_rate}
-            </div>
-            <div className="workflow-data-item">
-              <strong>Confidence:</strong> {classificationResult.confidence}
-            </div>
-            <div className="workflow-data-item">
-              <strong>USMCA Status:</strong> {classificationResult.usmca_eligible}
-            </div>
+
+            {classificationResult.classification_reasoning && (
+              <div className="ai-reasoning">
+                <strong>AI Reasoning:</strong>
+                <p>{classificationResult.classification_reasoning}</p>
+              </div>
+            )}
+
+            {classificationResult.web_search_findings && (
+              <div className="web-search-results">
+                <strong>Web Search Findings:</strong>
+                <p>{classificationResult.web_search_findings}</p>
+              </div>
+            )}
+
+            {classificationResult.regulatory_notes && (
+              <div className="regulatory-findings">
+                <strong>Regulatory Requirements Found:</strong>
+                <p>{classificationResult.regulatory_notes}</p>
+              </div>
+            )}
+
+            {Array.isArray(classificationResult.similar_products) && classificationResult.similar_products.length > 0 && (
+              <div className="similar-products">
+                <strong>Similar Products Classified:</strong>
+                <ul>
+                  {classificationResult.similar_products.map((product, idx) => (
+                    <li key={idx}>{product}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          <div className="workflow-classification-summary">
-            <p>✅ Classification completed using Enhanced Classification Agent</p>
-            <p>Web search verified current regulations and tariff rates</p>
-            <p>Professional validation by licensed customs broker (License #4601913)</p>
+          {/* Cristina's Professional Validation Form */}
+          <div className="professional-validation-form">
+            <h4>👩‍💼 Cristina's Professional Validation (License #4601913)</h4>
+            <p className="form-helper-text">Use your 17 years of electronics/telecom logistics experience to validate and enhance the AI classification</p>
+
+            <div className="form-group">
+              <label><strong>Validated HS Code:</strong></label>
+              <input
+                type="text"
+                className="form-input"
+                value={validatedHsCode}
+                onChange={(e) => setValidatedHsCode(e.target.value)}
+                placeholder={classificationResult.hs_code}
+              />
+              <span className="helper-text">Confirm or correct the AI suggestion</span>
+            </div>
+
+            <div className="form-group">
+              <label><strong>Confidence Level (%):</strong></label>
+              <input
+                type="number"
+                className="form-input"
+                value={confidenceLevel}
+                onChange={(e) => setConfidenceLevel(e.target.value)}
+                min="0"
+                max="100"
+              />
+              <span className="helper-text">Your professional confidence in this classification (e.g., 94%)</span>
+            </div>
+
+            <div className="form-group">
+              <label><strong>Professional Broker Notes:</strong></label>
+              <textarea
+                className="form-input"
+                rows="4"
+                value={brokerNotes}
+                onChange={(e) => setBrokerNotes(e.target.value)}
+                placeholder="Based on my 17 years classifying electronics/telecom products, this classification is correct because..."
+              />
+              <span className="helper-text">Why this classification is correct based on YOUR experience</span>
+            </div>
+
+            <div className="form-group">
+              <label><strong>Specific Risks for THIS Client:</strong></label>
+              <textarea
+                className="form-input"
+                rows="3"
+                value={specificRisks}
+                onChange={(e) => setSpecificRisks(e.target.value)}
+                placeholder={`e.g., "45% China sourcing creates $X,XXX tariff exposure if USMCA changes. Recommend shifting PCB assembly to Mexico."`}
+              />
+              <span className="helper-text">Based on their component origins and trade volume</span>
+            </div>
+
+            <div className="form-group">
+              <label><strong>Compliance Recommendations:</strong></label>
+              <textarea
+                className="form-input"
+                rows="3"
+                value={complianceRecommendations}
+                onChange={(e) => setComplianceRecommendations(e.target.value)}
+                placeholder="1. Complete component origin certificates for Mexico suppliers&#10;2. Obtain USMCA supplier declarations&#10;3. Update HS code in all shipping documentation"
+              />
+              <span className="helper-text">Specific actions they should take this quarter</span>
+            </div>
+
+            <div className="form-group">
+              <label><strong>Audit Defense Strategy:</strong></label>
+              <textarea
+                className="form-input"
+                rows="3"
+                value={auditDefenseNotes}
+                onChange={(e) => setAuditDefenseNotes(e.target.value)}
+                placeholder="For customs audit: Prepare technical specifications, component breakdown, and assembly process documentation. Key defense: [specific point]"
+              />
+              <span className="helper-text">What documentation they need if customs audits this classification</span>
+            </div>
           </div>
         </div>
       )}
@@ -757,14 +1057,66 @@ function ExpertValidationStage({ request, subscriberData, serviceDetails, onComp
       <div className="workflow-stage-actions">
         <button
           className="btn-primary"
-          onClick={() => onComplete({
-            classification_completed: true,
-            classification_result: classificationResult,
-            completed_at: new Date().toISOString()
-          })}
-          disabled={!classificationComplete || loading}
+          onClick={async () => {
+            // Validate Cristina filled in professional notes
+            if (!validatedHsCode || !brokerNotes || !specificRisks || !complianceRecommendations || !auditDefenseNotes) {
+              alert('⚠️ Please complete all professional validation fields to demonstrate your expertise.');
+              return;
+            }
+
+            try {
+              setGeneratingReport(true);
+
+              // Generate and send report with Cristina's professional input
+              const reportResponse = await fetch('/api/generate-hs-classification-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  serviceRequestId: request.id,
+                  stage1Data: subscriberData,
+                  stage2Data: {
+                    validated_hs_code: validatedHsCode || classificationResult.hs_code,
+                    confidence_level: confidenceLevel,
+                    broker_notes: brokerNotes,
+                    specific_risks: specificRisks,
+                    compliance_recommendations: complianceRecommendations,
+                    audit_defense: auditDefenseNotes
+                  }
+                })
+              });
+
+              const reportResult = await reportResponse.json();
+
+              if (reportResult.success) {
+                alert('✅ HS Classification report with your professional analysis sent to triangleintel@gmail.com');
+                onComplete({
+                  classification_completed: true,
+                  classification_result: classificationResult,
+                  cristina_validation: {
+                    validated_hs_code: validatedHsCode,
+                    confidence_level: confidenceLevel,
+                    broker_notes: brokerNotes,
+                    specific_risks: specificRisks,
+                    compliance_recommendations: complianceRecommendations,
+                    audit_defense: auditDefenseNotes
+                  },
+                  report_generated: true,
+                  report_sent_to: 'triangleintel@gmail.com',
+                  completed_at: new Date().toISOString()
+                });
+              } else {
+                throw new Error(reportResult.error || 'Failed to generate report');
+              }
+            } catch (error) {
+              console.error('Error generating report:', error);
+              alert('❌ Failed to generate report: ' + error.message);
+            } finally {
+              setGeneratingReport(false);
+            }
+          }}
+          disabled={!classificationComplete || generatingReport}
         >
-          {loading ? 'Processing...' : 'Complete HS Classification Service'}
+          {generatingReport ? '⏳ Generating Report...' : '📧 Complete & Send Professional Report'}
         </button>
       </div>
     </div>

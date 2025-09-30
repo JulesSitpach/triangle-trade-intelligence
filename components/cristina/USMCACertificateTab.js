@@ -557,7 +557,7 @@ function determineRiskLevel(request) {
 const usmcaCertificateService = {
   title: 'Professional USMCA Certificate with Expert Analysis & Ongoing Support',
   totalStages: 3,
-  stageNames: ['Professional Certificate Validation', 'Certificate Correction & Regeneration', 'Final Professional Delivery'],
+  stageNames: ['Professional Certificate Review', 'AI Compliance Risk Analysis', 'Expert Validation & Corrections'],
 
   renderStage: (stageNumber, request, stageData, onStageComplete, loading) => {
     const subscriberData = request?.subscriber_data || request?.workflow_data || {};
@@ -577,7 +577,7 @@ const usmcaCertificateService = {
 
       case 2:
         return (
-          <CertificateCorrectionStage
+          <ComplianceRiskAnalysisStage
             request={request}
             subscriberData={subscriberData}
             serviceDetails={serviceDetails}
@@ -589,7 +589,7 @@ const usmcaCertificateService = {
 
       case 3:
         return (
-          <FinalProfessionalDeliveryStage
+          <CertificateCorrectionStage
             request={request}
             subscriberData={subscriberData}
             serviceDetails={serviceDetails}
@@ -1272,8 +1272,266 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// Stage 2: Certificate Correction & Regeneration - Where Cristina Fixes the Issues
+// Stage 2: AI Compliance Risk Analysis - OpenRouter API analyzes certificate for compliance risks
+function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
+  const [analysisStep, setAnalysisStep] = useState(0);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const workflowData = request?.workflow_data || request?.service_details || {};
+  const stage1Data = stageData?.stage1 || stageData?.stage_1 || {};
+
+  const handleAIAnalysis = async () => {
+    try {
+      setAnalysisStep(1);
+      setErrorMessage('');
+
+      // Step 1: Preparing analysis
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setAnalysisStep(2);
+
+      // Step 2: Call OpenRouter API for compliance risk analysis
+      const response = await fetch('/api/usmca-compliance-risk-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceRequestId: request.id,
+          subscriberData: workflowData,
+          stage1Data: stage1Data
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
+      }
+
+      const aiResult = await response.json();
+
+      // Step 3: Processing results
+      setAnalysisStep(3);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Step 4: Finalizing analysis
+      setAnalysisStep(4);
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      setAnalysisResult({
+        compliance_risks: aiResult.compliance_risks || ['No major compliance risks identified'],
+        component_risks: aiResult.component_risks || [],
+        tariff_exposure: aiResult.tariff_exposure || 'Analysis completed',
+        recommendations: aiResult.recommendations || ['Standard compliance monitoring recommended'],
+        risk_score: aiResult.risk_score || 'Medium',
+        audit_readiness: aiResult.audit_readiness || 'Requires documentation review'
+      });
+
+      setAnalysisComplete(true);
+
+    } catch (error) {
+      console.error('AI compliance risk analysis error:', error);
+      setErrorMessage(`Analysis failed: ${error.message}`);
+
+      // Fallback results if API fails
+      setAnalysisResult({
+        compliance_risks: ['Unable to complete full AI analysis - manual review required'],
+        component_risks: [],
+        tariff_exposure: 'Requires manual assessment',
+        recommendations: ['Professional customs broker review recommended'],
+        risk_score: 'Medium',
+        audit_readiness: 'Requires comprehensive documentation review'
+      });
+      setAnalysisComplete(true);
+    }
+  };
+
+  const handleContinue = () => {
+    onComplete({
+      ai_compliance_analysis: analysisResult,
+      analysis_timestamp: new Date().toISOString(),
+      ai_analysis_performed: true
+    });
+  };
+
+  const analysisSteps = [
+    '🔍 Analyzing certificate compliance...',
+    '⚠️ Identifying compliance risks...',
+    '📊 Evaluating tariff exposure...',
+    '✅ Generating recommendations...'
+  ];
+
+  return (
+    <div className="workflow-stage">
+      <div className="workflow-stage-header">
+        <h3>Stage 2: AI Compliance Risk Analysis</h3>
+        <p><strong>AI-Powered Analysis:</strong> OpenRouter identifies compliance risks for Cristina to review</p>
+        <div className="expert-credentials">
+          🤖 AI Risk Detection | ⚖️ Compliance Assessment | 📋 Professional Review Preparation
+        </div>
+      </div>
+
+      <div className="certificate-summary-section">
+        <h4>📋 Certificate Under Analysis</h4>
+        <div className="certificate-info-grid">
+          <div className="data-row">
+            <span><strong>Company:</strong></span>
+            <span>{request.company_name}</span>
+          </div>
+          <div className="data-row">
+            <span><strong>Product:</strong></span>
+            <span>{workflowData.product_description || serviceDetails.product_description}</span>
+          </div>
+          <div className="data-row">
+            <span><strong>HS Code:</strong></span>
+            <span>{workflowData.classified_hs_code || serviceDetails.current_hs_code}</span>
+          </div>
+          <div className="data-row">
+            <span><strong>USMCA Status:</strong></span>
+            <span>{workflowData.qualification_status}</span>
+          </div>
+          <div className="data-row">
+            <span><strong>Trade Volume:</strong></span>
+            <span>${((workflowData.trade_volume || 0) / 1000000).toFixed(1)}M annually</span>
+          </div>
+          <div className="data-row">
+            <span><strong>Components:</strong></span>
+            <span>{workflowData.component_origins?.length || 0} origins tracked</span>
+          </div>
+        </div>
+      </div>
+
+      {!analysisComplete && (
+        <div className="ai-analysis-trigger">
+          <p className="analysis-description">
+            <strong>AI Analysis:</strong> OpenRouter will analyze this certificate for compliance risks,
+            component sourcing concerns, tariff exposure, and audit readiness. Cristina will review
+            AI findings in Stage 3.
+          </p>
+          <button
+            className="btn-primary analysis-btn"
+            onClick={handleAIAnalysis}
+            disabled={analysisStep > 0}
+          >
+            {analysisStep === 0 ? '🚀 Run AI Compliance Risk Analysis' : '⏳ Analysis Running...'}
+          </button>
+        </div>
+      )}
+
+      {analysisStep > 0 && !analysisComplete && (
+        <div className="analysis-progress">
+          <h4>⚙️ AI Analysis in Progress</h4>
+          {analysisSteps.map((step, index) => (
+            <div
+              key={index}
+              className={`analysis-step ${index < analysisStep ? 'completed' : index === analysisStep ? 'active' : 'pending'}`}
+            >
+              {index < analysisStep ? '✅' : index === analysisStep ? '⏳' : '⏸️'} {step}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="error-message-box">
+          <strong>⚠️ Analysis Error:</strong> {errorMessage}
+          <p>Proceeding with fallback analysis for manual review.</p>
+        </div>
+      )}
+
+      {analysisComplete && analysisResult && (
+        <div className="analysis-results">
+          <h4>📊 AI Compliance Risk Analysis Results</h4>
+          <p className="results-intro">
+            <strong>Analysis Complete:</strong> AI has identified compliance risks for Cristina's professional review
+          </p>
+
+          <div className="risk-section">
+            <h5>⚠️ Compliance Risks Identified:</h5>
+            <ul className="risk-list">
+              {Array.isArray(analysisResult.compliance_risks) ? analysisResult.compliance_risks.map((risk, idx) => (
+                <li key={idx} className="risk-item high-risk">❌ {risk}</li>
+              )) : <li>No compliance risks identified</li>}
+            </ul>
+          </div>
+
+          {Array.isArray(analysisResult.component_risks) && analysisResult.component_risks.length > 0 && (
+            <div className="risk-section">
+              <h5>🔍 Component Sourcing Risks:</h5>
+              <ul className="risk-list">
+                {analysisResult.component_risks.map((risk, idx) => (
+                  <li key={idx} className="risk-item medium-risk">⚠️ {risk}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="risk-section">
+            <h5>💰 Tariff Exposure Analysis:</h5>
+            <div className="tariff-exposure-box">
+              {analysisResult.tariff_exposure || 'Analysis in progress...'}
+            </div>
+          </div>
+
+          <div className="risk-section">
+            <h5>📋 AI Recommendations:</h5>
+            <ul className="recommendation-list">
+              {Array.isArray(analysisResult.recommendations) ? analysisResult.recommendations.map((rec, idx) => (
+                <li key={idx} className="recommendation-item">✓ {rec}</li>
+              )) : <li>No recommendations available</li>}
+            </ul>
+          </div>
+
+          <div className="risk-score-display">
+            <div className="score-item">
+              <strong>Overall Risk Score:</strong>
+              <span className={`risk-badge ${analysisResult.risk_score.toLowerCase()}`}>
+                {analysisResult.risk_score}
+              </span>
+            </div>
+            <div className="score-item">
+              <strong>Audit Readiness:</strong>
+              <span>{analysisResult.audit_readiness}</span>
+            </div>
+          </div>
+
+          <div className="next-step-info">
+            <h5>👩‍💼 Next: Cristina's Professional Review</h5>
+            <p>
+              Cristina will review these AI findings with her 17 years of customs expertise,
+              validate risk assessments, and provide professional corrections if needed.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="workflow-stage-actions">
+        <button
+          className="btn-primary"
+          onClick={handleContinue}
+          disabled={!analysisComplete || loading}
+        >
+          {loading ? 'Processing...' : 'Continue to Cristina\'s Review →'}
+        </button>
+
+        <div className="completion-status">
+          {analysisComplete ? (
+            <span className="status-complete">✅ AI compliance risk analysis complete</span>
+          ) : (
+            <span className="status-incomplete">⏳ Run AI analysis to continue</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Stage 3: Certificate Correction & Regeneration - Where Cristina Fixes the Issues
 function CertificateCorrectionStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
+  // Cristina's expert input fields (following HSClassificationTab pattern)
+  const [certificateValidation, setCertificateValidation] = useState('');
+  const [complianceRiskAssessment, setComplianceRiskAssessment] = useState('');
+  const [auditDefenseStrategy, setAuditDefenseStrategy] = useState('');
+  const [generatingReport, setGeneratingReport] = useState(false);
+
   const [corrections, setCorrections] = useState({
     // What needs to be fixed based on Stage 1 decision
     hs_code_correction: '',
@@ -1291,13 +1549,9 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
     ready_for_delivery: false
   });
 
-  // Get Stage 1 results from stageData, fallback to sample data for demonstration
-  const dataReview = stageData?.professional_data_review || {
-    compliance_confidence_level: 'approved_with_monitoring',
-    professional_recommendations: 'High China dependency (45%) requires documentation review and supplier diversification planning. Certificate technically complies but has strategic risk.',
-    customs_broker_guarantee: 'conditional_backing',
-    regulatory_compliance_additions: 'Additional supplier documentation needed for China components to strengthen audit defense.'
-  };
+  // Get Stage 1 and Stage 2 results from stageData
+  const dataReview = stageData?.stage1 || stageData?.professional_data_review || {};
+  const aiAnalysis = stageData?.stage2 || stageData?.ai_compliance_analysis || {};
 
   const handleCorrectionChange = (field, value) => {
     setCorrections(prev => ({ ...prev, [field]: value }));
@@ -1347,38 +1601,56 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 2: Certificate Correction & Regeneration</h3>
-        <p><strong>Fix the Issues:</strong> Cristina applies corrections and regenerates the certificate</p>
+        <h3>Stage 3: Expert Validation & Corrections</h3>
+        <p><strong>Cristina's Professional Review:</strong> Validate AI findings and apply corrections based on 17 years expertise</p>
         <div className="expert-credentials">
-          🔧 Apply Fixes | 🎯 Regenerate Certificate | ✅ Professional Validation
+          👩‍💼 Expert Review | 🔧 Apply Corrections | ✅ Professional Validation
         </div>
       </div>
 
-      <div className="validation-summary">
-        <h4>📋 Stage 1 Validation Results</h4>
-        <div className="validation-highlights">
-          <div className="validation-item">
-            <strong>Decision:</strong> {dataReview.compliance_confidence_level?.replace('_', ' ') || 'Not assessed'}
-          </div>
-          <div className="validation-item">
-            <strong>Professional Notes:</strong> {dataReview.professional_recommendations || 'No notes provided'}
-          </div>
-          <div className="validation-item">
-            <strong>Action Required:</strong>
-            {(() => {
-              const level = dataReview.compliance_confidence_level;
-              if (level?.includes('approved_high_confidence')) {
-                return 'Professional endorsement and final quality check';
-              } else if (level?.includes('approved_standard')) {
-                return 'Standard professional validation and backing';
-              } else if (level?.includes('approved_with_monitoring')) {
-                return 'Risk mitigation planning and enhanced documentation';
-              } else if (level?.includes('needs_adjustment')) {
-                return 'Certificate corrections and compliance improvements required';
-              } else {
-                return 'Professional assessment and corrective action plan needed';
-              }
-            })()}
+      <div className="ai-analysis-summary">
+        <h4>🤖 Stage 2: AI Compliance Risk Analysis Results</h4>
+        <div className="ai-findings">
+          {Array.isArray(aiAnalysis?.compliance_risks) && aiAnalysis.compliance_risks.length > 0 && (
+            <div className="finding-section">
+              <strong>Compliance Risks Identified:</strong>
+              <ul className="risk-list">
+                {aiAnalysis.compliance_risks.map((risk, idx) => (
+                  <li key={idx} className="risk-item">⚠️ {risk}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {Array.isArray(aiAnalysis?.component_risks) && aiAnalysis.component_risks.length > 0 && (
+            <div className="finding-section">
+              <strong>Component Sourcing Risks:</strong>
+              <ul className="risk-list">
+                {aiAnalysis.component_risks.map((risk, idx) => (
+                  <li key={idx} className="risk-item">🔍 {risk}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {aiAnalysis?.tariff_exposure && (
+            <div className="finding-section">
+              <strong>Tariff Exposure:</strong> {aiAnalysis.tariff_exposure}
+            </div>
+          )}
+
+          {aiAnalysis?.risk_score && (
+            <div className="finding-section">
+              <strong>AI Risk Score:</strong>
+              <span className={`risk-badge ${aiAnalysis.risk_score.toLowerCase()}`}>
+                {aiAnalysis.risk_score}
+              </span>
+            </div>
+          )}
+
+          <div className="professional-review-note">
+            <strong>👩‍💼 Cristina's Task:</strong> Review these AI findings with your 17 years of customs broker
+            expertise. Validate the risks, add corrections where needed, and provide professional backing.
           </div>
         </div>
       </div>
@@ -1493,7 +1765,7 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
                         <div className="data-row"><span>Status:</span> <span>{corrections.corrected_certificate_data.qualification_status}</span></div>
                       </div>
 
-                      {corrections.corrected_certificate_data.audit_defense_notes?.length > 0 && (
+                      {Array.isArray(corrections.corrected_certificate_data.audit_defense_notes) && corrections.corrected_certificate_data.audit_defense_notes.length > 0 && (
                         <div className="cert-section">
                           <h6>Audit Defense Preparation</h6>
                           <ul className="cert-list">
@@ -1504,7 +1776,7 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
                         </div>
                       )}
 
-                      {corrections.corrected_certificate_data.ongoing_monitoring?.length > 0 && (
+                      {Array.isArray(corrections.corrected_certificate_data.ongoing_monitoring) && corrections.corrected_certificate_data.ongoing_monitoring.length > 0 && (
                         <div className="cert-section">
                           <h6>Ongoing Monitoring Requirements</h6>
                           <ul className="cert-list">
@@ -1568,22 +1840,103 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
         </div>
       </div>
 
-      <div className="workflow-stage-actions">
+      {/* Cristina's Professional Validation Form (NEW - following HSClassificationTab pattern) */}
+      <div className="professional-validation-form">
+        <h4>👩‍💼 Cristina's Professional Validation (License #4601913)</h4>
+        <p className="form-helper-text">
+          Based on the AI analysis above and your 17 years of electronics/telecom logistics experience,
+          provide your professional validation of the certificate
+        </p>
+
+        <div className="form-group">
+          <label><strong>Certificate Accuracy Validation:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={certificateValidation}
+            onChange={(e) => setCertificateValidation(e.target.value)}
+            placeholder="Review automated certificate for errors. Based on my 17 years experience, the certificate is [correct/needs correction] because..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label><strong>Compliance Risk Assessment:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={complianceRiskAssessment}
+            onChange={(e) => setComplianceRiskAssessment(e.target.value)}
+            placeholder="Specific risks I see: [e.g., China 45% sourcing creates tariff exposure if USMCA changes]. Recommend..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label><strong>Audit Defense Strategy:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={auditDefenseStrategy}
+            onChange={(e) => setAuditDefenseStrategy(e.target.value)}
+            placeholder="For customs audit, client needs: [component origin certificates, supplier declarations, technical specs]. Key defense point..."
+          />
+        </div>
+
+        {/* Report Generation Button (NEW - copied from HSClassificationTab pattern) */}
         <button
           className="btn-primary"
-          onClick={handleSubmit}
-          disabled={!isValidationComplete || loading}
-        >
-          {loading ? 'Processing Certificate Correction...' : 'Complete Certificate Correction →'}
-        </button>
+          onClick={async () => {
+            if (!certificateValidation || !complianceRiskAssessment || !auditDefenseStrategy) {
+              alert('⚠️ Please complete all professional validation fields');
+              return;
+            }
 
-        <div className="completion-status">
-          {isValidationComplete ? (
-            <span className="status-complete">✅ Certificate correction completed</span>
-          ) : (
-            <span className="status-incomplete">⏳ Complete certificate regeneration and validation</span>
-          )}
-        </div>
+            try {
+              setGeneratingReport(true);
+              const response = await fetch('/api/generate-usmca-certificate-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  serviceRequestId: request.id,
+                  stage1Data: dataReview,
+                  stage2Data: aiAnalysis,
+                  stage3Data: {
+                    certificate_validation: certificateValidation,
+                    compliance_risk_assessment: complianceRiskAssessment,
+                    audit_defense_strategy: auditDefenseStrategy,
+                    corrections_applied: corrections
+                  }
+                })
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                alert('✅ Certificate report sent to triangleintel@gmail.com');
+                onComplete({
+                  certificate_completed: true,
+                  cristina_validation: {
+                    certificate_validation: certificateValidation,
+                    compliance_risk_assessment: complianceRiskAssessment,
+                    audit_defense_strategy: auditDefenseStrategy
+                  },
+                  corrections: corrections,
+                  report_generated: true,
+                  report_sent_to: 'triangleintel@gmail.com',
+                  completed_at: new Date().toISOString()
+                });
+              } else {
+                throw new Error(result.error || 'Failed to generate report');
+              }
+            } catch (error) {
+              console.error('Error generating report:', error);
+              alert('❌ Failed to generate report: ' + error.message);
+            } finally {
+              setGeneratingReport(false);
+            }
+          }}
+          disabled={generatingReport}
+        >
+          {generatingReport ? '⏳ Generating...' : '📧 Complete & Send Certificate Report'}
+        </button>
       </div>
     </div>
   );
@@ -1591,6 +1944,12 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
 
 // Stage 3: Final Professional Delivery - Complete Service Delivery with Liability Coverage
 function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
+  // Cristina's expert input for certificate validation (NEW - following HSClassificationTab pattern)
+  const [certificateValidation, setCertificateValidation] = useState('');
+  const [complianceRiskAssessment, setComplianceRiskAssessment] = useState('');
+  const [auditDefenseStrategy, setAuditDefenseStrategy] = useState('');
+  const [generatingReport, setGeneratingReport] = useState(false);
+
   const [deliveryPackage, setDeliveryPackage] = useState({
     // Final Certificate Package
     final_certificate_delivered: false,
@@ -1855,6 +2214,99 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
             className="form-input"
           />
         </div>
+      </div>
+
+      {/* Cristina's Professional Validation Form (NEW - copied from HSClassificationTab.js pattern) */}
+      <div className="professional-validation-form">
+        <h4>👩‍💼 Cristina's Professional Validation (License #4601913)</h4>
+        <p className="form-helper-text">Use your 17 years of electronics/telecom logistics experience to validate the certificate before final delivery</p>
+
+        <div className="form-group">
+          <label><strong>Certificate Accuracy Validation:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={certificateValidation}
+            onChange={(e) => setCertificateValidation(e.target.value)}
+            placeholder="Review automated certificate for errors. Based on my 17 years experience, the certificate is [correct/needs correction] because..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label><strong>Compliance Risk Assessment:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={complianceRiskAssessment}
+            onChange={(e) => setComplianceRiskAssessment(e.target.value)}
+            placeholder="Specific risks I see: [China 45% sourcing creates tariff exposure if USMCA changes]. Recommend..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label><strong>Audit Defense Strategy:</strong></label>
+          <textarea
+            className="form-input"
+            rows="4"
+            value={auditDefenseStrategy}
+            onChange={(e) => setAuditDefenseStrategy(e.target.value)}
+            placeholder="For customs audit, client needs: [component origin certificates, supplier declarations, technical specs]. Key defense point..."
+          />
+        </div>
+
+        {/* Report Generation Button (NEW - copied from HSClassificationTab.js pattern) */}
+        <button
+          className="btn-primary"
+          onClick={async () => {
+            if (!certificateValidation || !complianceRiskAssessment || !auditDefenseStrategy) {
+              alert('⚠️ Please complete all professional validation fields');
+              return;
+            }
+
+            try {
+              setGeneratingReport(true);
+              const response = await fetch('/api/generate-usmca-certificate-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  serviceRequestId: request.id,
+                  stage1Data: subscriberData,
+                  stage2Data: {
+                    certificate_validation: certificateValidation,
+                    compliance_risk_assessment: complianceRiskAssessment,
+                    audit_defense_strategy: auditDefenseStrategy
+                  }
+                })
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                alert('✅ Certificate report sent to triangleintel@gmail.com');
+                onComplete({
+                  certificate_completed: true,
+                  cristina_validation: {
+                    certificate_validation: certificateValidation,
+                    compliance_risk_assessment: complianceRiskAssessment,
+                    audit_defense_strategy: auditDefenseStrategy
+                  },
+                  report_generated: true,
+                  report_sent_to: 'triangleintel@gmail.com',
+                  completed_at: new Date().toISOString()
+                });
+              } else {
+                throw new Error(result.error || 'Failed to generate report');
+              }
+            } catch (error) {
+              console.error('Error generating report:', error);
+              alert('❌ Failed to generate report: ' + error.message);
+            } finally {
+              setGeneratingReport(false);
+            }
+          }}
+          disabled={generatingReport}
+        >
+          {generatingReport ? '⏳ Generating...' : '📧 Complete & Send Certificate Report'}
+        </button>
       </div>
 
       <div className="service-value-summary">

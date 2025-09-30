@@ -6,6 +6,12 @@
 
 import { crisisCalculatorService } from '../../lib/services/crisis-calculator-service.js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -25,19 +31,72 @@ export default async function handler(req, res) {
     });
   }
 
-  const { action, data = {} } = req.body;
+  const { action, data = {}, calculation_type } = req.body;
   const startTime = Date.now();
 
   try {
     logInfo('Crisis calculator API called', {
       action,
+      calculation_type,
       data: typeof data === 'object' ? Object.keys(data) : data,
       raw_body: req.body,
       body_type: typeof req.body,
       data_type: typeof data
     });
 
-    // Validate that action is provided
+    // Handle dashboard analytics requests (from RichDataConnector)
+    if (calculation_type === 'comprehensive' && !action) {
+      logInfo('Dashboard analytics request received', { calculation_type });
+
+      try {
+        // This is a dashboard analytics request, not a user calculation
+        // Return aggregate analytics data without requiring trade volume
+        const { data: calculations, error } = await supabase
+          .from('crisis_calculations')
+          .select('*')
+          .order('calculated_at', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          logError('Failed to fetch crisis analytics', { error: error.message });
+          // Return empty analytics rather than error
+          return res.status(200).json({
+            success: true,
+            calculation_type: 'comprehensive',
+            analytics: {
+              recent_calculations: [],
+              total_count: 0,
+              data_source: 'crisis_calculations_table',
+              note: 'No calculations found or table does not exist yet'
+            }
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          calculation_type: 'comprehensive',
+          analytics: {
+            recent_calculations: calculations || [],
+            total_count: calculations?.length || 0,
+            data_source: 'crisis_calculations_table'
+          }
+        });
+      } catch (error) {
+        logError('Dashboard analytics request failed', { error: error.message });
+        return res.status(200).json({
+          success: true,
+          calculation_type: 'comprehensive',
+          analytics: {
+            recent_calculations: [],
+            total_count: 0,
+            data_source: 'fallback',
+            error: error.message
+          }
+        });
+      }
+    }
+
+    // Validate that action is provided for actual calculations
     if (!action) {
       return res.status(400).json({
         success: false,
@@ -50,7 +109,8 @@ export default async function handler(req, res) {
           'batch_calculate',
           'quick_estimate',
           'health_check'
-        ]
+        ],
+        note: 'For dashboard analytics, use calculation_type: "comprehensive"'
       });
     }
 

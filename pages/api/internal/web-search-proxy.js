@@ -21,8 +21,9 @@ export default async function handler(req, res) {
     try {
       console.log(`[WebSearch Proxy] Performing real web search for: "${query}"`);
 
-      // Call the real web search endpoint
-      const searchResponse = await fetch('http://localhost:3001/api/internal/real-web-search', {
+      // Call the real web search endpoint (relative path for production compatibility)
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      const searchResponse = await fetch(`${baseUrl}/api/internal/real-web-search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

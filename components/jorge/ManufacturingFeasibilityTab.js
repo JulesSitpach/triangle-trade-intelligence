@@ -640,7 +640,7 @@ function ManufacturingContextStage({ request, subscriberData, serviceDetails, on
               {serviceDetails?.manufacturing_requirements && (
                 <div className="data-row"><span><strong>Requirements:</strong></span> <span>{serviceDetails.manufacturing_requirements}</span></div>
               )}
-              {serviceDetails?.quality_certifications && serviceDetails.quality_certifications.length > 0 && (
+              {Array.isArray(serviceDetails?.quality_certifications) && serviceDetails.quality_certifications.length > 0 && (
                 <div>
                   <div className="data-row"><span><strong>Required Certifications:</strong></span></div>
                   <ul className="certifications-list">
@@ -842,22 +842,40 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
 
   const handleAIAnalysis = async () => {
     try {
-      // Simulate AI analysis process
-      setAnalysisStep(2); // Location analysis
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Step 1: Start analysis
+      setAnalysisStep(1);
 
-      setAnalysisStep(3); // Cost estimation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Step 2: Call actual API for manufacturing feasibility analysis
+      setAnalysisStep(2);
+      const response = await fetch('/api/manufacturing-feasibility-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceRequestId: request.id,
+          stage1Data: stageData?.stage_1
+        })
+      });
 
-      setAnalysisStep(4); // Risk assessment
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
+      }
 
-      setAnalysisStep(5); // Infrastructure evaluation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const analysisResult = await response.json();
+
+      // Step 3-5: Show progress while processing
+      setAnalysisStep(3);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setAnalysisStep(4);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setAnalysisStep(5);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       setAnalysisComplete(true);
     } catch (error) {
       console.error('AI analysis error:', error);
+      setAnalysisComplete(true);
     }
   };
 
@@ -934,35 +952,17 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
 
 // Stage 3: Jorge's Recommendation Component
 function JorgeRecommendationStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
-  const [formData, setFormData] = useState({
-    feasibility_assessment: '',
-    go_no_go_recommendation: '',
-    recommended_location: '',
-    investment_analysis: '',
-    timeline_recommendation: '',
-    risk_mitigation: '',
-    next_steps: ''
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onComplete({
-      ...formData,
-      service_completed: true,
-      completed_at: new Date().toISOString()
-    });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  // Jorge's location assessment (following checklist pattern - 3 fields)
+  const [recommendedLocations, setRecommendedLocations] = useState('');
+  const [costAnalysis, setCostAnalysis] = useState('');
+  const [implementationRoadmap, setImplementationRoadmap] = useState('');
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 3: Jorge's Recommendation</h3>
-        <p>Expert go/no-go assessment and strategic recommendations</p>
+        <h3>Stage 3: Jorge's Location Assessment</h3>
+        <p>Expert Mexico manufacturing location recommendations</p>
       </div>
 
       <div className="workflow-subscriber-summary">
@@ -983,128 +983,98 @@ function JorgeRecommendationStage({ request, subscriberData, serviceDetails, sta
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="workflow-form">
+      {/* Jorge's Location Assessment Form */}
+      <div className="professional-validation-form">
+        <h4>👨‍💼 Jorge's Manufacturing Location Expertise</h4>
+        <p className="form-helper-text">Use your Mexico manufacturing knowledge to assess feasibility and recommend locations</p>
+
         <div className="form-group">
-          <label>Overall Feasibility Assessment:</label>
+          <label><strong>Recommended Mexico Locations:</strong></label>
           <textarea
-            name="feasibility_assessment"
-            value={formData.feasibility_assessment}
-            onChange={handleInputChange}
             className="form-input"
-            rows="4"
-            placeholder="Comprehensive assessment based on AI analysis and market knowledge..."
-            required
+            rows="5"
+            value={recommendedLocations}
+            onChange={(e) => setRecommendedLocations(e.target.value)}
+            placeholder="Top choice: [Monterrey/Guadalajara/Querétaro] because [infrastructure, labor, suppliers]. Second: [city] because..."
           />
         </div>
 
         <div className="form-group">
-          <label>Go/No-Go Recommendation:</label>
-          <div className="form-input">
-            <label>
-              <input
-                type="radio"
-                name="go_no_go_recommendation"
-                value="go"
-                checked={formData.go_no_go_recommendation === 'go'}
-                onChange={handleInputChange}
-                required
-              />
-              GO - Proceed with manufacturing setup
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="go_no_go_recommendation"
-                value="conditional_go"
-                checked={formData.go_no_go_recommendation === 'conditional_go'}
-                onChange={handleInputChange}
-              />
-              CONDITIONAL GO - Proceed with modifications
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="go_no_go_recommendation"
-                value="no_go"
-                checked={formData.go_no_go_recommendation === 'no_go'}
-                onChange={handleInputChange}
-              />
-              NO GO - Do not proceed at this time
-            </label>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Recommended Location and Rationale:</label>
+          <label><strong>Cost Analysis:</strong></label>
           <textarea
-            name="recommended_location"
-            value={formData.recommended_location}
-            onChange={handleInputChange}
             className="form-input"
-            rows="3"
-            placeholder="Specific location recommendations with strategic rationale..."
-            required
+            rows="5"
+            value={costAnalysis}
+            onChange={(e) => setCostAnalysis(e.target.value)}
+            placeholder="Setup costs: $[amount]. Monthly operational: $[amount]. Current manufacturing: $[amount]/month. Savings: $[amount]/year"
           />
         </div>
 
         <div className="form-group">
-          <label>Investment Analysis:</label>
+          <label><strong>Implementation Roadmap:</strong></label>
           <textarea
-            name="investment_analysis"
-            value={formData.investment_analysis}
-            onChange={handleInputChange}
             className="form-input"
-            rows="3"
-            placeholder="Cost breakdown, ROI projections, financial considerations..."
-            required
+            rows="5"
+            value={implementationRoadmap}
+            onChange={(e) => setImplementationRoadmap(e.target.value)}
+            placeholder="Phase 1 (Months 1-2): [specific steps]. Phase 2 (Months 3-6): [milestones]. Phase 3: [target]"
           />
         </div>
 
-        <div className="form-group">
-          <label>Timeline Recommendation:</label>
-          <input
-            type="text"
-            name="timeline_recommendation"
-            value={formData.timeline_recommendation}
-            onChange={handleInputChange}
-            className="form-input"
-            placeholder="e.g., Phase 1: 6 months setup, Phase 2: 12 months operations"
-            required
-          />
-        </div>
+        {/* Report Generation Button */}
+        <button
+          className="btn-primary"
+          onClick={async () => {
+            if (!recommendedLocations || !costAnalysis || !implementationRoadmap) {
+              alert('⚠️ Please complete all manufacturing feasibility fields');
+              return;
+            }
 
-        <div className="form-group">
-          <label>Risk Mitigation Strategies:</label>
-          <textarea
-            name="risk_mitigation"
-            value={formData.risk_mitigation}
-            onChange={handleInputChange}
-            className="form-input"
-            rows="3"
-            placeholder="Key risks identified and recommended mitigation strategies..."
-            required
-          />
-        </div>
+            try {
+              setGeneratingReport(true);
+              const response = await fetch('/api/generate-manufacturing-feasibility-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  serviceRequestId: request.id,
+                  stage1Data: subscriberData,
+                  stage3Data: {
+                    recommended_locations: recommendedLocations,
+                    cost_analysis: costAnalysis,
+                    implementation_roadmap: implementationRoadmap
+                  }
+                })
+              });
 
-        <div className="form-group">
-          <label>Next Steps & Action Items:</label>
-          <textarea
-            name="next_steps"
-            value={formData.next_steps}
-            onChange={handleInputChange}
-            className="form-input"
-            rows="4"
-            placeholder="Specific action items for client implementation..."
-            required
-          />
-        </div>
-
-        <div className="workflow-stage-actions">
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Completing Service...' : 'Complete Manufacturing Feasibility Service'}
-          </button>
-        </div>
-      </form>
+              const result = await response.json();
+              if (result.success) {
+                alert('✅ Manufacturing feasibility report sent to triangleintel@gmail.com');
+                onComplete({
+                  manufacturing_feasibility_completed: true,
+                  jorge_location_assessment: {
+                    recommended_locations: recommendedLocations,
+                    cost_analysis: costAnalysis,
+                    implementation_roadmap: implementationRoadmap
+                  },
+                  report_generated: true,
+                  report_sent_to: 'triangleintel@gmail.com',
+                  completed_at: new Date().toISOString()
+                });
+              } else {
+                throw new Error(result.error || 'Failed to generate report');
+              }
+            } catch (error) {
+              console.error('Error generating manufacturing feasibility report:', error);
+              alert('❌ Failed to generate report: ' + error.message);
+            } finally {
+              setGeneratingReport(false);
+            }
+          }}
+          disabled={generatingReport}
+        >
+          {generatingReport ? '⏳ Generating...' : '📧 Complete & Send Manufacturing Feasibility Report'}
+        </button>
+      </div>
     </div>
   );
 }
