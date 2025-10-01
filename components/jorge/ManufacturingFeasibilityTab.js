@@ -705,123 +705,62 @@ function ManufacturingContextStage({ request, subscriberData, serviceDetails, on
 
       <form onSubmit={handleSubmit} className="workflow-form">
         <div className="form-group">
-          <label>Manufacturing scope and objectives:</label>
+          <label><strong>What's your top priority for Mexico manufacturing?</strong></label>
+          <p className="form-helper-text">We already know your product ({subscriberData?.product_description || 'product'}), requirements, and supply chain. Just tell us what matters most:</p>
           <div className="form-input">
             <label>
               <input
                 type="radio"
-                name="manufacturing_scope"
-                value="full_production"
-                checked={formData.manufacturing_scope === 'full_production'}
+                name="manufacturing_priority"
+                value="cost_savings"
+                checked={formData.manufacturing_priority === 'cost_savings'}
                 onChange={handleInputChange}
                 required
               />
-              Full production facility (complete manufacturing)
+              💰 <strong>Cost Savings</strong> - Minimize setup and operational costs while maintaining quality
             </label>
             <label>
               <input
                 type="radio"
-                name="manufacturing_scope"
-                value="assembly_operation"
-                checked={formData.manufacturing_scope === 'assembly_operation'}
+                name="manufacturing_priority"
+                value="quality_control"
+                checked={formData.manufacturing_priority === 'quality_control'}
                 onChange={handleInputChange}
               />
-              Assembly operation (component integration)
+              ✅ <strong>Quality Control</strong> - Premium facilities with ISO/FDA certifications and proven track record
             </label>
             <label>
               <input
                 type="radio"
-                name="manufacturing_scope"
-                value="finishing_packaging"
-                checked={formData.manufacturing_scope === 'finishing_packaging'}
+                name="manufacturing_priority"
+                value="fast_setup"
+                checked={formData.manufacturing_priority === 'fast_setup'}
                 onChange={handleInputChange}
               />
-              Finishing and packaging only
+              ⚡ <strong>Fast Setup</strong> - Locations ready for production within 3-6 months
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="manufacturing_priority"
+                value="strategic_location"
+                checked={formData.manufacturing_priority === 'strategic_location'}
+                onChange={handleInputChange}
+              />
+              🎯 <strong>Strategic Location</strong> - Best overall value (infrastructure + logistics + labor)
             </label>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Investment budget range:</label>
-          <select
-            name="investment_budget"
-            value={formData.investment_budget}
-            onChange={handleInputChange}
-            className="form-input"
-            required
-          >
-            <option value="">Select budget range</option>
-            <option value="under_500k">Under $500K</option>
-            <option value="500k_2m">$500K - $2M</option>
-            <option value="2m_5m">$2M - $5M</option>
-            <option value="5m_plus">$5M+</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Timeline expectations:</label>
-          <select
-            name="timeline_expectation"
-            value={formData.timeline_expectation}
-            onChange={handleInputChange}
-            className="form-input"
-            required
-          >
-            <option value="">Select timeline</option>
-            <option value="6_months">6 months</option>
-            <option value="12_months">12 months</option>
-            <option value="18_months">18 months</option>
-            <option value="24_months">24+ months</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Location preference (if any):</label>
-          <input
-            type="text"
-            name="location_preference"
-            value={formData.location_preference}
-            onChange={handleInputChange}
-            className="form-input"
-            placeholder="e.g., Northern Mexico, specific states, border regions"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Expected production volume:</label>
-          <input
-            type="text"
-            name="production_volume"
-            value={formData.production_volume}
-            onChange={handleInputChange}
-            className="form-input"
-            placeholder="e.g., units per month, annual capacity"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Quality and certification requirements:</label>
+          <label>Any additional notes for Jorge? (Optional)</label>
           <textarea
-            name="quality_requirements"
-            value={formData.quality_requirements}
+            name="additional_requirements"
+            value={formData.additional_requirements}
             onChange={handleInputChange}
             className="form-input"
             rows="3"
-            placeholder="ISO certifications, industry standards, quality control requirements..."
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Regulatory or compliance considerations:</label>
-          <textarea
-            name="regulatory_considerations"
-            value={formData.regulatory_considerations}
-            onChange={handleInputChange}
-            className="form-input"
-            rows="3"
-            placeholder="USMCA requirements, export controls, environmental regulations..."
+            placeholder="Example: Need near-border location, specific certifications, labor considerations..."
           />
         </div>
 
@@ -879,7 +818,12 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setAnalysisStep(6);
-      setAnalysisResult(result);
+      // Extract ai_analysis from API response
+      const aiAnalysis = result.ai_analysis || result;
+      setAnalysisResult({
+        ...aiAnalysis,
+        raw_full_response: result // Keep full response for debugging
+      });
       setAnalysisComplete(true);
     } catch (error) {
       console.error('AI analysis error:', error);
@@ -905,20 +849,31 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
       </div>
 
       <div className="workflow-subscriber-summary">
-        <h4>🎯 Analysis Parameters</h4>
+        <h4>🎯 Client Requirements</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
-            <strong>Scope:</strong> {stageData?.stage_1?.manufacturing_scope?.replace('_', ' ') || 'Not defined'}
+            <strong>Company:</strong> {subscriberData?.company_name || request?.client_company}
           </div>
           <div className="workflow-data-item">
-            <strong>Budget:</strong> {stageData?.stage_1?.investment_budget?.replace('_', ' ') || 'Not defined'}
+            <strong>Product:</strong> {subscriberData?.product_description}
           </div>
           <div className="workflow-data-item">
-            <strong>Timeline:</strong> {stageData?.stage_1?.timeline_expectation?.replace('_', ' ') || 'Not defined'}
+            <strong>Priority:</strong> {
+              stageData?.stage_1?.manufacturing_priority === 'cost_savings' ? '💰 Cost Savings' :
+              stageData?.stage_1?.manufacturing_priority === 'quality_control' ? '✅ Quality Control' :
+              stageData?.stage_1?.manufacturing_priority === 'fast_setup' ? '⚡ Fast Setup' :
+              stageData?.stage_1?.manufacturing_priority === 'strategic_location' ? '🎯 Strategic Location' :
+              'Not defined'
+            }
           </div>
           <div className="workflow-data-item">
-            <strong>Volume:</strong> {stageData?.stage_1?.production_volume || 'Not defined'}
+            <strong>Trade Volume:</strong> ${Number(subscriberData?.trade_volume || 0).toLocaleString()}/year
           </div>
+          {stageData?.stage_1?.additional_requirements && (
+            <div className="workflow-data-item" style={{gridColumn: '1 / -1'}}>
+              <strong>Additional Notes:</strong> {stageData.stage_1.additional_requirements}
+            </div>
+          )}
         </div>
       </div>
 
@@ -954,71 +909,257 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
         <div className="workflow-ai-results">
           <h4>🤖 AI Feasibility Analysis Results</h4>
 
-          {analysisResult.location_analysis && (
+          {analysisResult.feasibility_score && (
             <div className="ai-analysis-section">
-              <h5>📍 Location Analysis:</h5>
+              <h5>📊 Overall Feasibility Score: {analysisResult.feasibility_score}/10</h5>
+            </div>
+          )}
+
+          {analysisResult.recommended_locations && Array.isArray(analysisResult.recommended_locations) && analysisResult.recommended_locations.length > 0 && (
+            <div className="ai-analysis-section">
+              <h5>📍 Recommended Mexico Locations:</h5>
               <div className="analysis-content">
-                {typeof analysisResult.location_analysis === 'object' ? (
-                  <pre>{JSON.stringify(analysisResult.location_analysis, null, 2)}</pre>
-                ) : (
-                  <p>{String(analysisResult.location_analysis)}</p>
+                {analysisResult.recommended_locations.map((loc, idx) => (
+                  <div key={idx} style={{marginBottom: '20px', borderLeft: '3px solid #134169', paddingLeft: '15px', backgroundColor: '#f9fafb', padding: '12px'}}>
+                    <p style={{fontSize: '1.1em', marginBottom: '8px'}}><strong>{loc.city}, {loc.region}</strong></p>
+
+                    {loc.advantages && (
+                      <div style={{marginBottom: '8px'}}>
+                        <strong>Advantages:</strong>
+                        {Array.isArray(loc.advantages) ? (
+                          <ul style={{marginTop: '4px', marginBottom: '0'}}>
+                            {loc.advantages.map((adv, i) => <li key={i}>{adv}</li>)}
+                          </ul>
+                        ) : <span> {typeof loc.advantages === 'string' ? loc.advantages : JSON.stringify(loc.advantages)}</span>}
+                      </div>
+                    )}
+
+                    {loc.labor_profile && typeof loc.labor_profile === 'object' && (
+                      <div style={{marginBottom: '8px'}}>
+                        <strong>Labor Profile:</strong>
+                        <ul style={{marginTop: '4px', marginBottom: '0'}}>
+                          {loc.labor_profile.skill_level && <li>Skill Level: {loc.labor_profile.skill_level}</li>}
+                          {loc.labor_profile.engineering_density && <li>Engineering Talent: {loc.labor_profile.engineering_density}</li>}
+                          {loc.labor_profile.average_wage && <li>Average Wage: {loc.labor_profile.average_wage}</li>}
+                        </ul>
+                      </div>
+                    )}
+
+                    {loc.infrastructure && typeof loc.infrastructure === 'object' && (
+                      <div style={{marginBottom: '8px'}}>
+                        <strong>Infrastructure:</strong>
+                        <ul style={{marginTop: '4px', marginBottom: '0'}}>
+                          {loc.infrastructure.highways && <li>Highways: {loc.infrastructure.highways}</li>}
+                          {loc.infrastructure.airports && <li>Airports: {loc.infrastructure.airports}</li>}
+                          {loc.infrastructure.industrial_parks && <li>Industrial Parks: {loc.infrastructure.industrial_parks}</li>}
+                          {loc.infrastructure.utilities && <li>Utilities: {loc.infrastructure.utilities}</li>}
+                        </ul>
+                      </div>
+                    )}
+
+                    {loc.cost_profile && typeof loc.cost_profile === 'object' && (
+                      <div style={{marginBottom: '8px'}}>
+                        <strong>Cost Profile:</strong>
+                        <ul style={{marginTop: '4px', marginBottom: '0'}}>
+                          {loc.cost_profile.facility_cost && <li>Facility Cost: {loc.cost_profile.facility_cost}</li>}
+                          {loc.cost_profile.operational_efficiency && <li>Operational Efficiency: {loc.cost_profile.operational_efficiency}</li>}
+                        </ul>
+                      </div>
+                    )}
+
+                    {loc.timeline && <p style={{marginBottom: '0'}}><strong>Timeline:</strong> {typeof loc.timeline === 'string' ? loc.timeline : JSON.stringify(loc.timeline)}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.financial_analysis && (
+            <div className="ai-analysis-section">
+              <h5>💰 Financial Analysis:</h5>
+              <div className="analysis-content">
+                {analysisResult.financial_analysis.setup_costs && typeof analysisResult.financial_analysis.setup_costs === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Setup Costs:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {analysisResult.financial_analysis.setup_costs.estimated_range && <li>Range: {analysisResult.financial_analysis.setup_costs.estimated_range}</li>}
+                      {analysisResult.financial_analysis.setup_costs.includes && Array.isArray(analysisResult.financial_analysis.setup_costs.includes) && (
+                        <li>Includes: {analysisResult.financial_analysis.setup_costs.includes.join(', ')}</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {analysisResult.financial_analysis.annual_operational_costs && typeof analysisResult.financial_analysis.annual_operational_costs === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Annual Operational Costs:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {analysisResult.financial_analysis.annual_operational_costs.estimated_range && <li>Range: {analysisResult.financial_analysis.annual_operational_costs.estimated_range}</li>}
+                      {analysisResult.financial_analysis.annual_operational_costs.breakdown && typeof analysisResult.financial_analysis.annual_operational_costs.breakdown === 'object' && (
+                        <li>Breakdown:
+                          <ul style={{marginTop: '4px'}}>
+                            {Object.entries(analysisResult.financial_analysis.annual_operational_costs.breakdown).map(([key, value]) => (
+                              <li key={key}>{key.charAt(0).toUpperCase() + key.slice(1)}: {value}</li>
+                            ))}
+                          </ul>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {analysisResult.financial_analysis.cost_comparison && typeof analysisResult.financial_analysis.cost_comparison === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Cost Comparison:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {Object.entries(analysisResult.financial_analysis.cost_comparison).map(([key, value]) => (
+                        <li key={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: {value}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {analysisResult.financial_analysis.roi_calculation && typeof analysisResult.financial_analysis.roi_calculation === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>ROI Analysis:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {Object.entries(analysisResult.financial_analysis.roi_calculation).map(([key, value]) => (
+                        <li key={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: {value}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {analysisResult.financial_analysis.payback_period && typeof analysisResult.financial_analysis.payback_period === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Payback Period:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {Object.entries(analysisResult.financial_analysis.payback_period).map(([key, value]) => (
+                        <li key={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: {Array.isArray(value) ? value.join(', ') : value}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             </div>
           )}
 
-          {analysisResult.cost_analysis && (
+          {analysisResult.implementation_timeline && (
             <div className="ai-analysis-section">
-              <h5>💰 Cost Analysis:</h5>
+              <h5>⏱️ Implementation Timeline:</h5>
               <div className="analysis-content">
-                {typeof analysisResult.cost_analysis === 'object' ? (
-                  <pre>{JSON.stringify(analysisResult.cost_analysis, null, 2)}</pre>
-                ) : (
-                  <p>{String(analysisResult.cost_analysis)}</p>
+                {analysisResult.implementation_timeline.phase1 && typeof analysisResult.implementation_timeline.phase1 === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Phase 1:</strong> {analysisResult.implementation_timeline.phase1.duration || ''}
+                    {analysisResult.implementation_timeline.phase1.activities && Array.isArray(analysisResult.implementation_timeline.phase1.activities) && (
+                      <ul style={{marginTop: '4px'}}>
+                        {analysisResult.implementation_timeline.phase1.activities.map((activity, i) => (
+                          <li key={i}>{activity}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {analysisResult.implementation_timeline.phase2 && typeof analysisResult.implementation_timeline.phase2 === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Phase 2:</strong> {analysisResult.implementation_timeline.phase2.duration || ''}
+                    {analysisResult.implementation_timeline.phase2.activities && Array.isArray(analysisResult.implementation_timeline.phase2.activities) && (
+                      <ul style={{marginTop: '4px'}}>
+                        {analysisResult.implementation_timeline.phase2.activities.map((activity, i) => (
+                          <li key={i}>{activity}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {analysisResult.implementation_timeline.phase3 && typeof analysisResult.implementation_timeline.phase3 === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Phase 3:</strong> {analysisResult.implementation_timeline.phase3.duration || ''}
+                    {analysisResult.implementation_timeline.phase3.activities && Array.isArray(analysisResult.implementation_timeline.phase3.activities) && (
+                      <ul style={{marginTop: '4px'}}>
+                        {analysisResult.implementation_timeline.phase3.activities.map((activity, i) => (
+                          <li key={i}>{activity}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {analysisResult.implementation_timeline.total_months && (
+                  <p><strong>Total Timeline:</strong> {String(analysisResult.implementation_timeline.total_months)} months</p>
                 )}
               </div>
             </div>
           )}
 
-          {analysisResult.risk_assessment && (
+          {analysisResult.risk_assessment && Array.isArray(analysisResult.risk_assessment) && analysisResult.risk_assessment.length > 0 && (
             <div className="ai-analysis-section">
               <h5>⚠️ Risk Assessment:</h5>
               <div className="analysis-content">
-                {typeof analysisResult.risk_assessment === 'object' ? (
-                  <pre>{JSON.stringify(analysisResult.risk_assessment, null, 2)}</pre>
-                ) : (
-                  <p>{String(analysisResult.risk_assessment)}</p>
+                {analysisResult.risk_assessment.map((risk, idx) => (
+                  <div key={idx} style={{marginBottom: '10px'}}>
+                    <p><strong>{risk.risk_category}:</strong></p>
+                    <p><em>Risks:</em> {
+                      Array.isArray(risk.specific_risks)
+                        ? risk.specific_risks.join(', ')
+                        : (typeof risk.specific_risks === 'object'
+                            ? JSON.stringify(risk.specific_risks)
+                            : String(risk.specific_risks || ''))
+                    }</p>
+                    <p><em>Mitigation:</em> {
+                      Array.isArray(risk.mitigation_strategies)
+                        ? risk.mitigation_strategies.join(', ')
+                        : (typeof risk.mitigation_strategies === 'object'
+                            ? JSON.stringify(risk.mitigation_strategies)
+                            : String(risk.mitigation_strategies || ''))
+                    }</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.usmca_strategy && (
+            <div className="ai-analysis-section">
+              <h5>🍁 USMCA Strategy:</h5>
+              <div className="analysis-content">
+                {analysisResult.usmca_strategy.regional_value_content && typeof analysisResult.usmca_strategy.regional_value_content === 'object' && (
+                  <div style={{marginBottom: '12px'}}>
+                    <strong>Regional Value Content:</strong>
+                    <ul style={{marginTop: '4px'}}>
+                      {analysisResult.usmca_strategy.regional_value_content.target_percentage && <li>Target: {analysisResult.usmca_strategy.regional_value_content.target_percentage}</li>}
+                      {analysisResult.usmca_strategy.regional_value_content.calculation_method && <li>Method: {analysisResult.usmca_strategy.regional_value_content.calculation_method}</li>}
+                      {analysisResult.usmca_strategy.regional_value_content.documentation_requirements && Array.isArray(analysisResult.usmca_strategy.regional_value_content.documentation_requirements) && (
+                        <li>Documentation:
+                          <ul style={{marginTop: '4px'}}>
+                            {analysisResult.usmca_strategy.regional_value_content.documentation_requirements.map((req, i) => (
+                              <li key={i}>{req}</li>
+                            ))}
+                          </ul>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {analysisResult.usmca_strategy.qualification_timeline && (
+                  <p><strong>Qualification Timeline:</strong> {typeof analysisResult.usmca_strategy.qualification_timeline === 'string' ? analysisResult.usmca_strategy.qualification_timeline : JSON.stringify(analysisResult.usmca_strategy.qualification_timeline)}</p>
+                )}
+
+                {analysisResult.usmca_strategy.certification_requirements && (
+                  <p><strong>Required Certifications:</strong> {Array.isArray(analysisResult.usmca_strategy.certification_requirements) ? analysisResult.usmca_strategy.certification_requirements.join(', ') : (typeof analysisResult.usmca_strategy.certification_requirements === 'string' ? analysisResult.usmca_strategy.certification_requirements : JSON.stringify(analysisResult.usmca_strategy.certification_requirements))}</p>
                 )}
               </div>
             </div>
           )}
 
-          {analysisResult.recommendations && (
-            <div className="ai-analysis-section">
-              <h5>💡 Strategic Recommendations:</h5>
-              <div className="analysis-content">
-                {Array.isArray(analysisResult.recommendations) ? (
-                  <ul>
-                    {analysisResult.recommendations.map((rec, idx) => (
-                      <li key={idx}>{String(rec)}</li>
-                    ))}
-                  </ul>
-                ) : typeof analysisResult.recommendations === 'object' ? (
-                  <pre>{JSON.stringify(analysisResult.recommendations, null, 2)}</pre>
-                ) : (
-                  <p>{String(analysisResult.recommendations)}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {analysisResult.feasibility_score && (
-            <div className="ai-analysis-section">
-              <h5>📊 Feasibility Score:</h5>
-              <div className="analysis-content">
-                <p><strong>{analysisResult.feasibility_score}</strong></p>
-              </div>
-            </div>
+          {analysisResult.raw_ai_analysis && (
+            <details className="workflow-details">
+              <summary><strong>📄 View Complete AI Analysis (Raw)</strong></summary>
+              <pre style={{whiteSpace: 'pre-wrap', fontSize: '0.9em', lineHeight: '1.4'}}>{analysisResult.raw_ai_analysis}</pre>
+            </details>
           )}
         </div>
       )}
@@ -1077,39 +1218,39 @@ function JorgeRecommendationStage({ request, subscriberData, serviceDetails, sta
 
       {/* Jorge's Location Assessment Form */}
       <div className="professional-validation-form">
-        <h4>👨‍💼 Jorge's Manufacturing Location Expertise</h4>
-        <p className="form-helper-text">Use your Mexico manufacturing knowledge to assess feasibility and recommend locations</p>
+        <h4>👨‍💼 Jorge's Location Research (Research Mexico Options First!)</h4>
+        <p className="form-helper-text"><strong>Step 1:</strong> Research AI-recommended locations. <strong>Step 2:</strong> Document findings below to generate client report.</p>
 
         <div className="form-group">
-          <label><strong>Recommended Mexico Locations:</strong></label>
+          <label><strong>What Mexico locations did you research? What did you find?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={recommendedLocations}
             onChange={(e) => setRecommendedLocations(e.target.value)}
-            placeholder="Top choice: [Monterrey/Guadalajara/Querétaro] because [infrastructure, labor, suppliers]. Second: [city] because..."
+            placeholder="Example: Researched Monterrey - strong automotive infrastructure, 3 available industrial parks. Checked Querétaro - skilled labor. Total: 3 viable locations."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Cost Analysis:</strong></label>
+          <label><strong>What can CLIENT do themselves (DIY steps)?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={costAnalysis}
             onChange={(e) => setCostAnalysis(e.target.value)}
-            placeholder="Setup costs: $[amount]. Monthly operational: $[amount]. Current manufacturing: $[amount]/month. Savings: $[amount]/year"
+            placeholder="Example: Week 1: Visit 3 locations I identified. Week 2: Compare facility costs. Week 3: Interview labor agencies. Week 4: Select location."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Implementation Roadmap:</strong></label>
+          <label><strong>What hourly services can CLIENT purchase from you?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={implementationRoadmap}
             onChange={(e) => setImplementationRoadmap(e.target.value)}
-            placeholder="Phase 1 (Months 1-2): [specific steps]. Phase 2 (Months 3-6): [milestones]. Phase 3: [target]"
+            placeholder="Example: Site selection support ($175/hr). Lease negotiations in Spanish ($150/hr). Setup coordination ($200/hr). Client decides if needed."
           />
         </div>
 

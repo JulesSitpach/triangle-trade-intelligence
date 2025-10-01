@@ -47,132 +47,51 @@ export default async function handler(req, res) {
       || (subscriberData.product_description ? `${subscriberData.product_description}` : null)
       || 'international trade';
 
-    // Generate comprehensive market entry report using OpenRouter
-    const reportPrompt = `PROFESSIONAL MEXICO MARKET ENTRY STRATEGY REPORT
+    // Generate CLIENT-FOCUSED action plan (not AI theater)
+    const reportPrompt = `You are Jorge Ochoa, Mexico market entry expert. Create a SHORT, actionable report for ${subscriberData.company_name || 'the client'}.
 
-BUSINESS CONTEXT:
-Company: ${subscriberData.company_name || 'N/A'}
-Product: ${subscriberData.product_description || 'N/A'}
-Current Operations: ${subscriberData.manufacturing_location || 'N/A'}
-Trade Volume: $${subscriberData.trade_volume || 'N/A'}
+CLIENT NEEDS:
+- Product: ${subscriberData.product_description || 'product/service'}
+- Goal: Enter Mexico market
+- Target: ${stage1Data.target_markets || 'Mexico market'}
 
-STAGE 1 - MEXICO MARKET STRATEGY:
-Target Products for Mexico Market: ${stage1Data.target_products}
-Target Markets: ${stage1Data.target_markets}
-Current Presence: ${stage1Data.current_presence}
-Market Entry Timeline: ${stage1Data.timeline}
-Budget Range: ${stage1Data.budget_range}
-Priority Level: ${stage1Data.priority_level}
+MARKET OPPORTUNITIES JORGE RESEARCHED:
+${stage3Data.market_assessment}
 
-JORGE'S MARKET ENTRY EXPERTISE:
-Mexico Market Assessment: ${stage3Data.market_assessment}
-Key Relationships to Build: ${stage3Data.key_relationships}
-Entry Strategy: ${stage3Data.entry_strategy}
+CLIENT DIY PLAN:
+${stage3Data.key_relationships}
 
-FINANCIAL CONTEXT:
-Current Trade Volume: $${subscriberData.trade_volume || 'N/A'}
-USMCA Qualification: ${subscriberData.qualification_status || 'Under review'}
-Market Opportunity Priority: ${stage1Data.priority_level}
+JORGE'S HOURLY SERVICES:
+${stage3Data.entry_strategy}
 
-COMPLIANCE GAPS:
-${Array.isArray(subscriberData.compliance_gaps) ? subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n') : 'None identified'}
+Create a 1-2 page report with:
 
-As Jorge Ochoa, B2B sales expert with proven track record in ${industryContext} sectors exceeding sales targets, bilingual (Spanish/English), cultural bridge for North American companies, with deep Mexico market knowledge:
+**MEXICO MARKET OPPORTUNITIES WE FOUND (3-4 opportunities)**
+For each opportunity:
+- Market sector/segment
+- Market size and growth
+- Competition level
+- Entry barriers
 
-Generate a professional Market Entry Strategy Report with these sections:
+**WHAT YOU (CLIENT) DO NEXT - 4 WEEK PLAN**
+Week 1: [Specific action client takes]
+Week 2: [What client needs to do]
+Week 3: [Client responsibilities]
+Week 4: [Expected outcome]
 
-1. EXECUTIVE SUMMARY
-   - Market entry objective and business opportunity
-   - Mexico market landscape overview
-   - Recommended entry strategy
-   - Revenue potential and timeline
-   - Investment required and expected ROI
+**WHAT JORGE DOES FOR YOU**
+- Local partnership introductions
+- Regulatory guidance in Spanish
+- Market launch coordination
+- Cultural bridge support
 
-2. MEXICO MARKET ANALYSIS
-   - Market size and growth trends
-   - Customer segments and buying behavior
-   - Demand drivers and market dynamics
-   - Regulatory environment and compliance requirements
-   - Cultural and business practice considerations
+**REVENUE & INVESTMENT ESTIMATE**
+- Market opportunity: $[amount]
+- Entry investment: $[amount]
+- Year 1 revenue potential: $[amount]
+- Timeline to first revenue: [months]
 
-3. COMPETITIVE LANDSCAPE
-   - Major competitors and market share analysis
-   - Competitive advantages and disadvantages
-   - Market positioning opportunities
-   - Differentiation strategy recommendations
-   - Pricing analysis and strategy
-
-4. ENTRY STRATEGY RECOMMENDATION
-   - Recommended market entry mode (direct sales, distributor, joint venture, etc.)
-   - Phase-by-phase implementation plan
-   - Geographic market prioritization (Mexico City, Monterrey, Guadalajara, etc.)
-   - Channel strategy (B2B, B2C, hybrid)
-   - Partnership and alliance opportunities
-
-5. DISTRIBUTION & SALES CHANNELS
-   - Optimal distribution channel analysis
-   - Partner/distributor identification and selection criteria
-   - Sales team structure recommendations
-   - Logistics and supply chain considerations
-   - E-commerce and digital presence strategy
-
-6. MARKETING & BRAND POSITIONING
-   - Brand positioning for Mexico market
-   - Marketing message adaptation for Mexican culture
-   - Promotional strategy and tactics
-   - Digital marketing and social media approach
-   - Trade show and industry event participation
-
-7. REGULATORY & COMPLIANCE FRAMEWORK
-   - Import/export regulations and documentation
-   - Product certifications and standards (NOM, etc.)
-   - Tax and customs considerations
-   - USMCA benefits and compliance
-   - Legal entity and business structure recommendations
-
-8. FINANCIAL PROJECTIONS & ROI
-   - 3-year revenue projections
-   - Market entry investment requirements
-   - Operating cost structure in Mexico
-   - Break-even analysis and timeline
-   - Expected ROI and profitability metrics
-
-9. RISK ASSESSMENT & MITIGATION
-   - Political and economic risks
-   - Currency exchange risk management
-   - Competition and market acceptance risks
-   - Operational and supply chain risks
-   - Mitigation strategies for each risk category
-
-10. IMPLEMENTATION ROADMAP
-   - Phase 1: Market validation and partnership development (Months 1-3)
-   - Phase 2: Legal entity setup and regulatory compliance (Months 2-4)
-   - Phase 3: Sales team hiring and training (Months 3-5)
-   - Phase 4: Pilot launch in priority markets (Months 5-7)
-   - Phase 5: Full market expansion and optimization (Months 7-18)
-
-11. JORGE'S PROFESSIONAL VALIDATION
-Write in first person as Jorge, incorporating his market entry expertise verbatim:
-
-"With my Mexico trade network and B2B sales experience, I have assessed the following:
-
-**Market Assessment:** ${stage3Data.market_assessment}
-
-**Key Relationships:** ${stage3Data.key_relationships}
-
-**Entry Strategy:** ${stage3Data.entry_strategy}
-
-Based on my professional network, the client should immediately contact [SPECIFIC distributor/partner from my relationships]. I will personally facilitate the introduction and first meeting. Expected outcome: [SPECIFIC revenue projection and market share from entry strategy]."
-
-TONE: Direct, relationship-focused, revenue-driven. Use actual company name (${subscriberData.company_name}) and Jorge's specific Mexico partner names. Show expertise through concrete relationship introductions and market entry steps, not generic advice.
-
-FORBIDDEN PHRASES:
-- "comprehensive market analysis" without specific partner names and revenue targets
-- "company with undisclosed details" (use ${subscriberData.company_name})
-- "requires further research" (provide the partner introductions NOW)
-- Generic advice like "build relationships" (name specific Mexico distributors/partners with contacts)
-
-Format as actionable market entry report with specific Mexico partner introductions from Jorge's network, revenue projections from market assessment, and quarter-by-quarter entry strategy.`;
+Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "What do I DO with this info?"`;
 
     console.log('[MARKET ENTRY REPORT] Calling OpenRouter API...');
 

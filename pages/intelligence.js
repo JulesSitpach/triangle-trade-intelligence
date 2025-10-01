@@ -50,7 +50,7 @@ export default function TradeIntelligence() {
     {
       title: 'Tariff Monitor Dashboard',
       description: 'Real-time tariff change tracking with automated alerts and impact analysis',
-      link: '/trump-tariff-alerts'
+      link: '/trade-risk-alternatives'
     },
     {
       title: 'Supply Chain Intelligence',

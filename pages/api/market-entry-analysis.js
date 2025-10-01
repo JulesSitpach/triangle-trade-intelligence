@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { original_request, market_strategy, professional_input } = req.body;
+    const { original_request, market_strategy } = req.body;
 
     // Extract comprehensive subscriber data and market strategy context
     const subscriberData = original_request?.subscriber_data || {};

@@ -42,7 +42,7 @@
 - **`/usmca-results`** - Analysis results with dual paths
 - **`/usmca-certificate-completion`** - Optional certificate generation
 - **`/trade-risk-alternatives`** - Crisis monitoring and alerts
-- **`/services/mexico-trade-services`** - Professional services selection
+- **`/services/logistics-support`** - Professional services selection
 
 ### Service Selection Pricing (Current Reality)
 - **Supplier Sourcing**: $450
@@ -131,28 +131,28 @@ const workflowStages = {
 
 #### Jorge's Services (3)
 **✅ Supplier Sourcing ($450) - 3-Stage Workflow (COMPLETE)**
-- **Stage 1**: USMCA Strategy Preferences - Strategic questions leveraging business intelligence
-- **Stage 2**: AI Supplier Discovery - OpenRouter API finds Mexico suppliers with web search
-- **Stage 3**: B2B Execution - Jorge contacts suppliers in Spanish, verifies capabilities, builds relationships
+- **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico supplier sourcing?" (Cost Savings, Quality & Compliance, Fast Transition, or Balanced) + optional notes
+- **Stage 2**: AI Supplier Discovery - OpenRouter API finds 5 Mexico suppliers with web search integration
+- **Stage 3**: Jorge's Verification & Report - Jorge calls suppliers to verify capabilities, documents findings, generates client DIY plan + optional hourly services
 - **Component**: `components/jorge/SupplierSourcingTab.js` ✅ **BUILT**
-- **API**: `/api/supplier-sourcing-discovery.js` ✅ **BUILT**
-- **Features**: Real-time web search, supplier matching, B2B relationship tracking
+- **API**: `/api/supplier-sourcing-discovery.js`, `/api/generate-supplier-sourcing-report.js` ✅ **BUILT**
+- **Deliverable**: ~500 word report with: 5 verified suppliers → 4-week DIY plan → Optional hourly support ($150-200/hr)
 
 **✅ Manufacturing Feasibility ($650) - 3-Stage Workflow (COMPLETE)**
-- **Stage 1**: Strategic Context - Manufacturing strategy preferences
-- **Stage 2**: AI Analysis - Location analysis + cost estimates with OpenRouter
-- **Stage 3**: Professional Validation - Jorge validates recommendations using B2B experience
+- **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico manufacturing?" (Cost Savings, Quality Control, Fast Setup, or Strategic Location) + optional notes
+- **Stage 2**: AI Analysis - Location analysis + cost estimates for 3 Mexico manufacturing sites
+- **Stage 3**: Jorge's Research & Report - Jorge researches viable locations, documents findings, generates client DIY plan + optional hourly services
 - **Component**: `components/jorge/ManufacturingFeasibilityTab.js` ✅ **BUILT**
-- **API**: `/api/manufacturing-feasibility-analysis.js` ✅ **BUILT**
-- **Features**: Comprehensive feasibility analysis, cost modeling, location recommendations
+- **API**: `/api/manufacturing-feasibility-analysis.js`, `/api/generate-manufacturing-feasibility-report.js` ✅ **BUILT**
+- **Deliverable**: ~500 word report with: 3 validated locations → 4-week DIY plan → Optional hourly support ($150-200/hr)
 
 **✅ Market Entry ($550) - 3-Stage Workflow (COMPLETE)**
-- **Stage 1**: Mexico Market Strategy - Market entry approach for Mexico focus
-- **Stage 2**: Market Analysis - AI market research + opportunities
-- **Stage 3**: Relationship Building - Jorge builds Mexico market relationships using sales expertise
+- **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico market entry?" (Revenue Growth, Market Share, Brand Presence, or Distribution Network) + optional notes
+- **Stage 2**: AI Market Analysis - OpenRouter API researches 3-4 Mexico market opportunities
+- **Stage 3**: Jorge's Research & Report - Jorge researches market opportunities, documents findings, generates client DIY plan + optional hourly services
 - **Component**: `components/jorge/MarketEntryTab.js` ✅ **BUILT**
-- **API**: `/api/market-entry-analysis.js` ✅ **BUILT**
-- **Features**: Market intelligence, competitor analysis, entry strategy recommendations
+- **API**: `/api/market-entry-analysis.js`, `/api/generate-market-entry-report.js` ✅ **BUILT**
+- **Deliverable**: ~500 word report with: 3-4 market opportunities → 4-week DIY plan → Optional hourly support ($150-200/hr)
 
 ### Service Status Summary
 **✅ ALL 6 COMPONENTS COMPLETED - PRODUCTION READY**
@@ -191,15 +191,17 @@ components/shared/
 **All services leverage existing subscriber workflow data:**
 - Complete business intelligence profile from USMCA workflow
 - No duplicate data entry
-- Minimal new strategic questions (3-5 per service)
+- **Jorge's services: Single strategic priority question + optional notes (Stage 1)**
+- AI does research/analysis (Stage 2)
+- Jorge verifies/documents findings and generates ~500 word actionable report (Stage 3)
 - Professional delivery with full business context
 
-### Expert Value Proposition
-**Jorge's Real Value:**
-- B2B sales execution using proven consultative methodology
-- Spanish-language supplier relationship building
-- Professional verification of AI recommendations
-- Implementation support and ongoing relationship management
+### Expert Value Proposition & Deliverables
+**Jorge's Real Value (Updated Workflow):**
+- **What's included in $450-650**: AI research + Jorge's verification calls/research + actionable report with DIY plan
+- **Report structure**: Options/suppliers/locations found → 4-week client DIY plan → Optional hourly services
+- **Optional hourly support**: $150-200/hr for Spanish negotiations, site visits, relationship building, implementation coordination
+- **Client decides**: Get research & roadmap included, pay hourly only if they need Jorge's execution help
 
 **Cristina's Real Value:**
 - Licensed customs broker validation (Legal weight)

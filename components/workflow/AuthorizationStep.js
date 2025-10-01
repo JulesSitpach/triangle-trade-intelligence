@@ -5,9 +5,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import useAgentOrchestration from '../../hooks/useAgentOrchestration';
-import ValidationStatusPanel from '../agents/ValidationStatusPanel';
-import OrchestrationStatusBar from '../agents/OrchestrationStatusBar';
 
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF }) {
   const [authData, setAuthData] = useState({
@@ -23,19 +20,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     ...formData
   });
 
-  // AI Agent Orchestration - validate at submission point
-  const {
-    isOrchestrating,
-    overallConfidence,
-    readyToSubmit,
-    userGuidance,
-    agentSuggestions,
-    expertRecommendation
-  } = useAgentOrchestration(workflowData || certificateData, {
-    userId: 'workflow-user',
-    certificateHistory: [],
-    userProfile: {}
-  });
+  // Agent orchestration removed - was causing excessive AI calls on every field change
 
   // Update parent when authData changes
   useEffect(() => {
@@ -255,22 +240,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
             </div>
           </div>
 
-          {/* AI Agent Validation - Shows confidence and issues before submission */}
-          <div className="element-spacing">
-            <OrchestrationStatusBar
-              isOrchestrating={isOrchestrating}
-              overallConfidence={overallConfidence}
-              readyToSubmit={readyToSubmit}
-              userGuidance={userGuidance}
-            />
-
-            {agentSuggestions.validation && (
-              <ValidationStatusPanel
-                validationResult={agentSuggestions.validation}
-                expertRecommendation={expertRecommendation}
-              />
-            )}
-          </div>
+          {/* AI Agent Validation removed - was causing performance issues */}
 
           <button
             className="btn-primary"
@@ -567,7 +537,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
                 <button
                   className="btn-secondary"
-                  onClick={() => window.location.href = '/services/mexico-trade-services'}
+                  onClick={() => window.location.href = '/services/logistics-support'}
                 >
                   🇲🇽 Need Mexico Suppliers?
                 </button>

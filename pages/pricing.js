@@ -60,34 +60,34 @@ export default function Pricing() {
 
   const addOns = [
     {
-      name: '📜 USMCA Certificate',
+      name: '📜 USMCA Certificate Generation',
       price: '$250',
-      description: 'Professional certificate completion by licensed customs broker'
+      description: 'Professional USMCA certificate with regulatory compliance validation by licensed customs broker'
     },
     {
-      name: '🔍 HS Classification',
+      name: '🔍 HS Code Classification',
       price: '$200',
-      description: 'Professional HS code verification with documentation'
+      description: 'Licensed customs broker classification with audit-proof documentation'
     },
     {
-      name: '🚨 Crisis Response',
+      name: '🚨 Crisis Response Management',
       price: '$400',
-      description: 'Emergency response for sudden tariff changes and regulatory shifts'
+      description: 'Emergency compliance analysis when tariffs change or shipments are held'
     },
     {
       name: '🔍 Supplier Sourcing',
-      price: '$500',
-      description: '5-7 pre-screened supplier contacts with capabilities analysis'
+      price: '$450',
+      description: 'AI-powered supplier discovery validated by Mexico B2B expert'
     },
     {
       name: '🏭 Manufacturing Feasibility',
-      price: '$500',
-      description: 'Location recommendations, regulatory overview, cost analysis'
+      price: '$650',
+      description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise'
     },
     {
-      name: '🚀 Market Entry',
-      price: '$450',
-      description: 'Regulatory requirements, cultural guidance, market entry strategy'
+      name: '🚀 Market Entry Strategy',
+      price: '$550',
+      description: 'AI market intelligence validated by on-the-ground Mexico business expertise'
     }
   ]
 

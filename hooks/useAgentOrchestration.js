@@ -67,16 +67,17 @@ export function useAgentOrchestration(certificateData, userContext) {
     }
   }, [certificateData, userContext]);
 
-  // Auto-orchestrate when certificate data changes (with debounce)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (certificateData && Object.keys(certificateData).length > 0) {
-        orchestrateCertificate();
-      }
-    }, 1000); // 1 second debounce
-
-    return () => clearTimeout(timer);
-  }, [certificateData, orchestrateCertificate]);
+  // DISABLED: Auto-orchestration was causing excessive AI calls on every field change
+  // Users should explicitly request orchestration via button click or form submission
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     if (certificateData && Object.keys(certificateData).length > 0) {
+  //       orchestrateCertificate();
+  //     }
+  //   }, 1000); // 1 second debounce
+  //
+  //   return () => clearTimeout(timer);
+  // }, [certificateData, orchestrateCertificate]);
 
   // Get field-specific suggestion from Form Assistant
   const getFieldSuggestion = useCallback(async (fieldName) => {

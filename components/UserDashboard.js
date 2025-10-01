@@ -373,7 +373,7 @@ export default function UserDashboard({ user, profile }) {
                   Supplier vetting, market entry strategy, and partnership intelligence for Mexico operations
                 </p>
                 <div className="hero-buttons">
-                  <Link href="/services/mexico-trade-services" className="btn-primary">
+                  <Link href="/services/logistics-support" className="btn-primary">
                     Request Consultation
                   </Link>
                 </div>

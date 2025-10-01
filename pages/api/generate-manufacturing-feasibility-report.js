@@ -47,123 +47,51 @@ export default async function handler(req, res) {
       || (subscriberData.product_description ? `${subscriberData.product_description}` : null)
       || 'international trade';
 
-    // Generate comprehensive manufacturing feasibility report using OpenRouter
-    const reportPrompt = `PROFESSIONAL MEXICO MANUFACTURING FEASIBILITY REPORT
+    // Generate CLIENT-FOCUSED action plan (not AI theater)
+    const reportPrompt = `You are Jorge Ochoa, Mexico manufacturing expert. Create a SHORT, actionable report for ${subscriberData.company_name || 'the client'}.
 
-BUSINESS CONTEXT:
-Company: ${subscriberData.company_name || 'N/A'}
-Product: ${subscriberData.product_description || 'N/A'}
-Current Manufacturing: ${subscriberData.manufacturing_location || 'N/A'}
-Trade Volume: $${subscriberData.trade_volume || 'N/A'}
+CLIENT NEEDS:
+- Product: ${subscriberData.product_description || 'manufacturing'}
+- Current location: ${subscriberData.manufacturing_location || 'non-Mexico'}
+- Goal: Feasibility of Mexico manufacturing
 
-STAGE 1 - MANUFACTURING STRATEGY:
-Manufacturing Type: ${stage1Data.manufacturing_type}
-Production Volume: ${stage1Data.production_volume}
-Facility Requirements: ${stage1Data.facility_requirements}
-Timeline: ${stage1Data.timeline}
-Budget Range: ${stage1Data.budget_range}
-Priority Level: ${stage1Data.priority_level}
+LOCATIONS JORGE RESEARCHED:
+${stage3Data.recommended_locations}
 
-JORGE'S MANUFACTURING ANALYSIS:
-Recommended Mexico Locations: ${stage3Data.recommended_locations}
-Cost Analysis: ${stage3Data.cost_analysis}
-Implementation Roadmap: ${stage3Data.implementation_roadmap}
+CLIENT DIY PLAN:
+${stage3Data.cost_analysis}
 
-FINANCIAL CONTEXT:
-Current Trade Volume: $${subscriberData.trade_volume || 'N/A'}
-USMCA Qualification: ${subscriberData.qualification_status || 'Under review'}
-Current Manufacturing Location: ${subscriberData.manufacturing_location || 'N/A'}
+JORGE'S HOURLY SERVICES:
+${stage3Data.implementation_roadmap}
 
-COMPLIANCE GAPS:
-${Array.isArray(subscriberData.compliance_gaps) ? subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n') : 'None identified'}
+Create a 1-2 page report with:
 
-As Jorge Ochoa, B2B sales expert with proven track record in ${industryContext} sectors exceeding sales targets, bilingual (Spanish/English), deep Mexico manufacturing knowledge through CCVIAL network, with 4+ years experience connecting North American companies with Mexico manufacturing partners:
+**MEXICO LOCATIONS WE IDENTIFIED (3 options)**
+For each location:
+- City/region and why it fits
+- Infrastructure advantages
+- Cost estimates (setup + monthly)
+- Labor availability
 
-Generate a professional Mexico Manufacturing Feasibility Report with these sections:
+**WHAT YOU (CLIENT) DO NEXT - 4 WEEK PLAN**
+Week 1: [Specific action client takes]
+Week 2: [What client needs to do]
+Week 3: [Client responsibilities]
+Week 4: [Expected outcome]
 
-1. EXECUTIVE SUMMARY
-   - Manufacturing feasibility objective and business case
-   - Mexico manufacturing landscape overview
-   - Recommended manufacturing strategy
-   - Investment requirements and timeline
-   - Expected ROI and USMCA benefits
+**WHAT JORGE DOES FOR YOU**
+- Site selection support
+- Lease negotiations in Spanish
+- Setup coordination
+- Local partner introductions
 
-2. MEXICO MANUFACTURING LANDSCAPE
-   - Manufacturing clusters and industrial parks (Monterrey, Guadalajara, Querétaro, Tijuana, Saltillo)
-   - Industry-specific manufacturing capabilities
-   - Workforce availability and skill levels
-   - Infrastructure and logistics advantages
-   - Regulatory environment and incentives
+**COST & SAVINGS ESTIMATE**
+- Setup costs: $[amount]
+- Monthly operational: $[amount]
+- Savings vs current: $[amount]/year
+- Timeline to operational: [months]
 
-3. LOCATION ANALYSIS & RECOMMENDATIONS
-   - Specific Mexico locations ranked by suitability
-   - Proximity to US markets and transportation corridors
-   - Industrial park options with contact information
-   - Utility costs (electricity, water, gas) by region
-   - Real estate costs and availability
-   - Workforce demographics and labor costs
-
-4. COST ANALYSIS & FINANCIAL PROJECTIONS
-   - Setup costs (facility, equipment, permits, legal)
-   - Monthly operational costs (labor, utilities, rent, compliance)
-   - Cost comparison with current manufacturing location
-   - USMCA tariff savings projections
-   - Total cost of ownership analysis
-   - Break-even timeline and ROI calculations
-
-5. IMPLEMENTATION ROADMAP
-   - Phase-by-phase implementation plan with timelines
-   - Site selection and facility setup milestones
-   - Permitting and regulatory compliance steps
-   - Equipment procurement and installation timeline
-   - Workforce hiring and training schedule
-   - Production ramp-up and optimization plan
-
-6. REGULATORY & COMPLIANCE FRAMEWORK
-   - Mexican manufacturing regulations and permits
-   - Environmental compliance requirements
-   - Labor law and employment regulations
-   - IMMEX program benefits for maquiladoras
-   - USMCA rules of origin compliance
-   - Import/export documentation requirements
-
-7. RISK ASSESSMENT & MITIGATION
-   - Political and economic risk analysis
-   - Supply chain and logistics risks
-   - Workforce and labor relations considerations
-   - Currency exchange risk management
-   - Quality control and standards compliance
-   - Business continuity planning
-
-8. USMCA OPTIMIZATION STRATEGY
-   - Regional value content (RVC) improvement potential
-   - Tariff classification benefits
-   - Certificate of origin requirements
-   - Supply chain integration with North American operations
-   - Long-term USMCA qualification strategy
-
-9. JORGE'S PROFESSIONAL MANUFACTURING NETWORK
-Write in first person as Jorge, incorporating his manufacturing intelligence verbatim:
-
-"Using my CCVIAL network and B2B sales experience in Mexico manufacturing, I have assessed the following:
-
-**Recommended Locations:** ${stage3Data.recommended_locations}
-
-**Cost Analysis:** ${stage3Data.cost_analysis}
-
-**Implementation Roadmap:** ${stage3Data.implementation_roadmap}
-
-I will personally facilitate site visits to Monterrey, Guadalajara, Querétaro, or Tijuana industrial parks, introduce you to manufacturing partners from my CCVIAL network, and provide cultural bridge advantage throughout setup. Expected outcome: [SPECIFIC cost savings, production timeline, and USMCA qualification improvement]."
-
-TONE: Direct, implementation-focused, financially-driven. Use actual company name (${subscriberData.company_name}) and Jorge's specific Mexico manufacturing contacts. Show expertise through concrete location recommendations with industrial park names, cost breakdowns, and implementation timelines - not generic advice.
-
-FORBIDDEN PHRASES:
-- "comprehensive feasibility study" without specific locations and costs
-- "company with undisclosed details" (use ${subscriberData.company_name})
-- "additional research required" (provide the feasibility analysis NOW)
-- Generic advice like "consider Mexico manufacturing" (name specific cities, industrial parks, partners with contacts)
-
-Format as actionable manufacturing feasibility report with specific Mexico location recommendations, detailed cost analysis with dollar amounts, and quarter-by-quarter implementation roadmap leveraging Jorge's CCVIAL manufacturing network.`;
+Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "What do I DO with this info?"`;
 
     console.log('[MANUFACTURING FEASIBILITY REPORT] Calling OpenRouter API...');
 

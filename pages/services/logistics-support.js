@@ -79,61 +79,61 @@ export default function ProfessionalServices() {
       id: 'supplier-sourcing',
       icon: '🔍',
       title: 'Supplier Sourcing',
-      price: 500,
-      expert: 'Jorge - Mexico-Based Trade Specialist',
+      price: 450,
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       benefits: [
-        'Pre-screened, verified suppliers',
-        'Local Mexico expertise and contacts',
-        'Cultural and language advantages',
-        'Direct introductions to decision makers'
+        'AI-powered supplier discovery with web search',
+        'Jorge validates findings with industry knowledge',
+        'Bilingual advantage for Mexico sourcing',
+        'Direct workflow integration with your data'
       ],
       deliverables: [
-        '5-7 qualified supplier contacts',
-        'Capabilities assessment for each supplier',
-        'Direct introductions and warm handoffs',
-        'Delivered within 3-5 business days'
+        'AI supplier analysis validated by Jorge',
+        'Strategic recommendations report',
+        'Implementation guidance and next steps',
+        'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Finding reliable Mexico suppliers is time-consuming and risky without local connections'
+      whyNeed: 'Get AI-powered supplier insights validated by Jorge\'s B2B expertise and Mexico market knowledge.'
     },
     {
       id: 'manufacturing-feasibility',
       icon: '🏭',
       title: 'Manufacturing Feasibility',
-      price: 500,
-      expert: 'Jorge - Mexico-Based Trade Specialist',
+      price: 650,
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       benefits: [
-        'Location recommendations based on your needs',
-        'Regulatory compliance roadmap',
-        'Cost analysis and labor market insights',
-        'Risk assessment and mitigation strategies'
+        'Comprehensive AI feasibility analysis',
+        'Jorge validates locations and cost estimates',
+        'Risk assessment with mitigation strategies',
+        'USMCA qualification strategy included'
       ],
       deliverables: [
-        'Detailed feasibility report',
-        'Location recommendations with rationale',
-        'Cost breakdown and regulatory overview',
-        'Delivered within 5-7 business days'
+        'AI feasibility analysis validated by Jorge',
+        'Location recommendations with pros/cons',
+        'Financial projections and timeline',
+        'Analysis completed within 5-7 business days'
       ],
-      whyNeed: 'Manufacturing in Mexico requires understanding of local regulations, costs, and logistics'
+      whyNeed: 'Get comprehensive feasibility analysis combining AI research with Jorge\'s manufacturing expertise.'
     },
     {
       id: 'market-entry',
       icon: '🚀',
       title: 'Market Entry Strategy',
-      price: 450,
-      expert: 'Jorge - Mexico-Based Trade Specialist',
+      price: 550,
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       benefits: [
-        'Market intelligence and entry strategy',
-        'Partnership introduction opportunities',
-        'Cultural guidance for business success',
-        'Regulatory requirements navigation'
+        'AI-powered market research and analysis',
+        'Jorge validates opportunities with local knowledge',
+        'Competitive landscape assessment',
+        'Entry strategy with actionable roadmap'
       ],
       deliverables: [
-        'Market entry strategy document',
-        'Partnership introduction opportunities',
-        'Cultural and business practice guidance',
-        'Delivered within 3-5 business days'
+        'AI market analysis validated by Jorge',
+        'Market opportunity assessment',
+        'Strategic entry recommendations',
+        'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Entering Mexico/Latin America markets requires local expertise to avoid costly mistakes'
+      whyNeed: 'Get AI market intelligence validated by Jorge\'s on-the-ground Mexico business expertise.'
     }
   ];
 

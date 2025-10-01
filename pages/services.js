@@ -16,94 +16,87 @@ export default function ProfessionalServices() {
 
   const serviceTiers = [
     {
-      name: 'USMCA Certificate Completion',
-      price: '$200 per certificate',
-      description: 'Professional completion of your USMCA certificate from your product data.',
+      name: 'USMCA Certificate Generation',
+      price: '$250',
+      description: 'Professional USMCA certificate with regulatory compliance validation.',
+      expert: 'Cristina Martinez - Licensed Customs Broker',
       features: [
-        'Expert completes your USMCA certificate',
-        'Turnaround: 3-5 business days',
-        'Capacity: 15 certificates/month',
-        'Prevents costly mistakes',
-        'Professional documentation',
-        'Compliance verification'
+        'Avoid 35% tariffs with proper USMCA compliance',
+        'Professional liability coverage',
+        'Zero risk of customs rejection',
+        'Expert validation of North American content',
+        'Complete USMCA Certificate of Origin',
+        'Delivered within 24-48 hours'
       ]
     },
     {
-      name: 'HS Code Classification & Verification',
-      price: '$150 per product',
-      description: 'Professional HS code research and verification with complete documentation.',
+      name: 'HS Code Classification',
+      price: '$200',
+      description: 'Licensed customs broker classification with audit-proof documentation.',
+      expert: 'Cristina Martinez - Licensed Customs Broker',
       features: [
-        'Professional HS code research',
-        'Verification with documentation',
-        'Justification documentation',
-        'Capacity: 20 classifications/month',
-        'Prevents thousands in penalties',
-        'Expert validation'
+        'Audit-proof classifications',
+        'Minimize duty payments legally',
+        'Avoid costly reclassification penalties',
+        'Expert research and documentation',
+        'Verified HS code with supporting rationale',
+        'Delivered within 1-2 business days'
       ]
     },
     {
-      name: 'Mexico Supplier Vetting & Introduction',
-      price: '$750 per supplier',
-      description: 'Research, vet, and introduce verified Mexico/Latin America suppliers.',
+      name: 'Crisis Response Management',
+      price: '$400',
+      description: 'Emergency compliance analysis when tariffs change or shipments are held.',
+      expert: 'Cristina Martinez - Licensed Customs Broker',
       features: [
-        'Supplier research and vetting',
-        'Verified supplier profiles',
-        'Introduction call included',
-        'Capacity: 8-10 suppliers/month',
-        'Saves months of research',
-        'Prevents bad partnerships'
+        'Emergency 24-48 hour response',
+        'Immediate action plan to minimize damage',
+        'Root cause analysis and prevention',
+        'Direct expert consultation',
+        'Emergency compliance analysis',
+        'Direct expert support until resolved'
       ]
     },
     {
-      name: 'Mexico Market Entry Strategy',
-      price: '$400/hour (2-hour minimum)',
-      description: 'Strategic consultation for entering Mexico/Latin America markets.',
+      name: 'Supplier Sourcing',
+      price: '$450',
+      description: 'AI-powered supplier discovery validated by Mexico B2B expert.',
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       features: [
-        'Market entry strategy consultation',
-        'Written market entry plan',
-        'Supplier recommendations',
-        'Capacity: 15 hours/month available',
-        'Premium strategy work',
-        'Latin America specialist'
+        'AI-powered supplier discovery with web search',
+        'Jorge validates findings with industry knowledge',
+        'Bilingual advantage for Mexico sourcing',
+        'AI supplier analysis validated by Jorge',
+        'Strategic recommendations report',
+        'Analysis completed within 3-5 business days'
       ]
     },
     {
-      name: 'Partnership Intelligence Briefing',
-      price: '$300/month',
-      description: 'Monthly report on Canada-Mexico partnership opportunities.',
+      name: 'Manufacturing Feasibility',
+      price: '$650',
+      description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise.',
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       features: [
-        'Monthly partnership opportunities report',
-        '2-page actionable briefings',
-        'CPKC and TC Energy deal tracking',
-        'Capacity: Scalable to 20+ clients',
-        'Real-time intelligence',
-        '$60B+ in tracked partnerships'
+        'Comprehensive AI feasibility analysis',
+        'Jorge validates locations and cost estimates',
+        'Risk assessment with mitigation strategies',
+        'USMCA qualification strategy included',
+        'Financial projections and timeline',
+        'Analysis completed within 5-7 business days'
       ]
     },
     {
-      name: 'Customs Clearance Support',
-      price: '$300 per shipment',
-      description: 'Document review, customs issue resolution, expedited clearance.',
+      name: 'Market Entry Strategy',
+      price: '$550',
+      description: 'AI market intelligence validated by on-the-ground Mexico business expertise.',
+      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
       features: [
-        'Document review and validation',
-        'Customs issue resolution',
-        'Expedited clearance support',
-        'Emergency rate: $500 same-day',
-        'Capacity: 10 shipments/month',
-        'Prevents costly delays'
-      ]
-    },
-    {
-      name: 'Crisis Response (Tariff Changes)',
-      price: '$650 per incident',
-      description: 'Emergency tariff analysis + action plan when regulations change.',
-      features: [
-        'Emergency tariff analysis',
-        'Action plan development',
-        'Same day for subscribers',
-        '24hrs for others',
-        'Capacity: 5 incidents/month',
-        'Premium crisis response'
+        'AI-powered market research and analysis',
+        'Jorge validates opportunities with local knowledge',
+        'Competitive landscape assessment',
+        'Entry strategy with actionable roadmap',
+        'Market opportunity assessment',
+        'Analysis completed within 3-5 business days'
       ]
     }
   ]
@@ -245,19 +238,22 @@ export default function ProfessionalServices() {
             {serviceTiers.map((service, index) => (
               <div key={index} className="content-card">
                 <h3 className="content-card-title">{service.name}</h3>
-                <p className="text-body">{service.price}</p>
+                <p className="text-body" style={{fontWeight: '600', fontSize: '1.5rem', color: '#134169', margin: '8px 0'}}>{service.price}</p>
+                {service.expert && (
+                  <p className="content-card-description" style={{fontSize: '0.9rem', marginBottom: '8px'}}>{service.expert}</p>
+                )}
                 <p className="content-card-description">{service.description}</p>
 
-                <div>
+                <div style={{marginTop: '16px'}}>
                   {service.features.map((feature, idx) => (
-                    <p key={idx} className="text-body">
+                    <p key={idx} className="text-body" style={{marginBottom: '4px'}}>
                       ✓ {feature}
                     </p>
                   ))}
                 </div>
 
-                <Link href="/usmca-workflow" className="content-card-link">
-                  Learn More
+                <Link href="/services/logistics-support" className="content-card-link" style={{marginTop: '16px', display: 'inline-block'}}>
+                  Request Service
                 </Link>
               </div>
             ))}

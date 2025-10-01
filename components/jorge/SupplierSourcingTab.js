@@ -1080,39 +1080,39 @@ function JorgeValidationStage({ request, subscriberData, serviceDetails, stageDa
 
       {/* Jorge's B2B Execution Form - SIMPLIFIED */}
       <div className="professional-validation-form">
-        <h4>👨‍💼 Jorge's B2B Relationship Building</h4>
-        <p className="form-helper-text"><strong>Your role:</strong> Contact suppliers, make introductions in Spanish, verify capabilities, and connect client with suppliers</p>
+        <h4>👨‍💼 Jorge's Supplier Verification (Call Suppliers First!)</h4>
+        <p className="form-helper-text"><strong>Step 1:</strong> Call AI-recommended suppliers to verify. <strong>Step 2:</strong> Document findings below to generate client report.</p>
 
         <div className="form-group">
-          <label><strong>Which suppliers will you contact first?</strong></label>
+          <label><strong>Which suppliers did you call? What did you verify?</strong></label>
           <textarea
             className="form-input"
             rows="3"
             value={supplierValidation}
             onChange={(e) => setSupplierValidation(e.target.value)}
-            placeholder="Example: I'll start with Coastline International and IVEMSA since I know their teams. Adding 2 suppliers from my CCVIAL network in Tijuana. Total: 5 companies to contact this week."
+            placeholder="Example: Called Grupo Industrial Monterrey - confirmed ISO 13485, 200 units/month capacity. Added 2 from Tijuana network. Total: 4 verified suppliers ready."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>What's your outreach plan?</strong></label>
+          <label><strong>What can CLIENT do themselves (DIY steps)?</strong></label>
           <textarea
             className="form-input"
             rows="3"
             value={relationshipStrategy}
             onChange={(e) => setRelationshipStrategy(e.target.value)}
-            placeholder="Example: Monday: Email introductions in Spanish to all 5 suppliers. Wednesday: Follow-up calls to top 3. Friday: Schedule facility tours for next week. Timeline: First responses within 48 hours."
+            placeholder="Example: Week 1: Contact suppliers (I'll provide contacts). Week 2: Request quotes. Week 3: Compare options. Week 4: Order samples."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Next steps after supplier responses?</strong></label>
+          <label><strong>What hourly services can CLIENT purchase from you?</strong></label>
           <textarea
             className="form-input"
             rows="3"
             value={implementationTimeline}
             onChange={(e) => setImplementationTimeline(e.target.value)}
-            placeholder="Example: Week 1: Verify certifications (FDA, ISO 13485). Week 2: Capability assessment calls. Week 3: Introduce top 2-3 suppliers to client. Week 4: Facilitate client-supplier meetings."
+            placeholder="Example: Spanish negotiations ($150/hr). Facility visits in Mexico ($200/hr + travel). Full supplier onboarding ($175/hr). Client decides if they need my help."
           />
         </div>
 

@@ -588,7 +588,7 @@ export default function PartnerApplication() {
               <a href="mailto:partners@triangleintelligence.com" className="google-btn gmail">
                 📧 Contact Partnership Team
               </a>
-              <a href="/services/mexico-trade-services" className="google-btn docs">
+              <a href="/services/logistics-support" className="google-btn docs">
                 🇲🇽 Jorge's Services
               </a>
               <a href="/usmca-workflow" className="google-btn calendar">

@@ -557,7 +557,7 @@ export default function TradeRiskAlternatives() {
                       {rec.teamMember === 'Jorge' ? (
                         <button
                           className="btn-primary"
-                          onClick={() => window.location.href = '/services/mexico-trade-services'}
+                          onClick={() => window.location.href = '/services/logistics-support'}
                         >
                           🇲🇽 Request Jorge Consultation
                         </button>
@@ -607,7 +607,7 @@ export default function TradeRiskAlternatives() {
               <div className="hero-buttons">
                 <button
                   className="btn-primary"
-                  onClick={() => window.location.href = '/services/mexico-trade-services'}
+                  onClick={() => window.location.href = '/services/logistics-support'}
                 >
                   🇲🇽 Get Jorge&apos;s Help Now
                 </button>

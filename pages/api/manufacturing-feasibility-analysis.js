@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { original_request, manufacturing_context, professional_input } = req.body;
+    const { original_request, manufacturing_context } = req.body;
 
     // Extract comprehensive subscriber data and manufacturing context
     const subscriberData = original_request?.subscriber_data || {};
@@ -197,7 +197,7 @@ Format as JSON with these exact keys: feasibility_score (1-10), recommended_loca
       } else {
         throw new Error('No JSON found in response');
       }
-    } catch (parseError) {
+    } catch {
       console.log('[MANUFACTURING FEASIBILITY] JSON parse failed, using structured fallback');
       // Fallback: structure the text response
       aiAnalysis = {

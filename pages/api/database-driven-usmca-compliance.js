@@ -10,6 +10,7 @@ import { performIntelligentClassification } from '../../lib/classification/datab
 import { databaseDrivenUSMCAEngine } from '../../lib/core/database-driven-usmca-engine.js';
 import { SYSTEM_CONFIG, MESSAGES, VALIDATION_RULES } from '../../config/system-config.js';
 import { logInfo, logError, logRequest, logPerformance } from '../../lib/utils/production-logger.js';
+import { ClassificationAgent } from '../../lib/agents/classification-agent.js';
 
 export default async function handler(req, res) {
   const startTime = Date.now();
@@ -343,39 +344,54 @@ async function handleProductClassificationStep(formData) {
       return await handleHSCodeBypass(formData);
     }
 
-    // CRITICAL FIX: Check for user-provided component HS codes FIRST
+    // IMPORTANT: Component HS codes should NOT be used as final product classification
+    // Only use component HS codes if the product IS the component (single-component products)
     if (formData.component_origins && formData.component_origins.length > 0) {
-      // Find the first component with an HS code (user manually entered)
       const componentWithHSCode = formData.component_origins.find(comp => comp.hs_code && comp.hs_code.length >= 4);
-      
-      if (componentWithHSCode) {
-        // Normalize HS code format (handle 8518.30.10 -> 85183010)
-        const originalHSCode = componentWithHSCode.hs_code;
-        const normalizedHSCode = originalHSCode.replace(/[.\s-]/g, ''); // Remove dots, spaces, dashes
-        
-        logInfo('Using user-provided HS code from component data', { 
-          original_hs_code: originalHSCode,
-          normalized_hs_code: normalizedHSCode,
-          component: componentWithHSCode.description,
-          total_components: formData.component_origins.length
-        });
-        
-        return {
-          success: true,
-          hs_code: normalizedHSCode, // Use normalized version for database lookups
-          original_hs_code: originalHSCode, // Keep original for display
-          description: componentWithHSCode.description || formData.product_description,
-          confidence: 95, // High confidence for user-provided codes
-          method: 'user_provided_component_hs_code',
-          bypass_used: false,
-          classification_details: {
-            source: 'user_manual_entry',
-            component_based: true,
-            component_description: componentWithHSCode.description,
-            user_confidence: 'high',
-            format_normalized: originalHSCode !== normalizedHSCode
-          }
-        };
+
+      // Only use component HS code if:
+      // 1. There's only ONE component (single-ingredient product)
+      // 2. The component description matches the product description (same thing)
+      if (componentWithHSCode && formData.component_origins.length === 1) {
+        const productDesc = formData.product_description?.toLowerCase() || '';
+        const componentDesc = componentWithHSCode.description?.toLowerCase() || '';
+
+        // Check if product and component descriptions are similar (same item)
+        const isSameItem = productDesc.includes(componentDesc) || componentDesc.includes(productDesc);
+
+        if (isSameItem) {
+          const originalHSCode = componentWithHSCode.hs_code;
+          const normalizedHSCode = originalHSCode.replace(/[.\s-]/g, '');
+
+          logInfo('Using single-component HS code (product IS the component)', {
+            original_hs_code: originalHSCode,
+            normalized_hs_code: normalizedHSCode,
+            component: componentWithHSCode.description,
+            product: formData.product_description
+          });
+
+          return {
+            success: true,
+            hs_code: normalizedHSCode,
+            original_hs_code: originalHSCode,
+            description: formData.product_description,
+            confidence: 95,
+            method: 'single_component_match',
+            bypass_used: false,
+            classification_details: {
+              source: 'user_manual_entry',
+              single_component: true,
+              component_description: componentWithHSCode.description,
+              user_confidence: 'high'
+            }
+          };
+        } else {
+          logInfo('Component HS code found but product differs - will classify final product instead', {
+            product: formData.product_description,
+            component: componentWithHSCode.description,
+            component_hs: componentWithHSCode.hs_code
+          });
+        }
       }
     }
 
@@ -401,28 +417,39 @@ async function handleProductClassificationStep(formData) {
       };
     }
 
-    // Perform intelligent classification if no pre-classification exists
-    const classificationRequest = {
-      productDescription: formData.product_description,
-      businessType: formData.business_type,
-      sourceCountry: formData.supplier_country
+    // Use AI-powered classification with full business context
+    const agent = new ClassificationAgent();
+
+    const additionalContext = {
+      business_type: formData.business_type,
+      origin_country: formData.supplier_country || 'MX',
+      destination_country: formData.destination_market || 'US',
+      trade_volume: formData.trade_volume,
+      company_name: formData.company_name,
+      manufacturing_location: formData.manufacturing_location
     };
 
-    const result = await performIntelligentClassification(classificationRequest);
-    
-    if (result.success && result.results && result.results.length > 0) {
-      const topResult = result.results[0];
+    const result = await agent.suggestHSCode(
+      formData.product_description,
+      formData.component_origins || [],
+      additionalContext
+    );
+
+    if (result.success && result.data.hsCode) {
       return {
         success: true,
-        hs_code: topResult.hs_code,
-        description: topResult.product_description,
-        confidence: topResult.confidenceScore,
-        method: 'database_driven_classification',
+        hs_code: result.data.hsCode,
+        description: result.data.description || formData.product_description,
+        confidence: result.data.confidence,
+        method: 'ai_classification_agent',
         bypass_used: false,
         classification_details: {
-          total_results: result.results.length,
-          search_terms: result.query.searchTerms,
-          processing_time_ms: result.processingTimeMs
+          ai_explanation: result.data.explanation,
+          usmca_qualification: result.data.usmcaQualification,
+          alternative_codes: result.data.alternativeCodes,
+          database_match: result.data.databaseMatch,
+          mfn_rate: result.data.mfnRate,
+          usmca_rate: result.data.usmcaRate
         }
       };
     }

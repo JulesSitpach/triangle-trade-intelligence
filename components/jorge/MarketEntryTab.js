@@ -551,10 +551,8 @@ const marketEntryService = {
 // Stage 1: Market Goals Component
 function MarketGoalsStage({ request, subscriberData, serviceDetails, onComplete, loading }) {
   const [goals, setGoals] = useState({
-    target_market: serviceDetails?.target_market || '',
-    market_size: serviceDetails?.market_size || '',
-    timeline: serviceDetails?.timeline || '',
-    budget_range: serviceDetails?.budget_range || ''
+    market_priority: serviceDetails?.market_priority || '',
+    additional_notes: serviceDetails?.additional_notes || ''
   });
 
   const handleInputChange = (field, value) => {
@@ -565,7 +563,7 @@ function MarketGoalsStage({ request, subscriberData, serviceDetails, onComplete,
     onComplete({ market_goals: goals });
   };
 
-  const isFormValid = goals.target_market && goals.market_size && goals.timeline && goals.budget_range;
+  const isFormValid = goals.market_priority; // Only market_priority is required
 
   return (
     <div className="workflow-stage">
@@ -709,64 +707,62 @@ function MarketGoalsStage({ request, subscriberData, serviceDetails, onComplete,
         <h4>🎯 Market Entry Goals</h4>
 
         <div className="form-group">
-          <label>Target Market Region</label>
-          <select
-            value={goals.target_market}
-            onChange={(e) => handleInputChange('target_market', e.target.value)}
-            className="form-input"
-          >
-            <option value="">Select target market</option>
-            <option value="Mexico">Mexico</option>
-            <option value="Central America">Central America</option>
-            <option value="South America">South America</option>
-            <option value="Caribbean">Caribbean</option>
-            <option value="Multi-region Latin America">Multi-region Latin America</option>
-          </select>
+          <label><strong>What's your top priority for Mexico market entry?</strong></label>
+          <p className="form-helper-text">We already know your product ({subscriberData?.product_description || 'product'}), business model, and goals. Just tell us what matters most:</p>
+          <div className="form-input">
+            <label>
+              <input
+                type="radio"
+                name="market_priority"
+                value="revenue_growth"
+                checked={goals.market_priority === 'revenue_growth'}
+                onChange={(e) => handleInputChange('market_priority', e.target.value)}
+                required
+              />
+              💰 <strong>Revenue Growth</strong> - Find high-revenue opportunities and fast sales channels
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="market_priority"
+                value="market_share"
+                checked={goals.market_priority === 'market_share'}
+                onChange={(e) => handleInputChange('market_priority', e.target.value)}
+              />
+              📈 <strong>Market Share</strong> - Establish dominant position in specific Mexico sectors
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="market_priority"
+                value="brand_presence"
+                checked={goals.market_priority === 'brand_presence'}
+                onChange={(e) => handleInputChange('market_priority', e.target.value)}
+              />
+              🎯 <strong>Brand Presence</strong> - Build awareness and credibility in Mexico market
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="market_priority"
+                value="distribution_network"
+                checked={goals.market_priority === 'distribution_network'}
+                onChange={(e) => handleInputChange('market_priority', e.target.value)}
+              />
+              🔗 <strong>Distribution Network</strong> - Establish partnerships and distribution channels
+            </label>
+          </div>
         </div>
 
         <div className="form-group">
-          <label>Expected Market Size</label>
-          <select
-            value={goals.market_size}
-            onChange={(e) => handleInputChange('market_size', e.target.value)}
+          <label>Any additional notes for Jorge? (Optional)</label>
+          <textarea
+            value={goals.additional_notes || ''}
+            onChange={(e) => handleInputChange('additional_notes', e.target.value)}
             className="form-input"
-          >
-            <option value="">Select market size expectation</option>
-            <option value="Small regional ($100K-500K annually)">Small regional ($100K-500K annually)</option>
-            <option value="Medium market ($500K-2M annually)">Medium market ($500K-2M annually)</option>
-            <option value="Large market ($2M-10M annually)">Large market ($2M-10M annually)</option>
-            <option value="Enterprise market ($10M+ annually)">Enterprise market ($10M+ annually)</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Entry Timeline</label>
-          <select
-            value={goals.timeline}
-            onChange={(e) => handleInputChange('timeline', e.target.value)}
-            className="form-input"
-          >
-            <option value="">Select timeline</option>
-            <option value="Immediate (0-3 months)">Immediate (0-3 months)</option>
-            <option value="Short-term (3-6 months)">Short-term (3-6 months)</option>
-            <option value="Medium-term (6-12 months)">Medium-term (6-12 months)</option>
-            <option value="Long-term (12+ months)">Long-term (12+ months)</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Investment Budget Range</label>
-          <select
-            value={goals.budget_range}
-            onChange={(e) => handleInputChange('budget_range', e.target.value)}
-            className="form-input"
-          >
-            <option value="">Select budget range</option>
-            <option value="Startup ($10K-50K)">Startup ($10K-50K)</option>
-            <option value="Growth ($50K-200K)">Growth ($50K-200K)</option>
-            <option value="Expansion ($200K-500K)">Expansion ($200K-500K)</option>
-            <option value="Enterprise ($500K+)">Enterprise ($500K+)</option>
-          </select>
+            rows="3"
+            placeholder="Example: Target specific regions, industry focus, partnership preferences..."
+          />
         </div>
       </div>
 
@@ -814,13 +810,15 @@ function MarketAnalysisStage({ request, subscriberData, serviceDetails, stageDat
 
       const apiResult = await response.json();
 
-      // Use real API results
+      // Use real API results from ai_analysis object
+      const aiAnalysis = apiResult.ai_analysis || {};
       setAnalysisResult({
-        market_intelligence: apiResult.market_intelligence || 'AI-generated market intelligence',
-        competition_landscape: apiResult.competition_landscape || 'Competitive analysis completed',
-        regulatory_requirements: apiResult.regulatory_requirements || 'Regulatory requirements identified',
-        market_opportunities: apiResult.market_opportunities || 'Market opportunities assessed',
-        risk_assessment: apiResult.risk_assessment || 'Risk analysis completed'
+        market_opportunity: aiAnalysis.market_opportunity || {},
+        competitive_analysis: aiAnalysis.competitive_analysis || {},
+        entry_strategy: aiAnalysis.entry_strategy || {},
+        partnership_strategy: aiAnalysis.partnership_strategy || {},
+        financial_projections: aiAnalysis.financial_projections || {},
+        raw_analysis: aiAnalysis.raw_ai_analysis || JSON.stringify(aiAnalysis, null, 2)
       });
 
       setAnalysisComplete(true);
@@ -855,17 +853,19 @@ function MarketAnalysisStage({ request, subscriberData, serviceDetails, stageDat
         <h4>🎯 Analysis Parameters</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
-            <strong>Target Market:</strong> {marketGoals.target_market || 'Market from previous stage'}
+            <strong>Market Priority:</strong> {marketGoals.market_priority?.replace(/_/g, ' ') || 'Not specified'}
           </div>
           <div className="workflow-data-item">
-            <strong>Market Size:</strong> {marketGoals.market_size || 'Size expectation from goals'}
+            <strong>Product:</strong> {subscriberData?.product_description || 'Product/service'}
           </div>
           <div className="workflow-data-item">
-            <strong>Timeline:</strong> {marketGoals.timeline || 'Timeline from goals'}
+            <strong>Company:</strong> {subscriberData?.company_name || request?.company_name || 'Client company'}
           </div>
-          <div className="workflow-data-item">
-            <strong>Budget:</strong> {marketGoals.budget_range || 'Budget from goals'}
-          </div>
+          {marketGoals.additional_notes && (
+            <div className="workflow-data-item" style={{gridColumn: '1 / -1'}}>
+              <strong>Additional Context:</strong> {marketGoals.additional_notes}
+            </div>
+          )}
         </div>
       </div>
 
@@ -892,21 +892,73 @@ function MarketAnalysisStage({ request, subscriberData, serviceDetails, stageDat
 
       {analysisComplete && analysisResult && (
         <div className="workflow-analysis-summary">
-          <h4>📈 Analysis Summary</h4>
-          <div className="workflow-data-grid">
-            <div className="workflow-data-item">
-              <strong>Market Intelligence:</strong> {analysisResult.market_intelligence}
+          <h4>📈 AI Market Analysis Results</h4>
+
+          {analysisResult.market_opportunity && (
+            <div className="workflow-section">
+              <h5>🎯 Market Opportunity</h5>
+              <div className="workflow-data-grid">
+                {analysisResult.market_opportunity.market_size && (
+                  <div className="workflow-data-item">
+                    <strong>Market Size:</strong> {typeof analysisResult.market_opportunity.market_size === 'string' || typeof analysisResult.market_opportunity.market_size === 'number' ? String(analysisResult.market_opportunity.market_size) : JSON.stringify(analysisResult.market_opportunity.market_size)}
+                  </div>
+                )}
+                {analysisResult.market_opportunity.growth_rate && (
+                  <div className="workflow-data-item">
+                    <strong>Growth Rate:</strong> {typeof analysisResult.market_opportunity.growth_rate === 'string' || typeof analysisResult.market_opportunity.growth_rate === 'number' ? String(analysisResult.market_opportunity.growth_rate) : JSON.stringify(analysisResult.market_opportunity.growth_rate)}
+                  </div>
+                )}
+                {analysisResult.market_opportunity.target_segments && Array.isArray(analysisResult.market_opportunity.target_segments) && analysisResult.market_opportunity.target_segments.length > 0 && (
+                  <div className="workflow-data-item" style={{gridColumn: '1 / -1'}}>
+                    <strong>Target Segments:</strong> {analysisResult.market_opportunity.target_segments.join(', ')}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="workflow-data-item">
-              <strong>Competition:</strong> {analysisResult.competition_landscape}
+          )}
+
+          {analysisResult.competitive_analysis && Object.keys(analysisResult.competitive_analysis).length > 0 && (
+            <div className="workflow-section">
+              <h5>⚔️ Competitive Analysis</h5>
+              <div className="workflow-data-grid">
+                {analysisResult.competitive_analysis.key_competitors && (
+                  <div className="workflow-data-item" style={{gridColumn: '1 / -1'}}>
+                    <strong>Key Competitors:</strong> {typeof analysisResult.competitive_analysis.key_competitors === 'string' ? analysisResult.competitive_analysis.key_competitors : JSON.stringify(analysisResult.competitive_analysis.key_competitors)}
+                  </div>
+                )}
+                {analysisResult.competitive_analysis.market_positioning && (
+                  <div className="workflow-data-item" style={{gridColumn: '1 / -1'}}>
+                    <strong>Market Positioning:</strong> {analysisResult.competitive_analysis.market_positioning}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="workflow-data-item">
-              <strong>Regulatory:</strong> {analysisResult.regulatory_requirements}
+          )}
+
+          {analysisResult.entry_strategy && Object.keys(analysisResult.entry_strategy).length > 0 && (
+            <div className="workflow-section">
+              <h5>🚀 Entry Strategy</h5>
+              <div className="workflow-data-grid">
+                {analysisResult.entry_strategy.recommended_approach && (
+                  <div className="workflow-data-item">
+                    <strong>Approach:</strong> {typeof analysisResult.entry_strategy.recommended_approach === 'string' ? analysisResult.entry_strategy.recommended_approach : JSON.stringify(analysisResult.entry_strategy.recommended_approach)}
+                  </div>
+                )}
+                {analysisResult.entry_strategy.investment_requirements && (
+                  <div className="workflow-data-item">
+                    <strong>Investment:</strong> {typeof analysisResult.entry_strategy.investment_requirements === 'string' || typeof analysisResult.entry_strategy.investment_requirements === 'number' ? String(analysisResult.entry_strategy.investment_requirements) : JSON.stringify(analysisResult.entry_strategy.investment_requirements)}
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="workflow-data-item">
-              <strong>Opportunities:</strong> {analysisResult.market_opportunities}
-            </div>
-          </div>
+          )}
+
+          {analysisResult.raw_analysis && (
+            <details className="workflow-details">
+              <summary><strong>📄 View Complete AI Analysis</strong></summary>
+              <pre style={{whiteSpace: 'pre-wrap', fontSize: '0.9em', lineHeight: '1.4'}}>{analysisResult.raw_analysis}</pre>
+            </details>
+          )}
         </div>
       )}
 
@@ -945,10 +997,10 @@ function JorgeStrategyStage({ request, subscriberData, serviceDetails, stageData
         <h4>🎯 Strategy Context</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
-            <strong>Target Market:</strong> {marketGoals.target_market || 'Market from analysis'}
+            <strong>Market Priority:</strong> {marketGoals.market_priority?.replace(/_/g, ' ') || 'Not specified'}
           </div>
           <div className="workflow-data-item">
-            <strong>Company Profile:</strong> {request?.company_name} - {request?.industry}
+            <strong>Company Profile:</strong> {subscriberData?.company_name || request?.company_name}
           </div>
           <div className="workflow-data-item">
             <strong>AI Analysis:</strong> {analysisResult.market_opportunities || 'Market intelligence completed'}
@@ -961,39 +1013,39 @@ function JorgeStrategyStage({ request, subscriberData, serviceDetails, stageData
 
       {/* Jorge's Market Entry Strategy Form */}
       <div className="professional-validation-form">
-        <h4>👨‍💼 Jorge's Market Entry Expertise</h4>
-        <p className="form-helper-text">Use your Mexico market knowledge and relationship network for market entry strategy</p>
+        <h4>👨‍💼 Jorge's Market Research (Research Mexico Market First!)</h4>
+        <p className="form-helper-text"><strong>Step 1:</strong> Research AI-recommended opportunities. <strong>Step 2:</strong> Document findings below to generate client report.</p>
 
         <div className="form-group">
-          <label><strong>Mexico Market Assessment:</strong></label>
+          <label><strong>What Mexico market opportunities did you research?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={marketAssessment}
             onChange={(e) => setMarketAssessment(e.target.value)}
-            placeholder="Market size: $[amount]. Competition: [analysis]. Entry barriers: [specific challenges]. Opportunity: [specific advantage]"
+            placeholder="Example: Researched Guadalajara tech sector - $2B market, low competition. Identified 3 distributor contacts. Total: 4 entry opportunities found."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Key Relationships to Build:</strong></label>
+          <label><strong>What can CLIENT do themselves (DIY steps)?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={keyRelationships}
             onChange={(e) => setKeyRelationships(e.target.value)}
-            placeholder="Priority 1: [Distributor name] in [city] - my contact: [person]. Priority 2: [Partner company]..."
+            placeholder="Example: Week 1: Register business in Mexico. Week 2: Contact the 3 distributors I identified. Week 3: Hire local sales rep. Week 4: Launch pilot."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Entry Strategy:</strong></label>
+          <label><strong>What hourly services can CLIENT purchase from you?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={entryStrategy}
             onChange={(e) => setEntryStrategy(e.target.value)}
-            placeholder="Quarter 1: [specific actions]. Quarter 2: [milestones]. Expected revenue: $[amount] by Month 12"
+            placeholder="Example: Local partnership introductions ($150/hr). Regulatory guidance ($175/hr). Market launch coordination ($200/hr). Client decides if needed."
           />
         </div>
 

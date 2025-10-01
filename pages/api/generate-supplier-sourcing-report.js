@@ -47,121 +47,47 @@ export default async function handler(req, res) {
       || (subscriberData.product_description ? `${subscriberData.product_description}` : null)
       || 'international trade';
 
-    // Generate comprehensive supplier sourcing report using OpenRouter
-    const reportPrompt = `PROFESSIONAL MEXICO SUPPLIER SOURCING REPORT
+    // Generate CLIENT-FOCUSED action plan (not AI theater)
+    const reportPrompt = `You are Jorge Ochoa, Mexico supplier sourcing expert. Create a SHORT, actionable report for ${subscriberData.company_name || 'the client'}.
 
-BUSINESS CONTEXT:
-Company: ${subscriberData.company_name || 'N/A'}
-Product: ${subscriberData.product_description || 'N/A'}
-Current Manufacturing: ${subscriberData.manufacturing_location || 'N/A'}
-Trade Volume: $${subscriberData.trade_volume || 'N/A'}
+CLIENT NEEDS:
+- Product: ${subscriberData.product_description || 'manufacturing'}
+- Current suppliers: ${stage1Data.current_suppliers || 'non-USMCA countries'}
+- Goal: Find Mexico suppliers for USMCA compliance
 
-STAGE 1 - USMCA SOURCING STRATEGY:
-Target Product Categories: ${stage1Data.product_categories}
-Current Supplier Countries: ${stage1Data.current_suppliers}
-USMCA Qualification Goals: ${stage1Data.usmca_goals}
-Timeline: ${stage1Data.timeline}
-Budget Range: ${stage1Data.budget_range}
+SUPPLIERS JORGE FOUND:
+${stage3Data.mexico_suppliers}
 
-JORGE'S SUPPLIER INTELLIGENCE:
-Mexico Suppliers Identified: ${stage3Data.mexico_suppliers}
-Relationship Building Strategy: ${stage3Data.relationship_strategy}
-USMCA Optimization Plan: ${stage3Data.usmca_optimization}
-Implementation Timeline: ${stage3Data.implementation_timeline}
+JORGE'S PLAN:
+${stage3Data.relationship_strategy}
 
-FINANCIAL CONTEXT:
-Current Trade Volume: $${subscriberData.trade_volume || 'N/A'}
-USMCA Qualification: ${subscriberData.qualification_status || 'Under review'}
-Annual Tariff Cost: $${subscriberData.annual_tariff_cost || 'N/A'}
-Potential USMCA Savings: $${subscriberData.potential_usmca_savings || 'N/A'}
+Create a 1-2 page report with:
 
-COMPLIANCE GAPS:
-${Array.isArray(subscriberData.compliance_gaps) ? subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n') : 'None identified'}
+**MEXICO SUPPLIERS WE FOUND (5 companies)**
+For each supplier:
+- Company name, location, contact
+- What they make (match to client needs)
+- Certifications (ISO, FDA, etc.)
+- Why Jorge recommends them
 
-As Jorge Ochoa, B2B sales expert with proven track record in ${industryContext} sectors exceeding sales targets, bilingual (Spanish/English), deep Mexico supplier network through CCVIAL connections, with 4+ years experience in consultative B2B sales methodology:
+**WHAT YOU (CLIENT) DO NEXT - 4 WEEK PLAN**
+Week 1: [Specific action client takes]
+Week 2: [What client needs to do]
+Week 3: [Client responsibilities]
+Week 4: [Expected outcome]
 
-Generate a professional Mexico Supplier Sourcing Report with these sections:
+**WHAT JORGE DOES FOR YOU**
+- Contact suppliers in Spanish
+- Verify capabilities
+- Facilitate introductions
+- Negotiate initial terms
 
-1. EXECUTIVE SUMMARY
-   - Supplier sourcing objective and USMCA benefits
-   - Mexico supplier landscape for target products
-   - Recommended sourcing strategy
-   - Cost savings and timeline
-   - USMCA qualification improvement
+**USMCA SAVINGS ESTIMATE**
+- Current tariff cost: $${subscriberData.annual_tariff_cost || 'TBD'}
+- Estimated savings: $${subscriberData.potential_usmca_savings || 'TBD'}/year
+- Timeline to qualification: 3-6 months
 
-2. MEXICO SUPPLIER MARKET ANALYSIS
-   - Supplier availability and capabilities for target products
-   - Manufacturing clusters in Mexico (Monterrey, Guadalajara, Querétaro, Tijuana)
-   - Quality standards and certifications (ISO, industry-specific)
-   - Pricing competitiveness vs. current suppliers
-   - Lead times and logistics considerations
-
-3. SUPPLIER IDENTIFICATION & VETTING
-   - Specific Mexico suppliers identified (company names and contacts)
-   - Capabilities assessment for each supplier
-   - Quality certifications and compliance status
-   - Production capacity and scalability
-   - Financial stability and business history
-
-4. USMCA OPTIMIZATION STRATEGY
-   - Current regional value content (RVC) calculation
-   - Target RVC improvement with Mexico sourcing
-   - Product categories to shift to Mexico suppliers
-   - USMCA qualification timeline and milestones
-   - Tariff savings projections ($$ amounts)
-
-5. RELATIONSHIP BUILDING & NEGOTIATION
-   - Jorge's B2B sales methodology for supplier partnerships
-   - Cultural considerations for Mexico supplier relationships
-   - Negotiation strategy and key terms
-   - Quality assurance and performance metrics
-   - Long-term partnership development approach
-
-6. IMPLEMENTATION ROADMAP
-   - Phase 1: Initial supplier contact and introductions (Weeks 1-2)
-   - Phase 2: Facility visits and capability verification (Weeks 3-4)
-   - Phase 3: Sample production and quality testing (Weeks 5-8)
-   - Phase 4: Contract negotiation and finalization (Weeks 9-12)
-   - Phase 5: Production ramp-up and relationship management (Months 4-6)
-
-7. RISK ASSESSMENT & MITIGATION
-   - Supplier concentration risk management
-   - Quality control and monitoring systems
-   - Logistics and supply chain risks
-   - Currency exchange considerations
-   - Contingency plans for supply disruptions
-
-8. FINANCIAL ANALYSIS
-   - Mexico supplier pricing vs. current suppliers
-   - USMCA tariff savings calculations
-   - Total cost of ownership analysis
-   - ROI projections and break-even timeline
-   - Working capital and payment terms
-
-9. JORGE'S PROFESSIONAL SUPPLIER NETWORK
-Write in first person as Jorge, incorporating his supplier intelligence verbatim:
-
-"Using my CCVIAL network and B2B sales experience in Mexico, I have identified the following suppliers:
-
-**Mexico Suppliers:** ${stage3Data.mexico_suppliers}
-
-**Relationship Strategy:** ${stage3Data.relationship_strategy}
-
-**USMCA Optimization:** ${stage3Data.usmca_optimization}
-
-**Implementation Timeline:** ${stage3Data.implementation_timeline}
-
-I will personally facilitate introductions, conduct facility visits in Spanish, negotiate terms leveraging my cultural bridge advantage, and ensure successful supplier relationships. Expected outcome: [SPECIFIC cost savings and USMCA qualification improvement]."
-
-TONE: Direct, relationship-focused, results-driven. Use actual company name (${subscriberData.company_name}) and Jorge's specific Mexico supplier contacts from CCVIAL network. Show expertise through concrete supplier introductions with company names, contact information, and specific capabilities - not generic advice.
-
-FORBIDDEN PHRASES:
-- "comprehensive supplier research" without specific company names and contacts
-- "company with undisclosed details" (use ${subscriberData.company_name})
-- "additional vetting required" (provide the vetted suppliers NOW)
-- Generic advice like "find suppliers" (name specific Mexico suppliers with contacts)
-
-Format as actionable supplier sourcing report with specific Mexico supplier introductions from Jorge's CCVIAL network, concrete pricing and capability details, and month-by-month implementation plan.`;
+Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "What do I DO with this info?"`;
 
     console.log('[SUPPLIER SOURCING REPORT] Calling OpenRouter API...');
 
