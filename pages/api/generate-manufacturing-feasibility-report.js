@@ -195,7 +195,11 @@ Format as actionable manufacturing feasibility report with specific Mexico locat
     }
 
     const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content || 'Report generation failed';
+    const reportContent = aiResponse.choices?.[0]?.message?.content;
+
+    if (!reportContent) {
+      throw new Error('OpenRouter API returned empty response. No report content generated.');
+    }
 
     // Create email with manufacturing feasibility report
     const nodemailer = require('nodemailer');

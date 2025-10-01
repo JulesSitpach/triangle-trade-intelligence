@@ -753,15 +753,7 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
 
   const handleClassificationProcess = async () => {
     try {
-      // Step through the AI Classification Agent process
-      setValidationStep(2); // Web search validation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setValidationStep(3); // Database comparison
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      setValidationStep(4); // Generating AI report
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      setValidationStep(2); // Show loading state
 
       // Call actual Enhanced Classification Agent API
       try {

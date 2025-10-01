@@ -802,8 +802,9 @@ function MarketAnalysisStage({ request, subscriberData, serviceDetails, stageDat
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serviceRequestId: request.id,
-          stage1Data: stageData?.market_goals
+          request_id: request.id,
+          subscriber_data: request.workflow_data || {},
+          market_entry_requirements: stageData?.market_goals || {}
         })
       });
 
@@ -812,16 +813,6 @@ function MarketAnalysisStage({ request, subscriberData, serviceDetails, stageDat
       }
 
       const apiResult = await response.json();
-
-      // Step 3-5: Show progress while processing
-      setAnalysisStep(3);
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      setAnalysisStep(4);
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      setAnalysisStep(5);
-      await new Promise(resolve => setTimeout(resolve, 800));
 
       // Use real API results
       setAnalysisResult({

@@ -761,17 +761,28 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
 
   const handleAIAnalysis = async () => {
     try {
-      // Step 1: Analyzing crisis situation
+      // Simulate realistic analysis progress
       setAnalysisStep(1);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Step 2: Call actual API for AI analysis
       setAnalysisStep(2);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setAnalysisStep(3);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setAnalysisStep(4);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      setAnalysisStep(5);
+
+      // Call actual API for AI analysis
       const response = await fetch('/api/crisis-response-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serviceRequestId: request.id,
-          stage1Data: stageData?.stage_1
+          original_request: request,
+          crisis_assessment: stageData?.stage_1
         })
       });
 
@@ -781,33 +792,21 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
 
       const aiResult = await response.json();
 
-      // Step 3-5: Show progress while processing results
-      setAnalysisStep(3);
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      setAnalysisStep(4);
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      setAnalysisStep(5);
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Set real AI analysis results
+      // Set real AI analysis results from API response
+      const analysis = aiResult.ai_analysis || {};
       setAnalysisResult({
-        impact_level: aiResult.impact_assessment || 'Analysis completed',
-        timeline: aiResult.timeline_assessment || 'Timeline evaluated',
-        action_count: aiResult.priority_actions || 'Actions identified',
-        risk_factors: aiResult.risk_assessment || 'Risk analysis completed'
+        full_analysis: analysis // Store full analysis for display
       });
 
+      setAnalysisStep(6); // All steps complete
       setAnalysisComplete(true);
     } catch (error) {
-      console.error('AI analysis error:', error);
-      // Fallback to basic analysis
+      console.error('❌ AI analysis error:', error);
+      // Show the actual error to Cristina
       setAnalysisResult({
-        impact_level: 'Crisis analysis in progress - professional review required',
-        timeline: 'Cristina will assess timeline based on crisis details',
-        action_count: 'Immediate actions will be identified in Stage 3',
-        risk_factors: 'Risk factors being evaluated'
+        error: true,
+        error_message: `API Error: ${error.message}. Check console for details.`,
+        full_analysis: null
       });
       setAnalysisComplete(true);
     }
@@ -863,22 +862,127 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
           </div>
         </div>
 
-        {analysisComplete && analysisResult && (
+        {analysisComplete && analysisResult && analysisResult.error && (
+          <div className="workflow-error">
+            <h4>❌ Analysis Error</h4>
+            <p>{analysisResult.error_message}</p>
+            <p>Please check the browser console for technical details, or contact support if this persists.</p>
+          </div>
+        )}
+
+      {analysisComplete && analysisResult && analysisResult.full_analysis && (
           <div className="workflow-analysis-result">
-            <h4>🤖 AI Analysis Complete</h4>
-            <div className="workflow-data-grid">
-              <div className="workflow-data-item">
-                <strong>Impact Assessment:</strong> {analysisResult.impact_level}
+            <h4>🤖 AI Crisis Intelligence Briefing</h4>
+
+            {/* Crisis Severity */}
+            <div className="analysis-section">
+              <h5>⚠️ Crisis Severity: {analysisResult.full_analysis.crisis_severity || 'High'}</h5>
+              {analysisResult.full_analysis.immediate_impact && typeof analysisResult.full_analysis.immediate_impact === 'object' ? (
+                <div className="financial-impact-details">
+                  {analysisResult.full_analysis.immediate_impact.total_cost_increase && (
+                    <p><strong>Total Cost Increase:</strong> ${Number(analysisResult.full_analysis.immediate_impact.total_cost_increase).toLocaleString()}</p>
+                  )}
+                  {analysisResult.full_analysis.immediate_impact.tariff_exposure_percentage && (
+                    <p><strong>Tariff Exposure:</strong> {analysisResult.full_analysis.immediate_impact.tariff_exposure_percentage}%</p>
+                  )}
+                  {analysisResult.full_analysis.immediate_impact.shipments_at_risk && (
+                    <p><strong>Shipments at Risk:</strong> {analysisResult.full_analysis.immediate_impact.shipments_at_risk}</p>
+                  )}
+                  {analysisResult.full_analysis.immediate_impact.annual_financial_vulnerability && (
+                    <p><strong>Annual Financial Vulnerability:</strong> ${Number(analysisResult.full_analysis.immediate_impact.annual_financial_vulnerability).toLocaleString()}</p>
+                  )}
+                </div>
+              ) : (
+                <p>{analysisResult.full_analysis.immediate_impact || analysisResult.impact_level || 'Analyzing impact...'}</p>
+              )}
+            </div>
+
+            {/* Risk Factors */}
+            {Array.isArray(analysisResult.full_analysis.risk_factors) && analysisResult.full_analysis.risk_factors.length > 0 && (
+              <div className="analysis-section">
+                <h5>🚨 Critical Risk Factors:</h5>
+                <ul>
+                  {analysisResult.full_analysis.risk_factors.map((risk, idx) => (
+                    <li key={idx}>{risk}</li>
+                  ))}
+                </ul>
               </div>
-              <div className="workflow-data-item">
-                <strong>Resolution Timeline:</strong> {analysisResult.timeline}
+            )}
+
+            {/* Immediate Actions (AI Recommendations) */}
+            {analysisResult.full_analysis.action_plan?.immediate_actions && (
+              <div className="analysis-section">
+                <h5>⚡ AI-Recommended Immediate Actions (0-24 hours):</h5>
+                <ul>
+                  {analysisResult.full_analysis.action_plan.immediate_actions.map((action, idx) => (
+                    <li key={idx}>{action}</li>
+                  ))}
+                </ul>
               </div>
-              <div className="workflow-data-item">
-                <strong>Recommended Actions:</strong> {analysisResult.action_count}
+            )}
+
+            {/* Short-term Actions */}
+            {analysisResult.full_analysis.action_plan?.short_term_actions && (
+              <div className="analysis-section">
+                <h5>📋 Short-term Actions (24-72 hours):</h5>
+                <ul>
+                  {analysisResult.full_analysis.action_plan.short_term_actions.map((action, idx) => (
+                    <li key={idx}>{action}</li>
+                  ))}
+                </ul>
               </div>
-              <div className="workflow-data-item">
-                <strong>Risk Analysis:</strong> {analysisResult.risk_factors}
+            )}
+
+            {/* Financial Mitigation */}
+            {Array.isArray(analysisResult.full_analysis.financial_mitigation) && analysisResult.full_analysis.financial_mitigation.length > 0 && (
+              <div className="analysis-section">
+                <h5>💰 Financial Impact Mitigation:</h5>
+                <ul>
+                  {analysisResult.full_analysis.financial_mitigation.map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ul>
               </div>
+            )}
+
+            {/* Supply Chain Recommendations */}
+            {Array.isArray(analysisResult.full_analysis.supply_chain_recommendations) && analysisResult.full_analysis.supply_chain_recommendations.length > 0 && (
+              <div className="analysis-section">
+                <h5>🔗 Supply Chain Diversification:</h5>
+                <ul>
+                  {analysisResult.full_analysis.supply_chain_recommendations.map((rec, idx) => (
+                    <li key={idx}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Regulatory Steps */}
+            {Array.isArray(analysisResult.full_analysis.regulatory_steps) && analysisResult.full_analysis.regulatory_steps.length > 0 && (
+              <div className="analysis-section">
+                <h5>📜 Regulatory Compliance Steps:</h5>
+                <ul>
+                  {analysisResult.full_analysis.regulatory_steps.map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Long-term Strategy */}
+            {analysisResult.full_analysis.action_plan?.long_term_strategy && (
+              <div className="analysis-section">
+                <h5>🎯 Long-term Prevention Strategy:</h5>
+                <ul>
+                  {analysisResult.full_analysis.action_plan.long_term_strategy.map((strategy, idx) => (
+                    <li key={idx}>{strategy}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="analysis-note">
+              <p><strong>Note for Cristina:</strong> Review this AI intelligence briefing and use it to create your professional crisis action plan in Stage 3. You can validate, modify, or expand on these recommendations based on your 17 years of logistics expertise.</p>
             </div>
           </div>
         )}
@@ -1005,7 +1109,7 @@ function ActionPlanStage({ request, subscriberData, serviceDetails, stageData, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   serviceRequestId: request.id,
-                  stage1Data: subscriberData,
+                  stage1Data: stageData?.stage_1 || {},
                   stage3Data: {
                     crisis_severity_assessment: crisisSeverityAssessment,
                     immediate_actions: immediateActions,

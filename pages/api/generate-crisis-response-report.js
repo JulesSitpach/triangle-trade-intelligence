@@ -47,6 +47,38 @@ export default async function handler(req, res) {
       || (subscriberData.product_description ? `${subscriberData.product_description}` : null)
       || 'international trade';
 
+    // Calculate urgency level based on crisis description
+    const calculateUrgencyLevel = () => {
+      const impactLower = (stage1Data.current_impact || '').toLowerCase();
+      const timelineLower = (stage1Data.timeline || '').toLowerCase();
+
+      if (impactLower.includes('stopped') || impactLower.includes('halted') || timelineLower.includes('immediate') || timelineLower.includes('urgent')) {
+        return 'Critical';
+      }
+      if (impactLower.includes('severe') || impactLower.includes('significant') || timelineLower.includes('today') || timelineLower.includes('yesterday')) {
+        return 'High';
+      }
+      return 'Medium';
+    };
+
+    const urgencyLevel = calculateUrgencyLevel();
+
+    // Calculate financial exposure from subscriber data
+    const calculateFinancialExposure = () => {
+      const tradeVolume = Number(subscriberData.trade_volume || 0);
+      const tariffCost = Number(subscriberData.annual_tariff_cost || 0);
+
+      if (tariffCost > 0) {
+        return `$${tariffCost.toLocaleString()} annual tariff exposure`;
+      }
+      if (tradeVolume > 0) {
+        return `$${tradeVolume.toLocaleString()} annual trade volume at risk`;
+      }
+      return stage1Data.current_impact || 'Analyzing financial impact';
+    };
+
+    const financialExposure = calculateFinancialExposure();
+
     // Generate comprehensive crisis response action plan using OpenRouter
     const reportPrompt = `You are formatting a professional Crisis Response Action Plan for Cristina Escalante, Licensed Customs Broker #4601913 with 17 years of ${industryContext} logistics management experience.
 
@@ -73,9 +105,9 @@ Vulnerability Factors: ${Array.isArray(subscriberData.vulnerability_factors) ? s
 Compliance Gaps: ${Array.isArray(subscriberData.compliance_gaps) ? subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n') : 'None identified'}
 
 FINANCIAL IMPACT:
-Annual Trade Volume: $${subscriberData.trade_volume || 'N/A'}
-Current Tariff Cost: $${subscriberData.annual_tariff_cost || 'N/A'}
-Crisis Financial Exposure: ${stage1Data.financial_exposure}
+Annual Trade Volume: $${Number(subscriberData.trade_volume || 0).toLocaleString()}
+Current Tariff Cost: $${Number(subscriberData.annual_tariff_cost || 0).toLocaleString()}
+Crisis Financial Exposure: ${financialExposure}
 
 As Cristina Escalante with 17 years of ${industryContext} logistics management experience specializing in crisis response for ${subscriberData.business_type || 'importers/exporters'}:
 
@@ -178,7 +210,11 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
     }
 
     const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content || 'Report generation failed';
+    const reportContent = aiResponse.choices?.[0]?.message?.content;
+
+    if (!reportContent) {
+      throw new Error('OpenRouter API returned empty response. No report content generated.');
+    }
 
     // Create email with urgent crisis response action plan
     const nodemailer = require('nodemailer');
@@ -216,7 +252,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
 
   <div class="content">
     <div class="urgent-banner">
-      <h2 style="margin-top: 0; color: #dc2626;">URGENT - ${stage1Data.urgency_level} Priority</h2>
+      <h2 style="margin-top: 0; color: #dc2626;">URGENT - ${urgencyLevel} Priority</h2>
       <p><strong>Crisis Type:</strong> ${stage1Data.crisis_type}</p>
       <p><strong>Timeline:</strong> ${stage1Data.timeline}</p>
       <p><strong>Action Required:</strong> Immediate implementation of response plan</p>
@@ -235,7 +271,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
       <p><strong>Company:</strong> ${subscriberData.company_name || serviceRequest.client_company}</p>
       <p><strong>Product Affected:</strong> ${subscriberData.product_description || 'Multiple products'}</p>
       <p><strong>Crisis Type:</strong> ${stage1Data.crisis_type}</p>
-      <p><strong>Financial Exposure:</strong> ${stage1Data.financial_exposure}</p>
+      <p><strong>Financial Exposure:</strong> ${financialExposure}</p>
     </div>
 
     <div class="timeline">
@@ -282,7 +318,8 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
           report_generated: true,
           report_content: reportContent,
           crisis_type: stage1Data.crisis_type,
-          urgency_level: stage1Data.urgency_level,
+          urgency_level: urgencyLevel,
+          financial_exposure: financialExposure,
           crisis_severity_assessment: stage3Data.crisis_severity_assessment,
           immediate_actions: stage3Data.immediate_actions,
           recovery_timeline: stage3Data.recovery_timeline,
@@ -305,7 +342,8 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
       report_content: reportContent,
       email_subject: emailSubject,
       crisis_type: stage1Data.crisis_type,
-      urgency_level: stage1Data.urgency_level
+      urgency_level: urgencyLevel,
+      financial_exposure: financialExposure
     });
 
   } catch (error) {

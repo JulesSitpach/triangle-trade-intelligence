@@ -1287,11 +1287,7 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
       setAnalysisStep(1);
       setErrorMessage('');
 
-      // Step 1: Preparing analysis
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setAnalysisStep(2);
-
-      // Step 2: Call OpenRouter API for compliance risk analysis
+      // Call OpenRouter API for compliance risk analysis
       const response = await fetch('/api/usmca-compliance-risk-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1307,14 +1303,6 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
       }
 
       const aiResult = await response.json();
-
-      // Step 3: Processing results
-      setAnalysisStep(3);
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Step 4: Finalizing analysis
-      setAnalysisStep(4);
-      await new Promise(resolve => setTimeout(resolve, 500));
 
       setAnalysisResult({
         compliance_risks: aiResult.compliance_risks || ['No major compliance risks identified'],

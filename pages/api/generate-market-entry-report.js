@@ -204,7 +204,11 @@ Format as actionable market entry report with specific Mexico partner introducti
     }
 
     const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content || 'Report generation failed';
+    const reportContent = aiResponse.choices?.[0]?.message?.content;
+
+    if (!reportContent) {
+      throw new Error('OpenRouter API returned empty response. No report content generated.');
+    }
 
     // Create email with market entry strategy report
     const nodemailer = require('nodemailer');

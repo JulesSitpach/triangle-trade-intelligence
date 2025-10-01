@@ -657,141 +657,62 @@ function StrategicPreferencesStage({ request, subscriberData, serviceDetails, on
 
       <form onSubmit={handleSubmit} className="workflow-form">
         <div className="form-group">
-          <label>What is your preferred sourcing strategy?</label>
+          <label><strong>What's your top priority for Mexico supplier sourcing?</strong></label>
+          <p className="form-helper-text">We already know your product ({subscriberData?.product_description || 'product'}), requirements, and supply chain. Just tell us what matters most:</p>
           <div className="form-input">
             <label>
               <input
                 type="radio"
-                name="sourcing_strategy"
-                value="immediate_transition"
-                checked={formData.sourcing_strategy === 'immediate_transition'}
+                name="sourcing_priority"
+                value="cost_savings"
+                checked={formData.sourcing_priority === 'cost_savings'}
                 onChange={handleInputChange}
                 required
               />
-              Immediate Mexico transition (compliance priority)
+              💰 <strong>Cost Savings</strong> - Find lowest-cost Mexico suppliers while maintaining quality standards
             </label>
             <label>
               <input
                 type="radio"
-                name="sourcing_strategy"
-                value="gradual_transition"
-                checked={formData.sourcing_strategy === 'gradual_transition'}
+                name="sourcing_priority"
+                value="quality_compliance"
+                checked={formData.sourcing_priority === 'quality_compliance'}
                 onChange={handleInputChange}
               />
-              Gradual transition (cost optimization)
+              ✅ <strong>Quality & Compliance</strong> - Premium Mexico suppliers with all certifications (FDA, ISO 13485, etc.)
             </label>
             <label>
               <input
                 type="radio"
-                name="sourcing_strategy"
-                value="hybrid_approach"
-                checked={formData.sourcing_strategy === 'hybrid_approach'}
+                name="sourcing_priority"
+                value="speed_transition"
+                checked={formData.sourcing_priority === 'speed_transition'}
                 onChange={handleInputChange}
               />
-              Hybrid approach (risk mitigation)
-            </label>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>What type of suppliers do you prefer?</label>
-          <div className="form-input">
-            <label>
-              <input
-                type="radio"
-                name="supplier_preference"
-                value="high_volume"
-                checked={formData.supplier_preference === 'high_volume'}
-                onChange={handleInputChange}
-                required
-              />
-              High-volume suppliers (established operations)
+              ⚡ <strong>Fast Transition</strong> - Suppliers ready to start production within 30-60 days
             </label>
             <label>
               <input
                 type="radio"
-                name="supplier_preference"
-                value="premium_immediate"
-                checked={formData.supplier_preference === 'premium_immediate'}
-                onChange={handleInputChange}
-              />
-              Premium suppliers (immediate availability)
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="supplier_preference"
-                value="balanced_portfolio"
-                checked={formData.supplier_preference === 'balanced_portfolio'}
-                onChange={handleInputChange}
-              />
-              Balanced portfolio approach
-            </label>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Timeline urgency:</label>
-          <select
-            name="timeline_urgency"
-            value={formData.timeline_urgency}
-            onChange={handleInputChange}
-            className="form-input"
-            required
-          >
-            <option value="">Select timeline</option>
-            <option value="immediate">Immediate (30-60 days)</option>
-            <option value="short_term">Short-term (3-6 months)</option>
-            <option value="medium_term">Medium-term (6-12 months)</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Risk tolerance for new supplier relationships:</label>
-          <div className="form-input">
-            <label>
-              <input
-                type="radio"
-                name="risk_tolerance"
-                value="conservative"
-                checked={formData.risk_tolerance === 'conservative'}
-                onChange={handleInputChange}
-                required
-              />
-              Conservative (established suppliers only)
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="risk_tolerance"
+                name="sourcing_priority"
                 value="balanced"
-                checked={formData.risk_tolerance === 'balanced'}
+                checked={formData.sourcing_priority === 'balanced'}
                 onChange={handleInputChange}
               />
-              Balanced (mix of established and emerging)
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="risk_tolerance"
-                value="aggressive"
-                checked={formData.risk_tolerance === 'aggressive'}
-                onChange={handleInputChange}
-              />
-              Aggressive (open to new partnerships)
+              🎯 <strong>Balanced Approach</strong> - Best overall value (cost + quality + timeline)
             </label>
           </div>
         </div>
 
         <div className="form-group">
-          <label>Additional requirements or specifications:</label>
+          <label>Any additional notes for Jorge? (Optional)</label>
           <textarea
             name="additional_requirements"
             value={formData.additional_requirements}
             onChange={handleInputChange}
             className="form-input"
             rows="3"
-            placeholder="Any specific requirements, certifications, or constraints..."
+            placeholder="Example: Must have experience with medical devices, prefer Tijuana region, need bilingual team..."
           />
         </div>
 
@@ -809,20 +730,25 @@ function StrategicPreferencesStage({ request, subscriberData, serviceDetails, on
 function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
   const [discoveryStep, setDiscoveryStep] = useState(1);
   const [discoveryComplete, setDiscoveryComplete] = useState(false);
+  const [discoveryResult, setDiscoveryResult] = useState(null);
 
   const handleAIDiscovery = async () => {
     try {
       // Step 1: Start discovery
       setDiscoveryStep(1);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       // Step 2: Call actual API for supplier discovery
       setDiscoveryStep(2);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const response = await fetch('/api/supplier-sourcing-discovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serviceRequestId: request.id,
-          stage1Data: stageData?.stage_1
+          request_id: request.id,
+          subscriber_data: request.service_details || {},
+          sourcing_requirements: stageData?.stage_1 || {}
         })
       });
 
@@ -830,18 +756,23 @@ function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, 
         throw new Error(`API call failed: ${response.status}`);
       }
 
-      const discoveryResult = await response.json();
+      const result = await response.json();
+      console.log('AI Discovery Result:', result);
 
-      // Step 3-4: Show progress while processing
       setDiscoveryStep(3);
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setDiscoveryStep(4);
       await new Promise(resolve => setTimeout(resolve, 800));
 
+      setDiscoveryResult(result);
       setDiscoveryComplete(true);
     } catch (error) {
       console.error('AI discovery error:', error);
+      setDiscoveryResult({
+        error: true,
+        error_message: `API Error: ${error.message}`
+      });
       setDiscoveryComplete(true);
     }
   };
@@ -855,24 +786,30 @@ function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, 
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 2: AI Supplier Discovery</h3>
+        <h3>Stage 2: AI Discovery</h3>
         <p>AI-powered supplier research and matching</p>
       </div>
 
       <div className="workflow-subscriber-summary">
-        <h4>🎯 Search Parameters</h4>
+        <h4>🎯 Client Requirements</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
-            <strong>Strategy:</strong> {stageData?.stage_1?.sourcing_strategy?.replace('_', ' ') || 'Not defined'}
+            <strong>Company:</strong> {subscriberData?.company_name || request?.client_company}
           </div>
           <div className="workflow-data-item">
-            <strong>Preference:</strong> {stageData?.stage_1?.supplier_preference?.replace('_', ' ') || 'Not defined'}
+            <strong>Product:</strong> {subscriberData?.product_description}
           </div>
           <div className="workflow-data-item">
-            <strong>Timeline:</strong> {stageData?.stage_1?.timeline_urgency || 'Not defined'}
+            <strong>Priority:</strong> {
+              stageData?.stage_1?.sourcing_priority === 'cost_savings' ? '💰 Cost Savings' :
+              stageData?.stage_1?.sourcing_priority === 'quality_compliance' ? '✅ Quality & Compliance' :
+              stageData?.stage_1?.sourcing_priority === 'speed_transition' ? '⚡ Fast Transition' :
+              stageData?.stage_1?.sourcing_priority === 'balanced' ? '🎯 Balanced Approach' :
+              'Not defined'
+            }
           </div>
           <div className="workflow-data-item">
-            <strong>Risk Level:</strong> {stageData?.stage_1?.risk_tolerance || 'Not defined'}
+            <strong>Trade Volume:</strong> ${Number(subscriberData?.trade_volume || 0).toLocaleString()}/year
           </div>
         </div>
       </div>
@@ -893,7 +830,7 @@ function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, 
           </div>
         </div>
 
-        {discoveryComplete && (
+        {discoveryComplete && discoveryResult && (
           <div className="workflow-discovery-complete">
             <p>✅ AI supplier discovery completed successfully!</p>
             <p>Ready for Jorge's expert validation and strategic recommendations.</p>
@@ -901,10 +838,138 @@ function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, 
         )}
       </div>
 
+      {/* AI Discovery Results Display */}
+      {discoveryResult && !discoveryResult.error && (
+        <div className="workflow-ai-results">
+          <h4>🤖 AI Discovery Results</h4>
+
+          {discoveryResult.ai_analysis && (
+            <div className="ai-analysis-section">
+              <h5>🎯 AI Strategic Analysis:</h5>
+              <div className="analysis-content">
+                {typeof discoveryResult.ai_analysis === 'object' ? (
+                  <div>
+                    {discoveryResult.ai_analysis.prioritized_suppliers && Array.isArray(discoveryResult.ai_analysis.prioritized_suppliers) && discoveryResult.ai_analysis.prioritized_suppliers.length > 0 && (
+                      <div>
+                        <strong>Prioritized Supplier Recommendations:</strong>
+                        {discoveryResult.ai_analysis.prioritized_suppliers.map((s, idx) => (
+                          <div key={idx} style={{marginLeft: '20px', marginTop: '10px'}}>
+                            <p><strong>#{idx + 1}: {s.supplier_name}</strong> (Fit Score: {s.fit_score}/10)</p>
+                            <p><em>{s.reasoning}</em></p>
+                            {s.usmca_benefit && <p>USMCA Benefit: {s.usmca_benefit}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {discoveryResult.ai_analysis.usmca_strategy && (
+                      <div style={{marginTop: '15px'}}>
+                        <strong>USMCA Optimization Strategy:</strong>
+                        {typeof discoveryResult.ai_analysis.usmca_strategy === 'object' ? (
+                          <div style={{marginLeft: '20px'}}>
+                            {discoveryResult.ai_analysis.usmca_strategy.regional_value_improvement && (
+                              <p>RVC Improvement: {discoveryResult.ai_analysis.usmca_strategy.regional_value_improvement}</p>
+                            )}
+                            {discoveryResult.ai_analysis.usmca_strategy.tariff_savings_potential && (
+                              <p>Tariff Savings: {discoveryResult.ai_analysis.usmca_strategy.tariff_savings_potential}</p>
+                            )}
+                            {discoveryResult.ai_analysis.usmca_strategy.qualification_timeline && (
+                              <p>Timeline: {discoveryResult.ai_analysis.usmca_strategy.qualification_timeline}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <p>{String(discoveryResult.ai_analysis.usmca_strategy)}</p>
+                        )}
+                      </div>
+                    )}
+                    {discoveryResult.ai_analysis.jorge_b2b_approach && (
+                      <div style={{marginTop: '15px'}}>
+                        <strong>Jorge's B2B Action Plan:</strong>
+                        {typeof discoveryResult.ai_analysis.jorge_b2b_approach === 'object' ? (
+                          <div style={{marginLeft: '20px'}}>
+                            {discoveryResult.ai_analysis.jorge_b2b_approach.spanish_talking_points && Array.isArray(discoveryResult.ai_analysis.jorge_b2b_approach.spanish_talking_points) && (
+                              <div>
+                                <p><em>Spanish Talking Points:</em></p>
+                                <ul>
+                                  {discoveryResult.ai_analysis.jorge_b2b_approach.spanish_talking_points.map((point, idx) => (
+                                    <li key={idx}>{point}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p>{String(discoveryResult.ai_analysis.jorge_b2b_approach)}</p>
+                        )}
+                      </div>
+                    )}
+                    {discoveryResult.ai_analysis.raw_ai_analysis && (
+                      <div style={{marginTop: '15px'}}>
+                        <strong>Full AI Analysis:</strong>
+                        <p style={{whiteSpace: 'pre-wrap'}}>{String(discoveryResult.ai_analysis.raw_ai_analysis)}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p>{String(discoveryResult.ai_analysis)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {discoveryResult.suppliers && Array.isArray(discoveryResult.suppliers) && discoveryResult.suppliers.length > 0 && (
+            <div className="ai-analysis-section">
+              <h5>🏭 Mexico Suppliers Found ({discoveryResult.suppliers.length}):</h5>
+              {discoveryResult.suppliers.map((supplier, idx) => (
+                <div key={idx} className="supplier-result-card">
+                  <p><strong>Name:</strong> {supplier.name || 'Unknown'}</p>
+                  <p><strong>Location:</strong> {supplier.location || 'Mexico'}</p>
+                  {supplier.capabilities && <p><strong>Capabilities:</strong> {supplier.capabilities}</p>}
+                  {supplier.extractedEmail && <p><strong>Email:</strong> {supplier.extractedEmail}</p>}
+                  {supplier.extractedPhone && <p><strong>Phone:</strong> {supplier.extractedPhone}</p>}
+                  {supplier.website && <p><strong>Website:</strong> {supplier.website}</p>}
+                  {supplier.confidence && <p><strong>Match Confidence:</strong> {(supplier.confidence * 100).toFixed(0)}%</p>}
+                  {supplier.match_reason && <p><em>{supplier.match_reason}</em></p>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {discoveryResult.discovery_summary && (
+            <div className="ai-analysis-section">
+              <h5>📊 Discovery Summary:</h5>
+              <div className="analysis-content">
+                <p><strong>Total Suppliers Found:</strong> {discoveryResult.discovery_summary.total_found}</p>
+                <p><strong>Search Time:</strong> {discoveryResult.discovery_summary.search_time}</p>
+                {discoveryResult.discovery_summary.sources_searched && (
+                  <p><strong>Sources:</strong> {discoveryResult.discovery_summary.sources_searched.join(', ')}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {discoveryResult.business_context && (
+            <div className="ai-analysis-section">
+              <h5>💼 Business Context:</h5>
+              <div className="analysis-content">
+                <p><strong>Current USMCA RVC:</strong> {discoveryResult.business_context.current_usmca_rvc}%</p>
+                <p><strong>Target RVC:</strong> {discoveryResult.business_context.target_usmca_rvc}%</p>
+                <p><strong>Annual Trade Volume:</strong> ${Number(discoveryResult.business_context.annual_trade_volume).toLocaleString()}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {discoveryResult && discoveryResult.error && (
+        <div className="workflow-error">
+          <p>❌ {discoveryResult.error_message}</p>
+        </div>
+      )}
+
       <div className="workflow-stage-actions">
         <button
           className="btn-primary"
-          onClick={() => onComplete({ ai_discovery_completed: true, completed_at: new Date().toISOString() })}
+          onClick={() => onComplete({ ai_discovery_completed: true, ai_results: discoveryResult, completed_at: new Date().toISOString() })}
           disabled={!discoveryComplete || loading}
         >
           {loading ? 'Processing...' : 'Complete AI Discovery → Jorge Review'}
@@ -916,84 +981,138 @@ function AIDiscoveryStage({ request, subscriberData, serviceDetails, stageData, 
 
 // Stage 3: Jorge's Validation Component
 function JorgeValidationStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
-  // Jorge's Mexico supplier expertise (following checklist pattern)
-  const [mexicoSuppliersIdentified, setMexicoSuppliersIdentified] = useState('');
+  // Jorge's B2B execution expertise (validating AI discoveries)
+  const [supplierValidation, setSupplierValidation] = useState('');
   const [relationshipStrategy, setRelationshipStrategy] = useState('');
-  const [usmcaOptimization, setUsmcaOptimization] = useState('');
   const [implementationTimeline, setImplementationTimeline] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
+
+  // Get AI-discovered suppliers
+  const aiSuppliers = stageData?.stage_2?.ai_results?.suppliers || [];
+  const aiAnalysis = stageData?.stage_2?.ai_results?.ai_analysis || {};
 
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 3: Jorge's Strategic Validation</h3>
-        <p>Expert validation and final recommendations</p>
+        <h3>Stage 3: Jorge's Validation</h3>
+        <p>Validate AI discoveries and execute B2B relationship building</p>
       </div>
 
       <div className="workflow-subscriber-summary">
-        <h4>📋 Service Summary</h4>
+        <h4>📋 AI Discovery Results</h4>
         <div className="workflow-data-grid">
           <div className="workflow-data-item">
             <strong>Client:</strong> {request?.company_name}
           </div>
           <div className="workflow-data-item">
-            <strong>Strategy:</strong> {stageData?.stage_1?.sourcing_strategy?.replace('_', ' ')}
+            <strong>Suppliers Found:</strong> {aiSuppliers.length} Mexico suppliers
           </div>
           <div className="workflow-data-item">
             <strong>Timeline:</strong> {stageData?.stage_1?.timeline_urgency}
           </div>
           <div className="workflow-data-item">
-            <strong>AI Discovery:</strong> {stageData?.stage_2?.ai_discovery_completed ? 'Completed' : 'Pending'}
+            <strong>Strategy:</strong> {stageData?.stage_1?.sourcing_strategy?.replace('_', ' ')}
           </div>
         </div>
       </div>
 
-      {/* Jorge's Mexico Supplier Expertise Form */}
+      {/* Show AI-discovered suppliers for Jorge to validate */}
+      {aiSuppliers.length > 0 && (
+        <div className="ai-suppliers-reference">
+          <h4>🤖 AI-Discovered Suppliers (for your validation):</h4>
+          <p className="form-helper-text"><em>Note: These are AI-generated research starting points. Jorge must verify all information using CCVIAL network.</em></p>
+          {aiSuppliers.slice(0, 7).map((supplier, idx) => (
+            <div key={idx} className="supplier-reference-card">
+              <div className="supplier-header">
+                <div className="supplier-title">
+                  <p><strong>{idx + 1}. {supplier.name}</strong></p>
+                  <p>📍 {supplier.location}</p>
+                </div>
+                {supplier.website && (
+                  <a
+                    href={supplier.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary"
+                  >
+                    🔗 Visit Website
+                  </a>
+                )}
+              </div>
+
+              <p><strong>Capabilities:</strong> <em>{supplier.capabilities}</em></p>
+
+              {supplier.company_size && (
+                <p><strong>Company Size:</strong> {supplier.company_size}</p>
+              )}
+
+              {supplier.certifications && Array.isArray(supplier.certifications) && supplier.certifications.length > 0 && (
+                <p><strong>Certifications:</strong> {supplier.certifications.join(', ')}</p>
+              )}
+
+              {supplier.production_capacity && (
+                <p><strong>Production Capacity:</strong> {supplier.production_capacity}</p>
+              )}
+
+              {supplier.usmca_ready && (
+                <p><strong>USMCA Compliance:</strong> {supplier.usmca_ready}</p>
+              )}
+
+              {supplier.contact_approach && (
+                <p><strong>📞 Contact Method:</strong> {supplier.contact_approach}</p>
+              )}
+
+              {supplier.match_reason && (
+                <div className="match-reason-box">
+                  <strong>Match Reason:</strong> {supplier.match_reason}
+                </div>
+              )}
+
+              {supplier.confidence && (
+                <p className="confidence-score">
+                  <strong>Confidence Score:</strong> {Math.round(supplier.confidence * 100)}%
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Jorge's B2B Execution Form - SIMPLIFIED */}
       <div className="professional-validation-form">
-        <h4>👨‍💼 Jorge's Mexico Supplier Expertise</h4>
-        <p className="form-helper-text">Use your CCVIAL network and B2B sales experience to identify and connect with Mexico suppliers</p>
+        <h4>👨‍💼 Jorge's B2B Relationship Building</h4>
+        <p className="form-helper-text"><strong>Your role:</strong> Contact suppliers, make introductions in Spanish, verify capabilities, and connect client with suppliers</p>
 
         <div className="form-group">
-          <label><strong>Mexico Suppliers Identified:</strong></label>
+          <label><strong>Which suppliers will you contact first?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
-            value={mexicoSuppliersIdentified}
-            onChange={(e) => setMexicoSuppliersIdentified(e.target.value)}
-            placeholder="Based on my CCVIAL network, I recommend: 1) [Company name] in [city] - specializes in [capability]. 2) [Company name]..."
+            rows="3"
+            value={supplierValidation}
+            onChange={(e) => setSupplierValidation(e.target.value)}
+            placeholder="Example: I'll start with Coastline International and IVEMSA since I know their teams. Adding 2 suppliers from my CCVIAL network in Tijuana. Total: 5 companies to contact this week."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>Relationship Building Strategy:</strong></label>
+          <label><strong>What's your outreach plan?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
+            rows="3"
             value={relationshipStrategy}
             onChange={(e) => setRelationshipStrategy(e.target.value)}
-            placeholder="Using my B2B sales methodology: Week 1: Initial contact in Spanish. Week 2: Plant visit to [city]. Week 3: Sample orders..."
+            placeholder="Example: Monday: Email introductions in Spanish to all 5 suppliers. Wednesday: Follow-up calls to top 3. Friday: Schedule facility tours for next week. Timeline: First responses within 48 hours."
           />
         </div>
 
         <div className="form-group">
-          <label><strong>USMCA Optimization Plan:</strong></label>
+          <label><strong>Next steps after supplier responses?</strong></label>
           <textarea
             className="form-input"
-            rows="5"
-            value={usmcaOptimization}
-            onChange={(e) => setUsmcaOptimization(e.target.value)}
-            placeholder="Current RVC: 30%. Target: 75%. Shift [component] from China to [Mexico supplier] increases to 68%. Then shift [component]..."
-          />
-        </div>
-
-        <div className="form-group">
-          <label><strong>Implementation Timeline:</strong></label>
-          <textarea
-            className="form-input"
-            rows="4"
+            rows="3"
             value={implementationTimeline}
             onChange={(e) => setImplementationTimeline(e.target.value)}
-            placeholder="Month 1: Supplier qualification. Month 2: First production run. Month 3: USMCA certification complete. ROI: [months]"
+            placeholder="Example: Week 1: Verify certifications (FDA, ISO 13485). Week 2: Capability assessment calls. Week 3: Introduce top 2-3 suppliers to client. Week 4: Facilitate client-supplier meetings."
           />
         </div>
 
@@ -1001,8 +1120,8 @@ function JorgeValidationStage({ request, subscriberData, serviceDetails, stageDa
         <button
           className="btn-primary"
           onClick={async () => {
-            if (!mexicoSuppliersIdentified || !relationshipStrategy || !usmcaOptimization || !implementationTimeline) {
-              alert('⚠️ Please complete all supplier sourcing fields');
+            if (!supplierValidation || !relationshipStrategy || !implementationTimeline) {
+              alert('⚠️ Please complete all relationship building fields');
               return;
             }
 
@@ -1014,11 +1133,11 @@ function JorgeValidationStage({ request, subscriberData, serviceDetails, stageDa
                 body: JSON.stringify({
                   serviceRequestId: request.id,
                   stage1Data: subscriberData,
+                  stage2Data: stageData?.stage_2?.ai_results || {},
                   stage3Data: {
-                    mexico_suppliers_identified: mexicoSuppliersIdentified,
-                    relationship_strategy: relationshipStrategy,
-                    usmca_optimization: usmcaOptimization,
-                    implementation_timeline: implementationTimeline
+                    suppliers_to_contact: supplierValidation,
+                    outreach_plan: relationshipStrategy,
+                    next_steps: implementationTimeline
                   }
                 })
               });
@@ -1028,11 +1147,10 @@ function JorgeValidationStage({ request, subscriberData, serviceDetails, stageDa
                 alert('✅ Supplier sourcing report sent to triangleintel@gmail.com');
                 onComplete({
                   supplier_sourcing_completed: true,
-                  jorge_supplier_expertise: {
-                    mexico_suppliers_identified: mexicoSuppliersIdentified,
-                    relationship_strategy: relationshipStrategy,
-                    usmca_optimization: usmcaOptimization,
-                    implementation_timeline: implementationTimeline
+                  jorge_b2b_execution: {
+                    suppliers_to_contact: supplierValidation,
+                    outreach_plan: relationshipStrategy,
+                    next_steps: implementationTimeline
                   },
                   report_generated: true,
                   report_sent_to: 'triangleintel@gmail.com',

@@ -1,6 +1,10 @@
 /**
- * Real Supplier Search using OpenRouter Web Search AI
- * Uses existing OpenRouter API key - no additional costs
+ * AI-Powered Supplier Recommendations (OpenRouter)
+ *
+ * NOTE: This generates AI-powered supplier recommendations based on product requirements,
+ * NOT real web search. These are plausible Mexico suppliers the AI recommends researching.
+ *
+ * Jorge validates and supplements these with his CCVIAL network contacts.
  */
 
 export default async function handler(req, res) {
@@ -15,41 +19,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Query is required' });
     }
 
-    console.log(`[OPENROUTER SEARCH] Real web search for: "${query}"`);
+    console.log(`[AI SUPPLIER RECOMMENDATIONS] Generating suggestions for: "${query}"`);
 
-    // Use OpenRouter with web search enabled model
+    // Call OpenRouter for AI-generated supplier recommendations
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title": "Triangle Intelligence Supplier Search"
+        "X-Title": "Triangle Intelligence Supplier Recommendations"
       },
       body: JSON.stringify({
-        model: "google/gemini-flash-1.5", // Fast, cost-effective model for research tasks
+        model: "anthropic/claude-3.5-haiku",
         messages: [{
           role: "user",
-          content: `Find real electronics manufacturers and suppliers in Mexico for: ${product || query}
+          content: `Based on the search query "${query}" for ${product || 'manufacturing'}, suggest 5-7 plausible Mexico-based suppliers that Jorge should research and validate using his CCVIAL network.
 
-Search for companies that:
-- Manufacture or supply ${product || query}
-- Are located in Mexico (Tijuana, Guadalajara, Monterrey, etc.)
-- Have export capabilities to North America
-- ${requirements?.certifications ? `Have ${requirements.certifications.join(', ')} certifications` : ''}
+Requirements: ${JSON.stringify(requirements || {})}
 
-For each supplier found, provide:
-1. Company name
-2. Location (city, state)
-3. Capabilities/specializations
-4. Contact information (email, phone if available)
-5. Website URL
+For each supplier, provide:
+1. A realistic company name (typical Mexico manufacturing company naming patterns)
+2. Likely location (Tijuana, Guadalajara, Monterrey, etc.)
+3. Expected capabilities based on the product type
+4. General contact format (no fake emails/phones - just indicate "Contact via company website" or "Requires Jorge's network introduction")
 
-Format as JSON array with objects containing: name, location, capabilities, extractedEmail, extractedPhone, website, confidence, match_reason
+Format as JSON array with objects containing: name, location, capabilities, contact_method, confidence (0-1), match_reason
 
-Provide real companies only - no fake or template data.`
+IMPORTANT: These are research starting points, NOT verified suppliers. Label them as "Recommended for Jorge's validation"`
         }],
-        temperature: 0.3,
+        temperature: 0.7,
         max_tokens: 2000
       })
     });
@@ -59,9 +58,6 @@ Provide real companies only - no fake or template data.`
     }
 
     const data = await response.json();
-    console.log(`[OPENROUTER SEARCH] API response received`);
-
-    // Extract supplier data from AI response
     const aiResponse = data.choices[0]?.message?.content;
 
     if (!aiResponse) {
@@ -71,75 +67,32 @@ Provide real companies only - no fake or template data.`
     // Parse JSON from AI response
     let suppliers = [];
     try {
-      // Try to extract JSON from the response
       const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         suppliers = JSON.parse(jsonMatch[0]);
-      } else {
-        // Fallback: parse structured text response
-        suppliers = parseTextResponse(aiResponse, product);
       }
     } catch (parseError) {
-      console.warn('[OPENROUTER SEARCH] JSON parse failed, using text parsing');
-      suppliers = parseTextResponse(aiResponse, product);
+      console.warn('[AI SUPPLIER RECOMMENDATIONS] JSON parse failed');
+      suppliers = [];
     }
 
-    console.log(`[OPENROUTER SEARCH] Found ${suppliers.length} suppliers`);
+    console.log(`[AI SUPPLIER RECOMMENDATIONS] Generated ${suppliers.length} recommendations`);
 
     return res.status(200).json({
       success: true,
       results: suppliers,
       query: query,
       total: suppliers.length,
-      source: 'openrouter_web_search'
+      source: 'ai_recommendations',
+      disclaimer: 'These are AI-generated research starting points. Jorge validates using CCVIAL network.'
     });
 
   } catch (error) {
-    console.error('[OPENROUTER SEARCH] Error:', error);
+    console.error('[AI SUPPLIER RECOMMENDATIONS] Error:', error);
     return res.status(500).json({
       success: false,
-      error: 'OpenRouter search failed',
+      error: 'AI recommendations failed',
       message: error.message
     });
   }
-}
-
-// Parse text response when JSON parsing fails
-function parseTextResponse(text, product) {
-  const suppliers = [];
-  const lines = text.split('\n');
-
-  let currentSupplier = {};
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (trimmed.includes('Company:') || trimmed.includes('Name:')) {
-      if (currentSupplier.name) {
-        suppliers.push(currentSupplier);
-      }
-      currentSupplier = {
-        name: trimmed.split(':')[1]?.trim() || 'Unknown Company',
-        confidence: 0.8,
-        match_reason: `Found via OpenRouter web search for ${product}`
-      };
-    } else if (trimmed.includes('Location:')) {
-      currentSupplier.location = trimmed.split(':')[1]?.trim() || 'Mexico';
-    } else if (trimmed.includes('Capabilities:') || trimmed.includes('Specializations:')) {
-      currentSupplier.capabilities = trimmed.split(':')[1]?.trim() || 'Manufacturing';
-    } else if (trimmed.includes('Email:')) {
-      currentSupplier.extractedEmail = trimmed.split(':')[1]?.trim() || null;
-    } else if (trimmed.includes('Phone:')) {
-      currentSupplier.extractedPhone = trimmed.split(':')[1]?.trim() || null;
-    } else if (trimmed.includes('Website:')) {
-      currentSupplier.website = trimmed.split(':')[1]?.trim() || null;
-    }
-  }
-
-  // Add the last supplier
-  if (currentSupplier.name) {
-    suppliers.push(currentSupplier);
-  }
-
-  return suppliers.slice(0, 7); // Limit to 7 results
 }

@@ -327,7 +327,11 @@ Format as a formal business report with clear headers, bullet points for key fin
     }
 
     const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content || 'Report generation failed';
+    const reportContent = aiResponse.choices?.[0]?.message?.content;
+
+    if (!reportContent) {
+      throw new Error('OpenRouter API returned empty response. No report content generated.');
+    }
 
     // Create email draft using Gmail API (requires nodemailer)
     const nodemailer = require('nodemailer');
@@ -383,6 +387,18 @@ Format as a formal business report with clear headers, bullet points for key fin
 
     <div class="section">
       <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Intelligence Platform.</em></p>
+    </div>
+
+    <div class="section" style="background: #f0f9ff; padding: 20px; border-left: 4px solid #2563eb; margin-top: 30px;">
+      <h3 style="color: #2563eb; margin-top: 0;">📄 Download Your Official USMCA Certificate</h3>
+      <p>Your professional USMCA Certificate of Origin (all 12 required fields) is available for download:</p>
+      <p style="margin: 20px 0;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?view=certificates&id=${serviceRequestId}"
+           style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">
+          Download USMCA Certificate (PDF)
+        </a>
+      </p>
+      <p style="font-size: 14px; color: #6b7280;">This certificate includes all 12 USMCA-required fields and is signed by Cristina Escalante, Licensed Customs Broker #4601913</p>
     </div>
   </div>
 </body>

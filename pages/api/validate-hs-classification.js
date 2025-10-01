@@ -181,7 +181,7 @@ Format as JSON with these exact keys: recommended_hs_code, confidence_level, cla
         'X-Title': 'Triangle Intelligence - HS Classification Analysis'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'anthropic/claude-3.5-haiku',
         messages: [{
           role: 'user',
           content: aiPrompt

@@ -173,7 +173,7 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
         'X-Title': 'Triangle Intelligence - Market Entry Analysis'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'anthropic/claude-3.5-haiku',
         messages: [{
           role: 'user',
           content: aiPrompt

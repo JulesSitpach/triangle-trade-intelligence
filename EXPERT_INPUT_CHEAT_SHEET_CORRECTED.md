@@ -85,6 +85,30 @@ For customs audit, client needs: 1) Supplier declarations from all 3 countries w
 
 ## CRISTINA'S DASHBOARD - Crisis Response Service
 
+### Stage 1: Crisis Details (4 questions)
+
+**Question 1: What crisis occurred?**
+```
+Sudden 25% tariff increase on Chinese electronics imports announced by US Trade Representative
+```
+
+**Question 2: When did it happen?**
+```
+Yesterday morning (announced at 9am EST)
+```
+
+**Question 3: Current impact on operations?**
+```
+Immediate 25% cost increase on $2.1M annual import volume from China. Current shipments in transit ($175K value) will face new tariffs at customs clearance. Manufacturing partner in Shenzhen cannot absorb costs - full pass-through to us expected.
+```
+
+**Question 4: Immediate concerns?**
+```
+Customer contracts locked at current pricing for 6 months ($1.2M revenue at risk). Cash flow impact of $52,500 per month in additional tariff costs. Need alternative sourcing strategy by end of quarter to avoid contract defaults. Three major customers threatening to switch suppliers if prices increase.
+```
+
+---
+
 ### Stage 3: Cristina's Professional Crisis Management
 
 **Field 1: Crisis Severity Assessment:**
@@ -117,6 +141,35 @@ Implement geographic diversification rule (max 40% from any single country), est
 
 ## JORGE'S DASHBOARD - Supplier Sourcing Service
 
+### Stage 1: Strategic Preferences (5 questions)
+
+**Question 1: What is your preferred sourcing strategy?**
+```
+Immediate Mexico transition (compliance priority)
+```
+
+**Question 2: What type of suppliers do you prefer?**
+```
+Balanced portfolio approach
+```
+
+**Question 3: Timeline urgency:**
+```
+3-6 months
+```
+
+**Question 4: Risk tolerance for new supplier relationships:**
+```
+Balanced (mix of established and emerging)
+```
+
+**Question 5: Additional requirements or specifications:**
+```
+Need FDA-compliant suppliers for medical devices with ISO 13485 certification. Looking for clean room manufacturing capabilities and experience with US regulatory requirements. Prefer suppliers with existing US client relationships.
+```
+
+---
+
 ### Stage 3: Jorge's Strategic Intelligence
 
 **Field 1: Mexico Suppliers Identified:**
@@ -143,6 +196,45 @@ Month 1: FDA facility audits and CCVIAL supplier introductions. Month 2: First p
 
 ## JORGE'S DASHBOARD - Manufacturing Feasibility Service
 
+### Stage 1: Manufacturing Context (7 questions)
+
+**Question 1: Manufacturing scope and objectives:**
+```
+New facility setup
+```
+
+**Question 2: Investment budget range:**
+```
+$10M - $50M
+```
+
+**Question 3: Timeline expectations:**
+```
+12-18 months
+```
+
+**Question 4: Location preference (if any):**
+```
+Open to recommendations
+```
+
+**Question 5: Expected production volume:**
+```
+High volume production for renewable energy components
+```
+
+**Question 6: Quality and certification requirements:**
+```
+ISO 9001, environmental certifications for renewable energy sector
+```
+
+**Question 7: Regulatory or compliance considerations:**
+```
+USMCA compliance, US import requirements, environmental regulations for clean energy manufacturing
+```
+
+---
+
 ### Stage 3: Jorge's Manufacturing Analysis
 
 **Field 1: Recommended Mexico Locations:**
@@ -163,6 +255,30 @@ Phase 1 (Months 1-6): Site selection in Sonora renewable energy park, environmen
 ---
 
 ## JORGE'S DASHBOARD - Market Entry Service
+
+### Stage 1: Market Goals (4 questions)
+
+**Question 1: Target Market Region**
+```
+Mexico
+```
+
+**Question 2: Expected Market Size**
+```
+$5M - $20M annually
+```
+
+**Question 3: Entry Timeline**
+```
+6-12 months
+```
+
+**Question 4: Investment Budget Range**
+```
+$500K - $2M
+```
+
+---
 
 ### Stage 3: Jorge's Market Intelligence
 
@@ -229,16 +345,18 @@ Quarter 1: Establish Mexico subsidiary and ANTAD membership, identify key distri
 ## 📋 FIELD COUNT PER SERVICE
 
 **Cristina Services:**
-- HS Classification: 6 fields (after AI analysis)
-- USMCA Certificate: 3 fields (after AI risk analysis)
-- Crisis Response: 4 fields (professional crisis management)
+- HS Classification: 6 fields in Stage 2 (after AI analysis)
+- USMCA Certificate: 3 fields in Stage 2 (after AI risk analysis)
+- Crisis Response: 4 fields in Stage 1 + 4 fields in Stage 3 = **8 fields total**
 
 **Jorge Services:**
-- Supplier Sourcing: 4 fields (strategic supplier intelligence)
-- Manufacturing Feasibility: 3 fields (location and feasibility analysis)
-- Market Entry: 3 fields (market intelligence and relationships)
+- Supplier Sourcing: 5 fields in Stage 1 + 4 fields in Stage 3 = **9 fields total**
+- Manufacturing Feasibility: 7 fields in Stage 1 + 3 fields in Stage 3 = **10 fields total**
+- Market Entry: 4 fields in Stage 1 + 3 fields in Stage 3 = **7 fields total**
 
-**Total: 23 professional input fields**
+**Total: 43 professional input fields across all services**
+- Stage 1 questions: 20 fields (Crisis: 4, Supplier: 5, Manufacturing: 7, Market Entry: 4)
+- Stage 2/3 expert validation: 23 fields (HS: 6, USMCA: 3, Crisis: 4, Supplier: 4, Manufacturing: 3, Market Entry: 3)
 
 ---
 

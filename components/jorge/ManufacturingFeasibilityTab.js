@@ -839,20 +839,29 @@ function ManufacturingContextStage({ request, subscriberData, serviceDetails, on
 function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
   const [analysisStep, setAnalysisStep] = useState(1);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   const handleAIAnalysis = async () => {
     try {
       // Step 1: Start analysis
       setAnalysisStep(1);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Step 2: Call actual API for manufacturing feasibility analysis
+      // Step 2: Location analysis
       setAnalysisStep(2);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Step 3: Call actual API for manufacturing feasibility analysis
+      setAnalysisStep(3);
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const response = await fetch('/api/manufacturing-feasibility-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serviceRequestId: request.id,
-          stage1Data: stageData?.stage_1
+          request_id: request.id,
+          subscriber_data: request.workflow_data || {},
+          feasibility_requirements: stageData?.stage_1 || {}
         })
       });
 
@@ -860,11 +869,8 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
         throw new Error(`API call failed: ${response.status}`);
       }
 
-      const analysisResult = await response.json();
-
-      // Step 3-5: Show progress while processing
-      setAnalysisStep(3);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const result = await response.json();
+      console.log('AI Analysis Result:', result);
 
       setAnalysisStep(4);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -872,9 +878,15 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
       setAnalysisStep(5);
       await new Promise(resolve => setTimeout(resolve, 800));
 
+      setAnalysisStep(6);
+      setAnalysisResult(result);
       setAnalysisComplete(true);
     } catch (error) {
       console.error('AI analysis error:', error);
+      setAnalysisResult({
+        error: true,
+        error_message: `API Error: ${error.message}`
+      });
       setAnalysisComplete(true);
     }
   };
@@ -929,7 +941,7 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
           </div>
         </div>
 
-        {analysisComplete && (
+        {analysisComplete && analysisResult && (
           <div className="workflow-analysis-complete">
             <p>✅ AI analysis completed successfully!</p>
             <p>Ready for Jorge's expert evaluation and go/no-go recommendation.</p>
@@ -937,10 +949,90 @@ function AIAnalysisStage({ request, subscriberData, serviceDetails, stageData, o
         )}
       </div>
 
+      {/* AI Analysis Results Display */}
+      {analysisResult && !analysisResult.error && (
+        <div className="workflow-ai-results">
+          <h4>🤖 AI Feasibility Analysis Results</h4>
+
+          {analysisResult.location_analysis && (
+            <div className="ai-analysis-section">
+              <h5>📍 Location Analysis:</h5>
+              <div className="analysis-content">
+                {typeof analysisResult.location_analysis === 'object' ? (
+                  <pre>{JSON.stringify(analysisResult.location_analysis, null, 2)}</pre>
+                ) : (
+                  <p>{String(analysisResult.location_analysis)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.cost_analysis && (
+            <div className="ai-analysis-section">
+              <h5>💰 Cost Analysis:</h5>
+              <div className="analysis-content">
+                {typeof analysisResult.cost_analysis === 'object' ? (
+                  <pre>{JSON.stringify(analysisResult.cost_analysis, null, 2)}</pre>
+                ) : (
+                  <p>{String(analysisResult.cost_analysis)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.risk_assessment && (
+            <div className="ai-analysis-section">
+              <h5>⚠️ Risk Assessment:</h5>
+              <div className="analysis-content">
+                {typeof analysisResult.risk_assessment === 'object' ? (
+                  <pre>{JSON.stringify(analysisResult.risk_assessment, null, 2)}</pre>
+                ) : (
+                  <p>{String(analysisResult.risk_assessment)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.recommendations && (
+            <div className="ai-analysis-section">
+              <h5>💡 Strategic Recommendations:</h5>
+              <div className="analysis-content">
+                {Array.isArray(analysisResult.recommendations) ? (
+                  <ul>
+                    {analysisResult.recommendations.map((rec, idx) => (
+                      <li key={idx}>{String(rec)}</li>
+                    ))}
+                  </ul>
+                ) : typeof analysisResult.recommendations === 'object' ? (
+                  <pre>{JSON.stringify(analysisResult.recommendations, null, 2)}</pre>
+                ) : (
+                  <p>{String(analysisResult.recommendations)}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {analysisResult.feasibility_score && (
+            <div className="ai-analysis-section">
+              <h5>📊 Feasibility Score:</h5>
+              <div className="analysis-content">
+                <p><strong>{analysisResult.feasibility_score}</strong></p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {analysisResult && analysisResult.error && (
+        <div className="workflow-error">
+          <p>❌ {analysisResult.error_message}</p>
+        </div>
+      )}
+
       <div className="workflow-stage-actions">
         <button
           className="btn-primary"
-          onClick={() => onComplete({ ai_analysis_completed: true, completed_at: new Date().toISOString() })}
+          onClick={() => onComplete({ ai_analysis_completed: true, ai_results: analysisResult, completed_at: new Date().toISOString() })}
           disabled={!analysisComplete || loading}
         >
           {loading ? 'Processing...' : 'Complete AI Analysis → Jorge Review'}

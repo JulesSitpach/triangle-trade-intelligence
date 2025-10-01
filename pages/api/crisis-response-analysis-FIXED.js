@@ -1,9 +1,12 @@
 /**
- * API: Crisis Response Analysis with OpenRouter AI + Professional Management
+ * API: Crisis Response Analysis with Claude 3.5 Haiku + Professional Management
+ * Cost-optimized AI analysis using standardized Anthropic client
  * Used by Cristina's CrisisResponseTab - 3-stage workflow
  * Stage 2: AI analysis with FULL business intelligence context
  * Stage 3: Cristina's professional validation and execution
  */
+
+import { callAnthropicAPI, validateAnthropicConfig, createFallbackAnalysis, estimateCost } from '../../lib/anthropic-client.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,6 +14,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Validate Anthropic configuration
+    validateAnthropicConfig();
+    
     const { original_request, crisis_assessment, professional_input } = req.body;
 
     // Extract comprehensive subscriber data and crisis details
@@ -119,65 +125,39 @@ Provide a comprehensive crisis response analysis that Cristina can review and va
 
 Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_factors (array), action_plan (object with immediate_actions, short_term_actions, long_term_strategy arrays), financial_mitigation (array), regulatory_steps (array), supply_chain_recommendations (array).`;
 
-    console.log('[CRISIS RESPONSE] Calling OpenRouter API with comprehensive business context...');
+    console.log('[CRISIS RESPONSE] Calling Claude 3.5 Haiku with comprehensive business context...');
 
-    // Call OpenRouter API with full business intelligence
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-        'X-Title': 'Triangle Intelligence - Crisis Response Analysis'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku',
-        messages: [{
-          role: 'user',
-          content: aiPrompt
-        }],
-        temperature: 0.7,
-        max_tokens: 2500
-      })
+    // Calculate estimated cost for transparency
+    const costEstimate = estimateCost(aiPrompt);
+    console.log(`[CRISIS RESPONSE] Estimated cost: $${costEstimate.totalCost}`);
+
+    // Use standardized Anthropic client with Claude 3.5 Haiku
+    const aiResult = await callAnthropicAPI(aiPrompt, {
+      maxTokens: 2000,
+      temperature: 0.7,
+      parseJSON: true
     });
 
-    if (!openRouterResponse.ok) {
-      throw new Error(`OpenRouter API error: ${openRouterResponse.status} ${openRouterResponse.statusText}`);
-    }
-
-    const openRouterData = await openRouterResponse.json();
-    const aiResponseText = openRouterData.choices[0]?.message?.content || '';
-
-    console.log('[CRISIS RESPONSE] OpenRouter API response received');
-
-    // Parse AI response (try JSON first, fallback to text parsing)
     let aiAnalysis;
-    try {
-      // Try to extract JSON from response
-      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        aiAnalysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in response');
-      }
-    } catch (parseError) {
-      console.log('[CRISIS RESPONSE] JSON parse failed, using structured fallback');
-      // Fallback: structure the text response
-      aiAnalysis = {
-        crisis_severity: 'High',
-        immediate_impact: aiResponseText.substring(0, 200),
-        risk_factors: ['AI analysis provided - requires professional review'],
-        action_plan: {
-          immediate_actions: ['Review AI analysis below', 'Validate with business context'],
-          short_term_actions: ['Implement validated recommendations'],
-          long_term_strategy: ['Establish prevention protocols']
-        },
-        financial_mitigation: ['Minimize tariff exposure', 'Diversify supply chain'],
-        regulatory_steps: ['Ensure compliance with regulations'],
-        supply_chain_recommendations: ['Reduce concentration risk'],
-        raw_ai_analysis: aiResponseText
-      };
+    
+    if (aiResult.success && aiResult.data) {
+      // Successfully parsed JSON response
+      aiAnalysis = aiResult.data;
+      console.log('[CRISIS RESPONSE] ✅ JSON analysis parsed successfully');
+    } else if (aiResult.success && aiResult.rawText) {
+      // Fallback to structured analysis from raw text
+      console.log('[CRISIS RESPONSE] Using fallback analysis structure');
+      aiAnalysis = createFallbackAnalysis(aiResult.rawText, 'crisis');
+    } else {
+      throw new Error('Failed to get valid response from Anthropic API');
     }
+
+    // Validate that we have meaningful analysis
+    if (!aiAnalysis || typeof aiAnalysis !== 'object') {
+      throw new Error('Failed to generate valid crisis analysis');
+    }
+
+    console.log('[CRISIS RESPONSE] ✅ Crisis analysis completed successfully');
 
     // Return AI analysis for Cristina's professional review in Stage 3
     res.status(200).json({
@@ -185,6 +165,10 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
       ai_analysis: aiAnalysis,
       business_context: businessContext, // Include for Stage 3 reference
       requires_professional_validation: true,
+      ai_provider: 'Anthropic Claude 3.5 Haiku', // Cost-optimized model
+      response_quality: aiResult.rawText?.length > 500 ? 'High' : 'Medium',
+      cost_estimate: costEstimate,
+      usage: aiResult.usage,
       next_stage: {
         stage: 3,
         title: 'Professional Validation & Execution',
@@ -206,10 +190,18 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
 
   } catch (error) {
     console.error('Crisis response analysis error:', error);
+    
+    // Provide detailed error info for debugging
     res.status(500).json({
       error: 'Crisis response analysis failed',
       message: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      ai_provider: 'Anthropic Claude 3.5 Haiku',
+      debug_info: {
+        anthropic_key_available: !!process.env.ANTHROPIC_API_KEY,
+        error_type: error.name,
+        is_config_error: error.message.includes('ANTHROPIC_API_KEY'),
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }
     });
   }
 }
