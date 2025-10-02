@@ -131,10 +131,10 @@ export default function CristinaDashboardModular() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Cristina&apos;s Compliance Services</h1>
+              <h1 className="dashboard-title">Compliance Services Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Cristina Martinez</span>
-                <span className="user-role">SMB Compliance Specialist</span>
+                <span className="user-name">Compliance Specialist</span>
+                <span className="user-role">USMCA Certificates • HS Classification • Crisis Response</span>
               </div>
             </div>
 

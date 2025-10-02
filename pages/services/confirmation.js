@@ -56,8 +56,8 @@ export default function ServiceConfirmation() {
         <div className="card element-spacing">
           <h2 className="error-text">Payment Verification Failed</h2>
           <p className="text-body">{error}</p>
-          <Link href="/services/logistics-support">
-            <a className="btn-primary">Return to Services</a>
+          <Link href="/services/logistics-support" className="btn-primary">
+            Return to Services
           </Link>
         </div>
       </div>
@@ -114,8 +114,8 @@ export default function ServiceConfirmation() {
           </div>
 
           <div className="actions-center">
-            <Link href="/dashboard">
-              <a className="btn-primary">View My Dashboard</a>
+            <Link href="/dashboard" className="btn-primary">
+              View My Dashboard
             </Link>
           </div>
         </div>

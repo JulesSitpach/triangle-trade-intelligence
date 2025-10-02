@@ -117,10 +117,10 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                         <Link href="/profile" className="admin-dropdown-item">
                           View Profile
                         </Link>
-                        <Link href="/account-settings" className="admin-dropdown-item">
+                        <Link href="/account/settings" className="admin-dropdown-item">
                           Account Settings
                         </Link>
-                        <Link href="/pricing" className="admin-dropdown-item">
+                        <Link href="/account/subscription" className="admin-dropdown-item">
                           Subscription/Billing
                         </Link>
                         <Link href="mailto:support@triangleintelligence.com" className="admin-dropdown-item">

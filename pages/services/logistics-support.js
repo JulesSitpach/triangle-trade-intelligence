@@ -10,15 +10,25 @@ import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 export default function ProfessionalServices() {
   const { user, loading: authLoading } = useSimpleAuth();
   const [isProcessing, setIsProcessing] = useState({});
+  const [showIntakeForm, setShowIntakeForm] = useState(null); // serviceId when form is shown
+  const [formData, setFormData] = useState({
+    company_name: '',
+    business_type: '',
+    product_description: '',
+    trade_volume: '',
+    manufacturing_location: '',
+    contact_name: '',
+    phone: ''
+  });
 
   const services = [
-    // Cristina's Services
+    // Compliance Services
     {
       id: 'usmca-certificate',
       icon: '📜',
       title: 'USMCA Certificate Generation',
       price: 250,
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Avoid 35% tariffs with proper USMCA compliance',
         'Professional liability coverage',
@@ -38,7 +48,7 @@ export default function ProfessionalServices() {
       icon: '🔍',
       title: 'HS Code Classification',
       price: 200,
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Audit-proof classifications',
         'Minimize duty payments legally',
@@ -58,7 +68,7 @@ export default function ProfessionalServices() {
       icon: '🚨',
       title: 'Crisis Response Management',
       price: 400,
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Emergency 24-48 hour response',
         'Immediate action plan to minimize damage',
@@ -74,70 +84,96 @@ export default function ProfessionalServices() {
       whyNeed: 'When tariffs change suddenly or shipments are held, every hour costs money'
     },
 
-    // Jorge's Services
+    // Mexico Trade Services
     {
       id: 'supplier-sourcing',
       icon: '🔍',
       title: 'Supplier Sourcing',
       price: 450,
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'AI-powered supplier discovery with web search',
-        'Jorge validates findings with industry knowledge',
+        'Expert validates findings with industry knowledge',
         'Bilingual advantage for Mexico sourcing',
         'Direct workflow integration with your data'
       ],
       deliverables: [
-        'AI supplier analysis validated by Jorge',
+        'AI supplier analysis validated by expert',
         'Strategic recommendations report',
         'Implementation guidance and next steps',
         'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Get AI-powered supplier insights validated by Jorge\'s B2B expertise and Mexico market knowledge.'
+      whyNeed: 'Get AI-powered supplier insights validated by B2B expertise and Mexico market knowledge.'
     },
     {
       id: 'manufacturing-feasibility',
       icon: '🏭',
       title: 'Manufacturing Feasibility',
       price: 650,
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'Comprehensive AI feasibility analysis',
-        'Jorge validates locations and cost estimates',
+        'Expert validates locations and cost estimates',
         'Risk assessment with mitigation strategies',
         'USMCA qualification strategy included'
       ],
       deliverables: [
-        'AI feasibility analysis validated by Jorge',
+        'AI feasibility analysis validated by expert',
         'Location recommendations with pros/cons',
         'Financial projections and timeline',
         'Analysis completed within 5-7 business days'
       ],
-      whyNeed: 'Get comprehensive feasibility analysis combining AI research with Jorge\'s manufacturing expertise.'
+      whyNeed: 'Get comprehensive feasibility analysis combining AI research with manufacturing expertise.'
     },
     {
       id: 'market-entry',
       icon: '🚀',
       title: 'Market Entry Strategy',
       price: 550,
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'AI-powered market research and analysis',
-        'Jorge validates opportunities with local knowledge',
+        'Expert validates opportunities with local knowledge',
         'Competitive landscape assessment',
         'Entry strategy with actionable roadmap'
       ],
       deliverables: [
-        'AI market analysis validated by Jorge',
+        'AI market analysis validated by expert',
         'Market opportunity assessment',
         'Strategic entry recommendations',
         'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Get AI market intelligence validated by Jorge\'s on-the-ground Mexico business expertise.'
+      whyNeed: 'Get AI market intelligence validated by on-the-ground Mexico business expertise.'
     }
   ];
 
   const handleServiceRequest = async (serviceId) => {
+    // Check if user is authenticated
+    if (!user) {
+      alert('Please sign in to request professional services');
+      window.location.href = '/login?redirect=/services/logistics-support';
+      return;
+    }
+
+    // Check if user has workflow data
+    const workflowData = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+    const hasWorkflowData = workflowData.company?.name;
+
+    // Check subscription status
+    const subscriptionData = JSON.parse(localStorage.getItem('subscription_data') || '{}');
+    const isSubscriber = subscriptionData.status === 'active' || subscriptionData.status === 'trialing';
+
+    // If no workflow data and not a subscriber, show intake form
+    if (!hasWorkflowData && !isSubscriber) {
+      setShowIntakeForm(serviceId);
+      return;
+    }
+
+    // Proceed to checkout
+    await proceedToCheckout(serviceId);
+  };
+
+  const proceedToCheckout = async (serviceId) => {
     setIsProcessing(prev => ({ ...prev, [serviceId]: true }));
 
     try {
@@ -147,34 +183,30 @@ export default function ProfessionalServices() {
       const workflowData = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
       const userProfile = JSON.parse(localStorage.getItem('triangleUserData') || '{}');
 
-      // Prepare service request data
-      const serviceRequest = {
-        service_type: serviceId,
-        company_name: workflowData.company?.name || userProfile.company?.name || 'Unknown Company',
+      // Use intake form data if available, otherwise use workflow/profile data
+      const useFormData = formData.company_name !== '';
+
+      // Prepare service request data for Stripe metadata
+      const serviceRequestData = {
+        company_name: useFormData ? formData.company_name : (workflowData.company?.name || userProfile.company?.name || 'Unknown Company'),
         client_info: {
-          company: workflowData.company?.name || userProfile.company?.name || 'Unknown Company',
+          company: useFormData ? formData.company_name : (workflowData.company?.name || userProfile.company?.name || 'Unknown Company'),
           email: user?.email || 'client@example.com',
-          contact_name: userProfile.contact_name || 'Client Contact',
-          phone: userProfile.phone || 'Not provided'
+          contact_name: useFormData ? formData.contact_name : (userProfile.contact_name || 'Client Contact'),
+          phone: useFormData ? formData.phone : (userProfile.phone || 'Not provided')
         },
         service_details: {
-          product_description: workflowData.product?.description || userProfile.product_description || 'Manufacturing project',
-          business_type: workflowData.company?.business_type || userProfile.business_type || 'Manufacturing',
-          trade_volume: workflowData.company?.trade_volume || userProfile.trade_volume || 'Standard volume',
-          manufacturing_location: workflowData.company?.manufacturing_location || 'To be determined',
+          product_description: useFormData ? formData.product_description : (workflowData.product?.description || userProfile.product_description || 'Manufacturing project'),
+          business_type: useFormData ? formData.business_type : (workflowData.company?.business_type || userProfile.business_type || 'Manufacturing'),
+          trade_volume: useFormData ? formData.trade_volume : (workflowData.company?.trade_volume || userProfile.trade_volume || 'Standard volume'),
+          manufacturing_location: useFormData ? formData.manufacturing_location : (workflowData.company?.manufacturing_location || 'To be determined'),
           timeline: 'Standard delivery (5-7 business days)',
           urgency: 'Standard'
         },
-        status: 'intake_form_completed', // Skip form step - data already collected
-        price: services.find(s => s.id === serviceId)?.price || 500,
-        assigned_to: serviceId.includes('manufacturing') || serviceId.includes('supplier') || serviceId.includes('market') ? 'Jorge' : 'Cristina',
-        created_at: new Date().toISOString(),
-        intake_form_completed: true,
-        intake_form_data: {
-          // Manufacturing feasibility specific data
-          product_description: workflowData.product?.description || 'Manufacturing project',
-          industry: workflowData.company?.business_type || 'Manufacturing',
-          volume: workflowData.company?.trade_volume || 'Standard volume',
+        subscriber_data: {
+          product_description: useFormData ? formData.product_description : (workflowData.product?.description || 'Manufacturing project'),
+          industry: useFormData ? formData.business_type : (workflowData.company?.business_type || 'Manufacturing'),
+          volume: useFormData ? formData.trade_volume : (workflowData.company?.trade_volume || 'Standard volume'),
           quality_standards: 'ISO 9001 certification required',
           target_price_range: '$10-25 per unit',
           geographic_preference: 'Mexico regions with USMCA advantages',
@@ -182,25 +214,52 @@ export default function ProfessionalServices() {
         }
       };
 
-      // Save to database
-      const response = await fetch('/api/admin/service-requests', {
+      // Create Stripe checkout session
+      const response = await fetch('/api/stripe/create-service-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(serviceRequest)
+        body: JSON.stringify({
+          service_id: serviceId,
+          service_request_data: serviceRequestData
+        })
       });
 
-      if (response.ok) {
-        alert(`✅ Service request submitted successfully! Your ${serviceId.replace(/[-_]/g, ' ')} request has been sent to our expert team with all your workflow data.`);
-      } else {
-        throw new Error('Failed to submit service request');
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
       }
+
+      const { url, sessionId } = await response.json();
+
+      // Redirect to Stripe checkout
+      console.log(`Redirecting to Stripe checkout: ${sessionId}`);
+      window.location.href = url;
 
     } catch (error) {
       console.error('Service request error:', error);
-      alert('Error submitting request. Please try again.');
-    } finally {
+      alert('Error processing payment. Please try again.');
       setIsProcessing(prev => ({ ...prev, [serviceId]: false }));
     }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!formData.company_name || !formData.business_type || !formData.product_description ||
+        !formData.trade_volume || !formData.contact_name) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Close form and proceed to checkout
+    const serviceId = showIntakeForm;
+    setShowIntakeForm(null);
+    await proceedToCheckout(serviceId);
   };
 
   return (
@@ -209,6 +268,145 @@ export default function ProfessionalServices() {
         <title>Professional Services - Triangle Intelligence</title>
         <meta name="description" content="Expert USMCA compliance, HS classification, and Mexico trade services" />
       </Head>
+
+      {/* Intake Form Modal */}
+      {showIntakeForm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Business Information Required</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowIntakeForm(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-body">
+              To provide you with expert service, we need some information about your business.
+              Subscribers skip this step!
+            </p>
+
+            <form onSubmit={handleFormSubmit}>
+              <div className="filter-section">
+                <div className="filter-group">
+                  <label>Company Name *</label>
+                  <input
+                    type="text"
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleFormChange}
+                    required
+                    className="filter-select"
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label>Business Type *</label>
+                  <select
+                    name="business_type"
+                    value={formData.business_type}
+                    onChange={handleFormChange}
+                    required
+                    className="filter-select"
+                  >
+                    <option value="">Select business type</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Import/Export">Import/Export</option>
+                    <option value="Distribution">Distribution</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label>Annual Trade Volume *</label>
+                  <select
+                    name="trade_volume"
+                    value={formData.trade_volume}
+                    onChange={handleFormChange}
+                    required
+                    className="filter-select"
+                  >
+                    <option value="">Select volume</option>
+                    <option value="Under $100K">Under $100K</option>
+                    <option value="$100K - $500K">$100K - $500K</option>
+                    <option value="$500K - $1M">$500K - $1M</option>
+                    <option value="$1M - $5M">$1M - $5M</option>
+                    <option value="Over $5M">Over $5M</option>
+                  </select>
+                </div>
+
+                <div className="filter-group">
+                  <label>Product Description *</label>
+                  <textarea
+                    name="product_description"
+                    value={formData.product_description}
+                    onChange={handleFormChange}
+                    required
+                    className="filter-select"
+                    rows="3"
+                    placeholder="Describe your products or manufacturing project"
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label>Manufacturing Location</label>
+                  <input
+                    type="text"
+                    name="manufacturing_location"
+                    value={formData.manufacturing_location}
+                    onChange={handleFormChange}
+                    className="filter-select"
+                    placeholder="Current or planned location"
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label>Contact Name *</label>
+                  <input
+                    type="text"
+                    name="contact_name"
+                    value={formData.contact_name}
+                    onChange={handleFormChange}
+                    required
+                    className="filter-select"
+                  />
+                </div>
+
+                <div className="filter-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleFormChange}
+                    className="filter-select"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowIntakeForm(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                >
+                  Continue to Payment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div style={{
         maxWidth: '1200px',
@@ -223,6 +421,41 @@ export default function ProfessionalServices() {
           <p style={{ fontSize: '1.25rem', color: '#6b7280', maxWidth: '600px', margin: '0 auto' }}>
             Expert completion by licensed professionals. Avoid 35% tariffs and compliance risks.
           </p>
+
+          {!authLoading && (
+            <>
+              {(() => {
+                const workflowData = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+                const subscriptionData = JSON.parse(localStorage.getItem('subscription_data') || '{}');
+                const hasWorkflowData = workflowData.company?.name;
+                const isSubscriber = subscriptionData.status === 'active' || subscriptionData.status === 'trialing';
+
+                if (!user) {
+                  return (
+                    <div className="card" style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fef3c7', border: '1px solid #fbbf24' }}>
+                      <p className="text-body" style={{ margin: 0, color: '#92400e', textAlign: 'center' }}>
+                        <strong>Sign in required:</strong> Please sign in to request professional services
+                      </p>
+                    </div>
+                  );
+                } else if (!hasWorkflowData && !isSubscriber) {
+                  return (
+                    <div className="card" style={{ marginTop: '30px', padding: '20px', backgroundColor: '#dbeafe', border: '1px solid #3b82f6' }}>
+                      <p className="text-body" style={{ margin: 0, color: '#1e40af', textAlign: 'center' }}>
+                        <strong>Note:</strong> You'll be asked to provide business information before payment.
+                        <a href="/usmca-workflow" style={{ marginLeft: '8px', color: '#2563eb', textDecoration: 'underline' }}>
+                          Complete our workflow
+                        </a> or <a href="/pricing" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                          subscribe
+                        </a> to skip this step!
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </>
+          )}
         </div>
 
         <div style={{

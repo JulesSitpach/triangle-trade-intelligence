@@ -105,7 +105,7 @@ async function handleCheckoutSessionCompleted(session) {
   console.log('Processing checkout.session.completed:', session.id);
 
   const userId = session.metadata?.user_id;
-  const purchaseType = session.metadata?.type;
+  const serviceId = session.metadata?.service_id;
 
   if (!userId) {
     console.error('No user_id in session metadata');
@@ -113,11 +113,11 @@ async function handleCheckoutSessionCompleted(session) {
   }
 
   try {
-    // Check if this is a service purchase or subscription
-    if (purchaseType === 'service_purchase') {
-      // Handle service purchase
-      await handleServicePurchase(session);
-    } else {
+    // Check if this is a one-time service payment or subscription
+    if (session.mode === 'payment' && serviceId) {
+      // Handle one-time service purchase
+      await handleServicePaymentCompleted(session);
+    } else if (session.mode === 'subscription') {
       // Handle subscription purchase
       await handleSubscriptionPurchase(session, userId);
     }
@@ -128,35 +128,55 @@ async function handleCheckoutSessionCompleted(session) {
 }
 
 /**
- * Handle service purchase from checkout session
+ * Handle service payment completed and create service request
  */
-async function handleServicePurchase(session) {
-  const { user_id, service_request_id, service_type } = session.metadata;
+async function handleServicePaymentCompleted(session) {
+  const { user_id, service_id, service_name, service_request_data } = session.metadata;
 
-  console.log(`Processing service purchase: ${service_type} (Request ID: ${service_request_id})`);
+  console.log(`Processing service payment: ${service_name} for user ${user_id}`);
 
   try {
-    // Update service request status to 'pending' (awaiting admin action)
-    const { error: updateError } = await supabase
-      .from('service_requests')
-      .update({
-        status: 'pending',
-        stripe_payment_intent: session.payment_intent,
-        paid_at: new Date().toISOString()
-      })
-      .eq('id', service_request_id);
+    // Parse service request data from metadata
+    const requestData = service_request_data ? JSON.parse(service_request_data) : {};
 
-    if (updateError) {
-      console.error('Failed to update service request:', updateError);
-      throw updateError;
+    // Determine which team handles this service
+    const assigned_to = ['supplier-sourcing', 'manufacturing-feasibility', 'market-entry'].includes(service_id)
+      ? 'Jorge'
+      : 'Cristina';
+
+    // Create service request in database
+    const { data: serviceRequest, error: insertError } = await supabase
+      .from('service_requests')
+      .insert([{
+        user_id: user_id,
+        service_type: service_id,
+        client_company: requestData.company_name || 'Unknown Company',
+        client_info: requestData.client_info || {},
+        service_details: requestData.service_details || {},
+        subscriber_data: requestData.subscriber_data || {},
+        status: 'pending', // Awaiting specialist action
+        assigned_to: assigned_to,
+        price: session.amount_total / 100, // Convert from cents to dollars
+        stripe_session_id: session.id,
+        stripe_payment_intent: session.payment_intent,
+        paid_at: new Date().toISOString(),
+        intake_form_completed: true,
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Failed to create service request:', insertError);
+      throw insertError;
     }
 
-    console.log(`Service purchase completed: ${service_request_id}`);
+    console.log(`Service request created: ${serviceRequest.id} - Assigned to ${assigned_to}`);
 
-    // TODO: Send notification to admin about new service request
+    // TODO: Send email notification to specialist (Jorge or Cristina)
     // TODO: Send confirmation email to customer
   } catch (error) {
-    console.error('Error processing service purchase:', error);
+    console.error('Error processing service payment:', error);
     throw error;
   }
 }

@@ -115,10 +115,10 @@ export default function JorgeDashboardCleanModular() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Jorge's Partnership Dashboard</h1>
+              <h1 className="dashboard-title">Mexico Trade Services Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Jorge Martinez</span>
-                <span className="user-role">Mexico Trade Specialist</span>
+                <span className="user-name">Mexico Trade Specialist</span>
+                <span className="user-role">Supplier Sourcing • Manufacturing • Market Entry</span>
               </div>
             </div>
 

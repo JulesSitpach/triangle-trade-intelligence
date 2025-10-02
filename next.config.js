@@ -21,5 +21,16 @@ module.exports = {
         ]
       }
     ]
+  },
+
+  // Redirect old broken URLs to correct paths
+  async redirects() {
+    return [
+      {
+        source: '/account-settings',
+        destination: '/account/settings',
+        permanent: true
+      }
+    ]
   }
 }

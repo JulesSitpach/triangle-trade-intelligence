@@ -19,7 +19,7 @@ export default function ProfessionalServices() {
       name: 'USMCA Certificate Generation',
       price: '$250',
       description: 'Professional USMCA certificate with regulatory compliance validation.',
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       features: [
         'Avoid 35% tariffs with proper USMCA compliance',
         'Professional liability coverage',
@@ -33,7 +33,7 @@ export default function ProfessionalServices() {
       name: 'HS Code Classification',
       price: '$200',
       description: 'Licensed customs broker classification with audit-proof documentation.',
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       features: [
         'Audit-proof classifications',
         'Minimize duty payments legally',
@@ -47,7 +47,7 @@ export default function ProfessionalServices() {
       name: 'Crisis Response Management',
       price: '$400',
       description: 'Emergency compliance analysis when tariffs change or shipments are held.',
-      expert: 'Cristina Martinez - Licensed Customs Broker',
+      expert: 'Compliance Services - Licensed Customs Broker',
       features: [
         'Emergency 24-48 hour response',
         'Immediate action plan to minimize damage',
@@ -61,12 +61,12 @@ export default function ProfessionalServices() {
       name: 'Supplier Sourcing',
       price: '$450',
       description: 'AI-powered supplier discovery validated by Mexico B2B expert.',
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
         'AI-powered supplier discovery with web search',
-        'Jorge validates findings with industry knowledge',
+        'Expert validates findings with industry knowledge',
         'Bilingual advantage for Mexico sourcing',
-        'AI supplier analysis validated by Jorge',
+        'AI supplier analysis validated by expert',
         'Strategic recommendations report',
         'Analysis completed within 3-5 business days'
       ]
@@ -75,10 +75,10 @@ export default function ProfessionalServices() {
       name: 'Manufacturing Feasibility',
       price: '$650',
       description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise.',
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
         'Comprehensive AI feasibility analysis',
-        'Jorge validates locations and cost estimates',
+        'Expert validates locations and cost estimates',
         'Risk assessment with mitigation strategies',
         'USMCA qualification strategy included',
         'Financial projections and timeline',
@@ -89,10 +89,10 @@ export default function ProfessionalServices() {
       name: 'Market Entry Strategy',
       price: '$550',
       description: 'AI market intelligence validated by on-the-ground Mexico business expertise.',
-      expert: 'Jorge Ochoa - Mexico B2B Sales Expert',
+      expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
         'AI-powered market research and analysis',
-        'Jorge validates opportunities with local knowledge',
+        'Expert validates opportunities with local knowledge',
         'Competitive landscape assessment',
         'Entry strategy with actionable roadmap',
         'Market opportunity assessment',

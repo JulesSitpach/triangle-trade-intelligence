@@ -157,10 +157,10 @@ export default function UserDashboard({ user, profile }) {
                   <Link href="/profile" className="admin-dropdown-item">
                     View Profile
                   </Link>
-                  <Link href="/account-settings" className="admin-dropdown-item">
+                  <Link href="/account/settings" className="admin-dropdown-item">
                     Account Settings
                   </Link>
-                  <Link href="/pricing" className="admin-dropdown-item">
+                  <Link href="/account/subscription" className="admin-dropdown-item">
                     Subscription/Billing
                   </Link>
                   <Link href="mailto:support@triangleintelligence.com" className="admin-dropdown-item">
@@ -363,10 +363,10 @@ export default function UserDashboard({ user, profile }) {
             <div className="grid-2-cols">
               <div className="content-card">
                 <div className="team-member">
-                  <div className="team-member-avatar">J</div>
+                  <div className="team-member-avatar">🇲🇽</div>
                   <div>
-                    <h3 className="content-card-title">Jorge Cervantes</h3>
-                    <p className="content-card-description">Mexico Trade Specialist</p>
+                    <h3 className="content-card-title">Mexico Trade Services</h3>
+                    <p className="content-card-description">Supplier Sourcing • Manufacturing • Market Entry</p>
                     <div className="team-status online">Available</div>
                   </div>
                 </div>
@@ -382,10 +382,10 @@ export default function UserDashboard({ user, profile }) {
 
               <div className="content-card">
                 <div className="team-member">
-                  <div className="team-member-avatar">C</div>
+                  <div className="team-member-avatar">📋</div>
                   <div>
-                    <h3 className="content-card-title">Cristina Martinez</h3>
-                    <p className="content-card-description">Customs & Logistics</p>
+                    <h3 className="content-card-title">Compliance Services</h3>
+                    <p className="content-card-description">USMCA Certificates • HS Classification • Crisis Response</p>
                     <div className="team-status online">Available</div>
                   </div>
                 </div>

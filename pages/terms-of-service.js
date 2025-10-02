@@ -129,8 +129,8 @@ export default function TermsOfService() {
           </section>
 
           <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-            <Link href="/">
-              <a className="btn-primary">Return to Home</a>
+            <Link href="/" className="btn-primary">
+              Return to Home
             </Link>
           </div>
         </div>

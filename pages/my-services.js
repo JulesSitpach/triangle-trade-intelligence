@@ -144,8 +144,8 @@ export default function MyServices() {
                 ? "You haven't purchased any professional services yet."
                 : `You don't have any ${filter.replace('_', ' ')} services.`}
             </p>
-            <Link href="/services/logistics-support">
-              <a className="btn-primary">Browse Professional Services</a>
+            <Link href="/services/logistics-support" className="btn-primary">
+              Browse Professional Services
             </Link>
           </div>
         ) : (
