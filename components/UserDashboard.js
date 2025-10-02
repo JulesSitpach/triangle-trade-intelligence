@@ -371,11 +371,11 @@ export default function UserDashboard({ user, profile }) {
                   </div>
                 </div>
                 <p className="text-body">
-                  Supplier vetting, market entry strategy, and partnership intelligence for Mexico operations
+                  Don't qualify? Need to restructure supply chain through Mexico to achieve USMCA benefits?
                 </p>
                 <div className="hero-buttons">
                   <Link href="/services/logistics-support" className="btn-primary">
-                    Request Consultation
+                    Get Expert Help
                   </Link>
                 </div>
               </div>
@@ -390,11 +390,11 @@ export default function UserDashboard({ user, profile }) {
                   </div>
                 </div>
                 <p className="text-body">
-                  HS code classification, customs compliance, and multi-route logistics optimization
+                  Facing qualification issues, trade risk alerts, or need professional customs broker validation?
                 </p>
                 <div className="hero-buttons">
                   <Link href="/services/logistics-support" className="btn-primary">
-                    Request Consultation
+                    Get Expert Help
                   </Link>
                 </div>
               </div>

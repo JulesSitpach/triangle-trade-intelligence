@@ -41,7 +41,7 @@ export default function ProfessionalServices() {
         'Compliance verification report',
         'Delivered within 24-48 hours'
       ],
-      whyNeed: 'With new 35% tariffs on non-compliant goods, a proper USMCA certificate can save thousands per shipment'
+      whyNeed: 'Our tool showed borderline qualification? Need professional customs broker validation for audit protection? We ensure your certificate withstands scrutiny.'
     },
     {
       id: 'hs-classification',
@@ -61,7 +61,7 @@ export default function ProfessionalServices() {
         'Alternative code analysis if applicable',
         'Delivered within 1-2 business days'
       ],
-      whyNeed: 'Wrong HS codes lead to penalties, duty overpayments, and shipment delays'
+      whyNeed: 'Unsure which HS code gets you USMCA qualification? Wrong classification blocking your benefits? Licensed customs broker finds the right code to minimize duties.'
     },
     {
       id: 'crisis-response',
@@ -81,7 +81,7 @@ export default function ProfessionalServices() {
         'Prevention strategy for future issues',
         'Direct expert support until resolved'
       ],
-      whyNeed: 'When tariffs change suddenly or shipments are held, every hour costs money'
+      whyNeed: 'Got a trade risk alert? Shipment held at customs? Tariffs changed overnight? Our experts respond in 24-48 hours to minimize damage and fix the problem.'
     },
 
     // Mexico Trade Services
@@ -103,7 +103,7 @@ export default function ProfessionalServices() {
         'Implementation guidance and next steps',
         'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Get AI-powered supplier insights validated by B2B expertise and Mexico market knowledge.'
+      whyNeed: 'Don\'t qualify because too much comes from China? Need to restructure supply chain through Mexico? We find qualified suppliers to get you USMCA benefits.'
     },
     {
       id: 'manufacturing-feasibility',
@@ -123,7 +123,7 @@ export default function ProfessionalServices() {
         'Financial projections and timeline',
         'Analysis completed within 5-7 business days'
       ],
-      whyNeed: 'Get comprehensive feasibility analysis combining AI research with manufacturing expertise.'
+      whyNeed: 'Can\'t qualify with current manufacturing? Need to move production to North America? We analyze Mexico locations to help you achieve USMCA qualification.'
     },
     {
       id: 'market-entry',
@@ -143,7 +143,7 @@ export default function ProfessionalServices() {
         'Strategic entry recommendations',
         'Analysis completed within 3-5 business days'
       ],
-      whyNeed: 'Get AI market intelligence validated by on-the-ground Mexico business expertise.'
+      whyNeed: 'Want to qualify for USMCA but no Mexico presence? Need market entry strategy to establish operations? We map your path to North American qualification.'
     }
   ];
 
@@ -416,10 +416,11 @@ export default function ProfessionalServices() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
           <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#134169', marginBottom: '16px' }}>
-            Professional Services
+            Expert Services for USMCA Qualification Issues
           </h1>
-          <p style={{ fontSize: '1.25rem', color: '#6b7280', maxWidth: '600px', margin: '0 auto' }}>
-            Expert completion by licensed professionals. Avoid 35% tariffs and compliance risks.
+          <p style={{ fontSize: '1.25rem', color: '#6b7280', maxWidth: '700px', margin: '0 auto' }}>
+            Don't qualify for USMCA benefits? Facing trade risks? Need supply chain optimization?
+            Our licensed experts restructure your operations, respond to crises, and help you achieve qualification.
           </p>
 
           {!authLoading && (

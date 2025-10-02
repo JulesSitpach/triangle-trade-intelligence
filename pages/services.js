@@ -191,18 +191,19 @@ export default function ProfessionalServices() {
         {/* Hero Content */}
         <div className="hero-content-container">
           <div className="hero-badge">
-            Expert USMCA Consulting Services
+            USMCA Qualification Problem Solving
           </div>
-          
+
           <h1 className="hero-main-title">
-            Professional Trade Services
+            Don't Qualify? We Can Fix That
           </h1>
           <h2 className="hero-sub-title">
-            Expert <span className="hero-gradient-text">Implementation</span>
+            Expert <span className="hero-gradient-text">Supply Chain Restructuring</span>
           </h2>
-          
+
           <p className="hero-description-text">
-            Professional consulting, implementation support, and compliance training from certified trade experts. Custom solutions designed for enterprise manufacturers and importers.
+            Failed USMCA qualification? Facing trade risks? Need to restructure through Mexico?
+            Licensed customs brokers and Mexico trade specialists help you achieve qualification and maintain compliance.
           </p>
           
           <div className="hero-button-group">
@@ -228,9 +229,9 @@ export default function ProfessionalServices() {
       <section className="main-content" id="services">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Latin America Trade Services & Customs Brokerage</h2>
+            <h2 className="section-header-title">Restructure Your Supply Chain to Achieve USMCA Qualification</h2>
             <p className="section-header-subtitle">
-              Expert Mexico routing services with transparent capacity limits - honest about being a 3-person team
+              Licensed experts fix qualification issues, respond to trade crises, and help you restructure operations through Mexico
             </p>
           </div>
 
@@ -265,9 +266,9 @@ export default function ProfessionalServices() {
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Why Choose Our Services</h2>
+            <h2 className="section-header-title">When You Need Expert Help</h2>
             <p className="section-header-subtitle">
-              Honest about our capacity, focused on Mexico expertise, transparent pricing with no hidden fees
+              Our workflow shows qualification issues - our experts fix them through Mexico supply chain restructuring
             </p>
           </div>
 

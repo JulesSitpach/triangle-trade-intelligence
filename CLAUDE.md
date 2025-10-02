@@ -521,3 +521,55 @@ Provide strategic analysis and recommendations.`;
 ---
 
 **This CLAUDE.md reflects the current reality of the Triangle Intelligence Platform and provides accurate guidance for building the dashboard components and supporting infrastructure.**
+
+You're absolutely right - I completely misunderstood your business model. Let me correct this:
+
+## Your Actual Business Model
+
+**Primary Users:**
+- Companies who use your USMCA workflow tool
+- Run analyses to check if their products qualify
+- Generate certificates when they DO qualify
+- Set up alerts to monitor trade risks
+
+**These users ARE confident** because:
+- Your tool verified their qualification
+- They have the certificate to prove it
+- They understand their HS codes now
+
+## So Who Needs Your Services?
+
+**Users need Jorge/Cristina services when they DON'T qualify or have problems:**
+
+**Path 1: USMCA Analysis shows "NOT QUALIFIED"**
+- User discovers they can't use USMCA benefits
+- They need help: "How do I restructure my supply chain?"
+- **Jorge's services:** Find Mexico suppliers, set up manufacturing there
+- Goal: Restructure to BECOME qualified
+
+**Path 2: Trade Risk Alerts trigger**
+- User gets alert: "Tariffs increasing on Chinese components"
+- They're currently qualified but at risk
+- **Jorge's services:** Find alternative suppliers to maintain qualification
+- **Cristina's services:** Crisis response, compliance help
+
+**Path 3: User is qualified but wants optimization**
+- Certificate generated successfully
+- But they see potential savings with better sourcing
+- **Jorge's services:** Find cheaper Mexico suppliers
+- Maintain qualification while reducing costs
+
+## Pricing Makes Sense Now
+
+**Subscribers ($99-599/month):**
+- Run unlimited analyses
+- Generate certificates when qualified
+- Get trade risk alerts
+- **Services at 15-20% discount** when they need restructuring help
+
+**Non-subscribers:**
+- One-off certificate generation
+- Pay full price for services
+- Less committed to optimization
+
+The services are for **fixing problems** or **optimization**, not for people who are already compliant and happy. My mistake - I had the user journey completely backwards.
