@@ -11,14 +11,28 @@ export default function ProfessionalServices() {
   const { user, loading: authLoading } = useSimpleAuth();
   const [isProcessing, setIsProcessing] = useState({});
   const [showIntakeForm, setShowIntakeForm] = useState(null); // serviceId when form is shown
+  const [isSubscriberForm, setIsSubscriberForm] = useState(false); // True if user has workflow data
   const [formData, setFormData] = useState({
+    // Simple form for subscribers
+    concerns: '',
+
+    // Full form for non-subscribers
     company_name: '',
     business_type: '',
     product_description: '',
     trade_volume: '',
     manufacturing_location: '',
     contact_name: '',
-    phone: ''
+    phone: '',
+    current_qualification_status: '',
+    qualification_problem: '',
+    component_origins_china: '',
+    component_origins_mexico: '',
+    component_origins_usmca: '',
+    component_origins_other: '',
+    hs_codes: '',
+    current_suppliers: '',
+    target_markets: []
   });
 
   const services = [
@@ -163,14 +177,16 @@ export default function ProfessionalServices() {
     const subscriptionData = JSON.parse(localStorage.getItem('subscription_data') || '{}');
     const isSubscriber = subscriptionData.status === 'active' || subscriptionData.status === 'trialing';
 
-    // If no workflow data and not a subscriber, show intake form
-    if (!hasWorkflowData && !isSubscriber) {
+    // If user has workflow data OR is subscriber, show simple form
+    if (hasWorkflowData || isSubscriber) {
+      setIsSubscriberForm(true);
       setShowIntakeForm(serviceId);
       return;
     }
 
-    // Proceed to checkout
-    await proceedToCheckout(serviceId);
+    // If no workflow data and not a subscriber, show full intake form with 20% markup
+    setIsSubscriberForm(false);
+    setShowIntakeForm(serviceId);
   };
 
   const proceedToCheckout = async (serviceId) => {
@@ -214,13 +230,19 @@ export default function ProfessionalServices() {
         }
       };
 
+      // Calculate price with 20% markup for non-subscribers (convert to cents)
+      const basePriceDollars = services.find(s => s.id === serviceId)?.price || 500;
+      const finalPriceDollars = isSubscriberForm ? basePriceDollars : Math.round(basePriceDollars * 1.2);
+      const finalPriceCents = finalPriceDollars * 100;
+
       // Create Stripe checkout session
       const response = await fetch('/api/stripe/create-service-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_id: serviceId,
-          service_request_data: serviceRequestData
+          service_request_data: serviceRequestData,
+          price_override: isSubscriberForm ? null : finalPriceCents // 20% markup for non-subscribers
         })
       });
 
@@ -242,18 +264,57 @@ export default function ProfessionalServices() {
   };
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    if (type === 'checkbox') {
+      // Handle target markets checkboxes
+      if (name === 'target_markets') {
+        setFormData(prev => ({
+          ...prev,
+          target_markets: checked
+            ? [...prev.target_markets, value]
+            : prev.target_markets.filter(m => m !== value)
+        }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleComponentOriginChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      component_origins: prev.component_origins.map((origin, i) =>
+        i === index ? { ...origin, [field]: value } : origin
+      )
+    }));
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (!formData.company_name || !formData.business_type || !formData.product_description ||
-        !formData.trade_volume || !formData.contact_name) {
-      alert('Please fill in all required fields');
-      return;
+    if (isSubscriberForm) {
+      // Simple validation for subscribers - just need concerns
+      if (!formData.concerns || formData.concerns.trim().length < 10) {
+        alert('Please describe your concerns (at least 10 characters)');
+        return;
+      }
+    } else {
+      // Full validation for non-subscribers
+      if (!formData.company_name || !formData.business_type || !formData.product_description ||
+          !formData.trade_volume || !formData.contact_name || !formData.current_qualification_status ||
+          !formData.qualification_problem) {
+        alert('Please fill in all required fields marked with *');
+        return;
+      }
+
+      // Validate at least one component origin is filled
+      const hasComponentOrigins = formData.component_origins_china || formData.component_origins_mexico ||
+                                   formData.component_origins_usmca || formData.component_origins_other;
+      if (!hasComponentOrigins) {
+        alert('Please provide at least one component origin percentage');
+        return;
+      }
     }
 
     // Close form and proceed to checkout
@@ -274,7 +335,7 @@ export default function ProfessionalServices() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>Business Information Required</h2>
+              <h2>{isSubscriberForm ? 'Describe Your Concerns' : 'Business Information Required (+20% Non-Subscriber Fee)'}</h2>
               <button
                 className="modal-close"
                 onClick={() => setShowIntakeForm(null)}
@@ -283,127 +344,194 @@ export default function ProfessionalServices() {
               </button>
             </div>
 
-            <p className="text-body">
-              To provide you with expert service, we need some information about your business.
-              Subscribers skip this step!
-            </p>
+            {isSubscriberForm ? (
+              // SIMPLE FORM FOR SUBSCRIBERS
+              <>
+                <p className="text-body">
+                  We already have your business context from your workflow analysis.
+                  Just tell us what problem you're facing and we'll match you with the right expert.
+                </p>
 
-            <form onSubmit={handleFormSubmit}>
-              <div className="filter-section">
-                <div className="filter-group">
-                  <label>Company Name *</label>
-                  <input
-                    type="text"
-                    name="company_name"
-                    value={formData.company_name}
-                    onChange={handleFormChange}
-                    required
-                    className="filter-select"
-                  />
-                </div>
+                <form onSubmit={handleFormSubmit}>
+                  <div className="filter-section">
+                    <div className="filter-group" style={{width: '100%'}}>
+                      <label>What challenge are you facing? *</label>
+                      <textarea
+                        name="concerns"
+                        value={formData.concerns}
+                        onChange={handleFormChange}
+                        required
+                        className="filter-select"
+                        rows="6"
+                        placeholder="Example: 'Our analysis showed we don't qualify because 60% of components come from China. We need help finding Mexico suppliers to restructure our supply chain and achieve USMCA qualification.'"
+                      />
+                      <small className="text-body" style={{color: '#6b7280', marginTop: '8px'}}>
+                        Be specific about your situation so our expert can prepare properly.
+                      </small>
+                    </div>
+                  </div>
 
-                <div className="filter-group">
-                  <label>Business Type *</label>
-                  <select
-                    name="business_type"
-                    value={formData.business_type}
-                    onChange={handleFormChange}
-                    required
-                    className="filter-select"
-                  >
-                    <option value="">Select business type</option>
-                    <option value="Manufacturing">Manufacturing</option>
-                    <option value="Import/Export">Import/Export</option>
-                    <option value="Distribution">Distribution</option>
-                    <option value="Retail">Retail</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setShowIntakeForm(null)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary">
+                      Continue to Payment
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              // FULL FORM FOR NON-SUBSCRIBERS
+              <>
+                <p className="text-body" style={{backgroundColor: '#fef3c7', padding: '12px', borderRadius: '8px', color: '#92400e'}}>
+                  <strong>Note:</strong> Non-subscribers pay 20% more. Complete our USMCA workflow or subscribe to skip this form and save money!
+                </p>
 
-                <div className="filter-group">
-                  <label>Annual Trade Volume *</label>
-                  <select
-                    name="trade_volume"
-                    value={formData.trade_volume}
-                    onChange={handleFormChange}
-                    required
-                    className="filter-select"
-                  >
-                    <option value="">Select volume</option>
-                    <option value="Under $100K">Under $100K</option>
-                    <option value="$100K - $500K">$100K - $500K</option>
-                    <option value="$500K - $1M">$500K - $1M</option>
-                    <option value="$1M - $5M">$1M - $5M</option>
-                    <option value="Over $5M">Over $5M</option>
-                  </select>
-                </div>
+                <form onSubmit={handleFormSubmit}>
+                  <div className="filter-section">
+                    {/* Basic Business Info */}
+                    <div className="filter-group">
+                      <label>Company Name *</label>
+                      <input type="text" name="company_name" value={formData.company_name} onChange={handleFormChange} required className="filter-select" />
+                    </div>
 
-                <div className="filter-group">
-                  <label>Product Description *</label>
-                  <textarea
-                    name="product_description"
-                    value={formData.product_description}
-                    onChange={handleFormChange}
-                    required
-                    className="filter-select"
-                    rows="3"
-                    placeholder="Describe your products or manufacturing project"
-                  />
-                </div>
+                    <div className="filter-group">
+                      <label>Business Type *</label>
+                      <select name="business_type" value={formData.business_type} onChange={handleFormChange} required className="filter-select">
+                        <option value="">Select type</option>
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Import/Export">Import/Export</option>
+                        <option value="Distribution">Distribution</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
 
-                <div className="filter-group">
-                  <label>Manufacturing Location</label>
-                  <input
-                    type="text"
-                    name="manufacturing_location"
-                    value={formData.manufacturing_location}
-                    onChange={handleFormChange}
-                    className="filter-select"
-                    placeholder="Current or planned location"
-                  />
-                </div>
+                    <div className="filter-group">
+                      <label>Annual Trade Volume *</label>
+                      <select name="trade_volume" value={formData.trade_volume} onChange={handleFormChange} required className="filter-select">
+                        <option value="">Select volume</option>
+                        <option value="Under $100K">Under $100K</option>
+                        <option value="$100K-$500K">$100K-$500K</option>
+                        <option value="$500K-$1M">$500K-$1M</option>
+                        <option value="$1M-$5M">$1M-$5M</option>
+                        <option value="Over $5M">Over $5M</option>
+                      </select>
+                    </div>
 
-                <div className="filter-group">
-                  <label>Contact Name *</label>
-                  <input
-                    type="text"
-                    name="contact_name"
-                    value={formData.contact_name}
-                    onChange={handleFormChange}
-                    required
-                    className="filter-select"
-                  />
-                </div>
+                    <div className="filter-group" style={{gridColumn: '1 / -1'}}>
+                      <label>Product Description *</label>
+                      <textarea name="product_description" value={formData.product_description} onChange={handleFormChange} required className="filter-select" rows="3" placeholder="What do you manufacture or import?" />
+                    </div>
 
-                <div className="filter-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleFormChange}
-                    className="filter-select"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-              </div>
+                    {/* USMCA Qualification Status */}
+                    <div className="filter-group" style={{gridColumn: '1 / -1'}}>
+                      <label>Do you currently qualify for USMCA? *</label>
+                      <select name="current_qualification_status" value={formData.current_qualification_status} onChange={handleFormChange} required className="filter-select">
+                        <option value="">Select status</option>
+                        <option value="qualified">Yes, we qualify</option>
+                        <option value="not-qualified">No, we don't qualify</option>
+                        <option value="unsure">Unsure / Haven't checked</option>
+                        <option value="borderline">Borderline / Close to 75%</option>
+                      </select>
+                    </div>
 
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => setShowIntakeForm(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
-                  Continue to Payment
-                </button>
-              </div>
-            </form>
+                    <div className="filter-group" style={{gridColumn: '1 / -1'}}>
+                      <label>What problem are you trying to solve? *</label>
+                      <textarea name="qualification_problem" value={formData.qualification_problem} onChange={handleFormChange} required className="filter-select" rows="3" placeholder="Example: 'Too much content from China, need Mexico suppliers' or 'Facing new tariffs, need crisis response'" />
+                    </div>
+
+                    {/* Component Origins */}
+                    <div className="filter-group" style={{gridColumn: '1 / -1', borderTop: '1px solid #e5e7eb', paddingTop: '16px', marginTop: '16px'}}>
+                      <label style={{fontSize: '1.1rem', fontWeight: '600', color: '#134169'}}>Where do your components/materials come from? *</label>
+                      <small className="text-body" style={{display: 'block', color: '#6b7280', marginBottom: '12px'}}>
+                        Provide approximate percentages (must add up to 100% or close)
+                      </small>
+                    </div>
+
+                    <div className="filter-group">
+                      <label>China %</label>
+                      <input type="number" name="component_origins_china" value={formData.component_origins_china} onChange={handleFormChange} className="filter-select" placeholder="0-100" min="0" max="100" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>Mexico %</label>
+                      <input type="number" name="component_origins_mexico" value={formData.component_origins_mexico} onChange={handleFormChange} className="filter-select" placeholder="0-100" min="0" max="100" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>USA/Canada %</label>
+                      <input type="number" name="component_origins_usmca" value={formData.component_origins_usmca} onChange={handleFormChange} className="filter-select" placeholder="0-100" min="0" max="100" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>Other %</label>
+                      <input type="number" name="component_origins_other" value={formData.component_origins_other} onChange={handleFormChange} className="filter-select" placeholder="0-100" min="0" max="100" />
+                    </div>
+
+                    {/* Additional Info */}
+                    <div className="filter-group">
+                      <label>Current Suppliers (if known)</label>
+                      <input type="text" name="current_suppliers" value={formData.current_suppliers} onChange={handleFormChange} className="filter-select" placeholder="Company names or regions" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>HS Codes (if known)</label>
+                      <input type="text" name="hs_codes" value={formData.hs_codes} onChange={handleFormChange} className="filter-select" placeholder="e.g. 8517.62, 8471.30" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>Manufacturing Location</label>
+                      <input type="text" name="manufacturing_location" value={formData.manufacturing_location} onChange={handleFormChange} className="filter-select" placeholder="Current or planned" />
+                    </div>
+
+                    {/* Contact Info */}
+                    <div className="filter-group" style={{gridColumn: '1 / -1', borderTop: '1px solid #e5e7eb', paddingTop: '16px', marginTop: '16px'}}>
+                      <label style={{fontSize: '1.1rem', fontWeight: '600', color: '#134169'}}>Contact Information *</label>
+                    </div>
+
+                    <div className="filter-group">
+                      <label>Contact Name *</label>
+                      <input type="text" name="contact_name" value={formData.contact_name} onChange={handleFormChange} required className="filter-select" />
+                    </div>
+
+                    <div className="filter-group">
+                      <label>Phone Number</label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleFormChange} className="filter-select" placeholder="(555) 123-4567" />
+                    </div>
+
+                    {/* Target Markets */}
+                    <div className="filter-group" style={{gridColumn: '1 / -1'}}>
+                      <label>Target Markets (check all that apply)</label>
+                      <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px'}}>
+                        {['USA', 'Canada', 'Mexico', 'Latin America', 'Europe', 'Asia'].map(market => (
+                          <label key={market} style={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
+                            <input
+                              type="checkbox"
+                              name="target_markets"
+                              value={market}
+                              checked={formData.target_markets.includes(market)}
+                              onChange={handleFormChange}
+                              style={{marginRight: '6px'}}
+                            />
+                            {market}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-actions">
+                    <button type="button" className="btn-secondary" onClick={() => setShowIntakeForm(null)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary">
+                      Continue to Payment (+20% Fee)
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

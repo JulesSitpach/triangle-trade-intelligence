@@ -42,7 +42,7 @@ const SERVICE_NAMES = {
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const { service_id, service_request_data } = req.body;
+    const { service_id, service_request_data, price_override } = req.body;
     const userId = req.user.id;
 
     // Validate required fields
@@ -74,7 +74,9 @@ export default protectedApiHandler({
     // Get or create Stripe customer
     const customerId = await getOrCreateStripeCustomer(user, supabase);
 
-    const servicePrice = SERVICE_PRICES[service_id];
+    // Use price_override if provided (for non-subscribers with 20% markup), otherwise use standard price
+    const basePrice = SERVICE_PRICES[service_id];
+    const servicePrice = price_override || basePrice;
     const serviceName = SERVICE_NAMES[service_id];
 
     try {
