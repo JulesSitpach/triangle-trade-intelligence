@@ -27,10 +27,12 @@ export default async function handler(req, res) {
     startDate.setDate(startDate.getDate() - daysBack);
 
     // Query all required data tables
-    const [usersResult, workflowsResult, certificatesResult] = await Promise.all([
+    const [usersResult, workflowsResult, certificatesResult, subscriptionsResult, serviceRequestsResult] = await Promise.all([
       queryUserProfiles(),
       queryWorkflowCompletions(),
-      queryCertificateGeneration()
+      queryCertificateGeneration(),
+      querySubscriptions(),
+      queryServiceRequests()
     ]);
 
     // Calculate analytics metrics
@@ -38,6 +40,8 @@ export default async function handler(req, res) {
       usersResult,
       workflowsResult,
       certificatesResult,
+      subscriptionsResult,
+      serviceRequestsResult,
       startDate
     );
 
@@ -154,12 +158,72 @@ async function queryCertificateGeneration() {
 }
 
 /**
+ * Query subscriptions for revenue analytics
+ */
+async function querySubscriptions() {
+  try {
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select(`
+        id,
+        user_id,
+        tier,
+        billing_period,
+        status,
+        created_at,
+        updated_at
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching subscriptions:', error);
+      return { data: null, error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (e) {
+    return { data: [], error: null };
+  }
+}
+
+/**
+ * Query service requests for service revenue analytics
+ */
+async function queryServiceRequests() {
+  try {
+    const { data, error } = await supabase
+      .from('service_requests')
+      .select(`
+        id,
+        user_id,
+        service_type,
+        status,
+        price,
+        paid_at,
+        created_at
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching service requests:', error);
+      return { data: null, error };
+    }
+
+    return { data: data || [], error: null };
+  } catch (e) {
+    return { data: [], error: null };
+  }
+}
+
+/**
  * Calculate comprehensive platform analytics
  */
-function calculatePlatformAnalytics(usersResult, workflowsResult, certificatesResult, startDate) {
+function calculatePlatformAnalytics(usersResult, workflowsResult, certificatesResult, subscriptionsResult, serviceRequestsResult, startDate) {
   const users = usersResult.data || [];
   const workflows = workflowsResult.data || [];
   const certificates = certificatesResult.data || [];
+  const subscriptions = subscriptionsResult.data || [];
+  const serviceRequests = serviceRequestsResult.data || [];
 
   // If no real data, return sample analytics
   if (users.length === 0 && workflows.length === 0 && certificates.length === 0) {
@@ -198,6 +262,24 @@ function calculatePlatformAnalytics(usersResult, workflowsResult, certificatesRe
   const workflowToUserRate = totalUsers > 0 ? (totalWorkflows / totalUsers) * 100 : 0;
   const certificateConversionRate = totalWorkflows > 0 ? (totalCertificates / totalWorkflows) * 100 : 0;
 
+  // Subscription metrics (Task 4.3)
+  const activeSubscriptions = subscriptions.filter(s => s.status === 'active').length;
+  const tierPricing = {
+    professional: 299,
+    business: 499,
+    enterprise: 599
+  };
+  const monthlyRecurringRevenue = subscriptions
+    .filter(s => s.status === 'active')
+    .reduce((total, sub) => total + (tierPricing[sub.tier] || 0), 0);
+
+  // Service revenue metrics (Task 4.3)
+  const paidServiceRequests = serviceRequests.filter(s => s.paid_at);
+  const totalServiceRevenue = paidServiceRequests.reduce((total, service) => {
+    return total + (parseFloat(service.price) || 0);
+  }, 0);
+  const pendingServiceRequests = serviceRequests.filter(s => s.status === 'pending').length;
+
   return {
     // Core metrics (what AdminDashboard.js expects)
     total_workflows: totalWorkflows,
@@ -224,7 +306,12 @@ function calculatePlatformAnalytics(usersResult, workflowsResult, certificatesRe
     revenue: {
       total_savings_generated: Math.round(totalSavings),
       avg_savings_per_user: Math.round(avgSavingsPerUser),
-      estimated_value_delivered: Math.round(totalSavings * 1.15) // Assume 15% service fee
+      estimated_value_delivered: Math.round(totalSavings * 1.15), // Assume 15% service fee
+      // Task 4.3: Subscription & Service Revenue
+      monthly_recurring_revenue: monthlyRecurringRevenue,
+      total_service_revenue: Math.round(totalServiceRevenue),
+      active_subscriptions: activeSubscriptions,
+      pending_service_requests: pendingServiceRequests
     },
     engagement: {
       workflow_to_user_ratio: Math.round(workflowToUserRate * 10) / 10,
@@ -264,7 +351,12 @@ function getSampleAnalytics() {
     revenue: {
       total_savings_generated: 0,
       avg_savings_per_user: 0,
-      estimated_value_delivered: 0
+      estimated_value_delivered: 0,
+      // Task 4.3: Subscription & Service Revenue
+      monthly_recurring_revenue: 0,
+      total_service_revenue: 0,
+      active_subscriptions: 0,
+      pending_service_requests: 0
     },
     engagement: {
       workflow_to_user_ratio: 0,

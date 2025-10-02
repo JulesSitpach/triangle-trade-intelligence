@@ -1,10 +1,15 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { getStripe } from '../lib/stripe/client'
 
 export default function Pricing() {
   const [isClient, setIsClient] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [billingPeriod, setBillingPeriod] = useState('monthly')
+  const [loading, setLoading] = useState(null)
+  const router = useRouter()
 
   useEffect(() => {
     setIsClient(true)
@@ -14,46 +19,101 @@ export default function Pricing() {
     setMobileMenuOpen(!mobileMenuOpen)
   }
 
+  const handleSubscribe = async (tier) => {
+    try {
+      setLoading(tier)
+
+      // Call API to create Stripe checkout session
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tier: tier.toLowerCase(),
+          billing_period: billingPeriod
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
+
+      // Redirect to Stripe Checkout
+      const stripe = await getStripe()
+      if (!stripe) {
+        throw new Error('Stripe failed to load')
+      }
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+    } catch (error) {
+      console.error('Subscription error:', error)
+      alert(`Subscription error: ${error.message}`)
+    } finally {
+      setLoading(null)
+    }
+  }
+
   const plans = [
     {
-      name: 'Starter',
-      price: '$99',
-      period: 'per month',
+      name: 'Professional',
+      tier: 'professional',
+      monthlyPrice: 99,
+      annualPrice: 950,
+      period: billingPeriod === 'monthly' ? 'per month' : 'per year',
       description: 'Essential USMCA tools for small importers avoiding 35% tariffs',
       features: [
         'Basic Mexico routing calculator',
         '5 HS code lookups per month',
         'Basic email alerts',
-        'Certificate templates (self-complete)'
+        'Certificate templates (self-complete)',
+        '14-day free trial'
       ],
-      cta: 'Start Starter Trial',
+      cta: 'Subscribe to Professional',
       popular: false
     },
     {
-      name: 'Professional',
-      price: '$299',
-      period: 'per month',
+      name: 'Business',
+      tier: 'business',
+      monthlyPrice: 299,
+      annualPrice: 2850,
+      period: billingPeriod === 'monthly' ? 'per month' : 'per year',
       description: 'Advanced routing analysis with real-time tariff alerts',
       features: [
         'Advanced routing analysis',
         '25 HS code lookups per month',
         'Real-time alerts (email + SMS)',
-        'Certificate wizard (guided self-complete)'
+        'Certificate wizard (guided self-complete)',
+        'Priority support',
+        '14-day free trial'
       ],
-      cta: 'Start Professional Trial',
+      cta: 'Subscribe to Business',
       popular: true
     },
     {
-      name: 'Business',
-      price: '$599',
-      period: 'per month',
+      name: 'Enterprise',
+      tier: 'enterprise',
+      monthlyPrice: 599,
+      annualPrice: 5750,
+      period: billingPeriod === 'monthly' ? 'per month' : 'per year',
       description: 'Complete USMCA compliance solution for high-volume importers',
       features: [
         'Unlimited HS code lookups',
         'All alert channels',
-        'Certificate wizard + validation'
+        'Certificate wizard + validation',
+        'Dedicated account manager',
+        'Custom integrations',
+        '14-day free trial'
       ],
-      cta: 'Start Business Trial',
+      cta: 'Subscribe to Enterprise',
       popular: false
     }
   ]
@@ -199,15 +259,42 @@ export default function Pricing() {
             <p className="section-header-subtitle">
               All plans include AI-enhanced classification, government-verified data, and professional support
             </p>
+
+            {/* Billing Period Toggle */}
+            <div className="hero-button-group">
+              <button
+                onClick={() => setBillingPeriod('monthly')}
+                className={billingPeriod === 'monthly' ? 'hero-primary-button' : 'hero-secondary-button'}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingPeriod('annual')}
+                className={billingPeriod === 'annual' ? 'hero-primary-button' : 'hero-secondary-button'}
+              >
+                Annual (Save up to 20%)
+              </button>
+            </div>
           </div>
 
           <div className="grid-3-cols">
             {plans.map((plan, index) => (
-              <div key={index} className="content-card">
+              <div key={index} className={`content-card ${plan.popular ? 'popular-plan' : ''}`}>
+                {plan.popular && <div className="popular-badge">Most Popular</div>}
                 <h3 className="content-card-title">{plan.name}</h3>
-                <p className="text-body">{plan.price} {plan.period && `/ ${plan.period}`}</p>
+                <div className="price-display">
+                  <p className="text-body">
+                    <strong>${billingPeriod === 'monthly' ? plan.monthlyPrice : plan.annualPrice}</strong>
+                    {' '}{plan.period}
+                  </p>
+                  {billingPeriod === 'annual' && (
+                    <p className="text-body">
+                      ${Math.round(plan.annualPrice / 12)}/month
+                    </p>
+                  )}
+                </div>
                 <p className="content-card-description">{plan.description}</p>
-                
+
                 <div>
                   {plan.features.map((feature, idx) => (
                     <p key={idx} className="text-body">
@@ -215,10 +302,14 @@ export default function Pricing() {
                     </p>
                   ))}
                 </div>
-                
-                <Link href="/usmca-workflow" className="content-card-link">
-                  {plan.cta}
-                </Link>
+
+                <button
+                  onClick={() => handleSubscribe(plan.tier)}
+                  disabled={loading === plan.tier}
+                  className="content-card-link btn-primary"
+                >
+                  {loading === plan.tier ? 'Loading...' : plan.cta}
+                </button>
               </div>
             ))}
           </div>

@@ -1,24 +1,21 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 
 export default function AdminNavigation({ user }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { logout } = useSimpleAuth();
 
-  const signOut = () => {
-    // Clear ALL possible authentication keys
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('triangle_user_session');
-    localStorage.removeItem('triangle-dev-mode');
+  const signOut = async () => {
+    // Clear workflow data (keep this for workflow cleanup)
     localStorage.removeItem('usmca_workflow_data');
     localStorage.removeItem('usmca_company_data');
     localStorage.removeItem('usmca_workflow_results');
     localStorage.removeItem('workflow_session_id');
+    localStorage.removeItem('triangle-dev-mode');
 
-    // Clear any other stored user data
-    localStorage.clear();
-
-    // Redirect to landing page
-    window.location.href = '/';
+    // Call the proper logout that clears cookie
+    await logout();
   };
 
   const toggleMobileMenu = () => {

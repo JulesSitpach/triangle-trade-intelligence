@@ -1,16 +1,18 @@
 import nodemailer from 'nodemailer';
+import { apiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
+import { ApiError, validateRequiredFields } from '../../lib/api/errorHandler.js';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+export default apiHandler({
+  POST: async (req, res) => {
+    const { requestId, formData, formType } = req.body;
 
-  const { requestId, formData, formType } = req.body;
+    // Validate required fields
+    validateRequiredFields(req.body, ['requestId', 'formData', 'formType']);
 
-  console.log('📝 Intake form submitted:', { requestId, formType });
-  console.log('📊 Form data:', formData);
+    console.log('📝 Intake form submitted:', { requestId, formType });
+    console.log('📊 Form data:', formData);
 
-  try {
+    // Update service request status
     const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/service-requests`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -22,17 +24,14 @@ export default async function handler(req, res) {
       })
     });
 
+    if (!updateResponse.ok) {
+      throw new ApiError('Failed to update service request', 500);
+    }
+
     const updateResult = await updateResponse.json();
     console.log('✅ Request updated in database:', updateResult);
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
-    });
-
+    // Build form data HTML table
     const formDataHTML = Object.entries(formData)
       .filter(([key]) => !key.endsWith('_file'))
       .map(([key, value]) => `
@@ -42,6 +41,7 @@ export default async function handler(req, res) {
         </tr>
       `).join('');
 
+    // Build email HTML
     const emailHTML = `
       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
         <h2 style="color: #134169; border-bottom: 3px solid #2563eb; padding-bottom: 10px;">
@@ -76,53 +76,36 @@ export default async function handler(req, res) {
       </div>
     `;
 
-    const draftEmail = {
-      from: `"Triangle Intelligence Platform" <${process.env.GMAIL_USER}>`,
-      to: '', // Empty - Jorge will fill this in after finding contact
-      subject: `📋 ${formType} Completed - Request ${requestId}`,
-      html: emailHTML
-    };
-
-    // Save as draft using Gmail API (requires googleapis package)
-    const { google } = require('googleapis');
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      'http://localhost:3000'
-    );
-
-    // Save draft to API for Jorge to access
+    // Prepare email draft data
     const draftData = {
       request_id: requestId,
       form_type: formType,
-      email_subject: draftEmail.subject,
+      email_subject: `📋 ${formType} Completed - Request ${requestId}`,
       email_body: emailHTML,
       status: 'draft',
       created_at: new Date().toISOString()
     };
 
     // Save draft via API
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/email-drafts`, {
+    const draftResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/email-drafts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(draftData)
     });
 
+    if (!draftResponse.ok) {
+      console.warn('⚠️ Failed to save email draft, continuing anyway');
+    }
+
     console.log('📧 Email draft created - Jorge can locate contact and send:', draftData);
 
-    res.status(200).json({
-      success: true,
-      message: `${formType} submitted successfully`,
-      requestId: requestId,
+    return sendSuccess(res, {
+      requestId,
       status: 'Stage 1: Form Completed',
       receivedFields: Object.keys(formData).length,
       notification: 'Email draft created - Jorge will locate contact and send',
       emailDraft: true,
-      draftData: draftData
-    });
-  } catch (error) {
-    console.error('❌ Error processing form:', error);
-    res.status(500).json({ error: 'Failed to process form submission' });
+      draftData
+    }, `${formType} submitted successfully`);
   }
-}
+});

@@ -3,12 +3,13 @@
  * Returns detailed system status
  */
 
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import { apiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
 
-  try {
+export default apiHandler({
+  GET: async (req, res) => {
+    // Cache for 60 seconds with stale-while-revalidate
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+
     const status = {
       service: 'triangle-intelligence-platform',
       status: 'operational',
@@ -26,12 +27,6 @@ export default async function handler(req, res) {
       }
     };
 
-    return res.status(200).json(status);
-  } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: error.message,
-      timestamp: new Date().toISOString()
-    });
+    return sendSuccess(res, status);
   }
-}
+});

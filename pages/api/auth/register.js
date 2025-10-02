@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
+import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
 
 // Service role client for user_profiles operations
 const supabaseAdmin = createClient(
@@ -15,15 +16,34 @@ const supabaseAuth = createClient(
 );
 
 export default async function handler(req, res) {
+  // Apply rate limiting FIRST
+  try {
+    await applyRateLimit(authLimiter)(req, res);
+  } catch (error) {
+    console.log('🛡️ Rate limit exceeded for registration attempt');
+    return res.status(429).json({
+      success: false,
+      error: 'Too many registration attempts. Please try again in 15 minutes.'
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password, company_name, full_name } = req.body;
+  const { email, password, company_name, full_name, accept_terms } = req.body;
 
+  // Validate required fields
   if (!email || !password || !company_name) {
     return res.status(400).json({
       error: 'Email, password, and company name are required'
+    });
+  }
+
+  // Validate terms acceptance
+  if (!accept_terms) {
+    return res.status(400).json({
+      error: 'You must accept the Terms of Service and Privacy Policy to register'
     });
   }
 
@@ -44,6 +64,8 @@ export default async function handler(req, res) {
 
     // Step 1: Create user in auth.users via Supabase Auth with email confirmation
     console.log('📝 Creating auth user with email confirmation...');
+    const termsAcceptedAt = new Date().toISOString();
+
     const { data: authData, error: authError } = await supabaseAuth.auth.signUp({
       email: email,
       password: password,
@@ -51,7 +73,9 @@ export default async function handler(req, res) {
         emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login?message=Account created successfully. Please sign in.`,
         data: {
           full_name: full_name || 'New User',
-          company_name: company_name
+          company_name: company_name,
+          terms_accepted_at: termsAcceptedAt,
+          privacy_accepted_at: termsAcceptedAt
         }
       }
     });

@@ -22,14 +22,14 @@ export function useWorkflowState() {
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
-  // Load saved user data from localStorage
+  // Load saved user data from localStorage (for initial render)
   const loadSavedData = () => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('triangleUserData');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          console.log('Loading saved user data:', parsed);
+          console.log('Loading saved user data from localStorage');
           return parsed;
         } catch (e) {
           console.error('Error loading saved data:', e);
@@ -89,6 +89,29 @@ export function useWorkflowState() {
     loadOptions();
   }, []);
 
+  // Load workflow data from database on mount
+  useEffect(() => {
+    const loadFromDatabase = async () => {
+      const sessionId = localStorage.getItem('workflow_session_id');
+      if (sessionId) {
+        try {
+          const response = await fetch(`/api/workflow-session?sessionId=${sessionId}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+              console.log('✅ Restored workflow data from database');
+              setFormData(prev => ({ ...prev, ...result.data }));
+            }
+          }
+        } catch (error) {
+          console.log('⚠️ Database load failed, using localStorage:', error.message);
+        }
+      }
+    };
+
+    loadFromDatabase();
+  }, []); // Run once on mount
+
   // Set form defaults after options are loaded
   useEffect(() => {
     if (!defaultsLoaded && !isLoadingOptions) {
@@ -107,12 +130,41 @@ export function useWorkflowState() {
     }
   }, [defaultsLoaded, isLoadingOptions]);
 
-  // Save data to localStorage whenever it changes
+  // Save data to localStorage AND database whenever it changes (with debounce)
   useEffect(() => {
     if (typeof window !== 'undefined' && formData.company_name) {
-      // Only save if we have at least a company name
+      // Save to localStorage immediately (for instant access)
       localStorage.setItem('triangleUserData', JSON.stringify(formData));
-      console.log('Saved user data to localStorage');
+
+      // Debounce database save (2 seconds after user stops typing)
+      const saveTimer = setTimeout(async () => {
+        try {
+          let sessionId = localStorage.getItem('workflow_session_id');
+          if (!sessionId) {
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('workflow_session_id', sessionId);
+          }
+
+          const response = await fetch('/api/workflow-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              workflowData: formData,
+              userId: 'current-user', // Will be replaced with actual user ID from auth
+              action: 'save'
+            })
+          });
+
+          if (response.ok) {
+            console.log('✅ Workflow data auto-saved to database');
+          }
+        } catch (error) {
+          console.log('⚠️ Database save failed (localStorage still has data):', error.message);
+        }
+      }, 2000); // 2 second debounce
+
+      return () => clearTimeout(saveTimer);
     }
   }, [formData]);
 

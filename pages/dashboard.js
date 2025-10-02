@@ -8,28 +8,25 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check localStorage for session (nuclear option approach)
-    const stored = localStorage.getItem('triangle_user_session') || localStorage.getItem('current_user');
-
-    if (stored) {
-      try {
-        const userData = JSON.parse(stored);
-        setUser(userData);
-
-        // Allow both admin and regular users to access this dashboard
-        console.log('Dashboard access granted for:', userData.isAdmin ? 'admin' : 'user');
-      } catch (e) {
-        console.log('Invalid stored user data');
+    // Check cookie-based session via API
+    fetch('/api/auth/me', {
+      credentials: 'include'
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.authenticated && data.user) {
+        setUser(data.user);
+        console.log('✅ Dashboard access granted for:', data.user.isAdmin ? 'admin' : 'user');
+        setLoading(false);
+      } else {
+        console.log('❌ No valid session, redirecting to login');
         router.push('/login');
-        return;
       }
-    } else {
-      // No session found, redirect to login
+    })
+    .catch(error => {
+      console.error('Auth check failed:', error);
       router.push('/login');
-      return;
-    }
-
-    setLoading(false);
+    });
   }, []);
 
   // Show loading while checking authentication

@@ -1,0 +1,34 @@
+# robots.txt for Triangle Intelligence Platform
+# https://triangleintelligence.com
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow authentication pages
+Disallow: /login
+Disallow: /register
+
+# Disallow user-specific pages
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /account/
+Disallow: /certificates
+Disallow: /my-services
+
+# Allow public pages
+Allow: /pricing
+Allow: /services
+Allow: /usmca-workflow
+Allow: /terms-of-service
+Allow: /privacy-policy
+
+# Sitemap location
+Sitemap: https://triangleintelligence.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

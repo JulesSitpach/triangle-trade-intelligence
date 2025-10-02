@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 
 export default function UserDashboard({ user, profile }) {
-  // Nuclear option: Simple signOut and utility functions
+  const { logout } = useSimpleAuth();
+
+  // Use the proper logout that clears cookies
   const signOut = () => {
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('triangle_user_session');
-    window.location.href = '/';
+    logout();
   };
 
   const isTrialExpired = () => {

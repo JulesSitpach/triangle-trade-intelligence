@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import TriangleLayout from '../components/TriangleLayout'
 import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
+import Footer from '../components/Footer'
 
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false)
@@ -34,6 +35,50 @@ export default function HomePage() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:title" content="TradeFlow Intelligence | USMCA Compliance Platform" />
         <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for enterprise clients." />
+
+        {/* Structured Data (JSON-LD) for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "Triangle Intelligence Platform",
+              "applicationCategory": "BusinessApplication",
+              "description": "Professional USMCA compliance analysis and certificate generation platform for North American importers and exporters.",
+              "operatingSystem": "Web Browser",
+              "offers": {
+                "@type": "Offer",
+                "price": "99",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "price": "99.00",
+                  "priceCurrency": "USD",
+                  "unitText": "MONTH"
+                }
+              },
+              "provider": {
+                "@type": "Organization",
+                "name": "Triangle Intelligence",
+                "url": "https://triangleintelligence.com",
+                "logo": "https://triangleintelligence.com/logo.png",
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "email": "legal@triangleintelligence.com",
+                  "contactType": "Customer Service"
+                }
+              },
+              "featureList": [
+                "USMCA Qualification Analysis",
+                "Certificate of Origin Generation",
+                "HS Code Classification",
+                "Mexico Supplier Sourcing",
+                "Trade Compliance Consulting"
+              ]
+            })
+          }}
+        />
       </Head>
 
       {/* Fixed Navigation */}
@@ -281,6 +326,8 @@ export default function HomePage() {
               </div>
             </div>
           </section>
+
+          <Footer />
         </>
       )}
     </>
