@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div>
             <h3 className="footer-title">
-              Triangle Intelligence
+              Triangle Trade Intelligence
             </h3>
             <p className="footer-text">
               Professional USMCA compliance and trade services platform for North American importers and exporters.
@@ -78,7 +78,7 @@ export default function Footer() {
 
         <div className="footer-divider">
           <p className="footer-copyright">
-            © {currentYear} Triangle Intelligence. All rights reserved.
+            © {currentYear} Triangle Trade Intelligence. All rights reserved.
           </p>
         </div>
       </div>

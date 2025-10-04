@@ -307,6 +307,28 @@ export default function ComponentOriginsStepEnhanced({
     }
 
     // If workflow is valid, proceed directly
+    console.log('🚀 ========== STEP 2 SUBMIT: COMPONENT DATA ==========');
+    console.log('📦 Component Data Being Submitted:', {
+      component_count: components.length,
+      components: components.map((c, i) => ({
+        index: i + 1,
+        description: c.description,
+        origin_country: c.origin_country,
+        value_percentage: c.value_percentage,
+        hs_code: c.hs_code,
+        manufacturing_location: c.manufacturing_location
+      })),
+      total_percentage: components.reduce((sum, c) => sum + parseFloat(c.value_percentage || 0), 0)
+    });
+    console.log('🏢 Company Data from formData:', {
+      company_name: formData.company_name,
+      business_type: formData.business_type,
+      trade_volume: formData.trade_volume,
+      product_description: formData.product_description,
+      manufacturing_location: formData.manufacturing_location
+    });
+    console.log('========== END COMPONENT DATA ==========');
+
     onProcessWorkflow();
   };
 
@@ -452,12 +474,8 @@ export default function ComponentOriginsStepEnhanced({
                   value={component.description}
                   onChange={(e) => {
                     updateComponent(index, 'description', e.target.value);
-                    const timer = setTimeout(() => {
-                      getComponentHSSuggestion(index, e.target.value);
-                    }, 1500);
-                    return () => clearTimeout(timer);
                   }}
-                  placeholder="Describe this component in detail"
+                  placeholder="Describe this component (AI will suggest HS code after you select country)"
                   className="form-input"
                 />
               </div>
@@ -469,7 +487,13 @@ export default function ComponentOriginsStepEnhanced({
                 </label>
                 <select
                   value={component.origin_country}
-                  onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
+                  onChange={(e) => {
+                    updateComponent(index, 'origin_country', e.target.value);
+                    // Trigger AI HS code suggestion only after country is selected
+                    if (e.target.value && component.description && component.description.length >= 10) {
+                      getComponentHSSuggestion(index, component.description);
+                    }
+                  }}
                   className="form-select"
                 >
                   <option value="">Select origin country...</option>

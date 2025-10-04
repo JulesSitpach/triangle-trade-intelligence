@@ -17,7 +17,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { payment_method_id } = req.body;
 
     validateRequiredFields(req.body, ['payment_method_id']);

@@ -5,8 +5,8 @@ export default function TermsOfService() {
   return (
     <>
       <Head>
-        <title>Terms of Service - Triangle Intelligence</title>
-        <meta name="description" content="Triangle Intelligence Platform Terms of Service" />
+        <title>Terms of Service - Triangle Trade Intelligence</title>
+        <meta name="description" content="Triangle Trade Intelligence Platform Terms of Service" />
       </Head>
 
       <div className="container">
@@ -19,14 +19,14 @@ export default function TermsOfService() {
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">1. Acceptance of Terms</h2>
             <p className="text-body">
-              By accessing or using the Triangle Intelligence Platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.
+              By accessing or using the Triangle Trade Intelligence Platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the Service.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">2. Description of Service</h2>
             <p className="text-body">
-              Triangle Intelligence provides USMCA compliance analysis, certificate generation, and professional trade services to North American importers and exporters. Our services include but are not limited to:
+              Triangle Trade Intelligence provides USMCA compliance analysis, certificate generation, and professional trade services to North American importers and exporters. Our services include but are not limited to:
             </p>
             <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
               <li className="text-body">USMCA qualification analysis</li>
@@ -51,10 +51,6 @@ export default function TermsOfService() {
             <p className="text-body">
               Subscription fees are billed in advance on a monthly or annual basis. You authorize us to charge your payment method for all fees incurred. Subscriptions automatically renew unless cancelled before the renewal date.
             </p>
-            <h3 className="card-title" style={{ fontSize: '1rem', marginTop: '1rem' }}>Free Trial</h3>
-            <p className="text-body">
-              New users receive a 14-day free trial. Your payment method will be charged at the end of the trial period unless you cancel before the trial ends.
-            </p>
             <h3 className="card-title" style={{ fontSize: '1rem', marginTop: '1rem' }}>Cancellation</h3>
             <p className="text-body">
               You may cancel your subscription at any time. Cancellations take effect at the end of the current billing period. No refunds are provided for partial months.
@@ -75,14 +71,14 @@ export default function TermsOfService() {
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">6. Intellectual Property</h2>
             <p className="text-body">
-              All content, features, and functionality of the Service are owned by Triangle Intelligence and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or reverse engineer any part of the Service.
+              All content, features, and functionality of the Service are owned by Triangle Trade Intelligence and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or reverse engineer any part of the Service.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">7. Disclaimer of Warranties</h2>
             <p className="text-body">
-              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. Triangle Intelligence does not guarantee that the Service will be uninterrupted, error-free, or free of viruses or other harmful components.
+              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. Triangle Trade Intelligence does not guarantee that the Service will be uninterrupted, error-free, or free of viruses or other harmful components.
             </p>
             <p className="text-body" style={{ marginTop: '0.5rem', fontWeight: 'bold' }}>
               Legal Compliance Disclaimer: While our services assist with USMCA compliance, they do not constitute legal advice. Users should consult with qualified legal professionals for specific compliance questions.
@@ -92,14 +88,14 @@ export default function TermsOfService() {
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">8. Limitation of Liability</h2>
             <p className="text-body">
-              To the maximum extent permitted by law, Triangle Intelligence shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the Service.
+              To the maximum extent permitted by law, Triangle Trade Intelligence shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the Service.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem' }}>
             <h2 className="card-title">9. Indemnification</h2>
             <p className="text-body">
-              You agree to indemnify and hold harmless Triangle Intelligence from any claims, damages, losses, liabilities, and expenses arising out of your use of the Service or violation of these Terms.
+              You agree to indemnify and hold harmless Triangle Trade Intelligence from any claims, damages, losses, liabilities, and expenses arising out of your use of the Service or violation of these Terms.
             </p>
           </section>
 

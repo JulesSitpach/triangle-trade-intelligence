@@ -105,7 +105,7 @@ export default function JorgeDashboardCleanModular() {
   return (
     <>
       <Head>
-        <title>Jorge's Dashboard - Triangle Intelligence</title>
+        <title>Jorge's Dashboard - Triangle Trade Intelligence</title>
         <meta name="description" content="Mexico Trade Partnership & Intelligence Dashboard" />
       </Head>
 

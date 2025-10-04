@@ -31,7 +31,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>Triangle Intelligence - Simplified</title>
+        <title>Triangle Trade Intelligence - Simplified</title>
         <meta name="description" content="Simplified tariff optimization and triangle routing intelligence for reliable operation" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -39,7 +39,7 @@ export default function App({ Component, pageProps }) {
       {/* Loading overlay - hidden when React hydrates */}
       {showLoading && (
         <div className="loading-overlay">
-          Triangle Intelligence Loading... (Simplified Mode)
+          Triangle Trade Intelligence Loading... (Simplified Mode)
         </div>
       )}
       

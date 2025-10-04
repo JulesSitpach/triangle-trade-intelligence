@@ -188,7 +188,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Intelligence - Crisis Response'
+        'X-Title': 'Triangle Trade Intelligence - Crisis Response'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-3-haiku',
@@ -302,7 +302,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
     `;
 
     await transporter.sendMail({
-      from: 'Triangle Intelligence - Crisis Response <triangleintel@gmail.com>',
+      from: 'Triangle Trade Intelligence - Crisis Response <triangleintel@gmail.com>',
       to: 'triangleintel@gmail.com',
       subject: emailSubject,
       html: emailBody,

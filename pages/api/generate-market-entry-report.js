@@ -101,7 +101,7 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Intelligence - Market Entry'
+        'X-Title': 'Triangle Trade Intelligence - Market Entry'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-3-haiku',
@@ -226,7 +226,7 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
     `;
 
     await transporter.sendMail({
-      from: 'Triangle Intelligence - Market Entry <triangleintel@gmail.com>',
+      from: 'Triangle Trade Intelligence - Market Entry <triangleintel@gmail.com>',
       to: 'triangleintel@gmail.com',
       subject: emailSubject,
       html: emailBody

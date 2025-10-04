@@ -94,7 +94,7 @@ export default function JorgeDashboard() {
   return (
     <>
       <Head>
-        <title>Jorge's Work Dashboard - Triangle Intelligence</title>
+        <title>Jorge's Work Dashboard - Triangle Trade Intelligence</title>
         <meta name="description" content="Jorge's Mexico trade services work dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

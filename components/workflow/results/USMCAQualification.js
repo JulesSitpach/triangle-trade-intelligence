@@ -12,53 +12,57 @@ export default function USMCAQualification({ results }) {
 
   const { qualified, rule, reason, documentation_required } = results.usmca;
   
-  // Extract gap analysis data for NOT QUALIFIED cases
+  // Extract gap analysis data from API response
   const extractGapAnalysis = () => {
-    console.log('🔍 Gap Analysis Debug:', { qualified, hasComponents: !!results.components, results });
-    if (qualified || !results.components) return null;
-    
+    console.log('🔍 Gap Analysis Debug:', { qualified, results });
+
+    // Don't show for qualified products
+    if (qualified) return null;
+
+    // Get threshold from API response (from config file via our hybrid approach)
     const currentContent = results.usmca.north_american_content || 0;
-    const requiredThreshold = results.usmca.threshold_required || 65;
+    const requiredThreshold = results.usmca.threshold_applied || results.usmca.threshold_required || 62.5;
     const gap = requiredThreshold - currentContent;
-    
+
+    console.log('📊 Threshold Data:', {
+      currentContent,
+      requiredThreshold,
+      gap,
+      source: 'API response (config file)'
+    });
+
     if (gap <= 0) return null;
-    
-    // Find largest non-USMCA component for recommendation
-    const nonUsmcaComponents = results.components.filter(c => 
-      !['US', 'CA', 'MX'].includes(c.origin_country)
+
+    // Get component data from usmca.component_breakdown (from API)
+    const components = results.usmca.component_breakdown || [];
+
+    // Find largest non-USMCA component
+    const nonUsmcaComponents = components.filter(c =>
+      !c.is_usmca_member && c.value_percentage > 0
     ).sort((a, b) => b.value_percentage - a.value_percentage);
-    
+
     const targetComponent = nonUsmcaComponents[0];
     if (!targetComponent) return null;
-    
-    // Calculate business impact
-    const estimatedTradeVolume = 3000000; // From test scenario
-    const currentTariffRate = results.tariff?.mfnRate || 5.3;
-    const usmcaRate = results.tariff?.usmcaRate || 0;
-    const potentialSavings = estimatedTradeVolume * (currentTariffRate - usmcaRate) / 100;
-    
+
+    // Get savings from API if available
+    const potentialSavings = results.savings?.annual_savings || 0;
+
     return {
       gap,
       currentContent,
       requiredThreshold,
       targetComponent,
-      potentialSavings: Math.round(potentialSavings),
+      potentialSavings,
       estimatedTimeline: gap > 20 ? '6-12 months' : '3-6 months'
     };
   };
   
-  const gapAnalysis = extractGapAnalysis() || {
-    gap: 10,
-    currentContent: 55,
-    requiredThreshold: 65,
-    targetComponent: {
-      origin_country: 'TW',
-      description: 'sensor components',
-      value_percentage: 45
-    },
-    potentialSavings: 297000,
-    estimatedTimeline: '3-6 months'
-  };
+  const gapAnalysis = extractGapAnalysis();
+
+  // If no gap analysis available, don't show the qualification path section
+  if (!gapAnalysis) {
+    // Component will render basic qualification status only
+  }
 
   return (
     <div className="element-spacing">
@@ -109,7 +113,7 @@ export default function USMCAQualification({ results }) {
         )}
         
         {/* Business Intelligence: Gap Analysis & Recommendations */}
-        {!qualified && (
+        {!qualified && gapAnalysis && (
           <div className="element-spacing">
             <div className="card">
               <div className="card-header">
@@ -157,14 +161,14 @@ export default function USMCAQualification({ results }) {
                   </div>
                 </div>
 
-                {/* Triangle Intelligence Business Opportunity */}
+                {/* Triangle Trade Intelligence Business Opportunity */}
                 <div className="alert alert-success">
                   <div className="alert-content">
-                    <div className="alert-title">🤝 Triangle Intelligence Can Help</div>
+                    <div className="alert-title">🤝 Triangle Trade Intelligence Can Help</div>
                     <div className="text-body">
-                      • Connect you with qualified Mexico semiconductor suppliers<br />
-                      • Our supplier network includes certified facilities in Guadalajara<br />
+                      • Connect you with qualified Mexico suppliers for your industry<br />
                       • Supply chain assessment and transition planning<br />
+                      • Expert guidance for USMCA qualification<br />
                       • Crisis-resistant USMCA-compliant sourcing strategies
                     </div>
                   </div>
@@ -177,17 +181,23 @@ export default function USMCAQualification({ results }) {
                   </div>
                   <div className="card-content">
                     <div className="button-group">
-                      <button 
+                      <button
                         className="btn btn-primary"
+                        disabled={!results?.company?.company_name || !gapAnalysis?.targetComponent}
                         onClick={async () => {
+                          if (!results?.company?.company_name || !gapAnalysis?.targetComponent) {
+                            alert('❌ Missing required data. Please complete the workflow first.');
+                            return;
+                          }
+
                           const requestData = {
                             type: 'supplier_introduction_request',
-                            company_name: results?.company?.company_name || 'TechCorp Electronics Inc',
-                            business_type: results?.company?.business_type || 'Electronics & Technology',
-                            supplier_type: 'mexico_semiconductor',
+                            company_name: results.company.company_name,
+                            business_type: results.company.business_type,
+                            supplier_type: 'mexico_supplier',
                             component_needed: gapAnalysis.targetComponent.description,
                             gap_percentage: gapAnalysis.gap,
-                            trade_volume: results?.company?.trade_volume || '$5M - $10M',
+                            trade_volume: results.company.trade_volume,
                             timestamp: new Date().toISOString()
                           };
                           
@@ -199,7 +209,7 @@ export default function USMCAQualification({ results }) {
                             });
                             
                             if (response.ok) {
-                              alert('✅ Request submitted! Triangle Intelligence will contact you within 24 hours with qualified Mexico suppliers.');
+                              alert('✅ Request submitted! Triangle Trade Intelligence will contact you within 24 hours with qualified Mexico suppliers.');
                             } else {
                               alert('❌ Request failed. Please try again or contact support.');
                             }
@@ -210,17 +220,23 @@ export default function USMCAQualification({ results }) {
                       >
                         Request Mexico Supplier Introduction
                       </button>
-                      <button 
+                      <button
                         className="btn btn-secondary"
+                        disabled={!results?.company?.company_name || !gapAnalysis}
                         onClick={async () => {
+                          if (!results?.company?.company_name || !gapAnalysis) {
+                            alert('❌ Missing required data. Please complete the workflow first.');
+                            return;
+                          }
+
                           const assessmentData = {
                             type: 'supply_chain_assessment_request',
-                            company_name: results?.company?.company_name || 'TechCorp Electronics Inc',
-                            business_type: results?.company?.business_type || 'Electronics & Technology',
+                            company_name: results.company.company_name,
+                            business_type: results.company.business_type,
                             current_usmca_content: gapAnalysis.currentContent,
                             required_threshold: gapAnalysis.requiredThreshold,
                             components: results?.components || [],
-                            trade_volume: results?.company?.trade_volume || '$5M - $10M',
+                            trade_volume: results.company.trade_volume,
                             timestamp: new Date().toISOString()
                           };
                           
@@ -243,11 +259,17 @@ export default function USMCAQualification({ results }) {
                       >
                         Schedule Supply Chain Assessment
                       </button>
-                      <button 
+                      <button
                         className="btn btn-secondary"
+                        disabled={!results?.company?.company_name || !gapAnalysis}
                         onClick={() => {
+                          if (!results?.company?.company_name || !gapAnalysis) {
+                            alert('❌ Missing required data. Please complete the workflow first.');
+                            return;
+                          }
+
                           const data = {
-                            company: results?.company?.company_name || 'TechCorp Electronics Inc',
+                            company: results.company.company_name,
                             currentContent: gapAnalysis.currentContent,
                             requiredThreshold: gapAnalysis.requiredThreshold,
                             gap: gapAnalysis.gap,

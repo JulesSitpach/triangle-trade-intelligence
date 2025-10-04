@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: to,
-      subject: `${formType} - Triangle Intelligence`,
+      subject: `${formType} - Triangle Trade Intelligence`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">${formType}</h2>
@@ -65,7 +65,7 @@ export default async function handler(req, res) {
             Best regards,<br>
             <strong>Jorge</strong><br>
             Mexico Trade Specialist<br>
-            Triangle Intelligence
+            Triangle Trade Intelligence
           </p>
         </div>
       `

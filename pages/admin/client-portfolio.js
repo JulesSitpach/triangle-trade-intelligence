@@ -1364,7 +1364,7 @@ export default function ClientPortfolio() {
   const handleSendCustomerEmail = async (customer) => {
     try {
       const subject = encodeURIComponent(`Follow-up: ${customer.company_name || 'Your Account'}`);
-      const body = encodeURIComponent(`Hi ${customer.contact_name || 'there'},\n\nI wanted to follow up on your Triangle Intelligence account and see how we can better support your Mexico trade operations.\n\nBest regards,\nJorge`);
+      const body = encodeURIComponent(`Hi ${customer.contact_name || 'there'},\n\nI wanted to follow up on your Triangle Trade Intelligence account and see how we can better support your Mexico trade operations.\n\nBest regards,\nJorge`);
       window.open(`https://mail.google.com/mail/?view=cm&to=${customer.email}&su=${subject}&body=${body}`, '_blank');
       alert(`Follow-up email opened for ${customer.company_name}`);
     } catch (error) {
@@ -1467,7 +1467,7 @@ export default function ClientPortfolio() {
   return (
     <>
       <Head>
-        <title>Jorge's Service Management Dashboard - Triangle Intelligence</title>
+        <title>Jorge's Service Management Dashboard - Triangle Trade Intelligence</title>
         <link rel="stylesheet" href="/styles/admin-tables.css" />
       </Head>
 
@@ -2280,7 +2280,7 @@ export default function ClientPortfolio() {
             <div className="admin-card">
               <div className="card-header">
                 <h2 className="card-title">➕ Create New Customer</h2>
-                <p className="card-description">Add new customers to the Triangle Intelligence platform and sales pipeline</p>
+                <p className="card-description">Add new customers to the Triangle Trade Intelligence platform and sales pipeline</p>
               </div>
 
               <div className="customer-creation-form">

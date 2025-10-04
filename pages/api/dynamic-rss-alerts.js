@@ -12,7 +12,7 @@ import Parser from 'rss-parser';
 const parser = new Parser({
   timeout: 10000,
   headers: {
-    'User-Agent': 'Triangle Intelligence RSS Monitor/1.0'
+    'User-Agent': 'Triangle Trade Intelligence RSS Monitor/1.0'
   }
 });
 

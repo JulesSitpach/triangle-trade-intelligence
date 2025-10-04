@@ -7,7 +7,7 @@ export default function Custom500() {
   return (
     <div className="container-app">
       <Head>
-        <title>500 - Server Error | Triangle Intelligence</title>
+        <title>500 - Server Error | Triangle Trade Intelligence</title>
       </Head>
 
       <div className="error-page">

@@ -13,7 +13,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   GET: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { limit = 10, offset = 0 } = req.query;
 
     try {

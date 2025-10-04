@@ -22,7 +22,7 @@ const SERVICE_PRICING = {
 
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { service_type, subscriber_data } = req.body;
 
     // Validation

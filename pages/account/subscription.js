@@ -74,22 +74,15 @@ export default function SubscriptionManagement() {
 
   const getTierDisplayName = (tier) => {
     const names = {
-      trial: 'Free Trial',
       professional: 'Professional',
       business: 'Business',
-      enterprise: 'Enterprise'
+      enterprise: 'Professional Plus'
     };
-    return names[tier?.toLowerCase()] || tier || 'Trial';
+    return names[tier?.toLowerCase()] || tier || 'Professional';
   };
 
   const getPlanFeatures = (tier) => {
     const features = {
-      trial: [
-        '5 USMCA compliance analyses per month',
-        'Basic certificate generation',
-        'Email support',
-        'Limited trade alerts'
-      ],
       professional: [
         '50 USMCA compliance analyses per month',
         'Unlimited certificate generation',
@@ -135,7 +128,7 @@ export default function SubscriptionManagement() {
   return (
     <>
       <Head>
-        <title>Subscription & Billing - Triangle Intelligence</title>
+        <title>Subscription & Billing - Triangle Trade Intelligence</title>
         <meta name="description" content="Manage your subscription and billing" />
       </Head>
 

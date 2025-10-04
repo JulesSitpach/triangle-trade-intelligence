@@ -77,8 +77,8 @@ export default function AdminDashboard({ user }) {
   return (
     <>
       <Head>
-        <title>Admin Dashboard - Triangle Intelligence</title>
-        <meta name="description" content="Triangle Intelligence Admin Dashboard" />
+        <title>Admin Dashboard - Triangle Trade Intelligence</title>
+        <meta name="description" content="Triangle Trade Intelligence Admin Dashboard" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 

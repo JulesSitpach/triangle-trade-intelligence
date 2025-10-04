@@ -1,7 +1,7 @@
 /**
  * ADMIN API: Business Opportunity Analytics
  * GET /api/admin/business-opportunity-analytics - Shows how "not qualified" results create business value
- * Tracks Triangle Intelligence solution positioning and Mexico triangle routing opportunities
+ * Tracks Triangle Trade Intelligence solution positioning and Mexico triangle routing opportunities
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -285,7 +285,7 @@ function calculateRevenuePipeline(qualifications, workflows, suppliers) {
   const totalOpportunityValue = notQualified.reduce((sum, q) => 
     sum + (q.potential_annual_savings || 15000), 0);
   
-  // Triangle Intelligence revenue potential (assuming 10% of savings as service fee)
+  // Triangle Trade Intelligence revenue potential (assuming 10% of savings as service fee)
   const triangleRevenueOpportunity = totalOpportunityValue * 0.10;
   
   // Pipeline stages
@@ -443,7 +443,7 @@ function generateSampleQualificationData() {
         { origin_country: countries[Math.floor(Math.random() * countries.length)], value_percentage: 50 + Math.random() * 40 }
       ],
       remediation_strategies: qualified ? [] : [
-        'Triangle Intelligence Mexico Bridge Program',
+        'Triangle Trade Intelligence Mexico Bridge Program',
         'Strategic supplier transition'
       ],
       mexico_opportunities: qualified ? [] : [

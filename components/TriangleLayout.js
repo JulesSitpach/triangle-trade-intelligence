@@ -66,7 +66,7 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
             <Link href="/" className="nav-logo-link">
               <div className="nav-logo-icon">T</div>
               <div>
-                <div className="nav-logo-text">Triangle Intelligence</div>
+                <div className="nav-logo-text">Triangle Trade Intelligence</div>
                 <div className="nav-logo-subtitle">{user ? 'My Dashboard' : 'USMCA Trade Platform'}</div>
               </div>
             </Link>

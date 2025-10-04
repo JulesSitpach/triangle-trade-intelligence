@@ -203,7 +203,7 @@ export default function PaymentMethods() {
   return (
     <>
       <Head>
-        <title>Payment Methods | TradeFlow Intelligence</title>
+        <title>Payment Methods | Triangle Trade Intelligence</title>
         <meta name="description" content="Manage your payment methods" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -214,7 +214,7 @@ export default function PaymentMethods() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -350,7 +350,7 @@ export default function PaymentMethods() {
         <div className="container-app">
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
           </div>
         </div>

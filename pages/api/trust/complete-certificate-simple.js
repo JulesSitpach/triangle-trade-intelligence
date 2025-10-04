@@ -72,7 +72,7 @@ export default async function handler(req, res) {
       certification: {
         issued_date: new Date().toISOString().split('T')[0],
         valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        issuing_authority: 'Triangle Intelligence USMCA Platform',
+        issuing_authority: 'Triangle Trade Intelligence USMCA Platform',
         status: qualified ? 'QUALIFIED' : 'NOT_QUALIFIED'
       },
       component_origins: componentOrigins || [],

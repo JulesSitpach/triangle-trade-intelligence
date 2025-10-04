@@ -16,7 +16,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   GET: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     try {
       // Fetch all service requests for this user

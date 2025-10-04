@@ -48,8 +48,8 @@ export default function Contact() {
   return (
     <>
       <Head>
-        <title>Contact Us - Triangle Intelligence</title>
-        <meta name="description" content="Contact Triangle Intelligence for USMCA compliance and trade services support" />
+        <title>Contact Us - Triangle Trade Intelligence</title>
+        <meta name="description" content="Contact Triangle Trade Intelligence for USMCA compliance and trade services support" />
       </Head>
 
       <div className="main-content">

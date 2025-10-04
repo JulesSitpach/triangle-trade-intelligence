@@ -210,7 +210,7 @@ export default function PresentationExport({
 
     emailContent += `Best regards,\n`;
     emailContent += `[YOUR NAME]\n`;
-    emailContent += `Triangle Intelligence\n`;
+    emailContent += `Triangle Trade Intelligence\n`;
     emailContent += `${branding.contact}\n`;
     emailContent += `${branding.website}\n\n`;
 
@@ -355,7 +355,7 @@ async function addTitlePage(pdf, slideTemplate) {
   // Company branding
   pdf.setTextColor(0, 0, 0);
   pdf.setFontSize(12);
-  pdf.text('Triangle Intelligence', 20, pageHeight - 30);
+  pdf.text('Triangle Trade Intelligence', 20, pageHeight - 30);
   pdf.text('Professional USMCA Compliance Platform', 20, pageHeight - 20);
   pdf.text(new Date().toLocaleDateString(), pageWidth - 60, pageHeight - 20);
 }
@@ -428,7 +428,7 @@ async function addContactPage(pdf) {
 
   pdf.setFontSize(12);
   pdf.setFont(undefined, 'normal');
-  pdf.text('Triangle Intelligence', 20, pageHeight - 65);
+  pdf.text('Triangle Trade Intelligence', 20, pageHeight - 65);
   pdf.text('sales@triangle-intelligence.com', 20, pageHeight - 55);
   pdf.text('triangle-intelligence.com', 20, pageHeight - 45);
   pdf.text('Professional USMCA Compliance Solutions', 20, pageHeight - 35);
@@ -440,7 +440,7 @@ async function addDocumentHeader(pdf) {
   
   pdf.setFontSize(20);
   pdf.setFont(undefined, 'bold');
-  pdf.text('Triangle Intelligence', 20, 20);
+  pdf.text('Triangle Trade Intelligence', 20, 20);
   
   pdf.setFontSize(14);
   pdf.text('USMCA Compliance Platform Overview', 20, 30);

@@ -30,7 +30,7 @@ const SimpleDetailPanel = ({
 
   const handleEmail = () => {
     const subject = encodeURIComponent(`Follow-up: ${record.companyName || record.client}`);
-    const body = encodeURIComponent(`Hi there,\n\nFollowing up on our discussion about USMCA compliance opportunities.\n\nBest regards,\nTriangle Intelligence Team`);
+    const body = encodeURIComponent(`Hi there,\n\nFollowing up on our discussion about USMCA compliance opportunities.\n\nBest regards,\nTriangle Trade Intelligence Team`);
     window.open(`https://mail.google.com/mail/?view=cm&to=${record.email}&su=${subject}&body=${body}`, '_blank');
 
     const newActivity = {
@@ -433,7 +433,7 @@ const SimpleDetailPanel = ({
 
   const handleSendAssessment = () => {
     const subject = encodeURIComponent(`USMCA Trade Assessment: ${record.companyName}`);
-    const body = encodeURIComponent(`Hi there,\n\nWe've prepared a comprehensive USMCA trade assessment for ${record.companyName}. This assessment will help you identify potential tariff savings and trade optimization opportunities.\n\nPlease find the assessment document attached and let us know if you have any questions.\n\nBest regards,\nTriangle Intelligence Team`);
+    const body = encodeURIComponent(`Hi there,\n\nWe've prepared a comprehensive USMCA trade assessment for ${record.companyName}. This assessment will help you identify potential tariff savings and trade optimization opportunities.\n\nPlease find the assessment document attached and let us know if you have any questions.\n\nBest regards,\nTriangle Trade Intelligence Team`);
     window.open(`https://mail.google.com/mail/?view=cm&to=${record.email}&su=${subject}&body=${body}`, '_blank');
 
     const newActivity = {

@@ -1,5 +1,5 @@
 /**
- * Dynamic sitemap.xml generator for Triangle Intelligence Platform
+ * Dynamic sitemap.xml generator for Triangle Trade Intelligence Platform
  * Automatically includes all public pages with proper priorities and changefreq
  */
 

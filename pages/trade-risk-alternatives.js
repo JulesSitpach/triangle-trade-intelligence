@@ -6,7 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
-import { useAuth } from '../lib/contexts/ProductionAuthContext';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
+import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -23,7 +24,15 @@ export default function TradeRiskAlternatives() {
   const [showDetailedConsent, setShowDetailedConsent] = useState(false);
   const [hasDetailedConsent, setHasDetailedConsent] = useState(false);
   const [expandedDetails, setExpandedDetails] = useState({});
-  const { user } = useAuth();
+  const [aiVulnerabilityAnalysis, setAiVulnerabilityAnalysis] = useState(null);
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+
+  // Save data consent modal state
+  const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
+  const [hasSaveDataConsent, setHasSaveDataConsent] = useState(false);
+  const [pendingProfile, setPendingProfile] = useState(null);
+
+  const { user } = useSimpleAuth();
 
   useEffect(() => {
     loadUserData();
@@ -142,31 +151,63 @@ export default function TradeRiskAlternatives() {
         tradeVolume: userData.company?.annual_trade_volume || userData.company?.trade_volume || 0,
         supplierCountry: userData.company?.supplier_country,
         qualificationStatus: userData.certificate?.qualification_result || userData.usmca?.qualification_status,
-        savings: userData.certificate?.savings || userData.savings?.total_savings || 0
+        savings: userData.certificate?.savings || userData.savings?.total_savings || 0,
+        componentOrigins: userData.component_origins || userData.components || []
       };
 
       setUserProfile(profile);
       generateDynamicContent(profile);
 
-      // Save trade profile to database for future visits (if user is logged in)
-      if (user) {
+      // NEW: Show consent modal instead of automatically saving
+      // Check if user is authenticated (cookie-based auth)
+      const savedConsent = localStorage.getItem('save_data_consent');
+      const isAuthenticated = !!user; // Simple check - user exists means authenticated
+
+      console.log('🔐 Auth check:', {
+        isAuthenticated,
+        hasUser: !!user,
+        userEmail: user?.email,
+        savedConsent
+      });
+
+      if (isAuthenticated && !savedConsent) {
+        // User is logged in but hasn't chosen save/erase yet
+        console.log('💾 Showing save data consent modal');
+        setPendingProfile(profile);
+        setShowSaveDataConsent(true);
+      } else if (isAuthenticated && savedConsent === 'save') {
+        // User previously chose to save - honor that choice
+        console.log('✅ User previously consented to save - saving to database');
+        setHasSaveDataConsent(true); // Used to control detailed consent display
         saveTradeProfile(profile);
+      } else if (isAuthenticated && savedConsent === 'erase') {
+        // User chose to erase - respect that choice
+        console.log('🔒 User previously chose to erase - respecting privacy choice');
+        setHasSaveDataConsent(false);
+      } else if (!isAuthenticated) {
+        // User not authenticated - just use localStorage (no modal)
+        console.log('ℹ️ User not authenticated - data stored in browser only');
       }
+      // If savedConsent === 'erase', do nothing (privacy first)
     }
 
     setIsLoading(false);
   };
 
   const saveTradeProfile = async (profile) => {
-    if (!user || !profile.hsCode || profile.hsCode === 'Not classified') return;
+    if (!user || !profile.hsCode || profile.hsCode === 'Not classified') {
+      console.log('⚠️ Cannot save to database: User not authenticated or no HS code');
+      return false;
+    }
 
     try {
-      await fetch('/api/trade-profile', {
+      // Use cookie-based authentication (credentials: 'include')
+      const response = await fetch('/api/trade-profile', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.session?.access_token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Use cookie authentication
         body: JSON.stringify({
           hs_codes: [profile.hsCode],
           business_types: profile.businessType ? [profile.businessType] : [],
@@ -176,13 +217,99 @@ export default function TradeRiskAlternatives() {
           total_products: 1
         })
       });
+
+      if (response.ok) {
+        console.log('✅ Trade profile saved to database via cookie auth');
+        return true;
+      } else {
+        console.warn(`⚠️ Database save failed: ${response.status} ${response.statusText}`);
+        return false;
+      }
     } catch (error) {
-      console.error('Error saving trade profile:', error);
+      console.error('❌ Error saving trade profile:', error);
+      return false;
     }
   };
 
-  const generateDynamicContent = (profile) => {
-    // Generate risks based on actual user profile
+  // Handle user choosing to SAVE their data
+  const handleSaveDataConsent = async () => {
+    console.log('✅ User chose to SAVE data for alerts and services');
+
+    // Save consent choice
+    localStorage.setItem('save_data_consent', 'save');
+    setHasSaveDataConsent(true);
+    setShowSaveDataConsent(false);
+
+    // Save the pending profile to database
+    if (pendingProfile) {
+      await saveTradeProfile(pendingProfile);
+      setPendingProfile(null);
+    }
+  };
+
+  // Handle user choosing to ERASE their data
+  const handleEraseDataConsent = () => {
+    console.log('🔒 User chose to ERASE data (privacy first)');
+
+    // Save consent choice to not show modal again this session
+    localStorage.setItem('save_data_consent', 'erase');
+    setHasSaveDataConsent(false);
+    setShowSaveDataConsent(false);
+    setPendingProfile(null);
+
+    // Note: Data stays in localStorage for this session only
+    // No database saving occurs
+  };
+
+  const generateDynamicContent = async (profile) => {
+    // Try to get AI-powered vulnerability analysis if we have workflow results
+    const resultsData = localStorage.getItem('usmca_workflow_results');
+
+    console.log('📥 ========== LOADING WORKFLOW DATA FOR ALERTS ==========');
+    console.log('localStorage keys:', Object.keys(localStorage).filter(k => k.includes('usmca')));
+    console.log('usmca_workflow_results exists:', !!resultsData);
+
+    if (resultsData) {
+      try {
+        const workflowResults = JSON.parse(resultsData);
+
+        console.log('📊 Workflow data parsed:', {
+          has_component_origins: !!(workflowResults.component_origins),
+          has_components: !!(workflowResults.components),
+          component_origins_length: (workflowResults.component_origins || []).length,
+          components_length: (workflowResults.components || []).length,
+          data_sample: workflowResults.component_origins || workflowResults.components
+        });
+
+        // Check if we have component origins data for AI analysis
+        if (workflowResults.component_origins || workflowResults.components) {
+          console.log('🤖 ========== AI VULNERABILITY ANALYSIS STARTING ==========');
+          console.log('Component origins found, requesting AI vulnerability analysis...');
+
+          const aiSucceeded = await generateAIVulnerabilityAlerts(workflowResults);
+
+          if (aiSucceeded) {
+            console.log('✅ AI analysis succeeded - using AI-generated alerts');
+            // AI set the dynamic risks, alternatives, and recommendations
+            // No need to set generic ones
+            setIsLoading(false);
+            return; // Exit early - AI has set everything
+          } else {
+            console.log('⚠️ AI analysis failed - falling back to rule-based alerts');
+          }
+        } else {
+          console.log('⚠️ No component origins found in workflow data - using rule-based alerts');
+          console.log('Workflow data keys:', Object.keys(workflowResults));
+        }
+      } catch (error) {
+        console.error('❌ Error checking for AI analysis capability:', error);
+      }
+    } else {
+      console.log('⚠️ No workflow results data in localStorage');
+    }
+
+    // Generate traditional risks based on profile (ONLY as fallback if AI didn't work)
+    console.log('📊 Using fallback rule-based alerts');
     const risks = generateRisksFromProfile(profile);
     const alternatives = generateAlternativesFromProfile(profile);
     const teamRecs = generateTeamRecommendationsFromProfile(profile);
@@ -191,6 +318,66 @@ export default function TradeRiskAlternatives() {
     setDynamicAlternatives(alternatives);
     setTeamRecommendations(teamRecs);
     setIsLoading(false);
+  };
+
+  const generateAIVulnerabilityAlerts = async (workflowResults) => {
+    setIsAiAnalyzing(true);
+
+    try {
+      console.log('📤 Sending workflow data to AI vulnerability endpoint...');
+
+      const response = await fetch('/api/ai-vulnerability-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(workflowResults)
+      });
+
+      if (!response.ok) {
+        throw new Error(`AI analysis failed: ${response.status}`);
+      }
+
+      const aiAnalysis = await response.json();
+
+      console.log('✅ AI vulnerability analysis received:', {
+        alert_count: aiAnalysis.alerts?.length,
+        risk_level: aiAnalysis.vulnerability_analysis?.overall_risk_level,
+        confidence: aiAnalysis.trust?.confidence_score
+      });
+
+      setAiVulnerabilityAnalysis(aiAnalysis);
+
+      // Replace dynamic risks with AI-generated alerts
+      if (aiAnalysis.alerts && aiAnalysis.alerts.length > 0) {
+        const aiRisks = aiAnalysis.alerts.map(alert => ({
+          title: alert.title,
+          severity: alert.severity,
+          generalImpact: alert.description,
+          detailedImpact: alert.potential_impact,
+          probability: 'AI-Analyzed',
+          timeframe: 'Real-time monitoring',
+          description: alert.description,
+          detailedInfo: `${alert.description}\n\nAffected Components: ${alert.affected_components?.join(', ') || 'Multiple'}\n\nRecommended Action: ${alert.recommended_action}\n\nMonitoring Guidance: ${alert.monitoring_guidance}`,
+          aiGenerated: true,
+          alertTriggers: alert.alert_triggers || []
+        }));
+
+        console.log('🚨 Setting AI-generated risks to replace generic ones:', {
+          ai_risk_count: aiRisks.length,
+          ai_risk_titles: aiRisks.map(r => r.title)
+        });
+        setDynamicRisks(aiRisks);
+        setIsAiAnalyzing(false);
+        return true; // Success - AI alerts set
+      }
+
+      setIsAiAnalyzing(false);
+      return false; // No alerts generated
+
+    } catch (error) {
+      console.error('❌ AI vulnerability analysis failed:', error);
+      setIsAiAnalyzing(false);
+      return false; // Failed - fall back to rule-based alerts
+    }
   };
 
   const generateRisksFromProfile = (profile) => {
@@ -433,7 +620,11 @@ export default function TradeRiskAlternatives() {
             <div className="status-card">
               <div className="status-label">Annual Volume</div>
               <div className="status-value">
-                {hasDetailedConsent ? formatCurrency(userProfile.tradeVolume) : 'Not specified'}
+                {hasDetailedConsent
+                  ? (userProfile.tradeVolume && !isNaN(userProfile.tradeVolume)
+                      ? formatCurrency(userProfile.tradeVolume)
+                      : 'Not specified')
+                  : 'Not specified'}
               </div>
             </div>
             <div className="status-card">
@@ -445,11 +636,70 @@ export default function TradeRiskAlternatives() {
           </div>
         </div>
 
+        {/* AI Vulnerability Analysis Status */}
+        {isAiAnalyzing && (
+          <div className="alert alert-info">
+            <div className="alert-content">
+              <div className="alert-title">🤖 AI Analyzing Your Supply Chain...</div>
+              <p className="text-body">Claude is analyzing your component origins for geopolitical and tariff vulnerabilities...</p>
+            </div>
+          </div>
+        )}
+
+        {aiVulnerabilityAnalysis && (
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">🤖 AI Vulnerability Analysis</h3>
+              <p className="card-subtitle">Powered by Claude 3.5 Sonnet</p>
+            </div>
+            <div className="status-grid">
+              <div className="status-card">
+                <div className="status-label">Overall Risk Level</div>
+                <div className={`status-value ${aiVulnerabilityAnalysis.vulnerability_analysis?.overall_risk_level === 'HIGH' ? 'error' : 'warning'}`}>
+                  {aiVulnerabilityAnalysis.vulnerability_analysis?.overall_risk_level || 'MODERATE'}
+                </div>
+              </div>
+              <div className="status-card">
+                <div className="status-label">Risk Score</div>
+                <div className="status-value">{aiVulnerabilityAnalysis.vulnerability_analysis?.risk_score || 50}/100</div>
+              </div>
+              <div className="status-card">
+                <div className="status-label">Alerts Generated</div>
+                <div className="status-value">{aiVulnerabilityAnalysis.alerts?.length || 0}</div>
+              </div>
+              <div className="status-card">
+                <div className="status-label">AI Confidence</div>
+                <div className="status-value">{aiVulnerabilityAnalysis.trust?.confidence_score || 85}%</div>
+              </div>
+            </div>
+            {aiVulnerabilityAnalysis.vulnerability_analysis?.primary_vulnerabilities && (
+              <div className="card-description">
+                <h4><strong>Primary Vulnerabilities:</strong></h4>
+                <ul>
+                  {aiVulnerabilityAnalysis.vulnerability_analysis.primary_vulnerabilities.map((vuln, i) => (
+                    <li key={i}>
+                      <strong>{vuln.vulnerability_type?.toUpperCase()}:</strong> {vuln.description}
+                      {vuln.affected_components && <span> (Affects: {vuln.affected_components.join(', ')})</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Dynamic Risk Analysis */}
         <div className="card">
           <div className="card-header">
-            <h3 className="card-title">🚨 Current Threats to Your Trade</h3>
-            <p className="card-subtitle">Issues specifically affecting your business profile</p>
+            <h3 className="card-title">
+              🚨 Current Threats to Your Trade
+              {aiVulnerabilityAnalysis && <span> (AI-Powered)</span>}
+            </h3>
+            <p className="card-subtitle">
+              {aiVulnerabilityAnalysis
+                ? 'AI-generated alerts specific to your component origins and supply chain'
+                : 'Issues specifically affecting your business profile'}
+            </p>
           </div>
 
           {dynamicRisks.map((risk, index) => (
@@ -707,6 +957,14 @@ export default function TradeRiskAlternatives() {
             </div>
           </div>
         )}
+
+        {/* Save Data Consent Modal - Privacy First */}
+        <SaveDataConsentModal
+          isOpen={showSaveDataConsent}
+          onSave={handleSaveDataConsent}
+          onErase={handleEraseDataConsent}
+          userProfile={pendingProfile}
+        />
       </div>
     </TriangleLayout>
   );

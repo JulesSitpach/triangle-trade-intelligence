@@ -240,7 +240,7 @@ export default function PartnerApplication() {
   return (
     <>
       <Head>
-        <title>Mexico Partner Application - Triangle Intelligence</title>
+        <title>Mexico Partner Application - Triangle Trade Intelligence</title>
         <meta name="description" content="Join our Mexico supplier network and connect with North American businesses" />
       </Head>
 
@@ -251,7 +251,7 @@ export default function PartnerApplication() {
             Join our verified supplier network and connect with North American businesses
           </p>
           <div className="hero-badge">
-            Powered by Triangle Intelligence Mexico Trade Bridge
+            Powered by Triangle Trade Intelligence Mexico Trade Bridge
           </div>
         </div>
 
@@ -479,7 +479,7 @@ export default function PartnerApplication() {
 
           <div className="admin-table-container">
             <div className="form-group">
-              <label className="font-label">Why do you want to partner with Triangle Intelligence? <span className="text-danger">*</span></label>
+              <label className="font-label">Why do you want to partner with Triangle Trade Intelligence? <span className="text-danger">*</span></label>
               <textarea
                 className={`filter-select ${formErrors.why_partner ? 'border-danger' : ''}`}
                 rows="4"

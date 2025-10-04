@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         blanket_end: '2024-12-31',
 
         // Original AI generation info
-        generated_by: 'Triangle Intelligence AI System',
+        generated_by: 'Triangle Trade Intelligence AI System',
         generation_date: '2024-09-27',
         confidence_score: 92,
         validation_status: 'AI Generated - Pending Professional Review',

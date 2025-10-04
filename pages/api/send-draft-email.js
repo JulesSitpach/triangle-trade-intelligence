@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     });
 
     await transporter.sendMail({
-      from: `"Jorge Martinez - Triangle Intelligence" <${process.env.GMAIL_USER}>`,
+      from: `"Jorge Martinez - Triangle Trade Intelligence" <${process.env.GMAIL_USER}>`,
       to: to,
       subject: subject,
       html: html

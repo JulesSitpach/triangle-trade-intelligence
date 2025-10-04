@@ -166,7 +166,7 @@ export default function UserProfile() {
   return (
     <>
       <Head>
-        <title>My Profile | TradeFlow Intelligence</title>
+        <title>My Profile | Triangle Trade Intelligence</title>
         <meta name="description" content="Manage your profile and account settings" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -177,7 +177,7 @@ export default function UserProfile() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -545,7 +545,7 @@ export default function UserProfile() {
         <div className="container-app">
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
           </div>
         </div>

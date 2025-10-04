@@ -121,7 +121,7 @@ export default function CristinaDashboardModular() {
   return (
     <>
       <Head>
-        <title>Cristina&apos;s Compliance Dashboard - Triangle Intelligence</title>
+        <title>Cristina&apos;s Compliance Dashboard - Triangle Trade Intelligence</title>
         <meta name="description" content="SMB Compliance & Document Validation Services" />
       </Head>
 

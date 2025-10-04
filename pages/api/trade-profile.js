@@ -5,39 +5,69 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { parse } from 'cookie';
+import crypto from 'crypto';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+function verifySession(cookieValue) {
+  try {
+    if (!cookieValue) return null;
+
+    const decoded = Buffer.from(cookieValue, 'base64').toString('utf-8');
+    const { data, sig } = JSON.parse(decoded);
+
+    const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
+    const expectedSig = crypto.createHmac('sha256', secret)
+      .update(JSON.stringify(data))
+      .digest('hex');
+
+    if (sig !== expectedSig) return null;
+
+    // Check expiration (7 days)
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - data.timestamp > sevenDaysMs) return null;
+
+    return data;
+  } catch (error) {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   const { method } = req;
 
-  // Extract user ID from authorization header
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Authorization required' });
+  // Verify cookie-based authentication
+  const cookies = parse(req.headers.cookie || '');
+  const sessionCookie = cookies.triangle_session;
+
+  if (!sessionCookie) {
+    console.log('❌ No session cookie found');
+    return res.status(401).json({ error: 'Authentication required - no session' });
   }
 
-  const token = authHeader.replace('Bearer ', '');
+  const session = verifySession(sessionCookie);
+
+  if (!session) {
+    console.log('❌ Invalid session cookie');
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+
+  console.log('✅ Session verified for user:', session.email);
 
   try {
-    // Verify user session
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid authorization' });
-    }
-
     switch (method) {
       case 'GET':
-        return await getTradeProfile(user.id, res);
+        return await getTradeProfile(session.userId, res);
 
       case 'POST':
-        return await saveTradeProfile(user.id, req.body, res);
+        return await saveTradeProfile(session.userId, req.body, res);
 
       case 'DELETE':
-        return await deleteTradeProfile(user.id, res);
+        return await deleteTradeProfile(session.userId, res);
 
       default:
         res.setHeader('Allow', ['GET', 'POST', 'DELETE']);

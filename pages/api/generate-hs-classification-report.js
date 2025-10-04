@@ -386,7 +386,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
 
     <div class="section" style="background: #f0f9ff; padding: 20px; border-left: 4px solid #2563eb; margin-top: 30px;">
@@ -407,7 +407,7 @@ Format as a formal business report with clear headers, bullet points for key fin
 
     // Save as draft in Gmail
     const mailOptions = {
-      from: 'Triangle Intelligence <triangleintel@gmail.com>',
+      from: 'Triangle Trade Intelligence <triangleintel@gmail.com>',
       to: 'triangleintel@gmail.com',
       subject: emailSubject,
       html: emailBody

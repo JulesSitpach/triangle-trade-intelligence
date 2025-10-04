@@ -1,6 +1,6 @@
 /**
  * TRUMP TARIFF MONITORING API ENDPOINT
- * Integrates with Triangle Intelligence existing API architecture
+ * Integrates with Triangle Trade Intelligence existing API architecture
  * 
  * Endpoints:
  * POST /api/trump-tariff-monitoring - Control monitoring system
@@ -211,7 +211,7 @@ async function handleGet(req, res, monitor) {
       trumpEraContext: {
         description: 'Real-time monitoring active for unprecedented tariff volatility',
         riskLevel: 'EXTREME',
-        recommendation: 'Monitor Triangle Intelligence dashboard daily for changes'
+        recommendation: 'Monitor Triangle Trade Intelligence dashboard daily for changes'
       },
       timestamp: new Date().toISOString()
     });

@@ -41,7 +41,9 @@ export default function ProfessionalServices() {
       id: 'usmca-certificate',
       icon: '📜',
       title: 'USMCA Certificate Generation',
-      price: 250,
+      price: 250, // Internal base price
+      displayPrice: 300, // Non-subscriber price shown on marketing
+      subscriberPrice: 250,
       expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Avoid 35% tariffs with proper USMCA compliance',
@@ -62,6 +64,8 @@ export default function ProfessionalServices() {
       icon: '🔍',
       title: 'HS Code Classification',
       price: 200,
+      displayPrice: 240,
+      subscriberPrice: 200,
       expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Audit-proof classifications',
@@ -82,6 +86,8 @@ export default function ProfessionalServices() {
       icon: '🚨',
       title: 'Crisis Response Management',
       price: 400,
+      displayPrice: 480,
+      subscriberPrice: 400,
       expert: 'Compliance Services - Licensed Customs Broker',
       benefits: [
         'Emergency 24-48 hour response',
@@ -104,6 +110,8 @@ export default function ProfessionalServices() {
       icon: '🔍',
       title: 'Supplier Sourcing',
       price: 450,
+      displayPrice: 540,
+      subscriberPrice: 450,
       expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'AI-powered supplier discovery with web search',
@@ -124,6 +132,8 @@ export default function ProfessionalServices() {
       icon: '🏭',
       title: 'Manufacturing Feasibility',
       price: 650,
+      displayPrice: 780,
+      subscriberPrice: 650,
       expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'Comprehensive AI feasibility analysis',
@@ -144,6 +154,8 @@ export default function ProfessionalServices() {
       icon: '🚀',
       title: 'Market Entry Strategy',
       price: 550,
+      displayPrice: 660,
+      subscriberPrice: 550,
       expert: 'Mexico Trade Services - B2B Sales Expert',
       benefits: [
         'AI-powered market research and analysis',
@@ -326,7 +338,7 @@ export default function ProfessionalServices() {
   return (
     <>
       <Head>
-        <title>Professional Services - Triangle Intelligence</title>
+        <title>Professional Services - Triangle Trade Intelligence</title>
         <meta name="description" content="Expert USMCA compliance, HS classification, and Mexico trade services" />
       </Head>
 
@@ -616,7 +628,13 @@ export default function ProfessionalServices() {
                 </div>
                 <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
                   <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#134169' }}>
-                    ${service.price}
+                    ${service.displayPrice}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#6b7280', textDecoration: 'line-through' }}>
+                    ${service.subscriberPrice}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: '600' }}>
+                    Subscribers save ${service.displayPrice - service.subscriberPrice}
                   </div>
                 </div>
               </div>
@@ -672,7 +690,7 @@ export default function ProfessionalServices() {
               >
                 {isProcessing[service.id]
                   ? 'Processing...'
-                  : `Request Service - $${service.price}`
+                  : `Request Service - $${service.displayPrice}`
                 }
               </button>
             </div>

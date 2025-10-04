@@ -211,13 +211,26 @@ export function useWorkflowState() {
 
   // Process workflow
   const processWorkflow = useCallback(async () => {
+    console.log('⚙️ ========== PROCESS WORKFLOW CALLED ==========');
+    console.log('📋 formData received by useWorkflowState:', {
+      company_name: formData.company_name,
+      business_type: formData.business_type,
+      trade_volume: formData.trade_volume,
+      product_description: formData.product_description,
+      manufacturing_location: formData.manufacturing_location,
+      component_origins_count: formData.component_origins?.length,
+      component_origins: formData.component_origins
+    });
+
     const validation = workflowService.validateFormData(formData);
-    
+
     if (!validation.isValid) {
+      console.error('❌ Validation failed:', validation.errors);
       setError('Form validation failed: ' + validation.errors.join(', '));
       return;
     }
 
+    console.log('✅ Validation passed, calling workflow service...');
     setIsLoading(true);
     setError(null);
 

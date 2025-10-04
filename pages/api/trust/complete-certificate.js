@@ -266,7 +266,7 @@ async function handleCertificateGeneration(req, res) {
       // Generation Information
       generation_info: {
         generated_date: new Date().toISOString(),
-        generated_by: 'Triangle Intelligence USMCA Platform',
+        generated_by: 'Triangle Trade Intelligence USMCA Platform',
         certificate_version: '2.0',
         platform_version: 'Professional'
       },

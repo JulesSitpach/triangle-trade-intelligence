@@ -517,7 +517,7 @@ export default function CanadaMexicoPartnership() {
   return (
     <>
       <Head>
-        <title>Canada-Mexico Partnership | Triangle Intelligence</title>
+        <title>Canada-Mexico Partnership | Triangle Trade Intelligence</title>
       </Head>
 
       <div className="min-h-screen bg-gray-50">

@@ -14,7 +14,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   GET: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     try {
       const { data: profile, error } = await supabase
@@ -43,7 +43,7 @@ export default protectedApiHandler({
   },
 
   PUT: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const {
       full_name,
       email,

@@ -300,7 +300,7 @@ Format as a formal business report with clear headers, bullet points for key fin
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Intelligence - USMCA Certificate'
+        'X-Title': 'Triangle Trade Intelligence - USMCA Certificate'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-3-haiku',
@@ -382,7 +382,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
   </div>
 </body>
@@ -390,7 +390,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     `;
 
     const mailOptions = {
-      from: 'Triangle Intelligence <triangleintel@gmail.com>',
+      from: 'Triangle Trade Intelligence <triangleintel@gmail.com>',
       to: 'triangleintel@gmail.com',
       subject: emailSubject,
       html: emailBody

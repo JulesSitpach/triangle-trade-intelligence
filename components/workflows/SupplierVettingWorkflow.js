@@ -64,7 +64,7 @@ export default function SupplierVettingWorkflow({ project, onUpdateProject }) {
             'Industry association member directories',
             'LinkedIn and professional networks',
             'Trade show exhibitor lists',
-            'Existing Triangle Intelligence supplier network'
+            'Existing Triangle Trade Intelligence supplier network'
           ],
           checklist: [
             'Initial list of 10-15 potential suppliers compiled',
@@ -256,7 +256,7 @@ export default function SupplierVettingWorkflow({ project, onUpdateProject }) {
           title: 'Current Client Reference Verification',
           description: 'Verification with existing clients about performance',
           referenceScript: `
-            "Hello, this is [Your Name] from Triangle Intelligence. We're conducting due diligence on [Supplier Name] for a potential client partnership. Could you spare 10 minutes to share your experience working with them?"
+            "Hello, this is [Your Name] from Triangle Trade Intelligence. We're conducting due diligence on [Supplier Name] for a potential client partnership. Could you spare 10 minutes to share your experience working with them?"
 
             Questions to ask:
             1. How long have you been working with this supplier?

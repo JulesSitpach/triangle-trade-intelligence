@@ -125,14 +125,15 @@ const getOfficialUSMCAThreshold = (businessType, hsCode) => {
     },
     
     // Textiles (Chapters 50-63) - Official USMCA requirement
+    // Textile products use "yarn forward" rule with 55% RVC minimum
     'Textiles': {
-      threshold: 62.5,
-      source: 'usmca_treaty_chapter_6',
+      threshold: 55.0,
+      source: 'usmca_treaty_chapter_6_yarn_forward',
       rule_type: 'tariff_shift_plus_rcv'
     },
     'Textiles & Apparel': {
-      threshold: 62.5,
-      source: 'usmca_treaty_chapter_6',
+      threshold: 55.0,
+      source: 'usmca_treaty_chapter_6_yarn_forward',
       rule_type: 'tariff_shift_plus_rcv'
     },
     

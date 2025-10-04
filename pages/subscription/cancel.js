@@ -5,7 +5,7 @@ export default function SubscriptionCancel() {
   return (
     <>
       <Head>
-        <title>Subscription Cancelled | TradeFlow Intelligence</title>
+        <title>Subscription Cancelled | Triangle Trade Intelligence</title>
         <meta name="description" content="Subscription process was cancelled" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -16,7 +16,7 @@ export default function SubscriptionCancel() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -73,7 +73,7 @@ export default function SubscriptionCancel() {
         <div className="container-app">
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
           </div>
         </div>

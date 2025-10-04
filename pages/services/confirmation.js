@@ -67,7 +67,7 @@ export default function ServiceConfirmation() {
   return (
     <>
       <Head>
-        <title>Service Purchase Confirmed - Triangle Intelligence</title>
+        <title>Service Purchase Confirmed - Triangle Trade Intelligence</title>
       </Head>
 
       <div className="container">

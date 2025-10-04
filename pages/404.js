@@ -7,7 +7,7 @@ export default function Custom404() {
   return (
     <div className="container-app">
       <Head>
-        <title>404 - Page Not Found | Triangle Intelligence</title>
+        <title>404 - Page Not Found | Triangle Trade Intelligence</title>
       </Head>
 
       <div className="error-page">

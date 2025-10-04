@@ -170,7 +170,7 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-        'X-Title': 'Triangle Intelligence - Market Entry Analysis'
+        'X-Title': 'Triangle Trade Intelligence - Market Entry Analysis'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-3.5-haiku',

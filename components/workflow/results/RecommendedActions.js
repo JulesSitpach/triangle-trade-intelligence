@@ -6,28 +6,51 @@
 import React from 'react';
 
 export default function RecommendedActions({ results }) {
-  const showRecommendations = results?.usmca?.qualified &&
-                             results?.savings &&
-                             (results.savings?.annual_savings || 0) > 0;
+  const isQualified = results?.usmca?.qualified;
+  const showRecommendations = (isQualified && results?.savings && (results.savings?.annual_savings || 0) > 0) ||
+                             (!isQualified && results?.recommendations && results.recommendations.length > 0);
 
   const hasTriangleOpportunities = results?.triangle_opportunities && results.triangle_opportunities.length > 0;
   const hasBusinessIntelligence = results?.business_intelligence && results.business_intelligence.length > 0;
+  const hasAIRecommendations = !isQualified && results?.recommendations && results.recommendations.length > 0;
 
   if (!showRecommendations) return null;
 
   return (
     <div className="element-spacing">
-      <div className="card">
-        <div className="card-header">
-          <h4 className="card-title">Recommended Next Steps</h4>
-        </div>
-        <div className="element-spacing">
-          <div className="status-card success">
-            <div className="header-actions">
-              <span className="status-value success">✓</span>
-              <span className="text-body">Download and complete the certificate template</span>
-            </div>
+      {/* AI-Generated Recommendations for NOT QUALIFIED */}
+      {hasAIRecommendations && (
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">🤖 AI-Powered Recommendations</h4>
+            <p className="text-body">Product-specific strategies to achieve USMCA qualification</p>
           </div>
+          <div className="element-spacing">
+            {results.recommendations.map((recommendation, index) => (
+              <div key={index} className="status-card warning">
+                <div className="header-actions">
+                  <span className="status-value warning">{index + 1}</span>
+                  <span className="text-body">{recommendation}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Qualified Product Recommendations */}
+      {isQualified && (
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">Recommended Next Steps</h4>
+          </div>
+          <div className="element-spacing">
+            <div className="status-card success">
+              <div className="header-actions">
+                <span className="status-value success">✓</span>
+                <span className="text-body">Download and complete the certificate template</span>
+              </div>
+            </div>
           <div className="status-card success">
             <div className="header-actions">
               <span className="status-value success">✓</span>
@@ -72,6 +95,7 @@ export default function RecommendedActions({ results }) {
           )}
         </div>
       </div>
+      )}
 
       {/* Triangle Routing Opportunities */}
       {hasTriangleOpportunities && (

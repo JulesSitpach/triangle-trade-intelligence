@@ -145,7 +145,7 @@ export default async function handler(req, res) {
       // Don't fail the whole request for notification issues
     }
 
-    // Send email notification to Triangle Intelligence team (optional enhancement)
+    // Send email notification to Triangle Trade Intelligence team (optional enhancement)
     try {
       const emailData = {
         to: 'jorge@triangleintel.com',
@@ -182,7 +182,7 @@ Please review in Jorge's Service Queue dashboard.
       assessment_id: assessmentId,
       status: 'submitted',
       next_steps: [
-        'Assessment forwarded to Triangle Intelligence specialists',
+        'Assessment forwarded to Triangle Trade Intelligence specialists',
         'Review and qualification within 2-3 business days',
         'Follow-up contact to discuss partnership opportunities',
         'Potential client introduction if qualifications align'

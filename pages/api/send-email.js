@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       });
 
       const mailOptions = {
-        from: `Jorge Martinez - Triangle Intelligence <${gmailUser}>`,
+        from: `Jorge Martinez - Triangle Trade Intelligence <${gmailUser}>`,
         to: to,
         subject: subject,
         html: emailContent,
@@ -94,7 +94,7 @@ export default async function handler(req, res) {
       // Test Mode - No real credentials
       const testEmail = {
         timestamp: new Date().toISOString(),
-        from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
+        from: 'Jorge Martinez - Triangle Trade Intelligence <triangleintel@gmail.com>',
         to: to,
         subject: subject,
         message: message,
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
       // Fall back to test mode
       const testEmail = {
         timestamp: new Date().toISOString(),
-        from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
+        from: 'Jorge Martinez - Triangle Trade Intelligence <triangleintel@gmail.com>',
         to: to,
         subject: subject,
         message: message,
@@ -178,7 +178,7 @@ function generateEmailContent(templateType, data) {
 
   const header = `
     <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 20px; text-align: center;">
-      <h1 style="color: white; margin: 0; font-family: Arial, sans-serif;">Triangle Intelligence</h1>
+      <h1 style="color: white; margin: 0; font-family: Arial, sans-serif;">Triangle Trade Intelligence</h1>
       <p style="color: #e0e7ff; margin: 5px 0 0 0;">Mexico Trade & Partnership Services</p>
     </div>
   `;
@@ -188,12 +188,12 @@ function generateEmailContent(templateType, data) {
       <p style="margin: 0; font-size: 14px; color: #64748b;">
         <strong>Jorge Martinez</strong><br>
         Mexico Trade Specialist<br>
-        Triangle Intelligence<br>
+        Triangle Trade Intelligence<br>
         Email: triangleintel@gmail.com<br>
         Specializing in Mexico trade routes, supplier verification, and market entry
       </p>
       <p style="margin: 10px 0 0 0; font-size: 12px; color: #94a3b8;">
-        This email was sent from Triangle Intelligence's professional services platform.
+        This email was sent from Triangle Trade Intelligence's professional services platform.
       </p>
     </div>
   `;

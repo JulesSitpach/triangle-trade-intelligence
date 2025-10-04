@@ -77,7 +77,7 @@ export default function InvoiceHistory() {
   return (
     <>
       <Head>
-        <title>Invoice History | TradeFlow Intelligence</title>
+        <title>Invoice History | Triangle Trade Intelligence</title>
         <meta name="description" content="View your billing history and invoices" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -88,7 +88,7 @@ export default function InvoiceHistory() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -254,7 +254,7 @@ export default function InvoiceHistory() {
         <div className="container-app">
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
           </div>
         </div>

@@ -14,7 +14,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     try {
       // Get user's subscription

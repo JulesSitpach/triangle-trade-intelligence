@@ -28,7 +28,7 @@ export default function AdminNavigation({ user }) {
         <Link href="/admin/dev-dashboard" className="nav-logo-link">
           <div className="nav-logo-icon">T</div>
           <div>
-            <div className="nav-logo-text">Triangle Intelligence</div>
+            <div className="nav-logo-text">Triangle Trade Intelligence</div>
             <div className="nav-logo-subtitle">Development Operations</div>
           </div>
         </Link>

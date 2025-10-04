@@ -113,7 +113,7 @@ async function sendIntakeForm(req, res) {
 
     <p>Once completed, we'll review your information and generate your certificate.</p>
 
-    <p>Best regards,<br>Triangle Intelligence Team</p>
+    <p>Best regards,<br>Triangle Trade Intelligence Team</p>
   `;
 
   await transporter.sendMail({
@@ -328,7 +328,7 @@ async function emailToClient(req, res) {
 
     <p>This certificate is valid and ready for use in your trade documentation.</p>
 
-    <p>Best regards,<br>Triangle Intelligence Team</p>
+    <p>Best regards,<br>Triangle Trade Intelligence Team</p>
   `;
 
   await transporter.sendMail({

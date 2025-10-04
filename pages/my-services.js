@@ -97,7 +97,7 @@ export default function MyServices() {
   return (
     <>
       <Head>
-        <title>My Services - Triangle Intelligence</title>
+        <title>My Services - Triangle Trade Intelligence</title>
       </Head>
 
       <div className="container">

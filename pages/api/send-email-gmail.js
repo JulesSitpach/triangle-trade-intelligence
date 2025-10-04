@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       to: to,
       subject: subject,
       message: emailContent,
-      from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>'
+      from: 'Jorge Martinez - Triangle Trade Intelligence <triangleintel@gmail.com>'
     });
 
     if (result.success) {
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     // Fallback to test mode
     const testEmail = {
       timestamp: new Date().toISOString(),
-      from: 'Jorge Martinez - Triangle Intelligence <triangleintel@gmail.com>',
+      from: 'Jorge Martinez - Triangle Trade Intelligence <triangleintel@gmail.com>',
       to: to,
       subject: subject,
       message: message,
@@ -112,7 +112,7 @@ function generateProfessionalEmail(templateType, data) {
   const { message, client_name, service_type } = data;
 
   const header = `
-Triangle Intelligence
+Triangle Trade Intelligence
 Mexico Trade & Partnership Services
 ──────────────────────────────────────
   `;
@@ -122,11 +122,11 @@ Mexico Trade & Partnership Services
 ──────────────────────────────────────
 Jorge Martinez
 Mexico Trade Specialist
-Triangle Intelligence
+Triangle Trade Intelligence
 Email: triangleintel@gmail.com
 
 Specializing in Mexico trade routes, supplier verification, and market entry strategies.
-This email was sent from Triangle Intelligence's professional services platform.
+This email was sent from Triangle Trade Intelligence's professional services platform.
   `;
 
   // Format message with proper line breaks

@@ -11,15 +11,15 @@ import Head from 'next/head';
  * @param {string} type - Open Graph type (website, article, etc.)
  */
 export default function SEO({
-  title = 'Triangle Intelligence - USMCA Compliance Platform',
+  title = 'Triangle Trade Intelligence - USMCA Compliance Platform',
   description = 'Professional USMCA compliance analysis and certificate generation platform for North American importers and exporters.',
   image = '/og-image.png',
   url = 'https://triangleintelligence.com',
   type = 'website'
 }) {
-  const fullTitle = title.includes('Triangle Intelligence')
+  const fullTitle = title.includes('Triangle Trade Intelligence')
     ? title
-    : `${title} | Triangle Intelligence`;
+    : `${title} | Triangle Trade Intelligence`;
 
   const fullUrl = url.startsWith('http')
     ? url
@@ -44,7 +44,7 @@ export default function SEO({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullImage} />
-      <meta property="og:site_name" content="Triangle Intelligence" />
+      <meta property="og:site_name" content="Triangle Trade Intelligence" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
@@ -60,7 +60,7 @@ export default function SEO({
       <meta name="robots" content="index, follow" />
       <meta name="language" content="English" />
       <meta name="revisit-after" content="7 days" />
-      <meta name="author" content="Triangle Intelligence" />
+      <meta name="author" content="Triangle Trade Intelligence" />
     </Head>
   );
 }

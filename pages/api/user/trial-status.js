@@ -10,7 +10,7 @@ import { checkTrialStatus } from '../../../lib/auth/trialMiddleware';
  */
 export default protectedApiHandler({
   GET: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     try {
       const accessStatus = await checkTrialStatus(userId);

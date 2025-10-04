@@ -64,7 +64,7 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Sign In - Triangle Intelligence</title>
+        <title>Sign In - Triangle Trade Intelligence</title>
       </Head>
 
       <div className="main-content">
@@ -77,7 +77,7 @@ export default function Login() {
                 <div className="nav-logo-icon">T</div>
               </Link>
               <h1 className="section-title">Welcome Back</h1>
-              <p className="text-body">Sign in to your Triangle Intelligence account</p>
+              <p className="text-body">Sign in to your Triangle Trade Intelligence account</p>
             </div>
 
             {/* Error Message */}

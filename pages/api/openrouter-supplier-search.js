@@ -28,7 +28,7 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-        "X-Title": "Triangle Intelligence Supplier Recommendations"
+        "X-Title": "Triangle Trade Intelligence Supplier Recommendations"
       },
       body: JSON.stringify({
         model: "anthropic/claude-3.5-haiku",

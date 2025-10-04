@@ -37,7 +37,7 @@ export default function SubscriptionSuccess() {
   return (
     <>
       <Head>
-        <title>Subscription Successful | TradeFlow Intelligence</title>
+        <title>Subscription Successful | Triangle Trade Intelligence</title>
         <meta name="description" content="Your subscription has been successfully activated" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -48,7 +48,7 @@ export default function SubscriptionSuccess() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -78,7 +78,7 @@ export default function SubscriptionSuccess() {
                 <div className="success-icon">✓</div>
                 <h1 className="section-header-title">Subscription Successful!</h1>
                 <p className="section-header-subtitle">
-                  Welcome to TradeFlow Intelligence. Your subscription is now active.
+                  Welcome to Triangle Trade Intelligence. Your subscription is now active.
                 </p>
 
                 <div className="content-card">
@@ -130,7 +130,7 @@ export default function SubscriptionSuccess() {
         <div className="container-app">
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
           </div>
         </div>

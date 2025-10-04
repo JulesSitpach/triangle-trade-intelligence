@@ -12,7 +12,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { session_id, service_request_id } = req.body;
 
     try {

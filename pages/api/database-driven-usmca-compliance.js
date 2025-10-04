@@ -152,6 +152,25 @@ export default async function handler(req, res) {
 async function handleCompleteWorkflow(formData) {
   const startTime = Date.now();
 
+  console.log('🔥 ========== API ENDPOINT: RECEIVED REQUEST ==========');
+  console.log('📥 Received formData:', {
+    company_name: formData.company_name,
+    business_type: formData.business_type,
+    trade_volume: formData.trade_volume,
+    product_description: formData.product_description,
+    manufacturing_location: formData.manufacturing_location,
+    supplier_country: formData.supplier_country,
+    destination_country: formData.destination_country,
+    component_origins_count: formData.component_origins?.length,
+    component_origins_details: formData.component_origins?.map((c, i) => ({
+      index: i + 1,
+      description: c.description,
+      origin_country: c.origin_country,
+      value_percentage: c.value_percentage,
+      hs_code: c.hs_code
+    }))
+  });
+
   try {
     // Validate required fields using configuration
     validateWorkflowData(formData);
@@ -209,11 +228,12 @@ async function handleCompleteWorkflow(formData) {
       // Certificate results (if applicable)
       certificate: certificateResults,
       
-      // Overall recommendations
+      // Overall recommendations (AI-powered, context-aware)
       recommendations: await generateWorkflowRecommendations(
-        productResults, 
-        usmcaResults, 
-        savingsResults
+        productResults,
+        usmcaResults,
+        savingsResults,
+        formData  // Pass full context for AI analysis
       ),
       
       // Disclaimers from configuration
@@ -530,33 +550,46 @@ async function handleHSCodeBypass(formData) {
  */
 async function handleUSMCAQualificationStep(hsCode, componentOrigins, manufacturingLocation, businessType) {
   try {
+    console.log('✅ ========== USMCA QUALIFICATION STEP ==========');
+    console.log('Input to USMCA engine:', {
+      hsCode,
+      businessType,
+      manufacturingLocation,
+      componentOrigins_count: componentOrigins?.length,
+      componentOrigins: componentOrigins?.map((c, i) => ({
+        index: i + 1,
+        description: c.description,
+        origin_country: c.origin_country,
+        value_percentage: c.value_percentage
+      }))
+    });
+
     if (!hsCode) {
       throw new Error('HS code is required for USMCA qualification check');
     }
 
-    return await databaseDrivenUSMCAEngine.checkUSMCAQualification(
+    const result = await databaseDrivenUSMCAEngine.checkUSMCAQualification(
       hsCode,
       componentOrigins || [],
       manufacturingLocation,
       businessType
     );
 
+    console.log('📊 USMCA Qualification Result:', {
+      qualified: result.qualified,
+      threshold_applied: result.threshold_applied,
+      north_american_content: result.north_american_content,
+      rule: result.rule,
+      reason: result.reason
+    });
+    console.log('========== END USMCA QUALIFICATION ==========');
+
+    return result;
+
   } catch (error) {
     logError('USMCA qualification step failed', { error: error.message, hsCode });
-    
-    // Return emergency fallback qualification result
-    return {
-      qualified: false,
-      rule: 'Database Error - Professional Review Required',
-      reason: `Unable to verify USMCA qualification: ${error.message}`,
-      north_american_content: 0,
-      documentation_required: [
-        'Contact licensed customs broker',
-        'Manual USMCA qualification review required'
-      ],
-      database_error: error.message,
-      fallback: MESSAGES.errors.professionalRequired
-    };
+    // NO FALLBACK - Fail loudly to expose real issues
+    throw error;
   }
 }
 
@@ -578,19 +611,8 @@ async function handleTariffSavingsStep(hsCode, tradeVolume, supplierCountry, des
 
   } catch (error) {
     logError('Tariff savings calculation step failed', { error: error.message, hsCode });
-    
-    // Return emergency fallback savings result
-    return {
-      annual_savings: 0,
-      monthly_savings: 0,
-      savings_percentage: 0,
-      mfn_rate: 'ERROR',
-      usmca_rate: 'ERROR',
-      trade_volume_used: 0,
-      database_error: error.message,
-      disclaimer: MESSAGES.disclaimers.tariffRates,
-      fallback: 'Contact customs broker for accurate tariff calculations'
-    };
+    // NO FALLBACK - Fail loudly to expose real issues
+    throw error;
   }
 }
 
@@ -611,18 +633,8 @@ async function handleCertificateGenerationStep(product, usmcaQualification, form
 
   } catch (error) {
     logError('Certificate generation step failed', { error: error.message });
-    
-    // Return emergency fallback certificate
-    return {
-      error: 'Certificate generation failed',
-      fallback_instructions: [
-        'Certificate template not available due to system error',
-        'Contact licensed customs broker immediately',
-        'Manual certificate preparation required',
-        'Verify all information before use'
-      ],
-      database_error: error.message
-    };
+    // NO FALLBACK - Fail loudly to expose real issues
+    throw error;
   }
 }
 
@@ -743,42 +755,137 @@ async function handleHealthCheck() {
 }
 
 /**
- * Generate workflow recommendations based on results
+ * Generate AI-powered, product-specific workflow recommendations (HYBRID APPROACH)
+ * Uses OpenRouter API for contextual analysis
  */
-async function generateWorkflowRecommendations(product, usmca, savings) {
+async function generateWorkflowRecommendations(product, usmca, savings, formData) {
   const recommendations = [];
 
-  // Classification recommendations
-  if (product.success) {
-    if (product.confidence < SYSTEM_CONFIG.classification.professionalReferralThreshold) {
+  console.log('🤖 ========== AI RECOMMENDATIONS: STARTING ==========');
+  console.log('Input data for AI:', {
+    qualified: usmca.qualified,
+    north_american_content: usmca.north_american_content,
+    threshold_applied: usmca.threshold_applied,
+    business_type: formData?.business_type,
+    product_description: formData?.product_description,
+    component_origins_count: formData?.component_origins?.length
+  });
+
+  // If not qualified, use AI to generate product-specific remediation advice
+  if (!usmca.qualified && formData) {
+    try {
+      // Build detailed context for AI
+      const componentBreakdown = formData.component_origins
+        ?.map(c => `- ${c.value_percentage}% from ${c.origin_country}${c.description ? ` (${c.description})` : ''}`)
+        .join('\n') || 'No component data';
+
+      console.log('📝 Component breakdown for AI:', componentBreakdown);
+
+      const prompt = `You are a USMCA compliance expert. Generate 3-4 specific, actionable recommendations for this company to achieve USMCA qualification.
+
+COMPANY CONTEXT:
+- Business Type: ${formData.business_type || 'Unknown'}
+- Product: ${formData.product_description || 'Unknown product'}
+- HS Code: ${product.hs_code || 'Not classified'}
+- Manufacturing Location: ${formData.manufacturing_location || 'Unknown'}
+
+CURRENT STATUS:
+- USMCA Qualified: NO
+- North American Content: ${usmca.north_american_content?.toFixed(1) || 0}%
+- Required Threshold: ${usmca.threshold_applied || 0}%
+- Gap: ${(usmca.threshold_applied - usmca.north_american_content)?.toFixed(1) || 0}% short
+
+COMPONENT BREAKDOWN:
+${componentBreakdown}
+
+INSTRUCTIONS:
+- Be specific to this product type (don't give generic advice)
+- Identify which specific non-USMCA components to replace
+- Suggest specific USMCA countries or regions for sourcing
+- If textiles: mention yarn-forward rule and fabric sourcing
+- If electronics: mention specific component manufacturers in Mexico/US
+- If automotive: mention specific automotive supplier hubs
+- Keep each recommendation under 15 words
+- Return ONLY the recommendations as a JSON array of strings, no other text
+
+Example output format:
+["Replace India fabric supplier with Mexico textile mills", "Source cotton from US or Canadian suppliers", "Consider yarn-forward rule compliance for textiles"]`;
+
+      console.log('🎯 ========== EXACT AI PROMPT SENT TO OPENROUTER ==========');
+      console.log(prompt);
+      console.log('========== END AI PROMPT ==========');
+
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3-haiku',
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
+      });
+
+      if (response.ok) {
+        const aiResult = await response.json();
+        const aiText = aiResult.choices?.[0]?.message?.content || '[]';
+
+        console.log('🔮 ========== RAW AI RESPONSE FROM OPENROUTER ==========');
+        console.log('Raw response text:', aiText);
+        console.log('========== END RAW AI RESPONSE ==========');
+
+        // Parse AI response (expecting JSON array)
+        try {
+          const aiRecommendations = JSON.parse(aiText.trim());
+          console.log('✅ Parsed AI recommendations:', aiRecommendations);
+          if (Array.isArray(aiRecommendations) && aiRecommendations.length > 0) {
+            recommendations.push(...aiRecommendations);
+            logInfo('AI-generated product-specific recommendations', {
+              businessType: formData.business_type,
+              recommendationCount: aiRecommendations.length
+            });
+          }
+        } catch (parseError) {
+          logError('Failed to parse AI recommendations', { aiText, error: parseError.message });
+          // Fall through to static recommendations
+        }
+      }
+    } catch (error) {
+      logError('AI recommendation generation failed', { error: error.message });
+      // Fall through to static recommendations
+    }
+  }
+
+  // Fallback to static recommendations if AI fails or product is qualified
+  if (recommendations.length === 0) {
+    // Classification recommendations
+    if (product.success && product.confidence < SYSTEM_CONFIG.classification.professionalReferralThreshold) {
       recommendations.push('Consider professional HS code verification');
     }
-    recommendations.push('Verify HS classification with customs authorities');
-  } else {
-    recommendations.push('Professional product classification required');
-  }
 
-  // USMCA recommendations
-  if (usmca.qualified) {
-    recommendations.push('Product qualifies for USMCA preferential treatment');
-    if (usmca.qualification_level === 'highly_qualified') {
-      recommendations.push('Strong USMCA qualification - excellent savings opportunity');
+    // USMCA recommendations
+    if (usmca.qualified) {
+      recommendations.push('Product qualifies for USMCA preferential treatment');
+      if (usmca.qualification_level === 'highly_qualified') {
+        recommendations.push('Strong USMCA qualification - excellent savings opportunity');
+      }
+    } else {
+      recommendations.push('Increase North American content to meet USMCA threshold');
+      recommendations.push('Explore Mexico-based suppliers for key components');
     }
-  } else {
-    recommendations.push('Consider supply chain adjustments to meet USMCA requirements');
-    recommendations.push('Explore triangle routing opportunities through Mexico');
-  }
 
-  // Savings recommendations
-  if (savings.annual_savings > 10000) {
-    recommendations.push('Significant tariff savings available - prioritize USMCA implementation');
-  } else if (savings.annual_savings > 0) {
-    recommendations.push('Moderate tariff savings available - evaluate implementation costs');
-  }
+    // Savings recommendations
+    if (savings.annual_savings > 10000) {
+      recommendations.push('Significant tariff savings available - prioritize USMCA implementation');
+    }
 
-  // General recommendations
-  recommendations.push('Maintain detailed supply chain documentation');
-  recommendations.push('Consider establishing USMCA compliance program');
+    // General recommendations
+    recommendations.push('Maintain detailed supply chain documentation');
+  }
 
   return recommendations;
 }

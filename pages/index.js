@@ -30,11 +30,11 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>TradeFlow Intelligence | USMCA Compliance & Supply Chain Optimization</title>
+        <title>Triangle Trade Intelligence | USMCA Compliance & Supply Chain Optimization</title>
         <meta name="description" content="Professional trade services platform delivering comprehensive USMCA compliance analysis and supply chain optimization for North American manufacturers and importers." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="TradeFlow Intelligence | USMCA Compliance Platform" />
-        <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for enterprise clients." />
+        <meta property="og:title" content="Triangle Trade Intelligence | USMCA Compliance Platform" />
+        <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for small manufacturers and importers." />
 
         {/* Structured Data (JSON-LD) for SEO */}
         <script
@@ -43,7 +43,7 @@ export default function HomePage() {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              "name": "Triangle Intelligence Platform",
+              "name": "Triangle Trade Intelligence Platform",
               "applicationCategory": "BusinessApplication",
               "description": "Professional USMCA compliance analysis and certificate generation platform for North American importers and exporters.",
               "operatingSystem": "Web Browser",
@@ -60,7 +60,7 @@ export default function HomePage() {
               },
               "provider": {
                 "@type": "Organization",
-                "name": "Triangle Intelligence",
+                "name": "Triangle Trade Intelligence",
                 "url": "https://triangleintelligence.com",
                 "logo": "https://triangleintelligence.com/logo.png",
                 "contactPoint": {
@@ -90,7 +90,7 @@ export default function HomePage() {
             </div>
             <div>
               <div className="nav-logo-text">
-                TradeFlow Intelligence
+                Triangle Trade Intelligence
               </div>
               <div className="nav-logo-subtitle">
                 USMCA Compliance Platform
@@ -108,15 +108,6 @@ export default function HomePage() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/solutions" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Solutions
-            </Link>
-            <Link href="/industries" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Industries
-            </Link>
-            <Link href="/intelligence" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Intelligence
-            </Link>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Services
             </Link>
@@ -170,12 +161,12 @@ export default function HomePage() {
             Move The World
           </h1>
           <h2 className="hero-sub-title">
-            Enterprise <span className="hero-gradient-text">USMCA Compliance</span><br/>
+            Small Business <span className="hero-gradient-text">USMCA Compliance</span><br/>
             <span>& Supply Chain Optimization</span>
           </h2>
-          
+
           <p className="hero-description-text">
-            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for Fortune 500 manufacturers and importers.
+            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for small manufacturers and importers who can't afford full-time trade compliance teams.
           </p>
           
           <div className="hero-button-group">
@@ -221,7 +212,7 @@ export default function HomePage() {
               <div className="section-header">
                 <h2 className="section-header-title">USMCA Compliance Solutions</h2>
                 <p className="section-header-subtitle">
-                  Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for enterprise clients.
+                  Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for small manufacturers and importers.
                 </p>
               </div>
               
@@ -275,7 +266,7 @@ export default function HomePage() {
                   <div className="content-card-icon" aria-hidden="true">RC</div>
                   <h3 className="content-card-title">Regulatory Compliance Management</h3>
                   <p className="content-card-description">
-                    Expert guidance on evolving trade regulations with real-time updates and implementation support for enterprise clients.
+                    Expert guidance on evolving trade regulations with real-time updates and implementation support for small manufacturers and importers.
                   </p>
                   <Link 
                     href="/trade-risk-alternatives" 
@@ -293,7 +284,7 @@ export default function HomePage() {
           <section className="main-content">
             <div className="container-app">
               <div className="section-header">
-                <h2 className="section-header-title">TradeFlow Intelligence Insights</h2>
+                <h2 className="section-header-title">Triangle Trade Intelligence Insights</h2>
                 <p className="section-header-subtitle">
                   Professional insights and analysis for strategic supply chain optimization and regulatory compliance management.
                 </p>
@@ -303,7 +294,7 @@ export default function HomePage() {
                 <div className="content-card">
                   <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
                   <p className="content-card-description">
-                    Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for enterprise manufacturers.
+                    Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers.
                   </p>
                   <div className="insights-button-group">
                     <Link href="/usmca-workflow" className="btn-primary">

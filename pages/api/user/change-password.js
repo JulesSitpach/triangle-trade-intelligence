@@ -18,7 +18,7 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { current_password, new_password } = req.body;
 
     validateRequiredFields(req.body, ['current_password', 'new_password']);

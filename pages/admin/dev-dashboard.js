@@ -1,6 +1,6 @@
 /**
  * Developer Operations Dashboard - Production-Quality Implementation
- * Complete UI + API + Database integration following Triangle Intelligence standards
+ * Complete UI + API + Database integration following Triangle Trade Intelligence standards
  * Salesforce-style tables, functional Google Apps integration, real system monitoring
  */
 
@@ -731,7 +731,7 @@ export default function DeveloperDashboard() {
   return (
     <>
       <Head>
-        <title>Developer Operations Dashboard - Triangle Intelligence</title>
+        <title>Developer Operations Dashboard - Triangle Trade Intelligence</title>
         <meta name="description" content="Real-time system monitoring and development operations management" />
       </Head>
 
