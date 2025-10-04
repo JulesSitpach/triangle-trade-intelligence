@@ -9,15 +9,24 @@ const supabase = createClient(
 );
 
 /**
- * Service prices (in cents)
+ * Service base prices (in cents) - before subscriber discounts
  */
 const SERVICE_PRICES = {
   'usmca-certificate': 25000, // $250
   'hs-classification': 20000, // $200
-  'crisis-response': 40000,   // $400
+  'crisis-response': 50000,   // $500
   'supplier-sourcing': 45000, // $450
   'manufacturing-feasibility': 65000, // $650
   'market-entry': 55000       // $550
+};
+
+/**
+ * Subscription tier discounts
+ */
+const TIER_DISCOUNTS = {
+  'Starter': 0,      // No discount
+  'Professional': 0.15, // 15% off
+  'Premium': 0.25    // 25% off
 };
 
 /**
@@ -74,10 +83,24 @@ export default protectedApiHandler({
     // Get or create Stripe customer
     const customerId = await getOrCreateStripeCustomer(user, supabase);
 
-    // Use price_override if provided (for non-subscribers with 20% markup), otherwise use standard price
+    // Calculate price with subscriber discount
     const basePrice = SERVICE_PRICES[service_id];
-    const servicePrice = price_override || basePrice;
+    const userTier = user.subscription_tier || 'Trial';
+    const discount = TIER_DISCOUNTS[userTier] || 0;
+
+    // Apply discount to base price
+    let servicePrice = basePrice;
+    if (discount > 0) {
+      servicePrice = Math.round(basePrice * (1 - discount));
+    }
+
+    // Allow price_override to override calculated price (for special cases)
+    if (price_override) {
+      servicePrice = price_override;
+    }
+
     const serviceName = SERVICE_NAMES[service_id];
+    const discountPercentage = discount * 100;
 
     try {
       // Create Stripe checkout session for one-time payment
@@ -121,7 +144,10 @@ export default protectedApiHandler({
         url: session.url,
         service_id: service_id,
         service_name: serviceName,
-        price: servicePrice / 100 // Return price in dollars
+        price: servicePrice / 100, // Return price in dollars
+        discount_applied: discountPercentage,
+        base_price: basePrice / 100,
+        subscriber_tier: userTier
       });
     } catch (stripeError) {
       console.error('Stripe checkout session creation error:', stripeError);

@@ -5,8 +5,8 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy - Triangle Intelligence</title>
-        <meta name="description" content="Triangle Intelligence Platform Privacy Policy" />
+        <title>Privacy Policy - Triangle Trade Intelligence</title>
+        <meta name="description" content="Triangle Trade Intelligence Platform Privacy Policy" />
       </Head>
 
       <div className="container">
@@ -46,6 +46,20 @@ export default function PrivacyPolicy() {
               <li className="text-body">Comply with legal obligations</li>
               <li className="text-body">Prevent fraud and ensure security</li>
             </ul>
+
+            <h3 className="card-title" style={{ fontSize: '1rem', marginTop: '1rem' }}>Automatic Workflow Data Storage</h3>
+            <p className="text-body" style={{ marginTop: '0.5rem' }}>
+              <strong>When you complete a USMCA workflow analysis or vulnerability assessment, we automatically save your analysis data to:</strong>
+            </p>
+            <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+              <li className="text-body">Enable trade risk alerts and monitoring</li>
+              <li className="text-body">Provide context for professional service requests</li>
+              <li className="text-body">Allow certificate regeneration and historical access</li>
+              <li className="text-body">Display your analysis history in the dashboard</li>
+            </ul>
+            <p className="text-body" style={{ marginTop: '0.5rem' }}>
+              You can delete saved analyses at any time from your dashboard settings or by contacting privacy@triangleintelligence.com. Deleting analysis data will disable related alerts and service features.
+            </p>
           </section>
 
           <section style={{ marginBottom: '2rem' }}>

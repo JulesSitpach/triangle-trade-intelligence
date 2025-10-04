@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useAuth } from '../lib/contexts/ProductionAuthContext';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import { useRouter } from 'next/router';
 
 export default function Signup() {
@@ -16,7 +16,7 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { signUp, user } = useAuth();
+  const { signUp, user } = useSimpleAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -88,8 +88,8 @@ export default function Signup() {
   return (
     <>
       <Head>
-        <title>Start Free Trial - Triangle Intelligence</title>
-        <meta name="description" content="Start your free trial with Triangle Intelligence" />
+        <title>Create Account - Triangle Trade Intelligence</title>
+        <meta name="description" content="Create your account to access professional USMCA compliance tools and expert support" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -102,8 +102,8 @@ export default function Signup() {
               <Link href="/">
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-title">Start Free Trial</h1>
-              <p className="text-body">Get started with Triangle Intelligence</p>
+              <h1 className="section-title">Create Account</h1>
+              <p className="text-body">Subscribe to access professional USMCA compliance tools</p>
             </div>
 
             {/* Error Message */}
@@ -210,12 +210,25 @@ export default function Signup() {
                 </div>
               </div>
 
+              <div className="form-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    required
+                    style={{marginRight: '0.5rem'}}
+                  />
+                  <span className="text-body">
+                    I agree to the <Link href="/terms-of-service" target="_blank" className="nav-link">Terms of Service</Link> and <Link href="/privacy-policy" target="_blank" className="nav-link">Privacy Policy</Link>, including automatic storage of workflow data for alerts and services.
+                  </span>
+                </label>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
                 className="btn-primary"
               >
-                {isLoading ? 'Creating Account...' : 'Start Free Trial'}
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
 

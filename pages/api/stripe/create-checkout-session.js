@@ -13,20 +13,20 @@ const supabase = createClient(
  * POST /api/stripe/create-checkout-session
  *
  * Body:
- * - tier: 'professional' | 'business' | 'enterprise'
+ * - tier: 'starter' | 'professional' | 'premium'
  * - billing_period: 'monthly' | 'annual'
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
     const { tier, billing_period } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // Validate required fields
     validateRequiredFields(req.body, ['tier', 'billing_period']);
 
     // Validate tier
-    if (!['professional', 'business', 'enterprise'].includes(tier)) {
-      throw new ApiError('Invalid subscription tier. Must be: professional, business, or enterprise', 400, {
+    if (!['starter', 'professional', 'premium'].includes(tier)) {
+      throw new ApiError('Invalid subscription tier. Must be: starter, professional, or premium', 400, {
         field: 'tier',
         provided: tier
       });

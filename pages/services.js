@@ -17,7 +17,10 @@ export default function ProfessionalServices() {
   const serviceTiers = [
     {
       name: 'USMCA Certificate Generation',
-      price: '$250',
+      serviceId: 'usmca-certificate',
+      basePrice: 250,
+      professionalPrice: 212,  // 15% off
+      premiumPrice: 188,       // 25% off
       description: 'Professional USMCA certificate with regulatory compliance validation.',
       expert: 'Compliance Services - Licensed Customs Broker',
       features: [
@@ -31,7 +34,10 @@ export default function ProfessionalServices() {
     },
     {
       name: 'HS Code Classification',
-      price: '$200',
+      serviceId: 'hs-classification',
+      basePrice: 200,
+      professionalPrice: 170,  // 15% off
+      premiumPrice: 150,       // 25% off
       description: 'Licensed customs broker classification with audit-proof documentation.',
       expert: 'Compliance Services - Licensed Customs Broker',
       features: [
@@ -45,7 +51,10 @@ export default function ProfessionalServices() {
     },
     {
       name: 'Crisis Response Management',
-      price: '$400',
+      serviceId: 'crisis-response',
+      basePrice: 500,
+      professionalPrice: 425,  // 15% off
+      premiumPrice: 375,       // 25% off
       description: 'Emergency compliance analysis when tariffs change or shipments are held.',
       expert: 'Compliance Services - Licensed Customs Broker',
       features: [
@@ -59,7 +68,10 @@ export default function ProfessionalServices() {
     },
     {
       name: 'Supplier Sourcing',
-      price: '$450',
+      serviceId: 'supplier-sourcing',
+      basePrice: 450,
+      professionalPrice: 383,  // 15% off
+      premiumPrice: 338,       // 25% off
       description: 'AI-powered supplier discovery validated by Mexico B2B expert.',
       expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
@@ -73,7 +85,10 @@ export default function ProfessionalServices() {
     },
     {
       name: 'Manufacturing Feasibility',
-      price: '$650',
+      serviceId: 'manufacturing-feasibility',
+      basePrice: 650,
+      professionalPrice: 552,  // 15% off
+      premiumPrice: 488,       // 25% off
       description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise.',
       expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
@@ -87,7 +102,10 @@ export default function ProfessionalServices() {
     },
     {
       name: 'Market Entry Strategy',
-      price: '$550',
+      serviceId: 'market-entry',
+      basePrice: 550,
+      professionalPrice: 467,  // 15% off
+      premiumPrice: 412,       // 25% off
       description: 'AI market intelligence validated by on-the-ground Mexico business expertise.',
       expert: 'Mexico Trade Services - B2B Sales Expert',
       features: [
@@ -128,7 +146,7 @@ export default function ProfessionalServices() {
     <>
       <Head>
         <title>Expert USMCA Consulting Services | Implementation & Training Support</title>
-        <meta name="description" content="Professional USMCA consulting, implementation support, and compliance training from certified trade experts. Custom solutions for enterprise manufacturers." />
+        <meta name="description" content="Professional USMCA consulting, implementation support, and compliance training from certified trade experts. Affordable solutions for small manufacturers and importers." />
         <meta name="keywords" content="USMCA consulting, trade compliance training, customs broker services, implementation support, audit preparation" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -139,7 +157,7 @@ export default function ProfessionalServices() {
           <Link href="/" className="nav-logo-link">
             <div className="nav-logo-icon">T</div>
             <div>
-              <div className="nav-logo-text">TradeFlow Intelligence</div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
               <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
             </div>
           </Link>
@@ -154,9 +172,6 @@ export default function ProfessionalServices() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/solutions" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Solutions</Link>
-            <Link href="/industries" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Industries</Link>
-            <Link href="/intelligence" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Intelligence</Link>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Start Analysis</Link>
@@ -239,7 +254,19 @@ export default function ProfessionalServices() {
             {serviceTiers.map((service, index) => (
               <div key={index} className="content-card">
                 <h3 className="content-card-title">{service.name}</h3>
-                <p className="text-body" style={{fontWeight: '600', fontSize: '1.5rem', color: '#134169', margin: '8px 0'}}>{service.price}</p>
+
+                <div style={{marginBottom: '12px'}}>
+                  <div style={{fontSize: '2rem', fontWeight: 'bold', color: '#134169'}}>
+                    ${service.basePrice}
+                  </div>
+                  <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                    Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.professionalPrice}</span> (15% off)
+                  </div>
+                  <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
+                    Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.premiumPrice}</span> (25% off)
+                  </div>
+                </div>
+
                 {service.expert && (
                   <p className="content-card-description" style={{fontSize: '0.9rem', marginBottom: '8px'}}>{service.expert}</p>
                 )}
@@ -253,7 +280,7 @@ export default function ProfessionalServices() {
                   ))}
                 </div>
 
-                <Link href="/services/logistics-support" className="content-card-link" style={{marginTop: '16px', display: 'inline-block'}}>
+                <Link href="/services/request-form" className="btn-primary" style={{marginTop: '16px', display: 'inline-block'}}>
                   Request Service
                 </Link>
               </div>
@@ -325,23 +352,23 @@ export default function ProfessionalServices() {
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">1. Start with App Trial</h3>
+              <h3 className="content-card-title">1. Start with Starter ($99/mo)</h3>
               <p className="content-card-description">
-                Begin with $99-$299 Mexico routing app to test our platform and understand your needs before committing to services.
+                Begin with $99/month Starter tier for 10 USMCA analyses. Test our platform and understand your qualification issues before upgrading.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">2. Pay for What You Need</h3>
+              <h3 className="content-card-title">2. Upgrade for Discounts</h3>
               <p className="content-card-description">
-                As you grow, pay for specific services: suppliers ($750), certificates ($200), clearance support ($300), intelligence ($300/month).
+                Professional ($299/mo) gets 15% off all services. Premium ($599/mo) gets 25% off plus quarterly strategy calls with Jorge & Cristina.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">3. Transparent Limits</h3>
+              <h3 className="content-card-title">3. Pay for Expert Help</h3>
               <p className="content-card-description">
-                We're honest about capacity: 15 certificates/month, 8-10 suppliers/month, 10 shipments/month, 5 crisis responses/month.
+                Services range from $200-$650 base price. Subscribers save 15-25% when they need certificates, supplier sourcing, or crisis response.
               </p>
             </div>
           </div>
@@ -378,7 +405,7 @@ export default function ProfessionalServices() {
           <div className="grid-3-cols">
             {/* Company Information */}
             <div>
-              <h3 className="section-header-title">TradeFlow Intelligence</h3>
+              <h3 className="section-header-title">Triangle Trade Intelligence</h3>
               <p className="text-body">
                 Professional USMCA compliance platform delivering trade classification, supply chain optimization, and regulatory guidance for North American manufacturers.
               </p>
@@ -392,9 +419,6 @@ export default function ProfessionalServices() {
                   <Link href="/usmca-workflow" className="nav-link">USMCA Analysis</Link>
                 </p>
                 <p className="text-body">
-                  <Link href="/industries" className="nav-link">Industries</Link>
-                </p>
-                <p className="text-body">
                   <Link href="/services" className="nav-link">Trade Services</Link>
                 </p>
                 <p className="text-body">
@@ -402,14 +426,11 @@ export default function ProfessionalServices() {
                 </p>
               </div>
             </div>
-            
+
             {/* Company & Legal Links */}
             <div>
               <h4 className="content-card-title">Company</h4>
               <div>
-                <p className="text-body">
-                  <Link href="/intelligence" className="nav-link">Intelligence</Link>
-                </p>
                 <p className="text-body">
                   <Link href="/contact" className="nav-link">Contact</Link>
                 </p>
@@ -426,10 +447,10 @@ export default function ProfessionalServices() {
           {/* Copyright Bar */}
           <div className="section-header">
             <p className="text-body">
-              © 2024 TradeFlow Intelligence. All rights reserved.
+              © 2024 Triangle Trade Intelligence. All rights reserved.
             </p>
             <p className="text-body">
-              Professional trade compliance platform for enterprise clients.
+              Professional USMCA compliance for small manufacturers and importers.
             </p>
           </div>
         </div>
