@@ -119,8 +119,8 @@ export function useWorkflowState() {
         ...prev,
         supplier_country: prev.supplier_country || 'CN',
         manufacturing_location: prev.manufacturing_location || 'MX',
-        component_origins: prev.component_origins.length > 0 
-          ? prev.component_origins 
+        component_origins: (prev.component_origins && prev.component_origins.length > 0)
+          ? prev.component_origins
           : [
               { origin_country: 'CN', value_percentage: 60 },
               { origin_country: 'MX', value_percentage: 40 }

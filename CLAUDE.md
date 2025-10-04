@@ -6,7 +6,7 @@
 
 **Core Value**: AI-enhanced expert services for Mexico/Latin America trade bridge serving North American importers/exporters.
 
-**Business Model**: Tiered subscriptions ($99-599/month) + Professional services ($200-650 per service) with AI acceleration.
+**Business Model**: SMB-focused tiered subscriptions ($99-599/month) + Professional services ($200-650 per service) with automatic subscriber discounts (15-25% off).
 
 ---
 
@@ -22,7 +22,72 @@
 - **USMCA Optimization Focus**: Help North American companies maximize USMCA benefits and prepare for potential agreement changes
 - **AI + Human Hybrid**: AI strategic analysis → Human execution and relationship building
 - **Mexico Trade Bridge**: Bilingual team advantage, cultural understanding, B2B sales expertise
-- **Database-Driven**: NO hardcoded data, configuration-driven
+- **Hybrid Architecture**: AI for context analysis, Config file for industry thresholds, Database for user data only - NO hardcoded fallbacks
+- **Cookie-Based Auth**: HttpOnly cookies for secure session management (NOT Supabase auth tokens in localStorage)
+
+---
+
+## 💰 SMB-Focused Pricing Structure
+
+### Subscription Tiers (Updated January 2025)
+
+**Starter ($99/month)**
+- 10 USMCA analyses per month
+- Basic trade alerts
+- Email support
+- Certificate generation
+- AI HS code suggestions
+- No service discounts
+
+**Professional ($299/month) ← Most SMBs land here**
+- Unlimited USMCA analyses
+- Real-time crisis alerts (tariff changes, trade disputes)
+- **15% discount on all professional services**
+- Priority support (48hr response)
+- Advanced trade policy analysis
+
+**Premium ($599/month) ← For high-volume SMBs**
+- Everything in Professional
+- **25% discount on all professional services**
+- Quarterly 1-on-1 strategy calls with Jorge & Cristina
+- Dedicated Slack/email support
+- Custom trade intelligence reports
+
+### Professional Service Pricing (All 6 Services)
+
+**Compliance Services (Cristina) - 3 Services:**
+1. **USMCA Certificate**: $250 base / $212 Professional / $188 Premium
+2. **HS Classification**: $200 base / $170 Professional / $150 Premium
+3. **Crisis Response**: $500 base / $425 Professional / $375 Premium
+
+**Mexico Trade Services (Jorge) - 3 Services:**
+4. **Supplier Sourcing**: $450 base / $383 Professional / $338 Premium
+5. **Manufacturing Feasibility**: $650 base / $552 Professional / $488 Premium
+6. **Market Entry Strategy**: $550 base / $467 Professional / $412 Premium
+
+### Automatic Discount Logic
+
+**Implementation** (`pages/api/stripe/create-service-checkout.js`):
+```javascript
+const TIER_DISCOUNTS = {
+  'Starter': 0,          // No discount
+  'Professional': 0.15,  // 15% off
+  'Premium': 0.25        // 25% off
+};
+
+// Calculate price with subscriber discount
+const basePrice = SERVICE_PRICES[service_id];
+const userTier = user.subscription_tier || 'Trial';
+const discount = TIER_DISCOUNTS[userTier] || 0;
+
+// Apply discount automatically
+let servicePrice = basePrice;
+if (discount > 0) {
+  servicePrice = Math.round(basePrice * (1 - discount));
+}
+```
+
+**Non-subscribers** pay base price (same as Starter tier).
 
 ---
 
@@ -59,11 +124,26 @@ components/workflow/
 └── AuthorizationStep.js            # Certificate completion
 ```
 
-### Critical User Data Flow
+### Critical User Data Flow (Updated January 2025)
 - **Step 1-2**: localStorage (immediate storage)
 - **Results**: User chooses Certificate OR Alerts path
-- **Database**: Only saves when user selects professional services
-- **No automatic tracking**: Users control data sharing
+- **Auto-save to Database**: Workflow data automatically saved for alerts and services (with user consent)
+- **Dashboard**: Dropdown + preview pattern for workflows and alerts
+- **Privacy Controls**: Users can delete all workflow data from `/account/settings`
+
+### Privacy Compliance Features (Added January 2025)
+- **Privacy Policy**: Auto-save disclosure explaining what data is saved and why
+- **Signup Consent**: Required checkbox agreeing to auto-save of workflow data
+- **Account Settings**: `/account/settings` page with "Delete All Workflow Data" option
+- **Delete API**: `/api/user/delete-workflow-data` permanently removes all user workflows and alerts
+- **Double Confirmation**: Two-step process to prevent accidental data deletion
+
+### Dashboard Experience (Updated January 2025)
+**Dropdown + Preview Pattern:**
+- **My Workflows**: Dropdown selector → Preview card with USMCA data → Action buttons
+- **Trade Alerts**: Dropdown selector → Preview card with risk data → Action buttons
+- **Monthly Usage**: Progress bar showing analyses used vs limit
+- Auto-selects first workflow/alert on load
 
 ---
 
@@ -105,7 +185,8 @@ const workflowStages = {
 ### Service Definitions (6 Total)
 
 #### Cristina's Services (3)
-**✅ USMCA Certificates ($250) - 3-Stage Workflow (COMPLETE)**
+**✅ USMCA Certificates - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $250 base / $212 Professional (15% off) / $188 Premium (25% off)
 - **Stage 1**: Regulatory Assessment - Professional compliance risk evaluation
 - **Stage 2**: Expert Validation - Licensed customs broker detailed review
 - **Stage 3**: Professional Certification - Final validation and PDF certificate generation
@@ -113,7 +194,8 @@ const workflowStages = {
 - **API**: `/api/regenerate-usmca-certificate.js`, `/api/add-certificate-data.js` ✅ **BUILT**
 - **Features**: Full CRUD, search/filter, pagination, risk assessment, real-time status updates
 
-**✅ HS Classification ($200) - 3-Stage Workflow (COMPLETE)**
+**✅ HS Classification - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $200 base / $170 Professional (15% off) / $150 Premium (25% off)
 - **Stage 1**: Classification Review - AI-powered HS code analysis
 - **Stage 2**: Regulatory Validation - Professional customs broker verification
 - **Stage 3**: Professional Certification - Final classification with regulatory notes
@@ -121,7 +203,8 @@ const workflowStages = {
 - **API**: `/api/validate-hs-classification.js` ✅ **BUILT**
 - **Features**: Complete workflow integration, OpenRouter API integration, database-driven
 
-**✅ Crisis Response ($500) - 3-Stage Workflow (COMPLETE)**
+**✅ Crisis Response - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $500 base / $425 Professional (15% off) / $375 Premium (25% off)
 - **Stage 1**: Crisis Assessment - Professional evaluation using logistics management experience
 - **Stage 2**: Impact Analysis - AI analysis + Cristina's supply chain expertise
 - **Stage 3**: Professional Action Plan - Expert crisis management plan with timeline
@@ -130,7 +213,8 @@ const workflowStages = {
 - **Features**: Real crisis scenario analysis, logistics expertise integration
 
 #### Jorge's Services (3)
-**✅ Supplier Sourcing ($450) - 3-Stage Workflow (COMPLETE)**
+**✅ Supplier Sourcing - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $450 base / $383 Professional (15% off) / $338 Premium (25% off)
 - **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico supplier sourcing?" (Cost Savings, Quality & Compliance, Fast Transition, or Balanced) + optional notes
 - **Stage 2**: AI Supplier Discovery - OpenRouter API finds 5 Mexico suppliers with web search integration
 - **Stage 3**: Jorge's Verification & Report - Jorge calls suppliers to verify capabilities, documents findings, generates client DIY plan + optional hourly services
@@ -138,7 +222,8 @@ const workflowStages = {
 - **API**: `/api/supplier-sourcing-discovery.js`, `/api/generate-supplier-sourcing-report.js` ✅ **BUILT**
 - **Deliverable**: ~500 word report with: 5 verified suppliers → 4-week DIY plan → Optional hourly support ($150-200/hr)
 
-**✅ Manufacturing Feasibility ($650) - 3-Stage Workflow (COMPLETE)**
+**✅ Manufacturing Feasibility - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $650 base / $552 Professional (15% off) / $488 Premium (25% off)
 - **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico manufacturing?" (Cost Savings, Quality Control, Fast Setup, or Strategic Location) + optional notes
 - **Stage 2**: AI Analysis - Location analysis + cost estimates for 3 Mexico manufacturing sites
 - **Stage 3**: Jorge's Research & Report - Jorge researches viable locations, documents findings, generates client DIY plan + optional hourly services
@@ -146,7 +231,8 @@ const workflowStages = {
 - **API**: `/api/manufacturing-feasibility-analysis.js`, `/api/generate-manufacturing-feasibility-report.js` ✅ **BUILT**
 - **Deliverable**: ~500 word report with: 3 validated locations → 4-week DIY plan → Optional hourly support ($150-200/hr)
 
-**✅ Market Entry ($550) - 3-Stage Workflow (COMPLETE)**
+**✅ Market Entry Strategy - 3-Stage Workflow (COMPLETE)**
+- **Pricing**: $550 base / $467 Professional (15% off) / $412 Premium (25% off)
 - **Stage 1**: Strategic Priority Question - Single question: "What's your top priority for Mexico market entry?" (Revenue Growth, Market Share, Brand Presence, or Distribution Network) + optional notes
 - **Stage 2**: AI Market Analysis - OpenRouter API researches 3-4 Mexico market opportunities
 - **Stage 3**: Jorge's Research & Report - Jorge researches market opportunities, documents findings, generates client DIY plan + optional hourly services
@@ -253,6 +339,159 @@ TASK: ${serviceSpecificPrompt}`
 - **Professional Human Execution**: Licensed expertise and relationship building AI cannot provide
 - **Cultural Bridge**: Mexico-based bilingual team advantage for North American companies
 - **Implementation Focus**: AI provides strategy, humans ensure execution and results
+
+---
+
+## 🔄 Hybrid Architecture (USMCA Workflow)
+
+### Architecture Decision: AI + Config File + Database
+
+**Updated January 2025**: Implemented hybrid approach for USMCA workflow optimization.
+
+### What Uses What:
+
+**🤖 AI (OpenRouter API):**
+- HS code classification (context-dependent, changes frequently)
+- Product-specific remediation recommendations (requires contextual analysis)
+- Tariff rate lookups (will add when database is incomplete)
+- Complex business logic requiring judgment
+
+**📄 Config File (`config/usmca-thresholds.js`):**
+- USMCA regional content thresholds by industry (fixed by treaty)
+- Official threshold sources (yarn-forward, regional value content, etc.)
+- Qualification rule types (tariff shift, wholly obtained, etc.)
+- Industry-specific documentation requirements
+
+**🗄️ Database (Supabase):**
+- User data (companies, workflows, service requests)
+- Component origins (user input from workflow)
+- Historical workflow results for analytics
+- Admin dashboard data (service completions, certificates)
+
+### Why This Approach:
+
+**For Early Stage (Current):**
+- ✅ Correct thresholds from official USMCA treaty (no database sync needed)
+- ✅ Product-specific AI recommendations (better than generic advice)
+- ✅ Fast iteration (no database migrations for threshold updates)
+- ✅ Low cost (~$0.005 per workflow = half a cent)
+
+**For Scale (Future):**
+- Cache common HS code requests when patterns emerge (>1000 users/month)
+- Store AI-generated recommendations for reuse when costs increase
+- Build Mexico supplier database when we have real usage data
+
+### Data Flow Architecture:
+
+```javascript
+// USMCA Qualification Check Flow
+1. User Input → ComponentOriginsStepEnhanced.js
+   ↓
+2. Form Data → useWorkflowState hook (localStorage + database)
+   ↓
+3. API Call → POST /api/database-driven-usmca-compliance
+   ↓
+4. Threshold Lookup → config/usmca-thresholds.js (NOT database)
+   ↓ getUSMCAThreshold(businessType, hsCode)
+   ↓ Returns: { threshold: 55, source: 'usmca_treaty_chapter_6_yarn_forward' }
+   ↓
+5. Calculation → database-driven-usmca-engine.js
+   ↓ calculateRegionalContent(components, usmcaCountries, rules)
+   ↓
+6. If Not Qualified → AI Recommendations
+   ↓ OpenRouter API with full business context
+   ↓ Prompt includes: business type, product, component descriptions
+   ↓ Returns: ["Replace India fabric with Mexico textile mills", ...]
+   ↓
+7. Results → WorkflowResults.js
+```
+
+### Critical Implementation Details:
+
+**Threshold Lookup (Fixed January 2025):**
+```javascript
+// database-driven-usmca-engine.js lines 91-120
+async getQualificationRules(hsCode = null, businessType = null) {
+  // Import config file directly (NOT database query)
+  const { getUSMCAThreshold } = await import('../../config/usmca-thresholds.js');
+
+  // Get threshold based on business type
+  const thresholdData = await getUSMCAThreshold(businessType, hsCode);
+
+  // Textiles → 55%, Electronics → 65%, Automotive → 75%
+  return {
+    rule_type: thresholdData.rule_type,
+    regional_content_threshold: thresholdData.threshold,
+    source: thresholdData.source
+  };
+}
+```
+
+**AI Recommendations (Added January 2025):**
+```javascript
+// database-driven-usmca-compliance.js lines 750-859
+async function generateWorkflowRecommendations(product, usmca, savings, formData) {
+  if (!usmca.qualified && formData) {
+    // Build component breakdown with descriptions
+    const componentBreakdown = formData.component_origins
+      ?.map(c => `- ${c.value_percentage}% from ${c.origin_country} (${c.description})`)
+      .join('\n');
+
+    const prompt = `You are a USMCA compliance expert...
+
+    COMPANY CONTEXT:
+    - Business Type: ${formData.business_type}
+    - Product: ${formData.product_description}
+    - Component Breakdown: ${componentBreakdown}
+
+    Generate 3-4 specific recommendations to achieve USMCA qualification.
+    Be specific to this product type (textiles, electronics, etc.)`;
+
+    // Call OpenRouter API
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      model: 'anthropic/claude-3-haiku',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    // Parse AI recommendations
+    const aiRecommendations = JSON.parse(response.choices[0].message.content);
+    return aiRecommendations;
+  }
+}
+```
+
+**No Fallback Data (Critical Change):**
+```javascript
+// All emergency fallbacks REMOVED (January 2025)
+// System now fails loudly to expose missing data
+
+// BEFORE (Wrong):
+if (!rules) {
+  return { threshold: 62.5, source: 'emergency_fallback' };  // ❌ Fake data
+}
+
+// AFTER (Correct):
+if (!rules) {
+  throw new Error('USMCA rules not found - config file incomplete');  // ✅ Fail loudly
+}
+```
+
+### Cost Analysis:
+
+**Per Workflow:**
+- HS code classification: ~$0.003 (Claude Haiku)
+- AI recommendations (if not qualified): ~$0.002 (Claude Haiku)
+- Total: **~$0.005 per workflow**
+
+**Monthly Estimates:**
+- 100 users: $0.50/month (negligible)
+- 1,000 users: $5/month (still cheap)
+- 10,000 users: $50/month (time to add caching)
+
+**When to Migrate to Full Database:**
+- Database caching when AI costs >$50/month
+- Store common HS code patterns for reuse
+- Cache AI recommendations for similar products
 
 ---
 
@@ -388,29 +627,42 @@ npm run css:check         # CSS compliance check
 ✅ **Phase 2 COMPLETE**: All 6 supporting API endpoints implemented
 ✅ **Phase 3 COMPLETE**: Integration testing and optimization completed
 
-### Recent Bug Fixes & Improvements (September 2025)
-**Critical Runtime Error Fixes:**
-- Fixed `TypeError: volume.includes is not a function` in USMCACertificateTab
-- Added type safety with `String()` conversion for all subscriber data fields
-- Improved null/undefined handling across all components
+### Recent Bug Fixes & Improvements (January 2025)
 
-**UX Enhancements:**
-- Added comprehensive search and filtering to all service dashboards
-- Implemented pagination for large service request lists
-- Added real-time status updates with toast notifications
-- Integrated professional risk assessment scoring
+**🔥 CRITICAL: Hybrid Architecture Implementation**
+- **Fixed wrong USMCA thresholds**: Textiles now show 55% (was 62.5%), Electronics 65%, Automotive 75%
+- **Removed database threshold lookup**: Now uses `config/usmca-thresholds.js` directly (fixed by treaty)
+- **Added AI-powered recommendations**: Product-specific advice using OpenRouter API with full business context
+- **Removed all emergency fallbacks**: System fails loudly to expose missing data (no more fake results)
+- **Fixed textile bug**: Recommendations now say "Replace India fabric" not "Replace TW sensor components"
 
-**Architecture Improvements:**
+**Data Flow Fixes:**
+- Component descriptions now flow through entire system (preserved for AI recommendations)
+- Threshold lookup uses config file → AI recommendations → database for user data only
+- No hardcoded business data (all configuration-driven or AI-generated)
+
+**Cost Optimization:**
+- Hybrid approach: ~$0.005 per workflow (half a cent)
+- AI only for context-dependent analysis (HS codes, recommendations)
+- Config file for fixed industry thresholds (no API calls needed)
+- Database for user data only (minimal query costs)
+
+**Architecture Improvements (September 2025):**
 - Standardized all services to 3-stage workflow pattern
 - Created reusable ServiceWorkflowModal component
 - Implemented ErrorBoundary for graceful error handling
 - Added ToastNotification system for user feedback
 
-**Database Integration:**
-- All components now use real Supabase data (no mock data)
+**Runtime Error Fixes (September 2025):**
+- Fixed `TypeError: volume.includes is not a function` in USMCACertificateTab
+- Added type safety with `String()` conversion for all subscriber data fields
+- Improved null/undefined handling across all components
+
+**Database Integration (September 2025):**
+- All admin components use real Supabase data (no mock data)
 - Added CRUD operations for service requests
 - Implemented real-time status tracking
-- Sample data fallback for demo purposes only
+- Sample data fallback for admin demo purposes only (user workflow has NO fallbacks)
 
 ---
 
@@ -522,24 +774,32 @@ Provide strategic analysis and recommendations.`;
 
 **This CLAUDE.md reflects the current reality of the Triangle Intelligence Platform and provides accurate guidance for building the dashboard components and supporting infrastructure.**
 
-You're absolutely right - I completely misunderstood your business model. Let me correct this:
+## SMB Pricing Value Proposition (Updated January 2025)
 
-## Your Actual Business Model
+**Starter Tier ($99/month):**
+- 10 USMCA analyses/month
+- Basic trade alerts
+- No service discounts
+- Perfect for testing the platform
 
-**Primary Users:**
-- Companies who use your USMCA workflow tool
-- Run analyses to check if their products qualify
-- Generate certificates when they DO qualify
-- Set up alerts to monitor trade risks
+**Professional Tier ($299/month) ← Most SMBs land here:**
+- Unlimited USMCA analyses
+- Real-time crisis alerts
+- **15% automatic discount on all services**
+- Priority 48hr support
 
-**These users ARE confident** because:
-- Your tool verified their qualification
-- They have the certificate to prove it
-- They understand their HS codes now
+**Premium Tier ($599/month):**
+- Everything in Professional
+- **25% automatic discount on all services**
+- Quarterly strategy calls with Jorge & Cristina
+- Dedicated Slack/email support
 
-## So Who Needs Your Services?
+**Non-subscribers:**
+- One-off service requests
+- Pay base price (no discount)
+- Can use public intake forms
 
-**Users need Jorge/Cristina services when they DON'T qualify or have problems:**
+### When Do Users Need Services?
 
 **Path 1: USMCA Analysis shows "NOT QUALIFIED"**
 - User discovers they can't use USMCA benefits
@@ -559,17 +819,61 @@ You're absolutely right - I completely misunderstood your business model. Let me
 - **Jorge's services:** Find cheaper Mexico suppliers
 - Maintain qualification while reducing costs
 
-## Pricing Makes Sense Now
+The services are for **fixing problems** or **optimization**, not for people who are already compliant and happy.
 
-**Subscribers ($99-599/month):**
-- Run unlimited analyses
-- Generate certificates when qualified
-- Get trade risk alerts
-- **Services at 15-20% discount** when they need restructuring help
+---
 
-**Non-subscribers:**
-- One-off certificate generation
-- Pay full price for services
-- Less committed to optimization
+## 📚 Additional Documentation
 
-The services are for **fixing problems** or **optimization**, not for people who are already compliant and happy. My mistake - I had the user journey completely backwards.
+### Hybrid Architecture Implementation (January 2025)
+- **`HYBRID_FIXES_APPLIED.md`** - Complete documentation of hybrid approach implementation
+  - All 4 fixes applied (thresholds, AI recommendations, component data, fallback removal)
+  - Testing checklist with expected results
+  - Cost analysis and migration strategy
+
+### Data Flow & Bug Analysis
+- **`USMCA_DATA_FLOW_BUGS.md`** - Detailed analysis of bugs found and fixed
+  - Complete data flow from user input to results
+  - All fallback data locations documented
+  - Required fixes with before/after code examples
+
+### Key Takeaways from Documentation:
+1. **Config file is source of truth** for USMCA thresholds (not database)
+2. **AI generates product-specific recommendations** using OpenRouter API
+3. **No emergency fallbacks** - system fails loudly to expose missing data
+4. **Component descriptions preserved** through entire flow for AI context
+5. **Cost per workflow: ~$0.005** (half a cent per user)
+
+---
+
+## Recent Updates (January 2025)
+
+### SMB-Focused Pricing Implementation
+- **New Tier Structure**: Starter ($99) → Professional ($299) → Premium ($599)
+- **Usage Limits**: Starter gets 10 analyses/month, Pro/Premium unlimited
+- **Automatic Discounts**: Professional 15% off, Premium 25% off all services
+- **Pricing APIs**: Updated checkout, service pricing, and Stripe configuration
+- **Dashboard Updates**: Usage limits reflect new tier structure
+
+### Privacy & Compliance Features
+- **Privacy Policy**: Auto-save disclosure explaining data usage
+- **Signup Consent**: Required checkbox for workflow data storage
+- **Account Settings**: New `/account/settings` page with data deletion
+- **Delete API**: Complete workflow data deletion endpoint
+- **GDPR/CCPA Ready**: Double confirmation for data deletion
+
+### Dashboard Improvements
+- **Dropdown + Preview Pattern**: Clean UX for workflows and alerts
+- **Auto-Save with Consent**: Workflow data saved for alerts and services
+- **User Control**: Can delete all data from settings anytime
+- **Better Navigation**: Clear action buttons based on qualification status
+
+### Stripe Integration Updates
+- **Tier Identifiers**: Changed from business/enterprise to starter/professional/premium
+- **Discount Calculation**: Automatic tiered pricing based on user subscription
+- **Service Checkout**: Returns discount info in API response
+- **Public Checkout**: Non-subscribers pay base price
+
+---
+
+**This CLAUDE.md reflects the current reality of the Triangle Intelligence Platform (January 2025) with SMB-focused pricing, privacy compliance, and hybrid architecture.**

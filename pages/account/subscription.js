@@ -83,12 +83,35 @@ export default function SubscriptionManagement() {
 
   const getPlanFeatures = (tier) => {
     const features = {
+      trial: [
+        '5 USMCA compliance analyses per month',
+        'Basic certificate generation',
+        'Email support',
+        'Trade alerts',
+        'Basic analytics'
+      ],
+      starter: [
+        '10 USMCA compliance analyses per month',
+        'Basic certificate generation',
+        'Email support',
+        'Trade alerts',
+        'Basic analytics'
+      ],
       professional: [
-        '50 USMCA compliance analyses per month',
+        'Unlimited USMCA compliance analyses',
         'Unlimited certificate generation',
-        'Priority email support',
-        'Real-time trade alerts',
-        'Advanced analytics'
+        '15% discount on all professional services',
+        'Priority email support (48hr response)',
+        'Real-time crisis alerts',
+        'Advanced trade policy analysis'
+      ],
+      premium: [
+        'Everything in Professional',
+        '25% discount on all professional services',
+        'Quarterly 1-on-1 strategy calls with Jorge & Cristina',
+        'Dedicated Slack/email support',
+        'Custom trade intelligence reports',
+        'Priority feature requests'
       ],
       business: [
         'Unlimited USMCA compliance analyses',
@@ -107,7 +130,7 @@ export default function SubscriptionManagement() {
         'SLA guarantees'
       ]
     };
-    return features[tier?.toLowerCase()] || features.trial;
+    return features[tier?.toLowerCase()] || features.trial || [];
   };
 
   if (loading) {

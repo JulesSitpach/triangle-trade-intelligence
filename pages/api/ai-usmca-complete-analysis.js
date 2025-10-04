@@ -5,14 +5,19 @@
  * Flexible for changing trade policies
  */
 
+import { protectedApiHandler } from '../../lib/api/apiHandler.js';
+import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
-  const startTime = Date.now();
+export default protectedApiHandler({
+  POST: async (req, res) => {
+    const startTime = Date.now();
+    const userId = req.user.id;
 
   try {
     const formData = req.body;
@@ -191,6 +196,38 @@ export default async function handler(req, res) {
       processing_time: result.processing_time_ms
     });
 
+    // Save workflow to database for dashboard display
+    try {
+      const { error: insertError } = await supabase
+        .from('workflow_sessions')
+        .insert({
+          user_id: userId,
+          session_id: `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          company_name: formData.company_name,
+          business_type: formData.business_type,
+          manufacturing_location: formData.manufacturing_location,
+          trade_volume: formData.trade_volume ? parseFloat(formData.trade_volume.replace(/[^0-9.-]+/g, '')) : null,
+          product_description: formData.product_description,
+          hs_code: result.product.hs_code,
+          component_origins: formData.component_origins,
+          qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
+          regional_content_percentage: result.usmca.north_american_content,
+          required_threshold: result.usmca.threshold_applied,
+          compliance_gaps: result.usmca.qualified ? null : { gap: `${result.usmca.gap}% gap from ${result.usmca.threshold_applied}% threshold` },
+          completed_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        logError('Failed to save workflow to database', { error: insertError.message });
+        // Don't fail the request, just log the error
+      } else {
+        console.log('✅ Workflow saved to database for user:', userId);
+      }
+    } catch (dbError) {
+      logError('Database save error', { error: dbError.message });
+      // Don't fail the request
+    }
+
     return res.status(200).json(result);
 
   } catch (error) {
@@ -208,7 +245,8 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString()
     });
   }
-}
+  }
+});
 
 /**
  * Build comprehensive AI prompt with all USMCA rules and context

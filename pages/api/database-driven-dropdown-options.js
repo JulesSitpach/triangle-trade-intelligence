@@ -141,18 +141,17 @@ async function getBusinessTypes() {
         
         // Keep the rule with higher threshold if duplicates exist
         if (!uniqueRulesMap.has(category) || uniqueRulesMap.get(category).threshold < threshold) {
-          uniqueRulesMap.set(category, { 
-            category, 
+          uniqueRulesMap.set(category, {
+            category,
             threshold,
-            value: category.replace(/[^a-zA-Z0-9]/g, ''),
-            label: category,
+            label: category,  // Keep original formatting with special characters
             description: `USMCA threshold: ${threshold}%`
           });
         }
       });
       
       const businessTypesFromRules = Array.from(uniqueRulesMap.values()).map(rule => ({
-        value: rule.value,
+        value: rule.label,  // Use label as value to preserve formatting like "Machinery & Equipment"
         label: rule.label,
         description: rule.description
       }));

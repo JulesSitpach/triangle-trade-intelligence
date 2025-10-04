@@ -50,11 +50,11 @@ export const SAFE_COUNTRIES = {
 export const SAFE_ENDPOINTS = {
   // Core APIs
   classification: getEnvValue('API_CLASSIFICATION', '/api/ai-classification'),
-  compliance: getEnvValue('API_COMPLIANCE', '/api/database-driven-usmca-compliance'),
+  compliance: getEnvValue('API_COMPLIANCE', '/api/ai-usmca-complete-analysis'),
   dropdownOptions: getEnvValue('API_DROPDOWN', '/api/database-driven-dropdown-options'),
   
-  // Trust APIs
-  trustWorkflow: getEnvValue('API_TRUST_WORKFLOW', '/api/trust/complete-workflow'),
+  // Trust APIs - Using AI approach
+  trustWorkflow: getEnvValue('API_TRUST_WORKFLOW', '/api/ai-usmca-complete-analysis'),
   trustProvenance: getEnvValue('API_TRUST_PROVENANCE', '/api/trust/data-provenance'),
   trustExpert: getEnvValue('API_TRUST_EXPERT', '/api/trust/expert-validation')
 };

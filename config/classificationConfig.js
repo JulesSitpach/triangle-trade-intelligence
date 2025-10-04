@@ -7,23 +7,23 @@
 // API Configuration - Updated for Microservices Architecture
 export const API_CONFIG = {
   endpoints: {
-    // FIXED: Use working endpoints instead of broken ones
+    // AI-powered endpoints
     productCategories: '/api/database-driven-dropdown-options?category=product_categories',
-    productClassification: '/api/database-driven-usmca-compliance',
-    aiCategoryAnalysis: '/api/database-driven-usmca-compliance', // FIXED: Use working API
-    userContributedHSCode: '/api/database-driven-usmca-compliance', // FIXED: Use working API
-    dynamicHSCodes: '/api/database-driven-usmca-compliance', // FIXED: Add missing endpoint
-    
-    // New Trust Microservice Endpoints
-    trustCompleteWorkflow: '/api/trust/complete-workflow',
+    productClassification: '/api/ai-usmca-complete-analysis',
+    aiCategoryAnalysis: '/api/ai-usmca-complete-analysis',
+    userContributedHSCode: '/api/ai-usmca-complete-analysis',
+    dynamicHSCodes: '/api/ai-usmca-complete-analysis',
+
+    // Trust Microservice Endpoints
+    trustCompleteWorkflow: '/api/ai-usmca-complete-analysis',
     trustDataProvenance: '/api/trust/data-provenance',
     trustExpertValidation: '/api/trust/expert-validation',
     trustMetrics: '/api/trust/trust-metrics',
     trustSuccessStories: '/api/trust/success-stories',
     trustCaseStudies: '/api/trust/case-studies',
-    
-    // Backward compatibility (deprecated - use trustCompleteWorkflow)
-    trustedComplianceWorkflow: '/api/trust/complete-workflow'
+
+    // Backward compatibility
+    trustedComplianceWorkflow: '/api/ai-usmca-complete-analysis'
   },
   timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '10000'),
   retryAttempts: parseInt(process.env.NEXT_PUBLIC_API_RETRY_ATTEMPTS || '3'),

@@ -122,7 +122,7 @@ export default function UserDashboard({ user, profile }) {
                         </strong>
                       </div>
                       <div className="text-body">
-                        USMCA Content: <strong>{selectedWorkflow.qualification_percentage}%</strong> (Threshold: {selectedWorkflow.threshold_percentage || 60}%)
+                        USMCA Content: <strong>{selectedWorkflow.regional_content_percentage}%</strong> (Threshold: {selectedWorkflow.required_threshold || 60}%)
                       </div>
                       {selectedWorkflow.hs_code && (
                         <div className="text-body">HS Code: {selectedWorkflow.hs_code}</div>
