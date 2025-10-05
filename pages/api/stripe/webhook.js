@@ -1,4 +1,3 @@
-import { buffer } from 'micro';
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,6 +12,17 @@ export const config = {
     bodyParser: false,
   },
 };
+
+/**
+ * Helper function to read raw body as buffer
+ */
+async function getRawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 /**
  * Stripe Webhook Handler
@@ -31,7 +41,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: `Method ${req.method} not allowed` });
   }
 
-  const buf = await buffer(req);
+  const buf = await getRawBody(req);
   const sig = req.headers['stripe-signature'];
 
   if (!sig) {
