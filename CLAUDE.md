@@ -18,6 +18,12 @@
 - **AI Integration**: OpenRouter API with Claude models for all AI functionality
 - **Styling**: Existing CSS classes only (NO Tailwind, NO inline styles)
 
+### Development Server Port Assignment
+- **Port 3000**: Reserved for USER - main development server for direct testing and console visibility
+- **Port 3001**: Reserved for CLAUDE CODE agents - testing, debugging, and automated validation
+- **Rationale**: User needs direct console visibility on port 3000 to see errors and debug output in real-time. Claude Code agents must use port 3001 to avoid interference.
+- **Usage**: All Claude Code sessions should run `npm run dev:3001` for testing (never use `npm run dev` which uses port 3000)
+
 ### Core Principles
 - **USMCA Optimization Focus**: Help North American companies maximize USMCA benefits and prepare for potential agreement changes
 - **AI + Human Hybrid**: AI strategic analysis → Human execution and relationship building
