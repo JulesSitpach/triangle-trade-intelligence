@@ -95,31 +95,6 @@ export default async function handler(req, res) {
     const agent = new ClassificationAgent();
 
     switch (action) {
-      case 'validate_hs_code':
-        if (!hsCode || !productDescription) {
-          return res.status(400).json({
-            error: 'hsCode and productDescription required'
-          });
-        }
-
-        const validation = await agent.validateHSCode(hsCode, productDescription);
-        const validationWithSubscription = await addSubscriptionContext(req, validation, 'classification');
-        return res.status(200).json(validationWithSubscription);
-
-      case 'get_alternatives':
-        if (!hsCode || !productDescription) {
-          return res.status(400).json({
-            error: 'hsCode and productDescription required'
-          });
-        }
-
-        const alternatives = await agent.getAlternativeClassifications(
-          productDescription,
-          hsCode
-        );
-        const alternativesWithSubscription = await addSubscriptionContext(req, alternatives, 'classification');
-        return res.status(200).json(alternativesWithSubscription);
-
       case 'search_similar':
         if (!productDescription) {
           return res.status(400).json({ error: 'productDescription required' });
@@ -136,7 +111,7 @@ export default async function handler(req, res) {
       default:
         return res.status(400).json({
           error: 'Invalid action',
-          validActions: ['suggest_hs_code', 'validate_hs_code', 'get_alternatives', 'search_similar']
+          validActions: ['suggest_hs_code', 'search_similar']
         });
     }
 
