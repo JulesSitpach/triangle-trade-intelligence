@@ -1,92 +1,140 @@
 /**
  * SaveDataConsentModal.js - Privacy-first data storage consent
- * Gives users explicit choice: Save for alerts/services OR Erase after viewing
+ * Appears after USMCA results to give users explicit choice
  * NO HARDCODING: Uses system configuration and user preferences
  * NO INLINE STYLES: Uses only existing CSS classes from globals.css
  */
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 
-const SaveDataConsentModal = ({ isOpen, onSave, onErase, userProfile }) => {
+const SaveDataConsentModal = ({ isOpen, onContinue, userProfile }) => {
+  const [selectedOption, setSelectedOption] = useState('save');
+  const clickLockRef = useRef(false);
+  const [isClosing, setIsClosing] = useState(false);
+
   if (!isOpen) return null;
 
+  const handleOptionClick = (option, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedOption(option);
+  };
+
+  const handleContinue = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Prevent double-clicks
+    if (clickLockRef.current || isClosing) {
+      console.log('🔒 Continue button already clicked - ignoring');
+      return;
+    }
+
+    clickLockRef.current = true;
+    setIsClosing(true);
+
+    // Call onContinue after setting closing state
+    setTimeout(() => {
+      onContinue(selectedOption === 'save');
+    }, 50);
+
+    // Reset after 2 seconds (failsafe)
+    setTimeout(() => {
+      clickLockRef.current = false;
+      setIsClosing(false);
+    }, 2000);
+  };
+
   return (
-    <div className="workflow-modal-overlay">
-      <div className="workflow-modal-content">
+    <div
+      className="workflow-modal-overlay"
+      onClick={(e) => e.stopPropagation()}
+      style={isClosing ? { pointerEvents: 'none', opacity: 0, transition: 'opacity 0.15s ease-out' } : {}}
+    >
+      <div className="workflow-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="workflow-modal-header">
-          <h2>💾 Save Your Trade Analysis?</h2>
-          <p className="text-body">Choose how you want to handle your data</p>
+          <h2 className="card-title">Save Your Analysis?</h2>
         </div>
 
-        <div className="card consent-option-card">
-          <div className="card-header">
-            <h3 className="card-title">Option 1: Save for Ongoing Value</h3>
-          </div>
-          <div className="card-description">
-            <p><strong>✅ What you get:</strong></p>
-            <ul>
-              <li>🚨 <strong>Trade Alerts:</strong> Get notified when policy changes affect your supply chain</li>
-              <li>👨‍💼 <strong>Professional Services:</strong> Jorge &amp; Cristina can help with your actual data</li>
-              <li>📜 <strong>Certificate History:</strong> Regenerate USMCA certificates anytime</li>
-              <li>📊 <strong>Dashboard Access:</strong> View your analysis history</li>
-            </ul>
-
-            <p><strong>What we'll save:</strong></p>
-            <ul>
-              <li>Company name and trade profile</li>
-              <li>Component origins: {userProfile?.componentOrigins?.length || 0} components</li>
-              <li>HS codes and product descriptions</li>
-              <li>USMCA qualification status</li>
-            </ul>
-
-            <p><strong>🔒 Security:</strong></p>
-            <p className="text-body">
-              Your data is stored securely using enterprise-grade encryption and authentication.
-              We use Supabase, a trusted platform that encrypts data both in storage and transmission.
-              Only you can access your company information through secure login.
-            </p>
+        {/* Option 1: Save */}
+        <div
+          className={`consent-option ${selectedOption === 'save' ? 'selected' : ''}`}
+          onClick={(e) => !isClosing && handleOptionClick('save', e)}
+          style={isClosing ? { pointerEvents: 'none' } : {}}
+        >
+          <div className="consent-option-content">
+            <input
+              type="radio"
+              name="consentOption"
+              checked={selectedOption === 'save'}
+              onChange={(e) => handleOptionClick('save', e)}
+              className="consent-option-radio"
+            />
+            <div>
+              <div className="consent-option-title">
+                Save to enable trade alerts and professional services
+              </div>
+              <ul className="consent-option-list">
+                <li>Get alerts when tariffs/policies affect YOUR supply chain</li>
+                <li>Access professional services with full context</li>
+                <li>View analysis history in dashboard</li>
+                <li>Regenerate certificates anytime</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="card consent-option-card">
-          <div className="card-header">
-            <h3 className="card-title">Option 2: Erase After Viewing</h3>
-          </div>
-          <div className="card-description">
-            <p><strong>🔒 Privacy-first approach:</strong></p>
-            <ul>
-              <li>View your results now</li>
-              <li>Download or print for your records</li>
-              <li>All data deleted after this session</li>
-              <li>No ongoing alerts or services available</li>
-            </ul>
-
-            <p className="text-body">
-              Note: Without saved data, we cannot send you alerts about policy changes
-              affecting your specific supply chain or provide professional services.
-            </p>
+        {/* Option 2: Don't Save */}
+        <div
+          className={`consent-option ${selectedOption === 'dont-save' ? 'selected' : ''}`}
+          onClick={(e) => !isClosing && handleOptionClick('dont-save', e)}
+          style={isClosing ? { pointerEvents: 'none' } : {}}
+        >
+          <div className="consent-option-content">
+            <input
+              type="radio"
+              name="consentOption"
+              checked={selectedOption === 'dont-save'}
+              onChange={(e) => handleOptionClick('dont-save', e)}
+              className="consent-option-radio"
+            />
+            <div>
+              <div className="consent-option-title">
+                Don't save - view results only
+              </div>
+              <ul className="consent-option-list">
+                <li>Results shown now but not stored</li>
+                <li>No trade alerts (we won't know your supply chain)</li>
+                <li>No service access (no context available)</li>
+                <li>Download/print results before closing</li>
+              </ul>
+            </div>
           </div>
         </div>
 
+        {/* Actions */}
         <div className="workflow-modal-actions">
           <button
-            onClick={onSave}
-            className="btn-primary btn-large"
+            onClick={handleContinue}
+            className="btn-primary"
+            disabled={isClosing}
+            style={isClosing ? { pointerEvents: 'none', opacity: 0.5 } : {}}
           >
-            ✅ Save My Analysis - Enable Alerts &amp; Services
+            Continue
           </button>
 
-          <button
-            onClick={onErase}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-secondary"
           >
-            🔒 Erase After Viewing - Privacy First
-          </button>
+            Privacy Policy
+          </a>
         </div>
 
-        <p className="text-body consent-footer">
-          You can request deletion of your data anytime from your account settings.
-          We don't sell or share your data with third parties.
+        <p className="modal-footer-text">
+          You can request deletion of your data anytime from account settings
         </p>
       </div>
     </div>

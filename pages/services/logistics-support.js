@@ -347,7 +347,7 @@ export default function ProfessionalServices() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h2>{isSubscriberForm ? 'Describe Your Concerns' : 'Business Information Required (+20% Non-Subscriber Fee)'}</h2>
+              <h2>{isSubscriberForm ? 'Request Professional Service' : 'Business Information Required (+20% Non-Subscriber Fee)'}</h2>
               <button
                 className="modal-close"
                 onClick={() => setShowIntakeForm(null)}
@@ -359,27 +359,19 @@ export default function ProfessionalServices() {
             {isSubscriberForm ? (
               // SIMPLE FORM FOR SUBSCRIBERS
               <>
-                <p className="text-body">
-                  We already have your business context from your workflow analysis.
-                  Just tell us what problem you're facing and we'll match you with the right expert.
-                </p>
-
                 <form onSubmit={handleFormSubmit}>
                   <div className="filter-section">
                     <div className="filter-group" style={{width: '100%'}}>
-                      <label>What challenge are you facing? *</label>
+                      <label>Describe your situation *</label>
                       <textarea
                         name="concerns"
                         value={formData.concerns}
                         onChange={handleFormChange}
                         required
                         className="filter-select"
-                        rows="6"
-                        placeholder="Example: 'Our analysis showed we don't qualify because 60% of components come from China. We need help finding Mexico suppliers to restructure our supply chain and achieve USMCA qualification.'"
+                        rows="4"
+                        placeholder="Briefly describe what you need help with..."
                       />
-                      <small className="text-body" style={{color: '#6b7280', marginTop: '8px'}}>
-                        Be specific about your situation so our expert can prepare properly.
-                      </small>
                     </div>
                   </div>
 

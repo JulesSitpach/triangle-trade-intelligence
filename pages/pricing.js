@@ -20,6 +20,11 @@ export default function Pricing() {
   }
 
   const handleSubscribe = async (tier) => {
+    // TEMPORARY: Stripe disabled for development
+    alert('Stripe subscriptions are currently disabled. Please contact support at dev@triangleintelligence.com to set up your subscription.')
+    return
+
+    /* DISABLED - Uncomment when Stripe is configured properly
     try {
       setLoading(tier)
 
@@ -60,6 +65,7 @@ export default function Pricing() {
     } finally {
       setLoading(null)
     }
+    */
   }
 
   const plans = [

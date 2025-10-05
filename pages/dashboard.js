@@ -5,6 +5,7 @@ import UserDashboard from '../components/UserDashboard';
 export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +29,20 @@ export default function Dashboard() {
       router.push('/login');
     });
   }, []);
+
+  // Force refresh when navigating to dashboard
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (url === '/dashboard') {
+        setRefreshKey(prev => prev + 1);
+      }
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [router]);
 
   // Show loading while checking authentication
   if (loading) {
@@ -56,5 +71,5 @@ export default function Dashboard() {
   }
 
   // Show user dashboard for regular users
-  return <UserDashboard user={user} profile={user} />;
+  return <UserDashboard key={refreshKey} user={user} profile={user} />;
 }

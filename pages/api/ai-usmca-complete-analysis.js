@@ -77,7 +77,17 @@ export default protectedApiHandler({
     try {
       // Extract JSON from markdown code blocks if present
       const jsonMatch = aiText.match(/```json\s*([\s\S]*?)\s*```/) || aiText.match(/```\s*([\s\S]*?)\s*```/);
-      const jsonText = jsonMatch ? jsonMatch[1] : aiText;
+      let jsonText = jsonMatch ? jsonMatch[1] : aiText;
+
+      // If parsing fails, try to extract just the JSON object (between first { and last })
+      if (!jsonMatch) {
+        const firstBrace = jsonText.indexOf('{');
+        const lastBrace = jsonText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          jsonText = jsonText.substring(firstBrace, lastBrace + 1);
+        }
+      }
+
       analysis = JSON.parse(jsonText.trim());
     } catch (parseError) {
       console.error('❌ Failed to parse AI response:', parseError);

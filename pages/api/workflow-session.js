@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
-import { apiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
+import { protectedApiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
 import { ApiError, validateRequiredFields } from '../../lib/api/errorHandler.js';
 
 const supabase = createClient(
@@ -21,10 +21,11 @@ const generateUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/
   return v.toString(16);
 });
 
-export default apiHandler({
+export default protectedApiHandler({
   GET: async (req, res) => {
     const startTime = Date.now();
     const { sessionId } = req.query;
+    const userId = req.user?.id; // Get user ID from authenticated session
 
     // Validate required fields
     validateRequiredFields({ sessionId }, ['sessionId']);
@@ -34,6 +35,7 @@ export default apiHandler({
       .from('workflow_sessions')
       .select('*')
       .eq('session_id', sessionId)
+      .eq('user_id', userId)
       .single();
 
     // If not found in sessions, try workflow_completions for completed workflows
@@ -42,6 +44,7 @@ export default apiHandler({
         .from('workflow_completions')
         .select('*')
         .eq('session_id', sessionId)
+        .eq('user_id', userId)
         .single();
 
       data = completedResult.data;
@@ -67,48 +70,62 @@ export default apiHandler({
 
   POST: async (req, res) => {
     const startTime = Date.now();
-    const { sessionId, workflowData, userId, action } = req.body;
+    const { sessionId, workflowData, action } = req.body;
+    const userId = req.user?.id; // Get user ID from authenticated session (optional for dev testing)
 
     // Validate required fields
     validateRequiredFields({ sessionId, workflowData }, ['sessionId', 'workflowData']);
+
+    // Skip database save if not authenticated (developer testing mode)
+    if (!userId) {
+      logInfo('Workflow not saved - no authentication (dev testing)', { sessionId });
+      return sendSuccess(res, { sessionId, saved: false, reason: 'not_authenticated' }, 'Workflow processed (not saved - no auth)');
+    }
 
     // Determine if this is a complete workflow
     const isCompleteWorkflow = action === 'complete' && workflowData.steps_completed >= 4;
 
     if (isCompleteWorkflow) {
       // Save complete workflow to workflow_completions
+      // Table schema: id, user_id, email, workflow_type, workflow_name, hs_code,
+      // completed_at, certificate_generated, status, total_savings, estimated_duty_savings,
+      // compliance_cost_savings, workflow_data (JSONB), session_id, completion_time_minutes
       const workflowRecord = {
-        id: workflowData.id || `wf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        user_id: userId || 'anonymous',
+        user_id: userId,
+        email: req.user?.email || null,
         workflow_type: workflowData.workflow_type || 'usmca_compliance',
         product_description: workflowData.product?.description || workflowData.product_description || 'USMCA Analysis',
         hs_code: workflowData.product?.hs_code || workflowData.hs_code || '',
-        classification_confidence: parseFloat(workflowData.classification_confidence) || 0.95,
-        qualification_result: {
-          status: workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-          trust_score: parseFloat(workflowData.trust?.score) || 95,
-          regional_content: parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0,
-          savings_calculation: parseFloat(workflowData.savings?.annual_savings) || 0,
-          component_origins: workflowData.components || [],
-          supplier_country: workflowData.company?.supplier_country
-        },
-        savings_amount: parseFloat(workflowData.savings?.annual_savings) || 0,
-        completion_time_seconds: workflowData.completion_time_seconds || 0,
         completed_at: new Date().toISOString(),
-        steps_completed: parseInt(workflowData.steps_completed) || 4,
-        total_steps: parseInt(workflowData.total_steps) || 4,
-        step_timings: workflowData.step_timings || null,
         certificate_generated: !!workflowData.certificate_generated,
-        certificate_id: workflowData.certificate_id || null,
-        session_id: sessionId
+        status: 'completed',
+
+        // Financial data in dedicated columns for easy querying
+        total_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
+        estimated_duty_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
+        compliance_cost_savings: 0,
+
+        // Store ALL workflow data in JSONB column
+        workflow_data: {
+          ...workflowData,
+          qualification_result: {
+            status: workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
+            trust_score: parseFloat(workflowData.trust?.score) || 95,
+            regional_content: parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0,
+            required_threshold: workflowData.usmca?.threshold_applied || 60,
+            component_origins: workflowData.components || workflowData.component_origins || [],
+            supplier_country: workflowData.company?.supplier_country
+          }
+        },
+
+        session_id: sessionId,
+        completion_time_minutes: Math.ceil((workflowData.completion_time_seconds || 180) / 60)
       };
 
       const { data, error } = await supabase
         .from('workflow_completions')
-        .upsert(workflowRecord, {
-          onConflict: 'session_id',
-          returning: 'minimal'
-        });
+        .insert(workflowRecord)
+        .select();
 
       if (error) {
         logError('Failed to save complete workflow', { error: error.message, sessionId });
@@ -117,8 +134,7 @@ export default apiHandler({
     } else {
       // Save in-progress workflow to workflow_sessions
       const sessionRecord = {
-        id: generateUUID(),
-        user_id: userId || 'anonymous',
+        user_id: userId,
         session_id: sessionId,
         state: 'in_progress',
         data: workflowData,

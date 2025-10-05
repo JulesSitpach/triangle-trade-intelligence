@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import TriangleLayout from './TriangleLayout';
 
-export default function UserDashboard({ user, profile }) {
+export default function UserDashboard({ user }) {
+  const router = useRouter();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
@@ -11,6 +13,7 @@ export default function UserDashboard({ user, profile }) {
 
   useEffect(() => {
     fetchUserData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchUserData = async () => {
@@ -49,6 +52,115 @@ export default function UserDashboard({ user, profile }) {
     }
   };
 
+  const handleGenerateCertificate = async (workflow) => {
+    try {
+      console.log('🔄 Auto-generating certificate from workflow data...');
+
+      // Build certificate data from workflow
+      const workflowData = workflow.workflow_data || {};
+      const certificateData = {
+        exporter: {
+          name: workflow.company_name || workflowData.company_name || 'Company',
+          address: workflowData.company_address || '',
+          tax_id: workflowData.tax_id || '',
+          phone: workflowData.contact_phone || '',
+          email: workflowData.contact_email || ''
+        },
+        product: {
+          hs_code: workflow.hs_code || '',
+          description: workflow.product_description || '',
+          preference_criterion: 'B'
+        },
+        usmca_analysis: {
+          qualified: workflow.qualification_status === 'QUALIFIED',
+          regional_content: workflow.regional_content_percentage || 0,
+          rule: 'Regional Value Content',
+          threshold: workflow.required_threshold || 60
+        },
+        authorization: {
+          signatory_name: workflow.company_name || 'Authorized Signatory',
+          signatory_title: 'Exporter',
+          signatory_date: new Date().toISOString()
+        },
+        blanket_period: {
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
+        }
+      };
+
+      // Import PDF generator
+      const { generateUSMCACertificatePDF } = await import('../lib/utils/usmca-certificate-pdf-generator.js');
+
+      // Generate and download PDF
+      await generateUSMCACertificatePDF(certificateData);
+
+      // Save to database
+      try {
+        const saveResponse = await fetch('/api/workflow-session/update-certificate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            product_description: workflow.product_description,
+            hs_code: workflow.hs_code,
+            certificate_data: certificateData,
+            certificate_generated: true
+          })
+        });
+
+        if (saveResponse.ok) {
+          console.log('✅ Certificate saved to database');
+          // Refresh dashboard to show updated certificate status
+          fetchUserData();
+        }
+      } catch (saveError) {
+        console.warn('⚠️ Failed to save certificate:', saveError);
+      }
+
+      console.log('✅ Certificate generated and downloaded');
+    } catch (error) {
+      console.error('❌ Error generating certificate:', error);
+      alert('Failed to generate certificate. Please try again.');
+    }
+  };
+
+  const handleDownloadCertificate = async (workflow) => {
+    try {
+      if (!workflow.certificate_data) {
+        alert('No certificate data available. Please generate a certificate first.');
+        return;
+      }
+
+      console.log('📄 Downloading certificate from database...');
+
+      // Import the PDF generator
+      const { generateUSMCACertificatePDF } = await import('../lib/utils/usmca-certificate-pdf-generator.js');
+
+      // Generate PDF from database certificate data
+      const pdfBlob = await generateUSMCACertificatePDF(workflow.certificate_data);
+
+      // Create download link
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `USMCA_Certificate_${workflow.certificate_data.certificate_number || Date.now()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log('✅ Certificate downloaded successfully');
+    } catch (error) {
+      console.error('❌ Error downloading certificate:', error);
+      alert('Failed to download certificate. Please try again.');
+    }
+  };
+
+  const handleViewAlert = (alertId) => {
+    // Use router.push instead of Link to properly handle navigation to the same route with different query params
+    router.push(`/trade-risk-alternatives?analysis_id=${alertId}`);
+  };
+
   if (loading) {
     return (
       <TriangleLayout user={user}>
@@ -82,18 +194,18 @@ export default function UserDashboard({ user, profile }) {
           {/* MY WORKFLOWS */}
           <div className="content-card">
             <div className="header-actions">
-              <h3 className="content-card-title">My Workflows</h3>
+              <h3 className="content-card-title">My Certificates</h3>
               <Link href="/usmca-workflow" className="btn-primary">
                 + New Analysis
               </Link>
             </div>
 
             {workflows.length === 0 ? (
-              <p className="text-body">No workflows yet. Run your first USMCA analysis to get started.</p>
+              <p className="text-body">No certificates yet. Run your first USMCA analysis to generate a certificate.</p>
             ) : (
               <>
                 <div className="form-group">
-                  <label className="form-label">Select workflow:</label>
+                  <label className="form-label">Select certificate:</label>
                   <select
                     className="form-input"
                     value={selectedWorkflow?.id || ''}
@@ -122,7 +234,7 @@ export default function UserDashboard({ user, profile }) {
                         </strong>
                       </div>
                       <div className="text-body">
-                        USMCA Content: <strong>{selectedWorkflow.regional_content_percentage}%</strong> (Threshold: {selectedWorkflow.required_threshold || 60}%)
+                        USMCA Content: <strong>{selectedWorkflow.regional_content_percentage || 'N/A'}%</strong> (Threshold: {selectedWorkflow.required_threshold || 60}%)
                       </div>
                       {selectedWorkflow.hs_code && (
                         <div className="text-body">HS Code: {selectedWorkflow.hs_code}</div>
@@ -134,7 +246,7 @@ export default function UserDashboard({ user, profile }) {
                       )}
                       {selectedWorkflow.component_origins && selectedWorkflow.component_origins.length > 0 && (
                         <div className="text-body">
-                          Components: {selectedWorkflow.component_origins.map((c, i) =>
+                          Components: {selectedWorkflow.component_origins.map((c) =>
                             `${c.origin_country || c.country}: ${c.value_percentage || c.percentage}%`
                           ).join(' | ')}
                         </div>
@@ -142,29 +254,56 @@ export default function UserDashboard({ user, profile }) {
                     </div>
 
                     <div className="hero-buttons">
+                      {/* QUALIFIED: [Download Certificate] [Request Service] */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <>
-                          <Link href="/usmca-certificate-completion" className="btn-primary">
-                            Generate Certificate
+                          <button
+                            onClick={() => selectedWorkflow.certificate_data
+                              ? handleDownloadCertificate(selectedWorkflow)
+                              : handleGenerateCertificate(selectedWorkflow)
+                            }
+                            className="btn-primary"
+                          >
+                            📥 Download Certificate
+                          </button>
+
+                          <Link
+                            href="/services/logistics-support"
+                            className="btn-secondary"
+                          >
+                            🎯 Request Professional Service
                           </Link>
-                          {selectedWorkflow.certificate_pdf_url && (
-                            <a href={selectedWorkflow.certificate_pdf_url} download className="btn-secondary">
-                              Download
-                            </a>
-                          )}
                         </>
                       )}
-                      <Link href="/trade-risk-alternatives" className="btn-secondary">
-                        View Full Analysis
-                      </Link>
-                      <Link
-                        href={selectedWorkflow.qualification_status === 'QUALIFIED'
-                          ? '/services/logistics-support'
-                          : '/services/request?service=supplier-sourcing'}
-                        className="btn-primary"
-                      >
-                        Request Service
-                      </Link>
+
+                      {/* NOT QUALIFIED: [View Analysis] [Get Help to Qualify] [Request Service] */}
+                      {selectedWorkflow.qualification_status !== 'QUALIFIED' && (
+                        <>
+                          <Link
+                            href={{
+                              pathname: '/trade-risk-alternatives',
+                              query: { analysis_id: selectedWorkflow.id }
+                            }}
+                            className="btn-secondary"
+                          >
+                            📊 View Analysis
+                          </Link>
+
+                          <Link
+                            href="/services/logistics-support"
+                            className="btn-primary"
+                          >
+                            🇲🇽 Get Help to Qualify
+                          </Link>
+
+                          <Link
+                            href="/services/logistics-support"
+                            className="btn-secondary"
+                          >
+                            🎯 Request Professional Service
+                          </Link>
+                        </>
+                      )}
                     </div>
                   </>
                 )}
@@ -241,12 +380,12 @@ export default function UserDashboard({ user, profile }) {
                     </div>
 
                     <div className="hero-buttons">
-                      <Link
-                        href={`/trade-risk-alternatives?analysis_id=${selectedAlert.id}`}
+                      <button
+                        onClick={() => handleViewAlert(selectedAlert.id)}
                         className="btn-secondary"
                       >
                         View Full Alert
-                      </Link>
+                      </button>
                       <Link
                         href="/services/request?service=crisis-response"
                         className="btn-primary"
@@ -264,20 +403,22 @@ export default function UserDashboard({ user, profile }) {
           <div className="content-card">
             <h3 className="content-card-title">Monthly Usage</h3>
             <p className="text-body">
-              <strong>{usageStats.used} of {usageStats.limit === 999 ? 'unlimited' : usageStats.limit}</strong> analyses used this month
+              <strong>{usageStats.used} of {usageStats.is_unlimited ? 'unlimited' : usageStats.limit}</strong> analyses used this month
             </p>
 
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min(usageStats.percentage || 0, 100)}%`,
-                  backgroundColor: usageStats.percentage >= 100 ? '#ef4444' : usageStats.percentage >= 80 ? '#f59e0b' : '#10b981'
-                }}
-              />
-            </div>
+            {!usageStats.is_unlimited && (
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${Math.min(usageStats.percentage || 0, 100)}%`,
+                    backgroundColor: usageStats.percentage >= 100 ? '#ef4444' : usageStats.percentage >= 80 ? '#f59e0b' : '#10b981'
+                  }}
+                />
+              </div>
+            )}
 
-            {usageStats.limit_reached && (
+            {usageStats.limit_reached && !usageStats.is_unlimited && (
               <div className="hero-buttons">
                 <Link href="/pricing" className="btn-primary">
                   Upgrade for More Analyses

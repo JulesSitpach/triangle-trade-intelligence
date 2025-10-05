@@ -4,7 +4,7 @@
  * Integrates all focused components and trust microservices
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useWorkflowState } from '../../hooks/useWorkflowState';
 import { useTrustIndicators } from '../../hooks/useTrustIndicators';
@@ -22,6 +22,8 @@ import AuthorizationStep from './AuthorizationStep';
 
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
+  const hasProcessedResetRef = useRef(false);
+
   const {
     currentStep,
     workflowPath,
@@ -48,15 +50,19 @@ export default function USMCAWorkflowOrchestrator() {
 
   const { trustIndicators } = useTrustIndicators();
 
-  // Handle "New Analysis" reset trigger
+  // Handle "New Analysis" reset trigger (prevent infinite loop with ref)
   useEffect(() => {
-    if (router.query.reset === 'true') {
+    if (router.query.reset === 'true' && !hasProcessedResetRef.current) {
+      hasProcessedResetRef.current = true;
       console.log('🔄 New Analysis triggered - resetting workflow');
       resetWorkflow();
       // Clean up the URL by removing the reset parameter
       router.replace('/usmca-workflow', undefined, { shallow: true });
+    } else if (router.query.reset !== 'true') {
+      // Reset the ref when reset param is removed
+      hasProcessedResetRef.current = false;
     }
-  }, [router.query.reset, resetWorkflow]);
+  }, [router.query.reset, resetWorkflow, router]);
 
   // Enhanced certificate download handler with trust verification
   const handleDownloadCertificate = (formatType = 'official') => {

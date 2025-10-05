@@ -100,9 +100,6 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                       </span>
                     )}
                   </Link>
-                  <Link href="/certificates" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-                    Certificates
-                  </Link>
 
                   {/* User Menu */}
                   <div className="admin-dropdown">

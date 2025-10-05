@@ -1,11 +1,10 @@
 /**
- * Dashboard Data API - Action-Driving Dashboard Data
- * Provides 5 key data sections that drive user actions:
- * 1. Qualification Issues (drives service purchases)
- * 2. Active Services (reduces support tickets)
- * 3. Recent Certificates (utility + social proof)
- * 4. Usage Stats (drives upgrades)
- * 5. Recent Successes (encourages repeat usage)
+ * Dashboard Data API - User Workflow & Alert Data
+ * Provides:
+ * 1. All workflow completions with certificate data
+ * 2. Vulnerability analysis history (alerts)
+ * 3. Monthly usage stats for tier limits
+ * 4. User profile data
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
@@ -16,20 +15,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const SERVICE_NAMES = {
-  'usmca-certificate': 'USMCA Certificate Generation',
-  'hs-classification': 'HS Code Classification',
-  'crisis-response': 'Crisis Response Management',
-  'supplier-sourcing': 'Supplier Sourcing',
-  'manufacturing-feasibility': 'Manufacturing Feasibility',
-  'market-entry': 'Market Entry Strategy'
-};
-
 const SUBSCRIPTION_LIMITS = {
-  'Trial': 5,
-  'Starter': 10,
-  'Professional': 999,
-  'Premium': 999
+  'Starter': 10,        // 10 analyses per month
+  'Professional': null, // Unlimited
+  'Premium': null       // Unlimited
 };
 
 export default protectedApiHandler({
@@ -37,38 +26,7 @@ export default protectedApiHandler({
     const userId = req.user.id;
 
     try {
-      // 1. Qualification Issues (drives service purchases)
-      const { data: qualificationIssues } = await supabase
-        .from('workflow_sessions')
-        .select('id, product_description, qualification_status, qualification_percentage, compliance_gaps, completed_at')
-        .eq('user_id', userId)
-        .eq('qualification_status', 'NOT_QUALIFIED')
-        .order('completed_at', { ascending: false })
-        .limit(1);
-
-      // 2. Active Services (reduces support tickets)
-      const { data: activeServices } = await supabase
-        .from('service_requests')
-        .select('id, service_type, status, assigned_to, created_at, price')
-        .eq('user_id', userId)
-        .in('status', ['pending', 'in_progress', 'needs_info'])
-        .order('created_at', { ascending: false });
-
-      // 3. Recent Certificates (utility + social proof)
-      const { data: recentCertificates } = await supabase
-        .from('usmca_certificate_completions')
-        .select('id, certificate_number, product_description, estimated_annual_savings, created_at, pdf_url')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      // Get total certificates count
-      const { count: totalCertificates } = await supabase
-        .from('usmca_certificate_completions')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId);
-
-      // 4. Monthly Usage (drives upgrades)
+      // Monthly Usage (drives upgrades)
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
       const { count: monthlyUsed } = await supabase
         .from('workflow_sessions')
@@ -78,22 +36,85 @@ export default protectedApiHandler({
 
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('subscription_tier, trial_expires_at, is_trial')
+        .select('subscription_tier, status, email')
         .eq('id', userId)
         .single();
 
-      const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] || 5;
-      const used = monthlyUsed || 0;
-      const percentage = Math.round((used / limit) * 100);
+      const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined
+        ? SUBSCRIPTION_LIMITS[profile?.subscription_tier]
+        : 10; // Default to Starter limit
 
-      // 5. All Workflows (for dropdown selector)
-      const { data: allWorkflows } = await supabase
+      const used = monthlyUsed || 0;
+
+      // Handle unlimited tiers (limit === null)
+      const isUnlimited = limit === null;
+      const percentage = isUnlimited ? 0 : Math.round((used / limit) * 100);
+      const remaining = isUnlimited ? null : Math.max(0, limit - used);
+      const limitReached = isUnlimited ? false : used >= limit;
+
+      // Get workflows from BOTH tables (sessions = in-progress, completions = with certificates)
+      const { data: sessionsRows } = await supabase
         .from('workflow_sessions')
         .select('*')
         .eq('user_id', userId)
         .order('completed_at', { ascending: false });
 
-      // 6. Vulnerability Analysis History (alerts)
+      const { data: completionsRows } = await supabase
+        .from('workflow_completions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('completed_at', { ascending: false });
+
+      // Transform workflow_sessions data
+      const sessionWorkflows = (sessionsRows || []).map(row => ({
+        id: row.id,
+        source: 'session',
+        company_name: row.company_name,
+        business_type: row.business_type,
+        product_description: row.product_description,
+        hs_code: row.hs_code,
+        qualification_status: row.qualification_status,
+        regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
+        required_threshold: parseFloat(row.required_threshold) || 60,
+        trade_volume: parseFloat(row.trade_volume) || 0,
+        estimated_annual_savings: 0,
+        component_origins: row.component_origins || [],
+        completed_at: row.completed_at || row.created_at,
+        manufacturing_location: row.manufacturing_location,
+        certificate_data: null,
+        certificate_generated: false
+      }));
+
+      // Transform workflow_completions data
+      const completionWorkflows = (completionsRows || []).map(row => {
+        const workflowData = row.workflow_data || {};
+        const qualificationResult = workflowData.qualification_result || {};
+
+        return {
+          id: row.id,
+          source: 'completion',
+          company_name: workflowData.company?.name || workflowData.company?.company_name || 'Company',
+          business_type: workflowData.company?.business_type || 'Not specified',
+          product_description: row.product_description || workflowData.product?.description,
+          hs_code: row.hs_code || workflowData.product?.hs_code,
+          qualification_status: qualificationResult.status || 'UNKNOWN',
+          regional_content_percentage: qualificationResult.regional_content || 0,
+          required_threshold: qualificationResult.required_threshold || 60,
+          trade_volume: parseFloat(workflowData.company?.annual_trade_volume || workflowData.company?.trade_volume) || 0,
+          estimated_annual_savings: row.total_savings || qualificationResult.savings_calculation || 0,
+          component_origins: qualificationResult.component_origins || [],
+          completed_at: row.completed_at || row.created_at,
+          manufacturing_location: qualificationResult.manufacturing_location || '',
+          certificate_data: workflowData.certificate || null,
+          certificate_generated: !!row.certificate_generated
+        };
+      });
+
+      // Merge both arrays and sort by completed_at
+      const allWorkflows = [...sessionWorkflows, ...completionWorkflows]
+        .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+
+      // Vulnerability Analysis History (alerts)
       const { data: alertHistory } = await supabase
         .from('vulnerability_analyses')
         .select('*')
@@ -107,8 +128,9 @@ export default protectedApiHandler({
           used: used,
           limit: limit,
           percentage: percentage,
-          remaining: Math.max(0, limit - used),
-          limit_reached: used >= limit
+          remaining: remaining,
+          limit_reached: limitReached,
+          is_unlimited: isUnlimited
         },
         user_profile: profile || {}
       });

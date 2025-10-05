@@ -8,6 +8,11 @@ export default async function handler(req, res) {
   try {
     const { action, fieldName, partialData, userContext } = req.body;
 
+    // Log request for debugging
+    if (!action) {
+      console.warn('[FormAssistant API] No action provided in request:', req.body);
+    }
+
     const agent = new FormAssistantAgent();
 
     switch (action) {

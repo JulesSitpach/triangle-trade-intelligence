@@ -5,8 +5,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF }) {
+  const router = useRouter();
   const [authData, setAuthData] = useState({
     // Authorized Signatory Information (NEW DATA COLLECTION)
     signatory_name: '',
@@ -48,6 +50,64 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleSetUpAlerts = () => {
+    console.log('🚨 ========== SETTING UP TRADE ALERTS FROM CERTIFICATE ==========');
+    console.log('📊 Certificate data structure:', {
+      has_workflow_data: !!workflowData,
+      has_certificate_data: !!certificateData,
+      has_preview_data: !!previewData,
+      component_origins: workflowData?.component_origins || workflowData?.components || certificateData?.analysis_results?.component_breakdown
+    });
+
+    // Prepare complete workflow data for AI vulnerability analysis
+    const alertData = {
+      company: {
+        name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
+        company_name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
+        business_type: workflowData?.company?.business_type,
+        trade_volume: workflowData?.company?.trade_volume,
+        annual_trade_volume: workflowData?.company?.trade_volume
+      },
+      product: {
+        hs_code: workflowData?.product?.hs_code || previewData?.professional_certificate?.hs_classification?.code,
+        description: workflowData?.product?.description || workflowData?.product?.product_description || previewData?.professional_certificate?.product?.description,
+        product_description: workflowData?.product?.description || workflowData?.product?.product_description || previewData?.professional_certificate?.product?.description
+      },
+      usmca: {
+        qualified: workflowData?.usmca?.qualified || certificateData?.analysis_results?.qualification_status === 'QUALIFIED',
+        qualification_status: workflowData?.usmca?.qualified || certificateData?.analysis_results?.qualification_status === 'QUALIFIED' ? 'QUALIFIED' : 'NOT_QUALIFIED',
+        north_american_content: workflowData?.usmca?.north_american_content || workflowData?.usmca?.regional_content || certificateData?.analysis_results?.regional_content,
+        threshold_applied: workflowData?.usmca?.threshold_applied,
+        gap: workflowData?.usmca?.gap || 0
+      },
+      component_origins: workflowData?.component_origins || workflowData?.components || certificateData?.analysis_results?.component_breakdown || [],
+      components: workflowData?.component_origins || workflowData?.components || certificateData?.analysis_results?.component_breakdown || [],
+      savings: {
+        total_savings: workflowData?.savings?.annual_savings || 0,
+        annual_savings: workflowData?.savings?.annual_savings || 0
+      },
+      workflow_path: 'alerts',
+      timestamp: new Date().toISOString()
+    };
+
+    // Save to localStorage for alerts page
+    localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
+    localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
+    localStorage.setItem('usmca_company_data', JSON.stringify(alertData.company));
+
+    console.log('✅ Alert data prepared and saved to localStorage:', {
+      company: alertData.company?.name,
+      component_origins_count: alertData.component_origins?.length,
+      component_origins: alertData.component_origins,
+      qualified: alertData.usmca?.qualified,
+      localStorage_keys: Object.keys(localStorage).filter(k => k.includes('usmca'))
+    });
+
+    // Navigate to alerts page
+    console.log('🔄 Navigating to /trade-risk-alternatives...');
+    router.push('/trade-risk-alternatives');
   };
 
   const titleOptions = [
@@ -265,25 +325,27 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               </div>
 
               {/* Full Certificate Display */}
-              <div style={{border: '2px solid #2563eb', padding: '20px', backgroundColor: '#f8fafc', fontFamily: 'Arial, sans-serif'}}>
-                <div style={{textAlign: 'center', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '20px'}}>
-                  <h3 style={{margin: '0', fontSize: '16px', fontWeight: 'bold'}}>UNITED STATES-MEXICO-CANADA AGREEMENT</h3>
-                  <h4 style={{margin: '5px 0', fontSize: '14px', fontWeight: 'bold'}}>CERTIFICATE OF ORIGIN</h4>
-                  <div style={{fontSize: '12px', marginTop: '10px'}}>
-                    Certificate No: {previewData.professional_certificate.certificate_number} | 
-                    Date: {new Date(previewData.professional_certificate.generation_info?.generated_date).toLocaleDateString()}
+              <div style={{border: '2px solid #2563eb', padding: '30px', backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif', lineHeight: '1.6'}}>
+                <div style={{textAlign: 'center', borderBottom: '3px solid #000', paddingBottom: '15px', marginBottom: '25px'}}>
+                  <h3 style={{margin: '0', fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.5px'}}>UNITED STATES-MEXICO-CANADA AGREEMENT</h3>
+                  <h4 style={{margin: '8px 0 0 0', fontSize: '16px', fontWeight: 'bold'}}>CERTIFICATE OF ORIGIN</h4>
+                  <div style={{fontSize: '13px', marginTop: '15px', color: '#334155'}}>
+                    <span style={{marginRight: '20px'}}><strong>Certificate No:</strong> {previewData.professional_certificate.certificate_number}</span>
+                    <span><strong>Date:</strong> {previewData.professional_certificate.generation_info?.generated_date
+                      ? new Date(previewData.professional_certificate.generation_info.generated_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                      : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
                   </div>
                 </div>
 
                 {/* FIELD 1 - EXPORTER */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
+                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
+                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
                     FIELD 1 - EXPORTER INFORMATION
                   </div>
-                  <div><strong>Company:</strong> {previewData.professional_certificate.exporter?.name}</div>
-                  <div><strong>Address:</strong> {previewData.professional_certificate.exporter?.address}</div>
-                  <div><strong>Country:</strong> {previewData.professional_certificate.exporter?.country}</div>
-                  <div><strong>Tax ID:</strong> {previewData.professional_certificate.exporter?.tax_id}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Company:</strong> {previewData.professional_certificate.exporter?.name || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Address:</strong> {previewData.professional_certificate.exporter?.address || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Country:</strong> {previewData.professional_certificate.exporter?.country || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Tax ID:</strong> {previewData.professional_certificate.exporter?.tax_id || 'Not specified'}</div>
                 </div>
 
                 {/* FIELD 2 - CERTIFIER */}
@@ -309,14 +371,14 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 </div>
 
                 {/* FIELD 4 - IMPORTER */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
+                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
+                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
                     FIELD 4 - IMPORTER INFORMATION
                   </div>
-                  <div><strong>Company:</strong> {previewData.professional_certificate.importer?.name}</div>
-                  <div><strong>Address:</strong> {previewData.professional_certificate.importer?.address}</div>
-                  <div><strong>Country:</strong> {previewData.professional_certificate.importer?.country}</div>
-                  <div><strong>Tax ID:</strong> {previewData.professional_certificate.importer?.tax_id}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Company:</strong> {previewData.professional_certificate.importer?.name || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Address:</strong> {previewData.professional_certificate.importer?.address || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Country:</strong> {previewData.professional_certificate.importer?.country || 'Not specified'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Tax ID:</strong> {previewData.professional_certificate.importer?.tax_id || 'Not specified'}</div>
                 </div>
 
                 {/* FIELD 5 - DESCRIPTION OF GOOD(S) */}
@@ -330,13 +392,26 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 </div>
 
                 {/* FIELD 6 - PREFERENCE CRITERION */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
+                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
+                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
                     FIELD 6 - PREFERENCE CRITERION
                   </div>
-                  <div><strong>Criterion:</strong> {previewData.professional_certificate.preference_criterion}</div>
-                  <div><strong>Explanation:</strong> {previewData.professional_certificate.criterion_explanation}</div>
-                  <div><strong>Regional Value Content:</strong> {previewData.professional_certificate.regional_value_content}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Criterion:</strong> {previewData.professional_certificate.preference_criterion || 'B'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Explanation:</strong> {previewData.professional_certificate.criterion_explanation || 'Qualifies under Regional Value Content calculation'}</div>
+                  <div style={{marginBottom: '6px'}}><strong>Regional Value Content:</strong> {previewData.professional_certificate.regional_value_content || 'Not calculated'}</div>
+
+                  {/* Component Breakdown */}
+                  {previewData.professional_certificate.component_origins && previewData.professional_certificate.component_origins.length > 0 && (
+                    <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #cbd5e1'}}>
+                      <div style={{fontWeight: 'bold', marginBottom: '8px', fontSize: '13px'}}>Component Breakdown:</div>
+                      {previewData.professional_certificate.component_origins.map((component, index) => (
+                        <div key={index} style={{marginLeft: '15px', fontSize: '13px', marginBottom: '4px', lineHeight: '1.5'}}>
+                          • <strong>{component.origin_country || component.country}:</strong> {component.value_percentage || component.percentage}%
+                          {component.description && ` - ${component.description}`}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* FIELD 7 - PRODUCER DECLARATION */}
@@ -392,7 +467,9 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   </div>
                   <div><strong>Signatory Name:</strong> {previewData.professional_certificate.authorization?.signatory_name}</div>
                   <div><strong>Title:</strong> {previewData.professional_certificate.authorization?.signatory_title}</div>
-                  <div><strong>Date:</strong> {new Date(previewData.professional_certificate.authorization?.signature_date).toLocaleDateString()}</div>
+                  <div><strong>Date:</strong> {previewData.professional_certificate.authorization?.signature_date
+                    ? new Date(previewData.professional_certificate.authorization.signature_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
                   <div><strong>Declaration Accepted:</strong> {previewData.professional_certificate.authorization?.declaration_accepted ? 'Yes' : 'No'}</div>
                 </div>
 
@@ -530,9 +607,9 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
                 <button
                   className="btn-primary"
-                  onClick={() => window.location.href = '/pricing'}
+                  onClick={handleSetUpAlerts}
                 >
-                  🚨 Subscribe for Crisis Alerts
+                  🚨 Set Up Trade Alerts
                 </button>
 
                 <button

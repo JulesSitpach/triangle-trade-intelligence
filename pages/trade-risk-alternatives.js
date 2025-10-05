@@ -26,10 +26,11 @@ export default function TradeRiskAlternatives() {
   const [expandedDetails, setExpandedDetails] = useState({});
   const [aiVulnerabilityAnalysis, setAiVulnerabilityAnalysis] = useState(null);
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState(null);
 
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
-  const [hasSaveDataConsent, setHasSaveDataConsent] = useState(false);
+  const [, setHasSaveDataConsent] = useState(false); // hasSaveDataConsent not used, only setter
   const [pendingProfile, setPendingProfile] = useState(null);
 
   const { user } = useSimpleAuth();
@@ -76,31 +77,89 @@ export default function TradeRiskAlternatives() {
       return;
     }
 
+    // Load user's subscription tier
     try {
-      // Try to load from database first (persistent trade profile)
-      const { data: tradeProfile } = await fetch('/api/trade-profile', {
-        headers: {
-          'Authorization': `Bearer ${user.session?.access_token}`
+      const response = await fetch('/api/dashboard-data', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const dashboardData = await response.json();
+        const tier = dashboardData.user_profile?.subscription_tier;
+        setSubscriptionTier(tier);
+        console.log('✅ Subscription tier loaded:', tier);
+      }
+    } catch (error) {
+      console.error('Failed to load subscription tier:', error);
+    }
+
+    try {
+      // Check if loading specific alert from dashboard
+      const urlParams = new URLSearchParams(window.location.search);
+      const analysisId = urlParams.get('analysis_id');
+
+      if (analysisId) {
+        console.log('📊 Loading specific alert:', analysisId);
+        // Load alert from database
+        const response = await fetch('/api/dashboard-data', {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const dashboardData = await response.json();
+          const alert = dashboardData.alerts?.find(a => a.id === analysisId);
+
+          if (alert) {
+            console.log('✅ Found alert data:', alert);
+
+            // Get supplier country from component origins
+            const components = alert.component_origins || [];
+            const primarySupplier = components.length > 0
+              ? (components[0].origin_country || components[0].country)
+              : 'Not specified';
+
+            const profile = {
+              companyName: alert.company_name || 'Your Company',
+              businessType: alert.business_type || 'Not specified',
+              hsCode: alert.hs_code || 'Not classified',
+              productDescription: alert.product_description || 'Product',
+              tradeVolume: alert.annual_trade_volume || 0,
+              supplierCountry: primarySupplier,
+              qualificationStatus: alert.qualification_status || 'NEEDS_REVIEW',
+              savings: 0, // Not stored in vulnerability_analyses table
+              componentOrigins: components,
+              recommendedAlternatives: alert.recommendations?.diversification_strategies || [],
+              vulnerabilities: alert.primary_vulnerabilities || []
+            };
+
+            setUserProfile(profile);
+
+            // Set alternatives from database if available
+            if (alert.recommendations?.diversification_strategies && alert.recommendations.diversification_strategies.length > 0) {
+              setDynamicAlternatives(alert.recommendations.diversification_strategies);
+            }
+
+            // Set risks from database if available
+            if (alert.alerts && alert.alerts.length > 0) {
+              const aiRisks = alert.alerts.map(a => ({
+                title: a.title,
+                severity: a.severity,
+                generalImpact: a.description,
+                detailedImpact: a.potential_impact,
+                probability: 'AI-Analyzed',
+                timeframe: 'Real-time monitoring',
+                description: a.description,
+                detailedInfo: a.monitoring_guidance,
+                aiGenerated: true
+              }));
+              setDynamicRisks(aiRisks);
+            }
+
+            generateDynamicContent(profile);
+            setIsLoading(false);
+            return;
+          }
         }
-      }).then(res => res.json()).catch(() => ({ data: null }));
-
-      if (tradeProfile) {
-        // User has a persistent trade profile
-        const profile = {
-          companyName: 'Your Company', // Never show company names from database
-          businessType: tradeProfile.business_types?.[0] || 'Not specified',
-          hsCode: tradeProfile.hs_codes?.[0] || 'Not classified',
-          productDescription: `${tradeProfile.business_types?.[0] || 'Products'}`,
-          tradeVolume: 'Not specified', // Never show trade volumes
-          supplierCountry: tradeProfile.origin_countries?.[0] || 'Not specified',
-          qualificationStatus: tradeProfile.usmca_qualification_status || 'NEEDS_REVIEW',
-          savings: 0 // Never show actual savings amounts
-        };
-
-        setUserProfile(profile);
-        generateDynamicContent(profile);
-        setIsLoading(false);
-        return;
       }
 
       // Fallback to localStorage (current session)
@@ -144,14 +203,14 @@ export default function TradeRiskAlternatives() {
 
     if (userData) {
       const profile = {
-        companyName: userData.company?.name || 'Your Company',
+        companyName: userData.company?.name || userData.company?.company_name || 'Your Company',
         businessType: userData.company?.business_type || userData.company?.businessType,
         hsCode: userData.product?.hs_code || userData.classification?.hs_code,
-        productDescription: userData.product?.description || userData.classification?.description,
+        productDescription: userData.product?.description || userData.product?.product_description || userData.classification?.description,
         tradeVolume: userData.company?.annual_trade_volume || userData.company?.trade_volume || 0,
-        supplierCountry: userData.company?.supplier_country,
-        qualificationStatus: userData.certificate?.qualification_result || userData.usmca?.qualification_status,
-        savings: userData.certificate?.savings || userData.savings?.total_savings || 0,
+        supplierCountry: userData.component_origins?.[0]?.origin_country || userData.components?.[0]?.country || userData.company?.supplier_country,
+        qualificationStatus: userData.certificate?.qualification_result || userData.usmca?.qualification_status || userData.usmca?.qualified === true ? 'QUALIFIED' : 'NOT_QUALIFIED',
+        savings: userData.certificate?.savings || userData.savings?.total_savings || userData.savings?.annual_savings || 0,
         componentOrigins: userData.component_origins || userData.components || []
       };
 
@@ -572,29 +631,48 @@ export default function TradeRiskAlternatives() {
     );
   }
 
+  // Check if user needs to upgrade (Trial or Starter tier)
+  // Don't show upgrade message while subscription tier is still loading
+  const needsUpgrade = !user ? false : (subscriptionTier === 'Trial' || subscriptionTier === 'Starter');
+  const hasPremiumAccess = subscriptionTier === 'Professional' || subscriptionTier === 'Premium' || subscriptionTier === 'Enterprise';
+
   return (
     <TriangleLayout>
       <div className="dashboard-container">
-        {/* Alert Access Gate */}
-        <div className="alert alert-info">
-          <div className="alert-content">
-            <div className="alert-title">📊 Trade Risk Alert Dashboard</div>
-            <div className="text-body">
-              Monitor your personalized trade risk alerts and crisis notifications.
-              <br />• Real-time tariff change alerts based on your trade profile
-              <br />• Supply chain disruption notifications
-              <br />• Alternative routing recommendations
-            </div>
-            <div className="hero-buttons">
-              <button
-                onClick={() => window.location.href = '/pricing'}
-                className="btn-primary"
-              >
-                Upgrade for Full Alert Access
-              </button>
+        {/* Alert Access Gate - Only show for Trial/Starter users */}
+        {needsUpgrade && (
+          <div className="alert alert-info">
+            <div className="alert-content">
+              <div className="alert-title">📊 Trade Risk Alert Dashboard</div>
+              <div className="text-body">
+                Monitor your personalized trade risk alerts and crisis notifications.
+                <br />• Real-time tariff change alerts based on your trade profile
+                <br />• Supply chain disruption notifications
+                <br />• Alternative routing recommendations
+              </div>
+              <div className="hero-buttons">
+                <button
+                  onClick={() => window.location.href = '/pricing'}
+                  className="btn-primary"
+                >
+                  Upgrade for Full Alert Access
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Premium Access Badge - Show for Premium/Professional/Enterprise users */}
+        {hasPremiumAccess && (
+          <div className="alert alert-success">
+            <div className="alert-content">
+              <div className="alert-title">✅ Premium Alert Access Active</div>
+              <div className="text-body">
+                You have full access to real-time trade alerts and crisis monitoring. Your {subscriptionTier} subscription includes unlimited alerts and professional support.
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="dashboard-header">
           <h1 className="dashboard-title">Trade Risk & Alternatives Dashboard</h1>
@@ -620,10 +698,8 @@ export default function TradeRiskAlternatives() {
             <div className="status-card">
               <div className="status-label">Annual Volume</div>
               <div className="status-value">
-                {hasDetailedConsent
-                  ? (userProfile.tradeVolume && !isNaN(userProfile.tradeVolume)
-                      ? formatCurrency(userProfile.tradeVolume)
-                      : 'Not specified')
+                {userProfile.tradeVolume && !isNaN(userProfile.tradeVolume) && userProfile.tradeVolume > 0
+                  ? formatCurrency(userProfile.tradeVolume)
                   : 'Not specified'}
               </div>
             </div>
@@ -669,7 +745,7 @@ export default function TradeRiskAlternatives() {
               </div>
               <div className="status-card">
                 <div className="status-label">AI Confidence</div>
-                <div className="status-value">{aiVulnerabilityAnalysis.trust?.confidence_score || 85}%</div>
+                <div className="status-value">{aiVulnerabilityAnalysis.trust?.confidence_score || 85}% confidence in risk assessment</div>
               </div>
             </div>
             {aiVulnerabilityAnalysis.vulnerability_analysis?.primary_vulnerabilities && (
@@ -712,16 +788,18 @@ export default function TradeRiskAlternatives() {
                     <div className="status-card">
                       <div className="status-label">Financial Impact</div>
                       <div className="status-value">
-                        {hasDetailedConsent && expandedDetails[index] ? risk.detailedImpact : risk.generalImpact}
+                        {hasDetailedConsent && expandedDetails[index]
+                          ? (risk.detailedImpact || risk.generalImpact)
+                          : (risk.generalImpact || 'Not specified')}
                       </div>
                     </div>
                     <div className="status-card">
                       <div className="status-label">Probability</div>
-                      <div className="status-value">{risk.probability}</div>
+                      <div className="status-value">{risk.probability || 'Unknown'}</div>
                     </div>
                     <div className="status-card">
                       <div className="status-label">Timeline</div>
-                      <div className="status-value">{risk.timeframe}</div>
+                      <div className="status-value">{risk.timeframe || 'Unknown'}</div>
                     </div>
                   </div>
 
@@ -729,11 +807,12 @@ export default function TradeRiskAlternatives() {
                   <div className="element-spacing">
                     <button
                       onClick={() => handleSeeMoreDetails(index)}
-                      className="text-body"
+                      className="btn-secondary"
+                      style={{padding: '8px 16px', fontSize: '14px'}}
                     >
                       {hasDetailedConsent && expandedDetails[index] ?
-                        'Show Less Details' :
-                        'See More Details 💰'
+                        '▲ Show Less Details' :
+                        '▼ See More Details'
                       }
                     </button>
                   </div>

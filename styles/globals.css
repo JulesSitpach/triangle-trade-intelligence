@@ -1091,7 +1091,96 @@ a:hover {
   }
 }
 
-/* ================== 16. PAGINATION CONTROLS ================== */
+/* ================== 16. WORKFLOW MODALS ================== */
+
+.workflow-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.workflow-modal-content {
+  background: white;
+  border-radius: var(--radius-base);
+  padding: var(--space-6);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.workflow-modal-header {
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: var(--space-3);
+}
+
+.workflow-modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* Consent options for save data modal */
+.consent-option {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+.consent-option:hover {
+  border-color: var(--blue-300);
+}
+
+.consent-option.selected {
+  border-color: var(--blue-600);
+  background-color: var(--blue-50);
+}
+
+.consent-option-content {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.consent-option-radio {
+  margin-right: var(--space-3);
+  margin-top: 4px;
+}
+
+.consent-option-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: var(--space-2);
+}
+
+.consent-option-list {
+  margin-left: var(--space-5);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.modal-footer-text {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+/* ================== 17. PAGINATION CONTROLS ================== */
 
 .pagination-controls {
   display: flex;
