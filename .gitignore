@@ -151,3 +151,6 @@ google-service-account.json
 # Build artifacts
 .next/
 *.log
+
+# Playwright MCP test artifacts
+.playwright-mcp/
