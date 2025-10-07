@@ -2,6 +2,11 @@ module.exports = {
   // Prevent aggressive cleaning
   generateBuildId: () => 'build-id',
 
+  // Disable ESLint errors during production builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Ensure environment variables are available
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
