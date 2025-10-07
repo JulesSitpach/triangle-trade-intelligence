@@ -180,3 +180,41 @@ _archive/
 cleanup-production.sh
 PRODUCTION_CLEANUP_PLAN.md
 CLEAN_PRODUCTION_REPO_GUIDE.md
+Create Clean Production Repo.md
+PRODUCTION_LAUNCH_COMPLETE.md
+FINAL_LAUNCH_TEST_CHECKLIST.md
+PRE_LAUNCH_VERIFICATION_REPORT.md
+
+# Test scripts in root
+TEST_*.js
+test-*.js
+test-*.html
+test-*.sh
+quick-test.js
+*.bat
+
+# Dev config files
+.claudemcp.json
+.mcp.json
+mcp-*.json
+.css-hashes.json
+.css-protection.js
+jest.config.js
+jest.setup.js
+playwright.config.js
+.semgrep-rules.yml
+
+# SQL test files
+check-tables.sql
+create_premium_user.sql
+
+# Misplaced components
+ServiceWorkflowModal.js
+
+# Security - never commit
+google-service-account.json
+*service-account*.json
+
+# Build artifacts
+*.tsbuildinfo
+dev-server.log
