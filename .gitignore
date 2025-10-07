@@ -154,3 +154,29 @@ google-service-account.json
 
 # Playwright MCP test artifacts
 .playwright-mcp/
+
+# Development infrastructure (not for production)
+.claude/
+.claude-flow/
+.githooks/
+.github/
+.superdesign/
+.swarm/
+.swc/
+__tests__/
+test/
+test-results/
+tests/
+docs/
+supabase/
+
+# Backup folders
+components-backup-*/
+*-backup-*/
+archive-unused-*/
+_archive/
+
+# Cleanup scripts
+cleanup-production.sh
+PRODUCTION_CLEANUP_PLAN.md
+CLEAN_PRODUCTION_REPO_GUIDE.md
