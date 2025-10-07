@@ -1,6 +1,1 @@
-# Ignore files with unused variable errors during build
-lib/triangle-trade-framework.js
-lib/utils/trust-verified-certificate-formatter.js
-lib/utils/validation.js
-lib/utils/web-search.js
-lib/websearch-tool-wrapper.js
+# ESLint ignore file - all errors have been fixed
