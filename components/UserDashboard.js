@@ -156,7 +156,7 @@ export default function UserDashboard({ user }) {
             <div className="dashboard-actions-left">
               <h2 className="form-section-title">My Certificates</h2>
             </div>
-            <div className="dashboard-actions-right" style={{ display: 'flex', gap: '0.75rem' }}>
+            <div className="dashboard-actions-right">
               {workflows.length > 0 && (
                 <button
                   onClick={async () => {
@@ -191,13 +191,12 @@ export default function UserDashboard({ user }) {
                       }
                     }
                   }}
-                  className="btn-secondary"
-                  style={{ color: '#dc2626' }}
+                  className="btn-secondary text-danger"
                 >
                   🗑️ Clear All
                 </button>
               )}
-              <Link href="/usmca-workflow" className="btn-primary">
+              <Link href="/usmca-workflow?reset=true" className="btn-primary">
                 + New Analysis
               </Link>
             </div>
@@ -227,12 +226,10 @@ export default function UserDashboard({ user }) {
 
                 {selectedWorkflow && (
                   <>
-                    <div className="service-request-card" style={{
-                      borderLeft: `4px solid ${selectedWorkflow.qualification_status === 'QUALIFIED' ? '#10b981' : '#ef4444'}`
-                    }}>
+                    <div className={`service-request-card ${selectedWorkflow.qualification_status === 'QUALIFIED' ? 'border-left-green' : 'border-left-red'}`}>
                       <div className="text-bold">{selectedWorkflow.product_description}</div>
                       <div className="text-body">
-                        Status: <strong style={{color: selectedWorkflow.qualification_status === 'QUALIFIED' ? '#10b981' : '#ef4444'}}>
+                        Status: <strong className={selectedWorkflow.qualification_status === 'QUALIFIED' ? 'text-green' : 'text-red'}>
                           {selectedWorkflow.qualification_status === 'QUALIFIED' ? '✓ QUALIFIED' : '✗ NOT QUALIFIED'}
                         </strong>
                       </div>
@@ -328,8 +325,7 @@ export default function UserDashboard({ user }) {
                             }
                           }
                         }}
-                        className="btn-secondary"
-                        style={{ color: '#dc2626' }}
+                        className="btn-secondary text-danger"
                       >
                         🗑️ Delete
                       </button>
@@ -381,8 +377,7 @@ export default function UserDashboard({ user }) {
                       }
                     }
                   }}
-                  className="btn-secondary"
-                  style={{ color: '#dc2626' }}
+                  className="btn-secondary text-danger"
                 >
                   🗑️ Clear All Alerts
                 </button>
@@ -414,18 +409,16 @@ export default function UserDashboard({ user }) {
 
                 {selectedAlert && (
                   <>
-                    <div className="service-request-card" style={{
-                      borderLeft: `4px solid ${
-                        selectedAlert.overall_risk_level === 'HIGH' ? '#ef4444' :
-                        selectedAlert.overall_risk_level === 'MODERATE' ? '#f59e0b' : '#10b981'
-                      }`
-                    }}>
+                    <div className={`service-request-card ${
+                      selectedAlert.overall_risk_level === 'HIGH' ? 'border-left-red' :
+                      selectedAlert.overall_risk_level === 'MODERATE' ? 'border-left-amber' : 'border-left-green'
+                    }`}>
                       <div className="text-bold">{selectedAlert.product_description || selectedAlert.company_name}</div>
                       <div className="text-body">
-                        Risk Level: <strong style={{
-                          color: selectedAlert.overall_risk_level === 'HIGH' ? '#ef4444' :
-                                 selectedAlert.overall_risk_level === 'MODERATE' ? '#f59e0b' : '#10b981'
-                        }}>
+                        Risk Level: <strong className={
+                          selectedAlert.overall_risk_level === 'HIGH' ? 'text-red' :
+                          selectedAlert.overall_risk_level === 'MODERATE' ? 'text-amber' : 'text-green'
+                        }>
                           {selectedAlert.overall_risk_level}
                         </strong>
                       </div>
@@ -435,7 +428,7 @@ export default function UserDashboard({ user }) {
                       {selectedAlert.primary_vulnerabilities && selectedAlert.primary_vulnerabilities.length > 0 && (
                         <div className="text-body">
                           <strong>Key Risks:</strong>
-                          <ul style={{marginTop: '0.5rem', paddingLeft: '1.5rem'}}>
+                          <ul className="list-simple">
                             {selectedAlert.primary_vulnerabilities.slice(0, 3).map((v, i) => (
                               <li key={i}>{v.description}</li>
                             ))}
@@ -445,7 +438,7 @@ export default function UserDashboard({ user }) {
                       {selectedAlert.recommendations?.immediate_actions && selectedAlert.recommendations.immediate_actions.length > 0 && (
                         <div className="text-body">
                           <strong>Recommended Actions:</strong>
-                          <ul style={{marginTop: '0.5rem', paddingLeft: '1.5rem'}}>
+                          <ul className="list-simple">
                             {selectedAlert.recommendations.immediate_actions.slice(0, 3).map((action, i) => (
                               <li key={i}>{action}</li>
                             ))}
@@ -490,8 +483,7 @@ export default function UserDashboard({ user }) {
                             }
                           }
                         }}
-                        className="btn-secondary"
-                        style={{ color: '#dc2626' }}
+                        className="btn-secondary text-danger"
                       >
                         🗑️ Delete
                       </button>
@@ -512,11 +504,11 @@ export default function UserDashboard({ user }) {
             {!usageStats.is_unlimited && (
               <div className="progress-bar">
                 <div
-                  className="progress-fill"
-                  style={{
-                    width: `${Math.min(usageStats.percentage || 0, 100)}%`,
-                    backgroundColor: usageStats.percentage >= 100 ? '#ef4444' : usageStats.percentage >= 80 ? '#f59e0b' : '#10b981'
-                  }}
+                  className={`progress-fill ${
+                    usageStats.percentage >= 100 ? 'progress-danger' :
+                    usageStats.percentage >= 80 ? 'progress-warning' : 'progress-success'
+                  }`}
+                  style={{ width: `${Math.min(usageStats.percentage || 0, 100)}%` }}
                 />
               </div>
             )}

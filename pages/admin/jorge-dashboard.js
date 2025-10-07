@@ -9,7 +9,6 @@ import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
-import '../../styles/admin-workflows.css';
 
 // Import Jorge's specialized tab components
 import ServiceQueueTab from '../../components/jorge/ServiceQueueTab';

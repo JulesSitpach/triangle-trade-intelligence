@@ -21,11 +21,6 @@ export default function Pricing() {
   }
 
   const handleSubscribe = async (tier) => {
-    // TEMPORARY: Stripe disabled for development
-    alert('Stripe subscriptions are currently disabled. Please contact support at dev@triangleintelligence.com to set up your subscription.')
-    return
-
-    /* DISABLED - Uncomment when Stripe is configured properly
     try {
       setLoading(tier)
 
@@ -35,6 +30,7 @@ export default function Pricing() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include', // Important: include auth cookie
         body: JSON.stringify({
           tier: tier.toLowerCase(),
           billing_period: billingPeriod
@@ -44,13 +40,19 @@ export default function Pricing() {
       const data = await response.json()
 
       if (!response.ok) {
+        // User-friendly error messages
+        if (response.status === 401) {
+          alert('Please log in to subscribe. Redirecting to login...')
+          router.push('/login?redirect=/pricing')
+          return
+        }
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
       // Redirect to Stripe Checkout
       const stripe = await getStripe()
       if (!stripe) {
-        throw new Error('Stripe failed to load')
+        throw new Error('Stripe failed to load. Please refresh and try again.')
       }
 
       const { error } = await stripe.redirectToCheckout({
@@ -62,11 +64,10 @@ export default function Pricing() {
       }
     } catch (error) {
       console.error('Subscription error:', error)
-      alert(`Subscription error: ${error.message}`)
+      alert(`Subscription error: ${error.message}\n\nIf this persists, please contact support@triangleintelligence.com`)
     } finally {
       setLoading(null)
     }
-    */
   }
 
   const plans = [
@@ -205,7 +206,7 @@ export default function Pricing() {
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
-            <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+            <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Start Analysis</Link>
           </div>
         </div>
@@ -284,13 +285,13 @@ export default function Pricing() {
             <div className="hero-button-group">
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={billingPeriod === 'monthly' ? 'hero-primary-button' : 'hero-secondary-button'}
+                className={billingPeriod === 'monthly' ? 'btn-primary' : 'btn-secondary'}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setBillingPeriod('annual')}
-                className={billingPeriod === 'annual' ? 'hero-primary-button' : 'hero-secondary-button'}
+                className={billingPeriod === 'annual' ? 'btn-primary' : 'btn-secondary'}
               >
                 Annual (Save up to 20%)
               </button>

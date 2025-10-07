@@ -1,7 +1,6 @@
 /**
- * Simple Login with httpOnly Cookies
- * Works with existing user_profiles table
- * No Supabase Auth - just secure cookies
+ * Secure Login with httpOnly Cookies + Supabase Auth
+ * Properly validates passwords using Supabase Auth
  *
  * Security: Rate limited to 5 attempts per 15 minutes
  */
@@ -11,14 +10,26 @@ import { serialize } from 'cookie';
 import crypto from 'crypto';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
 
-const supabase = createClient(
+// Admin client for user profile lookup
+const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Simple session signing (better than plain base64)
+// Auth client for password verification
+const supabaseAuth = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+// Secure session signing - NO FALLBACK
 function signSession(sessionData) {
-  const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable must be configured');
+  }
+
   const data = JSON.stringify(sessionData);
   const signature = crypto.createHmac('sha256', secret).update(data).digest('hex');
   return Buffer.from(JSON.stringify({ data: sessionData, sig: signature })).toString('base64');
@@ -49,24 +60,33 @@ export default async function handler(req, res) {
   try {
     console.log('🔐 Login attempt:', email);
 
-    // Get user from YOUR EXISTING user_profiles table
-    const { data: user, error } = await supabase
+    // Step 1: Verify password using Supabase Auth
+    const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
+      email: email.toLowerCase(),
+      password: password
+    });
+
+    if (authError || !authData.user) {
+      console.log('❌ Authentication failed:', email, authError?.message);
+      return res.status(401).json({ success: false, error: 'Invalid credentials' });
+    }
+
+    console.log('✅ Password verified for:', email);
+
+    // Step 2: Get user profile data
+    const { data: user, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .select('*')
       .eq('email', email.toLowerCase())
       .single();
 
-    if (error || !user) {
-      console.log('❌ User not found:', email);
+    if (profileError || !user) {
+      console.log('❌ User profile not found:', email);
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    // For NOW - accept any password (like your old system did)
-    // TODO: Add password_hash column and bcrypt validation later
-    console.log('⚠️ Password validation temporarily disabled for compatibility');
-
     // Update last login
-    await supabase
+    await supabaseAdmin
       .from('user_profiles')
       .update({ last_login: new Date().toISOString() })
       .eq('id', user.id);

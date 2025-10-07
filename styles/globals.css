@@ -245,6 +245,12 @@ a:hover {
   color: white;
 }
 
+.nav-menu-link.active {
+  color: white;
+  border-bottom: 2px solid #2563eb;
+  padding-bottom: 2px;
+}
+
 .nav-cta-button {
   background: #2563eb;
   color: white;

@@ -173,7 +173,7 @@ export default function ProfessionalServices() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
+            <Link href="/services" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Start Analysis</Link>
           </div>

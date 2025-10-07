@@ -86,13 +86,25 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
               {user ? (
                 // Signed in navigation
                 <>
-                  <Link href="/dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/dashboard"
+                    className={`nav-menu-link ${router.pathname === '/dashboard' ? 'active' : ''}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Dashboard
                   </Link>
-                  <Link href="/usmca-workflow" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/usmca-workflow"
+                    className={`nav-menu-link ${router.pathname === '/usmca-workflow' || router.pathname === '/usmca-certificate-completion' ? 'active' : ''}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Workflows
                   </Link>
-                  <Link href="/trade-risk-alternatives" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/trade-risk-alternatives"
+                    className={`nav-menu-link ${router.pathname === '/trade-risk-alternatives' ? 'active' : ''}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Alerts
                     {!loading && alertCount > 0 && (
                       <span className="badge badge-warning">

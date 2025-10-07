@@ -6,13 +6,10 @@ import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
 import Footer from '../components/Footer'
 
 export default function HomePage() {
-  const [isClient, setIsClient] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    setIsClient(true)
-
     // Check if user is logged in
     const checkAuth = () => {
       const currentUser = localStorage.getItem('current_user')
@@ -172,7 +169,7 @@ export default function HomePage() {
           <div className="hero-button-group">
             {isLoggedIn ? (
               <Link
-                href="/usmca-workflow"
+                href="/usmca-workflow?reset=true"
                 className="hero-primary-button"
                 aria-label="Start comprehensive USMCA compliance analysis workflow"
               >
@@ -198,129 +195,125 @@ export default function HomePage() {
         </div>
       </section>
 
-      {isClient && (
-        <>
-          <section id="calculator" className="main-content gradient-subtle">
-            <div className="container-app">
-              <SimpleSavingsCalculator />
+      <section id="calculator" className="main-content gradient-subtle">
+        <div className="container-app">
+          <SimpleSavingsCalculator />
+        </div>
+      </section>
+
+      {/* USMCA Compliance Solutions Section */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">USMCA Compliance Solutions</h2>
+            <p className="section-header-subtitle">
+              Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for small manufacturers and importers.
+            </p>
+          </div>
+
+          <div className="grid-2-cols">
+            <div className="content-card classification">
+              <div className="content-card-icon" aria-hidden="true">HC</div>
+              <h3 className="content-card-title">Trade Classification & Analysis</h3>
+              <p className="content-card-description">
+                Professional harmonized system classification with CBP-verified accuracy for streamlined customs processing and duty optimization.
+              </p>
+              <Link
+                href="/usmca-workflow?reset=true"
+                className="content-card-link"
+                aria-label="Start trade classification and analysis workflow"
+              >
+                Start Classification Analysis
+              </Link>
             </div>
-          </section>
 
-          {/* USMCA Compliance Solutions Section */}
-          <section className="main-content">
-            <div className="container-app">
-              <div className="section-header">
-                <h2 className="section-header-title">USMCA Compliance Solutions</h2>
-                <p className="section-header-subtitle">
-                  Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for small manufacturers and importers.
-                </p>
-              </div>
-              
-              <div className="grid-2-cols">
-                <div className="content-card classification">
-                  <div className="content-card-icon" aria-hidden="true">HC</div>
-                  <h3 className="content-card-title">Trade Classification & Analysis</h3>
-                  <p className="content-card-description">
-                    Professional harmonized system classification with CBP-verified accuracy for streamlined customs processing and duty optimization.
-                  </p>
-                  <Link 
-                    href="/usmca-workflow" 
-                    className="content-card-link"
-                    aria-label="Start trade classification and analysis workflow"
-                  >
-                    Start Classification Analysis
-                  </Link>
-                </div>
-
-                <div className="content-card analysis">
-                  <div className="content-card-icon" aria-hidden="true">RA</div>
-                  <h3 className="content-card-title">Supply Chain Route Analysis</h3>
-                  <p className="content-card-description">
-                    Comprehensive assessment of trade corridors through Mexico and Canada to identify cost savings and compliance opportunities.
-                  </p>
-                  <Link 
-                    href="/usmca-workflow" 
-                    className="content-card-link"
-                    aria-label="Start supply chain route analysis and optimization"
-                  >
-                    Analyze Trade Routes
-                  </Link>
-                </div>
-
-                <div className="content-card certificates">
-                  <div className="content-card-icon" aria-hidden="true">CO</div>
-                  <h3 className="content-card-title">Certificate of Origin Services</h3>
-                  <p className="content-card-description">
-                    Complete documentation services with audit-ready compliance records and professional customs broker partnership.
-                  </p>
-                  <Link 
-                    href="/usmca-workflow" 
-                    className="content-card-link"
-                    aria-label="Start certificate of origin generation and documentation services"
-                  >
-                    Generate Certificates
-                  </Link>
-                </div>
-
-                <div className="content-card compliance">
-                  <div className="content-card-icon" aria-hidden="true">RC</div>
-                  <h3 className="content-card-title">Regulatory Compliance Management</h3>
-                  <p className="content-card-description">
-                    Expert guidance on evolving trade regulations with real-time updates and implementation support for small manufacturers and importers.
-                  </p>
-                  <Link 
-                    href="/trade-risk-alternatives" 
-                    className="content-card-link"
-                    aria-label="Access real-time regulatory compliance monitoring and alerts"
-                  >
-                    Monitor Regulations
-                  </Link>
-                </div>
-              </div>
+            <div className="content-card analysis">
+              <div className="content-card-icon" aria-hidden="true">RA</div>
+              <h3 className="content-card-title">Supply Chain Route Analysis</h3>
+              <p className="content-card-description">
+                Comprehensive assessment of trade corridors through Mexico and Canada to identify cost savings and compliance opportunities.
+              </p>
+              <Link
+                href="/usmca-workflow?reset=true"
+                className="content-card-link"
+                aria-label="Start supply chain route analysis and optimization"
+              >
+                Analyze Trade Routes
+              </Link>
             </div>
-          </section>
 
-          {/* Industry Insights Section */}
-          <section className="main-content">
-            <div className="container-app">
-              <div className="section-header">
-                <h2 className="section-header-title">Triangle Trade Intelligence Insights</h2>
-                <p className="section-header-subtitle">
-                  Professional insights and analysis for strategic supply chain optimization and regulatory compliance management.
-                </p>
-              </div>
-              
-              <div className="insights-layout">
-                <div className="content-card">
-                  <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
-                  <p className="content-card-description">
-                    Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers.
-                  </p>
-                  <div className="insights-button-group">
-                    <Link href="/usmca-workflow" className="btn-primary">
-                      Read the Analysis
-                    </Link>
-                    <Link href="#calculator" className="btn-secondary">
-                      Calculate Your Savings
-                    </Link>
-                    <Link href="/services/logistics-support" className="btn-secondary">
-                      🚨 Don't Qualify? Get Expert Help
-                    </Link>
-                  </div>
-                </div>
-                
-                <img 
-                  src="/image/datos-financieros.jpg" 
-                  alt="Professional Trade Analysis Dashboard"
-                  className="insights-image"
-                />
+            <div className="content-card certificates">
+              <div className="content-card-icon" aria-hidden="true">CO</div>
+              <h3 className="content-card-title">Certificate of Origin Services</h3>
+              <p className="content-card-description">
+                Complete documentation services with audit-ready compliance records and professional customs broker partnership.
+              </p>
+              <Link
+                href="/usmca-workflow?reset=true"
+                className="content-card-link"
+                aria-label="Start certificate of origin generation and documentation services"
+              >
+                Generate Certificates
+              </Link>
+            </div>
+
+            <div className="content-card compliance">
+              <div className="content-card-icon" aria-hidden="true">RC</div>
+              <h3 className="content-card-title">Regulatory Compliance Management</h3>
+              <p className="content-card-description">
+                Expert guidance on evolving trade regulations with real-time updates and implementation support for small manufacturers and importers.
+              </p>
+              <Link
+                href="/trade-risk-alternatives"
+                className="content-card-link"
+                aria-label="Access real-time regulatory compliance monitoring and alerts"
+              >
+                Monitor Regulations
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Industry Insights Section */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Triangle Trade Intelligence Insights</h2>
+            <p className="section-header-subtitle">
+              Professional insights and analysis for strategic supply chain optimization and regulatory compliance management.
+            </p>
+          </div>
+
+          <div className="insights-layout">
+            <div className="content-card">
+              <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
+              <p className="content-card-description">
+                Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers.
+              </p>
+              <div className="insights-button-group">
+                <Link href="/usmca-workflow?reset=true" className="btn-primary">
+                  Read the Analysis
+                </Link>
+                <Link href="#calculator" className="btn-secondary">
+                  Calculate Your Savings
+                </Link>
+                <Link href="/services/logistics-support" className="btn-secondary">
+                  🚨 Don't Qualify? Get Expert Help
+                </Link>
               </div>
             </div>
-          </section>
 
-          <Footer />
-        </>
-      )}
+            <img
+              src="/image/datos-financieros.jpg"
+              alt="Professional Trade Analysis Dashboard"
+              className="insights-image"
+            />
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </>
   )
 }

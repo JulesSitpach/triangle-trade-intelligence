@@ -64,6 +64,51 @@
 
 .dashboard-actions-right {
   flex: 0 !important;
+  display: flex !important;
+  gap: 0.75rem !important;
+}
+
+/* Action button groups */
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Color utility classes for status-based styling */
+.border-left-green {
+  border-left: 4px solid #10b981 !important;
+}
+
+.border-left-red {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.border-left-amber {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.text-green {
+  color: #10b981 !important;
+}
+
+.text-red {
+  color: #ef4444 !important;
+}
+
+.text-amber {
+  color: #f59e0b !important;
+}
+
+.text-danger {
+  color: #dc2626 !important;
+}
+
+/* List styling */
+.list-simple {
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+  margin-bottom: 0;
 }
 
 /* ================== 2. TYPOGRAPHY ================== */
@@ -307,8 +352,20 @@
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background-color 0.3s ease;
   border-radius: 12px;
+}
+
+.progress-fill.progress-success {
+  background: #10b981;
+}
+
+.progress-fill.progress-warning {
+  background: #f59e0b;
+}
+
+.progress-fill.progress-danger {
+  background: #ef4444;
 }
 
 /* ================== 6. STATUS BADGES ================== */
