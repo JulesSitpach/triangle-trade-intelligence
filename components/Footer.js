@@ -63,6 +63,11 @@ export default function Footer() {
             </h4>
             <ul className="footer-list">
               <li>
+                <a href="mailto:support@triangleintelligence.com" className="footer-link">
+                  Support & Help
+                </a>
+              </li>
+              <li>
                 <a href="mailto:legal@triangleintelligence.com" className="footer-link">
                   Legal Inquiries
                 </a>

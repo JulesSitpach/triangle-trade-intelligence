@@ -107,7 +107,7 @@
 }
 
 body {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Roboto' !important;
   font-size: 1.25rem;
   line-height: 1.3;
   font-weight: 300;
@@ -123,7 +123,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--navy-900);
   letter-spacing: -0.025em;
   line-height: 1.25;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Roboto' !important;
 }
 
 h1 { font-size: 2.25rem; }
@@ -314,6 +314,25 @@ a:hover {
   font-weight: 500;
   display: inline-block;
   margin-bottom: 2rem;
+}
+
+/* Workflow Progress Badge States */
+.hero-badge.active {
+  background: var(--blue-500);
+  color: white !important;
+  border: 2px solid var(--blue-600);
+}
+
+.hero-badge.completed {
+  background: var(--green-600);
+  color: white !important;
+  border: 2px solid var(--green-700);
+}
+
+.hero-badge.inactive {
+  background: var(--gray-300);
+  color: var(--gray-700);
+  border: 2px solid var(--gray-400);
 }
 
 .hero-main-title {
@@ -615,6 +634,16 @@ a:hover {
   background-color: var(--gray-100);
   border-color: var(--gray-400);
   transform: translateY(-1px);
+}
+
+.btn-ai-suggestion {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.btn-ai-suggestion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ================== 10. INSIGHTS LAYOUT ================== */
@@ -1346,11 +1375,6 @@ a:hover {
     gap: var(--space-1);
   }
 
-  .workflow-step {
-    font-size: 12px;
-    padding: var(--space-1) var(--space-2);
-  }
-
   .workflow-client-context {
     padding: var(--space-3);
   }
@@ -1698,5 +1722,58 @@ a:hover {
   }
 }
 
+/* ================== USER DROPDOWN MENU ================== */
+
+.admin-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.admin-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background-color: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.admin-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: var(--navy-700);
+  text-decoration: none;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.admin-dropdown-item:hover {
+  background-color: var(--gray-50);
+  color: var(--blue-600);
+}
+
+.admin-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid var(--gray-100);
+}
+
+@media (max-width: 768px) {
+  .admin-dropdown-menu {
+    position: static;
+    margin-top: 0.5rem;
+    box-shadow: none;
+    border: 1px solid var(--gray-200);
+  }
+}
+
 /* ================== END OF MINIMAL GLOBALS CSS ================== */
-/* Total: ~900 lines - Focused on pre-signin pages + toast system + table controls + pagination + mobile optimizations + error handling + footer */
+/* Total: ~950 lines - Focused on pre-signin pages + toast system + table controls + pagination + mobile optimizations + error handling + footer + user dropdown */

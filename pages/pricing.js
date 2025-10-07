@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { getStripe } from '../lib/stripe/client'
+import Footer from '../components/Footer'
 
 export default function Pricing() {
   const [isClient, setIsClient] = useState(false)
@@ -92,10 +93,10 @@ export default function Pricing() {
       monthlyPrice: 299,
       annualPrice: 2850,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Unlimited analyses with real-time crisis monitoring',
+      description: 'Unlimited analyses with AI-powered risk assessment',
       features: [
         'Unlimited USMCA analyses',
-        'Real-time crisis alerts (tariff changes, trade disputes)',
+        'AI supply chain vulnerability analysis',
         '15% discount on professional services',
         'Priority support (48hr response)',
         'Advanced trade policy analysis'
@@ -336,41 +337,41 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* What Subscribers Get Every Week */}
+      {/* What Subscribers Get */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">What Subscribers Get Every Week</h2>
+            <h2 className="section-header-title">What Professional & Premium Subscribers Get</h2>
             <p className="section-header-subtitle">
-              We monitor trade policy so you don't have to
+              AI-powered compliance tools that save you time and money
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">📧 Monday Morning Digest</h3>
+              <h3 className="content-card-title">🔍 AI Supply Chain Analysis</h3>
               <p className="content-card-description">
-                USMCA policy changes, tariff announcements, compliance deadlines.
-                Curated by licensed customs broker. 30 minutes of reading saves you
-                10 hours of monitoring customs.gov, USITC, and CBP websites.
+                AI analyzes your component origins to identify geopolitical risks,
+                tariff exposure, and supply chain vulnerabilities. Get specific,
+                actionable recommendations based on your actual supply chain.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">🚨 Real-Time HS Code Alerts</h3>
+              <h3 className="content-card-title">📊 Unlimited USMCA Checks</h3>
               <p className="content-card-description">
-                When tariff rates change for YOUR specific products, you get instant
-                email alert. Only relevant changes, not noise. Example: "HS 8517.62
-                tariff increased from 0% to 5.8% - affects your telecom equipment."
+                Run unlimited qualification analyses. Check every product, every
+                scenario, every supplier. Instant AI-powered HS code suggestions
+                and qualification calculations. No per-analysis fees.
               </p>
             </div>
 
             <div className="content-card">
               <h3 className="content-card-title">💰 ROI for Small Importers</h3>
               <p className="content-card-description">
-                Your time is worth $50-100/hr. Monitoring customs.gov yourself: 5-10 hrs/week.
-                Cost: $250-500/week = $13k-26k/year. Our subscription: $99-299/month.
-                You save $10k-20k per year in time.
+                DIY USMCA compliance costs $50-100/hr of your time. Hiring a customs
+                broker full-time: $60k+/year. Our platform: $299-599/month with
+                expert support when you need it. Save $10k-50k per year.
               </p>
             </div>
           </div>
@@ -535,63 +536,7 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Professional Footer */}
-      <footer className="content-card">
-        <div className="container-app">
-          {/* Footer Content */}
-          <div className="grid-3-cols">
-            {/* Company Information */}
-            <div>
-              <h3 className="section-header-title">Triangle Trade Intelligence</h3>
-              <p className="text-body">
-                Professional USMCA compliance platform delivering trade classification, supply chain optimization, and regulatory guidance for North American manufacturers.
-              </p>
-            </div>
-            
-            {/* Solutions Links */}
-            <div>
-              <h4 className="content-card-title">Solutions</h4>
-              <div>
-                <p className="text-body">
-                  <Link href="/usmca-workflow" className="nav-link">USMCA Analysis</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/services" className="nav-link">Trade Services</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/pricing" className="nav-link">Pricing</Link>
-                </p>
-              </div>
-            </div>
-
-            {/* Company & Legal Links */}
-            <div>
-              <h4 className="content-card-title">Company</h4>
-              <div>
-                <p className="text-body">
-                  <Link href="/contact" className="nav-link">Contact</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/privacy-policy" className="nav-link">Privacy Policy</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/terms-of-service" className="nav-link">Terms of Service</Link>
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Copyright Bar */}
-          <div className="section-header">
-            <p className="text-body">
-              © 2024 Triangle Trade Intelligence. All rights reserved.
-            </p>
-            <p className="text-body">
-              Professional USMCA compliance for small manufacturers and importers.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   )
 }

@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import Footer from '../components/Footer'
 
 export default function ProfessionalServices() {
   const [isClient, setIsClient] = useState(false)
@@ -398,63 +399,7 @@ export default function ProfessionalServices() {
         </div>
       </section>
 
-      {/* Professional Footer */}
-      <footer className="content-card">
-        <div className="container-app">
-          {/* Footer Content */}
-          <div className="grid-3-cols">
-            {/* Company Information */}
-            <div>
-              <h3 className="section-header-title">Triangle Trade Intelligence</h3>
-              <p className="text-body">
-                Professional USMCA compliance platform delivering trade classification, supply chain optimization, and regulatory guidance for North American manufacturers.
-              </p>
-            </div>
-            
-            {/* Solutions Links */}
-            <div>
-              <h4 className="content-card-title">Solutions</h4>
-              <div>
-                <p className="text-body">
-                  <Link href="/usmca-workflow" className="nav-link">USMCA Analysis</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/services" className="nav-link">Trade Services</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/pricing" className="nav-link">Pricing</Link>
-                </p>
-              </div>
-            </div>
-
-            {/* Company & Legal Links */}
-            <div>
-              <h4 className="content-card-title">Company</h4>
-              <div>
-                <p className="text-body">
-                  <Link href="/contact" className="nav-link">Contact</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/privacy-policy" className="nav-link">Privacy Policy</Link>
-                </p>
-                <p className="text-body">
-                  <Link href="/terms-of-service" className="nav-link">Terms of Service</Link>
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Copyright Bar */}
-          <div className="section-header">
-            <p className="text-body">
-              © 2024 Triangle Trade Intelligence. All rights reserved.
-            </p>
-            <p className="text-body">
-              Professional USMCA compliance for small manufacturers and importers.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   )
 }

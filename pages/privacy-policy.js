@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import Footer from '../components/Footer';
 
 export default function PrivacyPolicy() {
   return (
@@ -177,6 +178,8 @@ export default function PrivacyPolicy() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </>
   );
 }
