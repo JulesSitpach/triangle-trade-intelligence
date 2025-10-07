@@ -23,6 +23,7 @@ import AuthorizationStep from './AuthorizationStep';
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
+  const hasLoadedResultsRef = useRef(false);
 
   const {
     currentStep,
@@ -45,7 +46,8 @@ export default function USMCAWorkflowOrchestrator() {
     isFormValid,
     isStepValid,
     getTotalComponentPercentage,
-    clearError
+    clearError,
+    loadSavedWorkflow
   } = useWorkflowState();
 
   const { trustIndicators } = useTrustIndicators();
@@ -63,6 +65,36 @@ export default function USMCAWorkflowOrchestrator() {
       hasProcessedResetRef.current = false;
     }
   }, [router.query.reset, resetWorkflow, router]);
+
+  // Handle "View Results" - load saved workflow and jump to results
+  useEffect(() => {
+    const workflowId = router.query.view_results;
+    if (workflowId && !hasLoadedResultsRef.current) {
+      hasLoadedResultsRef.current = true;
+      console.log('📊 Loading saved workflow results:', workflowId);
+
+      // Fetch workflow from database
+      fetch('/api/dashboard-data', { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          const workflow = data.workflows?.find(w => w.id === workflowId);
+          if (workflow && loadSavedWorkflow) {
+            loadSavedWorkflow(workflow);
+          }
+        })
+        .catch(err => console.error('Failed to load workflow:', err));
+
+      // Clean up URL
+      router.replace('/usmca-workflow', undefined, { shallow: true });
+    } else if (!router.query.view_results) {
+      hasLoadedResultsRef.current = false;
+    }
+  }, [router.query.view_results, router, loadSavedWorkflow]);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   // Enhanced certificate download handler with trust verification
   const handleDownloadCertificate = (formatType = 'official') => {
@@ -411,63 +443,31 @@ NOTE: Complete all fields and obtain proper signatures before submission.
   };
 
   return (
-    <div className="workflow-container">
-      {/* Enterprise Header */}
-      <section className="main-content hero-section">
-        <div className="container-app">
-          <div className="section-header">
-            <h1 className="page-title">
-              USMCA Compliance Analysis
-            </h1>
-            <h2 className="page-subtitle">
-              Enterprise Trade Classification & Certificate Generation Platform
-            </h2>
-            <p className="page-description">
-              AI-powered compliance analysis with government-verified data. Generate audit-ready certificates 
-              and optimize tariff savings through professional USMCA qualification assessment.
-            </p>
-            
-            {/* Professional Status Dashboard */}
-            <div className="status-grid">
-              <div className="status-card">
-                <div className="status-value success">34,476</div>
-                <div className="status-label">Government Records</div>
-                <div className="badge badge-success">Verified</div>
-              </div>
-              <div className="status-card">
-                <div className="status-value info">99.9%</div>
-                <div className="status-label">System Uptime</div>
-                <div className="badge badge-info">Operational</div>
-              </div>
-              <div className="status-card">
-                <div className="status-value primary">Licensed</div>
-                <div className="status-label">Customs Brokers</div>
-                <div className="badge badge-info">Expert Network</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">USMCA Compliance Analysis</h1>
+        <p className="dashboard-subtitle">
+          Complete the 3-step workflow to determine if your product qualifies for USMCA benefits
+        </p>
+      </div>
 
       {/* Progress Indicator */}
-      <WorkflowProgress 
+      <WorkflowProgress
         currentStep={currentStep}
         trustIndicators={trustIndicators}
         onStepClick={goToStep}
-        isStepClickable={currentStep === 3} // Allow navigation only from results
+        isStepClickable={true} // Allow navigation from any step
       />
 
       {/* Error Display */}
-      <WorkflowError 
+      <WorkflowError
         error={error}
         onDismiss={clearError}
         onRetry={currentStep === 3 ? handleRetryProcessing : undefined}
       />
 
       {/* Workflow Content */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="content-card">
+      <div className="form-section">
         {/* Step Components */}
         {currentStep === 1 && (
           <CompanyInformationStep
@@ -700,9 +700,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             trustIndicators={trustIndicators}
           />
         )}
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* Loading Overlay */}
       <WorkflowLoading isVisible={isLoading} />

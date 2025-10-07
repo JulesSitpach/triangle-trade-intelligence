@@ -51,22 +51,55 @@ export default function ComponentOriginsStepEnhanced({
   };
 
   // Get AI agent suggestion for specific component
-  const getComponentHSSuggestion = async (index, componentDescription) => {
-    if (!componentDescription || componentDescription.length < 10) {
-      const newSuggestions = { ...agentSuggestions };
-      delete newSuggestions[index];
-      setAgentSuggestions(newSuggestions);
+  const getComponentHSSuggestion = async (index) => {
+    const component = components[index];
+
+    // Validate all required fields are filled
+    if (!component.description || component.description.length < 10) {
+      console.log('Description too short or missing');
+      return;
+    }
+    if (!component.origin_country) {
+      console.log('Origin country not selected');
+      return;
+    }
+    if (!component.value_percentage || component.value_percentage <= 0) {
+      console.log('Value percentage not entered');
       return;
     }
 
+    setSearchingHS(prev => ({ ...prev, [index]: true }));
+
     try {
+      // Send complete business context for accurate AI classification
       const response = await fetch('/api/agents/classification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'suggest_hs_code',
-          productDescription: componentDescription,
-          componentOrigins: []
+          productDescription: component.description,
+          componentOrigins: [{
+            description: component.description,
+            origin_country: component.origin_country,
+            value_percentage: component.value_percentage
+          }],
+          additionalContext: {
+            // Complete product context from Step 1
+            overallProduct: formData.product_description,
+            businessType: formData.business_type,
+            manufacturingLocation: formData.manufacturing_location,
+            exportDestination: formData.export_destination,
+            tradeVolume: formData.annual_trade_volume,
+            companyName: formData.company_name,
+            primarySupplier: formData.primary_supplier_country,
+
+            // All components for context
+            allComponents: components.map(c => ({
+              description: c.description,
+              origin: c.origin_country,
+              percentage: c.value_percentage
+            })).filter(c => c.description) // Only send filled components
+          }
         })
       });
 
@@ -76,9 +109,15 @@ export default function ComponentOriginsStepEnhanced({
       if (result.success && result.data) {
         const suggestion = {
           hsCode: result.data.hsCode,
+          description: result.data.description, // ✅ REAL HTS DESCRIPTION
           confidence: result.data.confidence || result.data.adjustedConfidence,
           explanation: result.data.reasoning || result.data.explanation,
-          source: 'AI Classification Agent'
+          source: 'AI Classification Agent',
+          // Enhanced features from API (we're paying for this data - show it!)
+          alternativeCodes: result.enhanced_features?.alternative_codes || [],
+          mfnRate: result.tariff_analysis?.mfn_rate || null,
+          usmcaRate: result.tariff_analysis?.usmca_rate || null,
+          qualifiesForUSMCA: result.tariff_analysis?.qualifies_for_usmca || false
         };
         console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
         setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
@@ -87,6 +126,8 @@ export default function ComponentOriginsStepEnhanced({
       }
     } catch (error) {
       console.error(`Agent classification error for component ${index + 1}:`, error);
+    } finally {
+      setSearchingHS(prev => ({ ...prev, [index]: false }));
     }
   };
 
@@ -180,14 +221,23 @@ export default function ComponentOriginsStepEnhanced({
   };
 
   const addComponent = () => {
-    setComponents([...components, { 
-      description: '', 
-      origin_country: '', 
-      value_percentage: '', 
+    setComponents([...components, {
+      description: '',
+      origin_country: '',
+      value_percentage: '',
       hs_code: '',
       hs_suggestions: [],
       manufacturing_location: formData.manufacturing_location || ''
     }]);
+
+    // Scroll to the new component after it's added
+    setTimeout(() => {
+      const newComponentIndex = components.length;
+      const componentElement = document.querySelector(`[data-component-index="${newComponentIndex}"]`);
+      if (componentElement) {
+        componentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const removeComponent = (index) => {
@@ -373,19 +423,6 @@ export default function ComponentOriginsStepEnhanced({
         <p className="form-section-description">
           Describe your product, manufacturing location, and break it down into components with their origins and HS codes
         </p>
-        
-        {/* Educational template button */}
-        <div className="alert alert-info">
-          <div className="alert-content">
-            <button
-              type="button"
-              onClick={loadExample}
-              className="btn-secondary"
-            >
-              Show form structure example (educational only)
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Product Overview Section */}
@@ -441,29 +478,34 @@ export default function ComponentOriginsStepEnhanced({
 
       {/* Component Breakdown Section */}
       <div className="element-spacing">
-        <h3 className="card-title">Component Breakdown</h3>
-        <p className="text-muted">
+        <h2 className="form-section-title">Component Breakdown</h2>
+        <p className="text-body">
           Break down your product into its major components. Each component should represent a significant portion of the product's value.
         </p>
       </div>
 
       <div className="element-spacing">
         {components.map((component, index) => (
-          <div key={index} className="form-section">
-            <div className="header-actions tight-spacing">
-              <h3 className="card-title">Component {index + 1}</h3>
+          <div key={index} className="form-section" data-component-index={index}>
+            <div className="dashboard-actions">
+              <div className="dashboard-actions-left">
+                <h3 className="form-section-title">Component {index + 1}</h3>
+              </div>
               {components.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeComponent(index)}
-                  className="btn-danger"
-                  title="Remove component"
-                >
-                </button>
+                <div className="dashboard-actions-right">
+                  <button
+                    type="button"
+                    onClick={() => removeComponent(index)}
+                    className="btn-danger"
+                    title="Remove component"
+                  >
+                    Remove
+                  </button>
+                </div>
               )}
             </div>
 
-            <div className="grid-2">
+            <div className="form-grid-2">
               {/* Component Description */}
               <div className="form-group">
                 <label className="form-label">
@@ -487,13 +529,7 @@ export default function ComponentOriginsStepEnhanced({
                 </label>
                 <select
                   value={component.origin_country}
-                  onChange={(e) => {
-                    updateComponent(index, 'origin_country', e.target.value);
-                    // Trigger AI HS code suggestion only after country is selected
-                    if (e.target.value && component.description && component.description.length >= 10) {
-                      getComponentHSSuggestion(index, component.description);
-                    }
-                  }}
+                  onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
                   className="form-select"
                 >
                   <option value="">Select origin country...</option>
@@ -540,8 +576,24 @@ export default function ComponentOriginsStepEnhanced({
                   className="form-input"
                 />
                 <div className="form-help">
-                  Don't know your HS code? Leave blank - we'll classify it during analysis.
+                  Don't know your HS code? Get AI suggestion below.
                 </div>
+
+                {/* Get AI Suggestion Button */}
+                <button
+                  type="button"
+                  onClick={() => getComponentHSSuggestion(index)}
+                  disabled={
+                    !component.description ||
+                    component.description.length < 10 ||
+                    !component.origin_country ||
+                    !component.value_percentage ||
+                    searchingHS[index]
+                  }
+                  className="btn-secondary btn-ai-suggestion"
+                >
+                  {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
+                </button>
 
                 {/* AI Agent HS Code Suggestion for this component */}
                 {agentSuggestions[index] && (
@@ -550,10 +602,16 @@ export default function ComponentOriginsStepEnhanced({
                       success: true,
                       data: {
                         hsCode: agentSuggestions[index].hsCode,
+                        description: agentSuggestions[index].description, // ✅ REAL HTS DESCRIPTION
                         value: `HS Code: ${agentSuggestions[index].hsCode}`,
                         confidence: agentSuggestions[index].confidence,
                         explanation: agentSuggestions[index].explanation,
-                        source: agentSuggestions[index].source
+                        source: agentSuggestions[index].source,
+                        // Pass all enhanced data
+                        alternativeCodes: agentSuggestions[index].alternativeCodes,
+                        mfnRate: agentSuggestions[index].mfnRate,
+                        usmcaRate: agentSuggestions[index].usmcaRate,
+                        qualifiesForUSMCA: agentSuggestions[index].qualifiesForUSMCA
                       }
                     }}
                     onAccept={() => {

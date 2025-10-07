@@ -39,91 +39,61 @@ export default function CompanyInformationStep({
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">USMCA Compliance Analysis</h1>
-        <p className="dashboard-subtitle">Professional Trade Classification & Certificate Generation Platform</p>
-      </div>
-      
-      <div className="form-section">
-        <h2 className="form-section-title">
-          Company Information
-        </h2>
-        <p className="form-section-description">
-          Step 1 of 3 - Establish your business profile for compliance analysis
-        </p>
-        
+    <>
+      <h2 className="form-section-title">Company Information</h2>
+      <p className="form-section-description">Step 1 of 3 - Business profile for compliance analysis</p>
+
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label required">
-              Company Name
-            </label>
+            <label className="form-label required">Company Name</label>
             <input
               type="text"
               className="form-input"
               value={formData.company_name || ''}
-              onChange={(e) => {
-                console.log('Input onChange fired:', e.target.value);
-                updateFormData('company_name', e.target.value);
-              }}
-              placeholder="Enter your legal entity name"
+              onChange={(e) => updateFormData('company_name', e.target.value)}
+              placeholder="Enter legal entity name"
               required
             />
-            <div className="form-help">
-              Legal entity name as registered with authorities
-            </div>
+            <div className="form-help">Legal name as registered with authorities</div>
           </div>
 
           <div className="form-group">
-            <label className="form-label required">
-              Business Type
-            </label>
+            <label className="form-label required">Business Type</label>
             <select
-                className="form-select"
-                value={formData.business_type || ''}
-                onChange={(e) => updateFormData('business_type', e.target.value)}
-                required
-              >
-                <option value="">Select your primary business activity</option>
-                {isLoadingOptions ? (
-                  <option disabled>Loading business types...</option>
-                ) : (
-                  dropdownOptions.businessTypes?.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  )) || []
-                )}
+              className="form-select"
+              value={formData.business_type || ''}
+              onChange={(e) => updateFormData('business_type', e.target.value)}
+              required
+            >
+              <option value="">Select primary business activity</option>
+              {isLoadingOptions ? (
+                <option disabled>Loading business types...</option>
+              ) : (
+                dropdownOptions.businessTypes?.map(type => (
+                  <option key={type.value} value={type.value}>{type.label}</option>
+                )) || []
+              )}
             </select>
-            <div className="form-help">
-              Primary business activity for accurate trade classification
-            </div>
+            <div className="form-help">Primary activity for trade classification</div>
           </div>
         </div>
 
-        {/* Company Contact & Address Information */}
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label required">
-              Company Address
-            </label>
+            <label className="form-label required">Company Address</label>
             <input
               type="text"
               className="form-input"
               value={formData.company_address || ''}
               onChange={(e) => updateFormData('company_address', e.target.value)}
-              placeholder="Street address, City, State/Province"
+              placeholder="Street, City, State/Province"
               required
             />
-            <div className="form-help">
-              Physical business address for certificate documentation
-            </div>
+            <div className="form-help">Physical business address</div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">
-              Tax ID / EIN
-            </label>
+            <label className="form-label">Tax ID / EIN</label>
             <input
               type="text"
               className="form-input"
@@ -131,34 +101,27 @@ export default function CompanyInformationStep({
               onChange={(e) => updateFormData('tax_id', e.target.value)}
               placeholder="Tax identification number"
             />
-            <div className="form-help">
-              Federal tax ID or employer identification number
-            </div>
+            <div className="form-help">Federal tax ID or EIN</div>
           </div>
         </div>
 
+        <h3 className="form-section-title">Contact Information</h3>
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label required">
-              Contact Person
-            </label>
+            <label className="form-label required">Contact Person</label>
             <input
               type="text"
               className="form-input"
               value={formData.contact_person || ''}
               onChange={(e) => updateFormData('contact_person', e.target.value)}
-              placeholder="Primary contact for trade matters"
+              placeholder="Primary contact name"
               required
             />
-            <div className="form-help">
-              Person responsible for trade compliance
-            </div>
+            <div className="form-help">Trade compliance contact</div>
           </div>
 
           <div className="form-group">
-            <label className="form-label required">
-              Contact Phone
-            </label>
+            <label className="form-label required">Contact Phone</label>
             <input
               type="tel"
               className="form-input"
@@ -167,119 +130,98 @@ export default function CompanyInformationStep({
               placeholder="(214) 555-0147"
               required
             />
-            <div className="form-help">
-              Business phone number for certificate documentation
-            </div>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label required">
-            Contact Email
-          </label>
-          <input
-            type="email"
-            className="form-input"
-            value={formData.contact_email || ''}
-            onChange={(e) => updateFormData('contact_email', e.target.value)}
-            placeholder="compliance@fashionforward.com"
-            required
-          />
-          <div className="form-help">
-            Business email for official correspondence and certificate delivery
+            <div className="form-help">Business phone number</div>
           </div>
         </div>
 
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label">
-              Primary Supplier Country
-            </label>
-            <select
-                className="form-select"
-                value={formData.supplier_country || ''}
-                onChange={(e) => updateFormData('supplier_country', e.target.value)}
-              >
-                {isLoadingOptions ? (
-                  <option disabled>Loading...</option>
-                ) : (
-                  <>
-                    <option value="">Select primary supplier country</option>
-                    {dropdownOptions.countries?.map(country => {
-                      const countryName = typeof country === 'string' ? country : country.name || country.label;
-                      const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
-                      return (
-                        <option key={countryCode} value={countryCode}>
-                          {countryName}
-                        </option>
-                      );
-                    })}
-                  </>
-                )}
-            </select>
-            <div className="form-help">
-              Country where products originate
-            </div>
+            <label className="form-label required">Contact Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={formData.contact_email || ''}
+              onChange={(e) => updateFormData('contact_email', e.target.value)}
+              placeholder="compliance@company.com"
+              required
+            />
+            <div className="form-help">Email for official correspondence</div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">
-              Destination Market
-            </label>
-            <select
-                className="form-select"
-                value={formData.destination_country || SYSTEM_CONFIG.countries.defaultDestination}
-                onChange={(e) => updateFormData('destination_country', e.target.value)}
-              >
-                {dropdownOptions.usmcaCountries?.map(country => {
-                  const countryCode = country.code || country.value;
-                  const countryName = country.label || country.name;
-                  return (
-                    <option key={countryCode} value={countryCode}>
-                      {countryName}
-                    </option>
-                  );
-                })}
-                <optgroup label="Other Markets">
-                  {dropdownOptions.countries?.filter(country => {
-                    const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
-                    return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
-                  }).map(country => {
-                    const countryName = typeof country === 'string' ? country : country.name || country.label;
-                    const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
-                    return (
-                      <option key={countryCode} value={countryCode}>
-                        {countryName}
-                      </option>
-                    );
-                  })}
-                </optgroup>
-            </select>
-            <div className="form-help">
-              Where will the finished product be imported?
+            <label className="form-label required">Annual Trade Volume</label>
+            <div className="professional-input-group">
+              <div className="input-with-prefix">
+                <span className="input-prefix">$</span>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={formData.trade_volume || ''}
+                  onChange={(e) => updateFormData('trade_volume', e.target.value)}
+                  placeholder="4,800,000"
+                  required
+                />
+              </div>
             </div>
+            <div className="form-help">Estimated annual import value</div>
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label required">
-            Annual Trade Volume
-          </label>
-          <div className="professional-input-group">
-            <div className="input-with-prefix">
-              <span className="input-prefix">$</span>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.trade_volume || ''}
-                onChange={(e) => updateFormData('trade_volume', e.target.value)}
-                placeholder="4,800,000 or 4800000"
-                required
-              />
-            </div>
+        <h3 className="form-section-title">Trade Routes</h3>
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label">Primary Supplier Country</label>
+            <select
+              className="form-select"
+              value={formData.supplier_country || ''}
+              onChange={(e) => updateFormData('supplier_country', e.target.value)}
+            >
+              {isLoadingOptions ? (
+                <option disabled>Loading...</option>
+              ) : (
+                <>
+                  <option value="">Select supplier country</option>
+                  {dropdownOptions.countries?.map(country => {
+                    const countryName = typeof country === 'string' ? country : country.name || country.label;
+                    const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                    return (
+                      <option key={countryCode} value={countryCode}>{countryName}</option>
+                    );
+                  })}
+                </>
+              )}
+            </select>
+            <div className="form-help">Where products originate</div>
           </div>
-          <div className="form-help">
-            Enter your estimated annual import value (accepts commas: $4,800,000 or plain: $4800000)
+
+          <div className="form-group">
+            <label className="form-label">Destination Market</label>
+            <select
+              className="form-select"
+              value={formData.destination_country || SYSTEM_CONFIG.countries.defaultDestination}
+              onChange={(e) => updateFormData('destination_country', e.target.value)}
+            >
+              {dropdownOptions.usmcaCountries?.map(country => {
+                const countryCode = country.code || country.value;
+                const countryName = country.label || country.name;
+                return (
+                  <option key={countryCode} value={countryCode}>{countryName}</option>
+                );
+              })}
+              <optgroup label="Other Markets">
+                {dropdownOptions.countries?.filter(country => {
+                  const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                  return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
+                }).map(country => {
+                  const countryName = typeof country === 'string' ? country : country.name || country.label;
+                  const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                  return (
+                    <option key={countryCode} value={countryCode}>{countryName}</option>
+                  );
+                })}
+              </optgroup>
+            </select>
+            <div className="form-help">Import destination country</div>
           </div>
         </div>
 
@@ -295,10 +237,17 @@ export default function CompanyInformationStep({
 
         <div className="dashboard-actions">
           <div className="dashboard-actions-left">
-            <span className="form-help">Step 1 of 3 - All required fields must be completed</span>
+            {isClient && isNextDisabled && (
+              <span className="form-help">
+                ⚠️ Please complete all required fields to continue
+              </span>
+            )}
+            {isClient && !isNextDisabled && (
+              <span className="form-help">Step 1 of 3 - All required fields completed ✓</span>
+            )}
           </div>
           <div className="dashboard-actions-right">
-            <button 
+            <button
               onClick={() => onNext()}
               className="btn-primary"
               disabled={isNextDisabled}
@@ -307,7 +256,6 @@ export default function CompanyInformationStep({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

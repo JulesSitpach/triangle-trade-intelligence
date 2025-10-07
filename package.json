@@ -4,7 +4,7 @@
   "description": "Triangle Intelligence Platform - Tariff volatility tracking and trade optimization through USMCA triangle routing",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --no-lint",
     "build:fast": "SKIP_TYPE_CHECK=true next build --no-lint",
     "build-fast": "set NODE_ENV=development && next build",
@@ -31,7 +31,7 @@
     "clean:safe": "npm run clean:port",
     "dev:fresh": "npm run clean:safe && npm run dev",
     "dev:safe": "npm run clean:port && npm run dev",
-    "dev:3001": "next dev -p 3001",
+    "dev:3001": "next dev -p 3001 -H 0.0.0.0",
     "build:force": "echo WARNING: build:force disabled to prevent .next deletion && npm run build",
     "dev:robust": "npm run build && npm run dev:safe",
     "restart": "npm run clean:safe && npm run dev",

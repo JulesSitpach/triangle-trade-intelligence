@@ -160,11 +160,11 @@ export default protectedApiHandler({
         ]
       },
 
-      // Tariff savings
+      // Tariff savings (only if qualified for USMCA)
       savings: {
-        annual_savings: analysis.savings?.annual_savings || 0,
-        monthly_savings: analysis.savings?.monthly_savings || 0,
-        savings_percentage: analysis.savings?.savings_percentage || 0,
+        annual_savings: analysis.usmca?.qualified ? (analysis.savings?.annual_savings || 0) : 0,
+        monthly_savings: analysis.usmca?.qualified ? (analysis.savings?.monthly_savings || 0) : 0,
+        savings_percentage: analysis.usmca?.qualified ? (analysis.savings?.savings_percentage || 0) : 0,
         mfn_rate: analysis.savings?.mfn_rate || 0,
         usmca_rate: analysis.savings?.usmca_rate || 0
       },
@@ -262,23 +262,29 @@ export default protectedApiHandler({
  * Build comprehensive AI prompt with all USMCA rules and context
  */
 function buildComprehensiveUSMCAPrompt(formData) {
-  // Format component breakdown
+  // Format component breakdown with full details
   const componentBreakdown = formData.component_origins
-    .map((c, i) => `Component ${i + 1}: ${c.value_percentage}% from ${c.origin_country} (${c.description || 'Not specified'})`)
+    .map((c, i) => `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}`)
     .join('\n');
 
   const prompt = `You are a USMCA trade compliance expert analyzing a product for USMCA qualification. Perform a complete analysis including threshold determination, regional content calculation, qualification check, and recommendations.
 
-COMPANY INFORMATION:
-- Company Name: ${formData.company_name}
-- Business Type: ${formData.business_type}
-- Product Description: ${formData.product_description}
-- Manufacturing Location: ${formData.manufacturing_location || 'Not specified'}
-- Trade Volume: ${formData.trade_volume || 'Not specified'}
-- Destination Country: ${formData.destination_country || 'United States'}
+===== COMPANY PROFILE =====
+Company: ${formData.company_name}
+Business Type: ${formData.business_type}
+Annual Trade Volume: ${formData.trade_volume || 'Not specified'}
+Primary Supplier: ${formData.primary_supplier_country || formData.supplier_country || 'Not specified'}
+Manufacturing/Assembly: ${formData.manufacturing_location || 'Not specified'}
+Export Destination: ${formData.export_destination || formData.destination_country || 'United States'}
 
-COMPONENT ORIGINS:
+===== PRODUCT DETAILS =====
+Product: ${formData.product_description}
+
+===== COMPONENT BREAKDOWN =====
 ${componentBreakdown}
+
+Total Components: ${formData.component_origins?.length || 0}
+Total Percentage: ${formData.component_origins?.reduce((sum, c) => sum + (parseFloat(c.value_percentage) || 0), 0)}%
 
 USMCA THRESHOLD RULES (Official Treaty Standards):
 1. **Textiles & Apparel**: 55% regional content threshold (yarn-forward rule applies)

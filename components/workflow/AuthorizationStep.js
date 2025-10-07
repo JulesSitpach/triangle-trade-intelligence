@@ -4,11 +4,12 @@
  * Enhanced with AI agent validation at submission point
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF }) {
   const router = useRouter();
+  const previewRef = useRef(null);
   const [authData, setAuthData] = useState({
     // Authorized Signatory Information (NEW DATA COLLECTION)
     signatory_name: '',
@@ -42,6 +43,17 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           authority_certification: true
         }));
       }
+    }
+  }, [previewData]);
+
+  // Auto-scroll to certificate preview when generated
+  useEffect(() => {
+    if (previewData && previewData.professional_certificate && previewRef.current) {
+      // Scroll to preview with smooth animation
+      previewRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
   }, [previewData]);
 
@@ -128,193 +140,223 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   return (
     <div className="element-spacing">
       {/* 1. Authorization Section - NEW DATA COLLECTION */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">📝 CERTIFICATE AUTHORIZATION</h3>
-        </div>
-        
-        <div className="form-section">
-          <h4 className="section-title">Authorized Signatory Information</h4>
-          
-          <div className="form-grid">
-            <div className="form-group">
-              <label className="form-label">Full Name *</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.signatory_name}
-                onChange={(e) => handleFieldChange('signatory_name', e.target.value)}
-                placeholder="Enter full name of authorized signatory"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Title/Position *</label>
-              <select
-                className="form-input"
-                value={authData.signatory_title}
-                onChange={(e) => handleFieldChange('signatory_title', e.target.value)}
-                required
-              >
-                <option value="">Select title/position</option>
-                {titleOptions.map(title => (
-                  <option key={title} value={title}>{title}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Email *</label>
-              <input
-                type="email"
-                className="form-input"
-                value={authData.signatory_email}
-                onChange={(e) => handleFieldChange('signatory_email', e.target.value)}
-                placeholder="signatory@company.com"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Phone *</label>
-              <input
-                type="tel"
-                className="form-input"
-                value={authData.signatory_phone}
-                onChange={(e) => handleFieldChange('signatory_phone', e.target.value)}
-                placeholder="(555) 123-4567"
-                required
-              />
-            </div>
+      <div className="form-section">
+        <h2 className="form-section-title">📝 Certificate Authorization</h2>
+        <p className="form-section-description">Authorized Signatory Information</p>
+
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">Full Name</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.signatory_name}
+              onChange={(e) => handleFieldChange('signatory_name', e.target.value)}
+              placeholder="Enter full name of authorized signatory"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Title/Position</label>
+            <select
+              className="form-select"
+              value={authData.signatory_title}
+              onChange={(e) => handleFieldChange('signatory_title', e.target.value)}
+              required
+            >
+              <option value="">Select title/position</option>
+              {titleOptions.map(title => (
+                <option key={title} value={title}>{title}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={authData.signatory_email}
+              onChange={(e) => handleFieldChange('signatory_email', e.target.value)}
+              placeholder="signatory@company.com"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Phone</label>
+            <input
+              type="tel"
+              className="form-input"
+              value={authData.signatory_phone}
+              onChange={(e) => handleFieldChange('signatory_phone', e.target.value)}
+              placeholder="(555) 123-4567"
+              required
+            />
           </div>
         </div>
       </div>
 
       {/* 2. Importer Information - NEW DATA COLLECTION */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">📥 IMPORTER DETAILS</h3>
-          <div className="text-body">
-            Information about your customer (the importing company)
+      <div className="form-section">
+        <h2 className="form-section-title">📥 Importer Details</h2>
+        <p className="form-section-description">
+          Information about your customer (the importing company)
+        </p>
+
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">Company Name</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.importer_name || ''}
+              onChange={(e) => handleFieldChange('importer_name', e.target.value)}
+              placeholder="Enter importing company name"
+              required
+            />
           </div>
-        </div>
-        
-        <div className="form-section">
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Company Name *</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.importer_name || ''}
-                onChange={(e) => handleFieldChange('importer_name', e.target.value)}
-                placeholder="Enter importing company name"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Address *</label>
-              <textarea
-                className="form-input"
-                value={authData.importer_address || ''}
-                onChange={(e) => handleFieldChange('importer_address', e.target.value)}
-                placeholder="Complete address including street, city, state/province, postal code"
-                rows="3"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Tax ID/EIN *</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.importer_tax_id || ''}
-                onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)}
-                placeholder="Enter importer's tax identification number"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Contact Person</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.importer_contact_person || ''}
-                onChange={(e) => handleFieldChange('importer_contact_person', e.target.value)}
-                placeholder="Primary contact at importing company"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Phone</label>
-              <input
-                type="tel"
-                className="form-input"
-                value={authData.importer_phone || ''}
-                onChange={(e) => handleFieldChange('importer_phone', e.target.value)}
-                placeholder="(555) 123-4567"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-input"
-                value={authData.importer_email || ''}
-                onChange={(e) => handleFieldChange('importer_email', e.target.value)}
-                placeholder="contact@importer.com"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">Country *</label>
-              <select
-                className="form-input"
-                value={authData.importer_country || ''}
-                onChange={(e) => handleFieldChange('importer_country', e.target.value)}
-                required
-              >
-                <option value="">Select country</option>
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="Mexico">Mexico</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+
+          <div className="form-group">
+            <label className="form-label required">Address</label>
+            <textarea
+              className="form-input"
+              value={authData.importer_address || ''}
+              onChange={(e) => handleFieldChange('importer_address', e.target.value)}
+              placeholder="Complete address including street, city, state/province, postal code"
+              rows="3"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Tax ID/EIN</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.importer_tax_id || ''}
+              onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)}
+              placeholder="Enter importer's tax identification number"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Contact Person</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.importer_contact_person || ''}
+              onChange={(e) => handleFieldChange('importer_contact_person', e.target.value)}
+              placeholder="Primary contact at importing company"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Phone</label>
+            <input
+              type="tel"
+              className="form-input"
+              value={authData.importer_phone || ''}
+              onChange={(e) => handleFieldChange('importer_phone', e.target.value)}
+              placeholder="(555) 123-4567"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={authData.importer_email || ''}
+              onChange={(e) => handleFieldChange('importer_email', e.target.value)}
+              placeholder="contact@importer.com"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Country</label>
+            <select
+              className="form-select"
+              value={authData.importer_country || ''}
+              onChange={(e) => handleFieldChange('importer_country', e.target.value)}
+              required
+            >
+              <option value="">Select country</option>
+              <option value="United States">United States</option>
+              <option value="Canada">Canada</option>
+              <option value="Mexico">Mexico</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
         </div>
       </div>
 
-      {/* 3. Certificate Preview - Shows data from previous steps */}
-      <div className="card">
-        <div className="card-header">
-          <div>
-            <h3 className="card-title">📋 CERTIFICATE PREVIEW</h3>
+      {/* 3. Digital Signature & Certification */}
+      <div className="form-section">
+        <h2 className="form-section-title">✍️ Digital Signature</h2>
+        <p className="form-section-description">
+          Please certify the accuracy of the information before generating your certificate
+        </p>
+
+        <div className="checkbox-group" style={{marginBottom: '1.5rem'}}>
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '1rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.accuracy_certification}
+              onChange={(e) => handleFieldChange('accuracy_certification', e.target.checked)}
+              required
+              style={{marginTop: '0.25rem'}}
+            />
+            <span className="checkbox-text" style={{flex: 1}}>
+              I certify that the information provided is true and accurate
+            </span>
+          </label>
+
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.authority_certification}
+              onChange={(e) => handleFieldChange('authority_certification', e.target.checked)}
+              required
+              style={{marginTop: '0.25rem'}}
+            />
+            <span className="checkbox-text" style={{flex: 1}}>
+              I am authorized to sign this certificate on behalf of {companyName}
+            </span>
+          </label>
+        </div>
+
+        <div className="alert alert-info" style={{marginBottom: '1.5rem'}}>
+          <div className="alert-content">
+            <div className="alert-title">Certification Statement</div>
             <div className="text-body">
-              Review the information that will appear on your USMCA Certificate of Origin
+              "I certify that the goods described in this certificate qualify as originating goods
+              under the USMCA and that the information contained herein is true and accurate."
             </div>
           </div>
-
-          {/* AI Agent Validation removed - was causing performance issues */}
-
-          <button
-            className="btn-primary"
-            disabled={!authData.importer_name}
-            onClick={() => onPreviewCertificate && onPreviewCertificate(authData)}
-          >
-            📄 Generate & Preview Certificate
-          </button>
         </div>
-        
-        <div className="form-section">
-          {/* Certificate Preview Window - Shows professional certificate when generated */}
-          {previewData && previewData.professional_certificate ? (
-            <div className="element-spacing">
+
+        <button
+          className="btn-primary"
+          disabled={!authData.importer_name || !authData.accuracy_certification || !authData.authority_certification}
+          onClick={() => onPreviewCertificate && onPreviewCertificate(authData)}
+        >
+          📄 Generate & Preview Certificate
+        </button>
+      </div>
+
+      {/* 4. Certificate Preview */}
+      <div className="form-section">
+        <h2 className="form-section-title">📋 Certificate Preview</h2>
+        <p className="form-section-description">
+          Review the information that will appear on your USMCA Certificate of Origin
+        </p>
+
+        {/* Certificate Preview Window - Shows professional certificate when generated */}
+        {previewData && previewData.professional_certificate ? (
+            <div className="element-spacing" ref={previewRef}>
               <div className="alert alert-success">
                 <div className="alert-content">
                   <div className="alert-title">✅ Official USMCA Certificate Generated</div>
@@ -324,185 +366,275 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 </div>
               </div>
 
-              {/* Full Certificate Display */}
-              <div style={{border: '2px solid #2563eb', padding: '30px', backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif', lineHeight: '1.6'}}>
-                <div style={{textAlign: 'center', borderBottom: '3px solid #000', paddingBottom: '15px', marginBottom: '25px'}}>
-                  <h3 style={{margin: '0', fontSize: '18px', fontWeight: 'bold', letterSpacing: '0.5px'}}>UNITED STATES-MEXICO-CANADA AGREEMENT</h3>
-                  <h4 style={{margin: '8px 0 0 0', fontSize: '16px', fontWeight: 'bold'}}>CERTIFICATE OF ORIGIN</h4>
-                  <div style={{fontSize: '13px', marginTop: '15px', color: '#334155'}}>
-                    <span style={{marginRight: '20px'}}><strong>Certificate No:</strong> {previewData.professional_certificate.certificate_number}</span>
-                    <span><strong>Date:</strong> {previewData.professional_certificate.generation_info?.generated_date
-                      ? new Date(previewData.professional_certificate.generation_info.generated_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
-                      : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+              {/* Official USMCA Certificate - Matching PDF Template */}
+              <div style={{
+                border: '3px solid #000',
+                backgroundColor: '#ffffff',
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '11px',
+                maxWidth: '850px',
+                margin: '0 auto'
+              }}>
+                {/* Header */}
+                <div style={{
+                  textAlign: 'center',
+                  borderBottom: '2px solid #000',
+                  padding: '10px',
+                  backgroundColor: '#ffffff'
+                }}>
+                  <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>
+                    UNITED STATES MEXICO CANADA AGREEMENT (USMCA)
+                  </div>
+                  <div style={{fontWeight: 'bold', fontSize: '13px'}}>
+                    CERTIFICATION OF ORIGIN
                   </div>
                 </div>
 
-                {/* FIELD 1 - EXPORTER */}
-                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
-                    FIELD 1 - EXPORTER INFORMATION
-                  </div>
-                  <div style={{marginBottom: '6px'}}><strong>Company:</strong> {previewData.professional_certificate.exporter?.name || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Address:</strong> {previewData.professional_certificate.exporter?.address || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Country:</strong> {previewData.professional_certificate.exporter?.country || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Tax ID:</strong> {previewData.professional_certificate.exporter?.tax_id || 'Not specified'}</div>
-                </div>
-
-                {/* FIELD 2 - CERTIFIER */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 2 - CERTIFIER INFORMATION
-                  </div>
-                  <div><strong>Certifier Type:</strong> {previewData.professional_certificate.certifier?.type || 'Exporter'}</div>
-                  <div><strong>Company:</strong> {previewData.professional_certificate.certifier?.name}</div>
-                  <div><strong>Address:</strong> {previewData.professional_certificate.certifier?.address}</div>
-                  <div><strong>Country:</strong> {previewData.professional_certificate.certifier?.country}</div>
-                </div>
-
-                {/* FIELD 3 - PRODUCER */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 3 - PRODUCER INFORMATION
-                  </div>
-                  <div><strong>Producer:</strong> {previewData.professional_certificate.producer?.name}</div>
-                  <div><strong>Address:</strong> {previewData.professional_certificate.producer?.address}</div>
-                  <div><strong>Country:</strong> {previewData.professional_certificate.producer?.country}</div>
-                  <div><strong>Same as Exporter:</strong> {previewData.professional_certificate.producer?.same_as_exporter ? 'Yes' : 'No'}</div>
-                </div>
-
-                {/* FIELD 4 - IMPORTER */}
-                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
-                    FIELD 4 - IMPORTER INFORMATION
-                  </div>
-                  <div style={{marginBottom: '6px'}}><strong>Company:</strong> {previewData.professional_certificate.importer?.name || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Address:</strong> {previewData.professional_certificate.importer?.address || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Country:</strong> {previewData.professional_certificate.importer?.country || 'Not specified'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Tax ID:</strong> {previewData.professional_certificate.importer?.tax_id || 'Not specified'}</div>
-                </div>
-
-                {/* FIELD 5 - DESCRIPTION OF GOOD(S) */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 5 - DESCRIPTION OF GOOD(S)
-                  </div>
-                  <div><strong>HS Code:</strong> {previewData.professional_certificate.hs_classification?.code}</div>
-                  <div><strong>Description:</strong> {previewData.professional_certificate.product?.description}</div>
-                  <div><strong>Manufacturing Location:</strong> {previewData.professional_certificate.country_of_origin}</div>
-                </div>
-
-                {/* FIELD 6 - PREFERENCE CRITERION */}
-                <div style={{margin: '20px 0', padding: '15px', border: '1px solid #cbd5e1', backgroundColor: '#f8fafc', borderRadius: '4px'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e2e8f0', padding: '8px', marginBottom: '12px', fontSize: '14px', borderRadius: '3px'}}>
-                    FIELD 6 - PREFERENCE CRITERION
-                  </div>
-                  <div style={{marginBottom: '6px'}}><strong>Criterion:</strong> {previewData.professional_certificate.preference_criterion || 'B'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Explanation:</strong> {previewData.professional_certificate.criterion_explanation || 'Qualifies under Regional Value Content calculation'}</div>
-                  <div style={{marginBottom: '6px'}}><strong>Regional Value Content:</strong> {previewData.professional_certificate.regional_value_content || 'Not calculated'}</div>
-
-                  {/* Component Breakdown */}
-                  {previewData.professional_certificate.component_origins && previewData.professional_certificate.component_origins.length > 0 && (
-                    <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #cbd5e1'}}>
-                      <div style={{fontWeight: 'bold', marginBottom: '8px', fontSize: '13px'}}>Component Breakdown:</div>
-                      {previewData.professional_certificate.component_origins.map((component, index) => (
-                        <div key={index} style={{marginLeft: '15px', fontSize: '13px', marginBottom: '4px', lineHeight: '1.5'}}>
-                          • <strong>{component.origin_country || component.country}:</strong> {component.value_percentage || component.percentage}%
-                          {component.description && ` - ${component.description}`}
-                        </div>
-                      ))}
+                {/* Section 1: Certifier Type & Blanket Period */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '60% 40%',
+                  borderBottom: '1px solid #000'
+                }}>
+                  <div style={{borderRight: '1px solid #000', padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '6px'}}>
+                      1. CERTIFIER TYPE (INDICATE "X")
                     </div>
-                  )}
-                </div>
-
-                {/* FIELD 7 - PRODUCER DECLARATION */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 7 - PRODUCER DECLARATION
-                  </div>
-                  <div><strong>Is Producer:</strong> {previewData.professional_certificate.producer_declaration?.is_producer ? 'YES' : 'NO'}</div>
-                  <div><strong>Declaration:</strong> {previewData.professional_certificate.producer_declaration?.declaration}</div>
-                </div>
-
-                {/* FIELD 8 - HS CLASSIFICATION */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 8 - HS CLASSIFICATION
-                  </div>
-                  <div><strong>HS Code:</strong> {previewData.professional_certificate.hs_classification?.code}</div>
-                  <div><strong>Verified:</strong> {previewData.professional_certificate.hs_classification?.verified ? 'Yes' : 'No'}</div>
-                  <div><strong>Source:</strong> {previewData.professional_certificate.hs_classification?.verification_source}</div>
-                </div>
-
-                {/* FIELD 9 - METHOD OF QUALIFICATION */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 9 - METHOD OF QUALIFICATION
-                  </div>
-                  <div><strong>Method:</strong> {previewData.professional_certificate.qualification_method?.method}</div>
-                  <div><strong>Description:</strong> {previewData.professional_certificate.qualification_method?.description}</div>
-                </div>
-
-                {/* FIELD 10 - COUNTRY OF ORIGIN */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 10 - COUNTRY OF ORIGIN
-                  </div>
-                  <div><strong>Country:</strong> {previewData.professional_certificate.country_of_origin}</div>
-                  <div><strong>Manufacturing Location:</strong> {previewData.professional_certificate.country_of_origin}</div>
-                </div>
-
-                {/* FIELD 11 - BLANKET PERIOD */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 11 - BLANKET PERIOD
-                  </div>
-                  <div><strong>Start Date:</strong> {previewData.professional_certificate.blanket_period?.start_date}</div>
-                  <div><strong>End Date:</strong> {previewData.professional_certificate.blanket_period?.end_date}</div>
-                </div>
-
-                {/* FIELD 12 - AUTHORIZED SIGNATURE */}
-                <div style={{margin: '15px 0', padding: '10px', border: '1px solid #ddd', backgroundColor: 'white'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    FIELD 12 - AUTHORIZED SIGNATURE
-                  </div>
-                  <div><strong>Signatory Name:</strong> {previewData.professional_certificate.authorization?.signatory_name}</div>
-                  <div><strong>Title:</strong> {previewData.professional_certificate.authorization?.signatory_title}</div>
-                  <div><strong>Date:</strong> {previewData.professional_certificate.authorization?.signature_date
-                    ? new Date(previewData.professional_certificate.authorization.signature_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
-                    : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
-                  <div><strong>Declaration Accepted:</strong> {previewData.professional_certificate.authorization?.declaration_accepted ? 'Yes' : 'No'}</div>
-                </div>
-
-                {/* TRUST VERIFICATION */}
-                {previewData.professional_certificate.trust_verification && (
-                  <div style={{margin: '15px 0', padding: '10px', border: '2px solid #2563eb', backgroundColor: '#eff6ff'}}>
-                    <div style={{fontWeight: 'bold', backgroundColor: '#2563eb', color: 'white', padding: '5px', marginBottom: '10px'}}>
-                      🛡️ TRUST VERIFICATION
+                    <div style={{display: 'flex', gap: '20px', marginLeft: '10px'}}>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'IMPORTER'} />
+                        IMPORTER
+                      </label>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'EXPORTER'} />
+                        EXPORTER
+                      </label>
+                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'PRODUCER'} />
+                        PRODUCER
+                      </label>
                     </div>
-                    <div><strong>Trust Score:</strong> {(previewData.professional_certificate.trust_verification.overall_trust_score * 100).toFixed(1)}%</div>
-                    <div><strong>Trust Level:</strong> {previewData.professional_certificate.trust_verification.trust_level?.toUpperCase()}</div>
-                    <div><strong>Verification Status:</strong> {previewData.professional_certificate.trust_verification.verification_status}</div>
                   </div>
-                )}
-
-                {/* AUTHORIZED SIGNATURE SECTION */}
-                <div style={{marginTop: '20px', borderTop: '2px solid #000', paddingTop: '15px'}}>
-                  <div style={{fontWeight: 'bold', backgroundColor: '#e5e7eb', padding: '5px', marginBottom: '10px'}}>
-                    AUTHORIZED SIGNATURE
-                  </div>
-                  <div><strong>Signatory:</strong> {previewData.professional_certificate.authorization?.signatory_name}</div>
-                  <div><strong>Title:</strong> {previewData.professional_certificate.authorization?.signatory_title}</div>
-                  <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
-                  
-                  <div style={{marginTop: '15px', fontSize: '12px'}}>
-                    <strong>CERTIFICATION:</strong> I certify that the information on this document is true and accurate 
-                    and I assume the responsibility for proving such representations. I further certify that the good(s) 
-                    qualify as originating under the USMCA.
+                  <div style={{padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
+                      BLANKET PERIOD (MM/DD/YYYY)
+                    </div>
+                    <div style={{marginLeft: '10px'}}>
+                      <div>FROM: {previewData.professional_certificate.blanket_period?.start_date || 'N/A'}</div>
+                      <div>TO: {previewData.professional_certificate.blanket_period?.end_date || 'N/A'}</div>
+                    </div>
                   </div>
                 </div>
 
-                <div style={{marginTop: '20px', textAlign: 'center', fontSize: '10px', color: '#666', borderTop: '1px solid #ddd', paddingTop: '10px'}}>
-                  Generated by Triangle Trade Intelligence Platform with Trust Verification
+                {/* Sections 2-5: Contact Information Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  borderBottom: '1px solid #000'
+                }}>
+                  {/* Section 2: Certifier */}
+                  <div style={{borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
+                      2. CERTIFIER NAME, ADDRESS, PHONE, AND EMAIL
+                    </div>
+                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
+                      <div><strong>NAME</strong></div>
+                      <div>{previewData.professional_certificate.certifier?.name || previewData.professional_certificate.exporter?.name}</div>
+                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
+                      <div>{previewData.professional_certificate.certifier?.address || previewData.professional_certificate.exporter?.address}</div>
+                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.certifier?.country || previewData.professional_certificate.exporter?.country}</div>
+                      <div><strong>PHONE</strong> {previewData.professional_certificate.certifier?.phone || 'N/A'}</div>
+                      <div><strong>EMAIL</strong> {previewData.professional_certificate.certifier?.email || 'N/A'}</div>
+                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
+                      <div>{previewData.professional_certificate.certifier?.tax_id || previewData.professional_certificate.exporter?.tax_id}</div>
+                    </div>
+                  </div>
+
+                  {/* Section 3: Exporter */}
+                  <div style={{borderBottom: '1px solid #000', padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
+                      3. EXPORTER NAME, ADDRESS, PHONE, AND EMAIL
+                    </div>
+                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
+                      <div><strong>NAME</strong></div>
+                      <div>{previewData.professional_certificate.exporter?.name}</div>
+                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
+                      <div>{previewData.professional_certificate.exporter?.address}</div>
+                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.exporter?.country}</div>
+                      <div><strong>PHONE</strong> {previewData.professional_certificate.exporter?.phone || 'N/A'}</div>
+                      <div><strong>EMAIL</strong> {previewData.professional_certificate.exporter?.email || 'N/A'}</div>
+                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
+                      <div>{previewData.professional_certificate.exporter?.tax_id}</div>
+                    </div>
+                  </div>
+
+                  {/* Section 4: Producer */}
+                  <div style={{borderRight: '1px solid #000', padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
+                      4. PRODUCER NAME, ADDRESS, PHONE, AND EMAIL
+                    </div>
+                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
+                      <div><strong>NAME</strong></div>
+                      <div>{previewData.professional_certificate.producer?.same_as_exporter ? 'SAME AS EXPORTER' : previewData.professional_certificate.producer?.name}</div>
+                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
+                      <div>{previewData.professional_certificate.producer?.same_as_exporter ? 'SAME AS EXPORTER' : previewData.professional_certificate.producer?.address}</div>
+                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.producer?.country || previewData.professional_certificate.exporter?.country}</div>
+                      <div><strong>PHONE</strong> {previewData.professional_certificate.producer?.phone || 'N/A'}</div>
+                      <div><strong>EMAIL</strong> {previewData.professional_certificate.producer?.email || 'N/A'}</div>
+                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
+                      <div>{previewData.professional_certificate.producer?.tax_id || previewData.professional_certificate.exporter?.tax_id}</div>
+                    </div>
+                  </div>
+
+                  {/* Section 5: Importer */}
+                  <div style={{padding: '8px'}}>
+                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
+                      5. IMPORTER NAME, ADDRESS, PHONE, AND EMAIL
+                    </div>
+                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
+                      <div><strong>NAME</strong></div>
+                      <div>{previewData.professional_certificate.importer?.name}</div>
+                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
+                      <div>{previewData.professional_certificate.importer?.address}</div>
+                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.importer?.country}</div>
+                      <div><strong>PHONE</strong> {previewData.professional_certificate.importer?.phone || 'N/A'}</div>
+                      <div><strong>EMAIL</strong> {previewData.professional_certificate.importer?.email || 'N/A'}</div>
+                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
+                      <div>{previewData.professional_certificate.importer?.tax_id}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 6: Goods Description Table */}
+                <div style={{borderBottom: '1px solid #000'}}>
+                  <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '10px'}}>
+                    <thead>
+                      <tr style={{backgroundColor: '#f5f5f5'}}>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'left', fontWeight: 'bold', width: '30%'}}>
+                          6. DESCRIPTION OF GOOD(S)
+                        </th>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%'}}>
+                          7. HTS
+                        </th>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '15%'}}>
+                          8. ORIGIN CRITERION
+                        </th>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%'}}>
+                          9. PRODUCER (YES/NO)
+                        </th>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '18%'}}>
+                          10. METHOD OF QUALIFICATION
+                        </th>
+                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '13%'}}>
+                          11. COUNTRY OF ORIGIN
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={{border: '1px solid #000', padding: '6px', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.product?.description}
+                        </td>
+                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.hs_classification?.code}
+                        </td>
+                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.preference_criterion || 'B'}
+                        </td>
+                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.producer_declaration?.is_producer ? 'YES' : 'NO'}
+                        </td>
+                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.qualification_method?.method || 'RVC'}
+                        </td>
+                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
+                          {previewData.professional_certificate.country_of_origin}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Certification Statement */}
+                <div style={{borderBottom: '2px solid #000', padding: '10px', fontSize: '9px', lineHeight: '1.4'}}>
+                  I CERTIFY THAT THE GOODS DESCRIBED IN THIS DOCUMENT QUALIFY AS ORIGINATING AND THE INFORMATION CONTAINED IN THIS DOCUMENT IS TRUE
+                  AND ACCURATE. I ASSUME RESPONSIBILITY FOR PROVING SUCH REPRESENTATIONS AND AGREE TO MAINTAIN AND PRESENT UPON REQUEST OR TO MAKE
+                  AVAILABLE DURING A VERIFICATION VISIT, DOCUMENTATION NECESSARY TO SUPPORT THIS CERTIFICATION
+                </div>
+
+                {/* Section 12: Authorization */}
+                <div style={{padding: '10px'}}>
+                  <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '8px'}}>
+                    THIS CERTIFICATE CONSISTS OF _____ PAGES, INCLUDING ALL ATTACHMENTS.
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '10px',
+                    fontSize: '10px'
+                  }}>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12a. AUTHORIZED SIGNATURE</div>
+                      <div style={{borderBottom: '1px solid #000', minHeight: '30px', marginBottom: '8px'}}></div>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12b. COMPANY</div>
+                      <div>{previewData.professional_certificate.exporter?.name}</div>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12c. NAME</div>
+                      <div>{previewData.professional_certificate.authorization?.signatory_name}</div>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12d. TITLE</div>
+                      <div>{previewData.professional_certificate.authorization?.signatory_title}</div>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12e. DATE (MM/DD/YYYY)</div>
+                      <div>{previewData.professional_certificate.authorization?.signature_date
+                        ? new Date(previewData.professional_certificate.authorization.signature_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                        : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
+                    </div>
+                    <div>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12f. TELEPHONE NUMBER</div>
+                      <div>{previewData.professional_certificate.authorization?.phone || 'N/A'}</div>
+                    </div>
+                    <div style={{gridColumn: '1 / -1'}}>
+                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12g. EMAIL</div>
+                      <div>{previewData.professional_certificate.authorization?.email || 'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div style={{
+                  textAlign: 'right',
+                  padding: '8px',
+                  fontSize: '9px',
+                  borderTop: '1px solid #000'
+                }}>
+                  USMCA CERTIFICATE V3
+                </div>
+              </div>
+
+              {/* Certificate Actions - Below Preview */}
+              <div style={{marginTop: '2rem'}}>
+                <div className="hero-buttons">
+                  <button
+                    className="btn-primary"
+                    onClick={() => onDownloadCertificate && onDownloadCertificate()}
+                    disabled={!authData.accuracy_certification || !authData.authority_certification}
+                  >
+                    💾 Download PDF Certificate
+                  </button>
+
+                  <button
+                    className="btn-primary"
+                    onClick={handleSetUpAlerts}
+                  >
+                    🚨 Set Up Trade Alerts
+                  </button>
                 </div>
               </div>
             </div>
@@ -510,137 +642,11 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
             <div className="alert alert-info">
               <div className="alert-content">
                 <div className="text-body">
-                  ℹ️ If any information above is incorrect, go back to previous steps to make changes before finalizing the certificate.
+                  ℹ️ Complete the Digital Signature section above and click "Generate & Preview Certificate" to view your certificate.
                 </div>
               </div>
             </div>
           )}
-          
-        </div>
-      </div>
-
-
-      {/* 3. Digital Signature & Certification */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">✍️ DIGITAL SIGNATURE</h3>
-        </div>
-        
-        <div className="form-section">
-          <div className="checkbox-group">
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={authData.accuracy_certification}
-                onChange={(e) => handleFieldChange('accuracy_certification', e.target.checked)}
-                required
-              />
-              <span className="checkbox-text">
-                I certify that the information provided is true and accurate
-              </span>
-            </label>
-            
-            <label className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={authData.authority_certification}
-                onChange={(e) => handleFieldChange('authority_certification', e.target.checked)}
-                required
-              />
-              <span className="checkbox-text">
-                I am authorized to sign this certificate on behalf of {companyName}
-              </span>
-            </label>
-          </div>
-          
-          <div className="alert alert-info">
-            <div className="alert-content">
-              <div className="alert-title">Certification Statement</div>
-              <div className="text-body">
-                "I certify that the goods described in this certificate qualify as originating goods 
-                under the USMCA and that the information contained herein is true and accurate."
-              </div>
-            </div>
-          </div>
-
-          {/* Certificate Generation Status & Actions */}
-          <div className="element-spacing">
-            {/* Debug info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div style={{fontSize: '10px', color: '#666', marginBottom: '10px'}}>
-                Debug: previewData: {previewData ? 'YES' : 'NO'}, generatedPDF: {generatedPDF ? 'YES' : 'NO'}
-              </div>
-            )}
-            
-            {/* Certificate Generation Success - Clean display */}
-            {previewData && previewData.professional_certificate && (
-              <div className="alert alert-success">
-                <div className="alert-content">
-                  <div className="alert-title">✅ Certificate Generated Successfully</div>
-                  <div className="text-body">
-                    Certificate #{previewData.certificate_number} | Trust Score: {previewData.professional_certificate.trust_verification ? 
-                    (previewData.professional_certificate.trust_verification.overall_trust_score * 100).toFixed(1) + '%' : 'Calculating...'} | 
-                    HS Code: {previewData.professional_certificate.hs_classification?.code || workflowData?.product?.hs_code || 'Not specified'}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Download/Email Actions - Show when certificate is generated */}
-            {(previewData && previewData.professional_certificate) && (
-              <div className="hero-buttons">
-                <button 
-                  className="btn-primary"
-                  onClick={() => onDownloadCertificate && onDownloadCertificate()}
-                  disabled={!authData.accuracy_certification || !authData.authority_certification}
-                >
-                  💾 Download PDF Certificate
-                </button>
-                
-                <button
-                  className="btn-secondary"
-                  onClick={() => onEmailToImporter && onEmailToImporter(authData)}
-                  disabled={!authData.importer_email || !authData.accuracy_certification || !authData.authority_certification}
-                >
-                  ✉️ Email to Importer
-                </button>
-
-                <button
-                  className="btn-primary"
-                  onClick={handleSetUpAlerts}
-                >
-                  🚨 Set Up Trade Alerts
-                </button>
-
-                <button
-                  className="btn-secondary"
-                  onClick={() => window.location.href = '/services/logistics-support'}
-                >
-                  🇲🇽 Need Mexico Suppliers?
-                </button>
-              </div>
-            )}
-            
-            {/* Certification Required Warning */}
-            {(previewData && previewData.professional_certificate) && (!authData.accuracy_certification || !authData.authority_certification) && (
-              <div className="alert alert-warning">
-                <div className="alert-content">
-                  <div className="alert-title">📝 Certification Required</div>
-                  <div className="text-body">
-                    Check both certification boxes above to enable download and email options.
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Initial Instructions */}
-            {!previewData && (
-              <div className="text-body" style={{textAlign: 'center'}}>
-                Use "📄 Generate & Preview Certificate" button above to create your certificate
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

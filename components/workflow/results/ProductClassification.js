@@ -46,165 +46,35 @@ export default function ProductClassification({ results, onClassificationAction 
   };
 
   return (
-    <div className="element-spacing">
-      <h3 className="card-title">Product Classification Results</h3>
-      <div className="card">
-        <div className="classification-grid">
-          <div className="classification-item">
-            <span className="classification-label">HS Code:</span>
-            <span className="classification-value hs-code-display">
-              {hsCode}
-            </span>
-          </div>
-          <div className="classification-item">
-            <span className="classification-label">Product:</span>
-            <span className="classification-value">
-              {description}
-            </span>
-          </div>
-          <div className="classification-item">
-            <span className="classification-label">AI Confidence:</span>
-            <span className={`classification-value ${getConfidenceColor(confidence)}`}>
-              {confidence.toFixed(1)}%
-            </span>
-          </div>
-          <div className="classification-item">
-            <span className="classification-label">Method:</span>
-            <span className="classification-value">
-              {method === 'ai_enhanced' ? 'AI-Enhanced Classification' : 
-               method === 'manual' ? 'Manual Entry' : 
-               method || 'Standard Classification'}
-            </span>
+    <div className="card-content">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>HS Code</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{hsCode}</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>AI Confidence</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
+            {confidence >= 90 ? 'High' : confidence >= 75 ? 'Medium' : 'Low'} ({confidence.toFixed(0)}%)
           </div>
         </div>
-
-        {/* Comtrade Market Insights */}
-        {results.product.comtrade_insights && (
-          <div className="classification-insights element-spacing">
-            <h4 className="section-subtitle">📊 Market Intelligence</h4>
-            <div className="classification-grid">
-              {results.product.comtrade_insights.trade_volume_usd && (
-                <div className="classification-item">
-                  <span className="classification-label">Global Trade Volume:</span>
-                  <span className="classification-value">
-                    ${(results.product.comtrade_insights.trade_volume_usd / 1000000000).toFixed(1)}B USD
-                  </span>
-                </div>
-              )}
-              {results.product.comtrade_insights.growth_trend && (
-                <div className="classification-item">
-                  <span className="classification-label">Growth Trend:</span>
-                  <span className={`classification-value ${results.product.comtrade_insights.growth_trend > 0 ? 'status-success' : 'status-warning'}`}>
-                    {results.product.comtrade_insights.growth_trend > 0 ? '+' : ''}{results.product.comtrade_insights.growth_trend}%
-                  </span>
-                </div>
-              )}
-              {results.product.comtrade_insights.primary_exporters && (
-                <div className="classification-item">
-                  <span className="classification-label">Primary Exporters:</span>
-                  <span className="classification-value">
-                    {Array.isArray(results.product.comtrade_insights.primary_exporters)
-                      ? results.product.comtrade_insights.primary_exporters.slice(0, 3).join(', ')
-                      : results.product.comtrade_insights.primary_exporters}
-                  </span>
-                </div>
-              )}
-              {results.product.comtrade_insights.market_share && (
-                <div className="classification-item">
-                  <span className="classification-label">Market Share:</span>
-                  <span className="classification-value">
-                    {results.product.comtrade_insights.market_share}%
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* AI Fallback Information */}
-        {results.product.fallback_info && (
-          <div className="classification-fallback element-spacing">
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <h4 className="alert-title">Classification Notice</h4>
-                <p className="text-body">{results.product.fallback_info.user_message}</p>
-
-                {results.product.fallback_info.requires_user_decision && (
-                  <div className="hero-button-group element-spacing">
-                    {results.product.fallback_info.user_options?.map((option, index) => (
-                      <button
-                        key={index}
-                        className={option.recommended ? 'btn-primary' : 'btn-secondary'}
-                        onClick={() => handleUserOption(option.action)}
-                      >
-                        {option.label}
-                        {option.confidence && (
-                          <span className="confidence-indicator">
-                            ({option.confidence} confidence)
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div className="text-muted">
-                  Fallback method: {results.product.fallback_info.method}
-                  {results.product.fallback_info.confidence && (
-                    <> • Confidence: {results.product.fallback_info.confidence}</>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tariff Information if available */}
-        {results.product.tariff_rates && (
-          <div className="classification-tariffs">
-            <h4 className="form-label">Tariff Rates</h4>
-            <div className="tariff-comparison">
-              <div className="tariff-item">
-                <span className="tariff-label">MFN Rate:</span>
-                <span className="tariff-value">
-                  {results.product.tariff_rates.mfn_rate || '0'}%
-                </span>
-              </div>
-              <div className="tariff-item">
-                <span className="tariff-label">USMCA Rate:</span>
-                <span className="tariff-value status-success">
-                  {results.product.tariff_rates.usmca_rate || '0'}%
-                </span>
-              </div>
-              {results.product.tariff_rates.savings_percent && (
-                <div className="tariff-item">
-                  <span className="tariff-label">Potential Savings:</span>
-                  <span className="tariff-value status-success">
-                    {results.product.tariff_rates.savings_percent}%
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* AI Analysis Details */}
-        {confidence >= 85 && (
-          <div className="alert alert-success">
-            <div className="alert-content">
-              <strong>High Confidence Classification:</strong> Our AI system is highly confident in this classification based on the product description and business context.
-            </div>
-          </div>
-        )}
-        
-        {confidence < 75 && (
-          <div className="alert alert-warning">
-            <div className="alert-content">
-              <strong>Manual Review Recommended:</strong> Consider verifying this classification with a trade expert or customs broker.
-            </div>
-          </div>
-        )}
       </div>
+
+      <div style={{ marginTop: '1rem', fontSize: '0.9375rem', color: '#374151' }}>
+        <div style={{ marginBottom: '0.5rem' }}>
+          <span style={{ fontWeight: '500' }}>Product:</span> {description}
+        </div>
+        <div>
+          <span style={{ fontWeight: '500' }}>Company:</span> {results.company?.name || results.company?.company_name || 'N/A'}
+        </div>
+      </div>
+
+      {/* Warnings for low confidence */}
+      {confidence < 75 && (
+        <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fef3c7', borderLeft: '3px solid #f59e0b', borderRadius: '4px', fontSize: '0.875rem' }}>
+          <strong>⚠️ Review Recommended:</strong> Consider verifying this classification with a customs broker.
+        </div>
+      )}
     </div>
   );
 }

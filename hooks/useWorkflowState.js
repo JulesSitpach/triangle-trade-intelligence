@@ -8,7 +8,27 @@ import { useState, useEffect, useCallback } from 'react';
 import { workflowService } from '../lib/services/workflow-service.js';
 
 export function useWorkflowState() {
-  const [currentStep, setCurrentStep] = useState(1);
+  // Initialize step - check localStorage for saved session
+  const [currentStep, setCurrentStep] = useState(() => {
+    // Check if there's a saved step from a previous session
+    if (typeof window !== 'undefined') {
+      const savedStep = localStorage.getItem('workflow_current_step');
+      const savedResults = localStorage.getItem('usmca_workflow_results');
+
+      // If we have saved results, restore to step 3 (results page)
+      if (savedResults && savedStep) {
+        console.log('📂 Restoring workflow session - Step', savedStep);
+        return parseInt(savedStep, 10);
+      } else if (savedResults) {
+        console.log('📂 Restoring workflow results - Jumping to step 3');
+        return 3; // Results step
+      }
+    }
+
+    // Default: start at step 1 for new workflow
+    return 1;
+  });
+
   const [workflowPath, setWorkflowPath] = useState(null); // 'crisis-calculator', 'certificate', or null
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState(null);
@@ -39,10 +59,8 @@ export function useWorkflowState() {
     return null;
   };
 
-  // Form data state with saved data or defaults
-  const [formData, setFormData] = useState(() => {
-    const saved = loadSavedData();
-    return saved || {
+  // Form data state - initialize with defaults only (load saved data in useEffect)
+  const [formData, setFormData] = useState({
       // Company Information
       company_name: '',
       business_type: '',
@@ -66,11 +84,17 @@ export function useWorkflowState() {
       hs_code_confidence: 0,
       hs_code_description: '',
       classification_method: '',
-      
+
       // Component Origins
       component_origins: []
-    };
   });
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && currentStep) {
+      localStorage.setItem('workflow_current_step', currentStep.toString());
+    }
+  }, [currentStep]);
 
   // Load dropdown options on mount
   useEffect(() => {
@@ -89,6 +113,58 @@ export function useWorkflowState() {
     loadOptions();
   }, []);
 
+  // Load saved form data from localStorage (client-side only)
+  useEffect(() => {
+    const saved = loadSavedData();
+    if (saved) {
+      setFormData(saved);
+      console.log('✅ Loaded saved form data from localStorage:', {
+        company_name: saved.company_name,
+        product_description: saved.product_description,
+        component_origins_count: saved.component_origins?.length
+      });
+    } else {
+      console.log('ℹ️ No saved form data found in localStorage');
+    }
+  }, []);
+
+  // Load saved results from localStorage (client-side only)
+  // Note: currentStep is now restored in the useState initializer
+  useEffect(() => {
+    const savedResults = localStorage.getItem('usmca_workflow_results');
+
+    if (savedResults) {
+      try {
+        const parsed = JSON.parse(savedResults);
+        setResults(parsed);
+
+        // CRITICAL FIX: Also populate formData from saved results
+        // This ensures when users navigate back to earlier steps, form fields are populated
+        if (parsed) {
+          setFormData(prev => ({
+            ...prev,
+            company_name: parsed.company?.name || parsed.company?.company_name || prev.company_name,
+            business_type: parsed.company?.business_type || prev.business_type,
+            trade_volume: parsed.company?.trade_volume || prev.trade_volume,
+            company_address: parsed.company?.company_address || parsed.company?.address || prev.company_address,
+            tax_id: parsed.company?.tax_id || prev.tax_id,
+            contact_person: parsed.company?.contact_person || prev.contact_person,
+            contact_phone: parsed.company?.contact_phone || parsed.company?.phone || prev.contact_phone,
+            contact_email: parsed.company?.contact_email || parsed.company?.email || prev.contact_email,
+            product_description: parsed.product?.description || prev.product_description,
+            manufacturing_location: parsed.usmca?.manufacturing_location || prev.manufacturing_location,
+            classified_hs_code: parsed.product?.hs_code || prev.classified_hs_code,
+            component_origins: parsed.components || parsed.component_origins || prev.component_origins
+          }));
+        }
+
+        console.log('✅ Loaded saved results from localStorage AND populated formData');
+      } catch (e) {
+        console.error('Error loading saved results:', e);
+      }
+    }
+  }, []);
+
   // Load workflow data from database on mount
   useEffect(() => {
     const loadFromDatabase = async () => {
@@ -100,7 +176,16 @@ export function useWorkflowState() {
             const result = await response.json();
             if (result.success && result.data) {
               console.log('✅ Restored workflow data from database');
-              setFormData(prev => ({ ...prev, ...result.data }));
+
+              // Filter out null/undefined values to avoid overwriting localStorage data
+              const cleanData = Object.entries(result.data).reduce((acc, [key, value]) => {
+                if (value !== null && value !== undefined && value !== '') {
+                  acc[key] = value;
+                }
+                return acc;
+              }, {});
+
+              setFormData(prev => ({ ...prev, ...cleanData }));
             }
           }
         } catch (error) {
@@ -135,6 +220,11 @@ export function useWorkflowState() {
     if (typeof window !== 'undefined' && formData.company_name) {
       // Save to localStorage immediately (for instant access)
       localStorage.setItem('triangleUserData', JSON.stringify(formData));
+      console.log('💾 Saved form data to localStorage:', {
+        company_name: formData.company_name,
+        product_description: formData.product_description,
+        component_origins_count: formData.component_origins?.length
+      });
 
       // Debounce database save (2 seconds after user stops typing)
       const saveTimer = setTimeout(async () => {
@@ -307,7 +397,13 @@ export function useWorkflowState() {
     setCurrentStep(1);
     setResults(null);
     setError(null);
-    
+
+    // Clear saved step and results from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('workflow_current_step');
+      localStorage.removeItem('usmca_workflow_results');
+    }
+
     // Complete form reset - clear ALL fields for new analysis
     setFormData({
       company_name: '',
@@ -335,9 +431,20 @@ export function useWorkflowState() {
 
   // Navigation helpers
   const goToStep = useCallback((step) => {
+    console.log(`📍 Navigating to step ${step} - Current formData:`, {
+      company_name: formData.company_name,
+      product_description: formData.product_description,
+      component_origins_count: formData.component_origins?.length
+    });
+
     setCurrentStep(step);
     setError(null); // Clear any previous errors when navigating
-  }, []);
+
+    // Save step to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('workflow_current_step', step.toString());
+    }
+  }, [formData]);
 
   const nextStep = useCallback((path = 'default') => {
     if (path !== 'default') {
@@ -411,6 +518,69 @@ export function useWorkflowState() {
     setError(null);
   }, []);
 
+  // Load saved workflow from dashboard
+  const loadSavedWorkflow = useCallback((workflow) => {
+    console.log('📥 Loading saved workflow:', workflow);
+
+    // Convert workflow data to results format
+    const workflowData = workflow.workflow_data || {};
+
+    const loadedResults = {
+      success: true,
+      company: {
+        name: workflow.company_name,
+        company_name: workflow.company_name,
+        business_type: workflow.business_type,
+        trade_volume: workflow.trade_volume,
+        ...workflowData.company
+      },
+      product: {
+        hs_code: workflow.hs_code,
+        description: workflow.product_description,
+        confidence: workflowData.classification_confidence || 95,
+        ...workflowData.product
+      },
+      usmca: {
+        qualified: workflow.qualification_status === 'QUALIFIED',
+        north_american_content: workflow.regional_content_percentage,
+        regional_content: workflow.regional_content_percentage,
+        threshold_applied: workflow.required_threshold,
+        component_breakdown: workflow.component_origins || workflowData.components || [],
+        ...workflowData.usmca
+      },
+      savings: {
+        annual_savings: workflow.estimated_annual_savings || 0,
+        ...workflowData.savings
+      },
+      component_origins: workflow.component_origins || workflowData.components || [],
+      components: workflow.component_origins || workflowData.components || []
+    };
+
+    // CRITICAL FIX: Also populate formData so step navigation works
+    // This ensures when users click back to Step 1 or 2, the form fields are populated
+    setFormData(prev => ({
+      ...prev,
+      company_name: workflow.company_name || workflowData.company?.name || '',
+      business_type: workflow.business_type || workflowData.company?.business_type || '',
+      trade_volume: workflow.trade_volume || workflowData.company?.trade_volume || '',
+      company_address: workflowData.company?.company_address || workflowData.company?.address || '',
+      tax_id: workflowData.company?.tax_id || '',
+      contact_person: workflowData.company?.contact_person || '',
+      contact_phone: workflowData.company?.contact_phone || workflowData.company?.phone || '',
+      contact_email: workflowData.company?.contact_email || workflowData.company?.email || '',
+      product_description: workflow.product_description || workflowData.product?.description || '',
+      manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || 'MX',
+      classified_hs_code: workflow.hs_code || workflowData.product?.hs_code || '',
+      component_origins: workflow.component_origins || workflowData.components || []
+    }));
+
+    // Set results and jump to results page
+    setResults(loadedResults);
+    setCurrentStep(5);
+
+    console.log('✅ Workflow loaded, showing results AND formData populated for navigation');
+  }, []);
+
   return {
     // State
     currentStep,
@@ -421,28 +591,29 @@ export function useWorkflowState() {
     dropdownOptions,
     isLoadingOptions,
     formData,
-    
+
     // Form actions
     updateFormData,
     addComponentOrigin,
     updateComponentOrigin,
     removeComponentOrigin,
-    
+
     // Workflow actions
     processWorkflow,
     classifyProduct,
     resetWorkflow,
-    
+    loadSavedWorkflow,
+
     // Navigation
     goToStep,
     nextStep,
     previousStep,
-    
+
     // Validation
     isFormValid,
     isStepValid,
     getTotalComponentPercentage,
-    
+
     // Error handling
     clearError
   };

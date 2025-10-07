@@ -66,24 +66,31 @@ export default protectedApiHandler({
         .order('completed_at', { ascending: false });
 
       // Transform workflow_sessions data
-      const sessionWorkflows = (sessionsRows || []).map(row => ({
-        id: row.id,
-        source: 'session',
-        company_name: row.company_name,
-        business_type: row.business_type,
-        product_description: row.product_description,
-        hs_code: row.hs_code,
-        qualification_status: row.qualification_status,
-        regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
-        required_threshold: parseFloat(row.required_threshold) || 60,
-        trade_volume: parseFloat(row.trade_volume) || 0,
-        estimated_annual_savings: 0,
-        component_origins: row.component_origins || [],
-        completed_at: row.completed_at || row.created_at,
-        manufacturing_location: row.manufacturing_location,
-        certificate_data: null,
-        certificate_generated: false
-      }));
+      const sessionWorkflows = (sessionsRows || []).map(row => {
+        // Extract workflow_data if available
+        const workflowData = row.workflow_data || {};
+
+        return {
+          id: row.id,
+          source: 'session',
+          company_name: row.company_name,
+          business_type: row.business_type,
+          product_description: row.product_description,
+          hs_code: row.hs_code,
+          qualification_status: row.qualification_status,
+          regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
+          required_threshold: parseFloat(row.required_threshold) || 60,
+          trade_volume: parseFloat(row.trade_volume) || 0,
+          estimated_annual_savings: 0,
+          component_origins: row.component_origins || [],
+          completed_at: row.completed_at || row.created_at,
+          manufacturing_location: row.manufacturing_location,
+          certificate_data: null,
+          certificate_generated: false,
+          // Include full workflow_data for certificate generation
+          workflow_data: workflowData
+        };
+      });
 
       // Transform workflow_completions data
       const completionWorkflows = (completionsRows || []).map(row => {
@@ -106,7 +113,9 @@ export default protectedApiHandler({
           completed_at: row.completed_at || row.created_at,
           manufacturing_location: qualificationResult.manufacturing_location || '',
           certificate_data: workflowData.certificate || null,
-          certificate_generated: !!row.certificate_generated
+          certificate_generated: !!row.certificate_generated,
+          // Include full workflow_data for certificate generation
+          workflow_data: workflowData
         };
       });
 

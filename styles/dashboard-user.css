@@ -1,0 +1,619 @@
+/* ================== USER DASHBOARD CSS ================== */
+/* Minimal professional CSS - ~250 lines */
+/* Font: Roboto only */
+/* SCOPED TO .user-dashboard-page FOR SPECIFICITY */
+
+/* ================== 1. LAYOUT ================== */
+
+.user-dashboard-page .dashboard-container,
+.dashboard-container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 5rem 1rem 2rem 1rem !important;
+  font-family: 'Roboto' !important;
+}
+
+/* Workflow results has workflow progress above it, needs less top padding */
+.workflow-results-container {
+  padding-top: 1.5rem !important;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem !important;
+  text-align: center !important;
+}
+
+.dashboard-title {
+  font-family: 'Roboto' !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin: 0 0 0.5rem 0 !important;
+}
+
+.dashboard-subtitle {
+  font-family: 'Roboto' !important;
+  font-size: 1rem !important;
+  color: #6b7280 !important;
+  margin: 0 !important;
+}
+
+.form-section {
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  padding: 2rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.dashboard-actions {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 1.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 1.5rem !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.dashboard-actions-left {
+  flex: 1 !important;
+}
+
+.dashboard-actions-right {
+  flex: 0 !important;
+}
+
+/* ================== 2. TYPOGRAPHY ================== */
+
+.section-title {
+  font-family: 'Roboto';
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #134169;
+  margin-bottom: 0.5rem;
+}
+
+.section-description {
+  font-family: 'Roboto';
+  font-size: 1.125rem;
+  color: #6b7280;
+}
+
+.content-card-title {
+  font-family: 'Roboto';
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.text-body {
+  font-family: 'Roboto';
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.text-bold {
+  font-family: 'Roboto';
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* ================== 3. FORMS ================== */
+
+.form-section-title {
+  font-family: 'Roboto' !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  margin: 0 0 0.5rem 0 !important;
+  padding-bottom: 0.5rem !important;
+  border-bottom: 2px solid #2563eb !important;
+}
+
+.form-section-title:not(:first-child) {
+  margin-top: 2rem !important;
+}
+
+.form-section-description {
+  font-family: 'Roboto';
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-family: 'Roboto';
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: #dc2626;
+}
+
+.form-input, .form-select {
+  font-family: 'Roboto' !important;
+  width: 100% !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  background: white !important;
+  color: #1f2937 !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.form-help {
+  font-family: 'Roboto';
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+.professional-input-group {
+  position: relative;
+}
+
+.input-with-prefix {
+  position: relative;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.input-with-prefix .form-input {
+  padding-left: 2rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-top: 2rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.alert-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  font-family: 'Roboto';
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 0.25rem;
+}
+
+.service-request-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ================== 4. BUTTONS ================== */
+
+.btn-primary {
+  font-family: 'Roboto';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  font-family: 'Roboto';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1f2937;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ================== 5. COMPONENTS ================== */
+
+.hero-badge {
+  font-family: 'Roboto';
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 24px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+  transition: width 0.3s ease;
+  border-radius: 12px;
+}
+
+/* ================== 6. STATUS BADGES ================== */
+
+.status-qualified {
+  font-family: 'Roboto';
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-not-qualified {
+  font-family: 'Roboto';
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-high {
+  font-family: 'Roboto';
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-medium {
+  font-family: 'Roboto';
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Status Grid Layout - adaptive grid */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.status-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.status-label {
+  font-family: 'Roboto';
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.status-value {
+  font-family: 'Roboto';
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.status-value.success {
+  color: #16a34a;
+}
+
+.status-value.warning {
+  color: #f59e0b;
+}
+
+.status-value.error {
+  color: #dc2626;
+}
+
+/* Responsive status grid */
+@media (max-width: 768px) {
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================== 7. WORKFLOW PROGRESS ================== */
+
+.workflow-progress {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  max-width: 700px;
+  margin: 0 auto 2rem auto;
+  padding: 1rem 2rem;
+  position: relative;
+}
+
+.workflow-progress::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+.workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.workflow-step-indicator {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.workflow-step.active .workflow-step-indicator {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.workflow-step.complete .workflow-step-indicator {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: white;
+}
+
+.workflow-step-label {
+  font-family: 'Roboto';
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  font-weight: 400;
+  white-space: pre-line;
+  max-width: 120px;
+}
+
+.workflow-step.active .workflow-step-label {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.workflow-step.complete .workflow-step-label {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* Clickable workflow steps */
+.workflow-step.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.workflow-step.clickable:hover {
+  transform: translateY(-2px);
+}
+
+.workflow-step.clickable:hover .workflow-step-indicator {
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.15);
+  border-color: #2563eb;
+}
+
+.workflow-step.clickable.complete:hover .workflow-step-indicator {
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.15);
+  border-color: #16a34a;
+}
+
+.workflow-step.clickable:hover .workflow-step-label {
+  color: #2563eb;
+}
+
+.workflow-step.clickable.complete:hover .workflow-step-label {
+  color: #16a34a;
+}
+
+/* ================== 8. RESPONSIVE ================== */
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 80px 1rem 1rem 1rem;
+  }
+
+  .container-app {
+    padding: 80px 1rem 0 1rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .content-card {
+    padding: 1.5rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .workflow-progress {
+    max-width: 100%;
+    padding: 0.75rem 1rem;
+  }
+
+  .workflow-progress::before {
+    left: 15%;
+    right: 15%;
+  }
+
+  .workflow-step-label {
+    font-size: 0.625rem;
+    white-space: normal;
+    max-width: 70px;
+  }
+
+  .workflow-step-indicator {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .content-card-title {
+    font-size: 1.25rem;
+  }
+
+  .workflow-progress {
+    padding: 0.5rem;
+  }
+
+  .workflow-step-indicator {
+    width: 28px;
+    height: 28px;
+    font-size: 0.625rem;
+  }
+
+  .workflow-step-label {
+    font-size: 0.5rem;
+    max-width: 55px;
+  }
+}

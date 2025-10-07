@@ -6,6 +6,19 @@ import EnhancedClassificationAgent from '../../../lib/agents/enhanced-classifica
 import { ClassificationAgent } from '../../../lib/agents/classification-agent.js'; // Fallback
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
 
+function extractShortDescription(explanation, productDescription) {
+  if (!explanation) return productDescription || 'Product classification';
+
+  // Extract first text in single quotes (OpenRouter format: "HS code 8413.91.90 'Parts of pumps for liquids'")
+  const quoteMatch = explanation.match(/'([^']+)'/);
+  if (quoteMatch) {
+    return quoteMatch[1].trim();
+  }
+
+  // Fallback
+  return productDescription || 'Product classification';
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -50,9 +63,13 @@ export default async function handler(req, res) {
 
         // Tariff analysis
         tariff_analysis: {
-          mfn_rate: aiResult.data.mfnRate ? `${aiResult.data.mfnRate}%` : 'Not available',
-          usmca_rate: aiResult.data.usmcaRate ? `${aiResult.data.usmcaRate}%` : 'Not available',
-          qualifies_for_usmca: aiResult.data.usmcaRate && aiResult.data.mfnRate ? aiResult.data.usmcaRate < aiResult.data.mfnRate : false
+          mfn_rate: aiResult.data.mfnRate ? `${(aiResult.data.mfnRate * 100).toFixed(2)}%` : 'Not available',
+          usmca_rate: aiResult.data.usmcaRate !== undefined && aiResult.data.usmcaRate !== null
+            ? `${(aiResult.data.usmcaRate * 100).toFixed(2)}%`
+            : 'Not available',
+          qualifies_for_usmca: aiResult.data.usmcaRate !== undefined && aiResult.data.mfnRate
+            ? aiResult.data.usmcaRate < aiResult.data.mfnRate
+            : false
         },
 
         // Additional AI insights
@@ -73,7 +90,7 @@ export default async function handler(req, res) {
         // Backward compatibility data
         data: {
           hsCode: aiResult.data.hsCode,
-          description: aiResult.data.description,
+          description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
           confidence: Math.round(aiResult.data.confidence || 0),
           explanation: aiResult.data.explanation,
           reasoning: aiResult.data.explanation,

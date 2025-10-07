@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import '../styles/globals.css'
-import '../styles/dashboard.css'
+import '../styles/dashboard-user.css'
 import '../styles/salesforce-tables.css'
 import '../styles/agent-components.css'
-import '../styles/admin-workflows.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
 import { SimpleAuthProvider } from '../lib/contexts/SimpleAuthContext'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -14,35 +12,17 @@ import ErrorBoundary from '../components/ErrorBoundary'
 // import { TriangleStateProvider } from '../lib/state/TriangleStateContext'
 
 export default function App({ Component, pageProps }) {
-  const [showLoading, setShowLoading] = useState(true)
-  
-  useEffect(() => {
-    // Hide loading overlay when React hydrates
-    const timer = setTimeout(() => {
-      setShowLoading(false)
-      // Ensure dark background is visible
-      document.documentElement.style.visibility = 'visible'
-      document.body.style.visibility = 'visible'
-    }, 100)
-
-    return () => clearTimeout(timer)
-  }, [])
-
   return (
     <>
       <Head>
         <title>Triangle Trade Intelligence - Simplified</title>
         <meta name="description" content="Simplified tariff optimization and triangle routing intelligence for reliable operation" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </Head>
-      
-      {/* Loading overlay - hidden when React hydrates */}
-      {showLoading && (
-        <div className="loading-overlay">
-          Triangle Trade Intelligence Loading... (Simplified Mode)
-        </div>
-      )}
-      
+
       <ErrorBoundary>
         <SimpleAuthProvider>
           <AlertProvider>

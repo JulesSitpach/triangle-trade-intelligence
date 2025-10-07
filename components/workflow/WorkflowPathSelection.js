@@ -30,11 +30,11 @@ export default function WorkflowPathSelection({
   const tradeVolume = getTradeVolumeDisplay();
 
   return (
-    <div className="card">
-      <div className="section-header">
-        <h2 className="section-header-title">
+    <div className="form-section">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">
           Choose Your Protection Level
-        </h2>
+        </h1>
         <p className="text-body">
           You've provided all the data we need for <strong>{formData.company_name}</strong>
         </p>

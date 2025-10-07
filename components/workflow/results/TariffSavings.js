@@ -18,41 +18,31 @@ export default function TariffSavings({ results }) {
   } = results.savings;
 
   return (
-    <div className="element-spacing">
-      {/* Prominent Annual Savings Highlight */}
-      <div className="alert alert-success">
-        <div className="alert-content">
-          <div className="alert-title">
-            <DollarSign className="icon-sm" />
-            Potential Annual Tariff Savings
-          </div>
-          <div className="calculator-metric-value success">
-            ${annual_savings.toLocaleString()}
-          </div>
-          <div className="text-body">
-            Through USMCA qualification ({savings_percentage.toFixed(1)}% savings rate)
-          </div>
+    <div className="card-content">
+      {/* Annual Savings Highlight */}
+      <div style={{ textAlign: 'center', padding: '2rem', backgroundColor: '#f0fdf4', borderRadius: '4px', marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '0.5rem' }}>Estimated Annual Savings</div>
+        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#15803d', marginBottom: '0.5rem' }}>
+          ${annual_savings.toLocaleString()}
+        </div>
+        <div style={{ fontSize: '0.875rem', color: '#166534' }}>
+          {savings_percentage.toFixed(1)}% tariff savings through USMCA qualification
         </div>
       </div>
 
-      {/* Detailed Analysis Card */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">Tariff Rate Comparison</h3>
+      {/* Tariff Comparison */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Without USMCA</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{mfn_rate}%</div>
         </div>
-        <div className="status-grid">
-          <div className="status-card">
-            <div className="status-label">Standard MFN Rate</div>
-            <div className="status-value warning">{mfn_rate}%</div>
-          </div>
-          <div className="status-card success">
-            <div className="status-label">USMCA Preferential Rate</div>
-            <div className="status-value success">{usmca_rate !== undefined ? usmca_rate : 0}%</div>
-          </div>
-          <div className="status-card">
-            <div className="status-label">Monthly Savings</div>
-            <div className="status-value">${monthly_savings.toLocaleString()}</div>
-          </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>With USMCA</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{usmca_rate !== undefined ? usmca_rate : 0}%</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Monthly Savings</div>
+          <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>${monthly_savings.toLocaleString()}</div>
         </div>
       </div>
     </div>

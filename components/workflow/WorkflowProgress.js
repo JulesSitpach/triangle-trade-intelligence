@@ -4,19 +4,25 @@
  * Now using professional enterprise design system
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function WorkflowProgress({ 
-  currentStep, 
+export default function WorkflowProgress({
+  currentStep,
   onStepClick,
   trustIndicators,
-  isStepClickable = false 
+  isStepClickable = false
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const steps = [
-    { step: 1, label: 'Company Information', icon: 'CO' },
-    { step: 2, label: 'Product & Component Analysis', icon: 'PC' },
-    { step: 3, label: 'USMCA Results Review', icon: 'RR' },
-    { step: 4, label: 'Certificate Authorization', icon: 'CA' }
+    { step: 1, label: 'Company Information', icon: '1' },
+    { step: 2, label: 'Product & Component\nAnalysis', icon: '2' },
+    { step: 3, label: 'Results', icon: '3' },
+    { step: 4, label: 'Generate Certificate', icon: '4' }
   ];
 
   const handleStepClick = (step) => {
@@ -26,43 +32,38 @@ export default function WorkflowProgress({
   };
 
   const getStepStatus = (step) => {
+    if (!mounted) return 'inactive'; // Prevent hydration mismatch
     if (step < currentStep) return 'complete';
     if (step === currentStep) return 'active';
     return 'inactive';
   };
 
   return (
-    <section className="main-content">
-      <div className="container-app">
+    <div className="workflow-progress">
+      {/* Step Indicators */}
+      {steps.map((item, index) => {
+        const status = getStepStatus(item.step);
+        const isActive = status === 'active';
+        const isComplete = status === 'complete';
 
-        {/* Professional Progress Bar */}
-        <div className="workflow-progress">
-            {/* Step Indicators */}
-            {steps.map((item, index) => {
-              const status = getStepStatus(item.step);
-              const isActive = status === 'active';
-              const isComplete = status === 'complete';
-              
-              return (
-                <div 
-                  key={item.step}
-                  onClick={() => handleStepClick(item.step)}
-                  className={`workflow-step ${status} ${isStepClickable ? 'clickable' : ''}`}
-                >
-                  {/* Step Badge - Using existing hero-badge style for consistency */}
-                  <div className={`hero-badge ${isComplete ? 'completed' : isActive ? 'active' : 'inactive'}`}>
-                    {isComplete ? '✓' : item.step}
-                  </div>
+        return (
+          <div
+            key={item.step}
+            onClick={() => handleStepClick(item.step)}
+            className={`workflow-step ${status} ${isStepClickable ? 'clickable' : ''}`}
+          >
+            {/* Step Indicator - Compact circle design */}
+            <div className="workflow-step-indicator">
+              {isComplete ? '✓' : item.step}
+            </div>
 
-                  {/* Step Label */}
-                  <div className="text-body">
-                    {item.label}
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-      </div>
-    </section>
+            {/* Step Label - Slim text below */}
+            <div className="workflow-step-label">
+              {item.label}
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

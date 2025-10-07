@@ -7,7 +7,7 @@
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 100px 1rem 2rem 1rem;
   background-color: var(--gray-50);
   min-height: 100vh;
 }
@@ -36,7 +36,7 @@
 }
 
 .main-content {
-  padding: 2rem 0;
+  padding: 100px 0 2rem 0;
 }
 
 /* ================== 2. CARD SYSTEM ================== */
@@ -1187,7 +1187,7 @@
 .container-app {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 100px 1rem 0 1rem;
 }
 
 .flex-shrink-0 {

@@ -110,14 +110,14 @@ export default function AlertsSubscriptionFlow({
 
   if (currentStep === 1) {
     return (
-      <div className="card">
-        <div className="section-header">
+      <div className="form-section">
+        <div className="dashboard-header">
           <div className="content-card-icon certificates">
             <AlertTriangle className="icon-lg" />
           </div>
-          <h2 className="section-header-title">
+          <h1 className="dashboard-title">
             Crisis Alert Monitoring
-          </h2>
+          </h1>
           <p className="text-body">
             Protect your <strong>{formatCurrency(tradeVolume)}</strong> trade volume for just <strong>$3.30/day</strong>
           </p>
@@ -219,12 +219,12 @@ export default function AlertsSubscriptionFlow({
 
   if (currentStep === 2) {
     return (
-      <div className="card">
-        <div className="section-header">
-          <h2 className="section-header-title">
+      <div className="form-section">
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">
             Setup Your Crisis Alert Monitoring
-          </h2>
-          <p className="text-muted">
+          </h1>
+          <p className="text-body">
             7-day free trial • $99/month after trial • Cancel anytime
           </p>
         </div>

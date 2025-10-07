@@ -682,10 +682,8 @@ export default function TradeRiskAlternatives() {
         </div>
 
         {/* Dynamic User Trade Profile */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Your Trade Profile</h3>
-          </div>
+        <div className="form-section">
+          <h2 className="form-section-title">Your Trade Profile</h2>
           <div className="status-grid">
             <div className="status-card">
               <div className="status-label">Company</div>
@@ -723,11 +721,9 @@ export default function TradeRiskAlternatives() {
         )}
 
         {aiVulnerabilityAnalysis && (
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">🤖 AI Vulnerability Analysis</h3>
-              <p className="card-subtitle">Powered by Claude 3.5 Sonnet</p>
-            </div>
+          <div className="form-section">
+            <h2 className="form-section-title">🤖 AI Vulnerability Analysis</h2>
+            <p className="text-body">Powered by Claude 3.5 Sonnet</p>
             <div className="status-grid">
               <div className="status-card">
                 <div className="status-label">Overall Risk Level</div>
@@ -749,7 +745,7 @@ export default function TradeRiskAlternatives() {
               </div>
             </div>
             {aiVulnerabilityAnalysis.vulnerability_analysis?.primary_vulnerabilities && (
-              <div className="card-description">
+              <div className="text-body">
                 <h4><strong>Primary Vulnerabilities:</strong></h4>
                 <ul>
                   {aiVulnerabilityAnalysis.vulnerability_analysis.primary_vulnerabilities.map((vuln, i) => (
@@ -761,22 +757,87 @@ export default function TradeRiskAlternatives() {
                 </ul>
               </div>
             )}
+
+            {/* AI-Recommended Professional Services - The Value You're Paying For! */}
+            {aiVulnerabilityAnalysis.recommendations?.professional_services && aiVulnerabilityAnalysis.recommendations.professional_services.length > 0 && (
+              <div className="element-spacing">
+                <h3 className="card-title">💼 AI-Recommended Professional Services</h3>
+                <p className="text-body">Based on your specific vulnerabilities, our AI recommends these expert services:</p>
+
+                <div className="form-grid-2">
+                  {aiVulnerabilityAnalysis.recommendations.professional_services.map((service, i) => (
+                    <div key={i} className={`alert ${service.urgency === 'HIGH' ? 'alert-error' : 'alert-warning'}`}>
+                      <div className="alert-content">
+                        <div className="alert-title">{service.service_name}</div>
+                        <div className="text-body">
+                          <p><strong>Why AI Recommends This:</strong> {service.why_recommended}</p>
+                          <p><strong>Expected Outcome:</strong> {service.expected_outcome}</p>
+                          <p><strong>Urgency:</strong> <span className={service.urgency === 'HIGH' ? 'status-value error' : 'status-value warning'}>{service.urgency}</span></p>
+                        </div>
+                        <div className="hero-buttons">
+                          <button
+                            className="btn-primary"
+                            onClick={() => window.location.href = '/services/logistics-support'}
+                          >
+                            🎯 Request {service.service_name}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI Immediate Actions */}
+            {aiVulnerabilityAnalysis.recommendations?.immediate_actions && aiVulnerabilityAnalysis.recommendations.immediate_actions.length > 0 && (
+              <div className="element-spacing">
+                <h4><strong>⚡ Immediate Actions Recommended:</strong></h4>
+                <ul>
+                  {aiVulnerabilityAnalysis.recommendations.immediate_actions.map((action, i) => (
+                    <li key={i}>{action}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* AI Diversification Strategies - Don't Put All Eggs in One Basket */}
+            {aiVulnerabilityAnalysis.recommendations?.diversification_strategies && aiVulnerabilityAnalysis.recommendations.diversification_strategies.length > 0 && (
+              <div className="element-spacing">
+                <h4><strong>🛡️ Don&apos;t Put All Your Eggs in One Basket:</strong></h4>
+                <ul>
+                  {aiVulnerabilityAnalysis.recommendations.diversification_strategies.map((strategy, i) => (
+                    <li key={i}>{strategy}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* AI Monitoring Priorities */}
+            {aiVulnerabilityAnalysis.recommendations?.monitoring_priorities && aiVulnerabilityAnalysis.recommendations.monitoring_priorities.length > 0 && (
+              <div className="element-spacing">
+                <h4><strong>📊 What to Monitor:</strong></h4>
+                <ul>
+                  {aiVulnerabilityAnalysis.recommendations.monitoring_priorities.map((priority, i) => (
+                    <li key={i}>{priority}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 
         {/* Dynamic Risk Analysis */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">
-              🚨 Current Threats to Your Trade
-              {aiVulnerabilityAnalysis && <span> (AI-Powered)</span>}
-            </h3>
-            <p className="card-subtitle">
-              {aiVulnerabilityAnalysis
-                ? 'AI-generated alerts specific to your component origins and supply chain'
-                : 'Issues specifically affecting your business profile'}
-            </p>
-          </div>
+        <div className="form-section">
+          <h2 className="form-section-title">
+            🚨 Current Threats to Your Trade
+            {aiVulnerabilityAnalysis && <span> (AI-Powered)</span>}
+          </h2>
+          <p className="text-body">
+            {aiVulnerabilityAnalysis
+              ? 'AI-generated alerts specific to your component origins and supply chain'
+              : 'Issues specifically affecting your business profile'}
+          </p>
 
           {dynamicRisks.map((risk, index) => (
             <div key={index} className={`alert alert-${risk.severity === 'CRITICAL' ? 'error' : risk.severity === 'HIGH' ? 'warning' : 'info'}`}>
@@ -808,7 +869,6 @@ export default function TradeRiskAlternatives() {
                     <button
                       onClick={() => handleSeeMoreDetails(index)}
                       className="btn-secondary"
-                      style={{padding: '8px 16px', fontSize: '14px'}}
                     >
                       {hasDetailedConsent && expandedDetails[index] ?
                         '▲ Show Less Details' :
@@ -819,7 +879,7 @@ export default function TradeRiskAlternatives() {
 
                   {/* Detailed Information */}
                   {hasDetailedConsent && expandedDetails[index] && risk.detailedInfo && (
-                    <div className="card" style={{marginTop: '12px', padding: '12px'}}>
+                    <div className="form-section">
                       <div className="text-body">
                         <strong>Detailed Analysis:</strong> {risk.detailedInfo}
                       </div>
@@ -832,11 +892,9 @@ export default function TradeRiskAlternatives() {
         </div>
 
         {/* Dynamic Alternative Strategies */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">🛡️ Recommended Alternatives - Don&apos;t Put All Eggs in One Basket</h3>
-            <p className="card-subtitle">Strategic options tailored to your trade profile</p>
-          </div>
+        <div className="form-section">
+          <h2 className="form-section-title">🛡️ Recommended Alternatives - Don&apos;t Put All Eggs in One Basket</h2>
+          <p className="text-body">Strategic options tailored to your trade profile</p>
 
           {dynamicAlternatives.map((alternative, index) => (
             <div key={index} className="alert alert-success">
@@ -866,11 +924,9 @@ export default function TradeRiskAlternatives() {
 
         {/* Dynamic Team Recommendations */}
         {teamRecommendations.length > 0 && (
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">🤝 Get Expert Help from Our Team</h3>
-              <p className="card-subtitle">Specialists who can help with your specific trade challenges</p>
-            </div>
+          <div className="form-section">
+            <h2 className="form-section-title">🤝 Get Expert Help from Our Team</h2>
+            <p className="text-body">Specialists who can help with your specific trade challenges</p>
 
             <div className="form-grid-2">
               {teamRecommendations.map((rec, index) => (
@@ -913,10 +969,8 @@ export default function TradeRiskAlternatives() {
         )}
 
         {/* Action Items */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">✅ Next Steps for {userProfile.companyName}</h3>
-          </div>
+        <div className="form-section">
+          <h2 className="form-section-title">✅ Next Steps for {userProfile.companyName}</h2>
 
           <div className="alert alert-warning">
             <div className="alert-content">

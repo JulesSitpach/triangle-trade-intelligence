@@ -130,70 +130,77 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
     );
   }
 
-  // QUALIFIED - Auto-generate and download certificate
+  // QUALIFIED - Generate and preview certificate
+  const handleGenerateCertificate = () => {
+    // Save current results to localStorage for certificate wizard
+    localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+    localStorage.setItem('certificate_qualified', 'true');
+
+    // Navigate to certificate completion page
+    window.location.href = '/usmca-certificate-completion';
+  };
+
   return (
     <div className="element-spacing">
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">✅ USMCA Certificate Ready</h3>
+          <h3 className="card-title">✅ Ready to Generate Certificate</h3>
         </div>
 
         <div className="element-spacing">
           <div className="alert alert-success">
             <div className="alert-content">
-              <div className="alert-title">Your Certificate is Ready to Download</div>
+              <div className="alert-title">Your Product Qualifies for USMCA</div>
               <div className="text-body">
-                Your product qualifies for USMCA benefits. Download your certificate now.
+                Generate your certificate with complete company details, then preview before downloading.
               </div>
             </div>
           </div>
 
           <div className="status-grid">
             <div className="status-card">
-              <div className="status-label">Valid From</div>
-              <div className="status-value">
-                {new Date(certificate.blanket_start).toLocaleDateString()}
-              </div>
-            </div>
-            <div className="status-card">
-              <div className="status-label">Valid Until</div>
-              <div className="status-value">
-                {new Date(certificate.blanket_end).toLocaleDateString()}
-              </div>
+              <div className="status-label">Qualification Status</div>
+              <div className="status-value success">QUALIFIED</div>
             </div>
             <div className="status-card">
               <div className="status-label">Preference Criterion</div>
-              <div className="status-value">{certificate.preference_criterion}</div>
+              <div className="status-value">{certificate.preference_criterion || 'B'}</div>
             </div>
             <div className="status-card">
               <div className="status-label">Regional Content</div>
-              <div className="status-value">{results.usmca?.regional_content || 0}%</div>
+              <div className="status-value success">{results.usmca?.regional_content || results.usmca?.north_american_content || 0}%</div>
+            </div>
+            <div className="status-card">
+              <div className="status-label">Validity Period</div>
+              <div className="status-value">1 Year</div>
             </div>
           </div>
         </div>
 
         <div className="hero-buttons">
           <button
-            onClick={handleDownloadCertificate}
+            onClick={handleGenerateCertificate}
             className="btn-primary"
-            disabled={isGenerating}
           >
-            {isGenerating ? '⏳ Generating PDF...' : '📥 Download Certificate'}
+            📄 Generate & Preview Certificate
           </button>
 
           <button
             onClick={() => window.location.href = '/services/logistics-support'}
             className="btn-secondary"
           >
-            🎯 Request Service
+            🎯 Request Professional Service
           </button>
         </div>
 
         <div className="alert alert-info">
           <div className="alert-content">
-            <div className="alert-title">Need Professional Certification?</div>
+            <div className="alert-title">What happens next?</div>
             <div className="text-body">
-              For audit-proof certificates backed by a licensed customs broker, request our professional service ($250).
+              1. Complete any missing company details<br />
+              2. Review your certificate preview<br />
+              3. Download your USMCA certificate PDF<br /><br />
+              <strong>Need audit-proof certification?</strong> Request our professional service ($250) backed by a licensed customs broker.
             </div>
           </div>
         </div>

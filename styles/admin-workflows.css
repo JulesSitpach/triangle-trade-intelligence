@@ -83,7 +83,7 @@
   z-index: 1;
 }
 
-.workflow-step {
+.workflow-progress-steps .workflow-step {
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
@@ -96,13 +96,13 @@
   min-width: max-content;
 }
 
-.workflow-step.active {
+.workflow-progress-steps .workflow-step.active {
   border-color: #2563eb;
   background-color: #2563eb;
   color: white;
 }
 
-.workflow-step.completed {
+.workflow-progress-steps .workflow-step.completed {
   border-color: #059669;
   background-color: #059669;
   color: white;
