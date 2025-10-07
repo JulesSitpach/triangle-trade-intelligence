@@ -84,7 +84,7 @@ export default protectedApiHandler({
         const firstBrace = jsonText.indexOf('{');
         const lastBrace = jsonText.lastIndexOf('}');
         if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          jsonText = jsonText.substring(firstBrace, lastBrace + 1);
+          jsonText = jsonText.substring(firstBrace, lastBrace + 1);                                     
         }
       }
 

@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -597,35 +596,32 @@ export default function ComponentOriginsStepEnhanced({
 
                 {/* AI Agent HS Code Suggestion for this component */}
                 {agentSuggestions[index] && (
-                  <AgentSuggestionBadge
-                    suggestion={{
-                      success: true,
-                      data: {
-                        hsCode: agentSuggestions[index].hsCode,
-                        description: agentSuggestions[index].description, // ✅ REAL HTS DESCRIPTION
-                        value: `HS Code: ${agentSuggestions[index].hsCode}`,
-                        confidence: agentSuggestions[index].confidence,
-                        explanation: agentSuggestions[index].explanation,
-                        source: agentSuggestions[index].source,
-                        // Pass all enhanced data
-                        alternativeCodes: agentSuggestions[index].alternativeCodes,
-                        mfnRate: agentSuggestions[index].mfnRate,
-                        usmcaRate: agentSuggestions[index].usmcaRate,
-                        qualifiesForUSMCA: agentSuggestions[index].qualifiesForUSMCA
-                      }
-                    }}
-                    onAccept={() => {
-                      updateComponent(index, 'hs_code', agentSuggestions[index].hsCode);
-                      const newSuggestions = { ...agentSuggestions };
-                      delete newSuggestions[index];
-                      setAgentSuggestions(newSuggestions);
-                    }}
-                    onDismiss={() => {
-                      const newSuggestions = { ...agentSuggestions };
-                      delete newSuggestions[index];
-                      setAgentSuggestions(newSuggestions);
-                    }}
-                  />
+                  <div className="ai-suggestion-inline">
+                    <p><strong>AI Suggestion:</strong> {agentSuggestions[index].hsCode} - {agentSuggestions[index].description}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateComponent(index, 'hs_code', agentSuggestions[index].hsCode);
+                        const newSuggestions = { ...agentSuggestions };
+                        delete newSuggestions[index];
+                        setAgentSuggestions(newSuggestions);
+                      }}
+                      className="btn-primary"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSuggestions = { ...agentSuggestions };
+                        delete newSuggestions[index];
+                        setAgentSuggestions(newSuggestions);
+                      }}
+                      className="btn-secondary"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

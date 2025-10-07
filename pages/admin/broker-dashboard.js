@@ -11,7 +11,6 @@ import Head from 'next/head';
 import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 
 // Import Cristina's modular tab components
-import ServiceQueueTab from '../../components/broker/ServiceQueueTab';
 import USMCACertificateTab from '../../components/cristina/USMCACertificateTab';
 import HSClassificationTab from '../../components/cristina/HSClassificationTab';
 import CrisisResponseTab from '../../components/cristina/CrisisResponseTab';
@@ -20,7 +19,7 @@ export default function CristinaDashboardModular() {
   const router = useRouter();
   const { user, loading: authLoading } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('service-queue');
+  const [activeTab, setActiveTab] = useState('usmca-certificate');
   const [serviceRequests, setServiceRequests] = useState([]);
   const [cristinaServices, setCristinaServices] = useState([]);
 
@@ -95,8 +94,6 @@ export default function CristinaDashboardModular() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'service-queue':
-        return <ServiceQueueTab />;
       case 'usmca-certificate':
         return <USMCACertificateTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'hs-classification':
@@ -104,7 +101,7 @@ export default function CristinaDashboardModular() {
       case 'compliance-crisis-response':
         return <CrisisResponseTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       default:
-        return <ServiceQueueTab />;
+        return <USMCACertificateTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
     }
   };
 
@@ -156,13 +153,6 @@ export default function CristinaDashboardModular() {
 
           <div className="dashboard-tabs">
             <div className="tab-navigation">
-              <button
-                className={`tab-button ${activeTab === 'service-queue' ? 'active' : ''}`}
-                onClick={() => setActiveTab('service-queue')}
-                data-tab="service-queue"
-              >
-                📋 Service Queue
-              </button>
               <button
                 className={`tab-button ${activeTab === 'usmca-certificate' ? 'active' : ''}`}
                 onClick={() => setActiveTab('usmca-certificate')}
