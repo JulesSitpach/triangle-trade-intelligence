@@ -221,3 +221,4 @@ dev-server.log
 
 # AI Development Documentation (local only)
 CLAUDE.md
+# Git config updated for Vercel auto-deploy
