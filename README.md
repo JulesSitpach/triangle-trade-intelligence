@@ -20,6 +20,25 @@ Professional trade compliance platform helping North American companies maximize
 
 ---
 
+## 📌 Current Status (January 2025)
+
+**✅ Production-Ready Clean Codebase**
+- All legacy/experimental code archived
+- Single git repository: `triangle-trade-intelligence`
+- Working on `main` branch only
+- Auto-deploys to Vercel on push
+
+**🔐 Admin Access**
+- Dashboards: `/admin/broker-dashboard`, `/admin/jorge-dashboard`
+- Contact repository owner for admin credentials
+
+**🚀 Deployment**
+- Production: https://triangle-trade-intelligence.vercel.app
+- Auto-deploy: Push to `main` branch → Vercel deploys automatically
+- Simple workflow: `git add . && git commit -m "message" && git push`
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 (Pages Router), React 18
