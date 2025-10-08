@@ -1019,14 +1019,13 @@ export default function TradeRiskAlternatives() {
               >
                 <div className="alert-content">
                   <div className="alert-title">
-                    {alert.title}
+                    {alert.title} • <span className="form-help">{alert.category.toUpperCase()}</span>
                   </div>
                   <div className="text-body">
-                    <div className="hero-badge">{alert.category.toUpperCase()}</div>
                     <p><strong>{alert.summary}</strong></p>
                     <p className="form-help">
-                      Published: {new Date(alert.publishDate).toLocaleDateString()}
-                      {alert.lastUpdated !== alert.publishDate && ` • Updated: ${new Date(alert.lastUpdated).toLocaleDateString()}`}
+                      Published: {alert.publishDate}
+                      {alert.lastUpdated !== alert.publishDate && ` • Updated: ${alert.lastUpdated}`}
                     </p>
                   </div>
 
