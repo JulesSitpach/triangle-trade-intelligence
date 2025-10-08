@@ -238,10 +238,11 @@
   color: #6b7280;
   font-weight: 500;
   pointer-events: none;
+  z-index: 1;
 }
 
 .input-with-prefix .form-input {
-  padding-left: 2rem;
+  padding-left: 2.5rem;
 }
 
 .alert {
