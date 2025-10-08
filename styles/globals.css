@@ -1781,5 +1781,13 @@ a:hover {
   }
 }
 
+/* ================== EDUCATIONAL ARTICLE CONTENT ================== */
+.article-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
 /* ================== END OF MINIMAL GLOBALS CSS ================== */
 /* Total: ~950 lines - Focused on pre-signin pages + toast system + table controls + pagination + mobile optimizations + error handling + footer + user dropdown */

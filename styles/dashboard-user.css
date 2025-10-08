@@ -277,6 +277,142 @@
   margin-bottom: 1.5rem;
 }
 
+/* AI Suggestion Box - Each code with its own Accept button */
+.ai-suggestion-box {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.1);
+}
+
+.ai-suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #bae6fd;
+}
+
+.confidence-badge {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ai-suggestion-main {
+  margin-bottom: 1rem;
+}
+
+/* HS Code Option - Card style for each code */
+.hs-code-option {
+  background: white;
+  border: 1px solid #e0f2fe;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hs-code-option.alternative {
+  background: #f8fafc;
+}
+
+.hs-code-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hs-code-result {
+  font-size: 1.125rem;
+  color: #0c4a6e;
+  margin: 0 0 0.5rem 0;
+}
+
+.hs-description {
+  color: #334155;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.confidence-text {
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.5rem 0 0 0;
+}
+
+/* 2-column grid for reasoning and tariff side by side */
+.hs-code-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+}
+
+/* Inline explanation and tariff info */
+.ai-explanation-inline {
+  background: #f0f9ff;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.ai-explanation-inline p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.tariff-info-inline {
+  background: #fef3c7;
+  padding: 0.75rem;
+  border-radius: 6px;
+}
+
+.tariff-info-inline p {
+  margin: 0.25rem 0;
+  color: #78350f;
+  font-size: 0.875rem;
+}
+
+/* Accept button for each code */
+.btn-accept-code {
+  white-space: nowrap;
+  align-self: flex-start;
+  min-width: 140px;
+}
+
+/* Alternative codes section */
+.alternative-codes-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bae6fd;
+}
+
+.alternative-codes-title {
+  color: #0c4a6e;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+/* Dismiss all button at bottom */
+.ai-suggestion-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bae6fd;
+}
+
 /* ================== 4. BUTTONS ================== */
 
 .btn-primary {

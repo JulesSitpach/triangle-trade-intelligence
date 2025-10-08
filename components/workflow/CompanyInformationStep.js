@@ -149,19 +149,16 @@ export default function CompanyInformationStep({
           </div>
 
           <div className="form-group">
-            <label className="form-label required">Annual Trade Volume</label>
+            <label className="form-label required">Annual Trade Volume (US $)</label>
             <div className="professional-input-group">
-              <div className="input-with-prefix">
-                <span className="input-prefix">$</span>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.trade_volume || ''}
-                  onChange={(e) => updateFormData('trade_volume', e.target.value)}
-                  placeholder="4,800,000"
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                className="form-input"
+                value={formData.trade_volume || ''}
+                onChange={(e) => updateFormData('trade_volume', e.target.value)}
+                placeholder="4,800,000"
+                required
+              />
             </div>
             <div className="form-help">Estimated annual import value</div>
           </div>

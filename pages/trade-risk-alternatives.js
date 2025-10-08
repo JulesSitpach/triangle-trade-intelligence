@@ -15,6 +15,14 @@ import TRADE_RISK_CONFIG, {
   formatCurrency
 } from '../config/trade-risk-config';
 
+// Import educational alerts
+import {
+  EDUCATIONAL_ALERTS,
+  getAlertsByCategory,
+  getAlertsByPriority,
+  getLatestAlerts
+} from '../config/educational-alerts';
+
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [dynamicRisks, setDynamicRisks] = useState([]);
@@ -27,6 +35,11 @@ export default function TradeRiskAlternatives() {
   const [aiVulnerabilityAnalysis, setAiVulnerabilityAnalysis] = useState(null);
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(null);
+
+  // Educational alerts state
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPriority, setSelectedPriority] = useState('all');
+  const [expandedAlerts, setExpandedAlerts] = useState({});
 
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
@@ -202,12 +215,18 @@ export default function TradeRiskAlternatives() {
     }
 
     if (userData) {
+      // Parse trade volume - handle string with commas like "12,000,000"
+      const rawTradeVolume = userData.company?.annual_trade_volume || userData.company?.trade_volume || 0;
+      const parsedTradeVolume = typeof rawTradeVolume === 'string'
+        ? parseFloat(rawTradeVolume.replace(/,/g, ''))
+        : rawTradeVolume;
+
       const profile = {
         companyName: userData.company?.name || userData.company?.company_name || 'Your Company',
         businessType: userData.company?.business_type || userData.company?.businessType,
         hsCode: userData.product?.hs_code || userData.classification?.hs_code,
         productDescription: userData.product?.description || userData.product?.product_description || userData.classification?.description,
-        tradeVolume: userData.company?.annual_trade_volume || userData.company?.trade_volume || 0,
+        tradeVolume: parsedTradeVolume,
         supplierCountry: userData.component_origins?.[0]?.origin_country || userData.components?.[0]?.country || userData.company?.supplier_country,
         qualificationStatus: userData.certificate?.qualification_result || userData.usmca?.qualification_status || userData.usmca?.qualified === true ? 'QUALIFIED' : 'NOT_QUALIFIED',
         savings: userData.certificate?.savings || userData.savings?.total_savings || userData.savings?.annual_savings || 0,
@@ -595,6 +614,27 @@ export default function TradeRiskAlternatives() {
     return `Cristina can design backup logistics strategies for your ${formatCurrency(profile.tradeVolume)} annual trade volume`;
   };
 
+  // Educational alerts filtering
+  const getFilteredEducationalAlerts = () => {
+    let filtered = EDUCATIONAL_ALERTS;
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(alert => alert.category === selectedCategory);
+    }
+
+    if (selectedPriority !== 'all') {
+      filtered = filtered.filter(alert => alert.priority === selectedPriority);
+    }
+
+    return filtered;
+  };
+
+  const toggleAlertExpansion = (alertId) => {
+    setExpandedAlerts(prev => ({
+      ...prev,
+      [alertId]: !prev[alertId]
+    }));
+  };
 
   if (isLoading) {
     return (
@@ -810,6 +850,14 @@ export default function TradeRiskAlternatives() {
                     <li key={i}>{strategy}</li>
                   ))}
                 </ul>
+                <div className="hero-buttons">
+                  <button
+                    className="btn-primary"
+                    onClick={() => window.location.href = '/services/logistics-support'}
+                  >
+                    🎯 Get Expert Help with Supply Chain Diversification
+                  </button>
+                </div>
               </div>
             )}
 
@@ -891,82 +939,6 @@ export default function TradeRiskAlternatives() {
           ))}
         </div>
 
-        {/* Dynamic Alternative Strategies */}
-        <div className="form-section">
-          <h2 className="form-section-title">🛡️ Recommended Alternatives - Don&apos;t Put All Eggs in One Basket</h2>
-          <p className="text-body">Strategic options tailored to your trade profile</p>
-
-          {dynamicAlternatives.map((alternative, index) => (
-            <div key={index} className="alert alert-success">
-              <div className="alert-content">
-                <div className="alert-title">{alternative.strategy}</div>
-                <div className="text-body">{alternative.benefit}</div>
-                <div className="element-spacing">
-                  <div className="status-grid">
-                    <div className="status-card">
-                      <div className="status-label">Implementation</div>
-                      <div className="status-value">{alternative.implementation}</div>
-                    </div>
-                    <div className="status-card">
-                      <div className="status-label">Timeline</div>
-                      <div className="status-value">{alternative.timeline}</div>
-                    </div>
-                    <div className="status-card">
-                      <div className="status-label">Risk Reduction</div>
-                      <div className="status-value success">{alternative.riskReduction}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Dynamic Team Recommendations */}
-        {teamRecommendations.length > 0 && (
-          <div className="form-section">
-            <h2 className="form-section-title">🤝 Get Expert Help from Our Team</h2>
-            <p className="text-body">Specialists who can help with your specific trade challenges</p>
-
-            <div className="form-grid-2">
-              {teamRecommendations.map((rec, index) => (
-                <div key={index} className="alert alert-info">
-                  <div className="alert-content">
-                    <div className="alert-title">{rec.teamMember} - {rec.title}</div>
-                    <div className="text-body">
-                      <p><strong>Specializes in:</strong> {rec.expertise}</p>
-                      <p><strong>Relevant to you:</strong> {rec.relevantTo}</p>
-                      <p><strong>How {rec.teamMember} can help:</strong> {rec.contactReason}</p>
-                    </div>
-                    <div className="hero-buttons">
-                      {rec.teamMember === 'Jorge' ? (
-                        <button
-                          className="btn-primary"
-                          onClick={() => window.location.href = '/services/logistics-support'}
-                        >
-                          🇲🇽 Request Jorge Consultation
-                        </button>
-                      ) : (
-                        <button
-                          className="btn-primary"
-                          onClick={() => window.location.href = '/services/logistics-support'}
-                        >
-                          📦 Request Cristina Consultation
-                        </button>
-                      )}
-                      <button
-                        className="btn-secondary"
-                        onClick={() => window.location.href = `mailto:${rec.teamMember.toLowerCase()}@triangleintelligence.com`}
-                      >
-                        📧 Email {rec.teamMember}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Action Items */}
         <div className="form-section">
@@ -978,12 +950,12 @@ export default function TradeRiskAlternatives() {
               <div className="text-body">
                 <ol>
                   {userProfile.supplierCountry === 'CN' && (
-                    <li><strong>Immediate:</strong> Contact Jorge to identify Latin America alternatives to reduce China dependency</li>
+                    <li><strong>Immediate:</strong> Identify alternative suppliers to reduce single-country dependency</li>
                   )}
                   {userProfile.qualificationStatus !== 'QUALIFIED' && (
-                    <li><strong>This week:</strong> Schedule call with Jorge about Mexico manufacturing for USMCA qualification</li>
+                    <li><strong>This week:</strong> Explore Mexico manufacturing options for USMCA qualification</li>
                   )}
-                  <li><strong>This month:</strong> Work with Cristina to map backup logistics routes for {userProfile.productDescription}</li>
+                  <li><strong>This month:</strong> Map backup logistics routes for {userProfile.productDescription}</li>
                   <li><strong>Ongoing:</strong> Monitor trade policy changes affecting HS code {userProfile.hsCode}</li>
                 </ol>
               </div>
@@ -992,11 +964,128 @@ export default function TradeRiskAlternatives() {
                   className="btn-primary"
                   onClick={() => window.location.href = '/services/logistics-support'}
                 >
-                  🇲🇽 Get Jorge&apos;s Help Now
+                  🎯 Request Expert Consultation
                 </button>
                 <button className="btn-secondary">📋 Download Risk Assessment</button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Educational Trade Intelligence */}
+        <div className="form-section">
+          <h2 className="form-section-title">📚 Mexico Trade Intelligence & Policy Updates</h2>
+          <p className="text-body">
+            Strategic insights and thought leadership content to help you navigate the evolving Mexico trade landscape.
+          </p>
+
+          {/* Filters */}
+          <div className="form-grid-2">
+            <div className="form-group">
+              <label className="form-label">Filter by Category</label>
+              <select
+                className="form-select"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                <option value="policy">Policy Updates</option>
+                <option value="strategy">Strategic Insights</option>
+                <option value="risk">Risk Analysis</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Filter by Priority</label>
+              <select
+                className="form-select"
+                value={selectedPriority}
+                onChange={(e) => setSelectedPriority(e.target.value)}
+              >
+                <option value="all">All Priorities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Educational Alerts Display */}
+          <div className="element-spacing">
+            {getFilteredEducationalAlerts().map((alert) => (
+              <div
+                key={alert.id}
+                className={`alert alert-${alert.priority === 'critical' ? 'error' : alert.priority === 'high' ? 'warning' : 'info'}`}
+              >
+                <div className="alert-content">
+                  <div className="alert-title">
+                    {alert.title}
+                  </div>
+                  <div className="text-body">
+                    <div className="hero-badge">{alert.category.toUpperCase()}</div>
+                    <p><strong>{alert.summary}</strong></p>
+                    <p className="form-help">
+                      Published: {new Date(alert.publishDate).toLocaleDateString()}
+                      {alert.lastUpdated !== alert.publishDate && ` • Updated: ${new Date(alert.lastUpdated).toLocaleDateString()}`}
+                    </p>
+                  </div>
+
+                  {/* Expandable Content */}
+                  <div className="element-spacing">
+                    <button
+                      onClick={() => toggleAlertExpansion(alert.id)}
+                      className="btn-secondary"
+                    >
+                      {expandedAlerts[alert.id] ? '▲ Hide Full Article' : '▼ Read Full Article'}
+                    </button>
+                  </div>
+
+                  {expandedAlerts[alert.id] && (
+                    <div className="form-section">
+                      <div className="article-content">
+                        {alert.content}
+                      </div>
+
+                      {/* Call to Action Buttons */}
+                      {alert.cta && (
+                        <div className="hero-buttons">
+                          <button
+                            onClick={() => window.location.href = alert.cta.primaryLink}
+                            className="btn-primary"
+                          >
+                            {alert.cta.primary}
+                          </button>
+                          {alert.cta.secondary && (
+                            <button
+                              onClick={() => window.location.href = alert.cta.secondaryLink}
+                              className="btn-secondary"
+                            >
+                              {alert.cta.secondary}
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tags */}
+                      <div className="element-spacing">
+                        <div className="form-help">
+                          <strong>Topics:</strong> {alert.tags.join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {getFilteredEducationalAlerts().length === 0 && (
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="alert-title">No articles match your filters</div>
+                  <div className="text-body">Try selecting different category or priority filters.</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

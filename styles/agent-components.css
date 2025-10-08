@@ -3,6 +3,7 @@
 
 /* Agent Suggestion Badge */
 .agent-suggestion-badge {
+  width: 100%;
   border: 1px solid var(--gray-200);
   border-radius: 8px;
   padding: 1rem;
@@ -449,6 +450,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
   padding: 0.75rem;
   margin-top: 0.75rem;
   background: var(--blue-50);
@@ -507,6 +509,7 @@
 }
 
 .details-content {
+  width: 100%;
   margin-top: 1rem;
   padding: 1rem;
   background: white;
