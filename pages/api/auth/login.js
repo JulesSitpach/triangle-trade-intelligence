@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     console.log('🛡️ Rate limit exceeded for login attempt');
     return res.status(429).json({
       success: false,
-      error: 'Too many login attempts. Please try again in 15 minutes.'
+      error: 'Too many failed login attempts. Please try again in 15 minutes.'
     });
   }
 
