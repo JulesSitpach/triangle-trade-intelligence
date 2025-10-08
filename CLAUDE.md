@@ -10,6 +10,50 @@
 
 ---
 
+## 🎯 Current Project Status (January 2025)
+
+### Clean Codebase
+- **✅ Legacy code archived**: All experimental and backup code has been cleaned up
+- **✅ Production-ready**: Clean, focused codebase with only active production code
+- **✅ Single git repo**: triangle-trade-intelligence (https://github.com/JulesSitpach/triangle-trade-intelligence)
+- **✅ Single branch workflow**: Work on `main` branch, auto-deploys to Vercel
+
+### Repository & Deployment
+**Git Configuration:**
+```bash
+# Single remote (no confusion)
+origin → https://github.com/JulesSitpach/triangle-trade-intelligence.git
+
+# Simple workflow
+git add .
+git commit -m "message"
+git push                    # Auto-deploys to Vercel
+```
+
+**Deployment:**
+- **Production**: https://triangle-trade-intelligence.vercel.app
+- **Auto-deploy**: Pushes to `main` branch automatically deploy to Vercel
+- **No manual steps**: Just push to git and Vercel handles the rest
+
+### Admin Access (January 2025)
+**Admin Credentials:**
+- **Email**: triangleintel@gmail.com
+- **Password**: Admin2025!
+- **Role**: Admin (full access to all dashboards)
+- **Created**: Using Supabase `admin.createUser()` API (properly configured)
+
+**Admin Dashboards:**
+- `/admin/broker-dashboard` - Cristina's compliance services
+- `/admin/jorge-dashboard` - Jorge's Mexico trade services
+
+### Authentication Setup
+- **Method**: Cookie-based sessions with httpOnly cookies
+- **Database**: Supabase auth + user_profiles table
+- **Security**: Passwords hashed with bcrypt, JWT_SECRET for session signing
+- **Middleware**: Excludes `/api` routes to prevent interference
+
+---
+
 ## 🏗️ Architecture Overview
 
 ### Tech Stack
@@ -634,6 +678,13 @@ npm run css:check         # CSS compliance check
 ✅ **Phase 3 COMPLETE**: Integration testing and optimization completed
 
 ### Recent Bug Fixes & Improvements (January 2025)
+
+**🎯 PROJECT CLEANUP (January 2025):**
+- **✅ Archived legacy code**: Removed all backup and experimental code from main codebase
+- **✅ Single git repo**: Configured triangle-trade-intelligence as sole repository
+- **✅ Clean branch structure**: Working on `main` branch only, auto-deploys to Vercel
+- **✅ Admin authentication fixed**: Created admin user properly using Supabase `admin.createUser()` API
+- **✅ Middleware fix**: Excluded `/api` routes to prevent authentication interference
 
 **🔥 CRITICAL: Hybrid Architecture Implementation**
 - **Fixed wrong USMCA thresholds**: Textiles now show 55% (was 62.5%), Electronics 65%, Automotive 75%
