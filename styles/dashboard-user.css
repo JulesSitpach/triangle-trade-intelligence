@@ -811,3 +811,21 @@
     max-width: 55px;
   }
 }
+
+/* ================== 9. LOADING SPINNER ================== */
+
+.spinner-inline {
+  display: inline-block;
+  margin-left: 10px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #bfdbfe;
+  border-top: 2px solid #1e40af;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

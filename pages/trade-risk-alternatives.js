@@ -754,7 +754,10 @@ export default function TradeRiskAlternatives() {
         {isAiAnalyzing && (
           <div className="alert alert-info">
             <div className="alert-content">
-              <div className="alert-title">🤖 AI Analyzing Your Supply Chain...</div>
+              <div className="alert-title">
+                🤖 AI Analyzing Your Supply Chain...
+                <span className="spinner-inline"></span>
+              </div>
               <p className="text-body">Claude is analyzing your component origins for geopolitical and tariff vulnerabilities...</p>
             </div>
           </div>
