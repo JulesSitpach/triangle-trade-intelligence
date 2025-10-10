@@ -191,12 +191,15 @@ export default function UserDashboard({ user }) {
                       }
                     }
                   }}
-                  className="btn-secondary text-danger"
+                  className="btn-delete-small"
                 >
                   🗑️ Clear All
                 </button>
               )}
-              <Link href="/usmca-workflow?reset=true" className="btn-primary">
+              <Link
+                href="/usmca-workflow?reset=true"
+                className="btn-primary"
+              >
                 + New Analysis
               </Link>
             </div>
@@ -253,7 +256,7 @@ export default function UserDashboard({ user }) {
                       )}
                     </div>
 
-                    <div className="hero-buttons">
+                    <div className="action-buttons">
                       {/* QUALIFIED: Download Certificate only */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <button
@@ -269,7 +272,7 @@ export default function UserDashboard({ user }) {
                         <>
                           <Link
                             href={`/usmca-workflow?view_results=${selectedWorkflow.id}`}
-                            className="btn-secondary"
+                            className="btn-primary"
                           >
                             📊 View Analysis
                           </Link>
@@ -325,7 +328,7 @@ export default function UserDashboard({ user }) {
                             }
                           }
                         }}
-                        className="btn-secondary text-danger"
+                        className="btn-delete"
                       >
                         🗑️ Delete
                       </button>
@@ -377,7 +380,7 @@ export default function UserDashboard({ user }) {
                       }
                     }
                   }}
-                  className="btn-secondary text-danger"
+                  className="btn-delete-small"
                 >
                   🗑️ Clear All Alerts
                 </button>
@@ -447,10 +450,10 @@ export default function UserDashboard({ user }) {
                       )}
                     </div>
 
-                    <div className="hero-buttons">
+                    <div className="action-buttons">
                       <button
                         onClick={() => handleViewAlert(selectedAlert.id)}
-                        className="btn-secondary"
+                        className="btn-primary"
                       >
                         View Full Alert
                       </button>
@@ -483,7 +486,7 @@ export default function UserDashboard({ user }) {
                             }
                           }
                         }}
-                        className="btn-secondary text-danger"
+                        className="btn-delete"
                       >
                         🗑️ Delete
                       </button>

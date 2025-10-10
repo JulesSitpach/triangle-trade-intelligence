@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="triangleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#134169;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#009CEB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#012A49;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="url(#triangleGradient)"/>
+
+  <!-- Bigger triangle representing trade routes -->
+  <path d="M 32 10 L 54 48 L 10 48 Z" fill="white" opacity="0.95"/>
+
+  <!-- Three dots at triangle vertices with white stroke for contrast -->
+  <circle cx="32" cy="10" r="3.5" fill="#009CEB" stroke="white" stroke-width="1.5"/>
+  <circle cx="54" cy="48" r="3.5" fill="#009CEB" stroke="white" stroke-width="1.5"/>
+  <circle cx="10" cy="48" r="3.5" fill="#009CEB" stroke="white" stroke-width="1.5"/>
+
+  <!-- Stylized "T" centered in triangle (moved down a bit more) -->
+  <text x="32" y="40" font-family="Roboto, Arial, sans-serif" font-size="26" font-weight="900" fill="#134169" text-anchor="middle" dominant-baseline="middle">T</text>
+</svg>

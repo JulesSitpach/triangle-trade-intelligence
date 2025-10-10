@@ -438,7 +438,7 @@ export default function ComponentOriginsStepEnhanced({
             <textarea
               value={formData.product_description || ''}
               onChange={(e) => updateFormData('product_description', e.target.value)}
-              placeholder="Provide detailed product description including material composition, style, and specifications (e.g., '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric')"
+              placeholder="Example: '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric'"
               className="form-input"
               rows="3"
             />
@@ -456,7 +456,7 @@ export default function ComponentOriginsStepEnhanced({
             <select
               value={formData.manufacturing_location || ''}
               onChange={(e) => updateFormData('manufacturing_location', e.target.value)}
-              className="form-select"
+              className={`form-select ${formData.manufacturing_location ? 'has-value' : ''}`}
             >
               <option value="">Select manufacturing country...</option>
               {dropdownOptions.countries?.map(country => {
@@ -517,7 +517,7 @@ export default function ComponentOriginsStepEnhanced({
                   onChange={(e) => {
                     updateComponent(index, 'description', e.target.value);
                   }}
-                  placeholder="Describe this component (AI will suggest HS code after you select country)"
+                  placeholder="Example: 'Polyester fabric outer shell' or 'Stainless steel fasteners'"
                   className="form-input"
                 />
               </div>
@@ -530,7 +530,7 @@ export default function ComponentOriginsStepEnhanced({
                 <select
                   value={component.origin_country}
                   onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
-                  className="form-select"
+                  className={`form-select ${component.origin_country ? 'has-value' : ''}`}
                 >
                   <option value="">Select origin country...</option>
                   {dropdownOptions.countries?.map(country => {
@@ -555,8 +555,9 @@ export default function ComponentOriginsStepEnhanced({
                     type="number"
                     min="0"
                     max="100"
-                    value={component.value_percentage}
-                    onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || 0)}
+                    value={component.value_percentage || ''}
+                    onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || '')}
+                    placeholder="Example: 45"
                     className="form-input"
                   />
                   <span className="form-input-suffix">%</span>

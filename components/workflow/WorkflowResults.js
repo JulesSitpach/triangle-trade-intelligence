@@ -353,47 +353,29 @@ export default function WorkflowResults({
   if (!results) return null;
 
   const modalContent = showSaveConsentModal && (
-    <div style={{
-      position: 'fixed',
-      top: '100px',
-      left: 'calc(50% - 250px)',
-      width: '500px',
-      backgroundColor: 'white',
-      padding: '40px',
-      borderRadius: '8px',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-      zIndex: 999999
-    }}>
-      <h2 style={{ marginBottom: '10px', fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
+    <div className="consent-modal">
+      <h2 className="consent-modal-title">
         Save to Dashboard?
       </h2>
-      <p style={{ marginBottom: '30px', fontSize: '14px', color: '#6b7280' }}>
+      <p className="consent-modal-description">
         Choose how you'd like to use this analysis
       </p>
 
-      <div style={{ marginBottom: '30px' }}>
+      <div className="consent-modal-options">
         {/* SAVE Option */}
         <div
           onClick={() => setModalChoice('save')}
-          style={{
-            padding: '20px',
-            border: modalChoice === 'save' ? '3px solid #2563eb' : '1px solid #d1d5db',
-            marginBottom: '15px',
-            cursor: 'pointer',
-            backgroundColor: modalChoice === 'save' ? '#eff6ff' : 'white',
-            borderRadius: '8px'
-          }}
+          className={`consent-option ${modalChoice === 'save' ? 'selected' : ''}`}
         >
-          <div style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '16px', color: '#1f2937' }}>
+          <div className="consent-option-title">
             <input
               type="radio"
               checked={modalChoice === 'save'}
               onChange={() => setModalChoice('save')}
-              style={{ marginRight: '10px' }}
             />
             SAVE - Enable alerts and services
           </div>
-          <div style={{ marginLeft: '30px', fontSize: '14px', color: '#4b5563' }}>
+          <div className="consent-option-details">
             • Get real-time trade alerts for your product<br/>
             • Access professional services later<br/>
             • View analysis history in your dashboard<br/>
@@ -404,24 +386,17 @@ export default function WorkflowResults({
         {/* DON'T SAVE Option */}
         <div
           onClick={() => setModalChoice('dont-save')}
-          style={{
-            padding: '20px',
-            border: modalChoice === 'dont-save' ? '3px solid #2563eb' : '1px solid #d1d5db',
-            cursor: 'pointer',
-            backgroundColor: modalChoice === 'dont-save' ? '#eff6ff' : 'white',
-            borderRadius: '8px'
-          }}
+          className={`consent-option ${modalChoice === 'dont-save' ? 'selected' : ''}`}
         >
-          <div style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '16px', color: '#1f2937' }}>
+          <div className="consent-option-title">
             <input
               type="radio"
               checked={modalChoice === 'dont-save'}
               onChange={() => setModalChoice('dont-save')}
-              style={{ marginRight: '10px' }}
             />
             DON'T SAVE - View only
           </div>
-          <div style={{ marginLeft: '30px', fontSize: '14px', color: '#4b5563' }}>
+          <div className="consent-option-details">
             • No alerts or notifications<br/>
             • No professional services access<br/>
             • No data storage<br/>
@@ -434,28 +409,12 @@ export default function WorkflowResults({
         onClick={() => {
           handleSaveConsent(modalChoice === 'save');
         }}
-        style={{
-          width: '100%',
-          padding: '15px',
-          backgroundColor: '#2563eb',
-          color: 'white',
-          border: 'none',
-          fontSize: '18px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          borderRadius: '8px'
-        }}
+        className="consent-modal-button"
       >
         CONFIRM {modalChoice === 'save' ? 'SAVE' : "DON'T SAVE"}
       </button>
 
-      <p style={{
-        marginTop: '20px',
-        fontSize: '12px',
-        textAlign: 'center',
-        color: '#9ca3af',
-        lineHeight: '1.5'
-      }}>
+      <p className="consent-modal-privacy">
         <strong>Privacy Notice:</strong> You can delete all saved data anytime from Account Settings.
         We never share your data with third parties.
       </p>
@@ -471,36 +430,36 @@ export default function WorkflowResults({
       )}
 
       {/* QUALIFICATION RESULT */}
-      <div className={results.usmca?.qualified ? 'alert alert-success' : 'alert alert-warning'} style={{ marginBottom: '2rem' }}>
+      <div className={results.usmca?.qualified ? 'alert-success' : 'alert-warning'}>
         <div className="alert-content">
-          <h2 style={{ color: '#134e4a', marginBottom: '0.5rem', fontSize: '1.75rem', fontWeight: 'bold' }}>
+          <h2 className="alert-title-success">
             {results.usmca?.qualified ? '✓ USMCA Qualified' : '✗ Not Qualified'}
           </h2>
-          <p style={{ color: '#064e3b', marginBottom: '1.5rem' }}>
+          <p className="alert-text-success">
             {results.usmca?.qualified
               ? 'Your product meets all requirements for preferential tariff treatment'
               : 'Your product does not meet USMCA regional content requirements'}
           </p>
 
           {/* Key Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ color: '#064e3b', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Required</div>
-              <div style={{ color: '#134e4a', fontSize: '1.5rem', fontWeight: 'bold' }}>
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <div className="metric-label">Required</div>
+              <div className="metric-value">
                 {results.usmca?.threshold_applied || 60}%
               </div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ color: '#064e3b', fontSize: '0.875rem', marginBottom: '0.25rem' }}>Your Content</div>
-              <div style={{ color: '#134e4a', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            <div className="metric-card">
+              <div className="metric-label">Your Content</div>
+              <div className="metric-value">
                 {(results.usmca?.north_american_content || 0).toFixed(0)}%
               </div>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ color: '#064e3b', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+            <div className="metric-card">
+              <div className="metric-label">
                 {results.usmca?.qualified ? 'Margin' : 'Gap'}
               </div>
-              <div style={{ color: '#134e4a', fontSize: '1.5rem', fontWeight: 'bold' }}>
+              <div className="metric-value">
                 {results.usmca?.qualified
                   ? `+${(results.usmca.north_american_content - results.usmca.threshold_applied).toFixed(0)}%`
                   : `${(results.usmca.north_american_content - results.usmca.threshold_applied).toFixed(0)}%`}
@@ -536,20 +495,15 @@ export default function WorkflowResults({
           <h2 className="form-section-title">Strategic Recommendations</h2>
           <div>
             {results.recommendations.map((rec, idx) => (
-              <div key={idx} className="text-body" style={{
-                marginBottom: '0.75rem',
-                paddingLeft: '1.5rem',
-                position: 'relative'
-              }}>
-                <span style={{ position: 'absolute', left: 0 }}>•</span>
+              <div key={idx} className="text-body recommendation-item">
                 {rec}
               </div>
             ))}
 
             {/* Professional Services CTA */}
-            <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f0fdf4', borderRadius: '4px', textAlign: 'center' }}>
-              <div style={{ fontWeight: '600', color: '#166534', marginBottom: '0.5rem' }}>Need Expert Help?</div>
-              <div style={{ fontSize: '0.875rem', color: '#166534', marginBottom: '1rem' }}>
+            <div className="professional-services-cta">
+              <div className="professional-services-cta-title">Need Expert Help?</div>
+              <div className="professional-services-cta-description">
                 Licensed customs brokers in Mexico • Audit-proof certification • Supplier sourcing
               </div>
               <button
@@ -571,26 +525,26 @@ export default function WorkflowResults({
         </p>
         <div>
           {/* Privacy & Save Information Card - Always show with checkbox */}
-          <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '4px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+          <div className="privacy-info-box">
+            <div className="privacy-info-content">
               <input
                 type="checkbox"
                 id="saveConsent"
                 checked={userMadeChoice}
                 readOnly
-                style={{ marginTop: '0.25rem', width: '18px', height: '18px', cursor: 'default', pointerEvents: 'none' }}
+                className="privacy-info-checkbox"
               />
-              <label htmlFor="saveConsent" style={{ flex: 1 }}>
-                <div style={{ fontWeight: '600', color: '#1e40af', marginBottom: '0.5rem' }}>💾 Save to Dashboard</div>
-                <div style={{ fontSize: '0.875rem', color: '#1e40af', marginBottom: '0.5rem' }}>
+              <label htmlFor="saveConsent" className="privacy-info-label">
+                <div className="privacy-info-title">💾 Save to Dashboard</div>
+                <div className="privacy-info-text">
                   Save this analysis to:
-                  <ul style={{ marginTop: '0.5rem', marginLeft: '1.5rem', marginBottom: '0.5rem' }}>
+                  <ul className="privacy-info-list">
                     <li>Access your results anytime from your dashboard</li>
                     <li>Set up automated trade risk alerts</li>
                     <li>Request professional services later</li>
                   </ul>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#3730a3', fontStyle: 'italic' }}>
+                <div className="privacy-info-disclaimer">
                   Privacy: You can delete all saved data anytime from Account Settings
                 </div>
               </label>
@@ -607,7 +561,6 @@ export default function WorkflowResults({
                 setShowSaveConsentModal(true);
               }}
               className="btn-primary"
-              style={{ minWidth: '200px' }}
             >
               {userMadeChoice ? '✅ Saved to Dashboard (Change)' : '☐ Save to Dashboard'}
             </button>
@@ -662,7 +615,7 @@ export default function WorkflowResults({
       </div>
 
       {/* Simple disclaimer footer */}
-      <div className="text-body" style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.875rem', marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #e5e7eb' }}>
+      <div className="results-footer">
         AI-powered analysis • For production use, verify with customs authorities
       </div>
     </div>

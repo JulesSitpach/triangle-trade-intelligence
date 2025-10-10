@@ -20,18 +20,62 @@ export default function CompanyInformationStep({
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
+  const [validationError, setValidationError] = useState(null);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
-  const isNextDisabled = !isClient || !formData.company_name || 
-                        !formData.business_type || 
+
+  // Clear validation error when user starts filling in fields
+  useEffect(() => {
+    if (attemptedSubmit && validationError) {
+      // Check if any previously missing fields are now filled
+      const stillMissing = [];
+      if (!formData.company_name) stillMissing.push('Company Name');
+      if (!formData.business_type) stillMissing.push('Business Type');
+      if (!formData.company_address) stillMissing.push('Company Address');
+      if (!formData.contact_person) stillMissing.push('Contact Person');
+      if (!formData.contact_phone) stillMissing.push('Contact Phone');
+      if (!formData.contact_email) stillMissing.push('Contact Email');
+      if (!formData.trade_volume) stillMissing.push('Annual Trade Volume');
+
+      // If all fields are now filled, clear the error
+      if (stillMissing.length === 0) {
+        setValidationError(null);
+      }
+    }
+  }, [formData, attemptedSubmit, validationError]);
+
+  const isNextDisabled = !isClient || !formData.company_name ||
+                        !formData.business_type ||
                         !formData.trade_volume ||
                         !formData.company_address ||
                         !formData.contact_person ||
                         !formData.contact_phone ||
                         !formData.contact_email;
+
+  const handleContinue = () => {
+    setAttemptedSubmit(true);
+
+    // Check which required fields are missing
+    const missingFields = [];
+    if (!formData.company_name) missingFields.push('Company Name');
+    if (!formData.business_type) missingFields.push('Business Type');
+    if (!formData.company_address) missingFields.push('Company Address');
+    if (!formData.contact_person) missingFields.push('Contact Person');
+    if (!formData.contact_phone) missingFields.push('Contact Phone');
+    if (!formData.contact_email) missingFields.push('Contact Email');
+    if (!formData.trade_volume) missingFields.push('Annual Trade Volume');
+
+    if (missingFields.length > 0) {
+      setValidationError(missingFields);
+      return;
+    }
+
+    setValidationError(null);
+    onNext();
+  };
 
   const getCountryCode = (countryName) => {
     const codes = SYSTEM_CONFIG.countries.codeMappings;
@@ -60,7 +104,7 @@ export default function CompanyInformationStep({
           <div className="form-group">
             <label className="form-label required">Business Type</label>
             <select
-              className="form-select"
+              className={`form-select ${formData.business_type ? 'has-value' : ''}`}
               value={formData.business_type || ''}
               onChange={(e) => updateFormData('business_type', e.target.value)}
               required
@@ -169,7 +213,7 @@ export default function CompanyInformationStep({
           <div className="form-group">
             <label className="form-label">Primary Supplier Country</label>
             <select
-              className="form-select"
+              className={`form-select ${formData.supplier_country ? 'has-value' : ''}`}
               value={formData.supplier_country || ''}
               onChange={(e) => updateFormData('supplier_country', e.target.value)}
             >
@@ -232,22 +276,42 @@ export default function CompanyInformationStep({
           </div>
         </div>
 
+        {/* Validation Error Notice - Right above button */}
+        {validationError && validationError.length > 0 && (
+          <div className="validation-error-notice">
+            <div className="validation-error-content">
+              <span className="validation-error-icon">⚠️</span>
+              <div className="validation-error-body">
+                <h4 className="validation-error-title">
+                  Please Complete Required Fields
+                </h4>
+                <p className="validation-error-description">
+                  The following fields are missing:
+                </p>
+                <ul className="validation-error-list">
+                  {validationError.map((field, index) => (
+                    <li key={index}>
+                      <strong>{field}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="dashboard-actions">
           <div className="dashboard-actions-left">
-            {isClient && isNextDisabled && (
-              <span className="form-help">
-                ⚠️ Please complete all required fields to continue
+            {isClient && !validationError && !isNextDisabled && (
+              <span className="form-help success">
+                ✓ All required fields completed
               </span>
-            )}
-            {isClient && !isNextDisabled && (
-              <span className="form-help">Step 1 of 3 - All required fields completed ✓</span>
             )}
           </div>
           <div className="dashboard-actions-right">
             <button
-              onClick={() => onNext()}
+              onClick={handleContinue}
               className="btn-primary"
-              disabled={isNextDisabled}
             >
               Continue to Product Details
             </button>
