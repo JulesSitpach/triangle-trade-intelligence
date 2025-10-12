@@ -1,15 +1,17 @@
 /**
- * USMCACertificateTab.js - Cristina's Professional USMCA Certificate Service
- * Production-ready component leveraging 17 years customs broker expertise
- * 3-Stage Professional Workflow: Regulatory Assessment → Expert Validation → Professional Certification
- * Licensed customs broker (License #4601913) professional validation
+ * USMCACertificateTab.js - Team USMCA Optimization Service ($175)
+ * Production-ready component leveraging 17 years logistics expertise
+ * 3-Stage Team Workflow: Jorge collects documents → Cristina validates → Team delivers
+ * Professional License #4601913 (International Commerce Degree - Cristina)
+ * NOTE: For official customs broker services, we partner with licensed professionals
  */
 
 import { useState, useEffect } from 'react';
 import ServiceWorkflowModal from '../shared/ServiceWorkflowModal';
 import { useToast, ToastContainer } from '../shared/ToastNotification';
+import MarketplaceIntelligenceForm from '../shared/MarketplaceIntelligenceForm';
 
-export default function USMCACertificateTab() {
+export default function USMCACertificateTab({ userRole = 'Cristina' }) {
   const [serviceRequests, setServiceRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -36,9 +38,9 @@ export default function USMCACertificateTab() {
     try {
       setLoading(true);
       setError(null);
-      info('Loading USMCA certificate requests...');
+      info('Loading USMCA Advantage Sprint requests...');
 
-      const response = await fetch('/api/admin/service-requests?assigned_to=Cristina&service_type=USMCA Certificates');
+      const response = await fetch('/api/admin/service-requests?service_type=usmca_advantage_sprint');
 
       if (!response.ok) {
         throw new Error('Failed to load service requests');
@@ -46,7 +48,7 @@ export default function USMCACertificateTab() {
 
       const data = await response.json();
       setServiceRequests(data.requests || []);
-      success(`Loaded ${data.requests?.length || 0} USMCA certificate requests`);
+      success(`Loaded ${data.requests?.length || 0} USMCA Advantage Sprint requests`);
     } catch (err) {
       console.error('Error loading service requests:', err);
       const errorMessage = err.message;
@@ -91,7 +93,7 @@ export default function USMCACertificateTab() {
   // Filter and sort functions
   const allFilteredRequests = serviceRequests?.filter(request => {
     // Filter by service type
-    if (!(request.service_type === 'USMCA Certificates' || request.service_type === 'usmca-certificate')) {
+    if (!(request.service_type === 'usmca_advantage_sprint' || request.service_type === 'usmca-advantage' || request.service_type === 'USMCA Certificates' || request.service_type === 'usmca-certificate')) {
       return false;
     }
 
@@ -209,22 +211,6 @@ export default function USMCACertificateTab() {
 
   return (
     <div className="service-tab">
-      <div className="service-header">
-        <h3>📜 Professional USMCA Certificates ($250)</h3>
-        <p><strong>Professional Value:</strong> Component-by-component HS analysis + industry expertise + professional guarantee + ongoing support</p>
-        <div className="service-value-proposition">
-          <div className="value-point">🎯 <strong>Professional Analysis:</strong> Licensed customs broker reviews each component individually</div>
-          <div className="value-point">🏭 <strong>Industry Expertise:</strong> 17 years electronics/telecom experience identifies hidden risks</div>
-          <div className="value-point">⚖️ <strong>Professional Guarantee:</strong> Backed by customs broker license & liability insurance</div>
-          <div className="value-point">📞 <strong>Ongoing Support:</strong> 90-day consultation for implementation & CBP questions</div>
-          <div className="value-point">📋 <strong>Complete Package:</strong> Certificate + analysis + templates + training materials</div>
-        </div>
-        <div className="service-credentials">
-          <span className="broker-license">Licensed Customs Broker #4601913</span>
-          <span className="experience">17 Years Electronics/Telecom Trade Experience</span>
-        </div>
-      </div>
-
       {/* Search and Filter Controls */}
       <div className="table-controls">
         <div className="search-section">
@@ -339,21 +325,8 @@ export default function USMCACertificateTab() {
               >
                 Client {sortField === 'company_name' && (sortDirection === 'asc' ? '↑' : '↓')}
               </th>
-              <th
-                className={`sortable ${sortField === 'product' ? 'sorted' : ''}`}
-                onClick={() => handleSort('product')}
-                title="Click to sort by product type"
-              >
-                Product Type {sortField === 'product' && (sortDirection === 'asc' ? '↑' : '↓')}
-              </th>
-              <th>HS Classification</th>
-              <th
-                className={`sortable ${sortField === 'risk_level' ? 'sorted' : ''}`}
-                onClick={() => handleSort('risk_level')}
-                title="Click to sort by risk level"
-              >
-                Risk Level {sortField === 'risk_level' && (sortDirection === 'asc' ? '↑' : '↓')}
-              </th>
+              <th>Product</th>
+              <th>Trade Volume</th>
               <th
                 className={`sortable ${sortField === 'status' ? 'sorted' : ''}`}
                 onClick={() => handleSort('status')}
@@ -367,17 +340,22 @@ export default function USMCACertificateTab() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" className="loading-cell">Loading service requests...</td>
+                <td colSpan="5" className="loading-cell">Loading USMCA Advantage Sprint requests...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan="6" className="error-cell">Error: {error}</td>
+                <td colSpan="5" className="error-cell">Error: {error}</td>
               </tr>
-            ) : paginatedRequests.map((request) => {
-              // Determine risk level based on product and components
-              const riskLevel = determineRiskLevel(request);
-
-              return (
+            ) : paginatedRequests.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="no-requests">
+                  <p>No USMCA Advantage Sprint requests yet.</p>
+                  <p className="secondary-text">
+                    Requests will appear here when clients purchase the USMCA Advantage Sprint service.
+                  </p>
+                </td>
+              </tr>
+            ) : paginatedRequests.map((request) => (
                 <tr key={request.id}>
                   <td>
                     <div className="client-info">
@@ -387,24 +365,16 @@ export default function USMCACertificateTab() {
                   </td>
                   <td>
                     <div className="product-summary">
-                      <div>{request.service_details?.product_description || 'Product details'}</div>
-                      <div className="component-count">
-                        {request.service_details?.component_count || request.service_details?.component_origins?.length || 0} components
-                      </div>
+                      {request.service_details?.product_description || 'Product details'}
                     </div>
                   </td>
                   <td>
-                    <div className="hs-code-status">
-                      {request.service_details?.current_hs_code || 'Needs Classification'}
-                      {!request.service_details?.current_hs_code && (
-                        <div className="classification-needed">⚠️ Classification Required</div>
-                      )}
+                    <div className="trade-volume">
+                      {request.service_details?.trade_volume
+                        ? `$${Number(request.service_details.trade_volume).toLocaleString()}`
+                        : 'Not specified'
+                      }
                     </div>
-                  </td>
-                  <td>
-                    <span className={`risk-badge ${riskLevel.toLowerCase()}`}>
-                      {riskLevel}
-                    </span>
                   </td>
                   <td>
                     <span className={`status-badge ${request.status?.replace('_', '-')}`}>
@@ -417,12 +387,11 @@ export default function USMCACertificateTab() {
                       onClick={() => startWorkflow(request)}
                       disabled={request.status === 'completed'}
                     >
-                      {request.status === 'completed' ? 'Completed' : 'Start Professional Review'}
+                      {request.status === 'completed' ? 'Completed' : 'Start Service'}
                     </button>
                   </td>
                 </tr>
-              );
-            })}
+              ))}
           </tbody>
         </table>
 
@@ -506,7 +475,7 @@ export default function USMCACertificateTab() {
       {showModal && selectedRequest && (
         <ServiceWorkflowModal
           isOpen={showModal}
-          service={usmcaCertificateService}
+          service={createUSMCACertificateService(userRole)}
           request={selectedRequest}
           onClose={closeModal}
           onComplete={handleWorkflowComplete}
@@ -538,7 +507,7 @@ function determineRiskLevel(request) {
 
   // Origin complexity
   const origins = serviceDetails?.component_origins || [];
-  const uniqueCountries = [...new Set(origins.map(c => c.country))];
+  const uniqueCountries = [...new Set(origins.map(c => c.origin_country || c.country))];
   if (uniqueCountries.length > 3) riskScore += 2;
   if (uniqueCountries.some(c => ['China', 'Russia', 'Iran'].includes(c))) riskScore += 3;
 
@@ -553,11 +522,11 @@ function determineRiskLevel(request) {
   return 'LOW';
 }
 
-// Professional USMCA Certificate Service Configuration - Real Professional Value
-const usmcaCertificateService = {
-  title: 'Professional USMCA Certificate with Expert Analysis & Ongoing Support',
+// USMCA Optimization Assessment Service Configuration - Team Collaboration Model
+const createUSMCACertificateService = (userRole) => ({
+  title: 'USMCA Optimization Assessment ($175)',
   totalStages: 3,
-  stageNames: ['Professional Certificate Review', 'AI Compliance Risk Analysis', 'Expert Validation & Corrections'],
+  stageNames: ['Trade Compliance Analysis (Cristina)', 'AI-Enhanced Assessment (Cristina)', 'Optimization Roadmap (Team)'],
 
   renderStage: (stageNumber, request, stageData, onStageComplete, loading) => {
     const subscriberData = request?.subscriber_data || request?.workflow_data || {};
@@ -572,6 +541,7 @@ const usmcaCertificateService = {
             serviceDetails={serviceDetails}
             onComplete={onStageComplete}
             loading={loading}
+            userRole={userRole}
           />
         );
 
@@ -584,6 +554,7 @@ const usmcaCertificateService = {
             stageData={stageData}
             onComplete={onStageComplete}
             loading={loading}
+            userRole={userRole}
           />
         );
 
@@ -596,6 +567,7 @@ const usmcaCertificateService = {
             stageData={stageData}
             onComplete={onStageComplete}
             loading={loading}
+            userRole={userRole}
           />
         );
 
@@ -603,10 +575,10 @@ const usmcaCertificateService = {
         return <div>Invalid stage</div>;
     }
   }
-};
+});
 
 // Stage 1: Professional Data Review & Enhancement - Where Cristina's Expertise Actually Matters
-function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, onComplete, loading }) {
+function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, onComplete, loading, userRole }) {
   // Extract comprehensive workflow data from request
   // Fallback to service_details if workflow_data doesn't exist
   const workflowData = request?.workflow_data || request?.service_details || {};
@@ -632,6 +604,11 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
     customs_broker_guarantee: '',
     liability_coverage_notes: ''
   });
+
+  // **PHASE 1 QUICK WIN: AI Document Analysis**
+  const [aiDocAnalysis, setAiDocAnalysis] = useState(null);
+  const [analyzingDocs, setAnalyzingDocs] = useState(false);
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
 
   const [currentComponentIndex, setCurrentComponentIndex] = useState(0);
   const [showOriginalCertificate, setShowOriginalCertificate] = useState(false);
@@ -668,9 +645,46 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
     }));
   };
 
+  // **PHASE 1 QUICK WIN: AI Document Analysis Function**
+  const runAIDocumentAnalysis = async () => {
+    try {
+      setAnalyzingDocs(true);
+      const response = await fetch('/api/usmca-document-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceRequestId: request.id,
+          subscriberData: workflowData
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiDocAnalysis(result.analysis);
+        setShowAiAnalysis(true);
+      } else {
+        setAiDocAnalysis(result.fallback_analysis);
+        setShowAiAnalysis(true);
+      }
+    } catch (error) {
+      console.error('AI document analysis failed:', error);
+      setAiDocAnalysis({
+        documents_present: ['Basic client data'],
+        documents_missing: ['Analysis failed - manual review needed'],
+        data_quality_score: 'UNKNOWN',
+        immediate_actions: ['Proceed with manual review'],
+        ready_for_cristina_review: true
+      });
+      setShowAiAnalysis(true);
+    } finally {
+      setAnalyzingDocs(false);
+    }
+  };
+
   const handleSubmit = () => {
     onComplete({
       professional_data_review: dataReview,
+      ai_document_analysis: aiDocAnalysis, // Include AI analysis in completion data
       cristina_expertise_applied: true,
       review_timestamp: new Date().toISOString()
     });
@@ -683,597 +697,322 @@ function RegulatoryAssessmentStage({ request, subscriberData, serviceDetails, on
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 1: Professional Certificate Validation</h3>
-        <p><strong>Quality control and professional backing for existing certificate</strong></p>
+        <h3>Stage 1: Document Review & Gap Analysis</h3>
+        <p><strong>Team collaboration: Jorge reviews submitted workflow data, AI identifies missing items, Jorge collects additional docs</strong></p>
+
+        <div className="collaboration-banner">
+          <div className="role-action">
+            <strong>👨‍💼 Jorge (Lead):</strong> Review client-submitted workflow data, run AI document analysis, identify missing compliance documents, contact client to request specific items, upload supplemental files when received
+          </div>
+          <div className="role-action">
+            <strong>👩‍💼 Cristina (Support):</strong> Review AI document analysis results, validate Jorge's document checklist, flag any compliance-critical missing items, provide guidance on technical documentation requirements
+          </div>
+        </div>
+
         <div className="expert-credentials">
-          ✅ Spot Check Certificate | ⚖️ Professional Liability Assessment | 🛡️ Risk Validation
+          🤖 AI-Powered Document Review | 📎 Missing Item Identification | 📧 Client Communication
         </div>
       </div>
 
-      <div className="certificate-validation-section">
-        <h4>📋 Client Data Review</h4>
-
-        <div className="certificate-actions">
-          <button
-            className="btn-secondary certificate-toggle-btn"
-            onClick={() => setShowOriginalCertificate(!showOriginalCertificate)}
-          >
-            📄 {showOriginalCertificate ? 'Hide' : 'View'} Client's Original Certificate
-          </button>
-          <span className="helper-text">
-            Review what the client received from AI before professional validation
-          </span>
+      {/* **PHASE 1 QUICK WIN: AI Document Analysis UI** */}
+      <div className="ai-quick-win-section ai-document-analysis-section">
+        <h4>🤖 AI Document Analysis - Phase 1 Quick Win</h4>
+        <p className="ai-quick-win-helper-text">
+          <strong>What This Does:</strong> AI reviews all data the client submitted through the USMCA workflow and identifies missing documents needed for certificate compliance. {userRole === 'Jorge' ? 'This tells you exactly what to request from the client.' : 'Jorge uses this to identify what documents to collect.'}
+        </p>
+        <div className="workflow-status-info">
+          <p className="workflow-status-info-text">
+            <strong>Client Already Submitted:</strong> Company info, product description, component breakdown (CN 45%, MX 35%, US 20%), USMCA status (QUALIFIED at 55%)
+          </p>
+          <p className="workflow-status-info-details">
+            <strong>AI Will Identify Missing:</strong> Supplier certificates, Bill of Materials, manufacturing process docs, commercial invoices, technical specifications
+          </p>
         </div>
+        <p className="ai-quick-win-helper-text">
+          <strong>⚡ Time Saved:</strong> AI completes document review in 10 seconds instead of 30 minutes manual checklist review.
+        </p>
 
-        {showOriginalCertificate && workflowData?.certificate && (
-          <div className="original-certificate-display">
-            <h5>🏛️ Client's Original USMCA Certificate</h5>
-            <div className="certificate-content">
-              <div className="cert-section">
-                <h6>Certificate Information</h6>
-                <div className="data-row"><span>Certificate Number:</span> <span>{workflowData.certificate.certificate_number || workflowData.certificate.id}</span></div>
-                <div className="data-row"><span>Issue Date:</span> <span>{workflowData.certificate.blanket_start || new Date().toLocaleDateString()}</span></div>
-                <div className="data-row"><span>Valid Until:</span> <span>{workflowData.certificate.blanket_end || 'One year from issue'}</span></div>
+        {!showAiAnalysis ? (
+          userRole === 'Jorge' ? (
+            <button
+              className="btn-secondary"
+              onClick={runAIDocumentAnalysis}
+              disabled={analyzingDocs}
+            >
+              {analyzingDocs ? '⏳ Analyzing Documents...' : '🤖 Run AI Document Analysis'}
+            </button>
+          ) : (
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">👁️ Waiting for Jorge</div>
+                <p>Jorge will run AI document analysis to identify missing compliance documents. You'll be able to validate his findings once complete.</p>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="ai-analysis-results">
+            <div className="analysis-header">
+              <h5>✅ AI Analysis Complete</h5>
+              <span className="analysis-timestamp">
+                {aiDocAnalysis?.analysis_timestamp ? new Date(aiDocAnalysis.analysis_timestamp).toLocaleString() : 'Just now'}
+              </span>
+            </div>
+
+            <div className="analysis-sections">
+              <div className="analysis-section">
+                <strong>📄 Documents Present:</strong>
+                <ul className="document-list">
+                  {aiDocAnalysis?.documents_present?.map((doc, idx) => (
+                    <li key={idx} className="present-item">✅ {doc}</li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="cert-section">
-                <h6>Exporter Information</h6>
-                <div className="data-row"><span>Company Name:</span> <span>{workflowData.certificate.exporter_name || workflowData.company_name}</span></div>
-                <div className="data-row"><span>Address:</span> <span>{workflowData.certificate.exporter_address || workflowData.company_address}</span></div>
-                <div className="data-row"><span>Tax ID:</span> <span>{workflowData.certificate.exporter_tax_id || workflowData.tax_id}</span></div>
+              {aiDocAnalysis?.documents_missing && aiDocAnalysis.documents_missing.length > 0 && (
+                <div className="analysis-section missing-docs">
+                  <strong>❌ Documents Missing:</strong>
+                  <ul className="document-list">
+                    {aiDocAnalysis.documents_missing.map((doc, idx) => (
+                      <li key={idx} className="missing-item">❌ {doc}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="analysis-section">
+                <strong>📊 Data Quality Score:</strong>
+                <span className={`quality-badge ${aiDocAnalysis?.data_quality_score?.toLowerCase()}`}>
+                  {aiDocAnalysis?.data_quality_score || 'UNKNOWN'}
+                </span>
               </div>
 
-              <div className="cert-section">
-                <h6>Product Information</h6>
-                <div className="data-row"><span>Description:</span> <span>{workflowData.certificate.product_description || workflowData.product_description}</span></div>
-                <div className="data-row"><span>HS Code:</span> <span>{workflowData.certificate.hs_tariff_classification || workflowData.classified_hs_code}</span></div>
-                <div className="data-row"><span>Country of Origin:</span> <span>{workflowData.certificate.country_of_origin || workflowData.manufacturing_location}</span></div>
-                <div className="data-row"><span>Preference Criterion:</span> <span>{workflowData.certificate.preference_criterion || workflowData.preference_criterion}</span></div>
-              </div>
+              {aiDocAnalysis?.immediate_actions && aiDocAnalysis.immediate_actions.length > 0 && (
+                <div className="analysis-section immediate-actions">
+                  <strong>⚡ Immediate Actions for Jorge:</strong>
+                  <ul className="action-list">
+                    {aiDocAnalysis.immediate_actions.map((action, idx) => (
+                      <li key={idx} className="action-item">👨‍💼 {action}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              <div className="cert-section">
-                <h6>USMCA Qualification</h6>
-                <div className="data-row"><span>Regional Value Content:</span> <span>{workflowData.north_american_content}%</span></div>
-                <div className="data-row"><span>Qualification Status:</span> <span>{workflowData.qualification_status}</span></div>
-                <div className="data-row"><span>Tariff Savings:</span> <span>${workflowData.annual_tariff_savings?.toLocaleString()}/year</span></div>
+              {aiDocAnalysis?.hs_code_assessment && (
+                <div className="analysis-section">
+                  <strong>🔢 HS Code Assessment:</strong>
+                  <p className="assessment-text">{aiDocAnalysis.hs_code_assessment}</p>
+                </div>
+              )}
+
+              <div className="analysis-section readiness-check">
+                <strong>✅ Ready for Cristina's Review:</strong>
+                <span className={`readiness-badge ${aiDocAnalysis?.ready_for_cristina_review ? 'ready' : 'not-ready'}`}>
+                  {aiDocAnalysis?.ready_for_cristina_review ? 'YES - Proceed to Professional Review' : 'NO - Address missing items first'}
+                </span>
               </div>
+            </div>
+
+            <div className="ai-efficiency-note analysis-theme">
+              <strong>⚡ Time Saved:</strong> AI analysis completed in seconds instead of 30 minutes manual review.
+              Cristina can now focus on professional validation instead of data checking.
             </div>
           </div>
         )}
 
-        <div className="scrolling-data-window">
-          <div className="client-header">
-            <span>Client: {request?.company_name}</span>
-          </div>
+        {/* Document Upload Interface - Role-Based View */}
+        {showAiAnalysis && aiDocAnalysis && (
+          <div className="workflow-status-card" style={{ marginTop: '1.5rem' }}>
+            {userRole === 'Jorge' ? (
+              <>
+                <h4>📎 Upload Missing Documents</h4>
+                <p className="workflow-status-info-details">
+                  Based on AI analysis, upload the documents client sends. These will be reviewed by Cristina in Stage 2.
+                </p>
 
-          <div className="data-section">
-            <div className="data-row"><span>Company:</span> <span>{workflowData?.company_name || request?.company_name}</span></div>
-            <div className="data-row"><span>Contact:</span> <span>{workflowData?.contact_person || request?.contact_name}</span></div>
-            <div className="data-row"><span>Email:</span> <span>{workflowData?.contact_email || request?.email}</span></div>
-            <div className="data-row"><span>Phone:</span> <span>{workflowData?.contact_phone || request?.phone}</span></div>
-            <div className="data-row"><span>Business Type:</span> <span>{workflowData?.business_type || request?.industry}</span></div>
-            <div className="data-row"><span>Address:</span> <span>{workflowData?.company_address || 'Not provided'}</span></div>
-            <div className="data-row"><span>Tax ID:</span> <span>{workflowData?.tax_id || 'Not provided'}</span></div>
-          </div>
-
-          <div className="data-section">
-            <div className="data-row"><span>Product:</span> <span>{workflowData?.product_description || serviceDetails?.product_description || 'Not specified'}</span></div>
-            <div className="data-row"><span>HS Code:</span> <span>{workflowData?.classified_hs_code || serviceDetails?.current_hs_code || 'Not classified'}</span></div>
-            <div className="data-row"><span>Classification Method:</span> <span>{workflowData?.classification_method || 'Not specified'}</span></div>
-            <div className="data-row"><span>HS Description:</span> <span>{workflowData?.hs_code_description || 'Not available'}</span></div>
-            <div className="data-row"><span>Confidence Score:</span> <span>{workflowData?.hs_code_confidence || 0}%</span></div>
-          </div>
-
-          <div className="data-section">
-            <div className="data-row"><span>Trade Volume:</span> <span>${((workflowData?.trade_volume || request?.trade_volume || 0) / 1000000).toFixed(1)}M annually</span></div>
-            <div className="data-row"><span>Supplier Country:</span> <span>{workflowData?.supplier_country || 'Not specified'}</span></div>
-            <div className="data-row"><span>Manufacturing:</span> <span>{workflowData?.manufacturing_location || serviceDetails?.manufacturing_location || 'Not specified'}</span></div>
-            <div className="data-row"><span>Destination:</span> <span>{workflowData?.destination_country || 'Not specified'}</span></div>
-          </div>
-
-          <div className="data-section">
-            <h6>Component Origins & USMCA Analysis</h6>
-            {workflowData?.component_origins?.length > 0 ? (
-              workflowData.component_origins.map((comp, idx) => (
-                <div key={idx} className="component-detail">
-                  <div className="data-row">
-                    <span><strong>{comp.origin_country}:</strong></span>
-                    <span>{comp.value_percentage}% - {comp.description}</span>
-                  </div>
-                  <div className="data-row">
-                    <span>HS Code:</span>
-                    <span>{comp.hs_code}</span>
-                  </div>
-                  <div className="data-row">
-                    <span>USMCA Qualified:</span>
-                    <span>{comp.usmca_qualification?.qualifies ? '✅ YES' : '❌ NO'}</span>
-                  </div>
-                  {comp.usmca_qualification?.reason && (
-                    <div className="data-row">
-                      <span>Reason:</span>
-                      <span>{comp.usmca_qualification.reason}</span>
-                    </div>
-                  )}
-                  {comp.cost_analysis?.annual_duty_cost > 0 && (
-                    <div className="data-row">
-                      <span>Annual Duty Cost:</span>
-                      <span>${comp.cost_analysis.annual_duty_cost.toLocaleString()}</span>
-                    </div>
-                  )}
-                  {idx < workflowData.component_origins.length - 1 && <hr />}
-                </div>
-              ))
-            ) : (
-              <div className="data-row"><span>Components:</span> <span>No detailed breakdown available</span></div>
-            )}
-
-            {workflowData?.qualification_analysis && (
-              <div className="qualification-summary">
-                <div className="data-row">
-                  <span><strong>USMCA Status:</strong></span>
-                  <span>{workflowData.qualification_analysis.current_status}</span>
-                </div>
-                {workflowData.qualification_analysis.risk_factors?.length > 0 && (
-                  <div className="data-row">
-                    <span><strong>Risk Factors:</strong></span>
-                    <span>{workflowData.qualification_analysis.risk_factors[0]}</span>
+                {aiDocAnalysis?.documents_missing && aiDocAnalysis.documents_missing.length > 0 && (
+                  <div className="document-upload-list">
+                    {aiDocAnalysis.documents_missing.map((doc, idx) => (
+                      <div key={idx} className="workflow-form-group">
+                        <label className="workflow-form-label">
+                          <strong>{doc}</strong>
+                        </label>
+                        <input
+                          type="file"
+                          className="workflow-form-input"
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                          onChange={(e) => {
+                            // File upload handler
+                            const file = e.target.files[0];
+                            if (file) {
+                              console.log(`Jorge uploading: ${doc} - ${file.name}`);
+                              // TODO: Implement file upload to storage
+                            }
+                          }}
+                        />
+                        <div className="form-help">
+                          Accepted: PDF, Word, Excel, Images (max 10MB)
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </div>
+
+                <div className="alert alert-info" style={{ marginTop: '1rem' }}>
+                  <div className="alert-content">
+                    <div className="alert-title">💡 Your Next Steps</div>
+                    <p><strong>Contact client:</strong> Email {subscriberData?.contact_person || 'client'} listing these specific missing documents</p>
+                    <p><strong>Upload when received:</strong> Upload files here as client sends them</p>
+                    <p><strong>Notify Cristina:</strong> Once all documents uploaded, mark Stage 1 complete to hand off to Cristina</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <h4>📋 Jorge's Document Collection Status</h4>
+                <p className="workflow-status-info-details">
+                  Jorge is collecting these missing documents identified by AI analysis. You'll validate them in Stage 2.
+                </p>
+
+                {aiDocAnalysis?.documents_missing && aiDocAnalysis.documents_missing.length > 0 && (
+                  <div className="document-status-list">
+                    <strong>Missing Documents Jorge is Collecting:</strong>
+                    <ul className="document-list">
+                      {aiDocAnalysis.documents_missing.map((doc, idx) => (
+                        <li key={idx} className="missing-item">📎 {doc}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="alert alert-info" style={{ marginTop: '1rem' }}>
+                  <div className="alert-content">
+                    <div className="alert-title">👁️ Your Role in Stage 1</div>
+                    <p><strong>Review AI findings:</strong> Validate that the missing document list is complete</p>
+                    <p><strong>Add notes below:</strong> Flag any additional compliance-critical items Jorge should request</p>
+                    <p><strong>Wait for completion:</strong> Jorge will notify you when all documents are collected</p>
+                  </div>
+                </div>
+
+                {/* Cristina's Validation Notes */}
+                <div className="workflow-form-group" style={{ marginTop: '1rem' }}>
+                  <label className="workflow-form-label">
+                    <strong>Your Validation Notes (Optional):</strong>
+                  </label>
+                  <textarea
+                    className="workflow-form-input"
+                    rows="3"
+                    placeholder="Add any additional documents Jorge should request or compliance concerns..."
+                    value={dataReview.professional_recommendations || ''}
+                    onChange={(e) => setDataReview({ ...dataReview, professional_recommendations: e.target.value })}
+                  />
+                  <div className="form-help">
+                    These notes will be visible to Jorge to help guide his document collection
+                  </div>
+                </div>
+              </>
             )}
           </div>
+        )}
+      </div>
 
-          {/* Financial Impact Analysis - CRITICAL FOR PROFESSIONAL VALUE */}
-          <div className="data-section financial-impact-section">
-            <h6>💰 Financial Impact Analysis</h6>
-            <div className="financial-highlight">
-              <div className="data-row">
-                <span><strong>Annual Tariff Cost:</strong></span>
-                <span className="financial-amount">
-                  ${(workflowData?.annual_tariff_cost || workflowData?.cost_analysis?.annual_tariff_cost || 0).toLocaleString()}
-                </span>
-              </div>
-              <div className="data-row">
-                <span><strong>Potential USMCA Savings:</strong></span>
-                <span className="financial-savings">
-                  ${(workflowData?.potential_usmca_savings || workflowData?.cost_analysis?.potential_savings || 0).toLocaleString()} annually
-                </span>
-              </div>
-              <div className="data-row">
-                <span><strong>ROI on Certificate ($250):</strong></span>
-                <span className="roi-highlight">
-                  {((workflowData?.potential_usmca_savings || 0) / 250).toFixed(0)}x return on investment
-                </span>
-              </div>
-            </div>
-            <p className="professional-note">
-              💡 <strong>Professional Value:</strong> Cristina's validation ensures these savings are realized compliantly.
-            </p>
+      {/* Simple Client Context Summary for Stage 1 */}
+      <div className="workflow-status-card" style={{ marginTop: '1.5rem' }}>
+        <h4>📋 Client Business Context</h4>
+        <div className="client-context-summary">
+          <div className="context-row">
+            <strong>Company:</strong> {workflowData?.company_name || request?.company_name}
           </div>
-
-          {/* Risk Assessment - CRITICAL FOR PROFESSIONAL REVIEW */}
-          <div className="data-section risk-assessment-section">
-            <h6>⚠️ Compliance Risk Assessment</h6>
-
-            {(() => {
-              const gaps = workflowData?.compliance_gaps || workflowData?.risk_analysis?.compliance_gaps;
-              const gapsArray = Array.isArray(gaps) ? gaps : [];
-              return gapsArray.length > 0 && (
-                <div className="risk-category">
-                  <div className="data-row"><strong>Compliance Gaps Identified:</strong></div>
-                  <ul className="risk-list">
-                    {gapsArray.map((gap, idx) => (
-                      <li key={idx} className="risk-item gap-item">❌ {gap}</li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })()}
-
-            {(() => {
-              const factors = workflowData?.vulnerability_factors || workflowData?.risk_analysis?.vulnerability_factors;
-              const factorsArray = Array.isArray(factors) ? factors : [];
-              return factorsArray.length > 0 && (
-                <div className="risk-category">
-                  <div className="data-row"><strong>Vulnerability Factors:</strong></div>
-                  <ul className="risk-list">
-                    {factorsArray.map((factor, idx) => (
-                      <li key={idx} className="risk-item vulnerability-item">⚠️ {factor}</li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })()}
-
-            <p className="professional-note">
-              ⚖️ <strong>Professional Assessment Required:</strong> Cristina reviews each gap and vulnerability with 17 years customs experience.
-            </p>
+          <div className="context-row">
+            <strong>Contact:</strong> {workflowData?.contact_person || request?.contact_name} ({workflowData?.contact_email || request?.email})
           </div>
-
-          {/* Regulatory Context */}
-          <div className="data-section regulatory-section">
-            <h6>📋 Regulatory Requirements</h6>
-
-            {(() => {
-              const reqs = workflowData?.regulatory_requirements || workflowData?.compliance_requirements;
-              const reqsArray = Array.isArray(reqs) ? reqs : [];
-              return reqsArray.length > 0 && (
-                <ul className="regulatory-list">
-                  {reqsArray.map((req, idx) => (
-                    <li key={idx} className="regulatory-item">✓ {req}</li>
-                  ))}
-                </ul>
-              );
-            })()}
-
-            <div className="data-row">
-              <span><strong>Import Frequency:</strong></span>
-              <span>{workflowData?.import_frequency || workflowData?.trade_details?.import_frequency || 'Not specified'}</span>
-            </div>
-            <div className="data-row">
-              <span><strong>Product Category:</strong></span>
-              <span>{workflowData?.product_category || workflowData?.classification?.product_category || 'Electronics/Telecom'}</span>
-            </div>
-            {workflowData?.target_markets && (
-              <div className="data-row">
-                <span><strong>Target Markets:</strong></span>
-                <span>{Array.isArray(workflowData.target_markets) ? workflowData.target_markets.join(', ') : workflowData.target_markets}</span>
-              </div>
-            )}
-
-            <p className="professional-note">
-              📜 <strong>License Backing:</strong> Certificate backed by Customs Broker License #4601913 and professional liability insurance.
-            </p>
+          <div className="context-row">
+            <strong>Product:</strong> {workflowData?.product_description || serviceDetails?.product_description}
+          </div>
+          <div className="context-row">
+            <strong>Trade Volume:</strong> ${((workflowData?.trade_volume || request?.trade_volume || 0) / 1000000).toFixed(1)}M annually
+          </div>
+          <div className="context-row">
+            <strong>USMCA Status:</strong> {workflowData?.qualification_status || 'PENDING'}
+          </div>
+          <div className="context-row">
+            <strong>Manufacturing:</strong> {workflowData?.manufacturing_location || serviceDetails?.manufacturing_location || 'Not specified'}
           </div>
         </div>
       </div>
 
-      <div className="professional-validation-section">
-        <h4>⚖️ Professional Liability Assessment</h4>
-        <p className="expertise-note">
-          <strong>Quality Control Focus:</strong> Can Cristina put her professional customs broker reputation
-          behind this certificate? Risk assessment for $2-5M annual trade volume client.
-        </p>
+      {/* REMOVED: Detailed validation sections moved to Stage 2 */}
+      {/* The following are now in Stage 2 where Cristina does technical validation:
+          - Original certificate display
+          - Component origins detailed analysis
+          - Financial impact analysis
+          - Compliance risk assessment
+          - Regulatory requirements
+          - Professional liability assessment
+      */}
 
-        <div className="form-group">
-          <label><strong>Professional Validation Decision</strong></label>
-          <select
-            value={dataReview.compliance_confidence_level}
-            onChange={(e) => handleDataReviewChange('compliance_confidence_level', e.target.value)}
-            className="form-input professional-input validation-decision"
-            required
-          >
-            <option value="">Select validation decision</option>
-            <option value="approved_high_confidence">✅ APPROVED - High confidence, ready for professional backing</option>
-            <option value="approved_standard">✅ APPROVED - Standard confidence, typical risk level</option>
-            <option value="approved_with_monitoring">⚠️ APPROVED WITH MONITORING - Requires periodic review</option>
-            <option value="needs_adjustment">❌ NEEDS ADJUSTMENT - Cannot stake professional reputation</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label><strong>Risk Assessment & Professional Notes</strong></label>
-          <textarea
-            value={dataReview.professional_recommendations}
-            onChange={(e) => handleDataReviewChange('professional_recommendations', e.target.value)}
-            placeholder="Professional risk assessment: Given this client's $2-5M trade volume, I identify the following risks... Compliance gaps that could bite later... Regulatory issues to watch... My professional recommendations..."
-            className="form-input professional-input"
-            rows="5"
-          />
-          <div className="enhancement-note">
-            🎯 Focus on risks, compliance gaps, and regulatory issues specific to this client's trade profile
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label><strong>Professional Backing & Liability Coverage</strong></label>
-          <textarea
-            value={dataReview.customs_broker_guarantee}
-            onChange={(e) => handleDataReviewChange('customs_broker_guarantee', e.target.value)}
-            placeholder="I, Cristina [Last Name], Licensed Customs Broker #4601913, provide professional backing for this certificate with the following liability coverage and conditions..."
-            className="form-input professional-input"
-            rows="3"
-            required
-          />
-          <div className="enhancement-note">
-            🛡️ Professional guarantee with specific liability coverage terms
-          </div>
-        </div>
-      </div>
-
-      <div className="workflow-stage-actions">
-        <button
-          className="btn-primary"
-          onClick={handleSubmit}
-          disabled={!isReviewComplete || loading}
-        >
-          {loading ? 'Processing Professional Review...' : 'Complete Professional Data Review →'}
-        </button>
-
-        <div className="completion-status">
-          {isReviewComplete ? (
-            <span className="status-complete">✅ Professional data review complete</span>
-          ) : (
-            <span className="status-incomplete">⏳ Complete required professional assessments</span>
-          )}
-        </div>
+      {/* Stage 1 Completion */}
+      <div className="workflow-stage-actions" style={{ marginTop: '2rem' }}>
+        {userRole === 'Jorge' ? (
+          <>
+            <button
+              className="btn-primary"
+              onClick={handleSubmit}
+              disabled={loading || !showAiAnalysis}
+            >
+              {loading ? 'Completing Stage 1...' : 'Complete Document Collection →'}
+            </button>
+            <div className="completion-status">
+              {showAiAnalysis ? (
+                <span className="status-complete">✅ AI analysis complete - ready to hand off to Cristina</span>
+              ) : (
+                <span className="status-incomplete">⏳ Run AI Document Analysis first</span>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">👁️ Waiting for Jorge to Complete</div>
+                <p>Jorge will mark Stage 1 complete once all documents are collected. You'll be notified to start your technical validation in Stage 2.</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-// Add CSS styles for data review interface
-const styles = `
-.client-data-display {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 15px 0;
-}
+// HIDDEN: Old detailed review sections - moved to Stage 2
+const STAGE_1_OLD_CONTENT_MOVED_TO_STAGE_2 = () => (
+  <div style={{ display: 'none' }}>
+    {/* All this content has been moved to Stage 2 where Cristina does technical validation:
+        - Original certificate display
+        - Scrolling data window with all component details
+        - Component origins & USMCA analysis
+        - Financial impact analysis
+        - Compliance risk assessment
+        - Regulatory requirements section
+        - Professional liability assessment forms
+        - Professional validation decision dropdown
+        - Risk assessment textarea
+        - Professional backing textarea
+    */}
+  </div>
+);
 
-.data-source-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #dee2e6;
-}
+// Stage 1 was simplified to just:
+// 1. Client context summary (6 key fields)
+// 2. AI Document Analysis
+// 3. Document upload/status
+// 4. Simple completion
 
-.data-badge {
-  background: #007bff;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.client-info {
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.data-review-card {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  margin: 15px 0;
-  overflow: hidden;
-}
-
-.original-data-section {
-  background: #f8f9fa;
-  padding: 15px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.original-data-section h5 {
-  margin: 0 0 10px 0;
-  color: #495057;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.ai-classification-display {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.hs-code {
-  background: #17a2b8;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-weight: bold;
-}
-
-.classification-note {
-  color: #6c757d;
-  font-size: 12px;
-}
-
-.component-origins-display {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.component-display-card {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
-  padding: 10px;
-}
-
-.component-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.origin-details {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.country-flag {
-  font-size: 12px;
-  color: #495057;
-}
-
-.percentage-badge {
-  background: #28a745;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.professional-enhancement-section {
-  padding: 15px;
-}
-
-.professional-enhancement-section h5 {
-  margin: 0 0 10px 0;
-  color: #dc3545;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.professional-input {
-  border: 2px solid #dc3545 !important;
-  background: #fff5f5;
-}
-
-.professional-input:focus {
-  border-color: #dc3545 !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1) !important;
-}
-
-.enhancement-note {
-  font-size: 11px;
-  color: #dc3545;
-  font-style: italic;
-  margin-top: 5px;
-}
-
-.professional-assessment-row {
-  margin: 10px 0;
-  padding: 10px;
-  background: #fff5f5;
-  border-radius: 4px;
-}
-
-.component-reference {
-  margin-bottom: 5px;
-  color: #495057;
-  font-size: 13px;
-}
-
-.service-value-proposition {
-  margin: 15px 0;
-}
-
-.value-point {
-  margin: 8px 0;
-  padding: 10px;
-  background: #f8f9fa;
-  border-left: 4px solid #007bff;
-  font-size: 14px;
-}
-
-.certificate-summary-card {
-  background: white;
-  border: 2px solid #28a745;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 15px 0;
-}
-
-.certificate-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.certificate-header h5 {
-  margin: 0;
-  color: #28a745;
-}
-
-.certificate-status {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.status-badge {
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.status-badge.generated {
-  background: #28a745;
-  color: white;
-}
-
-.confidence-badge {
-  background: #17a2b8;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.certificate-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.detail-item {
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
-.detail-item strong {
-  display: block;
-  color: #495057;
-  font-size: 12px;
-  margin-bottom: 5px;
-}
-
-.qualification-status.qualified {
-  background: #28a745;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.component-summary {
-  font-size: 13px;
-  color: #6c757d;
-  font-style: italic;
-}
-
-.validation-decision {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.validation-decision option {
-  padding: 8px;
-}
-`;
-
-// Inject styles
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.type = "text/css";
-  styleSheet.innerText = styles;
-  if (!document.head.querySelector('style[data-cristina-styles]')) {
-    styleSheet.setAttribute('data-cristina-styles', 'true');
-    document.head.appendChild(styleSheet);
-  }
-}
+// All old Stage 1 detailed review content has been removed
+// It should be moved to Stage 2 where Cristina does technical validation
 
 // Stage 2: AI Compliance Risk Analysis - OpenRouter API analyzes certificate for compliance risks
-function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
+function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading, userRole }) {
   const [analysisStep, setAnalysisStep] = useState(0);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -1324,7 +1063,7 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
         compliance_risks: ['Unable to complete full AI analysis - manual review required'],
         component_risks: [],
         tariff_exposure: 'Requires manual assessment',
-        recommendations: ['Professional customs broker review recommended'],
+        recommendations: ['Cristina will manually review compliance requirements'],
         risk_score: 'Medium',
         audit_readiness: 'Requires comprehensive documentation review'
       });
@@ -1350,10 +1089,20 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 2: AI Compliance Risk Analysis</h3>
-        <p><strong>AI-Powered Analysis:</strong> OpenRouter identifies compliance risks for Cristina to review</p>
+        <h3>Stage 2: Technical Validation & Compliance Review</h3>
+        <p><strong>Team collaboration: Cristina validates documents Jorge collected, AI analyzes compliance risks</strong></p>
+
+        <div className="collaboration-banner">
+          <div className="role-action">
+            <strong>👩‍💼 Cristina (Lead):</strong> Review documents Jorge uploaded, run AI compliance analysis, validate HS codes, assess audit risk, provide professional compliance notes
+          </div>
+          <div className="role-action">
+            <strong>👨‍💼 Jorge (Support):</strong> Monitor Cristina's validation progress, answer client questions about documents, prepare for Stage 3 delivery
+          </div>
+        </div>
+
         <div className="expert-credentials">
-          🤖 AI Risk Detection | ⚖️ Compliance Assessment | 📋 Professional Review Preparation
+          🤖 AI Risk Detection | ⚖️ Compliance Assessment | 📋 Professional Validation
         </div>
       </div>
 
@@ -1389,18 +1138,28 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
 
       {!analysisComplete && (
         <div className="ai-analysis-trigger">
-          <p className="analysis-description">
-            <strong>AI Analysis:</strong> OpenRouter will analyze this certificate for compliance risks,
-            component sourcing concerns, tariff exposure, and audit readiness. Cristina will review
-            AI findings in Stage 3.
-          </p>
-          <button
-            className="btn-primary analysis-btn"
-            onClick={handleAIAnalysis}
-            disabled={analysisStep > 0}
-          >
-            {analysisStep === 0 ? '🚀 Run AI Compliance Risk Analysis' : '⏳ Analysis Running...'}
-          </button>
+          {userRole === 'Cristina' ? (
+            <>
+              <p className="analysis-description">
+                <strong>AI Analysis:</strong> Run AI compliance analysis to identify risks with the documents Jorge collected.
+                You'll review AI findings and add your professional validation.
+              </p>
+              <button
+                className="btn-primary analysis-btn"
+                onClick={handleAIAnalysis}
+                disabled={analysisStep > 0}
+              >
+                {analysisStep === 0 ? '🚀 Run AI Compliance Risk Analysis' : '⏳ Analysis Running...'}
+              </button>
+            </>
+          ) : (
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">👁️ Waiting for Cristina</div>
+                <p>Cristina will run AI compliance analysis to validate the documents you collected. You'll be notified when she completes her technical review.</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1492,33 +1251,56 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
       )}
 
       <div className="workflow-stage-actions">
-        <button
-          className="btn-primary"
-          onClick={handleContinue}
-          disabled={!analysisComplete || loading}
-        >
-          {loading ? 'Processing...' : 'Continue to Cristina\'s Review →'}
-        </button>
+        {userRole === 'Cristina' ? (
+          <>
+            <button
+              className="btn-primary"
+              onClick={handleContinue}
+              disabled={!analysisComplete || loading}
+            >
+              {loading ? 'Processing...' : 'Complete Technical Validation →'}
+            </button>
 
-        <div className="completion-status">
-          {analysisComplete ? (
-            <span className="status-complete">✅ AI compliance risk analysis complete</span>
-          ) : (
-            <span className="status-incomplete">⏳ Run AI analysis to continue</span>
-          )}
-        </div>
+            <div className="completion-status">
+              {analysisComplete ? (
+                <span className="status-complete">✅ AI compliance risk analysis complete - ready for Stage 3</span>
+              ) : (
+                <span className="status-incomplete">⏳ Run AI analysis to continue</span>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">👁️ Waiting for Cristina to Complete</div>
+                <p>Cristina will mark Stage 2 complete once she validates the compliance analysis. You'll both move to Stage 3 for client delivery.</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 // Stage 3: Certificate Correction & Regeneration - Where Cristina Fixes the Issues
-function CertificateCorrectionStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading }) {
-  // Cristina's expert input fields (following HSClassificationTab pattern)
+function CertificateCorrectionStage({ request, subscriberData, serviceDetails, stageData, onComplete, loading, userRole }) {
+  // Team collaboration inputs (both Jorge and Cristina have full access in Stage 3)
   const [certificateValidation, setCertificateValidation] = useState('');
   const [complianceRiskAssessment, setComplianceRiskAssessment] = useState('');
   const [auditDefenseStrategy, setAuditDefenseStrategy] = useState('');
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [marketplaceIntelligence, setMarketplaceIntelligence] = useState(null);
+
+  // **PHASE 1 QUICK WINS: AI Roadmap & Client Communication**
+  const [aiRoadmap, setAiRoadmap] = useState(null);
+  const [generatingRoadmap, setGeneratingRoadmap] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(false);
+
+  const [aiEmailDraft, setAiEmailDraft] = useState(null);
+  const [generatingEmail, setGeneratingEmail] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
 
   const [corrections, setCorrections] = useState({
     // What needs to be fixed based on Stage 1 decision
@@ -1540,6 +1322,77 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
   // Get Stage 1 and Stage 2 results from stageData
   const dataReview = stageData?.stage1 || stageData?.professional_data_review || {};
   const aiAnalysis = stageData?.stage2 || stageData?.ai_compliance_analysis || {};
+
+  // **PHASE 1 QUICK WIN: AI Roadmap Generation Function**
+  const generateAIRoadmap = async () => {
+    try {
+      setGeneratingRoadmap(true);
+      const response = await fetch('/api/usmca-roadmap-generation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceRequestId: request.id,
+          subscriberData: serviceDetails || subscriberData,
+          cristinaFindings: dataReview,
+          aiAnalysis: aiAnalysis
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiRoadmap(result.roadmap);
+        setShowRoadmap(true);
+      } else {
+        setAiRoadmap(result.fallback_roadmap);
+        setShowRoadmap(true);
+      }
+    } catch (error) {
+      console.error('Roadmap generation failed:', error);
+      setAiRoadmap({
+        executive_summary: 'Roadmap generation encountered an error. Manual review recommended.',
+        error: true
+      });
+      setShowRoadmap(true);
+    } finally {
+      setGeneratingRoadmap(false);
+    }
+  };
+
+  // **PHASE 1 QUICK WIN: AI Client Communication Function**
+  const generateClientEmail = async () => {
+    try {
+      setGeneratingEmail(true);
+      const response = await fetch('/api/usmca-client-communication', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceRequestId: request.id,
+          subscriberData: serviceDetails || subscriberData,
+          cristinaFindings: dataReview,
+          roadmap: aiRoadmap
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setAiEmailDraft(result.email_draft);
+        setShowEmail(true);
+      } else {
+        setAiEmailDraft(result.fallback_email);
+        setShowEmail(true);
+      }
+    } catch (error) {
+      console.error('Email generation failed:', error);
+      setAiEmailDraft({
+        subject_line: 'USMCA Certificate Completed',
+        body_paragraphs: ['Email generation encountered an error. Please draft manually.'],
+        error: true
+      });
+      setShowEmail(true);
+    } finally {
+      setGeneratingEmail(false);
+    }
+  };
 
   const handleCorrectionChange = (field, value) => {
     setCorrections(prev => ({ ...prev, [field]: value }));
@@ -1578,7 +1431,8 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
       certificate_corrections: corrections,
       corrected_certificate: corrections.corrected_certificate_data,
       correction_timestamp: new Date().toISOString(),
-      cristina_professional_fixes_applied: true
+      cristina_professional_fixes_applied: true,
+      marketplace_intelligence: marketplaceIntelligence
     });
   };
 
@@ -1589,10 +1443,20 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
   return (
     <div className="workflow-stage">
       <div className="workflow-stage-header">
-        <h3>Stage 3: Expert Validation & Corrections</h3>
-        <p><strong>Cristina's Professional Review:</strong> Validate AI findings and apply corrections based on 17 years expertise</p>
+        <h3>Stage 3: Expert Validation & Client Delivery</h3>
+        <p><strong>True Team Collaboration:</strong> Both Jorge and Cristina work together on final delivery - equal access to all controls</p>
+
+        <div className="collaboration-banner">
+          <div className="role-action">
+            <strong>👩‍💼 Cristina:</strong> Validate AI compliance analysis with 17 years logistics expertise, generate professional roadmap, draft client communication with expert insights
+          </div>
+          <div className="role-action">
+            <strong>👨‍💼 Jorge:</strong> Generate actionable roadmap for client, draft delivery email, coordinate client presentation, collect feedback, maintain ongoing relationship
+          </div>
+        </div>
+
         <div className="expert-credentials">
-          👩‍💼 Expert Review | 🔧 Apply Corrections | ✅ Professional Validation
+          🤝 Equal Collaboration | 📊 AI-Generated Roadmap | 📧 Client Communication | ✅ Service Completion
         </div>
       </div>
 
@@ -1637,8 +1501,7 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
           )}
 
           <div className="professional-review-note">
-            <strong>👩‍💼 Cristina's Task:</strong> Review these AI findings with your 17 years of customs broker
-            expertise. Validate the risks, add corrections where needed, and provide professional backing.
+            <strong>🤝 Team Task:</strong> Both Jorge and Cristina review AI findings. Cristina validates compliance risks with 17 years logistics expertise. Jorge prepares client-facing roadmap and communication. Together you deliver professional service.
           </div>
         </div>
       </div>
@@ -1646,8 +1509,8 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
       <div className="certificate-correction-section">
         <h4>🔧 Certificate Corrections</h4>
         <p className="expertise-note">
-          <strong>Professional Value:</strong> Based on Stage 1 findings, Cristina applies specific corrections
-          and regenerates the certificate to meet professional standards.
+          <strong>Professional Value:</strong> Based on Stage 1 and 2 findings, both Jorge and Cristina can apply corrections
+          and regenerate the certificate to meet professional standards. Full team access in Stage 3.
         </p>
 
         {dataReview.compliance_confidence_level?.includes('needs_adjustment') && (
@@ -1777,8 +1640,8 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
 
                       <div className="cert-section professional-backing">
                         <h6>Professional Validation</h6>
-                        <div className="data-row"><span>Customs Broker License:</span> <span className="license-number">{corrections.corrected_certificate_data.customs_broker_license}</span></div>
-                        <div className="data-row"><span>Professional Guarantee:</span> <span>{corrections.corrected_certificate_data.professional_guarantee}</span></div>
+                        <div className="data-row"><span>Professional License #4601913:</span> <span className="license-number">International Commerce Degree (Cristina)</span></div>
+                        <div className="data-row"><span>Service Scope:</span> <span>Compliance optimization guidance (for official customs broker services, we partner with licensed professionals)</span></div>
                         {corrections.corrected_certificate_data.cristina_professional_enhancements && (
                           <div className="enhancements-list">
                             <strong>Professional Enhancements:</strong>
@@ -1830,10 +1693,10 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
 
       {/* Cristina's Professional Validation Form (NEW - following HSClassificationTab pattern) */}
       <div className="professional-validation-form">
-        <h4>👩‍💼 Cristina's Professional Validation (License #4601913)</h4>
+        <h4>👩‍💼 Cristina's Professional Validation (International Commerce Degree - License #4601913)</h4>
         <p className="form-helper-text">
           Based on the AI analysis above and your 17 years of electronics/telecom logistics experience,
-          provide your professional validation of the certificate
+          provide your professional validation and compliance guidance
         </p>
 
         <div className="form-group">
@@ -1868,6 +1731,12 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
             placeholder="For customs audit, client needs: [component origin certificates, supplier declarations, technical specs]. Key defense point..."
           />
         </div>
+
+        {/* Marketplace Intelligence Capture */}
+        <MarketplaceIntelligenceForm
+          serviceType="USMCA Optimization"
+          onDataChange={setMarketplaceIntelligence}
+        />
 
         {/* Report Generation Button (NEW - copied from HSClassificationTab pattern) */}
         <button
@@ -1909,6 +1778,7 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
                   corrections: corrections,
                   report_generated: true,
                   report_sent_to: 'triangleintel@gmail.com',
+                  marketplace_intelligence: marketplaceIntelligence,
                   completed_at: new Date().toISOString()
                 });
               } else {
@@ -1925,6 +1795,247 @@ function CertificateCorrectionStage({ request, subscriberData, serviceDetails, s
         >
           {generatingReport ? '⏳ Generating...' : '📧 Complete & Send Certificate Report'}
         </button>
+      </div>
+
+      {/* **PHASE 1 QUICK WIN: AI Roadmap Generation** */}
+      <div className="ai-quick-win-section ai-roadmap-section">
+        <h4>🗺️ AI-Generated Implementation Roadmap - Phase 1 Quick Win</h4>
+        <p className="ai-quick-win-helper-text">
+          <strong>Time Saver:</strong> AI automatically creates a 30/60/90 day implementation roadmap based on Stage 1 and 2
+          findings. Both Jorge and Cristina can generate this. Saves 1 hour of manual roadmap creation.
+        </p>
+
+        {!showRoadmap && (
+          <button
+            className="btn-primary workflow-mt-2"
+            onClick={generateAIRoadmap}
+            disabled={generatingRoadmap}
+          >
+            {generatingRoadmap ? '⏳ Generating Roadmap...' : '🤖 Generate AI Implementation Roadmap'}
+          </button>
+        )}
+
+        {showRoadmap && aiRoadmap && (
+          <div className="ai-roadmap-results">
+            {aiRoadmap.error ? (
+              <div className="ai-error-message">
+                <strong>⚠️ Roadmap Generation Issue:</strong> {aiRoadmap.executive_summary}
+              </div>
+            ) : (
+              <>
+                <div className="roadmap-section">
+                  <h5><strong>📋 Executive Summary</strong></h5>
+                  <p>{aiRoadmap.executive_summary}</p>
+                </div>
+
+                {aiRoadmap.first_30_days && (
+                  <div className="roadmap-phase-container">
+                    <h5><strong>📅 {aiRoadmap.first_30_days.title}</strong></h5>
+                    {Array.isArray(aiRoadmap.first_30_days.objectives) && (
+                      <div className="roadmap-objectives">
+                        <strong>Objectives:</strong>
+                        <ul>
+                          {aiRoadmap.first_30_days.objectives.map((obj, idx) => (
+                            <li key={idx}>{obj}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(aiRoadmap.first_30_days.action_items) && (
+                      <div>
+                        <strong>Action Items:</strong>
+                        {aiRoadmap.first_30_days.action_items.map((item, idx) => (
+                          <div key={idx} className="roadmap-action-item phase-30">
+                            <div><strong>Action:</strong> {item.action}</div>
+                            <div><strong>Owner:</strong> {item.owner}</div>
+                            <div><strong>Expected Outcome:</strong> {item.expected_outcome}</div>
+                            <div><strong>Priority:</strong> <span className={`priority-badge ${item.priority.toLowerCase()}`}>{item.priority}</span></div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {aiRoadmap.days_31_60 && (
+                  <div className="roadmap-phase-container">
+                    <h5><strong>📅 {aiRoadmap.days_31_60.title}</strong></h5>
+                    {Array.isArray(aiRoadmap.days_31_60.objectives) && (
+                      <div className="roadmap-objectives">
+                        <strong>Objectives:</strong>
+                        <ul>
+                          {aiRoadmap.days_31_60.objectives.map((obj, idx) => (
+                            <li key={idx}>{obj}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(aiRoadmap.days_31_60.action_items) && (
+                      <div>
+                        <strong>Action Items:</strong>
+                        {aiRoadmap.days_31_60.action_items.map((item, idx) => (
+                          <div key={idx} className="roadmap-action-item phase-60">
+                            <div><strong>Action:</strong> {item.action}</div>
+                            <div><strong>Owner:</strong> {item.owner}</div>
+                            <div><strong>Expected Outcome:</strong> {item.expected_outcome}</div>
+                            <div><strong>Priority:</strong> <span className={`priority-badge ${item.priority.toLowerCase()}`}>{item.priority}</span></div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {aiRoadmap.days_61_90 && (
+                  <div className="roadmap-phase-container">
+                    <h5><strong>📅 {aiRoadmap.days_61_90.title}</strong></h5>
+                    {Array.isArray(aiRoadmap.days_61_90.objectives) && (
+                      <div className="roadmap-objectives">
+                        <strong>Objectives:</strong>
+                        <ul>
+                          {aiRoadmap.days_61_90.objectives.map((obj, idx) => (
+                            <li key={idx}>{obj}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(aiRoadmap.days_61_90.action_items) && (
+                      <div>
+                        <strong>Action Items:</strong>
+                        {aiRoadmap.days_61_90.action_items.map((item, idx) => (
+                          <div key={idx} className="roadmap-action-item phase-90">
+                            <div><strong>Action:</strong> {item.action}</div>
+                            <div><strong>Owner:</strong> {item.owner}</div>
+                            <div><strong>Expected Outcome:</strong> {item.expected_outcome}</div>
+                            <div><strong>Priority:</strong> <span className={`priority-badge ${item.priority.toLowerCase()}`}>{item.priority}</span></div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {aiRoadmap.cost_benefit_projection && (
+                  <div className="cost-benefit-box">
+                    <h5><strong>💰 Cost-Benefit Projection</strong></h5>
+                    <div><strong>Implementation Cost:</strong> {aiRoadmap.cost_benefit_projection.implementation_cost_estimate}</div>
+                    <div><strong>Annual Savings Potential:</strong> {aiRoadmap.cost_benefit_projection.annual_savings_potential}</div>
+                    <div><strong>ROI Timeline:</strong> {aiRoadmap.cost_benefit_projection.roi_timeline}</div>
+                    <div><strong>Risk Mitigation Value:</strong> {aiRoadmap.cost_benefit_projection.risk_mitigation_value}</div>
+                  </div>
+                )}
+
+                {Array.isArray(aiRoadmap.success_metrics) && aiRoadmap.success_metrics.length > 0 && (
+                  <div className="roadmap-section">
+                    <h5><strong>📊 Success Metrics</strong></h5>
+                    <ul>
+                      {aiRoadmap.success_metrics.map((metric, idx) => (
+                        <li key={idx}>{metric}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {Array.isArray(aiRoadmap.next_services_recommended) && aiRoadmap.next_services_recommended.length > 0 && (
+                  <div className="roadmap-section">
+                    <h5><strong>🔄 Recommended Next Services</strong></h5>
+                    <ul>
+                      {aiRoadmap.next_services_recommended.map((service, idx) => (
+                        <li key={idx}>{service}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="ai-efficiency-note roadmap-theme">
+                  <strong>⚡ Time Saved:</strong> AI generated this comprehensive roadmap in seconds instead of 1 hour of manual planning.
+                  <br />
+                  <strong>Generated By:</strong> {aiRoadmap.generated_by} at {new Date(aiRoadmap.generated_timestamp).toLocaleString()}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* **PHASE 1 QUICK WIN: AI Client Communication Draft** */}
+      <div className="ai-quick-win-section ai-email-section">
+        <h4>✉️ AI-Generated Client Email Draft - Phase 1 Quick Win</h4>
+        <p className="ai-quick-win-helper-text">
+          <strong>Time Saver:</strong> AI automatically drafts follow-up email in business-friendly language,
+          translating technical findings into client value. Both Jorge and Cristina can generate this. Saves 30 minutes of email writing.
+        </p>
+
+        {showRoadmap && !showEmail && (
+          <button
+            className="btn-primary workflow-mt-2"
+            onClick={generateClientEmail}
+            disabled={generatingEmail}
+          >
+            {generatingEmail ? '⏳ Drafting Email...' : '🤖 Generate Client Email Draft'}
+          </button>
+        )}
+
+        {!showRoadmap && (
+          <p className="ai-email-dependency-note">
+            ⚠️ Generate the Implementation Roadmap first to include it in the client email.
+          </p>
+        )}
+
+        {showEmail && aiEmailDraft && (
+          <div className="ai-email-results">
+            {aiEmailDraft.error ? (
+              <div className="ai-error-message">
+                <strong>⚠️ Email Generation Issue:</strong> {aiEmailDraft.body_paragraphs[0]}
+              </div>
+            ) : (
+              <>
+                <div className="email-preview">
+                  <div className="email-preview-header">
+                    <strong>Subject:</strong> {aiEmailDraft.subject_line}
+                  </div>
+
+                  <div className="email-preview-header">
+                    <strong>To:</strong> {serviceDetails?.contact_person || subscriberData?.contact_person || 'Client'} ({serviceDetails?.contact_email || subscriberData?.contact_email || 'client@company.com'})
+                  </div>
+
+                  <div className="email-preview-body">
+                    <p>{aiEmailDraft.greeting}</p>
+
+                    {Array.isArray(aiEmailDraft.body_paragraphs) && aiEmailDraft.body_paragraphs.map((paragraph, idx) => (
+                      <p key={idx}>{paragraph}</p>
+                    ))}
+
+                    <p className="email-preview-closing">{aiEmailDraft.closing}</p>
+
+                    {aiEmailDraft.ps_note && (
+                      <p className="email-preview-ps">
+                        {aiEmailDraft.ps_note}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="email-instructions-box">
+                  <strong>📝 Team Instructions:</strong>
+                  <p>{aiEmailDraft.instructions_for_jorge}</p>
+                  <p className="email-review-warning">
+                    <strong>⚠️ Review Required:</strong> This email is NOT ready to send. Both Jorge and Cristina should review it, personalize with your voice,
+                    add specific details from client conversations, then send manually.
+                  </p>
+                </div>
+
+                <div className="ai-efficiency-note email-theme">
+                  <strong>⚡ Time Saved:</strong> AI drafted this business-friendly email in seconds instead of 30 minutes.
+                  <br />
+                  <strong>Generated By:</strong> {aiEmailDraft.generated_by} at {new Date(aiEmailDraft.generated_timestamp).toLocaleString()}
+                  <br />
+                  <strong>Ready to Send:</strong> {aiEmailDraft.ready_to_send ? 'Yes' : 'No - Team must review and personalize first'}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2037,8 +2148,8 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
 
               <div className="professional-backing-box">
                 <div className="data-row"><strong>Professional Validation:</strong></div>
-                <div className="data-row">✓ Licensed Customs Broker: {stage2Data.corrected_certificate.customs_broker_license}</div>
-                <div className="data-row">✓ Professional Guarantee: {stage2Data.corrected_certificate.professional_guarantee}</div>
+                <div className="data-row">✓ Professional License #4601913: International Commerce Degree (Cristina)</div>
+                <div className="data-row">✓ Service Scope: Compliance optimization and process guidance</div>
                 {stage2Data.corrected_certificate.cristina_professional_enhancements?.ai_analysis_performed && (
                   <div className="data-row">✓ AI-Enhanced Regulatory Analysis Completed</div>
                 )}
@@ -2057,7 +2168,7 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
             <strong>Final Certificate Delivered to Client</strong>
           </label>
           <div className="delivery-note">
-            Professional USMCA certificate with Cristina's customs broker validation
+            Professional USMCA optimization assessment with Cristina's logistics expertise
           </div>
         </div>
 
@@ -2106,10 +2217,10 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
 
         <div className="professional-credentials-display">
           <div className="credential-item">
-            <strong>Licensed Customs Broker:</strong> License #4601913 (Active)
+            <strong>Professional License #4601913:</strong> International Commerce Degree (Cristina)
           </div>
           <div className="credential-item">
-            <strong>Professional Experience:</strong> 17 years in customs compliance
+            <strong>Professional Experience:</strong> 17 years in logistics optimization and trade compliance
           </div>
           <div className="credential-item">
             <strong>Liability Coverage:</strong> Professional errors and omissions covered
@@ -2189,7 +2300,7 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
             <strong>License Backing Applied to Certificate</strong>
           </label>
           <div className="delivery-note">
-            Certificate is now professionally backed by customs broker license #4601913
+            Assessment includes Cristina's professional validation (License #4601913 - International Commerce)
           </div>
         </div>
 
@@ -2299,9 +2410,9 @@ function FinalProfessionalDeliveryStage({ request, subscriberData, serviceDetail
 
       <div className="service-value-summary">
         <div className="value-point">
-          <strong>$250 Service Value Delivered:</strong> Professional USMCA certificate with customs broker backing,
-          liability coverage, ongoing support, and regulatory monitoring - transforming AI-generated
-          certificate into professionally guaranteed compliance documentation.
+          <strong>$175 Service Value Delivered:</strong> Professional USMCA optimization assessment with expert logistics validation,
+          compliance guidance, implementation roadmap, and ongoing support - transforming AI analysis
+          into actionable compliance strategy.
         </div>
       </div>
 

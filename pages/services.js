@@ -17,105 +17,107 @@ export default function ProfessionalServices() {
 
   const serviceTiers = [
     {
-      name: 'USMCA Certificate Generation',
-      serviceId: 'usmca-certificate',
-      basePrice: 250,
-      professionalPrice: 212,  // 15% off
-      premiumPrice: 188,       // 25% off
-      description: 'Professional USMCA certificate with regulatory compliance validation.',
-      expert: 'Compliance Services - Licensed Customs Broker',
+      name: '🏥 Trade Health Check',
+      serviceId: 'trade-health-check',
+      basePrice: 99,
+      professionalPrice: 99,  // No discount on this service
+      premiumPrice: 99,       // No discount on this service
+      description: 'Collaborative assessment by Jorge & Cristina to identify trade optimization opportunities.',
+      expert: 'Team Collaboration - Jorge & Cristina (50% each)',
       features: [
-        'Avoid 35% tariffs with proper USMCA compliance',
-        'Professional liability coverage',
-        'Zero risk of customs rejection',
-        'Expert validation of North American content',
-        'Complete USMCA Certificate of Origin',
-        'Delivered within 24-48 hours'
+        'Complete trade health assessment',
+        'Prioritized improvement recommendations',
+        'Service recommendation strategy',
+        '$99 credit toward any follow-up service',
+        '1-week delivery timeline',
+        'Perfect entry point for new clients'
       ]
     },
     {
-      name: 'HS Code Classification',
-      serviceId: 'hs-classification',
-      basePrice: 200,
-      professionalPrice: 170,  // 15% off
-      premiumPrice: 150,       // 25% off
-      description: 'Licensed customs broker classification with audit-proof documentation.',
-      expert: 'Compliance Services - Licensed Customs Broker',
+      name: '📜 USMCA Advantage Sprint',
+      serviceId: 'usmca-advantage',
+      basePrice: 175,
+      professionalPrice: 149,  // 15% off
+      premiumPrice: 131,       // 25% off
+      description: 'Product audit and USMCA qualification roadmap led by Cristina with Jorge\'s support.',
+      expert: 'Cristina Lead (70%) • Jorge Support (30%)',
+      disclaimer: 'For official USMCA certificates, we partner with licensed customs brokers',
       features: [
-        'Audit-proof classifications',
-        'Minimize duty payments legally',
-        'Avoid costly reclassification penalties',
-        'Expert research and documentation',
-        'Verified HS code with supporting rationale',
-        'Delivered within 1-2 business days'
+        'Complete USMCA qualification assessment',
+        'Compliance gap analysis',
+        'Optimization roadmap with implementation guidance',
+        'Product audit and documentation review',
+        'Delivered within 1 week',
+        'Team collaboration ensures comprehensive coverage'
       ]
     },
     {
-      name: 'Crisis Response Management',
-      serviceId: 'crisis-response',
-      basePrice: 500,
-      professionalPrice: 425,  // 15% off
-      premiumPrice: 375,       // 25% off
-      description: 'Emergency compliance analysis when tariffs change or shipments are held.',
-      expert: 'Compliance Services - Licensed Customs Broker',
+      name: '🔧 Supply Chain Optimization',
+      serviceId: 'supply-chain-optimization',
+      basePrice: 275,
+      professionalPrice: 234,  // 15% off
+      premiumPrice: 206,       // 25% off
+      description: 'Complete supply chain efficiency audit led by Cristina with Jorge\'s sourcing insights.',
+      expert: 'Cristina Lead (60%) • Jorge Support (40%)',
       features: [
-        'Emergency 24-48 hour response',
-        'Immediate action plan to minimize damage',
-        'Root cause analysis and prevention',
-        'Direct expert consultation',
-        'Emergency compliance analysis',
-        'Direct expert support until resolved'
+        'AI analysis validated by compliance expert',
+        'Cost reduction opportunities identified',
+        'Process optimization recommendations',
+        'Logistics efficiency improvements',
+        'Delivered within 1-2 weeks',
+        'Implementation roadmap included'
       ]
     },
     {
-      name: 'Supplier Sourcing',
-      serviceId: 'supplier-sourcing',
+      name: '🚀 Pathfinder Market Entry',
+      serviceId: 'pathfinder',
+      basePrice: 350,
+      professionalPrice: 298,  // 15% off
+      premiumPrice: 263,       // 25% off
+      description: 'Mexico market entry strategy led by Jorge with Cristina\'s regulatory compliance expertise.',
+      expert: 'Jorge Lead (65%) • Cristina Support (35%)',
+      features: [
+        'Complete Mexico market analysis',
+        'Distribution partner recommendations',
+        '90-day implementation plan',
+        'Regulatory requirements validation',
+        'Landed cost calculations',
+        'Go-to-market presentation delivered'
+      ]
+    },
+    {
+      name: '🛡️ Supply Chain Resilience',
+      serviceId: 'supply-chain-resilience',
       basePrice: 450,
       professionalPrice: 383,  // 15% off
       premiumPrice: 338,       // 25% off
-      description: 'AI-powered supplier discovery validated by Mexico B2B expert.',
-      expert: 'Mexico Trade Services - B2B Sales Expert',
+      description: 'Alternative supplier discovery and risk mitigation led by Jorge with Cristina\'s compliance verification.',
+      expert: 'Jorge Lead (60%) • Cristina Support (40%)',
       features: [
-        'AI-powered supplier discovery with web search',
-        'Expert validates findings with industry knowledge',
-        'Bilingual advantage for Mexico sourcing',
-        'AI supplier analysis validated by expert',
-        'Strategic recommendations report',
-        'Analysis completed within 3-5 business days'
+        '3-5 verified alternative supplier options',
+        'USMCA qualification status for each',
+        'Risk mitigation and contingency plan',
+        'Supplier capability assessment',
+        'Compliance verification included',
+        'Delivered within 2-3 weeks'
       ]
     },
     {
-      name: 'Manufacturing Feasibility',
-      serviceId: 'manufacturing-feasibility',
-      basePrice: 650,
-      professionalPrice: 552,  // 15% off
-      premiumPrice: 488,       // 25% off
-      description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise.',
-      expert: 'Mexico Trade Services - B2B Sales Expert',
+      name: '🆘 Crisis Navigator',
+      serviceId: 'crisis-navigator',
+      basePrice: 200,
+      professionalPrice: 200,  // Monthly retainer (no percentage discount applies)
+      premiumPrice: 200,       // Monthly retainer (no percentage discount applies)
+      recurring: true,
+      description: 'Ongoing monthly retainer for emergency response and regulatory monitoring led by Cristina.',
+      expert: 'Cristina Lead (60%) • Jorge Support (40%)',
       features: [
-        'Comprehensive AI feasibility analysis',
-        'Expert validates locations and cost estimates',
-        'Risk assessment with mitigation strategies',
-        'USMCA qualification strategy included',
-        'Financial projections and timeline',
-        'Analysis completed within 5-7 business days'
-      ]
-    },
-    {
-      name: 'Market Entry Strategy',
-      serviceId: 'market-entry',
-      basePrice: 550,
-      professionalPrice: 467,  // 15% off
-      premiumPrice: 412,       // 25% off
-      description: 'AI market intelligence validated by on-the-ground Mexico business expertise.',
-      expert: 'Mexico Trade Services - B2B Sales Expert',
-      features: [
-        'AI-powered market research and analysis',
-        'Expert validates opportunities with local knowledge',
-        'Competitive landscape assessment',
-        'Entry strategy with actionable roadmap',
-        'Market opportunity assessment',
-        'Analysis completed within 3-5 business days'
+        'Priority 4-hour emergency response time',
+        'Monthly regulatory updates and monitoring',
+        'Unlimited trade consultation',
+        'Emergency compliance resolution',
+        'Proactive risk alerts',
+        '$200/month ongoing retainer'
       ]
     }
   ]
@@ -123,32 +125,32 @@ export default function ProfessionalServices() {
   const expertise = [
     {
       icon: 'TT',
-      title: 'Transparent Team',
-      description: '3-person team with clear capacity limits. No overselling, no false promises - just honest service delivery.'
+      title: 'Team Collaboration',
+      description: 'All services delivered through Jorge & Cristina collaboration - combining SMB operational experience with enterprise logistics expertise.'
     },
     {
       icon: 'MX',
-      title: 'Mexico Specialist',
-      description: 'Focus on Mexico routing and Latin America partnerships. Specialized knowledge in USMCA triangle routing opportunities.'
+      title: 'Mexico Trade Bridge',
+      description: 'Mexico-based team with bilingual capabilities (Spanish/English) and cultural bridge advantage for North American companies.'
     },
     {
       icon: 'CB',
-      title: 'Customs Brokerage',
-      description: 'Licensed customs clearance support with real capacity for 30 shipments/month and emergency same-day service.'
+      title: 'Foreign Trade Consulting',
+      description: 'Expert trade guidance and strategic recommendations. For official customs services, we partner with licensed professionals.'
     },
     {
       icon: 'PA',
       title: 'Pay As You Grow',
-      description: 'Start with $99 app trial, pay for services as needed. No long contracts, transparent pricing structure.'
+      description: 'Start with $99 Trade Health Check. Upgrade to Professional ($299/mo) for 15% off or Premium ($599/mo) for 25% off all services.'
     }
   ]
 
   return (
     <>
       <Head>
-        <title>Expert USMCA Consulting Services | Implementation & Training Support</title>
-        <meta name="description" content="Professional USMCA consulting, implementation support, and compliance training from certified trade experts. Affordable solutions for small manufacturers and importers." />
-        <meta name="keywords" content="USMCA consulting, trade compliance training, customs broker services, implementation support, audit preparation" />
+        <title>Expert Trade Services | Mexico Trade Bridge Team</title>
+        <meta name="description" content="Professional trade consulting and USMCA optimization services from Mexico-based experts. Team collaboration delivers comprehensive supply chain solutions." />
+        <meta name="keywords" content="USMCA consulting, trade compliance, supply chain optimization, Mexico market entry, supplier sourcing" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -163,7 +165,7 @@ export default function ProfessionalServices() {
             </div>
           </Link>
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="nav-menu-toggle"
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile navigation menu"
@@ -171,7 +173,7 @@ export default function ProfessionalServices() {
           >
             ☰
           </button>
-          
+
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
@@ -200,42 +202,41 @@ export default function ProfessionalServices() {
           <source src="/image/earth-seamless-loop.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        
+
         {/* Gradient Overlay */}
         <div className="hero-gradient-overlay" />
-        
+
         {/* Hero Content */}
         <div className="hero-content-container">
           <div className="hero-badge">
-            USMCA Qualification Problem Solving
+            Team Collaboration Services
           </div>
 
           <h1 className="hero-main-title">
-            Don't Qualify? We Can Fix That
+            Jorge & Cristina: Your Mexico Trade Team
           </h1>
           <h2 className="hero-sub-title">
-            Expert <span className="hero-gradient-text">Supply Chain Restructuring</span>
+            Expert <span className="hero-gradient-text">Trade Consulting & USMCA Optimization</span>
           </h2>
 
           <p className="hero-description-text">
-            Failed USMCA qualification? Facing trade risks? Need to restructure through Mexico?
-            Licensed customs brokers and Mexico trade specialists help you achieve qualification and maintain compliance.
+            All services delivered through team collaboration - combining Jorge's SMB operational experience and Mexico market expertise with Cristina's 17 years of enterprise logistics and compliance knowledge.
           </p>
-          
+
           <div className="hero-button-group">
-            <Link 
-              href="/usmca-workflow" 
+            <Link
+              href="/usmca-workflow"
               className="hero-primary-button"
-              aria-label="Schedule expert consultation"
+              aria-label="Start with Trade Health Check"
             >
-              Schedule Consultation
+              Start with $99 Health Check
             </Link>
-            <Link 
-              href="#services" 
+            <Link
+              href="#services"
               className="hero-secondary-button"
               aria-label="View all services"
             >
-              View Services
+              View All Services
             </Link>
           </div>
         </div>
@@ -245,9 +246,9 @@ export default function ProfessionalServices() {
       <section className="main-content" id="services">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Restructure Your Supply Chain to Achieve USMCA Qualification</h2>
+            <h2 className="section-header-title">6 Team Collaboration Services</h2>
             <p className="section-header-subtitle">
-              Licensed experts fix qualification issues, respond to trade crises, and help you restructure operations through Mexico
+              All services combine Jorge's business development expertise with Cristina's compliance and logistics knowledge
             </p>
           </div>
 
@@ -258,20 +259,37 @@ export default function ProfessionalServices() {
 
                 <div style={{marginBottom: '12px'}}>
                   <div style={{fontSize: '2rem', fontWeight: 'bold', color: '#134169'}}>
-                    ${service.basePrice}
+                    ${service.basePrice}{service.recurring ? '/mo' : ''}
                   </div>
-                  <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
-                    Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.professionalPrice}</span> (15% off)
-                  </div>
-                  <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
-                    Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.premiumPrice}</span> (25% off)
-                  </div>
+                  {!service.recurring && service.basePrice !== 99 && (
+                    <>
+                      <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                        Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.professionalPrice}</span> (15% off)
+                      </div>
+                      <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
+                        Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${service.premiumPrice}</span> (25% off)
+                      </div>
+                    </>
+                  )}
+                  {service.basePrice === 99 && (
+                    <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                      No subscriber discounts (entry service)
+                    </div>
+                  )}
                 </div>
 
                 {service.expert && (
-                  <p className="content-card-description" style={{fontSize: '0.9rem', marginBottom: '8px'}}>{service.expert}</p>
+                  <p className="content-card-description" style={{fontSize: '0.9rem', marginBottom: '8px', fontWeight: '600', color: '#134169'}}>
+                    {service.expert}
+                  </p>
                 )}
                 <p className="content-card-description">{service.description}</p>
+
+                {service.disclaimer && (
+                  <p className="content-card-description" style={{fontSize: '0.85rem', fontStyle: 'italic', color: '#6b7280', marginTop: '8px'}}>
+                    Note: {service.disclaimer}
+                  </p>
+                )}
 
                 <div style={{marginTop: '16px'}}>
                   {service.features.map((feature, idx) => (
@@ -290,13 +308,13 @@ export default function ProfessionalServices() {
         </div>
       </section>
 
-      {/* Expertise Areas */}
+      {/* Team Value Proposition */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">When You Need Expert Help</h2>
+            <h2 className="section-header-title">Why Team Collaboration Works</h2>
             <p className="section-header-subtitle">
-              Our workflow shows qualification issues - our experts fix them through Mexico supply chain restructuring
+              Every service benefits from both perspectives - operational and compliance expertise combined
             </p>
           </div>
 
@@ -312,66 +330,73 @@ export default function ProfessionalServices() {
         </div>
       </section>
 
-      {/* Honest Business Reality */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Honest Business Reality</h2>
-            <p className="section-header-subtitle">
-              Transparent about being a 3-person team targeting ~$89K/month = $1.07M/year revenue
-            </p>
-          </div>
-
-          <div className="grid-3-cols">
-            <div className="content-card">
-              <h3 className="content-card-title">App Revenue (Lead Generation)</h3>
-              <p className="content-card-description">~$37K/month from Mexico routing app subscriptions</p>
-            </div>
-
-            <div className="content-card">
-              <h3 className="content-card-title">Services Revenue (High Margin)</h3>
-              <p className="content-card-description">~$52K/month from Latin America trade services and customs brokerage</p>
-            </div>
-
-            <div className="content-card">
-              <h3 className="content-card-title">What We Don't Offer</h3>
-              <p className="content-card-description">No training programs, 24/7 support, custom development, or on-site visits</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Service Approach */}
-      <section className="main-content gradient-subtle">
+      <section className="main-content">
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">Our Service Approach</h2>
             <p className="section-header-subtitle">
-              Low-risk start, transparent capacity, pay-as-you-grow with expert Mexico routing guidance
+              Start small, scale with confidence - subscriber discounts reward ongoing partnership
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">1. Start with Starter ($99/mo)</h3>
+              <h3 className="content-card-title">1. Start with $99 Health Check</h3>
               <p className="content-card-description">
-                Begin with $99/month Starter tier for 10 USMCA analyses. Test our platform and understand your qualification issues before upgrading.
+                Begin with Trade Health Check ($99) to identify opportunities. Get $99 credit toward any follow-up service. No subscription required.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">2. Upgrade for Discounts</h3>
+              <h3 className="content-card-title">2. Subscribe for Discounts</h3>
               <p className="content-card-description">
                 Professional ($299/mo) gets 15% off all services. Premium ($599/mo) gets 25% off plus quarterly strategy calls with Jorge & Cristina.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">3. Pay for Expert Help</h3>
+              <h3 className="content-card-title">3. Request Services as Needed</h3>
               <p className="content-card-description">
-                Services range from $200-$650 base price. Subscribers save 15-25% when they need certificates, supplier sourcing, or crisis response.
+                Services range from $175-$450 one-time or $200/month for Crisis Navigator. Subscribers save automatically at checkout.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer Section */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Service Scope & Disclaimers</h2>
+            <p className="section-header-subtitle">
+              Transparent about what we provide and when you need licensed professionals
+            </p>
+          </div>
+
+          <div className="content-card" style={{maxWidth: '800px', margin: '0 auto'}}>
+            <h3 className="content-card-title">What We Provide:</h3>
+            <p className="content-card-description" style={{marginBottom: '16px'}}>
+              ✅ Trade process consulting and optimization guidance<br/>
+              ✅ USMCA qualification assessment and recommendations<br/>
+              ✅ Logistics planning and strategic recommendations<br/>
+              ✅ Supply chain analysis and process improvement<br/>
+              ✅ Market entry strategy and business development support
+            </p>
+
+            <h3 className="content-card-title">What We DO NOT Provide:</h3>
+            <p className="content-card-description" style={{marginBottom: '16px'}}>
+              ❌ Licensed customs broker services<br/>
+              ❌ Official USMCA certificate preparation (legal documents)<br/>
+              ❌ Formal legal compliance certifications<br/>
+              ❌ Official customs declarations
+            </p>
+
+            <h3 className="content-card-title">Partner Network:</h3>
+            <p className="content-card-description" style={{fontStyle: 'italic'}}>
+              For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide guidance and assessment; official certifications require licensed customs brokers.
+            </p>
           </div>
         </div>
       </section>
@@ -384,15 +409,22 @@ export default function ProfessionalServices() {
               Ready to Get Started?
             </h2>
             <p className="section-header-subtitle">
-              Schedule a consultation with our certified trade experts to discuss your compliance needs and implementation requirements
+              Begin with our $99 Trade Health Check to identify your biggest opportunities
             </p>
             <div className="hero-button-group">
-              <Link 
-                href="/usmca-workflow" 
+              <Link
+                href="/usmca-workflow"
                 className="hero-primary-button"
-                aria-label="Schedule expert consultation"
+                aria-label="Start Trade Health Check"
               >
-                Schedule Consultation
+                Start with $99 Health Check
+              </Link>
+              <Link
+                href="/services/request-form"
+                className="hero-secondary-button"
+                aria-label="Request specific service"
+              >
+                Request Specific Service
               </Link>
             </div>
           </div>

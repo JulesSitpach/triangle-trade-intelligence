@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 
 export default function AdminNavigation({ user }) {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { logout } = useSimpleAuth();
 
@@ -44,13 +46,25 @@ export default function AdminNavigation({ user }) {
         </button>
 
         <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-          <Link href="/admin/dev-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            href="/admin/dev-dashboard"
+            className={`nav-menu-link ${router.pathname === '/admin/dev-dashboard' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Development
           </Link>
-          <Link href="/admin/jorge-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            href="/admin/jorge-dashboard"
+            className={`nav-menu-link ${router.pathname === '/admin/jorge-dashboard' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Jorge
           </Link>
-          <Link href="/admin/broker-dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+          <Link
+            href="/admin/broker-dashboard"
+            className={`nav-menu-link ${router.pathname === '/admin/broker-dashboard' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
             Cristina
           </Link>
           <button onClick={signOut} className="nav-cta-button">

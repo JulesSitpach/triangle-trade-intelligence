@@ -5,26 +5,27 @@ import { stripe } from '../../../lib/stripe/server';
 /**
  * Service base prices for non-subscribers (in cents)
  * Subscribers get 15% (Professional) or 25% (Premium) discount
+ * Trade Health Check and Crisis Navigator have no subscriber discounts
  */
 const NON_SUBSCRIBER_PRICES = {
-  'usmca-certificate': 25000, // $250 (Starter: $250, Pro: $212, Premium: $188)
-  'hs-classification': 20000, // $200 (Starter: $200, Pro: $170, Premium: $150)
-  'crisis-response': 50000,   // $500 (Starter: $500, Pro: $425, Premium: $375)
-  'supplier-sourcing': 45000, // $450 (Starter: $450, Pro: $383, Premium: $338)
-  'manufacturing-feasibility': 65000, // $650 (Starter: $650, Pro: $552, Premium: $488)
-  'market-entry': 55000       // $550 (Starter: $550, Pro: $467, Premium: $412)
+  'trade-health-check': 9900,              // $99 (no discounts)
+  'usmca-advantage': 17500,                // $175 (Pro: $149, Premium: $131)
+  'supply-chain-optimization': 27500,      // $275 (Pro: $234, Premium: $206)
+  'pathfinder': 35000,                     // $350 (Pro: $298, Premium: $263)
+  'supply-chain-resilience': 45000,        // $450 (Pro: $383, Premium: $338)
+  'crisis-navigator': 20000                // $200/month (no discounts)
 };
 
 /**
  * Service names for display
  */
 const SERVICE_NAMES = {
-  'usmca-certificate': 'USMCA Certificate Generation',
-  'hs-classification': 'HS Code Classification',
-  'crisis-response': 'Crisis Response Management',
-  'supplier-sourcing': 'Supplier Sourcing',
-  'manufacturing-feasibility': 'Manufacturing Feasibility Analysis',
-  'market-entry': 'Market Entry Strategy'
+  'trade-health-check': 'Trade Health Check',
+  'usmca-advantage': 'USMCA Advantage Sprint',
+  'supply-chain-optimization': 'Supply Chain Optimization',
+  'pathfinder': 'Pathfinder Market Entry',
+  'supply-chain-resilience': 'Supply Chain Resilience',
+  'crisis-navigator': 'Crisis Navigator'
 };
 
 /**

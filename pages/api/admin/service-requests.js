@@ -207,13 +207,6 @@ async function handleGetServiceRequests(req, res) {
 
       if (data && data.length > 0) {
         requests = data;
-
-        // Filter Jorge's services to only his 3 services
-        if (assigned_to === 'Jorge') {
-          const jorgeServices = ['Supplier Sourcing', 'Manufacturing Feasibility', 'Market Entry'];
-          requests = requests.filter(r => jorgeServices.includes(r.service_type));
-        }
-
         console.log(`📊 Loaded ${requests.length} service requests from database`);
       } else {
         throw new Error('No database records');

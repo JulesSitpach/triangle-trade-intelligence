@@ -12,33 +12,38 @@ const supabase = createClient(
  * Service base prices (in cents) - before subscriber discounts
  */
 const SERVICE_PRICES = {
-  'usmca-certificate': 25000, // $250
-  'hs-classification': 20000, // $200
-  'crisis-response': 50000,   // $500
-  'supplier-sourcing': 45000, // $450
-  'manufacturing-feasibility': 65000, // $650
-  'market-entry': 55000       // $550
+  'trade-health-check': 9900,              // $99 (no discount)
+  'usmca-advantage': 17500,                // $175 base
+  'supply-chain-optimization': 27500,      // $275 base
+  'pathfinder': 35000,                     // $350 base
+  'supply-chain-resilience': 45000,        // $450 base
+  'crisis-navigator': 20000                // $200/month
 };
 
 /**
- * Subscription tier discounts
+ * Subscription tier discounts (Trade Health Check gets no discount)
  */
 const TIER_DISCOUNTS = {
-  'Starter': 0,      // No discount
+  'Starter': 0,         // No discount
   'Professional': 0.15, // 15% off
-  'Premium': 0.25    // 25% off
+  'Premium': 0.25       // 25% off
 };
+
+/**
+ * Services that don't get subscriber discounts
+ */
+const NO_DISCOUNT_SERVICES = ['trade-health-check', 'crisis-navigator'];
 
 /**
  * Service names for display
  */
 const SERVICE_NAMES = {
-  'usmca-certificate': 'USMCA Certificate Generation',
-  'hs-classification': 'HS Code Classification',
-  'crisis-response': 'Crisis Response Management',
-  'supplier-sourcing': 'Supplier Sourcing',
-  'manufacturing-feasibility': 'Manufacturing Feasibility Analysis',
-  'market-entry': 'Market Entry Strategy'
+  'trade-health-check': 'Trade Health Check',
+  'usmca-advantage': 'USMCA Advantage Sprint',
+  'supply-chain-optimization': 'Supply Chain Optimization',
+  'pathfinder': 'Pathfinder Market Entry',
+  'supply-chain-resilience': 'Supply Chain Resilience',
+  'crisis-navigator': 'Crisis Navigator'
 };
 
 /**
@@ -88,9 +93,9 @@ export default protectedApiHandler({
     const userTier = user.subscription_tier || 'Trial';
     const discount = TIER_DISCOUNTS[userTier] || 0;
 
-    // Apply discount to base price
+    // Apply discount to base price (unless service is excluded from discounts)
     let servicePrice = basePrice;
-    if (discount > 0) {
+    if (discount > 0 && !NO_DISCOUNT_SERVICES.includes(service_id)) {
       servicePrice = Math.round(basePrice * (1 - discount));
     }
 

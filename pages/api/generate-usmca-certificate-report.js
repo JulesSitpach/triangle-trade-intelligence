@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -160,10 +161,10 @@ export default async function handler(req, res) {
       || (subscriberData.product_description ? `${subscriberData.product_description}` : null)
       || 'international trade';
 
-    // Generate comprehensive USMCA certificate report using OpenRouter
-    const reportPrompt = `You are formatting a professional USMCA Certificate Report for Cristina Escalante, Licensed Customs Broker #4601913 with 17 years of ${industryContext} logistics experience.
+    // Generate comprehensive USMCA optimization assessment report using OpenRouter
+    const reportPrompt = `You are formatting a professional USMCA Optimization Assessment Report for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} experience).
 
-CRITICAL INSTRUCTION: Cristina has already provided her professional assessment. Your job is to format it into a professional report. Use her EXACT words for all sections marked "CRISTINA'S". DO NOT add to, modify, or paraphrase her professional input. She is the licensed expert - your role is formatting only.
+CRITICAL INSTRUCTION: The team has already provided their professional assessment. Your job is to format it into a professional report. Use their EXACT words for all sections marked "TEAM'S" or "CRISTINA'S". DO NOT add to, modify, or paraphrase their professional input. This is consulting and guidance - your role is formatting only.
 
 CLIENT BUSINESS PROFILE:
 Company: ${subscriberData.company_name || serviceRequest.client_company}
@@ -261,28 +262,27 @@ ${currentStatus === 'QUALIFIED'
 - Certificate ROI: $250 certificate to unlock $${usmcaSavings.toLocaleString()}/year savings = ${Math.round(usmcaSavings / 250)}x ROI
 - Break-even: Certificate pays for itself in ${Math.ceil((250 / usmcaSavings) * 365)} days`}
 
-## 4. CRISTINA'S PROFESSIONAL VALIDATION
+## 4. TEAM'S PROFESSIONAL ASSESSMENT
 
-CRITICAL: Use Cristina's EXACT words verbatim. DO NOT paraphrase or expand. This is her professional opinion backed by her customs broker license.
+CRITICAL: This section contains the team's professional assessment based on combined expertise. Use EXACT words from the validation data verbatim. DO NOT paraphrase or expand.
 
-**Certificate Accuracy Validation:**
+**USMCA Qualification Assessment:**
 "${cristinaExpertInputs.certificate_validation}"
 
-**Compliance Risk Assessment:**
+**Compliance Risk Evaluation:**
 "${cristinaExpertInputs.compliance_risk_assessment}"
 
-**Audit Defense Strategy:**
+**Strategic Implementation Guidance:**
 "${cristinaExpertInputs.audit_defense_strategy}"
 
-Signed,
-Cristina Escalante
-Licensed Customs Broker #4601913
-17 Years Electronics/Telecom Logistics Experience
+Triangle Trade Intelligence Team
+Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
+Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
 
 ## 5. ACTION PLAN (NEXT 90 DAYS)
-Based on the financial analysis above and Cristina's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year
+Based on the financial analysis above and the team's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year
 
-TONE: Professional but direct. Use actual numbers from their data. Be specific about which components to shift from China to Mexico. Show your expertise through concrete recommendations with dollar amounts and timelines, not generic platitudes.
+TONE: Professional but direct. Use actual numbers from their data. Be specific about which components to shift from China to Mexico. Show the team's combined expertise (17 years enterprise logistics + 7 years SMB operations) through concrete recommendations with dollar amounts and timelines, not generic platitudes.
 
 FORBIDDEN PHRASES:
 - "comprehensive strategy" without specific component names and Mexico suppliers
@@ -292,41 +292,38 @@ FORBIDDEN PHRASES:
 
 Format as a formal business report with clear headers, bullet points for key findings, and bold text for critical dollar amounts and percentages.`;
 
-    console.log('[USMCA CERT REPORT] Calling OpenRouter API...');
+    // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
+    console.log('[USMCA CERT REPORT] Calling AI with fallback chain...');
 
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Trade Intelligence - USMCA Certificate'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: reportPrompt
-        }],
-        max_tokens: 4000,
-        temperature: 0.7
-      })
+    const aiResult = await executeWithFallback({
+      prompt: reportPrompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 4000,
+      cacheOptions: {
+        table: 'usmca_certificate_reports_cache',
+        query: {
+          company_name: subscriberData.company_name,
+          product_description: subscriberData.product_description
+        },
+        transform: (cached) => cached.report_content
+      }
     });
 
-    console.log('[USMCA CERT REPORT] OpenRouter response status:', openRouterResponse.status);
-
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
-      console.error('[USMCA CERT REPORT] OpenRouter API error:', errorText);
-      throw new Error(`OpenRouter API call failed: ${openRouterResponse.status} - ${errorText}`);
+    // Check if AI generation succeeded
+    if (!aiResult.success) {
+      console.error('[USMCA CERT REPORT] All AI services failed:', aiResult);
+      return res.status(503).json({
+        success: false,
+        error: 'USMCA Certificate report generation failed',
+        source: aiResult.source,
+        label: aiResult.label,
+        troubleshooting: aiResult.troubleshooting,
+        message: 'All AI services (OpenRouter, Anthropic) and cache are unavailable. Please check API keys and try again.'
+      });
     }
 
-    const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content;
-
-    if (!reportContent) {
-      throw new Error('OpenRouter API returned empty response. No report content generated.');
-    }
+    const reportContent = aiResult.data;
+    console.log(`[USMCA CERT REPORT] Generated successfully via ${aiResult.source}`);
 
     // Create email using nodemailer
     const nodemailer = require('nodemailer');
@@ -356,16 +353,18 @@ Format as a formal business report with clear headers, bullet points for key fin
 </head>
 <body>
   <div class="header">
-    <h1>USMCA Certificate Report</h1>
-    <p>Professional Customs Broker Analysis</p>
+    <h1>USMCA Optimization Assessment Report</h1>
+    <p>Professional Trade Consulting & Analysis</p>
   </div>
 
   <div class="content">
     <div class="credentials">
-      <strong>Licensed Customs Broker:</strong> Cristina Escalante<br>
-      <strong>License Number:</strong> #4601913<br>
-      <strong>Expertise:</strong> 17 years international logistics experience specializing in ${industryContext}<br>
-      <strong>Service Date:</strong> ${new Date().toLocaleDateString()}
+      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), HTS/INCOTERMS specialist<br>
+      <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
+      <strong>Service Type:</strong> Consulting and Guidance (USMCA Optimization Assessment)<br>
+      <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
+      <strong>Note:</strong> For official USMCA certificates, we partner with licensed customs brokers
     </div>
 
     <div class="section">
@@ -382,7 +381,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official USMCA certificates and formal compliance documents, we partner with licensed customs brokers. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
   </div>
 </body>
@@ -398,6 +397,25 @@ Format as a formal business report with clear headers, bullet points for key fin
 
     await transporter.sendMail(mailOptions);
 
+    // ✅ SAVE TO DATABASE CACHE for future fallback
+    if (aiResult.source === 'openrouter_api' || aiResult.source === 'anthropic_api') {
+      try {
+        await supabase
+          .from('usmca_certificate_reports_cache')
+          .upsert({
+            company_name: subscriberData.company_name,
+            product_description: subscriberData.product_description,
+            report_content: reportContent,
+            source: aiResult.source,
+            cached_at: new Date().toISOString()
+          });
+        console.log('[USMCA CERT REPORT] Saved to cache for future fallback');
+      } catch (cacheError) {
+        console.error('[USMCA CERT REPORT] Cache save failed:', cacheError);
+        // Non-blocking - don't fail the request
+      }
+    }
+
     // Update service request with completion data
     const { error: updateError } = await supabase
       .from('service_requests')
@@ -412,7 +430,11 @@ Format as a formal business report with clear headers, bullet points for key fin
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Cristina Escalante - License #4601913'
+          completed_by: 'Triangle Trade Intelligence Team (Jorge Ochoa & Cristina Escalante)',
+          // ✅ AI SOURCE TRACKING
+          ai_source: aiResult.source,
+          ai_label: aiResult.label,
+          ai_cost_estimate: aiResult.cost_estimate
         }
       })
       .eq('id', serviceRequestId);
@@ -425,7 +447,12 @@ Format as a formal business report with clear headers, bullet points for key fin
       success: true,
       message: 'USMCA Certificate report generated and sent to triangleintel@gmail.com',
       report_content: reportContent,
-      email_subject: emailSubject
+      email_subject: emailSubject,
+      // ✅ TRANSPARENT SOURCE LABELING
+      source: aiResult.source,
+      label: aiResult.label,
+      is_cached: aiResult.is_cached,
+      cost_estimate: aiResult.cost_estimate
     });
 
   } catch (error) {

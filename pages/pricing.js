@@ -114,7 +114,7 @@ export default function Pricing() {
       description: 'Everything plus quarterly strategy calls with our team',
       features: [
         'Everything in Professional',
-        'Quarterly strategy calls with Jorge & Cristina',
+        'Quarterly strategy calls with our expert team',
         '25% discount on professional services',
         'Dedicated Slack/email support',
         'Custom trade intelligence reports'
@@ -126,52 +126,58 @@ export default function Pricing() {
 
   const addOns = [
     {
-      name: '📜 USMCA Certificate Generation',
-      serviceId: 'usmca-certificate',
-      basePrice: 250,
-      professionalPrice: 212,  // 15% off
-      premiumPrice: 188,       // 25% off
-      description: 'Professional USMCA certificate with regulatory compliance validation by licensed customs broker'
+      name: '🏥 Trade Health Check',
+      serviceId: 'trade-health-check',
+      basePrice: 99,
+      professionalPrice: 99,  // No discount on entry service
+      premiumPrice: 99,       // No discount on entry service
+      description: 'Collaborative assessment by our expert team to identify trade optimization opportunities',
+      recurring: false
     },
     {
-      name: '🔍 HS Code Classification',
-      serviceId: 'hs-classification',
-      basePrice: 200,
-      professionalPrice: 170,  // 15% off
-      premiumPrice: 150,       // 25% off
-      description: 'Licensed customs broker classification with audit-proof documentation'
+      name: '📜 USMCA Advantage Sprint',
+      serviceId: 'usmca-advantage',
+      basePrice: 175,
+      professionalPrice: 149,  // 15% off
+      premiumPrice: 131,       // 25% off
+      description: 'Product audit and USMCA qualification roadmap led by compliance expert with business development support',
+      recurring: false
     },
     {
-      name: '🚨 Crisis Response Management',
-      serviceId: 'crisis-response',
-      basePrice: 500,
-      professionalPrice: 425,  // 15% off
-      premiumPrice: 375,       // 25% off
-      description: 'Emergency compliance analysis when tariffs change or shipments are held'
+      name: '🔧 Supply Chain Optimization',
+      serviceId: 'supply-chain-optimization',
+      basePrice: 275,
+      professionalPrice: 234,  // 15% off
+      premiumPrice: 206,       // 25% off
+      description: 'Complete supply chain efficiency audit led by compliance expert with sourcing specialist insights',
+      recurring: false
     },
     {
-      name: '🔍 Supplier Sourcing',
-      serviceId: 'supplier-sourcing',
+      name: '🚀 Pathfinder Market Entry',
+      serviceId: 'pathfinder',
+      basePrice: 350,
+      professionalPrice: 298,  // 15% off
+      premiumPrice: 263,       // 25% off
+      description: 'Mexico market entry strategy led by business development specialist with regulatory compliance expertise',
+      recurring: false
+    },
+    {
+      name: '🛡️ Supply Chain Resilience',
+      serviceId: 'supply-chain-resilience',
       basePrice: 450,
       professionalPrice: 383,  // 15% off
       premiumPrice: 338,       // 25% off
-      description: 'AI-powered supplier discovery validated by Mexico B2B expert'
+      description: 'Alternative supplier discovery and risk mitigation led by sourcing specialist with compliance verification',
+      recurring: false
     },
     {
-      name: '🏭 Manufacturing Feasibility',
-      serviceId: 'manufacturing-feasibility',
-      basePrice: 650,
-      professionalPrice: 552,  // 15% off
-      premiumPrice: 488,       // 25% off
-      description: 'Comprehensive feasibility analysis combining AI research with manufacturing expertise'
-    },
-    {
-      name: '🚀 Market Entry Strategy',
-      serviceId: 'market-entry',
-      basePrice: 550,
-      professionalPrice: 467,  // 15% off
-      premiumPrice: 412,       // 25% off
-      description: 'AI market intelligence validated by on-the-ground Mexico business expertise'
+      name: '🆘 Crisis Navigator',
+      serviceId: 'crisis-navigator',
+      basePrice: 200,
+      professionalPrice: 200,  // Monthly retainer (no percentage discount applies)
+      premiumPrice: 200,       // Monthly retainer (no percentage discount applies)
+      description: 'Ongoing monthly retainer for emergency response and regulatory monitoring led by compliance expert',
+      recurring: true
     }
   ]
 
@@ -179,8 +185,8 @@ export default function Pricing() {
     <>
       <Head>
         <title>USMCA Compliance Platform Pricing | Affordable Plans for Small Importers</title>
-        <meta name="description" content="Affordable USMCA compliance for small importers. Plans starting at $99/month with expert support from licensed customs brokers. Save $10k-20k/year in time." />
-        <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, small business trade platform, affordable customs broker" />
+        <meta name="description" content="Affordable USMCA compliance for small importers. Plans starting at $99/month with expert trade consulting support. Save $10k-20k/year in time." />
+        <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, small business trade platform, trade consulting services" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -250,7 +256,7 @@ export default function Pricing() {
           </h2>
 
           <p className="hero-description-text">
-            Affordable USMCA compliance for small businesses who can't afford full-time customs brokers. Plans start at $99/month with expert support from licensed professionals.
+            Affordable USMCA compliance for small businesses who can't afford full-time trade compliance teams. Plans start at $99/month with expert trade consulting support.
           </p>
           
           <div className="hero-button-group">
@@ -387,7 +393,7 @@ export default function Pricing() {
               <div className="alert-title">📱 App vs 🤝 Professional Services</div>
               <div className="text-body">
                 <p><strong>App Subscription (above):</strong> Self-service AI tools you use yourself. Run unlimited qualification checks, get AI suggestions, generate certificate templates, receive alerts.</p>
-                <p><strong>Professional Services (below):</strong> Jorge & Cristina do the work for you. They complete certificates, validate classifications, find suppliers, and handle crises. Pay only when you need expert help.</p>
+                <p><strong>Professional Services (below):</strong> Our expert team does the work for you. They complete assessments, validate strategies, find suppliers, and handle crises. Pay only when you need expert help.</p>
               </div>
             </div>
           </div>
@@ -400,7 +406,7 @@ export default function Pricing() {
           <div className="section-header">
             <h2 className="section-header-title">Professional Services (Separate from App)</h2>
             <p className="section-header-subtitle">
-              Jorge & Cristina do the work for you - pay only when you need expert help
+              Our expert team does the work for you - pay only when you need help
             </p>
           </div>
 
@@ -411,14 +417,28 @@ export default function Pricing() {
 
                 <div style={{marginBottom: '12px'}}>
                   <div style={{fontSize: '1.75rem', fontWeight: 'bold', color: '#134169'}}>
-                    ${addon.basePrice}
+                    ${addon.basePrice}{addon.recurring ? '/mo' : ''}
                   </div>
-                  <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
-                    Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.professionalPrice}</span> (15% off)
-                  </div>
-                  <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
-                    Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.premiumPrice}</span> (25% off)
-                  </div>
+                  {!addon.recurring && addon.basePrice !== 99 && (
+                    <>
+                      <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                        Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.professionalPrice}</span> (15% off)
+                      </div>
+                      <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
+                        Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.premiumPrice}</span> (25% off)
+                      </div>
+                    </>
+                  )}
+                  {addon.basePrice === 99 && (
+                    <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                      No subscriber discounts (entry service)
+                    </div>
+                  )}
+                  {addon.recurring && (
+                    <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
+                      Monthly retainer (no percentage discount)
+                    </div>
+                  )}
                 </div>
 
                 <p className="content-card-description">{addon.description}</p>
@@ -449,7 +469,7 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">What makes your professional services different?</h3>
               <p className="content-card-description">
-                Professional services by licensed customs broker (17 years logistics experience) and Mexico B2B specialist (4+ years proven sales track record). We limit monthly service capacity to ensure personalized attention and quality for every client.
+                Professional services by trade compliance expert (17 years enterprise logistics experience) and Mexico B2B specialist (7+ years SMB operational experience). Team collaboration ensures comprehensive coverage combining compliance expertise with business development skills.
               </p>
             </div>
 
@@ -492,23 +512,23 @@ export default function Pricing() {
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Need Suppliers?</h3>
-              <p className="content-card-description">$450 base / $383 Professional / $338 Premium - Get vetted Mexico partners validated by B2B expert</p>
+              <h3 className="content-card-title">Start with Health Check</h3>
+              <p className="content-card-description">$99 (no discounts) - Expert team assesses your trade opportunities</p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Need Certificates?</h3>
-              <p className="content-card-description">$250 base / $212 Professional / $188 Premium - Licensed customs broker validation</p>
+              <h3 className="content-card-title">Need USMCA Help?</h3>
+              <p className="content-card-description">$175 base / $149 Professional / $131 Premium - Compliance-led qualification roadmap</p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Crisis Response?</h3>
-              <p className="content-card-description">$500 base / $425 Professional / $375 Premium - Emergency compliance when tariffs change</p>
+              <h3 className="content-card-title">Supply Chain Issues?</h3>
+              <p className="content-card-description">$450 base / $383 Professional / $338 Premium - Sourcing specialist finds alternative Mexico suppliers</p>
             </div>
 
             <div className="content-card">
               <h3 className="content-card-title">Upgrade to Premium</h3>
-              <p className="content-card-description">$599/month - 25% service discount + quarterly strategy calls with Jorge & Cristina</p>
+              <p className="content-card-description">$599/month - 25% service discount + quarterly strategy calls with our expert team</p>
             </div>
           </div>
         </div>
@@ -522,7 +542,7 @@ export default function Pricing() {
               Ready to Get Started?
             </h2>
             <p className="section-header-subtitle">
-              Subscribe to access professional USMCA compliance tools and expert support from licensed customs brokers
+              Subscribe to access professional USMCA compliance tools and expert trade consulting support
             </p>
             <div className="hero-button-group">
               <Link

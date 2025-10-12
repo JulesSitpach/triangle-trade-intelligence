@@ -1,7 +1,8 @@
 /**
- * Cristina's Dashboard - Modular Component Version
- * 4 tabs: Service Queue, USMCA Certificates, HS Classification, Crisis Response
- * Uses modular components for maintainability (following Jorge's pattern)
+ * Cristina's Dashboard - Team Collaboration Services
+ * All services are SHARED with Jorge - different lead/support roles per service
+ * Cristina leads: USMCA Optimization (70%), Supply Chain Opt (60%), Crisis Navigator (60%)
+ * Jorge leads: Pathfinder (65%), Supply Chain Resilience (60%), Manufacturing (60%)
  */
 
 import { useState, useEffect } from 'react';
@@ -10,16 +11,20 @@ import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 
-// Import Cristina's modular tab components
-import USMCACertificateTab from '../../components/cristina/USMCACertificateTab';
-import HSClassificationTab from '../../components/cristina/HSClassificationTab';
-import CrisisResponseTab from '../../components/cristina/CrisisResponseTab';
+// Import shared service tab components (Team Collaboration Model)
+import TradeHealthCheckTab from '../../components/shared/TradeHealthCheckTab';
+import USMCAAdvantageTab from '../../components/shared/USMCAAdvantageTab';
+import SupplyChainOptimizationTab from '../../components/shared/SupplyChainOptimizationTab';
+import PathfinderTab from '../../components/shared/PathfinderTab';
+import SupplyChainResilienceTab from '../../components/shared/SupplyChainResilienceTab';
+import CrisisNavigatorTab from '../../components/shared/CrisisNavigatorTab';
+import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
 
 export default function CristinaDashboardModular() {
   const router = useRouter();
   const { user, loading: authLoading } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('usmca-certificate');
+  const [activeTab, setActiveTab] = useState('trade-health-check');
   const [serviceRequests, setServiceRequests] = useState([]);
   const [cristinaServices, setCristinaServices] = useState([]);
 
@@ -51,7 +56,8 @@ export default function CristinaDashboardModular() {
 
   const loadServiceRequests = async () => {
     try {
-      const response = await fetch('/api/admin/service-requests?assigned_to=Cristina');
+      // Load ALL service requests (team collaboration - both Jorge and Cristina see everything)
+      const response = await fetch('/api/admin/service-requests');
       const data = await response.json();
       if (data.success) {
         setServiceRequests(data.requests || []);
@@ -94,14 +100,20 @@ export default function CristinaDashboardModular() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'usmca-certificate':
-        return <USMCACertificateTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
-      case 'hs-classification':
-        return <HSClassificationTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
-      case 'compliance-crisis-response':
-        return <CrisisResponseTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'trade-health-check':
+        return <TradeHealthCheckTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} currentUser="Cristina" />;
+      case 'usmca-advantage':
+        return <USMCAAdvantageTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} userRole="Cristina" />;
+      case 'supply-chain-optimization':
+        return <SupplyChainOptimizationTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'pathfinder':
+        return <PathfinderTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'supply-chain-resilience':
+        return <SupplyChainResilienceTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'crisis-navigator':
+        return <CrisisNavigatorTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       default:
-        return <USMCACertificateTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+        return <TradeHealthCheckTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} currentUser="Cristina" />;
     }
   };
 
@@ -128,25 +140,29 @@ export default function CristinaDashboardModular() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Compliance Services Dashboard</h1>
+              <h1 className="dashboard-title">Cristina's Service Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Compliance Specialist</span>
-                <span className="user-role">USMCA Certificates • HS Classification • Crisis Response</span>
+                <span className="user-name">Cristina Escalante - Compliance Specialist</span>
+                <span className="user-role">USMCA Advantage • Supply Chain Optimization • Crisis Navigator</span>
               </div>
             </div>
 
-            <div className="dashboard-metrics">
-              <div className="metric-card">
-                <h3 className="metric-title">Monthly Revenue</h3>
-                <div className="metric-value">${calculateRevenue().toLocaleString()}</div>
-              </div>
-              <div className="metric-card">
-                <h3 className="metric-title">Capacity Utilization</h3>
-                <div className="metric-value">{calculateCapacityUtilization()}%</div>
-              </div>
+            <div className="metrics-grid">
               <div className="metric-card">
                 <h3 className="metric-title">Active Services</h3>
-                <div className="metric-value">{serviceRequests.length}</div>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'in_progress').length}</div>
+              </div>
+              <div className="metric-card">
+                <h3 className="metric-title">Pending Requests</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'pending').length}</div>
+              </div>
+              <div className="metric-card">
+                <h3 className="metric-title">Completed</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'completed').length}</div>
+              </div>
+              <div className="metric-card metric-urgent">
+                <h3 className="metric-title">🔥 Needs Attention</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'pending' && new Date() - new Date(r.created_at) > 2 * 24 * 60 * 60 * 1000).length}</div>
               </div>
             </div>
           </div>
@@ -154,25 +170,46 @@ export default function CristinaDashboardModular() {
           <div className="dashboard-tabs">
             <div className="tab-navigation">
               <button
-                className={`tab-button ${activeTab === 'usmca-certificate' ? 'active' : ''}`}
-                onClick={() => setActiveTab('usmca-certificate')}
-                data-tab="usmca-certificate"
+                className={`tab-button ${activeTab === 'trade-health-check' ? 'active' : ''}`}
+                onClick={() => setActiveTab('trade-health-check')}
+                data-tab="trade-health-check"
               >
-                📜 USMCA Certificates
+                🏥 Trade Health Check <span className="service-price">$99</span>
               </button>
               <button
-                className={`tab-button ${activeTab === 'hs-classification' ? 'active' : ''}`}
-                onClick={() => setActiveTab('hs-classification')}
-                data-tab="hs-classification"
+                className={`tab-button ${activeTab === 'usmca-advantage' ? 'active' : ''}`}
+                onClick={() => setActiveTab('usmca-advantage')}
+                data-tab="usmca-advantage"
               >
-                🔍 HS Classification
+                📜 USMCA Advantage Sprint <span className="service-price">$175</span>
               </button>
               <button
-                className={`tab-button ${activeTab === 'compliance-crisis-response' ? 'active' : ''}`}
-                onClick={() => setActiveTab('compliance-crisis-response')}
-                data-tab="crisis-response"
+                className={`tab-button ${activeTab === 'supply-chain-optimization' ? 'active' : ''}`}
+                onClick={() => setActiveTab('supply-chain-optimization')}
+                data-tab="supply-chain-optimization"
               >
-                🆘 Crisis Response
+                🔧 Supply Chain Optimization <span className="service-price">$275</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'pathfinder' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pathfinder')}
+                data-tab="pathfinder"
+              >
+                🚀 Pathfinder Market Entry <span className="service-price">$350</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'supply-chain-resilience' ? 'active' : ''}`}
+                onClick={() => setActiveTab('supply-chain-resilience')}
+                data-tab="supply-chain-resilience"
+              >
+                🛡️ Supply Chain Resilience <span className="service-price">$450</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'crisis-navigator' ? 'active' : ''}`}
+                onClick={() => setActiveTab('crisis-navigator')}
+                data-tab="crisis-navigator"
+              >
+                🆘 Crisis Navigator <span className="service-price">$200/mo</span>
               </button>
             </div>
 
@@ -181,6 +218,8 @@ export default function CristinaDashboardModular() {
             </div>
           </div>
         </main>
+
+        <FloatingTeamChat currentUser="Cristina" />
       </div>
     </>
   );

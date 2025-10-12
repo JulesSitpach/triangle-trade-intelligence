@@ -36,140 +36,144 @@ export default function ProfessionalServices() {
   });
 
   const services = [
-    // Compliance Services
     {
-      id: 'usmca-certificate',
+      id: 'trade-health-check',
+      icon: '🏥',
+      title: 'Trade Health Check',
+      price: 99, // Internal base price
+      displayPrice: 99, // Same price for all (no non-subscriber markup)
+      subscriberPrice: 99,
+      expert: 'Team Collaboration - Expert Assessment',
+      benefits: [
+        'Complete trade health assessment',
+        'Prioritized improvement recommendations',
+        'Service recommendation strategy',
+        '$99 credit toward any follow-up service'
+      ],
+      deliverables: [
+        'Overall Trade Health Score (0-100)',
+        'Prioritized improvement action plan',
+        'Follow-up service recommendations',
+        'Delivered within 1 week'
+      ],
+      whyNeed: 'Perfect entry point for new clients. Get comprehensive assessment of trade opportunities and clear recommendations for optimization.',
+      recurring: false
+    },
+    {
+      id: 'usmca-advantage',
       icon: '📜',
-      title: 'USMCA Certificate Generation',
-      price: 250, // Internal base price
-      displayPrice: 300, // Non-subscriber price shown on marketing
-      subscriberPrice: 250,
-      expert: 'Compliance Services - Licensed Customs Broker',
+      title: 'USMCA Advantage Sprint',
+      price: 175,
+      displayPrice: 175,
+      subscriberPrice: 175,
+      expert: 'Compliance Lead • Business Development Support',
       benefits: [
-        'Avoid 35% tariffs with proper USMCA compliance',
-        'Professional liability coverage',
-        'Zero risk of customs rejection',
-        'Expert validation of North American content'
+        'Complete USMCA qualification assessment',
+        'Compliance gap analysis',
+        'Optimization roadmap with implementation guidance',
+        'Product audit and documentation review'
       ],
       deliverables: [
-        'Complete USMCA Certificate of Origin',
-        'Supporting documentation package',
-        'Compliance verification report',
-        'Delivered within 24-48 hours'
+        'USMCA qualification assessment report',
+        'Compliance gap analysis with remediation steps',
+        'Optimization roadmap with timeline',
+        'Delivered within 1 week'
       ],
-      whyNeed: 'Our tool showed borderline qualification? Need professional customs broker validation for audit protection? We ensure your certificate withstands scrutiny.'
+      whyNeed: 'Don\'t qualify for USMCA benefits? Need professional guidance to restructure supply chain? Compliance expert leads product audit while business development provides supplier insights.',
+      recurring: false,
+      disclaimer: 'For official USMCA certificates, we partner with licensed customs brokers'
     },
     {
-      id: 'hs-classification',
-      icon: '🔍',
-      title: 'HS Code Classification',
-      price: 200,
-      displayPrice: 240,
-      subscriberPrice: 200,
-      expert: 'Compliance Services - Licensed Customs Broker',
+      id: 'supply-chain-optimization',
+      icon: '🔧',
+      title: 'Supply Chain Optimization',
+      price: 275,
+      displayPrice: 275,
+      subscriberPrice: 275,
+      expert: 'Compliance Lead • Sourcing Specialist Support',
       benefits: [
-        'Audit-proof classifications',
-        'Minimize duty payments legally',
-        'Avoid costly reclassification penalties',
-        'Expert research and documentation'
+        'AI analysis validated by compliance expert',
+        'Cost reduction opportunities identified',
+        'Process optimization recommendations',
+        'Logistics efficiency improvements'
       ],
       deliverables: [
-        'Verified HS code with supporting rationale',
-        'Classification ruling documentation',
-        'Alternative code analysis if applicable',
-        'Delivered within 1-2 business days'
+        'Complete supply chain efficiency audit',
+        'Cost reduction opportunity analysis',
+        'Process optimization roadmap',
+        'Delivered within 1-2 weeks'
       ],
-      whyNeed: 'Unsure which HS code gets you USMCA qualification? Wrong classification blocking your benefits? Licensed customs broker finds the right code to minimize duties.'
+      whyNeed: 'Already qualified but want to reduce costs? Compliance expert validates AI analysis while sourcing specialist identifies improvements.',
+      recurring: false
     },
     {
-      id: 'crisis-response',
-      icon: '🚨',
-      title: 'Crisis Response Management',
-      price: 400,
-      displayPrice: 480,
-      subscriberPrice: 400,
-      expert: 'Compliance Services - Licensed Customs Broker',
-      benefits: [
-        'Emergency 24-48 hour response',
-        'Immediate action plan to minimize damage',
-        'Root cause analysis and prevention',
-        'Direct expert consultation'
-      ],
-      deliverables: [
-        'Emergency compliance analysis',
-        'Step-by-step action plan',
-        'Prevention strategy for future issues',
-        'Direct expert support until resolved'
-      ],
-      whyNeed: 'Got a trade risk alert? Shipment held at customs? Tariffs changed overnight? Our experts respond in 24-48 hours to minimize damage and fix the problem.'
-    },
-
-    // Mexico Trade Services
-    {
-      id: 'supplier-sourcing',
-      icon: '🔍',
-      title: 'Supplier Sourcing',
-      price: 450,
-      displayPrice: 540,
-      subscriberPrice: 450,
-      expert: 'Mexico Trade Services - B2B Sales Expert',
-      benefits: [
-        'AI-powered supplier discovery with web search',
-        'Expert validates findings with industry knowledge',
-        'Bilingual advantage for Mexico sourcing',
-        'Direct workflow integration with your data'
-      ],
-      deliverables: [
-        'AI supplier analysis validated by expert',
-        'Strategic recommendations report',
-        'Implementation guidance and next steps',
-        'Analysis completed within 3-5 business days'
-      ],
-      whyNeed: 'Don\'t qualify because too much comes from China? Need to restructure supply chain through Mexico? We find qualified suppliers to get you USMCA benefits.'
-    },
-    {
-      id: 'manufacturing-feasibility',
-      icon: '🏭',
-      title: 'Manufacturing Feasibility',
-      price: 650,
-      displayPrice: 780,
-      subscriberPrice: 650,
-      expert: 'Mexico Trade Services - B2B Sales Expert',
-      benefits: [
-        'Comprehensive AI feasibility analysis',
-        'Expert validates locations and cost estimates',
-        'Risk assessment with mitigation strategies',
-        'USMCA qualification strategy included'
-      ],
-      deliverables: [
-        'AI feasibility analysis validated by expert',
-        'Location recommendations with pros/cons',
-        'Financial projections and timeline',
-        'Analysis completed within 5-7 business days'
-      ],
-      whyNeed: 'Can\'t qualify with current manufacturing? Need to move production to North America? We analyze Mexico locations to help you achieve USMCA qualification.'
-    },
-    {
-      id: 'market-entry',
+      id: 'pathfinder',
       icon: '🚀',
-      title: 'Market Entry Strategy',
-      price: 550,
-      displayPrice: 660,
-      subscriberPrice: 550,
-      expert: 'Mexico Trade Services - B2B Sales Expert',
+      title: 'Pathfinder Market Entry',
+      price: 350,
+      displayPrice: 350,
+      subscriberPrice: 350,
+      expert: 'Business Development Lead • Compliance Support',
       benefits: [
-        'AI-powered market research and analysis',
-        'Expert validates opportunities with local knowledge',
-        'Competitive landscape assessment',
-        'Entry strategy with actionable roadmap'
+        'Complete Mexico market analysis',
+        'Distribution partner recommendations',
+        '90-day implementation plan',
+        'Regulatory requirements validation'
       ],
       deliverables: [
-        'AI market analysis validated by expert',
-        'Market opportunity assessment',
-        'Strategic entry recommendations',
-        'Analysis completed within 3-5 business days'
+        'Mexico market opportunity assessment',
+        'Distribution partner recommendations',
+        '90-day go-to-market implementation plan',
+        'Go-to-market presentation delivered'
       ],
-      whyNeed: 'Want to qualify for USMCA but no Mexico presence? Need market entry strategy to establish operations? We map your path to North American qualification.'
+      whyNeed: 'Want to establish Mexico presence for USMCA qualification? Business development specialist leads market research while compliance expert validates regulatory requirements.',
+      recurring: false
+    },
+    {
+      id: 'supply-chain-resilience',
+      icon: '🛡️',
+      title: 'Supply Chain Resilience',
+      price: 450,
+      displayPrice: 450,
+      subscriberPrice: 450,
+      expert: 'Sourcing Specialist Lead • Compliance Support',
+      benefits: [
+        '3-5 verified alternative supplier options',
+        'USMCA qualification status for each',
+        'Risk mitigation and contingency plan',
+        'Supplier capability assessment'
+      ],
+      deliverables: [
+        '3-5 alternative supplier options with analysis',
+        'USMCA qualification verification for each',
+        'Risk mitigation and contingency plan',
+        'Delivered within 2-3 weeks'
+      ],
+      whyNeed: 'Dependent on single supplier? Facing geopolitical risks? Sourcing specialist finds alternatives while compliance expert validates qualifications.',
+      recurring: false
+    },
+    {
+      id: 'crisis-navigator',
+      icon: '🆘',
+      title: 'Crisis Navigator',
+      price: 200,
+      displayPrice: 200,
+      subscriberPrice: 200,
+      expert: 'Compliance Lead • Business Development Support',
+      benefits: [
+        'Priority 4-hour emergency response time',
+        'Monthly regulatory updates and monitoring',
+        'Unlimited trade consultation',
+        'Emergency compliance resolution'
+      ],
+      deliverables: [
+        'Priority emergency response (4-hour SLA)',
+        'Monthly regulatory change monitoring',
+        'Unlimited trade consultation access',
+        '$200/month ongoing retainer'
+      ],
+      whyNeed: 'Got a trade risk alert? Shipment held at customs? Tariffs changed overnight? Compliance expert leads crisis response while business development handles continuity.',
+      recurring: true
     }
   ];
 
@@ -552,7 +556,7 @@ export default function ProfessionalServices() {
           </h1>
           <p style={{ fontSize: '1.25rem', color: '#6b7280', maxWidth: '700px', margin: '0 auto' }}>
             Don't qualify for USMCA benefits? Facing trade risks? Need supply chain optimization?
-            Our licensed experts restructure your operations, respond to crises, and help you achieve qualification.
+            Our expert team restructures your operations, responds to crises, and helps you achieve qualification.
           </p>
 
           {!authLoading && (

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -80,9 +81,9 @@ export default async function handler(req, res) {
     const financialExposure = calculateFinancialExposure();
 
     // Generate comprehensive crisis response action plan using OpenRouter
-    const reportPrompt = `You are formatting a professional Crisis Response Action Plan for Cristina Escalante, Licensed Customs Broker #4601913 with 17 years of ${industryContext} logistics management experience.
+    const reportPrompt = `You are formatting a professional Crisis Response Action Plan for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} logistics management experience).
 
-CRITICAL INSTRUCTION: Cristina has already provided her professional crisis management plan. Your job is to format it into a professional report. Use her EXACT words for all crisis management sections. DO NOT add to, modify, or paraphrase her professional input. She is the licensed expert - your role is formatting only.
+CRITICAL INSTRUCTION: The team has already provided their professional crisis management plan. Your job is to format it into a professional report. Use their EXACT words for all crisis management sections. DO NOT add to, modify, or paraphrase their professional input. This is consulting and guidance - your role is formatting only.
 
 BUSINESS CONTEXT:
 Company: ${subscriberData.company_name || 'N/A'}
@@ -94,10 +95,10 @@ STAGE 1 - CRISIS DETAILS:
 Current Impact: ${stage1Data.current_impact}
 Immediate Concerns: ${stage1Data.immediate_concerns}
 
-CRISTINA'S PROFESSIONAL CRISIS MANAGEMENT (USE VERBATIM):
+TEAM'S PROFESSIONAL CRISIS ASSESSMENT (USE VERBATIM):
 Crisis Severity Assessment: "${stage3Data.crisis_severity_assessment}"
-Immediate Actions (24-48h): "${stage3Data.immediate_actions}"
-Recovery Timeline: "${stage3Data.recovery_timeline}"
+Immediate Action Recommendations (24-48h): "${stage3Data.immediate_actions}"
+Recovery Timeline Analysis: "${stage3Data.recovery_timeline}"
 Risk Mitigation Strategy: "${stage3Data.risk_mitigation}"
 
 COMPLIANCE & RISK CONTEXT:
@@ -109,9 +110,9 @@ Annual Trade Volume: $${Number(subscriberData.trade_volume || 0).toLocaleString(
 Current Tariff Cost: $${Number(subscriberData.annual_tariff_cost || 0).toLocaleString()}
 Crisis Financial Exposure: ${financialExposure}
 
-As Cristina Escalante with 17 years of ${industryContext} logistics management experience specializing in crisis response for ${subscriberData.business_type || 'importers/exporters'}:
+As the Triangle Trade Intelligence team with 17 years of enterprise ${industryContext} logistics experience combined with 7 years of SMB trade operations, specializing in crisis response for ${subscriberData.business_type || 'importers/exporters'}:
 
-Generate a professional Crisis Response Action Plan with these sections:
+Generate a professional Crisis Response Analysis and Recommendations with these sections:
 
 1. EXECUTIVE SUMMARY
    - Crisis situation overview
@@ -149,26 +150,25 @@ Generate a professional Crisis Response Action Plan with these sections:
    - Key decision points and stakeholders
    - Success metrics and monitoring
 
-7. CRISTINA'S PROFESSIONAL CRISIS MANAGEMENT
+7. TEAM'S PROFESSIONAL CRISIS ASSESSMENT
 
-CRITICAL: Use Cristina's EXACT words verbatim. DO NOT paraphrase or expand. This is her professional crisis management plan based on 17 years of ${industryContext} logistics experience.
+CRITICAL: This section contains the team's professional crisis management recommendations. Use EXACT words from the assessment data verbatim. DO NOT paraphrase or expand.
 
 **Crisis Severity Assessment:**
 "${stage3Data.crisis_severity_assessment}"
 
-**Immediate Actions (24-48 Hours):**
+**Immediate Action Recommendations (24-48 Hours):**
 "${stage3Data.immediate_actions}"
 
-**Recovery Timeline:**
+**Recovery Timeline Analysis:**
 "${stage3Data.recovery_timeline}"
 
 **Risk Mitigation Strategy:**
 "${stage3Data.risk_mitigation}"
 
-Signed,
-Cristina Escalante
-Licensed Customs Broker #4601913
-17 Years Logistics Management Experience
+Triangle Trade Intelligence Team
+Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
+Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
 
 TONE: Direct, urgent, actionable. Use actual company name (${subscriberData.company_name}) and specific crisis details. Show expertise through concrete crisis response steps with exact timelines, not generic advice.
 
@@ -180,41 +180,38 @@ FORBIDDEN PHRASES:
 
 Format as urgent professional crisis action plan with hour-by-hour first 48 hours, clear accountability, and specific dollar impacts.`;
 
-    console.log('[CRISIS REPORT] Calling OpenRouter API...');
+    // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
+    console.log('[CRISIS REPORT] Calling AI with fallback chain...');
 
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Trade Intelligence - Crisis Response'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: reportPrompt
-        }],
-        max_tokens: 4000,
-        temperature: 0.7
-      })
+    const aiResult = await executeWithFallback({
+      prompt: reportPrompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 4000,
+      cacheOptions: {
+        table: 'crisis_response_reports_cache',
+        query: {
+          company_name: subscriberData.company_name,
+          crisis_type: stage1Data.crisis_type
+        },
+        transform: (cached) => cached.report_content
+      }
     });
 
-    console.log('[CRISIS REPORT] OpenRouter response status:', openRouterResponse.status);
-
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
-      console.error('[CRISIS REPORT] OpenRouter API error:', errorText);
-      throw new Error(`OpenRouter API call failed: ${openRouterResponse.status} - ${errorText}`);
+    // Check if AI generation succeeded
+    if (!aiResult.success) {
+      console.error('[CRISIS REPORT] All AI services failed:', aiResult);
+      return res.status(503).json({
+        success: false,
+        error: 'Crisis Response report generation failed',
+        source: aiResult.source,
+        label: aiResult.label,
+        troubleshooting: aiResult.troubleshooting,
+        message: 'All AI services (OpenRouter, Anthropic) and cache are unavailable. Please check API keys and try again.'
+      });
     }
 
-    const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content;
-
-    if (!reportContent) {
-      throw new Error('OpenRouter API returned empty response. No report content generated.');
-    }
+    const reportContent = aiResult.data;
+    console.log(`[CRISIS REPORT] Generated successfully via ${aiResult.source}`);
 
     // Create email with urgent crisis response action plan
     const nodemailer = require('nodemailer');
@@ -246,24 +243,25 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
 </head>
 <body>
   <div class="header">
-    <h1>🚨 CRISIS RESPONSE ACTION PLAN</h1>
-    <p>Immediate Professional Logistics Management</p>
+    <h1>🚨 PROCESS SUPPORT & CRISIS ANALYSIS</h1>
+    <p>Professional Trade Consulting & Crisis Management Guidance</p>
   </div>
 
   <div class="content">
     <div class="urgent-banner">
       <h2 style="margin-top: 0; color: #dc2626;">URGENT - ${urgencyLevel} Priority</h2>
-      <p><strong>Crisis Type:</strong> ${stage1Data.crisis_type}</p>
+      <p><strong>Situation Type:</strong> ${stage1Data.crisis_type}</p>
       <p><strong>Timeline:</strong> ${stage1Data.timeline}</p>
-      <p><strong>Action Required:</strong> Immediate implementation of response plan</p>
+      <p><strong>Action Required:</strong> Review strategic recommendations and implementation guidance</p>
     </div>
 
     <div class="credentials">
-      <strong>Crisis Manager:</strong> Cristina Escalante<br>
-      <strong>Experience:</strong> 17 years ${industryContext} logistics management, specialized crisis response<br>
-      <strong>Expertise:</strong> International logistics director, supply chain emergency management<br>
+      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), crisis management, supply chain optimization<br>
+      <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
+      <strong>Service Type:</strong> Consulting and Guidance (Process Support & Crisis Analysis)<br>
       <strong>Response Date:</strong> ${new Date().toLocaleString()}<br>
-      <strong>24/7 Support:</strong> Available for critical situations
+      <strong>Note:</strong> For emergency customs broker services, we partner with licensed professionals
     </div>
 
     <div class="section">
@@ -287,14 +285,14 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
 
     <div class="section">
       <h3>Next Steps</h3>
-      <p><strong>1. Review this action plan immediately</strong></p>
-      <p><strong>2. Confirm implementation authorization</strong></p>
-      <p><strong>3. Cristina will begin execution within 24 hours</strong></p>
-      <p><strong>4. Daily status updates will be provided</strong></p>
+      <p><strong>1. Review strategic recommendations immediately</strong></p>
+      <p><strong>2. Determine which actions to implement</strong></p>
+      <p><strong>3. Consult with our team on implementation approach</strong></p>
+      <p><strong>4. Contact licensed professionals for emergency customs services if needed</strong></p>
     </div>
 
     <div class="section">
-      <p><em>This crisis response plan leverages 17 years of ${industryContext} logistics management experience and is backed by professional expertise. Cristina Escalante will personally oversee implementation and provide ongoing support throughout the crisis resolution process.</em></p>
+      <p><em>This crisis analysis leverages 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and strategic recommendations. For emergency customs broker services and official compliance actions, we partner with licensed professionals. Our team is available to provide ongoing consulting support throughout the crisis resolution process.</em></p>
     </div>
   </div>
 </body>
@@ -308,6 +306,25 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
       html: emailBody,
       priority: 'high'
     });
+
+    // ✅ SAVE TO DATABASE CACHE for future fallback
+    if (aiResult.source === 'openrouter_api' || aiResult.source === 'anthropic_api') {
+      try {
+        await supabase
+          .from('crisis_response_reports_cache')
+          .upsert({
+            company_name: subscriberData.company_name,
+            crisis_type: stage1Data.crisis_type,
+            report_content: reportContent,
+            source: aiResult.source,
+            cached_at: new Date().toISOString()
+          });
+        console.log('[CRISIS REPORT] Saved to cache for future fallback');
+      } catch (cacheError) {
+        console.error('[CRISIS REPORT] Cache save failed:', cacheError);
+        // Non-blocking - don't fail the request
+      }
+    }
 
     // Update service request with completion data
     const { error: updateError } = await supabase
@@ -327,7 +344,11 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: `Cristina Escalante - 17 years ${industryContext} logistics experience`
+          completed_by: `Triangle Trade Intelligence Team (Jorge Ochoa & Cristina Escalante)`,
+          // ✅ AI SOURCE TRACKING
+          ai_source: aiResult.source,
+          ai_label: aiResult.label,
+          ai_cost_estimate: aiResult.cost_estimate
         }
       })
       .eq('id', serviceRequestId);
@@ -343,7 +364,12 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
       email_subject: emailSubject,
       crisis_type: stage1Data.crisis_type,
       urgency_level: urgencyLevel,
-      financial_exposure: financialExposure
+      financial_exposure: financialExposure,
+      // ✅ TRANSPARENT SOURCE LABELING
+      source: aiResult.source,
+      label: aiResult.label,
+      is_cached: aiResult.is_cached,
+      cost_estimate: aiResult.cost_estimate
     });
 
   } catch (error) {

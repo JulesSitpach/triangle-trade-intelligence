@@ -1,7 +1,8 @@
 /**
- * Jorge's Dashboard - Modular Component Version
- * Four tabs: Service Queue, Supplier Vetting, Market Entry, Supplier Intel
- * Uses modular components for maintainability
+ * Jorge's Dashboard - Team Collaboration Services
+ * All services are SHARED with Cristina - different lead/support roles per service
+ * Jorge leads: Pathfinder (65%), Supply Chain Resilience (60%)
+ * Cristina leads: Trade Health Check (50%), USMCA Advantage (70%), Supply Chain Opt (60%), Crisis Navigator (60%)
  */
 
 import { useState, useEffect } from 'react';
@@ -10,17 +11,20 @@ import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
 import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 
-// Import Jorge's specialized tab components
-import ServiceQueueTab from '../../components/jorge/ServiceQueueTab';
-import SupplierSourcingTab from '../../components/jorge/SupplierSourcingTab';
-import ManufacturingFeasibilityTab from '../../components/jorge/ManufacturingFeasibilityTab';
-import MarketEntryTab from '../../components/jorge/MarketEntryTab';
+// Import shared service tab components (used by both Jorge and Cristina)
+import TradeHealthCheckTab from '../../components/shared/TradeHealthCheckTab';
+import USMCAAdvantageTab from '../../components/shared/USMCAAdvantageTab';
+import SupplyChainOptimizationTab from '../../components/shared/SupplyChainOptimizationTab';
+import PathfinderTab from '../../components/shared/PathfinderTab';
+import SupplyChainResilienceTab from '../../components/shared/SupplyChainResilienceTab';
+import CrisisNavigatorTab from '../../components/shared/CrisisNavigatorTab';
+import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
 
 export default function JorgeDashboardCleanModular() {
   const router = useRouter();
   const { user, loading: authLoading } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('supplier-sourcing');
+  const [activeTab, setActiveTab] = useState('trade-health-check');
   const [serviceRequests, setServiceRequests] = useState([]);
 
   useEffect(() => {
@@ -51,7 +55,8 @@ export default function JorgeDashboardCleanModular() {
 
   const loadServiceRequests = async () => {
     try {
-      const response = await fetch('/api/admin/service-requests?assigned_to=Jorge');
+      // Load ALL service requests (team collaboration - both Jorge and Cristina see everything)
+      const response = await fetch('/api/admin/service-requests');
       const data = await response.json();
       if (data.success) {
         setServiceRequests(data.requests || []);
@@ -79,16 +84,20 @@ export default function JorgeDashboardCleanModular() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'service-queue':
-        return <ServiceQueueTab />;
-      case 'supplier-sourcing':
-        return <SupplierSourcingTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
-      case 'manufacturing-feasibility':
-        return <ManufacturingFeasibilityTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
-      case 'market-entry':
-        return <MarketEntryTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'trade-health-check':
+        return <TradeHealthCheckTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} currentUser="Jorge" />;
+      case 'usmca-advantage':
+        return <USMCAAdvantageTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} userRole="Jorge" />;
+      case 'supply-chain-optimization':
+        return <SupplyChainOptimizationTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'pathfinder':
+        return <PathfinderTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'supply-chain-resilience':
+        return <SupplyChainResilienceTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'crisis-navigator':
+        return <CrisisNavigatorTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       default:
-        return <ServiceQueueTab />;
+        return <TradeHealthCheckTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} currentUser="Jorge" />;
     }
   };
 
@@ -115,25 +124,29 @@ export default function JorgeDashboardCleanModular() {
         <main className="admin-main">
           <div className="dashboard-header">
             <div className="header-content">
-              <h1 className="dashboard-title">Mexico Trade Services Dashboard</h1>
+              <h1 className="dashboard-title">Jorge's Service Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Mexico Trade Specialist</span>
-                <span className="user-role">Supplier Sourcing • Manufacturing • Market Entry</span>
+                <span className="user-name">Jorge Ochoa - Mexico Trade Specialist</span>
+                <span className="user-role">Market Entry • Supply Chain Resilience • Client Relationships</span>
               </div>
             </div>
 
-            <div className="dashboard-metrics">
+            <div className="metrics-grid">
               <div className="metric-card">
-                <h3 className="metric-title">Active Partnerships</h3>
-                <div className="metric-value">12</div>
+                <h3 className="metric-title">Active Services</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'in_progress').length}</div>
               </div>
               <div className="metric-card">
-                <h3 className="metric-title">Monthly Revenue</h3>
-                <div className="metric-value">$45,500</div>
+                <h3 className="metric-title">Pending Requests</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'pending').length}</div>
               </div>
               <div className="metric-card">
-                <h3 className="metric-title">Intelligence Reports</h3>
-                <div className="metric-value">8</div>
+                <h3 className="metric-title">Completed</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'completed').length}</div>
+              </div>
+              <div className="metric-card metric-urgent">
+                <h3 className="metric-title">🔥 Needs Attention</h3>
+                <div className="metric-value">{serviceRequests.filter(r => r.status === 'pending' && new Date() - new Date(r.created_at) > 2 * 24 * 60 * 60 * 1000).length}</div>
               </div>
             </div>
           </div>
@@ -141,28 +154,40 @@ export default function JorgeDashboardCleanModular() {
           <div className="dashboard-tabs">
             <div className="tab-navigation">
               <button
-                className={`tab-button ${activeTab === 'service-queue' ? 'active' : ''}`}
-                onClick={() => setActiveTab('service-queue')}
+                className={`tab-button ${activeTab === 'trade-health-check' ? 'active' : ''}`}
+                onClick={() => setActiveTab('trade-health-check')}
               >
-                📋 Service Queue
+                🏥 Trade Health Check <span className="service-price">$99</span>
               </button>
               <button
-                className={`tab-button ${activeTab === 'supplier-sourcing' ? 'active' : ''}`}
-                onClick={() => setActiveTab('supplier-sourcing')}
+                className={`tab-button ${activeTab === 'usmca-advantage' ? 'active' : ''}`}
+                onClick={() => setActiveTab('usmca-advantage')}
               >
-                🔍 Supplier Sourcing
+                📜 USMCA Advantage Sprint <span className="service-price">$175</span>
               </button>
               <button
-                className={`tab-button ${activeTab === 'manufacturing-feasibility' ? 'active' : ''}`}
-                onClick={() => setActiveTab('manufacturing-feasibility')}
+                className={`tab-button ${activeTab === 'supply-chain-optimization' ? 'active' : ''}`}
+                onClick={() => setActiveTab('supply-chain-optimization')}
               >
-                🏭 Manufacturing Feasibility
+                🔧 Supply Chain Optimization <span className="service-price">$275</span>
               </button>
               <button
-                className={`tab-button ${activeTab === 'market-entry' ? 'active' : ''}`}
-                onClick={() => setActiveTab('market-entry')}
+                className={`tab-button ${activeTab === 'pathfinder' ? 'active' : ''}`}
+                onClick={() => setActiveTab('pathfinder')}
               >
-                🚀 Market Entry
+                🚀 Pathfinder Market Entry <span className="service-price">$350</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'supply-chain-resilience' ? 'active' : ''}`}
+                onClick={() => setActiveTab('supply-chain-resilience')}
+              >
+                🛡️ Supply Chain Resilience <span className="service-price">$450</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'crisis-navigator' ? 'active' : ''}`}
+                onClick={() => setActiveTab('crisis-navigator')}
+              >
+                🆘 Crisis Navigator <span className="service-price">$200/mo</span>
               </button>
             </div>
 
@@ -171,6 +196,8 @@ export default function JorgeDashboardCleanModular() {
             </div>
           </div>
         </main>
+
+        <FloatingTeamChat currentUser="Jorge" />
       </div>
     </>
   );

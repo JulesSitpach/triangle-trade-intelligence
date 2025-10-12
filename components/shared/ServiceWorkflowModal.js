@@ -8,21 +8,64 @@
 import React, { useState, useEffect } from 'react';
 import { useToast, ToastContainer } from './ToastNotification';
 
-const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete }) => {
+const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete, currentUser = 'Jorge', viewMode = 'active' }) => {
   const [currentStage, setCurrentStage] = useState(1);
   const [stageData, setStageData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { toasts, showToast, removeToast, success, error: errorToast, warning, info } = useToast();
 
-  // Reset when modal opens/closes
+  // Reset when modal opens/closes and initialize workflow tracking
   useEffect(() => {
     if (isOpen && request) {
-      setCurrentStage(1);
+      // Set current stage from request or default to 1
+      setCurrentStage(request.current_stage || 1);
       setStageData({});
       setError(null);
+
+      // Initialize workflow tracking ONLY when actively starting (not in readonly mode)
+      if (!request.started_by && viewMode === 'active') {
+        initializeWorkflow();
+      }
     }
-  }, [isOpen, request]);
+  }, [isOpen, request, viewMode]);
+
+  // Initialize workflow tracking when first opened
+  const initializeWorkflow = async () => {
+    try {
+      const response = await fetch('/api/admin/service-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: request.id,
+          started_by: currentUser,
+          current_assigned_to: getStageAssignment(1), // Stage 1 assignment
+          current_stage: 1,
+          stage_1_started_at: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to initialize workflow tracking');
+      }
+    } catch (err) {
+      console.error('Error initializing workflow:', err);
+    }
+  };
+
+  // Determine who is assigned to each stage based on service type
+  const getStageAssignment = (stageNumber) => {
+    // For Trade Health Check: Stage 1 = Jorge, Stage 2 = Cristina, Stage 3 = Both
+    // This can be customized per service in the future
+    if (service.stageAssignments && service.stageAssignments[stageNumber]) {
+      return service.stageAssignments[stageNumber];
+    }
+
+    // Default assignment pattern
+    if (stageNumber === 1) return 'Jorge';
+    if (stageNumber === 2) return 'Cristina';
+    return 'Jorge'; // Stage 3+ defaults to Jorge
+  };
 
   // Extract subscriber data safely - NO business logic calculations here
   const subscriberContext = request?.subscriber_data || {};
@@ -40,16 +83,43 @@ const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete })
       };
       setStageData(updatedStageData);
 
+      // Save stage completion metadata to database
+      const stageCompletionData = {
+        id: request.id,
+        [`stage_${currentStage}_completed_by`]: currentUser,
+        [`stage_${currentStage}_completed_at`]: new Date().toISOString(),
+        workflow_state: updatedStageData
+      };
+
       // If last stage, complete the service
       if (currentStage >= service.totalStages) {
         info('Completing service workflow...');
         await completeService(updatedStageData);
         success('Service completed successfully!');
       } else {
+        // Update current stage and assignment for next stage
+        const nextStage = currentStage + 1;
+        const nextAssignment = getStageAssignment(nextStage);
+
+        stageCompletionData.current_stage = nextStage;
+        stageCompletionData.current_assigned_to = nextAssignment;
+        stageCompletionData[`stage_${nextStage}_started_at`] = new Date().toISOString();
+
+        // Save stage completion to database
+        const response = await fetch('/api/admin/service-requests', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(stageCompletionData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save stage completion');
+        }
+
         // Move to next stage
         success(`Stage ${currentStage} completed successfully`);
-        setCurrentStage(prev => prev + 1);
-        info(`Moving to Stage ${currentStage + 1}...`);
+        setCurrentStage(nextStage);
+        info(`Moving to Stage ${nextStage}...`);
       }
     } catch (err) {
       console.error('Stage completion error:', err);
@@ -148,6 +218,28 @@ const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete })
           </div>
         </div>
 
+        {/* Workflow tracking info */}
+        {request.started_by && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              Team Collaboration Status:
+            </div>
+            <div className="workflow-client-context-item">
+              <span className="workflow-client-context-label">Started by:</span> {request.started_by}
+            </div>
+            <div className="workflow-client-context-item">
+              <span className="workflow-client-context-label">Currently assigned to:</span> {request.current_assigned_to || 'Not assigned'}
+            </div>
+            {viewMode === 'readonly' && (
+              <div className="workflow-status-card workflow-status-info">
+                <div className="workflow-status-info-text">
+                  ℹ️ Read-only mode - Waiting for {request.current_assigned_to} to complete their task
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Client business context from subscriber workflow */}
         <div className="workflow-client-context">
           <div className="workflow-client-context-title">
@@ -201,7 +293,8 @@ const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete })
             request,
             stageData,
             handleStageComplete,
-            loading
+            loading,
+            viewMode
           )}
         </div>
 

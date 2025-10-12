@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -89,41 +90,38 @@ Week 4: [Expected outcome]
 
 Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "What do I DO with this info?"`;
 
-    console.log('[SUPPLIER SOURCING REPORT] Calling OpenRouter API...');
+    // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
+    console.log('[SUPPLIER SOURCING REPORT] Calling AI with fallback chain...');
 
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://triangle-intelligence.com',
-        'X-Title': 'Triangle Trade Intelligence - Supplier Sourcing'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: reportPrompt
-        }],
-        max_tokens: 4000,
-        temperature: 0.7
-      })
+    const aiResult = await executeWithFallback({
+      prompt: reportPrompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 4000,
+      cacheOptions: {
+        table: 'supplier_sourcing_reports_cache',
+        query: {
+          company_name: subscriberData.company_name,
+          product_categories: stage1Data.product_categories
+        },
+        transform: (cached) => cached.report_content
+      }
     });
 
-    console.log('[SUPPLIER SOURCING REPORT] OpenRouter response status:', openRouterResponse.status);
-
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
-      console.error('[SUPPLIER SOURCING REPORT] OpenRouter API error:', errorText);
-      throw new Error(`OpenRouter API call failed: ${openRouterResponse.status} - ${errorText}`);
+    // Check if AI generation succeeded
+    if (!aiResult.success) {
+      console.error('[SUPPLIER SOURCING REPORT] All AI services failed:', aiResult);
+      return res.status(503).json({
+        success: false,
+        error: 'Supplier Sourcing report generation failed',
+        source: aiResult.source,
+        label: aiResult.label,
+        troubleshooting: aiResult.troubleshooting,
+        message: 'All AI services (OpenRouter, Anthropic) and cache are unavailable. Please check API keys and try again.'
+      });
     }
 
-    const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content;
-
-    if (!reportContent) {
-      throw new Error('OpenRouter API returned empty response. No report content generated.');
-    }
+    const reportContent = aiResult.data;
+    console.log(`[SUPPLIER SOURCING REPORT] Generated successfully via ${aiResult.source}`);
 
     // Create email with supplier sourcing strategy report
     const nodemailer = require('nodemailer');
@@ -228,6 +226,25 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
       html: emailBody
     });
 
+    // ✅ SAVE TO DATABASE CACHE for future fallback
+    if (aiResult.source === 'openrouter_api' || aiResult.source === 'anthropic_api') {
+      try {
+        await supabase
+          .from('supplier_sourcing_reports_cache')
+          .upsert({
+            company_name: subscriberData.company_name,
+            product_categories: stage1Data.product_categories,
+            report_content: reportContent,
+            source: aiResult.source,
+            cached_at: new Date().toISOString()
+          });
+        console.log('[SUPPLIER SOURCING REPORT] Saved to cache for future fallback');
+      } catch (cacheError) {
+        console.error('[SUPPLIER SOURCING REPORT] Cache save failed:', cacheError);
+        // Non-blocking - don't fail the request
+      }
+    }
+
     // Update service request with completion data
     const { error: updateError } = await supabase
       .from('service_requests')
@@ -245,7 +262,11 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Jorge Ochoa - B2B Sales Expert, Mexico Supplier Network Specialist'
+          completed_by: 'Jorge Ochoa - B2B Sales Expert, Mexico Supplier Network Specialist',
+          // ✅ AI SOURCE TRACKING
+          ai_source: aiResult.source,
+          ai_label: aiResult.label,
+          ai_cost_estimate: aiResult.cost_estimate
         }
       })
       .eq('id', serviceRequestId);
@@ -259,7 +280,12 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
       message: 'Mexico Supplier Sourcing report generated and sent to triangleintel@gmail.com',
       report_content: reportContent,
       email_subject: emailSubject,
-      mexico_suppliers: stage3Data.mexico_suppliers
+      mexico_suppliers: stage3Data.mexico_suppliers,
+      // ✅ TRANSPARENT SOURCE LABELING
+      source: aiResult.source,
+      label: aiResult.label,
+      is_cached: aiResult.is_cached,
+      cost_estimate: aiResult.cost_estimate
     });
 
   } catch (error) {

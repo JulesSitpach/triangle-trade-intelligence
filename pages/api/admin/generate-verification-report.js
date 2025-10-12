@@ -106,35 +106,77 @@ export default async function handler(req, res) {
       client_ready: true
     };
 
-    // Save report to database
-    try {
-      const { data: report, error: reportError } = await supabase
-        .from('verification_reports')
-        .insert([reportData])
-        .select();
+    // ✅ SAVE REPORT TO DATABASE - Fail loudly if unsuccessful
+    const { data: savedReport, error: reportError } = await supabase
+      .from('verification_reports')
+      .insert([reportData])
+      .select()
+      .single();
 
-      if (reportError) {
-        console.log('Report saved locally due to database issue');
-      }
-
-      // Update supplier status to verified
-      await supabase
-        .from('suppliers')
-        .update({
-          verification_status: 'verified',
-          verified_at: new Date().toISOString(),
-          verification_report_id: reportData.id
-        })
-        .eq('id', supplier_id);
-
-    } catch (dbError) {
-      console.log('Database unavailable - report generated locally');
+    if (reportError) {
+      console.error('CRITICAL: Failed to save verification report to database', reportError);
+      return res.status(500).json({
+        success: false,
+        status: 'error',
+        source: 'database',
+        label: '❌ Database Save Failed',
+        error: 'Failed to save verification report',
+        message: `Report generated but could not be saved to database: ${reportError.message}`,
+        troubleshooting: {
+          issue: 'Database write failure',
+          table: 'verification_reports',
+          error_code: reportError.code || 'unknown',
+          next_steps: [
+            'Check Supabase connection',
+            'Verify verification_reports table exists',
+            'Check database permissions',
+            'Review table schema matches reportData structure'
+          ]
+        },
+        report_data: reportData // Include report data for manual recovery
+      });
     }
 
-    // Return success with report details
+    // ✅ UPDATE SUPPLIER STATUS - Fail loudly if unsuccessful
+    const { error: supplierUpdateError } = await supabase
+      .from('suppliers')
+      .update({
+        verification_status: 'verified',
+        verified_at: new Date().toISOString(),
+        verification_report_id: reportData.id
+      })
+      .eq('id', supplier_id);
+
+    if (supplierUpdateError) {
+      console.error('CRITICAL: Failed to update supplier status', supplierUpdateError);
+      return res.status(500).json({
+        success: false,
+        status: 'partial',
+        source: 'database',
+        label: '⚠️ Partial Save',
+        error: 'Report saved but supplier update failed',
+        message: `Verification report saved (ID: ${reportData.id}) but supplier status could not be updated: ${supplierUpdateError.message}`,
+        troubleshooting: {
+          issue: 'Supplier update failure',
+          table: 'suppliers',
+          report_id: reportData.id,
+          error_code: supplierUpdateError.code || 'unknown',
+          next_steps: [
+            'Manually update supplier verification_status to "verified"',
+            'Set verification_report_id to ' + reportData.id,
+            'Check suppliers table schema'
+          ]
+        }
+      });
+    }
+
+    // ✅ SUCCESS - Report saved and supplier updated
     res.status(200).json({
       success: true,
-      message: 'Verification report generated successfully',
+      status: 'success',
+      source: 'database',
+      label: '✓ Report Saved Successfully',
+      message: 'Verification report generated and saved to database',
       report: {
         id: reportData.id,
         supplier_name: supplier.name,
@@ -144,7 +186,8 @@ export default async function handler(req, res) {
         confidence_score: reportData.verification_summary.confidence_score,
         recommendation: reportData.verification_summary.recommendation,
         download_url: `/api/admin/download-report/${reportData.id}`,
-        sections: reportData.sections_included.length
+        sections: reportData.sections_included.length,
+        saved_to_database: true
       },
       deliverable: {
         type: 'Supplier Verification Report',

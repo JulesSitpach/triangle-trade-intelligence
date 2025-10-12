@@ -42,31 +42,71 @@ export default async function handler(req, res) {
       .select('*')
       .gte('created_at', startDate.toISOString());
 
-    // If tables don't exist, use sample opportunity data
-    const qualificationData = qualificationResults || generateSampleQualificationData();
-    const workflowData = workflows || generateSampleWorkflowData();
-    const supplierData = supplierConnections || generateSampleSupplierData();
+    // ✅ TRANSPARENT EMPTY STATE - No fake data generation
+    // Show exactly what data is available and what's missing
+    const hasQualificationData = qualificationResults && qualificationResults.length > 0;
+    const hasWorkflowData = workflows && workflows.length > 0;
+    const hasSupplierData = supplierConnections && supplierConnections.length > 0;
 
-    // Calculate business opportunity analytics
+    // If no data available, return empty state with clear messaging
+    if (!hasQualificationData && !hasWorkflowData && !hasSupplierData) {
+      return res.status(200).json({
+        status: 'empty',
+        source: 'database',
+        label: '❌ No Analytics Data Available',
+        message: 'No user workflows completed yet. Analytics will appear once users complete USMCA workflows.',
+        timeframe,
+        date_range: {
+          start: startDate.toISOString().split('T')[0],
+          end: new Date().toISOString().split('T')[0]
+        },
+        data_status: {
+          qualification_results: hasQualificationData ? 'available' : 'empty',
+          workflow_data: hasWorkflowData ? 'available' : 'empty',
+          supplier_connections: hasSupplierData ? 'available' : 'empty',
+          database_errors: {
+            qualifications: qualError ? qualError.message : null,
+            workflows: workflowError ? workflowError.message : null,
+            suppliers: supplierError ? supplierError.message : null
+          }
+        },
+        troubleshooting: {
+          next_steps: [
+            'Verify Supabase tables exist: usmca_qualification_results, workflow_completions, mexico_supplier_connections',
+            'Check if users are completing workflows',
+            'Review database connection logs'
+          ]
+        }
+      });
+    }
+
+    // Calculate business opportunity analytics with real data only
     const analytics = calculateBusinessOpportunityAnalytics(
-      qualificationData, 
-      workflowData, 
-      supplierData, 
+      qualificationResults || [],
+      workflows || [],
+      supplierConnections || [],
       startDate
     );
 
     return res.status(200).json({
       ...analytics,
+      status: 'success',
+      source: 'database',
+      label: '✓ Real Analytics Data',
       timeframe,
       date_range: {
         start: startDate.toISOString().split('T')[0],
         end: new Date().toISOString().split('T')[0]
       },
       data_status: {
-        qualification_results_available: qualificationResults !== null,
-        workflow_data_available: workflows !== null,
-        supplier_connections_available: supplierConnections !== null,
-        using_sample_data: qualificationResults === null
+        qualification_results: hasQualificationData ? 'available' : 'empty',
+        workflow_data: hasWorkflowData ? 'available' : 'empty',
+        supplier_connections: hasSupplierData ? 'available' : 'empty',
+        record_counts: {
+          qualifications: qualificationResults?.length || 0,
+          workflows: workflows?.length || 0,
+          suppliers: supplierConnections?.length || 0
+        }
       }
     });
 
@@ -415,86 +455,6 @@ function calculateBusinessTypeOpportunities(notQualified) {
     business_type: type,
     ...data
   }));
-}
-
-/**
- * Generate sample qualification data for demo purposes
- */
-function generateSampleQualificationData() {
-  const businessTypes = ['Electronics', 'Automotive', 'Textiles', 'Machinery'];
-  const countries = ['China', 'Vietnam', 'India', 'Mexico', 'Canada'];
-  const sampleData = [];
-  
-  for (let i = 0; i < 50; i++) {
-    const gapPercentage = Math.random() * 70; // 0-70% gap
-    const qualified = gapPercentage < 10; // Qualified if gap < 10%
-    const businessType = businessTypes[Math.floor(Math.random() * businessTypes.length)];
-    const hasChina = Math.random() > 0.6; // 40% have China suppliers
-    
-    sampleData.push({
-      id: `sample_${i}`,
-      qualified,
-      business_type: businessType,
-      gap_percentage: Math.round(gapPercentage * 10) / 10,
-      potential_annual_savings: Math.round((gapPercentage * 1000 + Math.random() * 20000)),
-      component_origins: hasChina ? [
-        { origin_country: 'China', value_percentage: 60 + Math.random() * 30 }
-      ] : [
-        { origin_country: countries[Math.floor(Math.random() * countries.length)], value_percentage: 50 + Math.random() * 40 }
-      ],
-      remediation_strategies: qualified ? [] : [
-        'Triangle Trade Intelligence Mexico Bridge Program',
-        'Strategic supplier transition'
-      ],
-      mexico_opportunities: qualified ? [] : [
-        {
-          strategy: 'Mexico Triangle Routing',
-          triangle_advantage: 'exclusive network access'
-        }
-      ],
-      created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    });
-  }
-  
-  return sampleData;
-}
-
-/**
- * Generate sample workflow data
- */
-function generateSampleWorkflowData() {
-  const statuses = ['in_progress', 'completed', 'pending'];
-  const sampleData = [];
-  
-  for (let i = 0; i < 15; i++) {
-    sampleData.push({
-      id: `workflow_${i}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      savings_amount: 5000 + Math.random() * 45000,
-      completed_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    });
-  }
-  
-  return sampleData;
-}
-
-/**
- * Generate sample supplier connection data
- */
-function generateSampleSupplierData() {
-  const countries = ['Mexico', 'Canada', 'US'];
-  const sampleData = [];
-  
-  for (let i = 0; i < 8; i++) {
-    sampleData.push({
-      id: `supplier_${i}`,
-      supplier_country: countries[Math.floor(Math.random() * countries.length)],
-      connection_type: 'triangle_intelligence_introduction',
-      created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    });
-  }
-  
-  return sampleData;
 }
 
 /**

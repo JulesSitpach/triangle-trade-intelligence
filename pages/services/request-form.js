@@ -37,12 +37,12 @@ export default function ServiceRequestForm() {
   });
 
   const services = {
-    'usmca-certificate': { name: 'USMCA Certificate Generation', price: 300 },
-    'hs-classification': { name: 'HS Code Classification', price: 240 },
-    'crisis-response': { name: 'Crisis Response Management', price: 480 },
-    'supplier-sourcing': { name: 'Supplier Sourcing', price: 540 },
-    'manufacturing-feasibility': { name: 'Manufacturing Feasibility', price: 780 },
-    'market-entry': { name: 'Market Entry Strategy', price: 660 }
+    'trade-health-check': { name: 'Trade Health Check', price: 99 },
+    'usmca-advantage': { name: 'USMCA Advantage Sprint', price: 175 },
+    'supply-chain-optimization': { name: 'Supply Chain Optimization', price: 275 },
+    'pathfinder': { name: 'Pathfinder Market Entry', price: 350 },
+    'supply-chain-resilience': { name: 'Supply Chain Resilience', price: 450 },
+    'crisis-navigator': { name: 'Crisis Navigator', price: 200 }
   };
 
   const handleChange = (e) => {
@@ -147,7 +147,7 @@ export default function ServiceRequestForm() {
           <div className="section-header">
             <h1 className="section-header-title">Request Professional Service</h1>
             <p className="section-header-subtitle">
-              Complete this form to request expert assistance from our licensed customs broker or Mexico trade specialist
+              Complete this form to request expert assistance from our trade compliance and business development team
             </p>
           </div>
 
@@ -172,15 +172,13 @@ export default function ServiceRequestForm() {
                 required
               >
                 <option value="">Choose a service...</option>
-                <optgroup label="Compliance Services - Licensed Customs Broker">
-                  <option value="usmca-certificate">USMCA Certificate Generation - $300</option>
-                  <option value="hs-classification">HS Code Classification - $240</option>
-                  <option value="crisis-response">Crisis Response Management - $480</option>
-                </optgroup>
-                <optgroup label="Mexico Trade Services - B2B Expert">
-                  <option value="supplier-sourcing">Supplier Sourcing - $540</option>
-                  <option value="manufacturing-feasibility">Manufacturing Feasibility - $780</option>
-                  <option value="market-entry">Market Entry Strategy - $660</option>
+                <optgroup label="Team Collaboration Services">
+                  <option value="trade-health-check">Trade Health Check - $99</option>
+                  <option value="usmca-advantage">USMCA Advantage Sprint - $175</option>
+                  <option value="supply-chain-optimization">Supply Chain Optimization - $275</option>
+                  <option value="pathfinder">Pathfinder Market Entry - $350</option>
+                  <option value="supply-chain-resilience">Supply Chain Resilience - $450</option>
+                  <option value="crisis-navigator">Crisis Navigator - $200/month</option>
                 </optgroup>
               </select>
             </div>

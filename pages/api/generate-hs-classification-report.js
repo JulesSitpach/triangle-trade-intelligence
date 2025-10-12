@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -140,9 +141,9 @@ export default async function handler(req, res) {
       || 'international trade';
 
     // Generate comprehensive report using OpenRouter
-    const reportPrompt = `You are formatting a professional HS Classification Report for Cristina Escalante, Licensed Customs Broker #4601913 with 17 years of ${industryContext} logistics experience.
+    const reportPrompt = `You are formatting a professional HS Classification Research Report for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} experience).
 
-CRITICAL INSTRUCTION: Cristina has already provided her professional analysis. Your job is to format it into a professional report. Use her EXACT words for all sections marked "CRISTINA'S". DO NOT add to, modify, or paraphrase her professional input. She is the licensed expert - your role is formatting only.
+CRITICAL INSTRUCTION: Cristina has already provided her professional analysis based on her 17 years of enterprise logistics experience. Your job is to format it into a professional report. Use her EXACT words for all sections marked "CRISTINA'S" or "TEAM'S". DO NOT add to, modify, or paraphrase her professional input. This is consulting and guidance - your role is formatting only.
 
 CLIENT BUSINESS PROFILE:
 Company: ${subscriberData.company_name || serviceRequest.client_company}
@@ -172,17 +173,17 @@ ${Array.isArray(subscriberData.vulnerability_factors) && subscriberData.vulnerab
   : '- High China sourcing creates tariff exposure\n- Limited USMCA-compliant supplier options\n- Trade agreement uncertainty'}
 
 HS CODE CLASSIFICATION:
-Validated HS Code: ${validationData.validated_hs_code}
-Classification Confidence: ${validationData.confidence_level}% (Cristina's professional assessment)
+Researched HS Code: ${validationData.validated_hs_code}
+Classification Confidence: ${validationData.confidence_level}% (Team's professional assessment)
 
-CRISTINA'S PROFESSIONAL ANALYSIS:
-Broker Notes: ${validationData.broker_notes}
+TEAM'S PROFESSIONAL ANALYSIS:
+Expert Notes: ${validationData.broker_notes}
 Specific Risks Identified: ${validationData.specific_risks}
 Compliance Recommendations: ${validationData.compliance_recommendations}
-Audit Defense Strategy: ${validationData.audit_defense}
+Strategic Guidance: ${validationData.audit_defense}
 
 YOUR TASK:
-Write a professional HS Classification Report that demonstrates your 17 years of ${industryContext} logistics expertise. Be SPECIFIC and ACTIONABLE for THIS specific ${subscriberData.business_type || 'business'}.
+Write a professional HS Classification Research Report that demonstrates the team's combined expertise (17 years enterprise logistics + 7 years SMB operations). Be SPECIFIC and ACTIONABLE for THIS specific ${subscriberData.business_type || 'business'}.
 
 REQUIRED SECTIONS:
 
@@ -282,9 +283,9 @@ CRITICAL: This is Cristina's professional audit defense strategy. Use her EXACT 
 
 This is based on her 17 years of experience defending classifications in customs audits across multiple industries including ${industryContext}.
 
-## 6. CRISTINA'S PROFESSIONAL ASSESSMENT
+## 6. TEAM'S PROFESSIONAL ASSESSMENT
 
-CRITICAL: Write this section in first person as Cristina, using her EXACT input verbatim. DO NOT paraphrase or modify her words.
+CRITICAL: This section contains the team's professional assessment based on combined expertise. Use EXACT words from the validation data verbatim. DO NOT paraphrase or modify.
 
 **Classification Validation:**
 "${validationData.broker_notes}"
@@ -292,46 +293,52 @@ CRITICAL: Write this section in first person as Cristina, using her EXACT input 
 **Risk Assessment:**
 "${validationData.specific_risks}"
 
-**My Professional Recommendations:**
+**Professional Recommendations:**
 "${validationData.compliance_recommendations}"
 
-**Audit Defense Preparation:**
+**Strategic Guidance:**
 "${validationData.audit_defense}"
 
-Signed,
-Cristina Escalante
-Licensed Customs Broker #4601913
-17 Years Electronics/Telecom Logistics Experience
+Triangle Trade Intelligence Team
+Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
+Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
 
 TONE: Professional but direct. Use actual numbers. Be specific. Show your expertise through concrete recommendations, not generic platitudes.
 
 Format as a formal business report with clear headers, bullet points for key findings, and bold text for critical recommendations.`;
 
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: reportPrompt
-        }]
-      })
+    // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
+    console.log('[HS CLASSIFICATION REPORT] Calling AI with fallback chain...');
+
+    const aiResult = await executeWithFallback({
+      prompt: reportPrompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 4000,
+      cacheOptions: {
+        table: 'hs_classification_reports_cache',
+        query: {
+          hs_code: validationData.validated_hs_code,
+          company_name: subscriberData.company_name
+        },
+        transform: (cached) => cached.report_content
+      }
     });
 
-    if (!openRouterResponse.ok) {
-      throw new Error('OpenRouter API call failed');
+    // Check if AI generation succeeded
+    if (!aiResult.success) {
+      console.error('[HS CLASSIFICATION REPORT] All AI services failed:', aiResult);
+      return res.status(503).json({
+        success: false,
+        error: 'HS Classification report generation failed',
+        source: aiResult.source,
+        label: aiResult.label,
+        troubleshooting: aiResult.troubleshooting,
+        message: 'All AI services (OpenRouter, Anthropic) and cache are unavailable. Please check API keys and try again.'
+      });
     }
 
-    const aiResponse = await openRouterResponse.json();
-    const reportContent = aiResponse.choices?.[0]?.message?.content;
-
-    if (!reportContent) {
-      throw new Error('OpenRouter API returned empty response. No report content generated.');
-    }
+    const reportContent = aiResult.data;
+    console.log(`[HS CLASSIFICATION REPORT] Generated successfully via ${aiResult.source}`);
 
     // Create email draft using Gmail API (requires nodemailer)
     const nodemailer = require('nodemailer');
@@ -362,16 +369,18 @@ Format as a formal business report with clear headers, bullet points for key fin
 </head>
 <body>
   <div class="header">
-    <h1>HS Classification Report</h1>
-    <p>Professional Customs Broker Analysis</p>
+    <h1>HS Classification Research Report</h1>
+    <p>Professional Trade Consulting & Analysis</p>
   </div>
 
   <div class="content">
     <div class="credentials">
-      <strong>Licensed Customs Broker:</strong> Cristina Escalante<br>
-      <strong>License Number:</strong> #4601913<br>
-      <strong>Expertise:</strong> 17 years international logistics experience specializing in ${industryContext}<br>
-      <strong>Service Date:</strong> ${new Date().toLocaleDateString()}
+      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), HTS/INCOTERMS specialist<br>
+      <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
+      <strong>Service Type:</strong> Consulting and Guidance (HS Classification Research)<br>
+      <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
+      <strong>Note:</strong> For official HS code certifications, we partner with licensed customs brokers
     </div>
 
     <div class="section">
@@ -386,19 +395,19 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by a licensed customs broker and is backed by professional liability insurance. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official HS code certifications and formal compliance documents, we partner with licensed customs brokers. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
 
     <div class="section" style="background: #f0f9ff; padding: 20px; border-left: 4px solid #2563eb; margin-top: 30px;">
-      <h3 style="color: #2563eb; margin-top: 0;">📄 Download Your Official USMCA Certificate</h3>
-      <p>Your professional USMCA Certificate of Origin (all 12 required fields) is available for download:</p>
+      <h3 style="color: #2563eb; margin-top: 0;">📄 USMCA Assessment Available</h3>
+      <p>Your USMCA qualification assessment and optimization recommendations are available:</p>
       <p style="margin: 20px 0;">
         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?view=certificates&id=${serviceRequestId}"
            style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: 600;">
-          Download USMCA Certificate (PDF)
+          View USMCA Assessment
         </a>
       </p>
-      <p style="font-size: 14px; color: #6b7280;">This certificate includes all 12 USMCA-required fields and is signed by Cristina Escalante, Licensed Customs Broker #4601913</p>
+      <p style="font-size: 14px; color: #6b7280;">This assessment includes strategic recommendations from our team. For official USMCA certificates, we partner with licensed customs brokers.</p>
     </div>
   </div>
 </body>
@@ -416,6 +425,25 @@ Format as a formal business report with clear headers, bullet points for key fin
     // Send email (will go to drafts if using Gmail API properly, or sent folder for testing)
     await transporter.sendMail(mailOptions);
 
+    // ✅ SAVE TO DATABASE CACHE for future fallback
+    if (aiResult.source === 'openrouter_api' || aiResult.source === 'anthropic_api') {
+      try {
+        await supabase
+          .from('hs_classification_reports_cache')
+          .upsert({
+            hs_code: validationData.validated_hs_code,
+            company_name: subscriberData.company_name,
+            report_content: reportContent,
+            source: aiResult.source,
+            cached_at: new Date().toISOString()
+          });
+        console.log('[HS CLASSIFICATION REPORT] Saved to cache for future fallback');
+      } catch (cacheError) {
+        console.error('[HS CLASSIFICATION REPORT] Cache save failed:', cacheError);
+        // Non-blocking - don't fail the request
+      }
+    }
+
     // Update service request with completion data
     const { error: updateError } = await supabase
       .from('service_requests')
@@ -429,7 +457,11 @@ Format as a formal business report with clear headers, bullet points for key fin
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Cristina Escalante - License #4601913'
+          completed_by: 'Cristina Escalante - License #4601913',
+          // ✅ AI SOURCE TRACKING
+          ai_source: aiResult.source,
+          ai_label: aiResult.label,
+          ai_cost_estimate: aiResult.cost_estimate
         }
       })
       .eq('id', serviceRequestId);
@@ -443,7 +475,12 @@ Format as a formal business report with clear headers, bullet points for key fin
       message: 'HS Classification report generated and sent to triangleintel@gmail.com',
       report_content: reportContent,
       email_subject: emailSubject,
-      validated_hs_code: validationData.validated_hs_code
+      validated_hs_code: validationData.validated_hs_code,
+      // ✅ TRANSPARENT SOURCE LABELING
+      source: aiResult.source,
+      label: aiResult.label,
+      is_cached: aiResult.is_cached,
+      cost_estimate: aiResult.cost_estimate
     });
 
   } catch (error) {
