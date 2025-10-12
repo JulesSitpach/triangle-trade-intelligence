@@ -475,6 +475,50 @@ export default function WorkflowResults({
         <ProductClassification results={results} />
       </div>
 
+      {/* CERTIFICATE FIELDS PREVIEW */}
+      {(results.origin_criterion || results.method_of_qualification || results.producer_name) && (
+        <div className="form-section">
+          <h2 className="form-section-title">Certificate Details</h2>
+
+          {results.origin_criterion && (
+            <div className="text-body" style={{marginBottom: '12px'}}>
+              <strong>Origin Criterion:</strong> {results.origin_criterion} - {
+                results.origin_criterion === 'A' ? 'Wholly Obtained' :
+                results.origin_criterion === 'B' ? 'Tariff Shift and Regional Value Content' :
+                results.origin_criterion === 'C' ? 'Specific Processing/Value Requirement' :
+                results.origin_criterion === 'D' ? 'Specific Manufacturing Process' :
+                'Regional Value Content'
+              }
+            </div>
+          )}
+
+          {results.method_of_qualification && (
+            <div className="text-body" style={{marginBottom: '12px'}}>
+              <strong>Qualification Method:</strong> {results.method_of_qualification} - {
+                results.method_of_qualification === 'TS' ? 'Tariff Shift' :
+                results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' :
+                results.method_of_qualification === 'NC' ? 'Net Cost (RVC)' :
+                results.method_of_qualification === 'NO' ? 'No Requirement' :
+                'Transaction Value'
+              }
+            </div>
+          )}
+
+          {results.producer_name && results.producer_name !== results.company?.name && (
+            <div className="text-body">
+              <strong>Producer (if different from exporter):</strong><br/>
+              <div style={{marginLeft: '20px', marginTop: '8px'}}>
+                {results.producer_name}<br/>
+                {results.producer_address && <>{results.producer_address}<br/></>}
+                {results.producer_country && <>{results.producer_country}<br/></>}
+                {results.producer_phone && <>Phone: {results.producer_phone}<br/></>}
+                {results.producer_email && <>Email: {results.producer_email}</>}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* COMPLIANCE ANALYSIS */}
       <div className="form-section">
         <h2 className="form-section-title">Component & Regional Content Analysis</h2>
@@ -504,7 +548,7 @@ export default function WorkflowResults({
             <div className="professional-services-cta">
               <div className="professional-services-cta-title">Need Expert Help?</div>
               <div className="professional-services-cta-description">
-                Licensed customs brokers in Mexico • Audit-proof certification • Supplier sourcing
+                Foreign trade & logistics consulting • Expert guidance • Mexico trade specialists
               </div>
               <button
                 onClick={() => router.push('/services/logistics-support')}

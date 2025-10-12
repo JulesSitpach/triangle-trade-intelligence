@@ -473,6 +473,47 @@ export default function ComponentOriginsStepEnhanced({
               Where is the final product assembled/manufactured?
             </div>
           </div>
+
+          {/* Origin Criterion - USMCA Certificate Field #8 */}
+          <div className="form-group">
+            <label className="form-label">
+              Origin Criterion
+            </label>
+            <select
+              value={formData.origin_criterion || ''}
+              onChange={(e) => updateFormData('origin_criterion', e.target.value)}
+              className={`form-select ${formData.origin_criterion ? 'has-value' : ''}`}
+            >
+              <option value="">Select origin criterion...</option>
+              <option value="A">A - Wholly Obtained</option>
+              <option value="B">B - Tariff Shift and Regional Value Content</option>
+              <option value="C">C - Specific Processing/Value Requirement</option>
+            </select>
+            <div className="form-help">
+              How does your product qualify under USMCA? (Certificate Field #8)
+            </div>
+          </div>
+
+          {/* Method of Qualification - USMCA Certificate Field #10 */}
+          <div className="form-group">
+            <label className="form-label">
+              Method of Qualification
+            </label>
+            <select
+              value={formData.method_of_qualification || ''}
+              onChange={(e) => updateFormData('method_of_qualification', e.target.value)}
+              className={`form-select ${formData.method_of_qualification ? 'has-value' : ''}`}
+            >
+              <option value="">Select calculation method...</option>
+              <option value="TS">TS - Tariff Shift</option>
+              <option value="TV">TV - Transaction Value (RVC)</option>
+              <option value="NC">NC - Net Cost (RVC)</option>
+              <option value="NO">NO - No Requirement</option>
+            </select>
+            <div className="form-help">
+              Method used to calculate regional value content (Certificate Field #10)
+            </div>
+          </div>
         </div>
       </div>
 
