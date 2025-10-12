@@ -136,7 +136,7 @@ export default function ServiceRequestForm() {
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/api/auth/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
+            <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
       </nav>
