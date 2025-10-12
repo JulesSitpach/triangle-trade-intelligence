@@ -67,23 +67,36 @@ export function useWorkflowState() {
       supplier_country: '',
       trade_volume: '',
       destination_country: '',
-      
+
       // Enhanced Company Details for Certificate Completion
       company_address: '',
       tax_id: '',
       contact_person: '',
       contact_email: '',
       contact_phone: '',
-      
-      // Product Information  
+
+      // Product Information
       product_description: '',
       manufacturing_location: '',
-      
+
       // HS Code Classification Results
       classified_hs_code: '',
       hs_code_confidence: 0,
       hs_code_description: '',
       classification_method: '',
+
+      // USMCA Certificate Fields
+      origin_criterion: '',
+      method_of_qualification: '',
+
+      // Producer Details (Field #4 - if different from exporter)
+      producer_name: '',
+      producer_address: '',
+      producer_tax_id: '',
+      producer_phone: '',
+      producer_email: '',
+      producer_country: '',
+      producer_same_as_exporter: false,
 
       // Component Origins
       component_origins: []
@@ -422,6 +435,17 @@ export function useWorkflowState() {
       hs_code_confidence: 0,
       hs_code_description: '',
       classification_method: '',
+      // Reset USMCA Certificate Fields
+      origin_criterion: '',
+      method_of_qualification: '',
+      // Reset Producer Details
+      producer_name: '',
+      producer_address: '',
+      producer_tax_id: '',
+      producer_phone: '',
+      producer_email: '',
+      producer_country: '',
+      producer_same_as_exporter: false,
       component_origins: [
         { origin_country: 'CN', value_percentage: 60 },
         { origin_country: 'MX', value_percentage: 40 }
