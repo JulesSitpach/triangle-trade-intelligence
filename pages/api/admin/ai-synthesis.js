@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { executeWithFallback } from '../../../lib/utils/ai-fallback-chain.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -100,8 +101,14 @@ Create a professional briefing with:
 
 Format as professional PDF-ready content. Focus on actionable insights that justify the $500/month fee.`;
 
-  // Generate with real Claude AI via OpenRouter
-  let aiGeneratedContent = await callClaudeAI(synthesisPrompt);
+  // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
+  const aiResult = await executeWithFallback({
+    prompt: synthesisPrompt,
+    model: 'anthropic/claude-3.5-sonnet',
+    maxTokens: 4000
+  });
+
+  let aiGeneratedContent = aiResult.success ? aiResult.data : null;
 
   // Fallback content if AI call fails
   if (!aiGeneratedContent) {
@@ -429,42 +436,5 @@ ${routes?.map(route => `
   };
 }
 
-// Real Claude AI integration via OpenRouter
-async function callClaudeAI(prompt) {
-  try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'X-Title': 'Jorge Trade Intelligence Assistant'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are Jorge\'s AI assistant for generating professional trade intelligence reports and market analysis. Create comprehensive, actionable reports that justify premium consulting fees. Focus on USMCA triangle routing, Mexico trade opportunities, and Canada-Mexico partnerships. Use professional business language and include specific data points, recommendations, and next steps.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 4000,
-        temperature: 0.7
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0]?.message?.content || 'AI generation failed - using fallback content';
-
-  } catch (error) {
-    console.error('Claude AI API error:', error);
-    return null; // Will trigger fallback content
-  }
-}
+// AI fallback chain is now handled by executeWithFallback utility
+// No need for custom OpenRouter function - uses lib/utils/ai-fallback-chain.js
