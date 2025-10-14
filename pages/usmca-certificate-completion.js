@@ -125,7 +125,9 @@ export default function USMCACertificateCompletion() {
               importer_name: authData.importer_name || '',
               importer_address: authData.importer_address || '',
               importer_country: authData.importer_country || '',
-              importer_tax_id: authData.importer_tax_id || ''
+              importer_tax_id: authData.importer_tax_id || '',
+              importer_phone: authData.importer_phone || '',
+              importer_email: authData.importer_email || ''
             },
             product_details: {
               hs_code: workflowData?.product?.hs_code || '',
