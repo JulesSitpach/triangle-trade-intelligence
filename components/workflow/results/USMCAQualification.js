@@ -69,7 +69,17 @@ export default function USMCAQualification({ results }) {
       {/* Component Breakdown Table */}
       {results.usmca.component_breakdown && results.usmca.component_breakdown.length > 0 && (
         <div className="element-spacing">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', tableLayout: 'fixed' }}>
+            <colgroup>
+              <col style={{ width: '25%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '15%' }} />
+            </colgroup>
             <thead>
               <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
                 <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Component</th>
@@ -95,7 +105,7 @@ export default function USMCAQualification({ results }) {
                 return (
                   <React.Fragment key={index}>
                     <tr style={{ borderBottom: '1px solid #e5e7eb', cursor: hasDetails ? 'pointer' : 'default' }}>
-                      <td style={{ padding: '0.75rem', color: '#1f2937' }}>
+                      <td style={{ padding: '0.75rem', color: '#1f2937', wordWrap: 'break-word', overflow: 'hidden' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           {hasDetails && (
                             <button
@@ -106,35 +116,36 @@ export default function USMCAQualification({ results }) {
                                 cursor: 'pointer',
                                 fontSize: '1rem',
                                 padding: '0',
-                                lineHeight: '1'
+                                lineHeight: '1',
+                                flexShrink: 0
                               }}
                               title={isExpanded ? 'Hide details' : 'Show AI analysis details'}
                             >
                               {isExpanded ? '▼' : '▶'}
                             </button>
                           )}
-                          <span>{component.description || 'Component ' + (index + 1)}</span>
+                          <span style={{ wordWrap: 'break-word', overflow: 'hidden' }}>{component.description || ('Component ' + (index + 1))}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '0.75rem', color: '#1f2937', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+                      <td style={{ padding: '0.75rem', color: '#1f2937', fontFamily: 'monospace', fontSize: '0.8125rem', wordWrap: 'break-word' }}>
                         {component.hs_code || component.classified_hs_code || '—'}
                       </td>
-                      <td style={{ padding: '0.75rem', color: '#1f2937', fontWeight: '500' }}>
+                      <td style={{ padding: '0.75rem', color: '#1f2937', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         {component.origin_country}
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
                         {component.value_percentage}%
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937', whiteSpace: 'nowrap' }}>
                         {hasRates ? `${mfnRate.toFixed(1)}%` : '—'}
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         {hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280', whiteSpace: 'nowrap' }}>
                         {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         {component.is_usmca_member ? (
                           <span style={{ color: '#059669', fontWeight: '500' }}>✓ Qualifies</span>
                         ) : (
