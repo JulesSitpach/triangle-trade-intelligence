@@ -123,12 +123,13 @@ export default protectedApiHandler({
       const allWorkflows = [...sessionWorkflows, ...completionWorkflows]
         .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
 
-      // Vulnerability Analysis History (alerts)
+      // Vulnerability Analysis History (alerts) - Limit to 5 most recent to avoid duplicates
       const { data: alertHistory } = await supabase
         .from('vulnerability_analyses')
         .select('*')
         .eq('user_id', userId)
-        .order('analyzed_at', { ascending: false });
+        .order('analyzed_at', { ascending: false })
+        .limit(5);
 
       return res.status(200).json({
         workflows: allWorkflows || [],
