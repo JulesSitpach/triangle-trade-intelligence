@@ -144,7 +144,7 @@ export default function AdminIntelligenceMetrics({ adminIntelligence }) {
                 <div className="alert-title">Opportunity Legend</div>
                 <div className="text-body">
                   <strong>⚠️ HS Validation:</strong> AI confidence &lt; 80% - Professional HS classification review recommended (Cristina's specialty)<br />
-                  <strong>💰 Mexico Sourcing:</strong> High tariff exposure (>5%) on non-USMCA components - Mexico supplier sourcing opportunity (Jorge's specialty)<br />
+                  <strong>💰 Mexico Sourcing:</strong> High tariff exposure (&gt;5%) on non-USMCA components - Mexico supplier sourcing opportunity (Jorge's specialty)<br />
                   <strong>📈 RVC Optimize:</strong> QUALIFIED but close to threshold - Increase safety margin with better sourcing (Team collaboration)
                 </div>
               </div>

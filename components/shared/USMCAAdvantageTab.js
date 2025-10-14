@@ -1212,7 +1212,7 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
               return (mfnRate - usmcaRate) > 5 && !c.is_usmca_member;
             }) && (
               <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderLeft: '3px solid #059669' }}>
-                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (>5%). Consider Mexico sourcing for this certificate holder.
+                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (&gt;5%). Consider Mexico sourcing for this certificate holder.
               </div>
             )}
           </div>

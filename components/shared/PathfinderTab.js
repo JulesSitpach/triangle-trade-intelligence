@@ -487,7 +487,7 @@ function MarketResearchStage({ request, subscriberData, serviceDetails, onComple
               return (mfnRate - usmcaRate) > 5 && !c.is_usmca_member;
             }) && (
               <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderLeft: '3px solid #059669', fontSize: '0.875rem' }}>
-                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (>5%). Sourcing from Mexico could save significant costs.
+                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (&gt;5%). Sourcing from Mexico could save significant costs.
               </div>
             )}
           </div>
