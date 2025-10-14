@@ -1415,6 +1415,55 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  table-layout: fixed;
+}
+
+/* Column width specifications for 8 columns */
+.component-table th:nth-child(1),
+.component-table td:nth-child(1) {
+  width: 18%; /* Component */
+}
+
+.component-table th:nth-child(2),
+.component-table td:nth-child(2) {
+  width: 8%; /* Origin */
+  text-align: center;
+}
+
+.component-table th:nth-child(3),
+.component-table td:nth-child(3) {
+  width: 10%; /* % of Product */
+  text-align: center;
+}
+
+.component-table th:nth-child(4),
+.component-table td:nth-child(4) {
+  width: 14%; /* HS Code */
+  font-family: monospace;
+}
+
+.component-table th:nth-child(5),
+.component-table td:nth-child(5) {
+  width: 12%; /* MFN Rate */
+  text-align: right;
+}
+
+.component-table th:nth-child(6),
+.component-table td:nth-child(6) {
+  width: 12%; /* USMCA Rate */
+  text-align: right;
+}
+
+.component-table th:nth-child(7),
+.component-table td:nth-child(7) {
+  width: 12%; /* Savings */
+  text-align: right;
+}
+
+.component-table th:nth-child(8),
+.component-table td:nth-child(8) {
+  width: 14%; /* AI Confidence */
+  text-align: center;
 }
 
 .component-table thead {
@@ -1433,6 +1482,9 @@
   padding: 0.75rem;
   border-bottom: 1px solid #e5e7eb;
   color: #1f2937;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  vertical-align: top;
 }
 
 .component-table tr.low-confidence {
