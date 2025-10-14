@@ -465,6 +465,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           enriched.classified_hs_code = classificationResult.hs_code;
           enriched.hs_code = classificationResult.hs_code;
           enriched.confidence = classificationResult.confidence;
+          enriched.ai_reasoning = classificationResult.reasoning; // Store AI reasoning for UI display
+          enriched.alternative_codes = classificationResult.alternative_codes || []; // Store alternative codes if provided
 
           // Step 2: Try official HTS database lookup for accurate tariff rates
           console.log(`🔍 Looking up official HTS rates for: ${classificationResult.hs_code}`);
@@ -635,7 +637,14 @@ Return ONLY a JSON object in this exact format (no other text):
   "mfn_rate": 5.0,
   "usmca_rate": 0.0,
   "confidence": 85,
-  "reasoning": "Detailed expert reasoning explaining classification, tariff rates, and any special considerations for USMCA qualification"
+  "reasoning": "Detailed expert reasoning explaining classification, tariff rates, and any special considerations for USMCA qualification",
+  "alternative_codes": [
+    {
+      "code": "XXXX.XX",
+      "confidence": 75,
+      "reason": "When to use this alternative code instead"
+    }
+  ]
 }
 
 CRITICAL: Be precise and accurate. This data will be used for compliance decisions and saved to build our database.`;
@@ -677,7 +686,8 @@ CRITICAL: Be precise and accurate. This data will be used for compliance decisio
       mfn_rate: classification.mfn_rate || 0,
       usmca_rate: classification.usmca_rate || 0,
       confidence: classification.confidence || 85,
-      reasoning: classification.reasoning
+      reasoning: classification.reasoning,
+      alternative_codes: classification.alternative_codes || []
     };
 
   } catch (error) {

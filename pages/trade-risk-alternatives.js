@@ -724,6 +724,30 @@ export default function TradeRiskAlternatives() {
           </div>
         )}
 
+        {/* RSS Monitoring Status Badge - Shows Real-Time Monitoring is Active */}
+        <div className="alert alert-info">
+          <div className="alert-content">
+            <div className="alert-title">📡 Real-Time Government Monitoring Active</div>
+            <div className="text-body">
+              <p>
+                <strong>Monitoring 4 Official U.S. Government Sources 24/7:</strong>
+              </p>
+              <ul>
+                <li><strong>USTR Press Releases</strong> - Section 301 tariffs, USMCA policy, trade agreements (checks every 30 min)</li>
+                <li><strong>USITC News Releases</strong> - Trade investigations, injury determinations, remedies (checks every 30 min)</li>
+                <li><strong>Commerce ITA</strong> - Antidumping and countervailing duty determinations (checks every 30 min)</li>
+                <li><strong>Federal Register CBP</strong> - Customs rules, tariff classifications, regulations (checks hourly)</li>
+              </ul>
+              <p>
+                <strong>Crisis Detection:</strong> Our AI monitors for Section 301 tariffs, USMCA changes, antidumping investigations, customs rulings, and policy updates affecting your HS codes and supply chain.
+              </p>
+              <p className="form-help">
+                💡 You receive immediate alerts when official government sources announce changes affecting your trade profile. These are authoritative sources - not news articles about policy, but the actual policy announcements.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="dashboard-header">
           <h1 className="dashboard-title">Trade Risk & Alternatives Dashboard</h1>
           <p className="dashboard-subtitle">

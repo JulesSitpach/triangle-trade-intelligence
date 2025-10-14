@@ -368,21 +368,22 @@ function generateStandardVolumeRanges() {
  */
 async function getProductCategories() {
   try {
-    // Generate categories from HS chapters since hs_master_rebuild doesn't have product_category column
+    // Generate categories from HS codes (extract chapter from hts8 field)
     const { data: hsData, error } = await serverDatabaseService.client
       .from(TABLE_CONFIG.comtradeReference)
-      .select('chapter, description')
-      .not('chapter', 'is', null)
+      .select('hts8, brief_description')
+      .not('hts8', 'is', null)
       .limit(1000);
 
     if (error) throw error;
 
     if (hsData && hsData.length > 0) {
-      // Create categories based on HS chapters
+      // Create categories based on HS chapters (extract from hts8)
       const chapterMap = new Map();
-      
+
       hsData.forEach(item => {
-        const chapter = item.chapter;
+        // Extract chapter from hts8 (first 2 digits)
+        const chapter = item.hts8 ? parseInt(item.hts8.substring(0, 2)) : null;
         if (chapter) {
           // Map chapters to logical product categories
           let category = getProductCategoryFromChapter(chapter);

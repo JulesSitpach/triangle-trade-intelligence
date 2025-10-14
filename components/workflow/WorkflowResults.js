@@ -657,30 +657,56 @@ export default function WorkflowResults({
         </div>
       )}
 
-      {/* RECOMMENDATIONS */}
+      {/* AI-POWERED RECOMMENDATIONS */}
       {results.recommendations && results.recommendations.length > 0 && (
         <div className="form-section">
-          <h2 className="form-section-title">Strategic Recommendations</h2>
-          <div>
+          <h2 className="form-section-title">🤖 AI-Powered Strategic Recommendations</h2>
+          <p className="text-body" style={{marginBottom: '1rem', color: '#6b7280'}}>
+            Product-specific insights and next steps based on your USMCA analysis
+          </p>
+
+          <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
             {results.recommendations.map((rec, idx) => (
-              <div key={idx} className="text-body recommendation-item">
-                {rec}
+              <div
+                key={idx}
+                style={{
+                  padding: '1rem',
+                  backgroundColor: results.usmca?.qualified ? '#f0fdf4' : '#fef3c7',
+                  borderLeft: `4px solid ${results.usmca?.qualified ? '#10b981' : '#f59e0b'}`,
+                  borderRadius: '6px',
+                  display: 'flex',
+                  gap: '0.75rem',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <span style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: results.usmca?.qualified ? '#059669' : '#d97706',
+                  minWidth: '2rem',
+                  textAlign: 'center'
+                }}>
+                  {idx + 1}
+                </span>
+                <span className="text-body" style={{flex: 1, lineHeight: '1.6'}}>
+                  {rec}
+                </span>
               </div>
             ))}
+          </div>
 
-            {/* Professional Services CTA */}
-            <div className="professional-services-cta">
-              <div className="professional-services-cta-title">Need Expert Help?</div>
-              <div className="professional-services-cta-description">
-                Foreign trade & logistics consulting • Expert guidance • Mexico trade specialists
-              </div>
-              <button
-                onClick={() => router.push('/services/logistics-support')}
-                className="btn-primary"
-              >
-                View Professional Services
-              </button>
+          {/* Professional Services CTA */}
+          <div className="professional-services-cta" style={{marginTop: '1.5rem'}}>
+            <div className="professional-services-cta-title">Need Expert Help?</div>
+            <div className="professional-services-cta-description">
+              Foreign trade & logistics consulting • Expert guidance • Mexico trade specialists
             </div>
+            <button
+              onClick={() => router.push('/services/logistics-support')}
+              className="btn-primary"
+            >
+              View Professional Services
+            </button>
           </div>
         </div>
       )}
