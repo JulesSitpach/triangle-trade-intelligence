@@ -61,9 +61,9 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are assisting Jorge Ochoa, a B2B sales expert with 4+ years at CCVIAL, proven track record in industrial/manufacturing sectors, bilingual (Spanish/English), specializing in Mexico market entry and partnership development.
+    const aiPrompt = `You are a senior Mexico market entry and B2B partnership development expert with 20+ years of experience in North American trade, distribution channel development, and cross-border business strategy. You have deep expertise in Mexico business culture, partnership negotiations, and Latin American market expansion. You are assisting Jorge Ochoa, a B2B sales expert with 7 years of business ownership and industrial/manufacturing experience, bilingual (Spanish/English).
 
-BUSINESS INTELLIGENCE CONTEXT:
+===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
 
 Company Profile:
 - Company: ${businessContext.company.name}

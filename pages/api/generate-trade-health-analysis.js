@@ -104,27 +104,56 @@ function buildAnalysisPrompt(clientData) {
     usmca_status,
     component_origins,
     annual_tariff_cost,
-    potential_savings
+    potential_savings,
+    company_address,
+    tax_id
   } = clientData;
 
-  // Build component breakdown for analysis
-  const componentBreakdown = component_origins?.map(comp =>
-    `  - ${comp.value_percentage || comp.percentage}% from ${comp.origin_country || comp.country} (${comp.description || comp.component_type})`
-  ).join('\n') || '  - No component data provided';
+  // Build ENRICHED component breakdown with tariff intelligence
+  const componentBreakdown = component_origins?.map((comp, idx) => {
+    const country = comp.origin_country || comp.country;
+    const percentage = comp.value_percentage || comp.percentage || 0;
+    const description = comp.description || comp.component_type || `Component ${idx + 1}`;
+    const hsCode = comp.hs_code || comp.classified_hs_code || 'Not classified';
+    const mfnRate = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+    const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+    const confidence = comp.confidence || 'N/A';
+    const isUSMCA = ['US', 'MX', 'CA'].includes(country) ? 'Yes' : 'No';
 
-  return `You are a USMCA compliance and Mexico trade expert conducting a comprehensive Trade Health Check assessment.
+    let componentLine = `  - ${description}: ${percentage}% from ${country}`;
+    if (hsCode !== 'Not classified') {
+      componentLine += `\n    HS Code: ${hsCode}`;
+      if (mfnRate > 0 || usmcaRate > 0) {
+        const savings = mfnRate - usmcaRate;
+        componentLine += `\n    Tariff Rates: MFN ${mfnRate.toFixed(1)}% | USMCA ${usmcaRate.toFixed(1)}% | Savings: ${savings.toFixed(1)}%`;
+      }
+      if (confidence !== 'N/A') {
+        componentLine += `\n    AI Classification Confidence: ${confidence}%`;
+      }
+    }
+    componentLine += `\n    USMCA Member: ${isUSMCA}`;
+    return componentLine;
+  }).join('\n\n') || '  - No component data provided';
 
-COMPANY PROFILE:
-- Company: ${company}
-- Product: ${product}
-- Annual Trade Volume: $${Number(trade_volume || 0).toLocaleString()}
-- Manufacturing Location: ${manufacturing_location}
-- Current USMCA Status: ${usmca_status}
+  return `You are a senior USMCA compliance and Mexico trade expert with 20+ years of experience in North American trade, customs regulations, and supply chain optimization. You have deep expertise in USMCA treaty requirements, tariff analysis, and Mexico market strategies. You are conducting a comprehensive Trade Health Check assessment.
 
-SUPPLY CHAIN BREAKDOWN:
+===== COMPLETE COMPANY INTELLIGENCE =====
+Company Name: ${company}
+Product: ${product}
+Annual Trade Volume: $${Number(trade_volume || 0).toLocaleString()}
+Manufacturing/Assembly Location: ${manufacturing_location}
+Current USMCA Qualification Status: ${usmca_status}
+${company_address ? `Company Location: ${company_address}` : ''}
+${tax_id ? `Tax ID: ${tax_id}` : ''}
+
+Business Context:
+- Trade volume indicates ${Number(trade_volume || 0) > 1000000 ? 'established' : 'growing'} import/export operations
+- ${['US', 'MX', 'CA'].includes(manufacturing_location) ? 'Manufacturing already in USMCA region' : 'Manufacturing outside USMCA region'}
+
+===== SUPPLY CHAIN COMPONENT BREAKDOWN WITH TARIFF INTELLIGENCE =====
 ${componentBreakdown}
 
-FINANCIAL CONTEXT:
+===== FINANCIAL CONTEXT =====
 ${annual_tariff_cost ? `- Current Annual Tariff Cost: $${Number(annual_tariff_cost).toLocaleString()}` : '- Annual tariff cost not specified'}
 ${potential_savings ? `- Potential USMCA Savings: $${Number(potential_savings).toLocaleString()}/year` : ''}
 

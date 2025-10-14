@@ -59,9 +59,9 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are assisting Cristina Escalante, a Licensed Customs Broker (#4601913) with 17 years of logistics experience specializing in electronics/telecom industries and crisis management.
+    const aiPrompt = `You are a senior crisis management and USMCA trade compliance expert with 20+ years of experience in trade policy, customs regulations, and supply chain resilience. You are assisting Cristina Escalante, a Licensed Customs Broker (#4601913) with 17 years of logistics experience specializing in electronics/telecom industries.
 
-BUSINESS INTELLIGENCE CONTEXT:
+===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
 
 Company Profile:
 - Company: ${businessContext.company.name}
@@ -73,8 +73,32 @@ Product & Supply Chain:
 - Product: ${businessContext.product.description}
 - Category: ${businessContext.product.category}
 - Current Manufacturing: ${businessContext.product.manufacturing_location}
-- Component Origins:
-${Array.isArray(businessContext.product.component_origins) ? businessContext.product.component_origins.map(c => `  • ${c.country} (${c.percentage}%): ${c.description || c.component_type}`).join('\n') : '  • No component data available'}
+
+===== SUPPLY CHAIN COMPONENTS WITH TARIFF INTELLIGENCE =====
+${Array.isArray(businessContext.product.component_origins) && businessContext.product.component_origins.length > 0 ? businessContext.product.component_origins.map((c, idx) => {
+    const country = c.origin_country || c.country || 'Unknown';
+    const percentage = c.value_percentage || c.percentage || 0;
+    const description = c.description || c.component_type || `Component ${idx + 1}`;
+    const hsCode = c.hs_code || c.classified_hs_code || 'Not classified';
+    const mfnRate = c.mfn_rate || c.tariff_rates?.mfn_rate || 0;
+    const usmcaRate = c.usmca_rate || c.tariff_rates?.usmca_rate || 0;
+    const savings = mfnRate - usmcaRate;
+    const confidence = c.confidence || 'N/A';
+    const isUSMCA = ['US', 'MX', 'CA'].includes(country) ? 'Yes' : 'No';
+
+    let componentInfo = `• ${description}: ${percentage}% from ${country}`;
+    if (hsCode !== 'Not classified') {
+      componentInfo += `\n  HS Code: ${hsCode}`;
+      if (mfnRate > 0 || usmcaRate > 0) {
+        componentInfo += `\n  Tariff Rates: MFN ${mfnRate.toFixed(1)}% | USMCA ${usmcaRate.toFixed(1)}% | Savings: ${savings.toFixed(1)}%`;
+      }
+      if (confidence !== 'N/A') {
+        componentInfo += `\n  AI Classification Confidence: ${confidence}%`;
+      }
+    }
+    componentInfo += `\n  USMCA Member: ${isUSMCA}`;
+    return componentInfo;
+  }).join('\n\n') : '• No component data available'}
 
 Trade Profile:
 - Annual Trade Volume: $${Number(businessContext.trade.annual_volume || 0).toLocaleString()}
