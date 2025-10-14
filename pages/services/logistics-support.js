@@ -618,12 +618,11 @@ export default function ProfessionalServices() {
                 )}
 
                 <button
-                  onClick={() => handleServiceRequest(service.id)}
-                  disabled={isProcessing[service.id] || !user}
+                  onClick={() => window.location.href = '/services/request-form'}
                   className="btn-primary"
                   style={{width: '100%'}}
                 >
-                  {isProcessing[service.id] ? 'Processing...' : `Request Service - $${service.displayPrice}`}
+                  Request Service - ${service.displayPrice}
                 </button>
               </div>
             ))}

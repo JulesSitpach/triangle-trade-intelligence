@@ -1,5 +1,6 @@
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { sendCustomerConfirmationEmail, sendAdminNotificationEmail } from '../../../lib/services/email-service';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -138,53 +139,66 @@ async function handleCheckoutSessionCompleted(session) {
 }
 
 /**
- * Handle service payment completed and create service request
+ * Handle service payment completed and update service request
  */
 async function handleServicePaymentCompleted(session) {
-  const { user_id, service_id, service_name, service_request_data } = session.metadata;
+  const { user_id, service_id, service_name, service_request_id } = session.metadata;
 
-  console.log(`Processing service payment: ${service_name} for user ${user_id}`);
+  console.log(`Processing service payment: ${service_name} (request ${service_request_id})`);
 
   try {
-    // Parse service request data from metadata
-    const requestData = service_request_data ? JSON.parse(service_request_data) : {};
-
-    // Determine which team handles this service
-    const assigned_to = ['supplier-sourcing', 'manufacturing-feasibility', 'market-entry'].includes(service_id)
-      ? 'Jorge'
-      : 'Cristina';
-
-    // Create service request in database
-    const { data: serviceRequest, error: insertError } = await supabase
+    // Service request already exists from checkout creation
+    // Update status from 'pending_payment' to 'pending' (awaiting expert)
+    const { data: serviceRequest, error: updateError } = await supabase
       .from('service_requests')
-      .insert([{
-        user_id: user_id,
-        service_type: service_id,
-        client_company: requestData.company_name || 'Unknown Company',
-        client_info: requestData.client_info || {},
-        service_details: requestData.service_details || {},
-        subscriber_data: requestData.subscriber_data || {},
+      .update({
         status: 'pending', // Awaiting specialist action
-        assigned_to: assigned_to,
-        price: session.amount_total / 100, // Convert from cents to dollars
         stripe_session_id: session.id,
         stripe_payment_intent: session.payment_intent,
         paid_at: new Date().toISOString(),
-        intake_form_completed: true,
-        created_at: new Date().toISOString()
-      }])
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', service_request_id)
       .select()
       .single();
 
-    if (insertError) {
-      console.error('Failed to create service request:', insertError);
-      throw insertError;
+    if (updateError) {
+      console.error('Failed to update service request:', updateError);
+      throw updateError;
     }
 
-    console.log(`Service request created: ${serviceRequest.id} - Assigned to ${assigned_to}`);
+    console.log(`✅ Service request updated: ${serviceRequest.id} - Status: pending`);
 
-    // TODO: Send email notification to specialist (Jorge or Cristina)
-    // TODO: Send confirmation email to customer
+    // Get customer email from service request
+    const customerEmail = serviceRequest.subscriber_data?.contact_email || session.customer_email;
+    const companyName = serviceRequest.company_name || serviceRequest.subscriber_data?.company_name;
+
+    console.log(`📧 Customer email: ${customerEmail}`);
+    console.log(`🏢 Company: ${companyName}`);
+
+    // Send confirmation email to customer
+    if (customerEmail) {
+      await sendCustomerConfirmationEmail({
+        customerEmail,
+        companyName,
+        serviceName: service_name,
+        serviceType: service_id,
+        price: serviceRequest.price,
+        orderId: serviceRequest.id
+      });
+    }
+
+    // Send notification to admin team (both Jorge and Cristina for all services)
+    await sendAdminNotificationEmail({
+      serviceName: service_name,
+      serviceType: service_id,
+      companyName,
+      customerEmail,
+      price: serviceRequest.price,
+      orderId: serviceRequest.id,
+      subscriberData: serviceRequest.subscriber_data
+    });
+
   } catch (error) {
     console.error('Error processing service payment:', error);
     throw error;

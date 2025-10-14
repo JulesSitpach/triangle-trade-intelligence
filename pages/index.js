@@ -30,6 +30,20 @@ export default function HomePage() {
         <title>Triangle Trade Intelligence | USMCA Compliance & Supply Chain Optimization</title>
         <meta name="description" content="Professional trade services platform delivering comprehensive USMCA compliance analysis and supply chain optimization for North American manufacturers and importers." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>{`
+          .pain-points-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+          }
+          @media (max-width: 768px) {
+            .pain-points-grid {
+              grid-template-columns: 1fr;
+              gap: 1.5rem;
+            }
+          }
+        `}</style>
         <meta property="og:title" content="Triangle Trade Intelligence | USMCA Compliance Platform" />
         <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for small manufacturers and importers." />
 
@@ -116,9 +130,14 @@ export default function HomePage() {
                 My Dashboard
               </Link>
             ) : (
-              <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
-                Sign In
-              </Link>
+              <>
+                <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
+                </Link>
+                <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Sign Up
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -167,30 +186,30 @@ export default function HomePage() {
           </p>
           
           <div className="hero-button-group">
+            <Link
+              href="/usmca-workflow?reset=true"
+              className="hero-primary-button"
+              aria-label="Start USMCA qualification analysis"
+            >
+              Start USMCA Analysis
+            </Link>
             {isLoggedIn ? (
               <Link
-                href="/usmca-workflow?reset=true"
-                className="hero-primary-button"
-                aria-label="Start comprehensive USMCA compliance analysis workflow"
+                href="/dashboard"
+                className="hero-secondary-button"
+                aria-label="Go to my dashboard"
               >
-                Start USMCA Analysis
+                My Dashboard
               </Link>
             ) : (
               <Link
-                href="/login"
-                className="hero-primary-button"
-                aria-label="Sign in to access USMCA compliance analysis"
+                href="/pricing"
+                className="hero-secondary-button"
+                aria-label="View pricing plans"
               >
-                Sign In to Start Analysis
+                View Pricing
               </Link>
             )}
-            <Link
-              href="#calculator"
-              className="hero-secondary-button"
-              aria-label="Scroll to tariff savings calculator section"
-            >
-              Calculate Savings
-            </Link>
           </div>
         </div>
       </section>
@@ -201,74 +220,150 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* USMCA Compliance Solutions Section */}
+      {/* Why Small Businesses Need This */}
       <section className="main-content">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">USMCA Compliance Solutions</h2>
+            <h2 className="section-header-title">Why Small Manufacturers Need USMCA Compliance</h2>
             <p className="section-header-subtitle">
-              Professional trade services delivering comprehensive compliance analysis and strategic supply chain optimization for small manufacturers and importers.
+              You can't afford a full-time compliance team, but you can't afford to ignore USMCA benefits either.
             </p>
           </div>
 
-          <div className="grid-2-cols">
-            <div className="content-card classification">
-              <div className="content-card-icon" aria-hidden="true">HC</div>
-              <h3 className="content-card-title">Trade Classification & Analysis</h3>
+          <div className="pain-points-grid">
+            <div className="content-card">
+              <div className="card-icon">💸</div>
+              <h3 className="content-card-title">Losing Money on Tariffs</h3>
               <p className="content-card-description">
-                Professional harmonized system classification with CBP-verified accuracy for streamlined customs processing and duty optimization.
+                Many SMBs pay 6-25% tariffs on imports from China, Mexico, or Canada without realizing they could qualify for 0% tariffs under USMCA.
               </p>
-              <Link
-                href="/usmca-workflow?reset=true"
-                className="content-card-link"
-                aria-label="Start trade classification and analysis workflow"
-              >
-                Start Classification Analysis
-              </Link>
             </div>
 
-            <div className="content-card analysis">
-              <div className="content-card-icon" aria-hidden="true">RA</div>
-              <h3 className="content-card-title">Supply Chain Route Analysis</h3>
+            <div className="content-card">
+              <div className="card-icon">❓</div>
+              <h3 className="content-card-title">Don't Know If You Qualify</h3>
               <p className="content-card-description">
-                Comprehensive assessment of trade corridors through Mexico and Canada to identify cost savings and compliance opportunities.
+                USMCA rules are complex. You need 55-75% regional content, but calculating this requires expertise you don't have in-house.
               </p>
-              <Link
-                href="/usmca-workflow?reset=true"
-                className="content-card-link"
-                aria-label="Start supply chain route analysis and optimization"
-              >
-                Analyze Trade Routes
-              </Link>
             </div>
 
-            <div className="content-card certificates">
-              <div className="content-card-icon" aria-hidden="true">CO</div>
-              <h3 className="content-card-title">Certificate of Origin Services</h3>
+            <div className="content-card">
+              <div className="card-icon">⚠️</div>
+              <h3 className="content-card-title">Supply Chain at Risk</h3>
               <p className="content-card-description">
-                Complete documentation services with audit-ready compliance records and professional customs broker partnership.
+                Tariff changes, trade disputes, and supplier disruptions can destroy your margins overnight. You need early warning and alternatives.
               </p>
-              <Link
-                href="/usmca-workflow?reset=true"
-                className="content-card-link"
-                aria-label="Start certificate of origin generation and documentation services"
-              >
-                Generate Certificates
-              </Link>
             </div>
 
-            <div className="content-card compliance">
-              <div className="content-card-icon" aria-hidden="true">RC</div>
-              <h3 className="content-card-title">Regulatory Compliance Management</h3>
+            <div className="content-card">
+              <div className="card-icon">📄</div>
+              <h3 className="content-card-title">Certificate Confusion</h3>
               <p className="content-card-description">
-                Expert guidance on evolving trade regulations with real-time updates and implementation support for small manufacturers and importers.
+                Need a USMCA certificate but don't know where to start? Wrong paperwork means customs delays and lost revenue.
               </p>
-              <Link
-                href="/trade-risk-alternatives"
-                className="content-card-link"
-                aria-label="Access real-time regulatory compliance monitoring and alerts"
-              >
-                Monitor Regulations
+            </div>
+
+            <div className="content-card">
+              <div className="card-icon">🌎</div>
+              <h3 className="content-card-title">Want to Enter Mexico Market</h3>
+              <p className="content-card-description">
+                Mexico offers huge opportunities, but finding reliable suppliers or distributors without local connections is nearly impossible.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <div className="card-icon">🚨</div>
+              <h3 className="content-card-title">No Emergency Plan</h3>
+              <p className="content-card-description">
+                When customs holds your shipment or tariffs spike, you need expert help immediately—but hiring a consultant takes weeks.
+              </p>
+            </div>
+          </div>
+
+          <div className="content-card">
+            <h3 className="content-card-title">Our Solution: AI Analysis + Expert Team</h3>
+            <p className="content-card-description">
+              Canadian-owned platform with Mexico-based bilingual experts (Jorge & Cristina). We combine AI-powered analysis with 15+ years of trade expertise—at SMB-friendly prices starting at $99/month.
+            </p>
+            <div className="hero-button-group">
+              <Link href="/usmca-workflow?reset=true" className="btn-primary">
+                Check If You Qualify
+              </Link>
+              <Link href="/services" className="btn-secondary">
+                View Expert Services
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Teaser */}
+      <section className="main-content" style={{backgroundColor: '#f0f9ff'}}>
+        <div className="container-app">
+          <div className="content-card" style={{textAlign: 'center'}}>
+            <h2 className="section-header-title">Affordable Subscriptions for SMBs</h2>
+            <p className="section-header-subtitle">
+              Plans starting at $99/month • Unlimited analyses • Real-time trade alerts • Subscriber discounts on expert services
+            </p>
+            <div className="hero-button-group">
+              <Link href="/pricing" className="btn-primary">
+                View All Plans
+              </Link>
+              <Link href="/usmca-workflow?reset=true" className="btn-secondary">
+                Try Analysis First
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Expert Services Teaser */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Not Qualified Yet? We Can Help.</h2>
+            <p className="section-header-subtitle">
+              Mexico-based bilingual expert team (Jorge & Cristina) with 15+ years of trade experience helps you restructure supply chains, find alternative suppliers, and achieve USMCA compliance.
+            </p>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card">
+              <div className="card-icon">🏥</div>
+              <h3 className="content-card-title">Trade Health Check</h3>
+              <p className="content-card-description">
+                Complete assessment with prioritized action plan. Starting at $99.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <div className="card-icon">📜</div>
+              <h3 className="content-card-title">USMCA Qualification</h3>
+              <p className="content-card-description">
+                Gap analysis and roadmap to achieve compliance. Starting at $175.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <div className="card-icon">🛡️</div>
+              <h3 className="content-card-title">Supply Chain Services</h3>
+              <p className="content-card-description">
+                Alternative suppliers, Mexico sourcing, crisis response. Starting at $275.
+              </p>
+            </div>
+          </div>
+
+          <div className="content-card" style={{backgroundColor: '#fef3c7', textAlign: 'center'}}>
+            <h3 className="content-card-title" style={{color: '#92400e'}}>💡 Subscribers Save 15-25% on All Services</h3>
+            <p className="content-card-description" style={{color: '#92400e', marginBottom: '1rem'}}>
+              Professional subscribers get 15% off • Premium subscribers get 25% off all expert services
+            </p>
+            <div className="hero-button-group">
+              <Link href="/services" className="btn-primary">
+                View All Services
+              </Link>
+              <Link href="/services/request-form" className="btn-secondary">
+                Request Service
               </Link>
             </div>
           </div>
@@ -289,17 +384,11 @@ export default function HomePage() {
             <div className="content-card">
               <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
               <p className="content-card-description">
-                Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers.
+                Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers. Find out if you qualify in under 5 minutes.
               </p>
               <div className="insights-button-group">
                 <Link href="/usmca-workflow?reset=true" className="btn-primary">
-                  Read the Analysis
-                </Link>
-                <Link href="#calculator" className="btn-secondary">
-                  Calculate Your Savings
-                </Link>
-                <Link href="/services/logistics-support" className="btn-secondary">
-                  🚨 Don't Qualify? Get Expert Help
+                  Start Your Analysis
                 </Link>
               </div>
             </div>

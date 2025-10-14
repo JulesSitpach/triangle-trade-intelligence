@@ -303,7 +303,7 @@ export default function MexicoSavingsCalculator() {
                     Start Free USMCA Analysis
                   </button>
                   <button
-                    onClick={() => window.location.href = '/services/logistics-support'}
+                    onClick={() => window.location.href = '/services/request-form'}
                     className="btn-secondary"
                   >
                     Explore Expert Services

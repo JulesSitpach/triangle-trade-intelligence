@@ -213,7 +213,8 @@ export default function Pricing() {
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Start Analysis</Link>
+            <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
+            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
           </div>
         </div>
       </nav>
@@ -261,11 +262,11 @@ export default function Pricing() {
           
           <div className="hero-button-group">
             <Link
-              href="/usmca-workflow"
+              href="/login"
               className="hero-primary-button"
-              aria-label="Start USMCA analysis"
+              aria-label="Sign in to subscribe"
             >
-              Start Analysis
+              Sign In to Subscribe
             </Link>
             <Link
               href="#pricing"
@@ -344,6 +345,122 @@ export default function Pricing() {
         </div>
       </section>
 
+      {/* Sample Certificate - Real Data */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">📜 What You Get: USMCA Certificate of Origin</h2>
+            <p className="section-header-subtitle">
+              Auto-generated from your compliance analysis - example from RTW Logistics
+            </p>
+          </div>
+
+          <div className="content-card" style={{maxWidth: '900px', margin: '0 auto', padding: '32px', backgroundColor: '#fff'}}>
+            <div style={{border: '2px solid #134169', padding: '24px', borderRadius: '8px'}}>
+              <div style={{textAlign: 'center', marginBottom: '24px'}}>
+                <h3 style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#134169'}}>USMCA CERTIFICATE OF ORIGIN</h3>
+                <p style={{fontSize: '0.9rem', color: '#6b7280'}}>Certificate #2025-001-USMCA</p>
+              </div>
+
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px'}}>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Exporter Name:</p>
+                  <p style={{fontSize: '0.9rem'}}>RTW LOGISTICS SA DE CV</p>
+                </div>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Product Description:</p>
+                  <p style={{fontSize: '0.9rem'}}>Mobile Smart Phone</p>
+                </div>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>HS Code:</p>
+                  <p style={{fontSize: '0.9rem'}}>8517.12.00</p>
+                </div>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Business Type:</p>
+                  <p style={{fontSize: '0.9rem'}}>Electronics & Technology</p>
+                </div>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Manufacturing Location:</p>
+                  <p style={{fontSize: '0.9rem'}}>Mexico</p>
+                </div>
+                <div>
+                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Qualification Status:</p>
+                  <p style={{fontSize: '0.9rem', color: '#16a34a', fontWeight: '600'}}>✓ QUALIFIED (100% USMCA Content)</p>
+                </div>
+              </div>
+
+              <div style={{backgroundColor: '#dcfce7', padding: '12px', borderRadius: '4px', marginBottom: '12px'}}>
+                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#16a34a', marginBottom: '8px'}}>Regional Value Content Calculation:</p>
+                <p style={{fontSize: '0.85rem'}}>✓ 100% Mexico (Complete manufacturing and assembly)</p>
+                <p style={{fontSize: '0.85rem'}}>✓ Required threshold: 65% (exceeded by 35 points)</p>
+                <p style={{fontSize: '0.85rem'}}>✓ Annual trade volume: $600,000</p>
+              </div>
+
+              <div style={{backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '4px'}}>
+                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169', marginBottom: '4px'}}>Certification:</p>
+                <p style={{fontSize: '0.85rem', fontStyle: 'italic'}}>This product qualifies as originating under the USMCA agreement and is eligible for preferential tariff treatment.</p>
+              </div>
+            </div>
+            <p style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '16px', textAlign: 'center', fontStyle: 'italic'}}>
+              Professional & Premium subscribers get unlimited certificate generation
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Sample Alert - Real Scenario */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">🚨 What You Get: Trade Risk Alerts</h2>
+            <p className="section-header-subtitle">
+              Real-time monitoring with AI-powered recommendations
+            </p>
+          </div>
+
+          <div className="content-card" style={{maxWidth: '900px', margin: '0 auto'}}>
+            <div style={{borderLeft: '4px solid #dc2626', padding: '16px', backgroundColor: '#fef2f2', borderRadius: '4px'}}>
+              <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
+                <span style={{fontSize: '1.5rem', marginRight: '12px'}}>⚠️</span>
+                <div>
+                  <h3 style={{fontSize: '1.1rem', fontWeight: 'bold', color: '#dc2626', margin: 0}}>CRITICAL SUPPLY CHAIN RISK</h3>
+                  <p style={{fontSize: '0.85rem', color: '#6b7280', margin: 0}}>Alert ID: RISK-2025-001 • Detected: January 13, 2025</p>
+                </div>
+              </div>
+
+              <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#134169', marginBottom: '8px'}}>
+                China Electronics Tariffs Increase to 60% on Mobile Phone Components
+              </h4>
+
+              <p style={{fontSize: '0.9rem', marginBottom: '12px'}}>
+                New Section 301 tariffs on Chinese electronics components (HS 8517.12, 8517.70) affect companies importing mobile phone parts. Products with significant Chinese component sourcing face major cost increases.
+              </p>
+
+              <div style={{backgroundColor: '#fff', padding: '12px', borderRadius: '4px', marginBottom: '12px', border: '1px solid #e5e7eb'}}>
+                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169', marginBottom: '8px'}}>Impact on Your Business:</p>
+                <p style={{fontSize: '0.85rem'}}>• Companies with 100% Mexico sourcing (like RTW Logistics): ✓ No impact</p>
+                <p style={{fontSize: '0.85rem'}}>• Companies with Chinese components: ⚠️ 60% tariff increase on affected parts</p>
+                <p style={{fontSize: '0.85rem'}}>• Estimated industry-wide impact: $2.8B in additional costs</p>
+              </div>
+
+              <div style={{backgroundColor: '#dcfce7', padding: '12px', borderRadius: '4px', marginBottom: '12px'}}>
+                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#16a34a', marginBottom: '8px'}}>AI-Recommended Actions:</p>
+                <p style={{fontSize: '0.85rem'}}>✓ If sourcing from China: Transition to Mexico suppliers to avoid tariffs</p>
+                <p style={{fontSize: '0.85rem'}}>✓ Maintain USMCA qualification to preserve duty-free status</p>
+                <p style={{fontSize: '0.85rem'}}>✓ Timeline: Act within 90 days before enforcement</p>
+              </div>
+
+              <Link href="/services" className="btn-primary" style={{fontSize: '0.9rem'}}>
+                Get Expert Help Finding Mexico Suppliers
+              </Link>
+            </div>
+            <p style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '16px', textAlign: 'center', fontStyle: 'italic'}}>
+              Professional & Premium subscribers get real-time alerts with AI analysis
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* What Subscribers Get */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
@@ -385,68 +502,19 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Divider: App vs Services */}
+      {/* Professional Services Callout */}
       <section className="main-content">
         <div className="container-app">
           <div className="alert alert-info">
             <div className="alert-content">
-              <div className="alert-title">📱 App vs 🤝 Professional Services</div>
+              <div className="alert-title">🤝 Need Expert Help?</div>
               <div className="text-body">
-                <p><strong>App Subscription (above):</strong> Self-service AI tools you use yourself. Run unlimited qualification checks, get AI suggestions, generate certificate templates, receive alerts.</p>
-                <p><strong>Professional Services (below):</strong> Our expert team does the work for you. They complete assessments, validate strategies, find suppliers, and handle crises. Pay only when you need expert help.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Professional Services */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Professional Services (Separate from App)</h2>
-            <p className="section-header-subtitle">
-              Our expert team does the work for you - pay only when you need help
-            </p>
-          </div>
-
-          <div className="grid-3-cols">
-            {addOns.map((addon, index) => (
-              <div key={index} className="content-card">
-                <h3 className="content-card-title">{addon.name}</h3>
-
-                <div style={{marginBottom: '12px'}}>
-                  <div style={{fontSize: '1.75rem', fontWeight: 'bold', color: '#134169'}}>
-                    ${addon.basePrice}{addon.recurring ? '/mo' : ''}
-                  </div>
-                  {!addon.recurring && addon.basePrice !== 99 && (
-                    <>
-                      <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
-                        Professional: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.professionalPrice}</span> (15% off)
-                      </div>
-                      <div style={{fontSize: '0.85rem', color: '#6b7280'}}>
-                        Premium: <span style={{color: '#16a34a', fontWeight: '600'}}>${addon.premiumPrice}</span> (25% off)
-                      </div>
-                    </>
-                  )}
-                  {addon.basePrice === 99 && (
-                    <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
-                      No subscriber discounts (entry service)
-                    </div>
-                  )}
-                  {addon.recurring && (
-                    <div style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '4px'}}>
-                      Monthly retainer (no percentage discount)
-                    </div>
-                  )}
-                </div>
-
-                <p className="content-card-description">{addon.description}</p>
-                <Link href="/services/request-form" className="btn-primary">
-                  Request Service
+                <p><strong>Professional & Premium subscribers save 15-25% on all expert services.</strong> Our Mexico-based team (Jorge & Cristina) provides trade consulting, USMCA optimization, supplier sourcing, and crisis response - pay only when you need help.</p>
+                <Link href="/services" className="btn-primary" style={{marginTop: '12px', display: 'inline-block'}}>
+                  View All Professional Services
                 </Link>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -546,11 +614,18 @@ export default function Pricing() {
             </p>
             <div className="hero-button-group">
               <Link
-                href="/usmca-workflow"
+                href="/login"
                 className="hero-primary-button"
-                aria-label="Start USMCA analysis"
+                aria-label="Sign in to get started"
               >
-                Start USMCA Analysis
+                Sign In to Get Started
+              </Link>
+              <Link
+                href="/services"
+                className="hero-secondary-button"
+                aria-label="View professional services"
+              >
+                View Services
               </Link>
             </div>
           </div>

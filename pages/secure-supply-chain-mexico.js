@@ -311,7 +311,7 @@ export default function SecureSupplyChainMexico() {
 
           <div className="hero-buttons">
             <button
-              onClick={() => window.location.href = '/services/logistics-support'}
+              onClick={() => window.location.href = '/services/request-form'}
               className="btn-primary"
             >
               View All Services

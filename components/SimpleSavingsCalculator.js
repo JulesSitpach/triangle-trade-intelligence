@@ -320,15 +320,15 @@ export default function SimpleSavingsCalculator() {
           </div>
           
           <div className="status-info calculator-assessment-section">
-            <div className="content-card-title">Professional Assessment Available</div>
+            <div className="content-card-title">Expert Services Available</div>
             <div className="text-muted">
-              Request comprehensive supplier network analysis and compliance documentation
+              Trade Health Check ($99) • USMCA Advantage Sprint ($175) • Supply Chain Optimization ($275) • Pathfinder Market Entry ($350) • Supply Chain Resilience ($450) • Crisis Navigator ($200/mo)
             </div>
           </div>
           
           <div className="calculator-button-group">
             <button
-              onClick={() => setShowLeadCapture(true)}
+              onClick={() => window.location.href = '/services/request-form'}
               className="btn-primary btn-large"
             >
               Request Professional Assessment

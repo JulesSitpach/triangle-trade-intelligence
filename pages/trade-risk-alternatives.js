@@ -820,7 +820,7 @@ export default function TradeRiskAlternatives() {
                         <div className="hero-buttons">
                           <button
                             className="btn-primary"
-                            onClick={() => window.location.href = '/services/logistics-support'}
+                            onClick={() => window.location.href = '/services/request-form'}
                           >
                             🎯 Request {service.service_name}
                           </button>
@@ -856,7 +856,7 @@ export default function TradeRiskAlternatives() {
                 <div className="hero-buttons">
                   <button
                     className="btn-primary"
-                    onClick={() => window.location.href = '/services/logistics-support'}
+                    onClick={() => window.location.href = '/services/request-form'}
                   >
                     🎯 Get Expert Help with Supply Chain Diversification
                   </button>
@@ -893,8 +893,104 @@ export default function TradeRiskAlternatives() {
           {dynamicRisks.map((risk, index) => (
             <div key={index} className={`alert alert-${risk.severity === 'CRITICAL' ? 'error' : risk.severity === 'HIGH' ? 'warning' : 'info'}`}>
               <div className="alert-content">
-                <div className="alert-title">{risk.title}</div>
+                <div className="alert-title">
+                  {risk.title}
+                  {risk.category && (
+                    <span className="form-help"> • {risk.category.toUpperCase()}</span>
+                  )}
+                </div>
                 <div className="text-body">{risk.description}</div>
+
+                {/* Enhanced Component Details - HS Codes and Tariff Exposure */}
+                {(risk.affected_hs_codes || risk.tariff_exposure || risk.ai_confidence || risk.rvc_details) && (
+                  <div className="element-spacing">
+                    <div className="status-grid">
+                      {/* HS Codes for Affected Components */}
+                      {risk.affected_hs_codes && risk.affected_hs_codes.length > 0 && (
+                        <div className="status-card">
+                          <div className="status-label">Affected HS Codes</div>
+                          <div className="status-value" style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                            {risk.affected_hs_codes.join(', ')}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Tariff Rate Exposure */}
+                      {risk.tariff_exposure && (
+                        <>
+                          <div className="status-card">
+                            <div className="status-label">MFN Rate</div>
+                            <div className="status-value" style={{ color: '#dc2626' }}>
+                              {risk.tariff_exposure.mfn_rate?.toFixed(1)}%
+                            </div>
+                          </div>
+                          <div className="status-card">
+                            <div className="status-label">USMCA Rate</div>
+                            <div className="status-value" style={{ color: '#059669' }}>
+                              {risk.tariff_exposure.usmca_rate?.toFixed(1)}%
+                            </div>
+                          </div>
+                          {risk.tariff_exposure.savings_potential > 0 && (
+                            <div className="status-card">
+                              <div className="status-label">Tariff Savings</div>
+                              <div className="status-value" style={{ color: '#059669' }}>
+                                {risk.tariff_exposure.savings_potential?.toFixed(1)}%
+                              </div>
+                            </div>
+                          )}
+                          {hasDetailedConsent && risk.tariff_exposure.annual_dollar_impact && (
+                            <div className="status-card">
+                              <div className="status-label">Annual Dollar Impact</div>
+                              <div className="status-value">
+                                ${risk.tariff_exposure.annual_dollar_impact.toLocaleString()}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* AI Confidence Warning */}
+                      {risk.ai_confidence && (
+                        <div className="status-card">
+                          <div className="status-label">AI Classification Confidence</div>
+                          <div className="status-value" style={{ color: risk.ai_confidence < 80 ? '#f59e0b' : '#059669' }}>
+                            {risk.ai_confidence}%
+                            {risk.ai_confidence < 80 && ' ⚠️ Low Confidence'}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* RVC Optimization Details */}
+                      {risk.rvc_details && (
+                        <>
+                          <div className="status-card">
+                            <div className="status-label">Current RVC</div>
+                            <div className="status-value">
+                              {risk.rvc_details.current_rvc?.toFixed(1)}%
+                            </div>
+                          </div>
+                          <div className="status-card">
+                            <div className="status-label">RVC Threshold</div>
+                            <div className="status-value">
+                              {risk.rvc_details.threshold?.toFixed(1)}%
+                            </div>
+                          </div>
+                          {risk.rvc_details.potential_rvc && (
+                            <div className="status-card">
+                              <div className="status-label">Potential RVC</div>
+                              <div className="status-value" style={{ color: '#059669' }}>
+                                {risk.rvc_details.potential_rvc?.toFixed(1)}%
+                                {risk.rvc_details.safety_margin && ` (+${risk.rvc_details.safety_margin?.toFixed(1)}% margin)`}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Original Status Grid */}
                 <div className="element-spacing">
                   <div className="status-grid">
                     <div className="status-card">
@@ -965,7 +1061,7 @@ export default function TradeRiskAlternatives() {
               <div className="hero-buttons">
                 <button
                   className="btn-primary"
-                  onClick={() => window.location.href = '/services/logistics-support'}
+                  onClick={() => window.location.href = '/services/request-form'}
                 >
                   🎯 Request Expert Consultation
                 </button>

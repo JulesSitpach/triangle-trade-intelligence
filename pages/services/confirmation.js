@@ -5,16 +5,16 @@ import Link from 'next/link';
 
 export default function ServiceConfirmation() {
   const router = useRouter();
-  const { session_id, service_request_id } = router.query;
+  const { session_id } = router.query;
   const [loading, setLoading] = useState(true);
   const [serviceData, setServiceData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (session_id && service_request_id) {
+    if (session_id) {
       verifyPayment();
     }
-  }, [session_id, service_request_id]);
+  }, [session_id]);
 
   const verifyPayment = async () => {
     try {
@@ -22,7 +22,7 @@ export default function ServiceConfirmation() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ session_id, service_request_id })
+        body: JSON.stringify({ session_id })
       });
 
       const data = await response.json();
@@ -70,6 +70,24 @@ export default function ServiceConfirmation() {
         <title>Service Purchase Confirmed - Triangle Trade Intelligence</title>
       </Head>
 
+      {/* Navigation */}
+      <nav className="nav-fixed">
+        <div className="nav-container">
+          <Link href="/" className="nav-logo-link">
+            <div className="nav-logo-icon">T</div>
+            <div>
+              <div className="nav-logo-text">Triangle Trade Intelligence</div>
+              <div className="nav-logo-subtitle">USMCA Compliance Platform</div>
+            </div>
+          </Link>
+          <div className="nav-menu">
+            <Link href="/services" className="nav-menu-link">Services</Link>
+            <Link href="/pricing" className="nav-menu-link">Pricing</Link>
+            <Link href="/login" className="nav-cta-button">Sign In</Link>
+          </div>
+        </div>
+      </nav>
+
       <div className="container">
         <div className="card element-spacing">
           <div className="success-icon">
@@ -99,24 +117,33 @@ export default function ServiceConfirmation() {
             <h3 className="card-title">What Happens Next?</h3>
             <ol className="steps-list">
               <li className="text-body">
-                Our expert team has been notified of your service request
+                <strong>Confirmation Email:</strong> You'll receive a payment receipt at <strong>{serviceData?.subscriber_data?.contact_email || 'your email'}</strong>
               </li>
               <li className="text-body">
-                You'll receive an email within 24 hours with next steps
+                <strong>Expert Assignment:</strong> Our team has been notified and will begin your service within 24 hours
               </li>
               <li className="text-body">
-                Track your service progress in your dashboard
+                <strong>Service Delivery:</strong> Receive your completed deliverable within 5-7 business days via email
               </li>
               <li className="text-body">
-                Receive your completed deliverable within 5-7 business days
+                <strong>Questions?</strong> Reply to any email from us or contact support@triangleintelligence.com
               </li>
             </ol>
           </div>
 
-          <div className="actions-center">
-            <Link href="/dashboard" className="btn-primary">
-              View My Dashboard
-            </Link>
+          <div className="next-steps" style={{marginTop: '2rem', padding: '1rem', backgroundColor: '#f0f9ff', borderRadius: '8px'}}>
+            <h3 className="card-title">💡 Want to save 15-25% on future services?</h3>
+            <p className="text-body">
+              Subscribe to our Professional ($299/mo) or Premium ($599/mo) plan to get automatic discounts on all services plus unlimited USMCA analysis.
+            </p>
+            <div style={{marginTop: '1rem'}}>
+              <Link href="/pricing" className="btn-primary" style={{marginRight: '0.5rem'}}>
+                View Pricing Plans
+              </Link>
+              <Link href="/services" className="btn-secondary">
+                Browse Services
+              </Link>
+            </div>
           </div>
         </div>
       </div>

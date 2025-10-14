@@ -1,6 +1,12 @@
 import { apiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 /**
  * Service base prices for non-subscribers (in cents)
@@ -39,7 +45,7 @@ const SERVICE_NAMES = {
  */
 export default apiHandler({
   POST: async (req, res) => {
-    const { service_id, service_request_data } = req.body;
+    const { service_id, service_request_data, consent_to_store } = req.body;
 
     // Validate required fields
     validateRequiredFields(req.body, ['service_id', 'service_request_data']);
@@ -67,6 +73,35 @@ export default apiHandler({
       }
     }
 
+    // Save service request to database FIRST (avoids Stripe 500-char metadata limit)
+    // Always save to database (needed for service delivery)
+    // If no consent, mark with auto_delete flag for cleanup after 30 days
+    let serviceRequestId = null;
+    const autoDelete = (consent_to_store === false); // Auto-delete if no consent
+
+    const { data: serviceRequest, error: requestError } = await supabase
+      .from('service_requests')
+      .insert({
+        user_id: null, // Non-subscriber (no user_id yet)
+        service_type: service_id,
+        status: 'pending_payment',
+        company_name: service_request_data.company_name || 'Unknown',
+        price: servicePrice / 100, // Store price in dollars
+        subscriber_data: service_request_data,
+        auto_delete: autoDelete // Mark for auto-deletion if no consent
+      })
+      .select()
+      .single();
+
+    if (requestError) {
+      console.error('Failed to create service request:', requestError);
+      throw new ApiError('Failed to save service request', 500, {
+        error: requestError.message
+      });
+    }
+
+    serviceRequestId = serviceRequest.id;
+
     try {
       // Create Stripe checkout session WITHOUT customer ID (guest checkout)
       const session = await stripe.checkout.sessions.create({
@@ -85,7 +120,7 @@ export default apiHandler({
           }
         ],
         mode: 'payment', // One-time payment
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/confirmation?session_id={CHECKOUT_SESSION_ID}&service=${service_id}`,
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/request-form?cancelled=true`,
         customer_email: service_request_data.contact_email || undefined,
         metadata: {
@@ -94,9 +129,9 @@ export default apiHandler({
           company_name: service_request_data.company_name,
           contact_name: service_request_data.contact_name,
           is_subscriber: 'false',
-          environment: process.env.NODE_ENV,
-          // Store service request data as JSON string for webhook processing
-          service_request_data: JSON.stringify(service_request_data)
+          auto_delete: String(autoDelete), // True if no consent (auto-delete after 30 days)
+          service_request_id: serviceRequestId, // ID only (not full data)
+          environment: process.env.NODE_ENV
         },
         allow_promotion_codes: true,
         billing_address_collection: 'required',
@@ -109,7 +144,9 @@ export default apiHandler({
         service: serviceName,
         price: servicePrice / 100,
         company: service_request_data.company_name,
-        session_id: session.id
+        session_id: session.id,
+        service_request_id: serviceRequestId,
+        auto_delete: autoDelete
       });
 
       return res.status(200).json({

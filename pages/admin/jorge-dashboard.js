@@ -19,6 +19,7 @@ import PathfinderTab from '../../components/shared/PathfinderTab';
 import SupplyChainResilienceTab from '../../components/shared/SupplyChainResilienceTab';
 import CrisisNavigatorTab from '../../components/shared/CrisisNavigatorTab';
 import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
+import AdminIntelligenceMetrics from '../../components/admin/AdminIntelligenceMetrics';
 
 export default function JorgeDashboardCleanModular() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function JorgeDashboardCleanModular() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('trade-health-check');
   const [serviceRequests, setServiceRequests] = useState([]);
+  const [adminIntelligence, setAdminIntelligence] = useState(null);
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -60,6 +62,11 @@ export default function JorgeDashboardCleanModular() {
       const data = await response.json();
       if (data.success) {
         setServiceRequests(data.requests || []);
+        // Extract admin intelligence metrics for opportunity prioritization
+        if (data.summary && data.summary.admin_intelligence) {
+          setAdminIntelligence(data.summary.admin_intelligence);
+          console.log('📊 Admin intelligence loaded:', data.summary.admin_intelligence);
+        }
       }
     } catch (error) {
       console.error('Error loading service requests:', error);
@@ -150,6 +157,11 @@ export default function JorgeDashboardCleanModular() {
               </div>
             </div>
           </div>
+
+          {/* Admin Intelligence Metrics - Client Opportunity Data */}
+          {adminIntelligence && (
+            <AdminIntelligenceMetrics adminIntelligence={adminIntelligence} />
+          )}
 
           <div className="dashboard-tabs">
             <div className="tab-navigation">

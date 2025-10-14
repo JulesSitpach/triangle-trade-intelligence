@@ -177,7 +177,8 @@ export default function ProfessionalServices() {
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/usmca-workflow" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Start Analysis</Link>
+            <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
+            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
           </div>
         </div>
       </nav>
@@ -225,7 +226,7 @@ export default function ProfessionalServices() {
 
           <div className="hero-button-group">
             <Link
-              href="/usmca-workflow"
+              href="/services/request-form"
               className="hero-primary-button"
               aria-label="Start with Trade Health Check"
             >
@@ -413,7 +414,7 @@ export default function ProfessionalServices() {
             </p>
             <div className="hero-button-group">
               <Link
-                href="/usmca-workflow"
+                href="/services/request-form"
                 className="hero-primary-button"
                 aria-label="Start Trade Health Check"
               >

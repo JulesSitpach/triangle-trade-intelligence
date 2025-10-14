@@ -194,8 +194,10 @@ async function handleGetServiceRequests(req, res) {
   try {
     const { assigned_to } = req.query;
 
-    // Try to load from database
+    // Try to load from database with vulnerability analysis data
     let requests = [];
+    let vulnerabilityAnalyses = [];
+
     try {
       const query = supabase.from('service_requests').select('*');
 
@@ -208,6 +210,55 @@ async function handleGetServiceRequests(req, res) {
       if (data && data.length > 0) {
         requests = data;
         console.log(`📊 Loaded ${requests.length} service requests from database`);
+
+        // Load vulnerability analyses for all users with service requests
+        // This gives admins visibility into client risk profiles and opportunities
+        try {
+          const userEmails = [...new Set(requests.map(r => r.email).filter(Boolean))];
+
+          if (userEmails.length > 0) {
+            // Get user IDs from emails
+            const { data: users } = await supabase
+              .from('user_profiles')
+              .select('id, email')
+              .in('email', userEmails);
+
+            if (users && users.length > 0) {
+              const userIds = users.map(u => u.id);
+
+              // Load vulnerability analyses for these users
+              const { data: analyses } = await supabase
+                .from('vulnerability_analyses')
+                .select('*')
+                .in('user_id', userIds)
+                .order('created_at', { ascending: false });
+
+              if (analyses && analyses.length > 0) {
+                vulnerabilityAnalyses = analyses;
+                console.log(`📊 Loaded ${analyses.length} vulnerability analyses for admin review`);
+
+                // Attach most recent analysis to each request
+                requests = requests.map(request => {
+                  const userProfile = users.find(u => u.email === request.email);
+                  if (userProfile) {
+                    const userAnalyses = analyses.filter(a => a.user_id === userProfile.id);
+                    const latestAnalysis = userAnalyses.length > 0 ? userAnalyses[0] : null;
+
+                    return {
+                      ...request,
+                      vulnerability_analysis: latestAnalysis,
+                      total_analyses: userAnalyses.length
+                    };
+                  }
+                  return request;
+                });
+              }
+            }
+          }
+        } catch (analysisError) {
+          console.log('⚠️ Could not load vulnerability analyses:', analysisError.message);
+          // Continue without vulnerability data
+        }
       } else {
         throw new Error('No database records');
       }
@@ -215,6 +266,9 @@ async function handleGetServiceRequests(req, res) {
       console.log('📋 Database unavailable - no service requests to display');
       requests = []; // Empty array when no database connection
     }
+
+    // Calculate admin intelligence metrics from vulnerability analyses
+    const adminIntelligence = calculateAdminIntelligenceMetrics(requests);
 
     const summary = {
       total_requests: requests.length,
@@ -225,7 +279,9 @@ async function handleGetServiceRequests(req, res) {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return r.status === 'completed' && new Date(r.updated_at) > weekAgo;
-      }).length
+      }).length,
+      // NEW: Admin intelligence metrics for prioritization
+      admin_intelligence: adminIntelligence
     };
 
     res.status(200).json({
@@ -307,6 +363,108 @@ async function handleUpdateServiceRequest(req, res) {
       message: error.message
     });
   }
+}
+
+/**
+ * Calculate admin intelligence metrics from vulnerability analyses
+ * Helps Cristina and Jorge prioritize high-value opportunities
+ */
+function calculateAdminIntelligenceMetrics(requests) {
+  const requestsWithAnalysis = requests.filter(r => r.vulnerability_analysis);
+
+  if (requestsWithAnalysis.length === 0) {
+    return {
+      total_with_analysis: 0,
+      low_confidence_hs_codes: 0,
+      high_tariff_exposure_count: 0,
+      total_tariff_opportunity: 0,
+      rvc_optimization_opportunities: 0,
+      top_opportunities: []
+    };
+  }
+
+  let lowConfidenceCount = 0;
+  let highTariffCount = 0;
+  let totalTariffOpportunity = 0;
+  let rvcOpportunityCount = 0;
+  const opportunities = [];
+
+  requestsWithAnalysis.forEach(request => {
+    const analysis = request.vulnerability_analysis;
+    if (!analysis) return;
+
+    const components = analysis.component_origins || [];
+    let requestTariffOpportunity = 0;
+    let hasLowConfidence = false;
+    let hasHighTariff = false;
+    let hasRVCOpportunity = false;
+
+    // Check each component for opportunities
+    components.forEach(comp => {
+      // Low confidence HS code check
+      const confidence = comp.confidence || 100;
+      if (confidence < 80) {
+        hasLowConfidence = true;
+      }
+
+      // High tariff exposure check
+      const mfnRate = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+      const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+      const savings = mfnRate - usmcaRate;
+
+      if (savings > 5 && !comp.is_usmca_member) {
+        hasHighTariff = true;
+        // Calculate dollar opportunity
+        const tradeVolume = analysis.annual_trade_volume || 0;
+        const componentValue = tradeVolume * (comp.value_percentage / 100);
+        const dollarSavings = componentValue * (savings / 100);
+        requestTariffOpportunity += dollarSavings;
+      }
+    });
+
+    // RVC optimization check
+    if (analysis.qualification_status === 'QUALIFIED') {
+      // Check if close to threshold (within 15% margin)
+      const rvc = parseFloat(analysis.component_origins?.[0]?.regional_value_content || 0);
+      const threshold = 60; // Standard USMCA threshold
+      if (rvc < threshold + 15) {
+        hasRVCOpportunity = true;
+      }
+    }
+
+    // Count flags
+    if (hasLowConfidence) lowConfidenceCount++;
+    if (hasHighTariff) {
+      highTariffCount++;
+      totalTariffOpportunity += requestTariffOpportunity;
+    }
+    if (hasRVCOpportunity) rvcOpportunityCount++;
+
+    // Add to top opportunities list
+    if (hasLowConfidence || hasHighTariff || hasRVCOpportunity) {
+      opportunities.push({
+        company_name: request.company_name,
+        request_id: request.id,
+        low_confidence: hasLowConfidence,
+        high_tariff: hasHighTariff,
+        tariff_opportunity: requestTariffOpportunity,
+        rvc_optimization: hasRVCOpportunity,
+        risk_score: analysis.risk_score || 0
+      });
+    }
+  });
+
+  // Sort opportunities by tariff savings potential
+  opportunities.sort((a, b) => b.tariff_opportunity - a.tariff_opportunity);
+
+  return {
+    total_with_analysis: requestsWithAnalysis.length,
+    low_confidence_hs_codes: lowConfidenceCount,
+    high_tariff_exposure_count: highTariffCount,
+    total_tariff_opportunity: Math.round(totalTariffOpportunity),
+    rvc_optimization_opportunities: rvcOpportunityCount,
+    top_opportunities: opportunities.slice(0, 10) // Top 10 opportunities
+  };
 }
 
 function determinePriority(tradeVolume, timeline, budgetRange) {

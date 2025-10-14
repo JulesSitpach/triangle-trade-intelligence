@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import ServiceWorkflowModal from '../shared/ServiceWorkflowModal';
 import ToastNotification from '../shared/ToastNotification';
 import MarketplaceIntelligenceForm from '../shared/MarketplaceIntelligenceForm';
+import { filterByServiceType } from '../../lib/utils/service-type-mapping';
 
 export default function PathfinderTab({ requests: propRequests, onRequestUpdate }) {
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -26,9 +27,8 @@ export default function PathfinderTab({ requests: propRequests, onRequestUpdate 
 
   useEffect(() => {
     if (propRequests) {
-      const pathfinderRequests = propRequests.filter(
-        req => req.service_type === 'pathfinder_market_entry' || req.service_type === 'pathfinder' || req.service_type === 'market-entry'
-      );
+      // Filter using utility
+      const pathfinderRequests = filterByServiceType(propRequests, 'pathfinder');
       setServiceRequests(pathfinderRequests);
       setLoading(false);
     } else {
@@ -39,11 +39,14 @@ export default function PathfinderTab({ requests: propRequests, onRequestUpdate 
   const loadServiceRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/service-requests?service_type=pathfinder_market_entry');
+      // Load ALL service requests
+      const response = await fetch('/api/admin/service-requests');
       const data = await response.json();
 
       if (data.success) {
-        setServiceRequests(data.requests || []);
+        // Filter using utility
+        const filtered = filterByServiceType(data.requests || [], 'pathfinder');
+        setServiceRequests(filtered);
       }
       setLoading(false);
     } catch (error) {
@@ -79,10 +82,11 @@ export default function PathfinderTab({ requests: propRequests, onRequestUpdate 
     }
   };
 
-  // Filter and sort logic
+  // Filter and sort logic (service type already filtered)
   const filteredRequests = serviceRequests.filter(request => {
+    const data = request.subscriber_data || request.service_details || {};
     const matchesSearch = request.client_company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.subscriber_data?.product_description?.toLowerCase().includes(searchTerm.toLowerCase());
+                         data.product_description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || request.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -181,27 +185,30 @@ export default function PathfinderTab({ requests: propRequests, onRequestUpdate 
                   </p>
                 </td>
               </tr>
-            ) : paginatedRequests.map((request) => (
-              <tr key={request.id}>
-                <td>
-                  <div className="client-info">
-                    <strong>{request.client_company || 'Unknown Company'}</strong>
-                    <div className="contact-name">{request.contact_name}</div>
-                  </div>
-                </td>
-                <td>
-                  <div className="product-summary">
-                    {request.subscriber_data?.product_description || 'Not specified'}
-                  </div>
-                </td>
-                <td>
-                  <div className="trade-volume">
-                    {request.subscriber_data?.trade_volume
-                      ? `$${Number(request.subscriber_data.trade_volume).toLocaleString()}`
-                      : 'Not specified'
-                    }
-                  </div>
-                </td>
+            ) : paginatedRequests.map((request) => {
+              const data = request.subscriber_data || request.service_details || {};
+              const contactName = request.contact_name || data.contact_name || 'Contact not provided';
+              const productDescription = data.product_description || 'Product details not provided';
+              const tradeVolume = data.trade_volume ? `$${Number(data.trade_volume).toLocaleString()}` : 'Not specified';
+
+              return (
+                <tr key={request.id}>
+                  <td>
+                    <div className="client-info">
+                      <strong>{request.client_company || 'Unknown Company'}</strong>
+                      <div className="contact-name">{contactName}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="product-summary">
+                      {productDescription}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="trade-volume">
+                      {tradeVolume}
+                    </div>
+                  </td>
                 <td>
                   <span className={`status-badge ${request.status?.replace('_', '-')}`}>
                     {request.status?.replace('_', ' ')}
@@ -218,7 +225,8 @@ export default function PathfinderTab({ requests: propRequests, onRequestUpdate 
                   </button>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>
@@ -406,14 +414,82 @@ function MarketResearchStage({ request, subscriberData, serviceDetails, onComple
 
         {subscriberData.component_origins && subscriberData.component_origins.length > 0 && (
           <div className="component-breakdown">
-            <strong>Current Supply Chain:</strong>
-            <ul>
-              {subscriberData.component_origins.map((comp, idx) => (
-                <li key={idx}>
-                  {comp.value_percentage}% from {comp.origin_country} - {comp.description || comp.component_type}
-                </li>
-              ))}
-            </ul>
+            <strong>Current Supply Chain (with Tariff Intelligence):</strong>
+            <div style={{ overflowX: 'auto', marginTop: '0.5rem' }}>
+              <table className="data-table" style={{ width: '100%', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>Component</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>Origin</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>Value %</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>HS Code</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>MFN Rate</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>USMCA Rate</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Savings</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>AI Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscriberData.component_origins.map((comp, idx) => {
+                    const hsCode = comp.hs_code || comp.classified_hs_code || '—';
+                    const mfnRate = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                    const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+                    const savings = mfnRate - usmcaRate;
+                    const confidence = comp.confidence || null;
+
+                    return (
+                      <tr key={idx}>
+                        <td style={{ padding: '0.5rem', fontWeight: '500' }}>
+                          {comp.description || comp.component_type || `Component ${idx + 1}`}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {comp.origin_country}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {comp.value_percentage}%
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
+                          {hsCode}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#dc2626' }}>
+                          {mfnRate > 0 ? `${mfnRate.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#059669' }}>
+                          {usmcaRate >= 0 ? `${usmcaRate.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: savings > 0 ? '#059669' : '#6b7280', fontWeight: '600' }}>
+                          {savings > 0 ? `${savings.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {confidence ? (
+                            <span style={{ color: confidence < 80 ? '#f59e0b' : '#059669' }}>
+                              {confidence}% {confidence < 80 && '⚠️'}
+                            </span>
+                          ) : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {subscriberData.component_origins.some(c => {
+              const confidence = c.confidence || 100;
+              return confidence < 80;
+            }) && (
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#fef3c7', borderLeft: '3px solid #f59e0b', fontSize: '0.875rem' }}>
+                ⚠️ <strong>Low Confidence Alert:</strong> Some components have AI classification confidence below 80%. Professional HS validation recommended.
+              </div>
+            )}
+            {subscriberData.component_origins.some(c => {
+              const mfnRate = c.mfn_rate || c.tariff_rates?.mfn_rate || 0;
+              const usmcaRate = c.usmca_rate || c.tariff_rates?.usmca_rate || 0;
+              return (mfnRate - usmcaRate) > 5 && !c.is_usmca_member;
+            }) && (
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderLeft: '3px solid #059669', fontSize: '0.875rem' }}>
+                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (>5%). Sourcing from Mexico could save significant costs.
+              </div>
+            )}
           </div>
         )}
       </div>

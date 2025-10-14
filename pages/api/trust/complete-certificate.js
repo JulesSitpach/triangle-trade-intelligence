@@ -140,6 +140,17 @@ export default async function handler(req, res) {
         qualified: supply_chain?.qualified !== false,
         regional_content: supply_chain?.regional_value_content || 0,
         threshold_applied: supply_chain?.threshold_applied || 60
+      },
+
+      // Additional Information for Field 9
+      additional_information: {
+        manufacturing_country: supply_chain?.manufacturing_location || product_details.manufacturing_location || company_info.exporter_country,
+        regional_value_content: supply_chain?.regional_value_content || 0,
+        method_of_qualification: supply_chain?.method_of_qualification || 'TV',
+        preference_criterion: supply_chain?.preference_criterion || 'B',
+        qualification_rule: supply_chain?.rule || 'Regional Value Content',
+        rvc_threshold: supply_chain?.threshold_applied || 60,
+        component_breakdown: supply_chain?.component_origins || []
       }
     };
 

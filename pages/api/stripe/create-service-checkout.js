@@ -107,6 +107,33 @@ export default protectedApiHandler({
     const serviceName = SERVICE_NAMES[service_id];
     const discountPercentage = discount * 100;
 
+    // Create service request in database first (status: pending_payment)
+    // This avoids Stripe metadata 500-character limit
+    let serviceRequestId = null;
+    if (service_request_data) {
+      const { data: serviceRequest, error: requestError } = await supabase
+        .from('service_requests')
+        .insert({
+          user_id: userId,
+          service_type: service_id,
+          status: 'pending_payment',
+          company_name: service_request_data.company_name || 'Unknown',
+          price: servicePrice / 100, // Store price in dollars
+          subscriber_data: service_request_data
+        })
+        .select()
+        .single();
+
+      if (requestError) {
+        console.error('Failed to create service request:', requestError);
+        throw new ApiError('Failed to save service request', 500, {
+          error: requestError.message
+        });
+      }
+
+      serviceRequestId = serviceRequest.id;
+    }
+
     try {
       // Create Stripe checkout session for one-time payment
       const session = await stripe.checkout.sessions.create({
@@ -126,21 +153,25 @@ export default protectedApiHandler({
           }
         ],
         mode: 'payment', // One-time payment, not subscription
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/confirmation?session_id={CHECKOUT_SESSION_ID}&service=${service_id}`,
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/services/logistics-support?cancelled=true`,
         metadata: {
           user_id: userId,
           service_id: service_id,
           service_name: serviceName,
           environment: process.env.NODE_ENV,
-          // Store service request data as JSON string for webhook processing
-          service_request_data: JSON.stringify(service_request_data || {})
+          // Store only the service_request ID (not the full data - avoids 500 char limit)
+          service_request_id: serviceRequestId || ''
         },
         allow_promotion_codes: true,
-        billing_address_collection: 'auto',
-        automatic_tax: {
-          enabled: true
+        billing_address_collection: 'required',
+        customer_update: {
+          address: 'auto'  // Save address from checkout to customer
         }
+        // Automatic tax disabled - requires pre-existing customer address
+        // automatic_tax: {
+        //   enabled: true
+        // }
       });
 
       return res.status(200).json({

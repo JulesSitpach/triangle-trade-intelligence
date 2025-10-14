@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import ServiceWorkflowModal from '../shared/ServiceWorkflowModal';
 import { useToast, ToastContainer } from '../shared/ToastNotification';
 import MarketplaceIntelligenceForm from '../shared/MarketplaceIntelligenceForm';
+import { filterByServiceType } from '../../lib/utils/service-type-mapping';
 
 export default function USMCACertificateTab({ userRole = 'Cristina' }) {
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -40,15 +41,19 @@ export default function USMCACertificateTab({ userRole = 'Cristina' }) {
       setError(null);
       info('Loading USMCA Advantage Sprint requests...');
 
-      const response = await fetch('/api/admin/service-requests?service_type=usmca_advantage_sprint');
+      // Load ALL service requests
+      const response = await fetch('/api/admin/service-requests');
 
       if (!response.ok) {
         throw new Error('Failed to load service requests');
       }
 
       const data = await response.json();
-      setServiceRequests(data.requests || []);
-      success(`Loaded ${data.requests?.length || 0} USMCA Advantage Sprint requests`);
+
+      // Filter using utility
+      const filtered = filterByServiceType(data.requests || [], 'usmca-advantage');
+      setServiceRequests(filtered);
+      success(`Loaded ${filtered.length} USMCA Advantage Sprint requests`);
     } catch (err) {
       console.error('Error loading service requests:', err);
       const errorMessage = err.message;
@@ -90,18 +95,15 @@ export default function USMCACertificateTab({ userRole = 'Cristina' }) {
     setSelectedRequest(null);
   };
 
-  // Filter and sort functions
+  // Filter and sort functions (service type already filtered)
   const allFilteredRequests = serviceRequests?.filter(request => {
-    // Filter by service type
-    if (!(request.service_type === 'usmca_advantage_sprint' || request.service_type === 'usmca-advantage' || request.service_type === 'USMCA Certificates' || request.service_type === 'usmca-certificate')) {
-      return false;
-    }
+    const data = request.subscriber_data || request.service_details || {};
 
     // Search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const companyMatch = request.company_name?.toLowerCase().includes(searchLower);
-      const productMatch = request.service_details?.product_description?.toLowerCase().includes(searchLower);
+      const productMatch = data.product_description?.toLowerCase().includes(searchLower);
       const contactMatch = request.contact_name?.toLowerCase().includes(searchLower);
 
       if (!companyMatch && !productMatch && !contactMatch) {
@@ -1134,6 +1136,87 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
             <span>{workflowData.component_origins?.length || 0} origins tracked</span>
           </div>
         </div>
+
+        {workflowData.component_origins && workflowData.component_origins.length > 0 && (
+          <div className="component-breakdown" style={{ marginTop: '1rem' }}>
+            <strong>Component Supply Chain (with Tariff Intelligence):</strong>
+            <div style={{ overflowX: 'auto', marginTop: '0.5rem' }}>
+              <table className="data-table" style={{ width: '100%', fontSize: '0.875rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '0.5rem' }}>Component</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>Origin</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>Value %</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>HS Code</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>MFN Rate</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>USMCA Rate</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Savings</th>
+                    <th style={{ textAlign: 'center', padding: '0.5rem' }}>AI Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {workflowData.component_origins.map((comp, idx) => {
+                    const hsCode = comp.hs_code || comp.classified_hs_code || '—';
+                    const mfnRate = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                    const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+                    const savings = mfnRate - usmcaRate;
+                    const confidence = comp.confidence || null;
+
+                    return (
+                      <tr key={idx}>
+                        <td style={{ padding: '0.5rem', fontWeight: '500' }}>
+                          {comp.description || comp.component_type || `Component ${idx + 1}`}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {comp.origin_country}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {comp.value_percentage}%
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace' }}>
+                          {hsCode}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#dc2626' }}>
+                          {mfnRate > 0 ? `${mfnRate.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#059669' }}>
+                          {usmcaRate >= 0 ? `${usmcaRate.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', color: savings > 0 ? '#059669' : '#6b7280', fontWeight: '600' }}>
+                          {savings > 0 ? `${savings.toFixed(1)}%` : '—'}
+                        </td>
+                        <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                          {confidence ? (
+                            <span style={{ color: confidence < 80 ? '#f59e0b' : '#059669' }}>
+                              {confidence}% {confidence < 80 && '⚠️'}
+                            </span>
+                          ) : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Visual Alerts */}
+            {workflowData.component_origins.some(c => (c.confidence || 100) < 80) && (
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#fef3c7', borderLeft: '3px solid #f59e0b' }}>
+                ⚠️ <strong>Low Confidence Alert:</strong> Some components have AI classification confidence below 80%. Professional HS validation recommended for certificate accuracy.
+              </div>
+            )}
+
+            {workflowData.component_origins.some(c => {
+              const mfnRate = c.mfn_rate || c.tariff_rates?.mfn_rate || 0;
+              const usmcaRate = c.usmca_rate || c.tariff_rates?.usmca_rate || 0;
+              return (mfnRate - usmcaRate) > 5 && !c.is_usmca_member;
+            }) && (
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderLeft: '3px solid #059669' }}>
+                💰 <strong>Mexico Sourcing Opportunity:</strong> High tariff exposure detected (>5%). Consider Mexico sourcing for this certificate holder.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {!analysisComplete && (

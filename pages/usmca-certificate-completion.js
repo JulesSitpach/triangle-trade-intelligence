@@ -144,6 +144,7 @@ export default function USMCACertificateCompletion() {
               rule: workflowData?.usmca?.rule,
               threshold_applied: workflowData?.usmca?.threshold_applied,
               preference_criterion: certificateData.analysis_results.origin_criterion,
+              method_of_qualification: workflowData?.method_of_qualification || 'TV',
               trust_score: certificateData.analysis_results.trust_score,
               verification_status: workflowData?.usmca?.verification_status
             },

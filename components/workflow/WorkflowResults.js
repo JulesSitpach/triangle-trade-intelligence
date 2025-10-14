@@ -476,48 +476,151 @@ export default function WorkflowResults({
       </div>
 
       {/* CERTIFICATE FIELDS PREVIEW */}
-      {(results.origin_criterion || results.method_of_qualification || results.producer_name) && (
-        <div className="form-section">
-          <h2 className="form-section-title">Certificate Details</h2>
+      {(results.origin_criterion || results.method_of_qualification || results.producer_name) && (() => {
+        // Validate Origin Criterion against actual analysis
+        const validateOriginCriterion = () => {
+          if (!results.origin_criterion) return null;
 
-          {results.origin_criterion && (
-            <div className="text-body" style={{marginBottom: '12px'}}>
-              <strong>Origin Criterion:</strong> {results.origin_criterion} - {
-                results.origin_criterion === 'A' ? 'Wholly Obtained' :
-                results.origin_criterion === 'B' ? 'Tariff Shift and Regional Value Content' :
-                results.origin_criterion === 'C' ? 'Specific Processing/Value Requirement' :
-                results.origin_criterion === 'D' ? 'Specific Manufacturing Process' :
-                'Regional Value Content'
-              }
-            </div>
-          )}
+          // Determine expected criterion based on qualification results
+          const hasNonUSMCA = results.usmca?.component_breakdown?.some(c => !c.is_usmca_member);
+          const usesRVC = results.usmca?.rule?.toLowerCase().includes('regional value content');
 
-          {results.method_of_qualification && (
-            <div className="text-body" style={{marginBottom: '12px'}}>
-              <strong>Qualification Method:</strong> {results.method_of_qualification} - {
-                results.method_of_qualification === 'TS' ? 'Tariff Shift' :
-                results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' :
-                results.method_of_qualification === 'NC' ? 'Net Cost (RVC)' :
-                results.method_of_qualification === 'NO' ? 'No Requirement' :
-                'Transaction Value'
-              }
-            </div>
-          )}
+          let expected = null;
+          let reason = '';
 
-          {results.producer_name && results.producer_name !== results.company?.name && (
-            <div className="text-body">
-              <strong>Producer (if different from exporter):</strong><br/>
-              <div style={{marginLeft: '20px', marginTop: '8px'}}>
-                {results.producer_name}<br/>
-                {results.producer_address && <>{results.producer_address}<br/></>}
-                {results.producer_country && <>{results.producer_country}<br/></>}
-                {results.producer_phone && <>Phone: {results.producer_phone}<br/></>}
-                {results.producer_email && <>Email: {results.producer_email}</>}
+          if (!hasNonUSMCA && results.usmca?.qualified) {
+            // All components from USMCA countries
+            expected = 'A';
+            reason = 'All components originate from USMCA countries (Wholly Obtained)';
+          } else if (hasNonUSMCA && usesRVC) {
+            // Has non-USMCA components and uses RVC method
+            expected = 'B';
+            reason = 'Product uses Regional Value Content calculation with tariff shift requirement';
+          }
+
+          if (expected && results.origin_criterion !== expected) {
+            return {
+              mismatch: true,
+              expected,
+              reason,
+              userSelected: results.origin_criterion
+            };
+          }
+
+          return { mismatch: false };
+        };
+
+        // Validate Method of Qualification against actual calculation
+        const validateMethodOfQualification = () => {
+          if (!results.method_of_qualification) return null;
+
+          // Determine expected method based on actual calculation used
+          let expected = null;
+          let reason = '';
+
+          if (results.usmca?.rule?.toLowerCase().includes('regional value content')) {
+            expected = 'TV'; // Transaction Value is most common for RVC
+            reason = 'Analysis used Transaction Value method for Regional Value Content calculation';
+          }
+
+          if (expected && results.method_of_qualification !== expected) {
+            return {
+              mismatch: true,
+              expected,
+              reason,
+              userSelected: results.method_of_qualification
+            };
+          }
+
+          return { mismatch: false };
+        };
+
+        const originValidation = validateOriginCriterion();
+        const methodValidation = validateMethodOfQualification();
+
+        return (
+          <div className="form-section">
+            <h2 className="form-section-title">Certificate Details</h2>
+
+            {results.origin_criterion && (
+              <div style={{marginBottom: '12px'}}>
+                <div className="text-body">
+                  <strong>Origin Criterion:</strong> {results.origin_criterion} - {
+                    results.origin_criterion === 'A' ? 'Wholly Obtained' :
+                    results.origin_criterion === 'B' ? 'Tariff Shift and Regional Value Content' :
+                    results.origin_criterion === 'C' ? 'Specific Processing/Value Requirement' :
+                    results.origin_criterion === 'D' ? 'Specific Manufacturing Process' :
+                    'Regional Value Content'
+                  }
+                </div>
+                {originValidation?.mismatch && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#fef3c7',
+                    borderLeft: '3px solid #f59e0b',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem'
+                  }}>
+                    <strong style={{color: '#92400e'}}>⚠️ Validation Warning:</strong>
+                    <div style={{color: '#92400e', marginTop: '0.25rem'}}>
+                      Based on your component analysis, the recommended Origin Criterion is <strong>{originValidation.expected}</strong>.
+                    </div>
+                    <div style={{color: '#78350f', marginTop: '0.25rem', fontSize: '0.8125rem'}}>
+                      Reason: {originValidation.reason}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+
+            {results.method_of_qualification && (
+              <div style={{marginBottom: '12px'}}>
+                <div className="text-body">
+                  <strong>Qualification Method:</strong> {results.method_of_qualification} - {
+                    results.method_of_qualification === 'TS' ? 'Tariff Shift' :
+                    results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' :
+                    results.method_of_qualification === 'NC' ? 'Net Cost (RVC)' :
+                    results.method_of_qualification === 'NO' ? 'No Requirement' :
+                    'Transaction Value'
+                  }
+                </div>
+                {methodValidation?.mismatch && (
+                  <div style={{
+                    marginTop: '0.5rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#fef3c7',
+                    borderLeft: '3px solid #f59e0b',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem'
+                  }}>
+                    <strong style={{color: '#92400e'}}>⚠️ Validation Warning:</strong>
+                    <div style={{color: '#92400e', marginTop: '0.25rem'}}>
+                      Based on your qualification analysis, the recommended Method is <strong>{methodValidation.expected}</strong>.
+                    </div>
+                    <div style={{color: '#78350f', marginTop: '0.25rem', fontSize: '0.8125rem'}}>
+                      Reason: {methodValidation.reason}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {results.producer_name && results.producer_name !== results.company?.name && (
+              <div className="text-body">
+                <strong>Producer (if different from exporter):</strong><br/>
+                <div style={{marginLeft: '20px', marginTop: '8px'}}>
+                  {results.producer_name}<br/>
+                  {results.producer_address && <>{results.producer_address}<br/></>}
+                  {results.producer_country && <>{results.producer_country}<br/></>}
+                  {results.producer_phone && <>Phone: {results.producer_phone}<br/></>}
+                  {results.producer_email && <>Email: {results.producer_email}</>}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* COMPLIANCE ANALYSIS */}
       <div className="form-section">

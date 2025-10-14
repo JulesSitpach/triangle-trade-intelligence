@@ -16,6 +16,7 @@ import JorgeClientIntakeStage from './stages/JorgeClientIntakeStage';
 import CristinaDocumentReviewStage from './stages/CristinaDocumentReviewStage';
 import AIAnalysisValidationStage from './stages/AIAnalysisValidationStage';
 import ReportGenerationStage from './stages/ReportGenerationStage';
+import { filterByServiceType } from '../../lib/utils/service-type-mapping';
 
 export default function TradeHealthCheckTab({ requests: propRequests, onRequestUpdate, currentUser = 'Jorge' }) {
   const [serviceRequests, setServiceRequests] = useState(propRequests || []);
@@ -51,15 +52,20 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
       setError(null);
       info('Loading Trade Health Check requests...');
 
-      const response = await fetch('/api/admin/service-requests?service_type=Trade Health Check');
+      // Load ALL service requests (API returns all by default)
+      const response = await fetch('/api/admin/service-requests');
 
       if (!response.ok) {
         throw new Error('Failed to load service requests');
       }
 
       const data = await response.json();
-      setServiceRequests(data.requests || []);
-      success(`Loaded ${data.requests?.length || 0} Trade Health Check requests`);
+
+      // Filter for trade-health-check using utility (handles all variations)
+      const tradeHealthRequests = filterByServiceType(data.requests || [], 'trade-health-check');
+
+      setServiceRequests(tradeHealthRequests);
+      success(`Loaded ${tradeHealthRequests.length} Trade Health Check requests`);
     } catch (err) {
       console.error('Error loading service requests:', err);
       const errorMessage = err.message;
@@ -121,16 +127,15 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
 
   // Filter and sort logic
   const allFilteredRequests = serviceRequests?.filter(request => {
-    const matchesService = request.service_type === 'Trade Health Check' || request.service_type === 'trade_health_check';
-
+    // Service type already filtered in loadServiceRequests (no need to double-check)
     const matchesSearch = !searchTerm ||
       request.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.service_details?.product_description?.toLowerCase().includes(searchTerm.toLowerCase());
+      request.subscriber_data?.product_description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
 
-    return matchesService && matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus;
   })?.sort((a, b) => {
     let aValue, bValue;
 
@@ -307,49 +312,57 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
                   </p>
                 </td>
               </tr>
-            ) : paginatedRequests.map((request) => (
-              <tr key={request.id}>
-                <td>
-                  <div className="client-info">
-                    <strong>{request.company_name}</strong>
-                    <div className="contact-name">{request.contact_name}</div>
-                  </div>
-                </td>
-                <td>
-                  <div className="product-summary">
-                    {request.service_details?.product_description || 'Product details'}
-                  </div>
-                </td>
-                <td>
-                  <div className="trade-volume">
-                    {request.service_details?.trade_volume
-                      ? `$${Number(request.service_details.trade_volume).toLocaleString()}`
-                      : 'Not specified'
-                    }
-                  </div>
-                </td>
-                <td>
-                  <span className={`status-badge ${request.status?.replace('_', '-')}`}>
-                    {request.status?.replace('_', ' ')}
-                  </span>
-                </td>
-                <td>
-                  {(() => {
-                    const buttonState = getButtonState(request);
-                    return (
-                      <button
-                        className={buttonState.className}
-                        onClick={() => startWorkflow(request, buttonState.mode)}
-                        disabled={buttonState.disabled}
-                        title={buttonState.mode === 'readonly' ? `Waiting for ${request.current_assigned_to || 'team member'}` : ''}
-                      >
-                        {buttonState.label}
-                      </button>
-                    );
-                  })()}
-                </td>
-              </tr>
-            ))}
+            ) : paginatedRequests.map((request) => {
+              // Try multiple data sources (subscriber_data or service_details)
+              const data = request.subscriber_data || request.service_details || {};
+              const contactName = request.contact_name || data.contact_name || 'Contact not provided';
+              const productDescription = data.product_description || 'Product details not provided';
+              const tradeVolume = data.trade_volume || data.annual_trade_volume;
+
+              return (
+                <tr key={request.id}>
+                  <td>
+                    <div className="client-info">
+                      <strong>{request.company_name}</strong>
+                      <div className="contact-name">{contactName}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="product-summary">
+                      {productDescription}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="trade-volume">
+                      {tradeVolume
+                        ? `$${Number(String(tradeVolume).replace(/[$,]/g, '')).toLocaleString()}`
+                        : 'Not specified'
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${request.status?.replace('_', '-')}`}>
+                      {request.status?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td>
+                    {(() => {
+                      const buttonState = getButtonState(request);
+                      return (
+                        <button
+                          className={buttonState.className}
+                          onClick={() => startWorkflow(request, buttonState.mode)}
+                          disabled={buttonState.disabled}
+                          title={buttonState.mode === 'readonly' ? `Waiting for ${request.current_assigned_to || 'team member'}` : ''}
+                        >
+                          {buttonState.label}
+                        </button>
+                      );
+                    })()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

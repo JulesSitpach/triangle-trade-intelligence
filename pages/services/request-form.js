@@ -12,6 +12,8 @@ export default function ServiceRequestForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(true); // Default to YES
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [formData, setFormData] = useState({
     service_type: '',
     // Step 1: Company Information
@@ -35,6 +37,31 @@ export default function ServiceRequestForm() {
       { description: '', origin_country: '', value_percentage: '', hs_code: '' }
     ]
   });
+
+  // Check if user is authenticated - redirect subscribers to dashboard
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+
+        if (data.authenticated && data.user) {
+          // User is a subscriber - redirect to dashboard where they get discounts
+          router.push('/dashboard');
+        } else {
+          // Not authenticated - allow access to public form
+          setCheckingAuth(false);
+        }
+      } catch (error) {
+        // Error checking auth - allow access to form
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const services = {
     'trade-health-check': { name: 'Trade Health Check', price: 99 },
@@ -83,7 +110,8 @@ export default function ServiceRequestForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_id: formData.service_type,
-          service_request_data: formData
+          service_request_data: formData,
+          consent_to_store: privacyConsent
         })
       });
 
@@ -104,6 +132,25 @@ export default function ServiceRequestForm() {
   };
 
   const selectedService = services[formData.service_type];
+
+  // Show loading while checking auth
+  if (checkingAuth) {
+    return (
+      <>
+        <Head>
+          <title>Request Professional Service - Triangle Trade Intelligence</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </Head>
+        <div className="main-content">
+          <div className="container-app">
+            <div className="content-card">
+              <p className="text-body">Checking access...</p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -148,14 +195,6 @@ export default function ServiceRequestForm() {
             <h1 className="section-header-title">Request Professional Service</h1>
             <p className="section-header-subtitle">
               Complete this form to request expert assistance from our trade compliance and business development team
-            </p>
-          </div>
-
-          {/* Subscriber Discount Notice */}
-          <div className="content-card" style={{border: '2px solid #f59e0b', backgroundColor: '#fffbeb', marginBottom: '2rem'}}>
-            <h3 className="content-card-title">💡 Save 20% with Subscriber Pricing</h3>
-            <p className="content-card-description">
-              Complete our <Link href="/usmca-workflow" className="nav-link">free USMCA workflow analysis</Link> first to qualify for subscriber discounts and skip most of this form.
             </p>
           </div>
 
@@ -527,8 +566,28 @@ export default function ServiceRequestForm() {
               </div>
             </div>
 
+            {/* Privacy Consent */}
+            <div className="content-card" style={{backgroundColor: '#f0f9ff', marginTop: '2rem', padding: '1rem'}}>
+              <div style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem'}}>
+                <input
+                  type="checkbox"
+                  id="privacy-consent"
+                  checked={privacyConsent}
+                  onChange={(e) => setPrivacyConsent(e.target.checked)}
+                  style={{marginTop: '0.25rem', width: '18px', height: '18px', cursor: 'pointer'}}
+                />
+                <label htmlFor="privacy-consent" style={{flex: 1, cursor: 'pointer', fontSize: '0.9rem', lineHeight: '1.5'}}>
+                  <span style={{fontWeight: '600', color: '#134169'}}>Save my business information for better service delivery</span>
+                  <br/>
+                  <span style={{color: '#6b7280', fontSize: '0.85rem'}}>
+                    We'll securely store your company details, product information, and component breakdown to help our experts deliver your service efficiently and provide better support if you return. Uncheck this if you prefer one-time use only (your data will be processed for service fulfillment but not permanently stored in our system).
+                  </span>
+                </label>
+              </div>
+            </div>
+
             {/* Submit Button */}
-            <div className="hero-buttons" style={{marginTop: '2rem'}}>
+            <div className="hero-buttons" style={{marginTop: '1rem'}}>
               <button
                 type="submit"
                 disabled={isSubmitting || !formData.service_type}
