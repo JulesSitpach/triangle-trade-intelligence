@@ -281,15 +281,25 @@ function buildComprehensiveUSMCAPrompt(formData) {
     .map((c, i) => `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}`)
     .join('\n');
 
-  const prompt = `You are a USMCA trade compliance expert analyzing a product for USMCA qualification. Perform a complete analysis including threshold determination, regional content calculation, qualification check, and recommendations.
+  const prompt = `You are a senior USMCA trade compliance expert with 20+ years of experience in North American trade, customs regulations, and supply chain optimization. You have deep expertise in USMCA treaty requirements, HTS classification, and tariff analysis.
 
-===== COMPANY PROFILE =====
-Company: ${formData.company_name}
+===== COMPLETE COMPANY INTELLIGENCE =====
+Company Name: ${formData.company_name}
 Business Type: ${formData.business_type}
 Annual Trade Volume: ${formData.trade_volume || 'Not specified'}
-Primary Supplier: ${formData.primary_supplier_country || formData.supplier_country || 'Not specified'}
-Manufacturing/Assembly: ${formData.manufacturing_location || 'Not specified'}
-Export Destination: ${formData.export_destination || formData.destination_country || 'United States'}
+
+Supply Chain Details:
+- Primary Supplier Country: ${formData.primary_supplier_country || formData.supplier_country || 'Not specified'}
+- Manufacturing/Assembly Location: ${formData.manufacturing_location || 'Not specified'}
+- Export Destination: ${formData.export_destination || formData.destination_country || 'United States'}
+
+${formData.company_address ? `Company Location: ${formData.company_address}` : ''}
+${formData.tax_id ? `Tax ID: ${formData.tax_id}` : ''}
+
+Business Context:
+- This analysis is for ${formData.business_type} operations
+- Trade volume indicates ${formData.trade_volume ? 'established' : 'new/growing'} import/export activity
+- ${['US', 'MX', 'CA'].includes(formData.manufacturing_location) ? 'Manufacturing is already in USMCA region' : 'Manufacturing is outside USMCA region'}
 
 ===== PRODUCT DETAILS =====
 Product: ${formData.product_description}
@@ -314,31 +324,46 @@ USMCA MEMBER COUNTRIES:
 - Mexico (MX)
 - Canada (CA)
 
-ANALYSIS INSTRUCTIONS:
+===== YOUR EXPERT ANALYSIS TASK =====
 
-1. **Determine Applicable Threshold**: Based on the business type, identify which threshold applies (55%, 60%, 62.5%, 65%, or 75%)
+Use your 20+ years of expertise to perform a comprehensive USMCA qualification analysis:
 
-2. **Calculate Regional Content**:
-   - Add up ALL component percentages from US, MX, and CA
-   - This is the "North American Content %"
-   - Formula: SUM(components from US + MX + CA)
+1. **Industry Threshold Determination**:
+   - Analyze the business type and product category
+   - Apply the correct USMCA threshold (55%, 60%, 62.5%, 65%, or 75%)
+   - Consider any product-specific rules or exceptions
+   - Explain WHY this threshold applies
 
-3. **Qualification Check**:
-   - Compare North American Content % to Threshold %
-   - If North American Content >= Threshold: QUALIFIED
-   - If North American Content < Threshold: NOT QUALIFIED
-   - Calculate the gap: (Threshold - North American Content)
+2. **Precise Regional Content Calculation**:
+   - Calculate North American content: SUM(all components from US + MX + CA)
+   - Verify the math: Total component percentages must equal 100%
+   - Identify which specific components contribute to USMCA qualification
+   - Show your calculation work clearly
 
-4. **Generate Recommendations** (ONLY if NOT QUALIFIED):
-   - Identify specific non-USMCA components to replace
-   - Suggest which USMCA countries/regions for sourcing
-   - Be product-specific (textiles→fabric mills, electronics→component manufacturers, automotive→supplier hubs)
-   - Provide 3-4 actionable steps, each under 20 words
+3. **Qualification Determination**:
+   - Compare North American Content % vs Required Threshold %
+   - QUALIFIED if: North American Content >= Threshold
+   - NOT QUALIFIED if: North American Content < Threshold
+   - Calculate the exact gap if not qualified
+   - Consider any special cases or product-specific rules
 
-5. **Estimate Tariff Savings** (if data available):
-   - Typical MFN rates by product category
-   - USMCA preferential rate: 0%
-   - Estimate annual savings based on trade volume
+4. **Strategic Recommendations** (if NOT QUALIFIED):
+   - Identify the HIGHEST-VALUE non-USMCA components to replace (prioritize by % and cost impact)
+   - Provide SPECIFIC regional sourcing recommendations:
+     * Textiles → Mexico textile mills, US fabric manufacturers
+     * Electronics → Mexico maquiladoras, US component manufacturers
+     * Automotive → Mexico automotive clusters (Guanajuato, Puebla), US tier-1 suppliers
+     * Chemicals → Texas/Louisiana chemical corridor, Mexico petrochemical hubs
+   - Calculate how much regional content each change would add
+   - Provide 3-5 actionable, prioritized steps (most impactful first)
+
+5. **Comprehensive Tariff Savings Analysis**:
+   - Research typical MFN (Most Favored Nation) rates for this product category
+   - USMCA preferential rate: 0% (duty-free)
+   - Calculate annual savings = (Trade Volume) × (MFN Rate - 0%)
+   - Calculate monthly savings = Annual / 12
+   - Express savings as both dollar amount and percentage
+   - Consider the ROI of supply chain changes needed to qualify
 
 REQUIRED OUTPUT FORMAT (JSON):
 
@@ -409,7 +434,7 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
       if (!component.hs_code && !component.classified_hs_code) {
         console.log(`📋 AI Classifying component: "${component.description}"`);
 
-        const classificationResult = await classifyComponentHS(component.description, productContext);
+        const classificationResult = await classifyComponentHS(component.description, productContext, component);
 
         if (classificationResult.success) {
           // AI provides EVERYTHING: HS code + tariff rates + confidence
@@ -476,18 +501,41 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
  * @param {string} productContext - Product context for better classification
  * @returns {Object} Classification result with hs_code, tariff rates, and confidence
  */
-async function classifyComponentHS(componentDescription, productContext) {
+async function classifyComponentHS(componentDescription, productContext, component) {
   try {
-    const classificationPrompt = `You are an HS code classification expert with tariff knowledge. Classify this component and provide tariff rates.
+    const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience in international trade, USMCA compliance, and tariff analysis. You have deep knowledge of the Harmonized Tariff Schedule and trade agreements.
 
-PRODUCT CONTEXT: ${productContext}
-COMPONENT: ${componentDescription}
+===== COMPLETE BUSINESS CONTEXT =====
+OVERALL PRODUCT: ${productContext}
+COMPONENT TO CLASSIFY: "${componentDescription}"
+ORIGIN COUNTRY: ${component.origin_country}
+VALUE PERCENTAGE: ${component.value_percentage}% of total product value
+USMCA MEMBER: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
 
-Provide:
-1. Most accurate 6-digit HS code
-2. MFN (Most Favored Nation) tariff rate as a percentage
-3. USMCA preferential tariff rate as a percentage
-4. Your confidence level
+===== YOUR EXPERT TASK =====
+Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
+
+1. **HS Code Classification**:
+   - Use your expertise to determine the precise 6-digit HS code
+   - Consider the component's function within the overall product
+   - Consider the material composition and manufacturing process
+   - Use the most specific classification available (avoid generic "parts" categories when specific codes exist)
+
+2. **Tariff Rate Analysis**:
+   - MFN Rate: Standard Most Favored Nation tariff rate (percentage)
+   - USMCA Rate: Preferential rate under USMCA treaty (typically 0% for qualifying goods from US/MX/CA)
+   - Consider the actual tariff schedule for this specific product category
+
+3. **Confidence Assessment**:
+   - Rate your confidence based on description clarity and classification complexity
+   - High confidence (90-100%): Clear, unambiguous classification
+   - Medium confidence (75-89%): Some interpretation needed
+   - Low confidence (50-74%): Multiple possible classifications
+
+4. **Expert Reasoning**:
+   - Explain WHY this HS code is correct
+   - Note any alternative classifications considered
+   - Mention relevant USMCA rules or special considerations
 
 Return ONLY a JSON object in this exact format (no other text):
 {
@@ -495,10 +543,10 @@ Return ONLY a JSON object in this exact format (no other text):
   "mfn_rate": 5.0,
   "usmca_rate": 0.0,
   "confidence": 85,
-  "reasoning": "brief explanation of classification and typical tariff rates"
+  "reasoning": "Detailed expert reasoning explaining classification, tariff rates, and any special considerations for USMCA qualification"
 }
 
-Note: USMCA rate is typically 0% (duty-free) for qualifying goods from US/MX/CA. MFN rate varies by product.`;
+CRITICAL: Be precise and accurate. This data will be used for compliance decisions and saved to build our database.`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
