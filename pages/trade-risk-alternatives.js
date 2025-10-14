@@ -758,6 +758,88 @@ export default function TradeRiskAlternatives() {
               </div>
             </div>
           </div>
+
+          {/* Component Intelligence Table - Show enriched component data if available */}
+          {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (
+            <div className="element-spacing">
+              <h3 className="card-title">Component Tariff Intelligence</h3>
+              <p className="text-body">
+                Detailed tariff analysis for each component in your product:
+              </p>
+
+              <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+                <table className="component-table">
+                  <thead>
+                    <tr>
+                      <th>Component</th>
+                      <th>Origin</th>
+                      <th>% of Product</th>
+                      <th>HS Code</th>
+                      <th>MFN Rate</th>
+                      <th>USMCA Rate</th>
+                      <th>Savings</th>
+                      <th>AI Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {userProfile.componentOrigins.map((comp, idx) => (
+                      <tr key={idx}>
+                        <td>{comp.component_type || comp.description || 'Component ' + (idx + 1)}</td>
+                        <td>{comp.origin_country || comp.country}</td>
+                        <td>{comp.percentage || comp.value_percentage}%</td>
+                        <td style={{ fontFamily: 'monospace' }}>
+                          {comp.hs_code || <span style={{ color: '#9ca3af' }}>Not classified</span>}
+                        </td>
+                        <td style={{ color: comp.mfn_rate ? '#dc2626' : '#9ca3af' }}>
+                          {comp.mfn_rate !== undefined ? `${comp.mfn_rate.toFixed(1)}%` : 'N/A'}
+                        </td>
+                        <td style={{ color: comp.usmca_rate !== undefined ? '#059669' : '#9ca3af' }}>
+                          {comp.usmca_rate !== undefined ? `${comp.usmca_rate.toFixed(1)}%` : 'N/A'}
+                        </td>
+                        <td style={{ color: comp.savings_percentage > 0 ? '#059669' : '#9ca3af' }}>
+                          {comp.savings_percentage > 0 ? `${comp.savings_percentage.toFixed(1)}%` : '-'}
+                        </td>
+                        <td>
+                          {comp.ai_confidence ? (
+                            <span style={{ color: comp.ai_confidence < 80 ? '#f59e0b' : '#059669' }}>
+                              {comp.ai_confidence}%
+                              {comp.ai_confidence < 80 && ' ⚠️'}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#9ca3af' }}>N/A</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Insights from Component Data */}
+              {userProfile.componentOrigins.some(c => c.ai_confidence && c.ai_confidence < 80) && (
+                <div className="alert alert-warning" style={{ marginTop: '1rem' }}>
+                  <div className="alert-content">
+                    <div className="alert-title">⚠️ Low Confidence Classifications Detected</div>
+                    <div className="text-body">
+                      Some components have low AI confidence scores. Consider requesting professional verification for accurate tariff calculations.
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {userProfile.componentOrigins.some(c => c.savings_percentage > 5) && (
+                <div className="alert alert-success" style={{ marginTop: '1rem' }}>
+                  <div className="alert-content">
+                    <div className="alert-title">💰 Significant Tariff Savings Identified</div>
+                    <div className="text-body">
+                      Your components show strong tariff savings potential through USMCA qualification.
+                      {userProfile.qualificationStatus !== 'QUALIFIED' && ' Consider supply chain optimization to unlock these savings.'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* AI Vulnerability Analysis Status */}
