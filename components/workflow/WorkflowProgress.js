@@ -13,9 +13,15 @@ export default function WorkflowProgress({
   isStepClickable = false
 }) {
   const [mounted, setMounted] = useState(false);
+  const [certificateGenerated, setCertificateGenerated] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Check if certificate was actually generated
+    if (typeof window !== 'undefined') {
+      const certGenerated = sessionStorage.getItem('certificate_generated');
+      setCertificateGenerated(certGenerated === 'true');
+    }
   }, []);
 
   const steps = [
@@ -35,11 +41,11 @@ export default function WorkflowProgress({
     if (!mounted) return 'inactive'; // Prevent hydration mismatch
 
     // Special handling for Step 4 (Generate Certificate)
-    // Should only be complete if user actually generated certificate (step 5+)
+    // Only mark complete (green checkmark) when user is CURRENTLY on step 4
     if (step === 4) {
-      if (currentStep > 4) return 'complete';  // Actually completed certificate generation
-      if (currentStep === 4) return 'active';  // Currently on certificate step
-      return 'inactive';  // Haven't reached certificate yet
+      if (currentStep === 4 && certificateGenerated) return 'complete';  // Green checkmark only on certificate page
+      if (currentStep >= 3) return 'active';  // Available after results (step 3)
+      return 'inactive';  // Haven't reached results yet
     }
 
     // For steps 1-3, mark complete if past them
