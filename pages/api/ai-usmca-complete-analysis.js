@@ -192,7 +192,19 @@ export default protectedApiHandler({
     // ========== COMPONENT ENRICHMENT WITH TARIFF INTELLIGENCE ==========
     // Enrich each component with HS codes, tariff rates, and savings calculations
     console.log('🔍 Enriching components with tariff intelligence...');
-    const enrichedComponents = await enrichComponentsWithTariffIntelligence(formData.component_origins, formData.product_description);
+
+    // Build COMPLETE context object for component classification
+    const fullBusinessContext = {
+      product_description: formData.product_description,
+      company_name: formData.company_name,
+      business_type: formData.business_type,
+      industry: formData.industry || extractIndustryFromBusinessType(formData.business_type),
+      manufacturing_location: formData.manufacturing_location,
+      end_use: formData.end_use || 'commercial',
+      trade_volume: formData.trade_volume
+    };
+
+    const enrichedComponents = await enrichComponentsWithTariffIntelligence(formData.component_origins, fullBusinessContext);
     console.log('✅ Component enrichment complete:', {
       total_components: enrichedComponents.length,
       enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length
@@ -420,10 +432,12 @@ Perform the analysis now:`;
 /**
  * Enrich components with HS code classification, tariff rates, and savings calculations
  * @param {Array} components - Array of component objects with basic data
- * @param {string} productContext - Product description for AI context
+ * @param {Object} businessContext - Full business context including product, industry, end-use
  * @returns {Array} Enriched components with tariff intelligence
  */
-async function enrichComponentsWithTariffIntelligence(components, productContext) {
+async function enrichComponentsWithTariffIntelligence(components, businessContext) {
+  // Extract product description for backward compatibility
+  const productContext = typeof businessContext === 'string' ? businessContext : businessContext.product_description;
   const enrichedComponents = [];
 
   for (const component of components) {
@@ -434,7 +448,7 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
       if (!component.hs_code && !component.classified_hs_code) {
         console.log(`📋 AI Classifying component: "${component.description}"`);
 
-        const classificationResult = await classifyComponentHS(component.description, productContext, component);
+        const classificationResult = await classifyComponentHS(component.description, businessContext, component);
 
         if (classificationResult.success) {
           // AI provides EVERYTHING: HS code + tariff rates + confidence
@@ -498,28 +512,50 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
 /**
  * Classify component description to HS code using AI (100% AI-powered - NO database lookups)
  * @param {string} componentDescription - Component description to classify
- * @param {string} productContext - Product context for better classification
+ * @param {Object|string} businessContext - Full business context or just product description (backward compatible)
+ * @param {Object} component - Component data with origin and percentage
  * @returns {Object} Classification result with hs_code, tariff rates, and confidence
  */
-async function classifyComponentHS(componentDescription, productContext, component) {
+async function classifyComponentHS(componentDescription, businessContext, component) {
   try {
+    // Extract context fields (support both object and string for backward compatibility)
+    const context = typeof businessContext === 'string'
+      ? { product_description: businessContext }
+      : businessContext;
+
     const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience in international trade, USMCA compliance, and tariff analysis. You have deep knowledge of the Harmonized Tariff Schedule and trade agreements.
 
-===== COMPLETE BUSINESS CONTEXT =====
-OVERALL PRODUCT: ${productContext}
-COMPONENT TO CLASSIFY: "${componentDescription}"
-ORIGIN COUNTRY: ${component.origin_country}
-VALUE PERCENTAGE: ${component.value_percentage}% of total product value
-USMCA MEMBER: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
+===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
+
+COMPANY & INDUSTRY:
+- Company: ${context.company_name || 'Not specified'}
+- Business Type: ${context.business_type || 'Not specified'}
+- Industry Sector: ${context.industry || extractIndustryFromBusinessType(context.business_type) || 'Not specified'}
+- Manufacturing Location: ${context.manufacturing_location || 'Not specified'}
+- Trade Volume: ${context.trade_volume || 'Not specified'}
+
+END PRODUCT APPLICATION:
+- Product Description: ${context.product_description}
+- End Use: ${context.end_use || 'Commercial/Industrial'}
+- Target Market: ${context.target_market || 'North America'}
+
+COMPONENT TO CLASSIFY:
+- Component Description: "${componentDescription}"
+- Origin Country: ${component.origin_country}
+- Value Percentage: ${component.value_percentage}% of total product value
+- USMCA Member Source: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
 
 ===== YOUR EXPERT TASK =====
 Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
 
 1. **HS Code Classification**:
-   - Use your expertise to determine the precise 6-digit HS code
-   - Consider the component's function within the overall product
-   - Consider the material composition and manufacturing process
-   - Use the most specific classification available (avoid generic "parts" categories when specific codes exist)
+   - **CRITICAL**: Use the END PRODUCT CONTEXT to inform component chemistry/specification
+   - Consider how this component FUNCTIONS within the ${context.product_description}
+   - Consider the INDUSTRY requirements (${context.business_type || 'industrial'} applications)
+   - Use the END USE to guide material specifications (e.g., marine = corrosion-resistant, automotive = high-performance)
+   - Example: "Polymer resins" for "marine coating" = epoxy/polyurethane (NOT urea resins for wood/furniture)
+   - Example: "Additives" for "industrial coating" = general mixed preparations (NOT hyper-specific catalysts unless description indicates)
+   - Avoid generic "parts" classifications when product context suggests specific chemistry
 
 2. **Tariff Rate Analysis**:
    - MFN Rate: Standard Most Favored Nation tariff rate (percentage)
@@ -595,6 +631,29 @@ CRITICAL: Be precise and accurate. This data will be used for compliance decisio
       error: error.message
     };
   }
+}
+
+/**
+ * Extract industry from business type for better component classification context
+ * @param {string} businessType - Business type from form
+ * @returns {string} Industry sector
+ */
+function extractIndustryFromBusinessType(businessType) {
+  if (!businessType) return 'General Manufacturing';
+
+  const type = businessType.toLowerCase();
+
+  // Map business types to industry sectors
+  if (type.includes('textile') || type.includes('apparel') || type.includes('clothing')) return 'Textiles & Apparel';
+  if (type.includes('automotive') || type.includes('vehicle') || type.includes('transportation')) return 'Automotive & Transportation';
+  if (type.includes('electronic') || type.includes('technology') || type.includes('semiconductor')) return 'Electronics & Technology';
+  if (type.includes('chemical') || type.includes('pharmaceutical') || type.includes('coating') || type.includes('resin')) return 'Chemicals & Materials';
+  if (type.includes('food') || type.includes('agriculture') || type.includes('beverage')) return 'Food & Agriculture';
+  if (type.includes('machinery') || type.includes('equipment') || type.includes('industrial')) return 'Machinery & Equipment';
+  if (type.includes('metal') || type.includes('steel') || type.includes('aluminum')) return 'Metals & Mining';
+  if (type.includes('plastic') || type.includes('polymer')) return 'Plastics & Polymers';
+
+  return 'General Manufacturing';
 }
 
 /**
