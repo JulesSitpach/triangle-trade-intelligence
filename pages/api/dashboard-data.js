@@ -2,9 +2,13 @@
  * Dashboard Data API - User Workflow & Alert Data
  * Provides:
  * 1. All workflow completions with certificate data
- * 2. Vulnerability analysis history (alerts)
+ * 2. Real-time crisis alerts from RSS monitoring (matched to user's HS codes)
  * 3. Monthly usage stats for tier limits
  * 4. User profile data
+ *
+ * UPDATED (October 2025): Now loads crisis_alerts from RSS monitoring instead
+ * of static vulnerability_analyses. Alerts are matched to user's product HS codes
+ * and combined with workflow context for complete business intelligence.
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
@@ -123,17 +127,95 @@ export default protectedApiHandler({
       const allWorkflows = [...sessionWorkflows, ...completionWorkflows]
         .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
 
-      // Vulnerability Analysis History (alerts) - Limit to 5 most recent to avoid duplicates
-      const { data: alertHistory } = await supabase
-        .from('vulnerability_analyses')
-        .select('*')
-        .eq('user_id', userId)
-        .order('analyzed_at', { ascending: false })
-        .limit(5);
+      // Get user's HS codes from workflows to match with crisis alerts
+      const userHSCodes = [...new Set(
+        allWorkflows
+          .map(w => w.hs_code)
+          .filter(code => code && code !== 'Not classified')
+      )];
+
+      // Crisis Alerts from RSS Monitoring (real-time government announcements)
+      // Match alerts to user's HS codes and combine with workflow context
+      let crisisAlerts = [];
+
+      if (userHSCodes.length > 0) {
+        // Get crisis alerts that affect user's HS codes
+        const { data: matchedAlerts } = await supabase
+          .from('crisis_alerts')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(20); // Get recent alerts
+
+        // Filter alerts that match user's HS codes
+        const relevantAlerts = (matchedAlerts || []).filter(alert => {
+          if (!alert.affected_hs_codes || alert.affected_hs_codes.length === 0) {
+            return true; // General alerts affect everyone
+          }
+          // Check if any user HS code matches
+          return userHSCodes.some(userCode =>
+            alert.affected_hs_codes.some(affectedCode =>
+              userCode.startsWith(affectedCode.replace(/\./g, '').substring(0, 6))
+            )
+          );
+        });
+
+        // Transform crisis alerts to match expected structure
+        crisisAlerts = relevantAlerts.slice(0, 5).map(alert => {
+          // Find the most recent workflow for context
+          const contextWorkflow = allWorkflows[0] || {};
+
+          return {
+            id: alert.id,
+            source: 'crisis_alert',
+            company_name: contextWorkflow.company_name || 'Your Company',
+            business_type: contextWorkflow.business_type || 'Not specified',
+            hs_code: contextWorkflow.hs_code || 'Multiple',
+            product_description: contextWorkflow.product_description || 'Product',
+            annual_trade_volume: contextWorkflow.trade_volume || 0,
+            qualification_status: contextWorkflow.qualification_status || 'NEEDS_REVIEW',
+            component_origins: contextWorkflow.component_origins || [],
+
+            // Crisis alert specific data
+            analyzed_at: alert.created_at,
+            alert_type: 'rss_crisis',
+            severity_level: alert.severity_level,
+
+            // Transform crisis alert into vulnerability analysis format
+            primary_vulnerabilities: [
+              {
+                title: alert.title,
+                severity: alert.severity_level,
+                description: alert.description,
+                impact: alert.business_impact
+              }
+            ],
+
+            alerts: [
+              {
+                title: alert.title,
+                severity: alert.severity_level,
+                description: alert.description,
+                potential_impact: alert.business_impact,
+                recommended_action: alert.recommended_actions,
+                monitoring_guidance: `Source: ${alert.source_type} | Score: ${alert.crisis_score}/10`,
+                affected_components: alert.affected_industries || [],
+                alert_triggers: alert.keywords_matched || []
+              }
+            ],
+
+            recommendations: {
+              diversification_strategies: alert.recommended_actions
+                ? [alert.recommended_actions]
+                : []
+            }
+          };
+        });
+      }
 
       return res.status(200).json({
         workflows: allWorkflows || [],
-        alerts: alertHistory || [],
+        alerts: crisisAlerts || [],
         usage_stats: {
           used: used,
           limit: limit,
