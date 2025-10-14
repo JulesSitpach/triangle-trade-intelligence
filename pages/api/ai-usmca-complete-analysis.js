@@ -201,6 +201,11 @@ export default protectedApiHandler({
     // Store enriched component origins for results/certificate display
     result.component_origins = enrichedComponents;
     result.components = enrichedComponents; // Alias
+
+    // CRITICAL: Update component_breakdown with enriched data
+    // USMCAQualification.js reads from result.usmca.component_breakdown
+    result.usmca.component_breakdown = enrichedComponents;
+
     result.manufacturing_location = formData.manufacturing_location;
     result.workflow_data = {
       company_name: formData.company_name,
@@ -400,56 +405,49 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
     try {
       const enriched = { ...component };
 
-      // Step 1: Classify component to get HS code (if not already provided)
+      // Step 1: AI Classification with Tariff Rates (100% AI-powered - NO database lookups)
       if (!component.hs_code && !component.classified_hs_code) {
-        console.log(`📋 Classifying component: "${component.description}"`);
+        console.log(`📋 AI Classifying component: "${component.description}"`);
 
         const classificationResult = await classifyComponentHS(component.description, productContext);
 
         if (classificationResult.success) {
+          // AI provides EVERYTHING: HS code + tariff rates + confidence
           enriched.classified_hs_code = classificationResult.hs_code;
-          enriched.hs_code = classificationResult.hs_code; // Alias for compatibility
+          enriched.hs_code = classificationResult.hs_code;
           enriched.confidence = classificationResult.confidence;
-          console.log(`✅ Classified "${component.description}" → HS ${classificationResult.hs_code} (${classificationResult.confidence}% confidence)`);
-        } else {
-          console.log(`⚠️ Classification failed for "${component.description}"`);
-          enriched.confidence = 0;
-        }
-      } else {
-        // Use existing HS code
-        enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
-        enriched.hs_code = component.hs_code || component.classified_hs_code;
-        enriched.confidence = component.confidence || 100; // Assume user-provided HS code is accurate
-      }
-
-      // Step 2: Look up tariff rates from database
-      if (enriched.classified_hs_code) {
-        console.log(`💰 Looking up tariff rates for HS ${enriched.classified_hs_code}`);
-
-        const tariffRates = await lookupTariffRates(enriched.classified_hs_code);
-
-        if (tariffRates.success) {
-          enriched.mfn_rate = tariffRates.mfn_rate;
-          enriched.usmca_rate = tariffRates.usmca_rate;
+          enriched.mfn_rate = classificationResult.mfn_rate;
+          enriched.usmca_rate = classificationResult.usmca_rate;
           enriched.tariff_rates = {
-            mfn_rate: tariffRates.mfn_rate,
-            usmca_rate: tariffRates.usmca_rate
+            mfn_rate: classificationResult.mfn_rate,
+            usmca_rate: classificationResult.usmca_rate
           };
+          enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
 
-          // Step 3: Calculate savings
-          const savings = tariffRates.mfn_rate - tariffRates.usmca_rate;
-          enriched.savings_percent = savings;
+          console.log(`✅ AI Classification: "${component.description}" → HS ${classificationResult.hs_code}`);
+          console.log(`   💰 MFN: ${classificationResult.mfn_rate}% | USMCA: ${classificationResult.usmca_rate}% | Savings: ${enriched.savings_percent}%`);
+          console.log(`   🎯 Confidence: ${classificationResult.confidence}%`);
 
-          console.log(`✅ Tariff rates found: MFN ${tariffRates.mfn_rate}%, USMCA ${tariffRates.usmca_rate}%, Savings ${savings}%`);
+          // Save AI-generated data to database to BUILD the database
+          await saveAIDataToDatabase(classificationResult, component);
         } else {
-          console.log(`⚠️ Tariff rates not found for HS ${enriched.classified_hs_code}`);
+          console.log(`⚠️ AI Classification failed for "${component.description}"`);
+          enriched.confidence = 0;
           enriched.mfn_rate = 0;
           enriched.usmca_rate = 0;
           enriched.savings_percent = 0;
         }
+      } else {
+        // Use existing HS code (user-provided)
+        enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
+        enriched.hs_code = component.hs_code || component.classified_hs_code;
+        enriched.confidence = component.confidence || 100;
+        enriched.mfn_rate = component.mfn_rate || 0;
+        enriched.usmca_rate = component.usmca_rate || 0;
+        enriched.savings_percent = (component.mfn_rate || 0) - (component.usmca_rate || 0);
       }
 
-      // Step 4: Determine USMCA member status
+      // Step 2: Determine USMCA member status
       const usmcaCountries = ['US', 'MX', 'CA'];
       enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
 
@@ -473,26 +471,34 @@ async function enrichComponentsWithTariffIntelligence(components, productContext
 }
 
 /**
- * Classify component description to HS code using AI
+ * Classify component description to HS code using AI (100% AI-powered - NO database lookups)
  * @param {string} componentDescription - Component description to classify
  * @param {string} productContext - Product context for better classification
- * @returns {Object} Classification result with hs_code and confidence
+ * @returns {Object} Classification result with hs_code, tariff rates, and confidence
  */
 async function classifyComponentHS(componentDescription, productContext) {
   try {
-    const classificationPrompt = `You are an HS code classification expert. Classify this component to its 6-digit HS code.
+    const classificationPrompt = `You are an HS code classification expert with tariff knowledge. Classify this component and provide tariff rates.
 
 PRODUCT CONTEXT: ${productContext}
 COMPONENT: ${componentDescription}
 
-Provide the most accurate 6-digit HS code classification.
+Provide:
+1. Most accurate 6-digit HS code
+2. MFN (Most Favored Nation) tariff rate as a percentage
+3. USMCA preferential tariff rate as a percentage
+4. Your confidence level
 
 Return ONLY a JSON object in this exact format (no other text):
 {
   "hs_code": "XXXX.XX",
+  "mfn_rate": 5.0,
+  "usmca_rate": 0.0,
   "confidence": 85,
-  "reasoning": "brief explanation"
-}`;
+  "reasoning": "brief explanation of classification and typical tariff rates"
+}
+
+Note: USMCA rate is typically 0% (duty-free) for qualifying goods from US/MX/CA. MFN rate varies by product.`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -501,7 +507,7 @@ Return ONLY a JSON object in this exact format (no other text):
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku', // Use faster, cheaper model for component classification
+        model: 'anthropic/claude-3-haiku',
         messages: [{
           role: 'user',
           content: classificationPrompt
@@ -528,7 +534,10 @@ Return ONLY a JSON object in this exact format (no other text):
     return {
       success: true,
       hs_code: classification.hs_code,
-      confidence: classification.confidence || 85
+      mfn_rate: classification.mfn_rate || 0,
+      usmca_rate: classification.usmca_rate || 0,
+      confidence: classification.confidence || 85,
+      reasoning: classification.reasoning
     };
 
   } catch (error) {
@@ -541,54 +550,36 @@ Return ONLY a JSON object in this exact format (no other text):
 }
 
 /**
- * Look up MFN and USMCA tariff rates from database
- * @param {string} hsCode - 6-digit HS code (format: XXXX.XX)
- * @returns {Object} Tariff rates or error
+ * Save AI-generated classification data to database to BUILD the database
+ * This is the CORRECT approach: AI generates data → Save to database to help build it
+ * @param {Object} classificationResult - AI classification with HS code and tariff rates
+ * @param {Object} component - Original component data
  */
-async function lookupTariffRates(hsCode) {
+async function saveAIDataToDatabase(classificationResult, component) {
   try {
-    // Query hs_master_rebuild table for tariff rates
-    const { data, error } = await supabase
-      .from('hs_master_rebuild')
-      .select('hs_code, mfn_rate, usmca_rate')
-      .eq('hs_code', hsCode)
-      .single();
+    // Save to ai_classifications table to build our database over time
+    const { error } = await supabase
+      .from('ai_classifications')
+      .insert({
+        hs_code: classificationResult.hs_code,
+        component_description: component.description,
+        mfn_rate: classificationResult.mfn_rate,
+        usmca_rate: classificationResult.usmca_rate,
+        confidence: classificationResult.confidence,
+        reasoning: classificationResult.reasoning,
+        origin_country: component.origin_country,
+        value_percentage: component.value_percentage,
+        created_at: new Date().toISOString()
+      });
 
-    if (error || !data) {
-      // Try without decimal point (some HS codes stored as XXXXXX)
-      const hsCodeNoDecimal = hsCode.replace('.', '');
-      const { data: data2, error: error2 } = await supabase
-        .from('hs_master_rebuild')
-        .select('hs_code, mfn_rate, usmca_rate')
-        .eq('hs_code', hsCodeNoDecimal)
-        .single();
-
-      if (error2 || !data2) {
-        console.log(`⚠️ Tariff rates not found in database for HS ${hsCode}`);
-        return {
-          success: false,
-          error: 'Tariff rates not found'
-        };
-      }
-
-      return {
-        success: true,
-        mfn_rate: parseFloat(data2.mfn_rate) || 0,
-        usmca_rate: parseFloat(data2.usmca_rate) || 0
-      };
+    if (error) {
+      // Don't fail the request - just log the error
+      console.log(`⚠️ Failed to save AI data to database:`, error.message);
+    } else {
+      console.log(`💾 Saved AI classification to database: HS ${classificationResult.hs_code}`);
     }
-
-    return {
-      success: true,
-      mfn_rate: parseFloat(data.mfn_rate) || 0,
-      usmca_rate: parseFloat(data.usmca_rate) || 0
-    };
-
   } catch (error) {
-    console.error('Database lookup failed:', error);
-    return {
-      success: false,
-      error: error.message
-    };
+    // Don't fail the request - just log the error
+    console.log(`⚠️ Database save error:`, error.message);
   }
 }
