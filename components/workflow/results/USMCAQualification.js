@@ -100,7 +100,7 @@ export default function USMCAQualification({ results }) {
                 const hasRates = mfnRate > 0 || usmcaRate >= 0;
 
                 const isExpanded = expandedComponents[index];
-                const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence;
+                const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence || component.hs_description;
 
                 return (
                   <React.Fragment key={index}>
@@ -169,6 +169,52 @@ export default function USMCAQualification({ results }) {
                                 }}>
                                   {component.confidence}% {component.confidence >= 90 ? '(High)' : component.confidence >= 75 ? '(Medium)' : '(Low)'}
                                 </span>
+                              </div>
+                            )}
+
+                            {/* HS Code Description */}
+                            {component.hs_description && (
+                              <div style={{ marginBottom: '0.75rem' }}>
+                                <strong style={{ color: '#374151' }}>HS Code Description:</strong>
+                                <div style={{
+                                  marginTop: '0.25rem',
+                                  padding: '0.75rem',
+                                  backgroundColor: '#ffffff',
+                                  borderRadius: '4px',
+                                  borderLeft: '3px solid #10b981',
+                                  color: '#4b5563'
+                                }}>
+                                  {component.hs_description}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Tariff Rate Information */}
+                            {(component.mfn_rate || component.usmca_rate !== undefined) && (
+                              <div style={{ marginBottom: '0.75rem' }}>
+                                <strong style={{ color: '#374151' }}>Tariff Rate Details:</strong>
+                                <div style={{
+                                  marginTop: '0.5rem',
+                                  padding: '0.75rem',
+                                  backgroundColor: '#ffffff',
+                                  borderRadius: '4px',
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(3, 1fr)',
+                                  gap: '1rem'
+                                }}>
+                                  <div>
+                                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>MFN Rate</div>
+                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{(component.mfn_rate || 0).toFixed(1)}%</div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(component.usmca_rate || 0).toFixed(1)}%</div>
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Savings</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.mfn_rate || 0) - (component.usmca_rate || 0)).toFixed(1)}%</div>
+                                  </div>
+                                </div>
                               </div>
                             )}
 
