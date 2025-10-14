@@ -221,4 +221,10 @@ dev-server.log
 
 # AI Development Documentation (local only)
 CLAUDE.md
+
+# HTS Tariff Data Files (large files - download separately)
+tariff_data_2025.zip
+tariff_database_2025.txt
+tariff_database_2025.xlsx
+
 # Git config updated for Vercel auto-deploy

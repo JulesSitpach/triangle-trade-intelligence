@@ -8,6 +8,7 @@
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
+import { lookupHTSTariffRates } from '../../lib/tariff/hts-lookup.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -450,28 +451,54 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
     try {
       const enriched = { ...component };
 
-      // Step 1: AI Classification with Tariff Rates (100% AI-powered - NO database lookups)
+      // Step 1: AI Classification (using complete business context)
       if (!component.hs_code && !component.classified_hs_code) {
         console.log(`📋 AI Classifying component: "${component.description}"`);
 
         const classificationResult = await classifyComponentHS(component.description, businessContext, component);
 
         if (classificationResult.success) {
-          // AI provides EVERYTHING: HS code + tariff rates + confidence
+          // AI classified the HS code
           enriched.classified_hs_code = classificationResult.hs_code;
           enriched.hs_code = classificationResult.hs_code;
           enriched.confidence = classificationResult.confidence;
-          enriched.mfn_rate = classificationResult.mfn_rate;
-          enriched.usmca_rate = classificationResult.usmca_rate;
-          enriched.tariff_rates = {
-            mfn_rate: classificationResult.mfn_rate,
-            usmca_rate: classificationResult.usmca_rate
-          };
-          enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
 
-          console.log(`✅ AI Classification: "${component.description}" → HS ${classificationResult.hs_code}`);
-          console.log(`   💰 MFN: ${classificationResult.mfn_rate}% | USMCA: ${classificationResult.usmca_rate}% | Savings: ${enriched.savings_percent}%`);
-          console.log(`   🎯 Confidence: ${classificationResult.confidence}%`);
+          // Step 2: Try official HTS database lookup for accurate tariff rates
+          console.log(`🔍 Looking up official HTS rates for: ${classificationResult.hs_code}`);
+          const htsLookup = await lookupHTSTariffRates(classificationResult.hs_code);
+
+          if (htsLookup.success) {
+            // Use official database rates (ACCURATE)
+            enriched.mfn_rate = htsLookup.mfn_rate;
+            enriched.usmca_rate = htsLookup.usmca_rate;
+            enriched.tariff_rates = {
+              mfn_rate: htsLookup.mfn_rate,
+              usmca_rate: htsLookup.usmca_rate
+            };
+            enriched.savings_percent = htsLookup.mfn_rate - htsLookup.usmca_rate;
+            enriched.rate_source = 'official_hts_2025'; // Indicate source
+            enriched.hs_description = htsLookup.description;
+            enriched.last_updated = htsLookup.last_updated;
+
+            console.log(`✅ Official HTS Rates: "${component.description}" → HS ${classificationResult.hs_code}`);
+            console.log(`   💰 MFN: ${htsLookup.mfn_rate.toFixed(1)}% | USMCA: ${htsLookup.usmca_rate.toFixed(1)}% | Savings: ${enriched.savings_percent.toFixed(1)}%`);
+            console.log(`   📊 Source: ${htsLookup.source}`);
+            console.log(`   🎯 AI Confidence: ${classificationResult.confidence}%`);
+          } else {
+            // Fallback to AI-provided rates (if database lookup fails)
+            enriched.mfn_rate = classificationResult.mfn_rate;
+            enriched.usmca_rate = classificationResult.usmca_rate;
+            enriched.tariff_rates = {
+              mfn_rate: classificationResult.mfn_rate,
+              usmca_rate: classificationResult.usmca_rate
+            };
+            enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
+            enriched.rate_source = 'ai_estimated'; // Indicate AI estimate
+
+            console.log(`⚠️ HTS database lookup failed, using AI rates for "${component.description}"`);
+            console.log(`   💰 MFN: ${classificationResult.mfn_rate}% | USMCA: ${classificationResult.usmca_rate}% | Savings: ${enriched.savings_percent}%`);
+            console.log(`   🎯 Confidence: ${classificationResult.confidence}%`);
+          }
 
           // Save AI-generated data to database to BUILD the database
           await saveAIDataToDatabase(classificationResult, component);
@@ -481,15 +508,30 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           enriched.mfn_rate = 0;
           enriched.usmca_rate = 0;
           enriched.savings_percent = 0;
+          enriched.rate_source = 'unavailable';
         }
       } else {
         // Use existing HS code (user-provided)
         enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
         enriched.hs_code = component.hs_code || component.classified_hs_code;
         enriched.confidence = component.confidence || 100;
-        enriched.mfn_rate = component.mfn_rate || 0;
-        enriched.usmca_rate = component.usmca_rate || 0;
-        enriched.savings_percent = (component.mfn_rate || 0) - (component.usmca_rate || 0);
+
+        // Try database lookup for user-provided HS code
+        const htsLookup = await lookupHTSTariffRates(enriched.hs_code);
+        if (htsLookup.success) {
+          enriched.mfn_rate = htsLookup.mfn_rate;
+          enriched.usmca_rate = htsLookup.usmca_rate;
+          enriched.savings_percent = htsLookup.mfn_rate - htsLookup.usmca_rate;
+          enriched.rate_source = 'official_hts_2025';
+          enriched.hs_description = htsLookup.description;
+          enriched.last_updated = htsLookup.last_updated;
+        } else {
+          // Fallback to component values
+          enriched.mfn_rate = component.mfn_rate || 0;
+          enriched.usmca_rate = component.usmca_rate || 0;
+          enriched.savings_percent = (component.mfn_rate || 0) - (component.usmca_rate || 0);
+          enriched.rate_source = 'user_provided';
+        }
       }
 
       // Step 2: Determine USMCA member status

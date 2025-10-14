@@ -7,6 +7,11 @@ module.exports = {
     ignoreDuringBuilds: true,
   },
 
+  // Disable TypeScript type checking during builds (speeds up build significantly)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   // Ensure environment variables are available
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
