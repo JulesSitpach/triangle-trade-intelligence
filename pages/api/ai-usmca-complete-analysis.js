@@ -58,7 +58,7 @@ export default protectedApiHandler({
           role: 'user',
           content: prompt
         }],
-        temperature: 0.1 // Low temperature for consistent, factual responses
+        temperature: 0 // Zero temperature for perfect determinism (same input = same output)
       })
     });
 
@@ -644,7 +644,7 @@ CRITICAL: Be precise and accurate. This data will be used for compliance decisio
           role: 'user',
           content: classificationPrompt
         }],
-        temperature: 0.1
+        temperature: 0 // Zero temperature for deterministic HS classification
       })
     });
 
