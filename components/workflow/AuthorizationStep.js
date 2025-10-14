@@ -740,6 +740,19 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 </div>
               </div>
 
+              {/* Platform Disclaimer - Below certificate preview */}
+              <div className="alert alert-info" style={{marginTop: '1.5rem', marginBottom: '1.5rem'}}>
+                <div className="alert-content">
+                  <div className="alert-title">⚖️ Platform Disclaimer</div>
+                  <div className="text-body" style={{fontSize: '11px', lineHeight: '1.5'}}>
+                    This certificate was prepared by the signatory identified above using Triangle Trade Intelligence tools.
+                    Triangle Trade Intelligence provides software tools only and assumes no legal responsibility for the accuracy,
+                    completeness, or compliance of this certificate. The signatory assumes full legal responsibility for all
+                    information contained herein and certifies compliance with all applicable regulations.
+                  </div>
+                </div>
+              </div>
+
               {/* Certificate Actions - Below Preview */}
               <div style={{marginTop: '2rem'}}>
                 <div className="hero-buttons">

@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import LegalDisclaimer from '../../components/LegalDisclaimer';
 
 export default function TradeHealthCheck() {
   const router = useRouter();
@@ -225,6 +226,13 @@ export default function TradeHealthCheck() {
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Legal Disclaimer - Compact Version */}
+        <section className="section">
+          <div className="section-content">
+            <LegalDisclaimer variant="compact" />
           </div>
         </section>
 

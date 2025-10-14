@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import LegalDisclaimer from '../components/LegalDisclaimer'
 import Footer from '../components/Footer'
 
 export default function ProfessionalServices() {
@@ -243,6 +244,13 @@ export default function ProfessionalServices() {
         </div>
       </section>
 
+      {/* Legal Disclaimer - Before Services */}
+      <section className="main-content">
+        <div className="container-app">
+          <LegalDisclaimer />
+        </div>
+      </section>
+
       {/* Service Tiers */}
       <section className="main-content" id="services">
         <div className="container-app">
@@ -362,42 +370,6 @@ export default function ProfessionalServices() {
                 Services range from $175-$450 one-time or $200/month for Crisis Navigator. Subscribers save automatically at checkout.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Legal Disclaimer Section */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Service Scope & Disclaimers</h2>
-            <p className="section-header-subtitle">
-              Transparent about what we provide and when you need licensed professionals
-            </p>
-          </div>
-
-          <div className="content-card" style={{maxWidth: '800px', margin: '0 auto'}}>
-            <h3 className="content-card-title">What We Provide:</h3>
-            <p className="content-card-description" style={{marginBottom: '16px'}}>
-              ✅ Trade process consulting and optimization guidance<br/>
-              ✅ USMCA qualification assessment and recommendations<br/>
-              ✅ Logistics planning and strategic recommendations<br/>
-              ✅ Supply chain analysis and process improvement<br/>
-              ✅ Market entry strategy and business development support
-            </p>
-
-            <h3 className="content-card-title">What We DO NOT Provide:</h3>
-            <p className="content-card-description" style={{marginBottom: '16px'}}>
-              ❌ Licensed customs broker services<br/>
-              ❌ Official USMCA certificate preparation (legal documents)<br/>
-              ❌ Formal legal compliance certifications<br/>
-              ❌ Official customs declarations
-            </p>
-
-            <h3 className="content-card-title">Partner Network:</h3>
-            <p className="content-card-description" style={{fontStyle: 'italic'}}>
-              For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide guidance and assessment; official certifications require licensed customs brokers.
-            </p>
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import TriangleLayout from '../components/TriangleLayout'
 import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
+import LegalDisclaimer from '../components/LegalDisclaimer'
 import Footer from '../components/Footer'
 
 export default function HomePage() {
@@ -294,6 +295,13 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer - Visible before pricing and services */}
+      <section className="main-content">
+        <div className="container-app">
+          <LegalDisclaimer />
         </div>
       </section>
 

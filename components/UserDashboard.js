@@ -124,6 +124,33 @@ export default function UserDashboard({ user }) {
     router.push(`/trade-risk-alternatives?analysis_id=${alertId}`);
   };
 
+  // Helper function to scroll to Request Service section
+  const scrollToServiceRequest = (workflowId = null, serviceId = null) => {
+    const section = document.getElementById('request-service-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Pre-select workflow and service if provided
+      if (workflowId) {
+        setTimeout(() => {
+          const workflowSelect = document.querySelector('#workflow-selector');
+          if (workflowSelect) {
+            workflowSelect.value = workflowId;
+            workflowSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }, 300);
+      }
+      if (serviceId) {
+        setTimeout(() => {
+          const serviceSelect = document.querySelector('#service-selector');
+          if (serviceSelect) {
+            serviceSelect.value = serviceId;
+            serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }, 500);
+      }
+    }
+  };
+
   // REQUEST SERVICE SECTION COMPONENT (Subscriber-only fast path)
   const RequestServiceSection = ({ user, workflows }) => {
     const [selectedWorkflowId, setSelectedWorkflowId] = useState('');
@@ -257,7 +284,7 @@ export default function UserDashboard({ user }) {
     const selectedServiceObj = services.find(s => s.id === selectedService);
 
     return (
-      <div className="form-section">
+      <div id="request-service-section" className="form-section">
         <h2 className="form-section-title">🚀 Request Expert Service</h2>
         <p className="text-body">
           Fast-track service requests for subscribers with automatic discount pricing
@@ -282,6 +309,7 @@ export default function UserDashboard({ user }) {
                 Select Workflow: <span className="text-red">*</span>
               </label>
               <select
+                id="workflow-selector"
                 className="form-select"
                 value={selectedWorkflowId}
                 onChange={(e) => setSelectedWorkflowId(e.target.value)}
@@ -318,6 +346,7 @@ export default function UserDashboard({ user }) {
             <div className="form-group">
               <label className="form-label">Select Service:</label>
               <select
+                id="service-selector"
                 className="form-select"
                 value={selectedService}
                 onChange={(e) => setSelectedService(e.target.value)}
@@ -546,12 +575,12 @@ export default function UserDashboard({ user }) {
                             📊 View Analysis
                           </Link>
 
-                          <Link
-                            href="/services/logistics-support"
+                          <button
+                            onClick={() => scrollToServiceRequest(selectedWorkflow.id, 'usmca-advantage')}
                             className="btn-primary"
                           >
                             🇲🇽 Get Help to Qualify
-                          </Link>
+                          </button>
                         </>
                       )}
 
@@ -732,12 +761,19 @@ export default function UserDashboard({ user }) {
                       >
                         View Full Alert
                       </button>
-                      <Link
-                        href="/services/request?service=crisis-response"
+                      <button
+                        onClick={() => {
+                          // Find the workflow associated with this alert
+                          const relatedWorkflow = workflows.find(w =>
+                            w.product_description === selectedAlert.product_description ||
+                            w.company_name === selectedAlert.company_name
+                          );
+                          scrollToServiceRequest(relatedWorkflow?.id, 'crisis-navigator');
+                        }}
                         className="btn-primary"
                       >
                         Get Professional Help
-                      </Link>
+                      </button>
 
                       {/* Delete Alert Button */}
                       <button

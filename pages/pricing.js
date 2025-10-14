@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { getStripe } from '../lib/stripe/client'
+import LegalDisclaimer from '../components/LegalDisclaimer'
 import Footer from '../components/Footer'
 
 export default function Pricing() {
@@ -276,6 +277,13 @@ export default function Pricing() {
               View Plans
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer - Before Pricing */}
+      <section className="main-content">
+        <div className="container-app">
+          <LegalDisclaimer />
         </div>
       </section>
 

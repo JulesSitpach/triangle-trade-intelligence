@@ -26,6 +26,7 @@ export default function WorkflowResults({
   const [dataSentToAlerts, setDataSentToAlerts] = useState(false);
   const [showSaveConsentModal, setShowSaveConsentModal] = useState(false);
   const [userMadeChoice, setUserMadeChoice] = useState(false);
+  const [certificateGenerated, setCertificateGenerated] = useState(false);
   const [modalChoice, setModalChoice] = useState('save'); // Default to save
   const modalShownRef = useRef(false);
   const modalClosedTimeRef = useRef(0);
@@ -43,6 +44,13 @@ export default function WorkflowResults({
     if (savedChoice) {
       setUserMadeChoice(true);
       console.log('✅ User previously chose:', savedChoice);
+    }
+
+    // Check if user already generated certificate for this session
+    const certGenerated = sessionStorage.getItem('certificate_generated');
+    if (certGenerated === 'true') {
+      setCertificateGenerated(true);
+      console.log('✅ Certificate already generated this session');
     }
   }, []);
 
@@ -244,10 +252,12 @@ export default function WorkflowResults({
             console.log('ℹ️ Workflow not saved to database (developer testing - not signed in)');
           } else {
             console.log('✅ Workflow saved to database successfully');
-            // Success message handled by button click handler
+            // Show success notification
+            alert('✅ Analysis saved to your dashboard!\n\nYou can now:\n• View it anytime from your Dashboard\n• Set up trade risk alerts\n• Request professional services');
           }
         } else {
           console.error('⚠️ Failed to save workflow to database:', await response.text());
+          alert('⚠️ Unable to save to database. Please try again or contact support.');
         }
       } catch (error) {
         console.error('❌ Error saving workflow to database:', error);
@@ -260,6 +270,17 @@ export default function WorkflowResults({
         console.log('🚨 User consented - redirecting to alerts...');
         // Call handleSetUpAlerts again now that consent is granted
         setTimeout(() => handleSetUpAlerts(), 500);
+      }
+
+      // Check if user was trying to generate certificate
+      const pendingCertificate = localStorage.getItem('pending_certificate_generation');
+      if (pendingCertificate === 'true') {
+        localStorage.removeItem('pending_certificate_generation');
+        console.log('📄 User consented - redirecting to certificate generation...');
+        localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+        sessionStorage.setItem('certificate_generated', 'true');
+        setCertificateGenerated(true);
+        setTimeout(() => router.push('/usmca-certificate-completion'), 500);
       }
 
     } else {
@@ -358,7 +379,7 @@ export default function WorkflowResults({
         Save to Dashboard?
       </h2>
       <p className="consent-modal-description">
-        Choose how you&apos;d like to use this analysis
+        All features work either way - choose how to handle your data
       </p>
 
       <div className="consent-modal-options">
@@ -373,13 +394,13 @@ export default function WorkflowResults({
               checked={modalChoice === 'save'}
               onChange={() => setModalChoice('save')}
             />
-            SAVE - Enable alerts and services
+            SAVE - Keep everything for later
           </div>
           <div className="consent-option-details">
-            • Get real-time trade alerts for your product<br/>
-            • Access professional services later<br/>
-            • View analysis history in your dashboard<br/>
-            • Store this analysis for future reference
+            • Certificate saved to dashboard (download anytime)<br/>
+            • Alerts persist after logout<br/>
+            • Service requests with pre-filled data<br/>
+            • Access this analysis anytime from dashboard
           </div>
         </div>
 
@@ -394,13 +415,13 @@ export default function WorkflowResults({
               checked={modalChoice === 'dont-save'}
               onChange={() => setModalChoice('dont-save')}
             />
-            DON&apos;T SAVE - View only
+            DON&apos;T SAVE - Use now, delete after
           </div>
           <div className="consent-option-details">
-            • No alerts or notifications<br/>
-            • No professional services access<br/>
-            • No data storage<br/>
-            • This analysis will not be saved
+            • Certificate generates but NOT saved to dashboard<br/>
+            • Alerts work now but deleted on logout<br/>
+            • Services work but no saved data<br/>
+            • Must redo workflow for another certificate
           </div>
         </div>
       </div>
@@ -668,7 +689,7 @@ export default function WorkflowResults({
       <div className="form-section">
         <h2 className="form-section-title">Next Steps</h2>
         <p className="text-body">
-          Save your analysis to access it later, set up alerts, and request professional services
+          All features are available - certificates, alerts, and services work either way. Choose whether to save for later access or use once and delete.
         </p>
         <div>
           {/* Privacy & Save Information Card - Always show with checkbox */}
@@ -682,14 +703,16 @@ export default function WorkflowResults({
                 className="privacy-info-checkbox"
               />
               <label htmlFor="saveConsent" className="privacy-info-label">
-                <div className="privacy-info-title">💾 Save to Dashboard</div>
+                <div className="privacy-info-title">💾 Save to Dashboard (Recommended)</div>
                 <div className="privacy-info-text">
-                  Save this analysis to:
+                  Saving allows you to:
                   <ul className="privacy-info-list">
-                    <li>Access your results anytime from your dashboard</li>
-                    <li>Set up automated trade risk alerts</li>
-                    <li>Request professional services later</li>
+                    <li>Download certificates anytime from your dashboard</li>
+                    <li>Keep alerts active after logout</li>
+                    <li>Request services with pre-filled data</li>
+                    <li>Access analysis history whenever needed</li>
                   </ul>
+                  <strong>Not saving?</strong> Features still work but data is deleted immediately after use.
                 </div>
                 <div className="privacy-info-disclaimer">
                   Privacy: You can delete all saved data anytime from Account Settings
@@ -716,44 +739,85 @@ export default function WorkflowResults({
             {results.usmca?.qualified && (
               <button
                 onClick={() => {
+                  // Check if user has made a choice (doesn't matter which one)
+                  const savedChoice = localStorage.getItem('save_data_consent');
+
+                  if (!savedChoice) {
+                    // If no choice made, open modal directly
+                    setShowSaveConsentModal(true);
+                    localStorage.setItem('pending_certificate_generation', 'true');
+                    return;
+                  }
+
+                  // Proceed to certificate generation (works either way)
                   localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+                  sessionStorage.setItem('certificate_generated', 'true');
+                  setCertificateGenerated(true);
+                  console.log('✅ Proceeding to certificate generation...');
+
+                  if (savedChoice !== 'save') {
+                    console.log('⚠️ Certificate will NOT be saved to dashboard (user chose view-only)');
+                  }
+
                   router.push('/usmca-certificate-completion');
                 }}
-                className={userMadeChoice ? 'btn-primary' : 'btn-secondary'}
+                className="btn-primary"
               >
-                📄 Generate Certificate
+                {certificateGenerated ? '✓ Certificate Generated' : '📄 Generate Certificate'}
               </button>
             )}
 
             {/* Button 3: Request Professional Service */}
             <button
-              onClick={() => router.push('/services/logistics-support')}
-              className="btn-secondary"
+              onClick={() => {
+                const savedChoice = localStorage.getItem('save_data_consent');
+                if (!savedChoice) {
+                  // Open modal directly
+                  setShowSaveConsentModal(true);
+                  return;
+                }
+                router.push('/services/logistics-support');
+              }}
+              className="btn-primary"
             >
               🎯 Request Professional Service
             </button>
 
-            {/* Button 4: Print Analysis */}
+            {/* Button 4: Set Up Alerts */}
             <button
-              onClick={() => window.print()}
-              className="btn-secondary"
+              onClick={() => {
+                const savedChoice = localStorage.getItem('save_data_consent');
+                if (!savedChoice) {
+                  // Open modal directly
+                  setShowSaveConsentModal(true);
+                  localStorage.setItem('pending_alert_setup', 'true');
+                  return;
+                }
+                handleSetUpAlerts();
+              }}
+              className="btn-primary"
             >
-              🖨️ Print Analysis
+              🔔 Set Up Alerts
             </button>
 
             {/* Button 5: New Analysis */}
             <button
               onClick={() => {
-                if (confirm('Start a new analysis? Your current results will remain saved in your dashboard.')) {
+                const message = userMadeChoice && localStorage.getItem('save_data_consent') === 'save'
+                  ? 'Start a new analysis? Your current results will remain saved in your dashboard.'
+                  : 'Start a new analysis? Your current results will be cleared.';
+
+                if (confirm(message)) {
                   // Clear localStorage for fresh start
                   localStorage.removeItem('workflow_current_step');
                   localStorage.removeItem('usmca_workflow_results');
+                  sessionStorage.removeItem('certificate_generated');
                   // Trigger reset and go to step 1
                   onReset && onReset();
                   router.push('/usmca-workflow?reset=true');
                 }
               }}
-              className="btn-secondary"
+              className="btn-primary"
             >
               🔄 New Analysis
             </button>

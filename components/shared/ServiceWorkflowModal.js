@@ -277,6 +277,188 @@ const ServiceWorkflowModal = ({ isOpen, service, request, onClose, onComplete, c
           )}
         </div>
 
+        {/* USMCA Qualification Results */}
+        {subscriberContext.qualification_status && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              USMCA Qualification Analysis:
+            </div>
+            <div className="workflow-client-context-item">
+              <span className="workflow-client-context-label">Status:</span>
+              <strong>{subscriberContext.qualification_status}</strong>
+            </div>
+            {subscriberContext.north_american_content && (
+              <div className="workflow-client-context-item">
+                <span className="workflow-client-context-label">North American Content:</span> {subscriberContext.north_american_content}%
+              </div>
+            )}
+            {subscriberContext.threshold_applied && (
+              <div className="workflow-client-context-item">
+                <span className="workflow-client-context-label">Threshold Applied:</span> {subscriberContext.threshold_applied}%
+              </div>
+            )}
+            {subscriberContext.gap && (
+              <div className="workflow-client-context-item">
+                <span className="workflow-client-context-label">Gap to Qualify:</span> {subscriberContext.gap}%
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Savings & Financial Impact */}
+        {(subscriberContext.annual_savings || subscriberContext.potential_usmca_savings || subscriberContext.calculated_savings) && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              Financial Impact:
+            </div>
+            <div className="workflow-client-context-item">
+              <span className="workflow-client-context-label">Annual USMCA Savings:</span>
+              <strong>${(subscriberContext.annual_savings || subscriberContext.potential_usmca_savings || subscriberContext.calculated_savings || 0).toLocaleString()}</strong>
+            </div>
+            {subscriberContext.annual_tariff_cost && (
+              <div className="workflow-client-context-item">
+                <span className="workflow-client-context-label">Current Annual Tariff Cost:</span> ${subscriberContext.annual_tariff_cost.toLocaleString()}
+              </div>
+            )}
+            {subscriberContext.monthly_savings && (
+              <div className="workflow-client-context-item">
+                <span className="workflow-client-context-label">Monthly Savings:</span> ${subscriberContext.monthly_savings.toLocaleString()}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Compliance Gaps & Risk Factors */}
+        {(subscriberContext.compliance_gaps || subscriberContext.vulnerability_factors) && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              Compliance & Risk Assessment:
+            </div>
+            {subscriberContext.compliance_gaps && subscriberContext.compliance_gaps.length > 0 && (
+              <div className="risk-factors">
+                <strong>Compliance Gaps:</strong>
+                <ul>
+                  {subscriberContext.compliance_gaps.map((gap, index) => (
+                    <li key={index}>{gap}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {subscriberContext.vulnerability_factors && subscriberContext.vulnerability_factors.length > 0 && (
+              <div className="risk-factors">
+                <strong>Vulnerability Factors:</strong>
+                <ul>
+                  {subscriberContext.vulnerability_factors.map((factor, index) => (
+                    <li key={index}>{factor}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Trade Alerts & Crisis Intelligence */}
+        {(subscriberContext.alerts || subscriberContext.trade_alerts || subscriberContext.crisis_factors) && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              Trade Alerts & Crisis Intelligence:
+            </div>
+            {(subscriberContext.alerts || subscriberContext.trade_alerts || []).map((alert, index) => (
+              <div key={index} className="workflow-client-context-item">
+                <strong>{alert.type || alert.alert_type}:</strong> {alert.message || alert.description}
+                {alert.impact && <div><span className="workflow-client-context-label">Impact:</span> ${alert.impact.toLocaleString()}/year</div>}
+              </div>
+            ))}
+            {subscriberContext.crisis_factors && subscriberContext.crisis_factors.length > 0 && (
+              <div className="risk-factors">
+                <strong>Crisis Factors:</strong>
+                <ul>
+                  {subscriberContext.crisis_factors.map((factor, index) => (
+                    <li key={index}>{factor}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Component Tariff Intelligence - Enriched Data from Workflow */}
+        {(subscriberContext.component_origins || subscriberContext.components || subscriberContext.component_breakdown) && (
+          <div className="workflow-client-context">
+            <div className="workflow-client-context-title">
+              Component Tariff Intelligence:
+            </div>
+            <div className="component-table-wrapper">
+              <table className="component-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>HS Code</th>
+                    <th>Origin</th>
+                    <th>Value %</th>
+                    <th>MFN Rate</th>
+                    <th>USMCA Rate</th>
+                    <th>Savings</th>
+                    <th>Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(subscriberContext.component_origins || subscriberContext.components || subscriberContext.component_breakdown || []).map((component, index) => {
+                    const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
+                    const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
+                    const savingsPercent = mfnRate - usmcaRate;
+                    const confidence = component.confidence || 0;
+                    const isLowConfidence = confidence < 70;
+                    const isMexicoOpportunity = component.origin_country === 'MX' && savingsPercent > 5;
+
+                    return (
+                      <tr key={index} className={isLowConfidence ? 'low-confidence' : ''}>
+                        <td>{component.description || component.component_type || 'Component ' + (index + 1)}</td>
+                        <td>{component.hs_code || component.classified_hs_code || 'Not classified'}</td>
+                        <td>{component.origin_country || component.country || 'Unknown'}</td>
+                        <td>{component.value_percentage || component.percentage || 0}%</td>
+                        <td>{mfnRate.toFixed(1)}%</td>
+                        <td>{usmcaRate.toFixed(1)}%</td>
+                        <td className={savingsPercent > 0 ? 'savings-positive' : 'savings-zero'}>
+                          {savingsPercent.toFixed(1)}%
+                        </td>
+                        <td>
+                          <span className={isLowConfidence ? 'confidence-low' : 'confidence-high'}>
+                            {confidence}%
+                          </span>
+                          {isLowConfidence && ' ⚠️'}
+                          {isMexicoOpportunity && ' 🇲🇽'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <div className="component-table-footer">
+                <div className="enrichment-indicators">
+                  <span className="enrichment-note">
+                    Rate Source: {subscriberContext.component_origins?.[0]?.rate_source === 'official_hts_2025'
+                      ? '✅ Official USITC HTS 2025 Database'
+                      : subscriberContext.component_origins?.[0]?.rate_source === 'ai_estimated'
+                      ? '🤖 AI Estimated (verify if needed)'
+                      : 'Database + AI Hybrid System'}
+                  </span>
+                  {subscriberContext.component_origins?.some(c => c.confidence < 70) && (
+                    <span className="enrichment-warning">
+                      ⚠️ Low confidence components require professional validation
+                    </span>
+                  )}
+                  {subscriberContext.component_origins?.some(c => c.origin_country === 'MX') && (
+                    <span className="enrichment-opportunity">
+                      🇲🇽 Mexico sourcing opportunities identified
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Error display */}
         {error && (
           <div className="workflow-status-card workflow-status-warning">

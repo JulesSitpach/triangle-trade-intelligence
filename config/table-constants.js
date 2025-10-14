@@ -6,8 +6,9 @@
  */
 
 export const VERIFIED_TABLE_CONFIG = {
-  comtradeReference: 'hs_master_rebuild',
-  tariffRates: 'hs_master_rebuild', 
+  tariffIntelligence: 'tariff_intelligence_master',  // NEW: Consolidated master table
+  comtradeReference: 'tariff_intelligence_master',   // Consolidated into master
+  tariffRates: 'tariff_intelligence_master',         // Consolidated into master
   usmcaRules: 'usmca_qualification_rules',
   triangleRouting: 'triangle_routing_opportunities',
   countries: 'countries',
