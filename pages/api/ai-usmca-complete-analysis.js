@@ -137,7 +137,10 @@ export default protectedApiHandler({
         product_description: formData.product_description,
         confidence: analysis.product?.confidence || 85,
         classification_method: 'ai_analysis',
-        manufacturing_location: formData.manufacturing_location || ''
+        manufacturing_location: formData.manufacturing_location || '',
+        // Product-level tariff rates (from AI savings analysis)
+        mfn_rate: analysis.savings?.mfn_rate || 0,
+        usmca_rate: analysis.savings?.usmca_rate || 0
       },
 
       // USMCA qualification (from AI)
@@ -159,6 +162,9 @@ export default protectedApiHandler({
           'Supplier declarations'
         ]
       },
+
+      // Method of qualification for certificate (Transaction Value for RVC calculations)
+      method_of_qualification: 'TV', // Transaction Value method for Regional Value Content
 
       // Tariff savings (only if qualified for USMCA)
       savings: {
