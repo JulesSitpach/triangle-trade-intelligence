@@ -325,9 +325,9 @@ export default function TradeRiskAlternatives() {
     }
   };
 
-  // Handle user choosing to ERASE their data
+  // Handle user choosing to ERASE their data / Skip alerts
   const handleEraseDataConsent = () => {
-    console.log('🔒 User chose to ERASE data (privacy first)');
+    console.log('🔒 User chose to ERASE data / Skip alerts (privacy first)');
 
     // Save consent choice to not show modal again this session
     localStorage.setItem('save_data_consent', 'erase');
@@ -335,8 +335,18 @@ export default function TradeRiskAlternatives() {
     setShowSaveDataConsent(false);
     setPendingProfile(null);
 
-    // Note: Data stays in localStorage for this session only
-    // No database saving occurs
+    // Clear all workflow data from localStorage (respect privacy choice)
+    localStorage.removeItem('usmca_workflow_results');
+    localStorage.removeItem('usmca_workflow_data');
+    localStorage.removeItem('usmca_company_data');
+
+    // Show user feedback and redirect
+    alert('✅ No data saved. You can set up alerts anytime from your dashboard.');
+
+    // Redirect to dashboard
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 1000);
   };
 
   const generateDynamicContent = async (profile) => {
@@ -1278,12 +1288,13 @@ export default function TradeRiskAlternatives() {
           </div>
         )}
 
-        {/* Save Data Consent Modal - Privacy First */}
+        {/* Save Data Consent Modal - Privacy First with Alerts Context */}
         <SaveDataConsentModal
           isOpen={showSaveDataConsent}
           onSave={handleSaveDataConsent}
           onErase={handleEraseDataConsent}
           userProfile={pendingProfile}
+          context="alerts"
         />
       </div>
     </TriangleLayout>

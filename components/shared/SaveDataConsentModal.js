@@ -2,16 +2,33 @@
  * SaveDataConsentModal - ULTRA MINIMAL - ZERO CSS INTERFERENCE
  * Uses !important inline styles to override ALL CSS
  * Unique ID to prevent any class conflicts
- * Wrapped in React.memo to prevent unnecessary re-renders
+ * Enhanced with clear data saving notification and opt-out options
  */
 
 import React, { useState } from 'react';
 
-function SaveDataConsentModal({ isOpen, onContinue }) {
+function SaveDataConsentModal({ isOpen, onContinue, onSave, onErase, context = 'general' }) {
   const [choice, setChoice] = useState('save');
 
+  // Support both old API (onContinue) and new API (onSave/onErase)
+  const handleConfirm = () => {
+    console.log('CLICKED BUTTON - Choice:', choice);
+
+    if (onSave && onErase) {
+      // New API - separate handlers
+      if (choice === 'save') {
+        onSave();
+      } else {
+        onErase();
+      }
+    } else if (onContinue) {
+      // Old API - single handler with boolean
+      onContinue(choice === 'save');
+    }
+  };
+
   // DEBUG: Log when modal renders
-  console.log('🎯 SaveDataConsentModal RENDER - isOpen:', isOpen, 'Returning:', !isOpen ? 'NULL (not showing)' : 'MODAL JSX');
+  console.log('🎯 SaveDataConsentModal RENDER - isOpen:', isOpen, 'Context:', context);
 
   if (!isOpen) {
     console.log('❌ Modal isOpen=false, returning null');
@@ -19,6 +36,23 @@ function SaveDataConsentModal({ isOpen, onContinue }) {
   }
 
   console.log('✅ Modal isOpen=true, rendering modal JSX');
+
+  // Context-specific messaging
+  const getTitle = () => {
+    if (context === 'alerts') return '🔔 Set Up Trade Alerts - Save Your Data?';
+    if (context === 'certificate') return '📄 Generate Certificate - Save Your Data?';
+    return 'Save to Dashboard?';
+  };
+
+  const getNotification = () => {
+    if (context === 'alerts') {
+      return 'To receive personalized trade alerts, we need to save your workflow data. You can opt out and skip alerts.';
+    }
+    if (context === 'certificate') {
+      return 'To save your certificate to the dashboard, we need to store your workflow data. You can opt out and just download once.';
+    }
+    return 'Choose how to handle your workflow data:';
+  };
 
   return (
     <div
@@ -45,10 +79,10 @@ function SaveDataConsentModal({ isOpen, onContinue }) {
         id="consent-modal-card-unique"
         style={{
           position: 'absolute !important',
-          top: '100px !important',
+          top: '80px !important',
           left: '50% !important',
           transform: 'translateX(-50%) !important',
-          width: '500px !important',
+          width: '550px !important',
           maxWidth: '90vw !important',
           backgroundColor: '#ffffff !important',
           padding: '40px !important',
@@ -60,14 +94,31 @@ function SaveDataConsentModal({ isOpen, onContinue }) {
         }}
       >
         <h2 style={{
-          margin: '0 0 30px 0 !important',
+          margin: '0 0 15px 0 !important',
           fontSize: '24px !important',
           fontWeight: 'bold !important',
           color: '#1f2937 !important',
           transition: 'none !important'
         }}>
-          Save to Dashboard?
+          {getTitle()}
         </h2>
+
+        {/* Clear notification about data saving */}
+        <div style={{
+          marginBottom: '25px !important',
+          padding: '15px !important',
+          backgroundColor: '#f0f9ff !important',
+          border: '2px solid #0ea5e9 !important',
+          borderRadius: '6px !important',
+          fontSize: '14px !important',
+          color: '#0c4a6e !important',
+          lineHeight: '1.5 !important'
+        }}>
+          <strong style={{ display: 'block !important', marginBottom: '8px !important' }}>
+            📋 Data Notification:
+          </strong>
+          {getNotification()}
+        </div>
 
         <div style={{ marginBottom: '30px !important' }}>
           {/* SAVE Option */}
@@ -101,14 +152,14 @@ function SaveDataConsentModal({ isOpen, onContinue }) {
             </div>
           </div>
 
-          {/* DON'T SAVE Option */}
+          {/* DON'T SAVE Option - More prominent */}
           <div
             onClick={() => setChoice('dont-save')}
             style={{
               padding: '20px !important',
-              border: choice === 'dont-save' ? '3px solid blue !important' : '1px solid #ccc !important',
+              border: choice === 'dont-save' ? '3px solid #dc2626 !important' : '2px solid #e5e7eb !important',
               cursor: 'pointer !important',
-              backgroundColor: choice === 'dont-save' ? '#e3f2fd !important' : 'white !important',
+              backgroundColor: choice === 'dont-save' ? '#fef2f2 !important' : 'white !important',
               borderRadius: '4px !important',
               transition: 'none !important',
               animation: 'none !important',
@@ -122,22 +173,31 @@ function SaveDataConsentModal({ isOpen, onContinue }) {
                 onChange={() => setChoice('dont-save')}
                 style={{ marginRight: '10px !important', cursor: 'pointer !important' }}
               />
-              DON'T SAVE - View only
+              🚫 DON'T SAVE - Skip this feature
             </div>
             <div style={{ marginLeft: '30px !important', fontSize: '14px !important', color: '#4b5563 !important' }}>
-              • No alerts<br/>
-              • No services<br/>
-              • No storage
+              {context === 'alerts' ? (
+                <>
+                  • Skip trade alerts setup<br/>
+                  • No data will be stored<br/>
+                  • Return to dashboard<br/>
+                  • You can always set up alerts later
+                </>
+              ) : (
+                <>
+                  • No data saved to dashboard<br/>
+                  • One-time use only<br/>
+                  • Data cleared after session<br/>
+                  • Must redo workflow later
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {/* CONFIRM BUTTON */}
         <button
-          onClick={() => {
-            console.log('CLICKED BUTTON - Choice:', choice);
-            onContinue(choice === 'save');
-          }}
+          onClick={handleConfirm}
           style={{
             width: '100% !important',
             padding: '15px !important',
