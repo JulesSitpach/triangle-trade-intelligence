@@ -182,7 +182,7 @@ export default function HomePage() {
           </h2>
 
           <p className="hero-description-text">
-            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for small manufacturers and importers who can't afford full-time trade compliance teams.
+            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for small manufacturers and importers who can&apos;t afford full-time trade compliance teams.
           </p>
           
           <div className="hero-button-group">
@@ -226,7 +226,7 @@ export default function HomePage() {
           <div className="section-header">
             <h2 className="section-header-title">Why Small Manufacturers Need USMCA Compliance</h2>
             <p className="section-header-subtitle">
-              You can't afford a full-time compliance team, but you can't afford to ignore USMCA benefits either.
+              You can&apos;t afford a full-time compliance team, but you can&apos;t afford to ignore USMCA benefits either.
             </p>
           </div>
 
@@ -241,9 +241,9 @@ export default function HomePage() {
 
             <div className="content-card">
               <div className="card-icon">❓</div>
-              <h3 className="content-card-title">Don't Know If You Qualify</h3>
+              <h3 className="content-card-title">Don&apos;t Know If You Qualify</h3>
               <p className="content-card-description">
-                USMCA rules are complex. You need 55-75% regional content, but calculating this requires expertise you don't have in-house.
+                USMCA rules are complex. You need 55-75% regional content, but calculating this requires expertise you don&apos;t have in-house.
               </p>
             </div>
 
@@ -259,7 +259,7 @@ export default function HomePage() {
               <div className="card-icon">📄</div>
               <h3 className="content-card-title">Certificate Confusion</h3>
               <p className="content-card-description">
-                Need a USMCA certificate but don't know where to start? Wrong paperwork means customs delays and lost revenue.
+                Need a USMCA certificate but don&apos;t know where to start? Wrong paperwork means customs delays and lost revenue.
               </p>
             </div>
 

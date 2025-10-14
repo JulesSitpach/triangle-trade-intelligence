@@ -358,7 +358,7 @@ export default function WorkflowResults({
         Save to Dashboard?
       </h2>
       <p className="consent-modal-description">
-        Choose how you'd like to use this analysis
+        Choose how you&apos;d like to use this analysis
       </p>
 
       <div className="consent-modal-options">
@@ -394,7 +394,7 @@ export default function WorkflowResults({
               checked={modalChoice === 'dont-save'}
               onChange={() => setModalChoice('dont-save')}
             />
-            DON'T SAVE - View only
+            DON&apos;T SAVE - View only
           </div>
           <div className="consent-option-details">
             • No alerts or notifications<br/>
@@ -411,7 +411,7 @@ export default function WorkflowResults({
         }}
         className="consent-modal-button"
       >
-        CONFIRM {modalChoice === 'save' ? 'SAVE' : "DON'T SAVE"}
+        CONFIRM {modalChoice === 'save' ? 'SAVE' : "DON&apos;T SAVE"}
       </button>
 
       <p className="consent-modal-privacy">
