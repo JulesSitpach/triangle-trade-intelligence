@@ -807,30 +807,30 @@ export default function TradeRiskAlternatives() {
                   </thead>
                   <tbody>
                     {userProfile.componentOrigins.map((comp, idx) => (
-                      <tr key={idx}>
+                      <tr key={idx} className={comp.ai_confidence && comp.ai_confidence < 80 ? 'low-confidence' : ''}>
                         <td>{comp.component_type || comp.description || 'Component ' + (idx + 1)}</td>
                         <td>{comp.origin_country || comp.country}</td>
                         <td>{comp.percentage || comp.value_percentage}%</td>
-                        <td style={{ fontFamily: 'monospace' }}>
-                          {comp.hs_code || <span style={{ color: '#9ca3af' }}>Not classified</span>}
+                        <td className="hs-code-cell">
+                          {comp.hs_code || <span className="text-muted">Not classified</span>}
                         </td>
-                        <td style={{ color: comp.mfn_rate ? '#dc2626' : '#9ca3af' }}>
+                        <td className={comp.mfn_rate ? 'text-danger' : 'text-muted'}>
                           {comp.mfn_rate !== undefined ? `${comp.mfn_rate.toFixed(1)}%` : 'N/A'}
                         </td>
-                        <td style={{ color: comp.usmca_rate !== undefined ? '#059669' : '#9ca3af' }}>
+                        <td className={comp.usmca_rate !== undefined ? 'text-success' : 'text-muted'}>
                           {comp.usmca_rate !== undefined ? `${comp.usmca_rate.toFixed(1)}%` : 'N/A'}
                         </td>
-                        <td style={{ color: comp.savings_percentage > 0 ? '#059669' : '#9ca3af' }}>
+                        <td className={comp.savings_percentage > 0 ? 'savings-positive' : 'text-muted'}>
                           {comp.savings_percentage > 0 ? `${comp.savings_percentage.toFixed(1)}%` : '-'}
                         </td>
                         <td>
                           {comp.ai_confidence ? (
-                            <span style={{ color: comp.ai_confidence < 80 ? '#f59e0b' : '#059669' }}>
+                            <span className={comp.ai_confidence < 80 ? 'confidence-low' : 'confidence-high'}>
                               {comp.ai_confidence}%
                               {comp.ai_confidence < 80 && ' ⚠️'}
                             </span>
                           ) : (
-                            <span style={{ color: '#9ca3af' }}>N/A</span>
+                            <span className="text-muted">N/A</span>
                           )}
                         </td>
                       </tr>
