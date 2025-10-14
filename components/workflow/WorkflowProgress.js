@@ -33,6 +33,16 @@ export default function WorkflowProgress({
 
   const getStepStatus = (step) => {
     if (!mounted) return 'inactive'; // Prevent hydration mismatch
+
+    // Special handling for Step 4 (Generate Certificate)
+    // Should only be complete if user actually generated certificate (step 5+)
+    if (step === 4) {
+      if (currentStep > 4) return 'complete';  // Actually completed certificate generation
+      if (currentStep === 4) return 'active';  // Currently on certificate step
+      return 'inactive';  // Haven't reached certificate yet
+    }
+
+    // For steps 1-3, mark complete if past them
     if (step < currentStep) return 'complete';
     if (step === currentStep) return 'active';
     return 'inactive';
