@@ -41,6 +41,10 @@ export default function TradeRiskAlternatives() {
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [expandedAlerts, setExpandedAlerts] = useState({});
 
+  // Real policy alerts state (NEW - fetched from database)
+  const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
+  const [isLoadingPolicyAlerts, setIsLoadingPolicyAlerts] = useState(false);
+
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
   const [, setHasSaveDataConsent] = useState(false); // hasSaveDataConsent not used, only setter
@@ -54,6 +58,13 @@ export default function TradeRiskAlternatives() {
     const consent = localStorage.getItem('detailed_alerts_consent');
     setHasDetailedConsent(consent === 'true');
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load real policy alerts when user profile is available
+  useEffect(() => {
+    if (userProfile && userProfile.componentOrigins) {
+      loadRealPolicyAlerts(userProfile);
+    }
+  }, [userProfile]);
 
   const handleSeeMoreDetails = (riskIndex) => {
     if (!hasDetailedConsent) {
@@ -646,6 +657,73 @@ export default function TradeRiskAlternatives() {
     }));
   };
 
+  /**
+   * Load REAL tariff policy alerts from database
+   * Filters by user's component origins and HS codes for relevance
+   */
+  const loadRealPolicyAlerts = async (profile) => {
+    setIsLoadingPolicyAlerts(true);
+
+    try {
+      console.log('🚨 Fetching real tariff policy alerts from government sources...');
+
+      const response = await fetch('/api/tariff-policy-alerts', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch policy alerts: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.alerts) {
+        console.log(`✅ Loaded ${data.alerts.length} total policy alerts`);
+
+        // Extract user's component countries and HS codes for filtering
+        const userCountries = profile.componentOrigins
+          ?.map(c => c.origin_country || c.country)
+          .filter(Boolean) || [];
+
+        const userHSCodes = profile.componentOrigins
+          ?.map(c => c.hs_code)
+          .filter(Boolean) || [];
+
+        console.log('🔍 User trade profile:', {
+          countries: userCountries,
+          hs_codes: userHSCodes
+        });
+
+        // Filter alerts relevant to user's trade profile
+        const relevantAlerts = data.alerts.filter(alert => {
+          // Check if alert affects user's origin countries
+          const affectsUserCountry = alert.affected_countries?.some(country =>
+            userCountries.includes(country)
+          );
+
+          // Check if alert affects user's HS codes
+          const affectsUserHSCode = alert.affected_hs_codes?.some(hsCode =>
+            userHSCodes.some(userHS => userHS && userHS.startsWith(hsCode.substring(0, 4)))
+          );
+
+          // Always show CRITICAL alerts (priority 1-3) regardless of specifics
+          const isCritical = alert.severity === 'CRITICAL';
+
+          return affectsUserCountry || affectsUserHSCode || isCritical;
+        });
+
+        console.log(`🎯 ${relevantAlerts.length} alerts relevant to your trade profile`);
+        setRealPolicyAlerts(relevantAlerts);
+      }
+    } catch (error) {
+      console.error('❌ Error loading real policy alerts:', error);
+      setRealPolicyAlerts([]);
+    } finally {
+      setIsLoadingPolicyAlerts(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <TriangleLayout>
@@ -1227,6 +1305,181 @@ export default function TradeRiskAlternatives() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
+        <div className="form-section">
+          <h2 className="form-section-title">🚨 Government Policy Alerts Affecting Your Trade</h2>
+          <p className="text-body">
+            Real tariff and trade policy changes from official U.S. government sources that directly impact your components and supply chain.
+            {realPolicyAlerts.length > 0 && ` Showing ${realPolicyAlerts.length} alerts relevant to your trade profile.`}
+          </p>
+
+          {isLoadingPolicyAlerts && (
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">
+                  Loading government policy alerts...
+                  <span className="spinner-inline"></span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isLoadingPolicyAlerts && realPolicyAlerts.length === 0 && (
+            <div className="alert alert-success">
+              <div className="alert-content">
+                <div className="alert-title">✅ No Critical Policy Changes Affecting Your Trade</div>
+                <div className="text-body">
+                  Great news! There are currently no government-announced tariff or policy changes that directly impact your component origins or HS codes. We monitor official sources 24/7 and will alert you immediately when relevant changes occur.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isLoadingPolicyAlerts && realPolicyAlerts.length > 0 && (
+            <div className="element-spacing">
+              {realPolicyAlerts.map((alert, idx) => (
+                <div
+                  key={idx}
+                  className={`alert alert-${alert.severity === 'CRITICAL' ? 'error' : alert.severity === 'HIGH' ? 'warning' : 'info'}`}
+                >
+                  <div className="alert-content">
+                    <div className="alert-title">
+                      {alert.title}
+                      <span className="form-help"> • {alert.severity}</span>
+                    </div>
+
+                    <div className="text-body">
+                      <p><strong>{alert.description}</strong></p>
+                    </div>
+
+                    {/* Policy Details Grid */}
+                    <div className="element-spacing">
+                      <div className="status-grid">
+                        {alert.category && (
+                          <div className="status-card">
+                            <div className="status-label">Policy Type</div>
+                            <div className="status-value">{alert.category}</div>
+                          </div>
+                        )}
+
+                        {alert.effective_date && (
+                          <div className="status-card">
+                            <div className="status-label">Effective Date</div>
+                            <div className="status-value">
+                              {new Date(alert.effective_date).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {alert.tariff_adjustment && (
+                          <div className="status-card">
+                            <div className="status-label">Tariff Change</div>
+                            <div className="status-value" style={{ color: '#dc2626', fontWeight: 'bold' }}>
+                              {alert.tariff_adjustment}
+                            </div>
+                          </div>
+                        )}
+
+                        {alert.adjustment_percentage && (
+                          <div className="status-card">
+                            <div className="status-label">Rate Increase</div>
+                            <div className="status-value" style={{ color: '#dc2626' }}>
+                              +{alert.adjustment_percentage}%
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Affected Countries */}
+                    {alert.affected_countries && alert.affected_countries.length > 0 && (
+                      <div className="element-spacing">
+                        <div className="text-body">
+                          <strong>Affected Countries:</strong>{' '}
+                          {alert.affected_countries.map((country, i) => (
+                            <span key={i} className="form-help" style={{ marginRight: '8px' }}>
+                              🌍 {country}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Affected HS Codes */}
+                    {alert.affected_hs_codes && alert.affected_hs_codes.length > 0 && (
+                      <div className="element-spacing">
+                        <div className="text-body">
+                          <strong>Affected HS Codes:</strong>{' '}
+                          {alert.affected_hs_codes.map((code, i) => (
+                            <span key={i} style={{ fontFamily: 'monospace', marginRight: '8px', fontSize: '0.9rem' }}>
+                              {code}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Impact Summary */}
+                    {alert.impact_summary && (
+                      <div className="element-spacing">
+                        <div className="text-body">
+                          <strong>Impact on Your Trade:</strong>
+                          <p>{alert.impact_summary}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Source Link */}
+                    {alert.source_url && (
+                      <div className="element-spacing">
+                        <div className="text-body">
+                          <strong>Official Source:</strong>{' '}
+                          <a href={alert.source_url} target="_blank" rel="noopener noreferrer" className="nav-link">
+                            {alert.source_feed || 'View Government Announcement'} →
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Last Updated */}
+                    {alert.last_updated && (
+                      <div className="form-help">
+                        Last updated: {new Date(alert.last_updated).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="hero-buttons">
+                      <button
+                        onClick={() => window.location.href = '/services/request-form'}
+                        className="btn-primary"
+                      >
+                        🎯 Get Expert Help with This Policy Change
+                      </button>
+                      {alert.source_url && (
+                        <button
+                          onClick={() => window.open(alert.source_url, '_blank')}
+                          className="btn-secondary"
+                        >
+                          📄 Read Official Announcement
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Educational Trade Intelligence */}
