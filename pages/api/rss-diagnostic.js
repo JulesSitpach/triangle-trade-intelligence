@@ -20,13 +20,13 @@ export default async function handler(req, res) {
     const { data: feeds, error: feedsError } = await supabase
       .from('rss_feeds')
       .select('*')
-      .order('last_checked_at', { ascending: false });
+      .order('last_check_at', { ascending: false });
 
     // Check RSS items fetched
     const { data: items, error: itemsError } = await supabase
-      .from('rss_feed_items')
-      .select('feed_id, published_at, title')
-      .order('published_at', { ascending: false })
+      .from('rss_feed_activities')
+      .select('feed_id, pub_date, title')
+      .order('pub_date', { ascending: false })
       .limit(10);
 
     // Check crisis alerts created
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
     // Count items per feed
     const { data: itemCounts } = await supabase
-      .from('rss_feed_items')
+      .from('rss_feed_activities')
       .select('feed_id');
 
     const countsMap = {};
@@ -52,13 +52,14 @@ export default async function handler(req, res) {
       feeds: {
         total: feeds?.length || 0,
         active: feeds?.filter(f => f.is_active).length || 0,
-        last_checked: feeds?.[0]?.last_checked_at || 'Never',
+        last_checked: feeds?.[0]?.last_check_at || 'Never',
         details: feeds?.map(f => ({
           name: f.name,
           category: f.category,
           is_active: f.is_active,
-          last_checked_at: f.last_checked_at,
-          total_items_processed: f.total_items_processed,
+          last_check_at: f.last_check_at,
+          last_success_at: f.last_success_at,
+          failure_count: f.failure_count,
           items_in_db: countsMap[f.id] || 0
         }))
       },
@@ -66,7 +67,7 @@ export default async function handler(req, res) {
         total_fetched: itemCounts?.length || 0,
         recent_items: items?.map(i => ({
           title: i.title,
-          published_at: i.published_at
+          pub_date: i.pub_date
         })) || []
       },
       crisis_alerts: {
