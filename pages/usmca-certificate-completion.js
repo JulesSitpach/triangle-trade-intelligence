@@ -275,7 +275,7 @@ export default function USMCACertificateCompletion() {
     }
   };
 
-  const handlePreviewCertificate = async () => {
+  const handleViewCertificatePreview = async () => {
     // Allow preview for all users (including Trial)
     if (previewData?.professional_certificate) {
       try {
@@ -442,7 +442,7 @@ export default function USMCACertificateCompletion() {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button onClick={handlePreviewCertificate} className="btn-secondary">
+                  <button onClick={handleViewCertificatePreview} className="btn-secondary">
                     Preview with Watermark
                   </button>
                   <a href="/pricing" className="btn-primary">
