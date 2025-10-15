@@ -6,11 +6,5 @@
     "DISABLE_ESLINT_PLUGIN": "true",
     "SKIP_ENV_VALIDATION": "true",
     "SKIP_TYPE_CHECK": "true"
-  },
-  "crons": [
-    {
-      "path": "/api/cron/rss-polling",
-      "schedule": "*/30 * * * *"
-    }
-  ]
+  }
 }
