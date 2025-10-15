@@ -580,6 +580,105 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
 }
 
 /**
+ * Fetch active tariff policy updates from database for AI prompt injection
+ * This makes AI prompts dynamically update based on RSS feeds, GTA API, and admin-approved policies
+ */
+async function getActivePolicyUpdates() {
+  try {
+    const { data: policies, error } = await supabase
+      .from('tariff_policy_updates')
+      .select('*')
+      .eq('is_active', true)
+      .eq('status', 'approved')
+      .order('priority', { ascending: true }) // Priority 1 first
+      .order('effective_date', { ascending: false });
+
+    if (error) {
+      console.error('❌ Failed to fetch policy updates:', error);
+      return [];
+    }
+
+    return policies || [];
+  } catch (error) {
+    console.error('❌ Error fetching policy updates:', error);
+    return [];
+  }
+}
+
+/**
+ * Build dynamic tariff policy context from database (replaces hardcoded policy text)
+ * Automatically updates AI prompts when admins approve new policies from RSS/GTA
+ */
+async function buildDynamicPolicyContext(originCountry) {
+  const policies = await getActivePolicyUpdates();
+
+  if (policies.length === 0) {
+    // Fallback to basic context if no policies in database yet
+    return `===== CURRENT TARIFF POLICY CONTEXT (2025) =====
+
+NOTE: Using baseline tariff analysis. Admin has not activated any specific policy updates yet.
+
+YOUR TASK - PROVIDE CURRENT RATES:
+- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
+- USMCA Rate: Preferential rate under USMCA treaty (typically 0% for qualifying goods)
+- Always provide BOTH base rate AND policy-adjusted rate if adjustments apply
+- Include last_updated date (today: ${new Date().toISOString().split('T')[0]})`;
+  }
+
+  // Build dynamic policy context from database
+  const criticalChanges = policies
+    .filter(p => p.priority <= 3)
+    .map(p => `- ${p.prompt_text}`)
+    .join('\n');
+
+  // Group policies by affected countries for country-specific adjustments
+  const countryPolicies = {};
+  policies.forEach(policy => {
+    if (policy.affected_countries && Array.isArray(policy.affected_countries)) {
+      policy.affected_countries.forEach(country => {
+        if (!countryPolicies[country]) {
+          countryPolicies[country] = [];
+        }
+        countryPolicies[country].push(policy);
+      });
+    }
+  });
+
+  // Build country-specific adjustments
+  const countryAdjustments = Object.entries(countryPolicies)
+    .map(([country, countryPols]) => {
+      const adjustments = countryPols
+        .map(p => `${p.tariff_adjustment}${p.adjustment_percentage ? ` (${p.adjustment_percentage}%)` : ''}`)
+        .join(', ');
+      return `- ${country}: ${adjustments}`;
+    })
+    .join('\n');
+
+  return `===== CURRENT TARIFF POLICY CONTEXT (2025) =====
+
+CRITICAL RECENT CHANGES (from official sources):
+${criticalChanges || '- No critical policy changes active'}
+
+ORIGIN COUNTRY POLICY ADJUSTMENTS:
+${countryAdjustments || '- No country-specific adjustments active'}
+
+${originCountry && countryPolicies[originCountry] ? `
+⚠️ COMPONENT ORIGIN: ${originCountry}
+Applicable policies:
+${countryPolicies[originCountry].map(p => `- ${p.tariff_adjustment}: ${p.description.substring(0, 150)}...`).join('\n')}
+` : ''}
+
+YOUR TASK - PROVIDE CURRENT RATES:
+- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
+- APPLY active policy adjustments listed above for origin country ${originCountry}
+- Always provide BOTH base rate AND policy-adjusted rate
+- Flag significant policy adjustments in policy_adjustments array
+- Include last_updated date (today: ${new Date().toISOString().split('T')[0]})
+
+SOURCE: Policies approved by admin from Global Trade Alert API, government RSS feeds, and official announcements`;
+}
+
+/**
  * Classify component description to HS code using AI (100% AI-powered - NO database lookups)
  * @param {string} componentDescription - Component description to classify
  * @param {Object|string} businessContext - Full business context or just product description (backward compatible)
@@ -592,6 +691,9 @@ async function classifyComponentHS(componentDescription, businessContext, compon
     const context = typeof businessContext === 'string'
       ? { product_description: businessContext }
       : businessContext;
+
+    // Build dynamic policy context from database
+    const policyContext = await buildDynamicPolicyContext(component.origin_country);
 
     const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience in international trade, USMCA compliance, and tariff analysis. You have deep knowledge of the Harmonized Tariff Schedule and trade agreements.
 
@@ -615,26 +717,7 @@ COMPONENT TO CLASSIFY:
 - Value Percentage: ${component.value_percentage}% of total product value
 - USMCA Member Source: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
 
-===== CURRENT TARIFF POLICY CONTEXT (2025) =====
-
-CRITICAL RECENT CHANGES:
-- Trump Administration Section 301 China Tariffs: +100% increase effective Nov 1st, 2025
-- Chinese Ship Port Fees: New fees on all Chinese-flagged vessels (adds ~2-5% effective cost)
-- USMCA Under Review: Bilateral deal negotiations may affect preferential rates
-- Weekly Policy Changes: Tariff landscape extremely volatile in 2025
-
-ORIGIN COUNTRY POLICY ADJUSTMENTS:
-- China (CN): Add +100% to base MFN rate (Section 301 tariff increases)
-- Chinese Ships: Add +2-5% port fee surcharge to total landed cost
-- Vietnam/Thailand: Under investigation for transshipment (potential +25% tariffs)
-- EU: Energy crisis affecting manufacturing costs (+25-35% indirect cost pressure)
-
-YOUR TASK - PROVIDE CURRENT RATES:
-- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
-- APPLY current policy adjustments based on origin country (especially China +100%)
-- Always provide BOTH base rate AND policy-adjusted rate
-- Flag when significant policy adjustments have been applied
-- Include last_updated date (today: October 15, 2025)
+${policyContext}
 
 ===== YOUR EXPERT TASK =====
 Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
