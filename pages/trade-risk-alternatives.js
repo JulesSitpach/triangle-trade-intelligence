@@ -15,14 +15,6 @@ import TRADE_RISK_CONFIG, {
   formatCurrency
 } from '../config/trade-risk-config';
 
-// Import educational alerts
-import {
-  EDUCATIONAL_ALERTS,
-  getAlertsByCategory,
-  getAlertsByPriority,
-  getLatestAlerts
-} from '../config/educational-alerts';
-
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [dynamicRisks, setDynamicRisks] = useState([]);
@@ -35,11 +27,6 @@ export default function TradeRiskAlternatives() {
   const [aiVulnerabilityAnalysis, setAiVulnerabilityAnalysis] = useState(null);
   const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(null);
-
-  // Educational alerts state
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedPriority, setSelectedPriority] = useState('all');
-  const [expandedAlerts, setExpandedAlerts] = useState({});
 
   // Real policy alerts state (NEW - fetched from database)
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
@@ -635,28 +622,6 @@ export default function TradeRiskAlternatives() {
     return `Cristina can design backup logistics strategies for your ${formatCurrency(profile.tradeVolume)} annual trade volume`;
   };
 
-  // Educational alerts filtering
-  const getFilteredEducationalAlerts = () => {
-    let filtered = EDUCATIONAL_ALERTS;
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(alert => alert.category === selectedCategory);
-    }
-
-    if (selectedPriority !== 'all') {
-      filtered = filtered.filter(alert => alert.priority === selectedPriority);
-    }
-
-    return filtered;
-  };
-
-  const toggleAlertExpansion = (alertId) => {
-    setExpandedAlerts(prev => ({
-      ...prev,
-      [alertId]: !prev[alertId]
-    }));
-  };
-
   /**
    * Load REAL tariff policy alerts from database
    * Filters by user's component origins and HS codes for relevance
@@ -768,105 +733,6 @@ export default function TradeRiskAlternatives() {
   return (
     <TriangleLayout>
       <div className="dashboard-container">
-        {/* Trial User - View Only, No Email Notifications */}
-        {isTrialUser && (
-          <div className="alert alert-warning">
-            <div className="alert-content">
-              <div className="alert-title">📊 Free Trial - View-Only Access</div>
-              <div className="text-body">
-                You can view all crisis alerts in this dashboard, but your free trial does not include email notifications.
-                <br /><br />
-                <strong>What you have access to:</strong>
-                <br />• ✓ View all real-time crisis alerts in your dashboard
-                <br />• ✓ See tariff changes and supply chain disruptions
-                <br />• ✓ Access risk analysis and recommendations
-                <br /><br />
-                <strong>What requires a subscription:</strong>
-                <br />• ✗ Email notifications when alerts are published
-                <br />• ✗ Instant crisis alerts delivered to your inbox
-                <br />• ✗ Priority support and professional guidance
-              </div>
-              <div className="hero-buttons">
-                <button
-                  onClick={() => window.location.href = '/pricing'}
-                  className="btn-primary"
-                >
-                  Upgrade to Receive Email Alerts
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Starter User - Limited Email Notifications (High/Critical Only) */}
-        {isStarterUser && (
-          <div className="alert alert-info">
-            <div className="alert-content">
-              <div className="alert-title">📧 Starter Plan - High/Critical Email Alerts</div>
-              <div className="text-body">
-                Your Starter subscription includes email notifications for HIGH and CRITICAL alerts only.
-                <br /><br />
-                <strong>What you receive:</strong>
-                <br />• ✓ Email notifications for HIGH and CRITICAL alerts
-                <br />• ✓ View all alerts (including low/medium) in dashboard
-                <br /><br />
-                <strong>Upgrade to Professional for:</strong>
-                <br />• Email notifications for ALL alert levels
-                <br />• 15% discount on professional services
-                <br />• Priority support (48hr response)
-              </div>
-              <div className="hero-buttons">
-                <button
-                  onClick={() => window.location.href = '/pricing'}
-                  className="btn-primary"
-                >
-                  Upgrade to Professional
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Premium Access Badge - Show for Premium/Professional/Enterprise users */}
-        {hasPremiumAccess && (
-          <div className="alert alert-success">
-            <div className="alert-content">
-              <div className="alert-title">✅ Premium Alert Access Active - Email Notifications Enabled</div>
-              <div className="text-body">
-                You receive email notifications for ALL alert levels. Your {subscriptionTier} subscription includes:
-                <br />• Instant email alerts for all severity levels
-                <br />• Dashboard access to view all alerts
-                <br />• Professional support and guidance
-                <br /><br />
-                <strong>Email Notification Status:</strong> Active for all crisis alerts
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* RSS Monitoring Status Badge - Shows Real-Time Monitoring is Active */}
-        <div className="alert alert-info">
-          <div className="alert-content">
-            <div className="alert-title">📡 Real-Time Government Monitoring Active</div>
-            <div className="text-body">
-              <p>
-                <strong>Monitoring 4 Official U.S. Government Sources 24/7:</strong>
-              </p>
-              <ul>
-                <li><strong>USTR Press Releases</strong> - Section 301 tariffs, USMCA policy, trade agreements (checks every 30 min)</li>
-                <li><strong>USITC News Releases</strong> - Trade investigations, injury determinations, remedies (checks every 30 min)</li>
-                <li><strong>Commerce ITA</strong> - Antidumping and countervailing duty determinations (checks every 30 min)</li>
-                <li><strong>Federal Register CBP</strong> - Customs rules, tariff classifications, regulations (checks hourly)</li>
-              </ul>
-              <p>
-                <strong>Crisis Detection:</strong> Our AI monitors for Section 301 tariffs, USMCA changes, antidumping investigations, customs rulings, and policy updates affecting your HS codes and supply chain.
-              </p>
-              <p className="form-help">
-                💡 You receive immediate alerts when official government sources announce changes affecting your trade profile. These are authoritative sources - not news articles about policy, but the actual policy announcements.
-              </p>
-            </div>
-          </div>
-        </div>
 
         <div className="dashboard-header">
           <h1 className="dashboard-title">Trade Risk & Alternatives Dashboard</h1>
@@ -1482,121 +1348,6 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Educational Trade Intelligence */}
-        <div className="form-section">
-          <h2 className="form-section-title">📚 Mexico Trade Intelligence & Policy Updates</h2>
-          <p className="text-body">
-            Strategic insights and thought leadership content to help you navigate the evolving Mexico trade landscape.
-          </p>
-
-          {/* Filters */}
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Filter by Category</label>
-              <select
-                className="form-select"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                <option value="policy">Policy Updates</option>
-                <option value="strategy">Strategic Insights</option>
-                <option value="risk">Risk Analysis</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Filter by Priority</label>
-              <select
-                className="form-select"
-                value={selectedPriority}
-                onChange={(e) => setSelectedPriority(e.target.value)}
-              >
-                <option value="all">All Priorities</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Educational Alerts Display */}
-          <div className="element-spacing">
-            {getFilteredEducationalAlerts().map((alert) => (
-              <div
-                key={alert.id}
-                className={`alert alert-${alert.priority === 'critical' ? 'error' : alert.priority === 'high' ? 'warning' : 'info'}`}
-              >
-                <div className="alert-content">
-                  <div className="alert-title">
-                    {alert.title} • <span className="form-help">{alert.category.toUpperCase()}</span>
-                  </div>
-                  <div className="text-body">
-                    <p><strong>{alert.summary}</strong></p>
-                    <p className="form-help">
-                      Published: {alert.publishDate}
-                      {alert.lastUpdated !== alert.publishDate && ` • Updated: ${alert.lastUpdated}`}
-                    </p>
-                  </div>
-
-                  {/* Expandable Content */}
-                  <div className="element-spacing">
-                    <button
-                      onClick={() => toggleAlertExpansion(alert.id)}
-                      className="btn-secondary"
-                    >
-                      {expandedAlerts[alert.id] ? '▲ Hide Full Article' : '▼ Read Full Article'}
-                    </button>
-                  </div>
-
-                  {expandedAlerts[alert.id] && (
-                    <div className="form-section">
-                      <div className="article-content">
-                        {alert.content}
-                      </div>
-
-                      {/* Call to Action Buttons */}
-                      {alert.cta && (
-                        <div className="hero-buttons">
-                          <button
-                            onClick={() => window.location.href = alert.cta.primaryLink}
-                            className="btn-primary"
-                          >
-                            {alert.cta.primary}
-                          </button>
-                          {alert.cta.secondary && (
-                            <button
-                              onClick={() => window.location.href = alert.cta.secondaryLink}
-                              className="btn-secondary"
-                            >
-                              {alert.cta.secondary}
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Tags */}
-                      <div className="element-spacing">
-                        <div className="form-help">
-                          <strong>Topics:</strong> {alert.tags.join(', ')}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {getFilteredEducationalAlerts().length === 0 && (
-              <div className="alert alert-info">
-                <div className="alert-content">
-                  <div className="alert-title">No articles match your filters</div>
-                  <div className="text-body">Try selecting different category or priority filters.</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="hero-buttons">
