@@ -139,13 +139,20 @@ export default protectedApiHandler({
       let crisisAlerts = [];
 
       if (userHSCodes.length > 0) {
-        // Get crisis alerts that affect user's HS codes
-        const { data: matchedAlerts } = await supabase
-          .from('crisis_alerts')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-          .limit(20); // Get recent alerts
+        try {
+          // Get crisis alerts that affect user's HS codes
+          // Wrapped in try-catch to prevent hanging if query fails
+          const { data: matchedAlerts, error: alertsError } = await supabase
+            .from('crisis_alerts')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+            .limit(20); // Get recent alerts
+
+          if (alertsError) {
+            console.error('Crisis alerts query error:', alertsError);
+            // Continue without alerts rather than failing
+          } else {
 
         // Filter alerts that match user's HS codes
         const relevantAlerts = (matchedAlerts || []).filter(alert => {
@@ -211,6 +218,12 @@ export default protectedApiHandler({
             }
           };
         });
+          }
+        } catch (alertError) {
+          console.error('Crisis alerts fetch failed:', alertError);
+          // Continue without alerts - don't fail the entire dashboard
+          crisisAlerts = [];
+        }
       }
 
       return res.status(200).json({
