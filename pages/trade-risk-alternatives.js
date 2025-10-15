@@ -681,31 +681,68 @@ export default function TradeRiskAlternatives() {
     );
   }
 
-  // Check if user needs to upgrade (Trial or Starter tier)
+  // Check tier-based alert access
   // Don't show upgrade message while subscription tier is still loading
-  const needsUpgrade = !user ? false : (subscriptionTier === 'Trial' || subscriptionTier === 'Starter');
+  const isTrialUser = subscriptionTier === 'Trial';
+  const isStarterUser = subscriptionTier === 'Starter';
   const hasPremiumAccess = subscriptionTier === 'Professional' || subscriptionTier === 'Premium' || subscriptionTier === 'Enterprise';
 
   return (
     <TriangleLayout>
       <div className="dashboard-container">
-        {/* Alert Access Gate - Only show for Trial/Starter users */}
-        {needsUpgrade && (
-          <div className="alert alert-info">
+        {/* Trial User - View Only, No Email Notifications */}
+        {isTrialUser && (
+          <div className="alert alert-warning">
             <div className="alert-content">
-              <div className="alert-title">📊 Trade Risk Alert Dashboard</div>
+              <div className="alert-title">📊 Free Trial - View-Only Access</div>
               <div className="text-body">
-                Monitor your personalized trade risk alerts and crisis notifications.
-                <br />• Real-time tariff change alerts based on your trade profile
-                <br />• Supply chain disruption notifications
-                <br />• Alternative routing recommendations
+                You can view all crisis alerts in this dashboard, but your free trial does not include email notifications.
+                <br /><br />
+                <strong>What you have access to:</strong>
+                <br />• ✓ View all real-time crisis alerts in your dashboard
+                <br />• ✓ See tariff changes and supply chain disruptions
+                <br />• ✓ Access risk analysis and recommendations
+                <br /><br />
+                <strong>What requires a subscription:</strong>
+                <br />• ✗ Email notifications when alerts are published
+                <br />• ✗ Instant crisis alerts delivered to your inbox
+                <br />• ✗ Priority support and professional guidance
               </div>
               <div className="hero-buttons">
                 <button
                   onClick={() => window.location.href = '/pricing'}
                   className="btn-primary"
                 >
-                  Upgrade for Full Alert Access
+                  Upgrade to Receive Email Alerts
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Starter User - Limited Email Notifications (High/Critical Only) */}
+        {isStarterUser && (
+          <div className="alert alert-info">
+            <div className="alert-content">
+              <div className="alert-title">📧 Starter Plan - High/Critical Email Alerts</div>
+              <div className="text-body">
+                Your Starter subscription includes email notifications for HIGH and CRITICAL alerts only.
+                <br /><br />
+                <strong>What you receive:</strong>
+                <br />• ✓ Email notifications for HIGH and CRITICAL alerts
+                <br />• ✓ View all alerts (including low/medium) in dashboard
+                <br /><br />
+                <strong>Upgrade to Professional for:</strong>
+                <br />• Email notifications for ALL alert levels
+                <br />• 15% discount on professional services
+                <br />• Priority support (48hr response)
+              </div>
+              <div className="hero-buttons">
+                <button
+                  onClick={() => window.location.href = '/pricing'}
+                  className="btn-primary"
+                >
+                  Upgrade to Professional
                 </button>
               </div>
             </div>
@@ -716,9 +753,14 @@ export default function TradeRiskAlternatives() {
         {hasPremiumAccess && (
           <div className="alert alert-success">
             <div className="alert-content">
-              <div className="alert-title">✅ Premium Alert Access Active</div>
+              <div className="alert-title">✅ Premium Alert Access Active - Email Notifications Enabled</div>
               <div className="text-body">
-                You have full access to real-time trade alerts and crisis monitoring. Your {subscriptionTier} subscription includes unlimited alerts and professional support.
+                You receive email notifications for ALL alert levels. Your {subscriptionTier} subscription includes:
+                <br />• Instant email alerts for all severity levels
+                <br />• Dashboard access to view all alerts
+                <br />• Professional support and guidance
+                <br /><br />
+                <strong>Email Notification Status:</strong> Active for all crisis alerts
               </div>
             </div>
           </div>
