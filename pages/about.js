@@ -319,14 +319,14 @@ export default function About() {
             <div className="hero-button-group">
               <Link
                 href="/services/request-form"
-                className="hero-primary-button"
+                className="btn-primary"
                 aria-label="Request Trade Health Check"
               >
                 Request Trade Health Check
               </Link>
               <Link
                 href="/pricing"
-                className="hero-secondary-button"
+                className="btn-secondary"
                 aria-label="View subscription plans"
               >
                 View Pricing Plans
