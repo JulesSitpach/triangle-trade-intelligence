@@ -74,6 +74,7 @@ export default async function handler(req, res) {
         data: {
           full_name: full_name || 'New User',
           company_name: company_name,
+          subscription_tier: 'Trial',
           terms_accepted_at: termsAcceptedAt,
           privacy_accepted_at: termsAcceptedAt
         }
