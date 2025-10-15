@@ -476,41 +476,45 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           enriched.ai_reasoning = classificationResult.reasoning; // Store AI reasoning for UI display
           enriched.alternative_codes = classificationResult.alternative_codes || []; // Store alternative codes if provided
 
-          // Step 2: Try official HTS database lookup for accurate tariff rates
-          console.log(`🔍 Looking up official HTS rates for: ${classificationResult.hs_code}`);
-          const htsLookup = await lookupHTSTariffRates(classificationResult.hs_code);
+          // Step 2: Use AI-provided rates (PRIMARY - includes 2025 policy adjustments)
+          enriched.mfn_rate = classificationResult.mfn_rate;
+          enriched.base_mfn_rate = classificationResult.base_mfn_rate || classificationResult.mfn_rate;
+          enriched.policy_adjusted_mfn_rate = classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate;
+          enriched.usmca_rate = classificationResult.usmca_rate;
+          enriched.policy_adjustments = classificationResult.policy_adjustments || [];
+          enriched.tariff_rates = {
+            mfn_rate: classificationResult.mfn_rate,
+            usmca_rate: classificationResult.usmca_rate,
+            policy_adjusted: classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate
+          };
+          enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
+          enriched.rate_source = 'ai_current_2025'; // AI with 2025 policy context
+          enriched.last_updated = classificationResult.last_updated || new Date().toISOString().split('T')[0];
 
-          if (htsLookup.success) {
-            // Use official database rates (ACCURATE)
-            enriched.mfn_rate = htsLookup.mfn_rate;
-            enriched.usmca_rate = htsLookup.usmca_rate;
-            enriched.tariff_rates = {
-              mfn_rate: htsLookup.mfn_rate,
-              usmca_rate: htsLookup.usmca_rate
-            };
-            enriched.savings_percent = htsLookup.mfn_rate - htsLookup.usmca_rate;
-            enriched.rate_source = 'official_hts_2025'; // Indicate source
-            enriched.hs_description = htsLookup.description;
-            enriched.last_updated = htsLookup.last_updated;
+          console.log(`✅ AI Classification with 2025 Policy: "${component.description}" → HS ${classificationResult.hs_code}`);
+          console.log(`   💰 Base MFN: ${enriched.base_mfn_rate}% | Adjusted: ${enriched.policy_adjusted_mfn_rate}% | USMCA: ${classificationResult.usmca_rate}%`);
+          if (enriched.policy_adjustments.length > 0) {
+            console.log(`   📊 Policy Adjustments: ${enriched.policy_adjustments.join(', ')}`);
+          }
+          console.log(`   🎯 AI Confidence: ${classificationResult.confidence}%`);
 
-            console.log(`✅ Official HTS Rates: "${component.description}" → HS ${classificationResult.hs_code}`);
-            console.log(`   💰 MFN: ${htsLookup.mfn_rate.toFixed(1)}% | USMCA: ${htsLookup.usmca_rate.toFixed(1)}% | Savings: ${enriched.savings_percent.toFixed(1)}%`);
-            console.log(`   📊 Source: ${htsLookup.source}`);
-            console.log(`   🎯 AI Confidence: ${classificationResult.confidence}%`);
-          } else {
-            // Fallback to AI-provided rates (if database lookup fails)
-            enriched.mfn_rate = classificationResult.mfn_rate;
-            enriched.usmca_rate = classificationResult.usmca_rate;
-            enriched.tariff_rates = {
-              mfn_rate: classificationResult.mfn_rate,
-              usmca_rate: classificationResult.usmca_rate
-            };
-            enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
-            enriched.rate_source = 'ai_estimated'; // Indicate AI estimate
-
-            console.log(`⚠️ HTS database lookup failed, using AI rates for "${component.description}"`);
-            console.log(`   💰 MFN: ${classificationResult.mfn_rate}% | USMCA: ${classificationResult.usmca_rate}% | Savings: ${enriched.savings_percent}%`);
-            console.log(`   🎯 Confidence: ${classificationResult.confidence}%`);
+          // OPTIONAL: Try database lookup for comparison (STALE DATA - Jan 2025)
+          // This is a fallback ONLY if AI fails or for verification purposes
+          // Database data is outdated and does NOT include 2025 policy changes
+          try {
+            const htsLookup = await lookupHTSTariffRates(classificationResult.hs_code);
+            if (htsLookup.success) {
+              enriched.database_comparison = {
+                mfn_rate: htsLookup.mfn_rate,
+                usmca_rate: htsLookup.usmca_rate,
+                last_updated: htsLookup.last_updated,
+                note: 'STALE DATA - Does not include 2025 policy changes (China +100%, port fees, etc.)'
+              };
+              console.log(`   📚 Database (STALE): MFN ${htsLookup.mfn_rate}% (Jan 2025 data, not current)`);
+            }
+          } catch (dbError) {
+            // Database lookup failed - not critical since we have AI rates
+            console.log(`   ⚠️ Database lookup failed (not critical, using AI rates)`);
           }
 
           // Save AI-generated data to database to BUILD the database
@@ -611,6 +615,27 @@ COMPONENT TO CLASSIFY:
 - Value Percentage: ${component.value_percentage}% of total product value
 - USMCA Member Source: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
 
+===== CURRENT TARIFF POLICY CONTEXT (2025) =====
+
+CRITICAL RECENT CHANGES:
+- Trump Administration Section 301 China Tariffs: +100% increase effective Nov 1st, 2025
+- Chinese Ship Port Fees: New fees on all Chinese-flagged vessels (adds ~2-5% effective cost)
+- USMCA Under Review: Bilateral deal negotiations may affect preferential rates
+- Weekly Policy Changes: Tariff landscape extremely volatile in 2025
+
+ORIGIN COUNTRY POLICY ADJUSTMENTS:
+- China (CN): Add +100% to base MFN rate (Section 301 tariff increases)
+- Chinese Ships: Add +2-5% port fee surcharge to total landed cost
+- Vietnam/Thailand: Under investigation for transshipment (potential +25% tariffs)
+- EU: Energy crisis affecting manufacturing costs (+25-35% indirect cost pressure)
+
+YOUR TASK - PROVIDE CURRENT RATES:
+- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
+- APPLY current policy adjustments based on origin country (especially China +100%)
+- Always provide BOTH base rate AND policy-adjusted rate
+- Flag when significant policy adjustments have been applied
+- Include last_updated date (today: October 15, 2025)
+
 ===== YOUR EXPERT TASK =====
 Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
 
@@ -642,10 +667,17 @@ Provide the MOST ACCURATE classification for this component with complete tariff
 Return ONLY a JSON object in this exact format (no other text):
 {
   "hs_code": "XXXX.XX",
-  "mfn_rate": 5.0,
+  "base_mfn_rate": 5.0,
+  "policy_adjusted_mfn_rate": 105.0,
+  "mfn_rate": 105.0,
   "usmca_rate": 0.0,
+  "policy_adjustments": [
+    "Section 301 China +100%: 5.0% → 105.0%",
+    "Port fee estimate: +3% on landed cost"
+  ],
   "confidence": 85,
-  "reasoning": "Detailed expert reasoning explaining classification, tariff rates, and any special considerations for USMCA qualification",
+  "last_updated": "2025-10-15",
+  "reasoning": "Detailed expert reasoning explaining classification, current tariff rates with policy adjustments, and any special considerations for USMCA qualification",
   "alternative_codes": [
     {
       "code": "XXXX.XX",
@@ -655,7 +687,7 @@ Return ONLY a JSON object in this exact format (no other text):
   ]
 }
 
-CRITICAL: Be precise and accurate. This data will be used for compliance decisions and saved to build our database.`;
+CRITICAL: Be precise and accurate. Apply current 2025 policy adjustments. This data will be used for compliance decisions and saved to build our database.`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -691,8 +723,12 @@ CRITICAL: Be precise and accurate. This data will be used for compliance decisio
     return {
       success: true,
       hs_code: classification.hs_code,
+      base_mfn_rate: classification.base_mfn_rate || classification.mfn_rate || 0,
+      policy_adjusted_mfn_rate: classification.policy_adjusted_mfn_rate || classification.mfn_rate || 0,
       mfn_rate: classification.mfn_rate || 0,
       usmca_rate: classification.usmca_rate || 0,
+      policy_adjustments: classification.policy_adjustments || [],
+      last_updated: classification.last_updated || new Date().toISOString().split('T')[0],
       confidence: classification.confidence || 85,
       reasoning: classification.reasoning,
       alternative_codes: classification.alternative_codes || []
@@ -744,12 +780,17 @@ async function saveAIDataToDatabase(classificationResult, component) {
       .insert({
         hs_code: classificationResult.hs_code,
         component_description: component.description,
+        base_mfn_rate: classificationResult.base_mfn_rate || classificationResult.mfn_rate,
+        policy_adjusted_mfn_rate: classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate,
         mfn_rate: classificationResult.mfn_rate,
         usmca_rate: classificationResult.usmca_rate,
+        policy_adjustments: classificationResult.policy_adjustments || [],
         confidence: classificationResult.confidence,
         reasoning: classificationResult.reasoning,
         origin_country: component.origin_country,
         value_percentage: component.value_percentage,
+        verified: false, // AI-generated, not human-verified
+        last_updated: classificationResult.last_updated || new Date().toISOString().split('T')[0],
         created_at: new Date().toISOString()
       });
 
@@ -757,7 +798,7 @@ async function saveAIDataToDatabase(classificationResult, component) {
       // Don't fail the request - just log the error
       console.log(`⚠️ Failed to save AI data to database:`, error.message);
     } else {
-      console.log(`💾 Saved AI classification to database: HS ${classificationResult.hs_code}`);
+      console.log(`💾 Saved AI classification to database: HS ${classificationResult.hs_code} (verified: false)`);
     }
   } catch (error) {
     // Don't fail the request - just log the error

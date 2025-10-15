@@ -317,20 +317,24 @@ triangle-trade-intelligence/
 - **Error Boundaries**: Graceful error handling
 
 ### Component Enrichment (NEW - October 2025)
-**Automatic AI-powered enrichment of component data:**
-- HS code classification (via OpenRouter API)
-- Tariff rate lookup (from database hs_master_rebuild table)
-- MFN rate (Most Favored Nation)
-- USMCA rate (preferential)
-- Savings calculation (MFN - USMCA)
-- AI confidence score
+**Automatic AI-powered enrichment with 2025 policy context:**
+- HS code classification (via OpenRouter API with full business context)
+- 2025 Tariff Policy Integration: China +100%, port fees, bilateral deal impacts
+- Base MFN rate + Policy-adjusted MFN rate (real-time 2025 changes)
+- USMCA rate (preferential 0%)
+- Policy Adjustments Tracking: Section 301 tariffs, port fees, transshipment investigations
+- Savings calculation (Policy-adjusted MFN - USMCA)
+- AI confidence score + policy adjustment flags
 - Visual alerts for low confidence or Mexico opportunities
+- Database comparison (stale Jan 2025 data for reference only)
 
 **Admin Dashboard Display:**
-- 8-column component tables with complete tariff intelligence
+- 8-column component tables with complete tariff intelligence + policy tracking
 - Real-time enrichment status indicators
-- Automatic fallback to AI if database lookup fails
+- Policy adjustment badges (China +100%, Port Fees, etc.)
+- AI-first approach: OpenRouter primary, database comparison secondary
 - Professional validation for low-confidence classifications
+- Verified flag: false (AI-generated, pending human review)
 
 ---
 
@@ -389,15 +393,17 @@ npm run lint             # Run ESLint
 
 **AI Integration:**
 - All AI functionality uses OpenRouter API
-- Claude models for analysis and recommendations
+- Claude models for analysis and recommendations with 2025 policy context
 - ~$0.005 per workflow (half a cent)
-- Hybrid approach: Database first, AI fallback
+- AI-First approach: OpenRouter (2025 policy) → Database comparison (stale Jan 2025 data)
+- Real-time policy adjustments: China +100%, port fees, bilateral deals
+- Verified flag: false (AI-generated, pending human review)
 
 **USMCA Compliance:**
 - Config file for industry thresholds (treaty-defined)
-- AI for context-dependent analysis (HS codes, recommendations)
-- Database for user data only
-- No hardcoded business data
+- AI for context-dependent analysis with current 2025 trade policy
+- Database for user data + historical comparison only (not primary tariff source)
+- No hardcoded business data or stale tariff rates
 
 **Anti-Hardcoding Architecture:**
 - All services in `config/service-configurations.js`
