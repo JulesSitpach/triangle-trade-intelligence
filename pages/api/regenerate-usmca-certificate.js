@@ -203,7 +203,7 @@ Return a JSON object with:
         generated_date: new Date().toISOString(),
         generated_by: 'Triangle Trade Intelligence Platform',
         validated_by: correctedData.hs_code_corrected_by_professional
-          ? 'Licensed Customs Broker Cristina Escalante #4601913'
+          ? 'Licensed Customs Broker Trade Compliance Expert #4601913'
           : 'AI-powered USMCA compliance engine (OpenRouter API)'
       },
 
@@ -241,7 +241,7 @@ Return a JSON object with:
         verified: true,
         source: correctedData.hs_code_corrected_by_professional ? 'Professional customs broker classification' : 'AI classification',
         verification_source: correctedData.hs_code_corrected_by_professional
-          ? 'Professionally verified by Licensed Customs Broker Cristina Escalante #4601913'
+          ? 'Professionally verified by Licensed Customs Broker Trade Compliance Expert #4601913'
           : 'AI-classified via OpenRouter API (Claude 3.5 Sonnet)'
       },
 
@@ -310,7 +310,7 @@ Return a JSON object with:
       // Professional backing
       professional_validation: correctedData.professional_validation,
       customs_broker_license: '4601913',
-      professional_guarantee: 'This certificate is professionally backed by Licensed Customs Broker Cristina Escalante, License #4601913',
+      professional_guarantee: 'This certificate is professionally backed by Licensed Customs Broker Trade Compliance Expert, License #4601913',
 
       // AI-enhanced features
       audit_defense_notes: aiEnhancements?.audit_defense_notes || [

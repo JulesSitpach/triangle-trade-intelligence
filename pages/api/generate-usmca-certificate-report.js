@@ -162,7 +162,7 @@ export default async function handler(req, res) {
       || 'international trade';
 
     // Generate comprehensive USMCA optimization assessment report using OpenRouter
-    const reportPrompt = `You are formatting a professional USMCA Optimization Assessment Report for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} experience).
+    const reportPrompt = `You are formatting a professional USMCA Optimization Assessment Report for the Triangle Trade Intelligence team (Business Development Specialist - Mexico Trade Expert & Trade Compliance Expert - Licensed Specialist with 17 years of ${industryContext} experience).
 
 CRITICAL INSTRUCTION: The team has already provided their professional assessment. Your job is to format it into a professional report. Use their EXACT words for all sections marked "TEAM'S" or "CRISTINA'S". DO NOT add to, modify, or paraphrase their professional input. This is consulting and guidance - your role is formatting only.
 
@@ -276,8 +276,8 @@ CRITICAL: This section contains the team's professional assessment based on comb
 "${cristinaExpertInputs.audit_defense_strategy}"
 
 Triangle Trade Intelligence Team
-Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
-Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
+Trade Compliance Expert - Licensed Specialist (17 years Motorola, Arris, Tekmovil)
+Business Development Specialist - Mexico Trade Expert (7 years business ownership, Mexico expertise)
 
 ## 5. ACTION PLAN (NEXT 90 DAYS)
 Based on the financial analysis above and the team's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year
@@ -359,7 +359,7 @@ Format as a formal business report with clear headers, bullet points for key fin
 
   <div class="content">
     <div class="credentials">
-      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Team:</strong> Business Development Specialist (Mexico Trade Expert) & Trade Compliance Expert (Licensed Specialist)<br>
       <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), HTS/INCOTERMS specialist<br>
       <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
       <strong>Service Type:</strong> Consulting and Guidance (USMCA Optimization Assessment)<br>
@@ -430,7 +430,7 @@ Format as a formal business report with clear headers, bullet points for key fin
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Triangle Trade Intelligence Team (Jorge Ochoa & Cristina Escalante)',
+          completed_by: 'Triangle Trade Intelligence Team (Business Development Specialist & Trade Compliance Expert)',
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
           ai_label: aiResult.label,

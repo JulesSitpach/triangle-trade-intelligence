@@ -141,7 +141,7 @@ export default async function handler(req, res) {
       || 'international trade';
 
     // Generate comprehensive report using OpenRouter
-    const reportPrompt = `You are formatting a professional HS Classification Research Report for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} experience).
+    const reportPrompt = `You are formatting a professional HS Classification Research Report for the Triangle Trade Intelligence team (Business Development Specialist - Mexico Trade Expert & Trade Compliance Expert - Licensed Specialist with 17 years of ${industryContext} experience).
 
 CRITICAL INSTRUCTION: Cristina has already provided her professional analysis based on her 17 years of enterprise logistics experience. Your job is to format it into a professional report. Use her EXACT words for all sections marked "CRISTINA'S" or "TEAM'S". DO NOT add to, modify, or paraphrase her professional input. This is consulting and guidance - your role is formatting only.
 
@@ -300,8 +300,8 @@ CRITICAL: This section contains the team's professional assessment based on comb
 "${validationData.audit_defense}"
 
 Triangle Trade Intelligence Team
-Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
-Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
+Trade Compliance Expert - Licensed Specialist (17 years Motorola, Arris, Tekmovil)
+Business Development Specialist - Mexico Trade Expert (7 years business ownership, Mexico expertise)
 
 TONE: Professional but direct. Use actual numbers. Be specific. Show your expertise through concrete recommendations, not generic platitudes.
 
@@ -375,7 +375,7 @@ Format as a formal business report with clear headers, bullet points for key fin
 
   <div class="content">
     <div class="credentials">
-      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Team:</strong> Business Development Specialist (Mexico Trade Expert) & Trade Compliance Expert (Licensed Specialist)<br>
       <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), HTS/INCOTERMS specialist<br>
       <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
       <strong>Service Type:</strong> Consulting and Guidance (HS Classification Research)<br>
@@ -457,7 +457,7 @@ Format as a formal business report with clear headers, bullet points for key fin
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Cristina Escalante - License #4601913',
+          completed_by: 'Trade Compliance Expert - License #4601913',
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
           ai_label: aiResult.label,

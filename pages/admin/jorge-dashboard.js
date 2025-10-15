@@ -133,7 +133,7 @@ export default function JorgeDashboardCleanModular() {
             <div className="header-content">
               <h1 className="dashboard-title">Jorge's Service Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Jorge Ochoa - Mexico Trade Specialist</span>
+                <span className="user-name">Business Development Specialist - Mexico Trade Expert</span>
                 <span className="user-role">Market Entry • Supply Chain Resilience • Client Relationships</span>
               </div>
             </div>

@@ -161,12 +161,12 @@ export default function About() {
               <p className="text-body">✓ Bilingual: English/French (Quebec market access)</p>
             </div>
 
-            {/* Jorge Ochoa */}
+            {/* Business Development Specialist */}
             <div className="content-card">
               <div className="content-card-icon">J</div>
-              <h3 className="content-card-title">Jorge Ochoa</h3>
+              <h3 className="content-card-title">Business Development Specialist</h3>
               <p className="content-card-description">
-                <strong>Business Development Specialist</strong>
+                <strong>Mexico Trade Expert</strong>
               </p>
               <p className="text-body">✓ B2B sales expert with 7+ years as business owner</p>
               <p className="text-body">✓ Proven SMB operational experience (Art Printing)</p>
@@ -179,12 +179,12 @@ export default function About() {
               </p>
             </div>
 
-            {/* Cristina Escalante */}
+            {/* Trade Compliance Expert */}
             <div className="content-card">
               <div className="content-card-icon">C</div>
-              <h3 className="content-card-title">Cristina Escalante</h3>
+              <h3 className="content-card-title">Trade Compliance Expert</h3>
               <p className="content-card-description">
-                <strong>Trade Compliance Expert</strong>
+                <strong>Licensed Compliance Specialist</strong>
               </p>
               <p className="text-body">✓ 17-year logistics expert</p>
               <p className="text-body">✓ Enterprise experience: Motorola, Arris, Tekmovil</p>

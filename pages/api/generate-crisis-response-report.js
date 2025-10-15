@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     const financialExposure = calculateFinancialExposure();
 
     // Generate comprehensive crisis response action plan using OpenRouter
-    const reportPrompt = `You are formatting a professional Crisis Response Action Plan for the Triangle Trade Intelligence team (Jorge Ochoa - SMB Trade Specialist & Cristina Escalante - Enterprise Logistics Expert with 17 years of ${industryContext} logistics management experience).
+    const reportPrompt = `You are formatting a professional Crisis Response Action Plan for the Triangle Trade Intelligence team (Business Development Specialist - Mexico Trade Expert & Trade Compliance Expert - Licensed Specialist with 17 years of ${industryContext} logistics management experience).
 
 CRITICAL INSTRUCTION: The team has already provided their professional crisis management plan. Your job is to format it into a professional report. Use their EXACT words for all crisis management sections. DO NOT add to, modify, or paraphrase their professional input. This is consulting and guidance - your role is formatting only.
 
@@ -167,8 +167,8 @@ CRITICAL: This section contains the team's professional crisis management recomm
 "${stage3Data.risk_mitigation}"
 
 Triangle Trade Intelligence Team
-Cristina Escalante - Enterprise Logistics Expert (17 years Motorola, Arris, Tekmovil)
-Jorge Ochoa - SMB Trade Specialist (7 years business ownership, Mexico expertise)
+Trade Compliance Expert - Licensed Specialist (17 years Motorola, Arris, Tekmovil)
+Business Development Specialist - Mexico Trade Expert (7 years business ownership, Mexico expertise)
 
 TONE: Direct, urgent, actionable. Use actual company name (${subscriberData.company_name}) and specific crisis details. Show expertise through concrete crisis response steps with exact timelines, not generic advice.
 
@@ -256,7 +256,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
     </div>
 
     <div class="credentials">
-      <strong>Team:</strong> Jorge Ochoa (SMB Trade Specialist) & Cristina Escalante (Enterprise Logistics Expert)<br>
+      <strong>Team:</strong> Business Development Specialist (Mexico Trade Expert) & Trade Compliance Expert (Licensed Specialist)<br>
       <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), crisis management, supply chain optimization<br>
       <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
       <strong>Service Type:</strong> Consulting and Guidance (Process Support & Crisis Analysis)<br>
@@ -344,7 +344,7 @@ Format as urgent professional crisis action plan with hour-by-hour first 48 hour
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: `Triangle Trade Intelligence Team (Jorge Ochoa & Cristina Escalante)`,
+          completed_by: `Triangle Trade Intelligence Team (Business Development Specialist & Trade Compliance Expert)`,
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
           ai_label: aiResult.label,

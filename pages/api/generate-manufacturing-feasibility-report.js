@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       || 'international trade';
 
     // Generate CLIENT-FOCUSED action plan (not AI theater)
-    const reportPrompt = `You are Jorge Ochoa, Mexico manufacturing expert. Create a SHORT, actionable report for ${subscriberData.company_name || 'the client'}.
+    const reportPrompt = `You are Business Development Specialist, Mexico manufacturing expert. Create a SHORT, actionable report for ${subscriberData.company_name || 'the client'}.
 
 CLIENT NEEDS:
 - Product: ${subscriberData.product_description || 'manufacturing'}
@@ -162,7 +162,7 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
 
   <div class="content">
     <div class="credentials">
-      <strong>Manufacturing Feasibility Expert:</strong> Jorge Ochoa<br>
+      <strong>Manufacturing Feasibility Expert:</strong> Business Development Specialist<br>
       <strong>Experience:</strong> 4+ years CCVIAL, proven B2B track record in manufacturing sectors<br>
       <strong>Expertise:</strong> Consultative B2B sales methodology, Mexico manufacturing network, bilingual (Spanish/English)<br>
       <strong>Unique Advantage:</strong> Cultural bridge for North American companies, CCVIAL industrial connections<br>
@@ -266,7 +266,7 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Jorge Ochoa - B2B Sales Expert, Mexico Manufacturing Specialist',
+          completed_by: 'Business Development Specialist - B2B Sales Expert, Mexico Manufacturing Specialist',
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
           ai_label: aiResult.label,

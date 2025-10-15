@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are a senior Mexico market entry and B2B partnership development expert with 20+ years of experience in North American trade, distribution channel development, and cross-border business strategy. You have deep expertise in Mexico business culture, partnership negotiations, and Latin American market expansion. You are assisting Jorge Ochoa, a B2B sales expert with 7 years of business ownership and industrial/manufacturing experience, bilingual (Spanish/English).
+    const aiPrompt = `You are a senior Mexico market entry and B2B partnership development expert with 20+ years of experience in North American trade, distribution channel development, and cross-border business strategy. You have deep expertise in Mexico business culture, partnership negotiations, and Latin American market expansion. You are assisting Business Development Specialist, a B2B sales expert with 7 years of business ownership and industrial/manufacturing experience, bilingual (Spanish/English).
 
 ===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
 
@@ -264,7 +264,7 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
         stage: 3,
         title: 'Professional Market Entry Execution & Partnership Building',
         description: 'Jorge leverages Mexico business networks to identify partners, build relationships, negotiate agreements, and manage market entry execution',
-        expert: 'Jorge Ochoa',
+        expert: 'Business Development Specialist',
         credentials: 'B2B Sales Expert, 4+ years at CCVIAL, Mexico Market Specialist, Bilingual Spanish/English'
       },
       professional_value_add: {

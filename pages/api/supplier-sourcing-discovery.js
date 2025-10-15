@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     // Call OpenRouter for AI strategic supplier discovery with full business context
     console.log('[SUPPLIER DISCOVERY] Calling OpenRouter API for supplier discovery...');
 
-    const aiPrompt = `You are helping Jorge Ochoa, a B2B sales expert at CCVIAL, find Mexico suppliers for this client.
+    const aiPrompt = `You are helping Business Development Specialist, a B2B sales expert at CCVIAL, find Mexico suppliers for this client.
 
 CLIENT: ${businessContext.company.name}
 INDUSTRY: ${businessContext.company.industry}

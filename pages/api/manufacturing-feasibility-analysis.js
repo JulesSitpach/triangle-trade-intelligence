@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are assisting Jorge Ochoa, a B2B sales expert with 4+ years at CCVIAL, proven track record in industrial/manufacturing sectors, bilingual (Spanish/English), specializing in Mexico manufacturing partnerships.
+    const aiPrompt = `You are assisting Business Development Specialist, a B2B sales expert with 4+ years at CCVIAL, proven track record in industrial/manufacturing sectors, bilingual (Spanish/English), specializing in Mexico manufacturing partnerships.
 
 BUSINESS INTELLIGENCE CONTEXT:
 
@@ -234,7 +234,7 @@ Format as JSON with these exact keys: feasibility_score (1-10), recommended_loca
         stage: 3,
         title: 'Professional Manufacturing Partnership Execution',
         description: 'Jorge validates recommendations, coordinates site visits, negotiates with manufacturing partners, and manages implementation',
-        expert: 'Jorge Ochoa',
+        expert: 'Business Development Specialist',
         credentials: 'B2B Sales Expert, 4+ years at CCVIAL, Industrial Sector Specialist, Mexico Manufacturing Networks'
       },
       professional_value_add: {

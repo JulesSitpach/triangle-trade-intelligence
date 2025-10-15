@@ -149,7 +149,7 @@ export default function CristinaDashboardModular() {
             <div className="header-content">
               <h1 className="dashboard-title">Cristina's Service Dashboard</h1>
               <div className="user-info">
-                <span className="user-name">Cristina Escalante - Compliance Specialist</span>
+                <span className="user-name">Trade Compliance Expert - Licensed Specialist</span>
                 <span className="user-role">USMCA Advantage • Supply Chain Optimization • Crisis Navigator</span>
               </div>
             </div>

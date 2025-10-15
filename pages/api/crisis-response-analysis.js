@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are a senior crisis management and USMCA trade compliance expert with 20+ years of experience in trade policy, customs regulations, and supply chain resilience. You are assisting Cristina Escalante, a Licensed Customs Broker (#4601913) with 17 years of logistics experience specializing in electronics/telecom industries.
+    const aiPrompt = `You are a senior crisis management and USMCA trade compliance expert with 20+ years of experience in trade policy, customs regulations, and supply chain resilience. You are assisting our Licensed Trade Compliance Expert (#4601913) with 17 years of logistics experience specializing in electronics/telecom industries.
 
 ===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
 
@@ -213,7 +213,7 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
         stage: 3,
         title: 'Professional Validation & Execution',
         description: 'Cristina reviews AI analysis and adds professional crisis management execution plan',
-        expert: 'Cristina Escalante',
+        expert: 'Trade Compliance Expert',
         credentials: 'Licensed Customs Broker #4601913, 17 years logistics & crisis management'
       },
       professional_value_add: {

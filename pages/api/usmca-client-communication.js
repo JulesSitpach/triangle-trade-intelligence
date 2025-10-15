@@ -58,7 +58,7 @@ Return your email in this JSON format:
     "Paragraph 3: Next steps and implementation timeline",
     "Paragraph 4: Call to action and support offer"
   ],
-  "closing": "Best regards,\\nJorge Ochoa\\nMexico Trade Specialist\\nTriangle Trade Intelligence",
+  "closing": "Best regards,\\nBusiness Development Specialist\\nMexico Trade Specialist\\nTriangle Trade Intelligence",
   "ps_note": "Optional P.S. with urgency or value reminder"
 }
 
@@ -112,7 +112,7 @@ Write as if you're Jorge personally reaching out to help this client succeed.`;
             `Next steps are straightforward: I've attached a 30/60/90 day implementation roadmap to guide you. The first 30 days focus on organizing your compliance documentation - something you can start this week.`,
             `I'm here to help you implement this. Let's schedule a 15-minute call this week to walk through the roadmap and answer any questions. Does Thursday or Friday work better for you?`
           ],
-          closing: "Best regards,\nJorge Ochoa\nMexico Trade Specialist\nTriangle Trade Intelligence\nPhone: [Your Number]\nEmail: jorge@triangleintel.com",
+          closing: "Best regards,\nBusiness Development Specialist\nMexico Trade Specialist\nTriangle Trade Intelligence\nPhone: [Your Number]\nEmail: jorge@triangleintel.com",
           ps_note: "P.S. The sooner we implement, the faster you'll see those tariff savings hit your bottom line."
         };
       }
@@ -127,7 +127,7 @@ Write as if you're Jorge personally reaching out to help this client succeed.`;
           "Let me know if you have any questions or need clarification on the next steps.",
           "I'm available for a call this week to discuss the details."
         ],
-        closing: "Best regards,\nJorge Ochoa\nTriangle Trade Intelligence",
+        closing: "Best regards,\nBusiness Development Specialist\nTriangle Trade Intelligence",
         ps_note: ""
       };
     }
@@ -158,7 +158,7 @@ Write as if you're Jorge personally reaching out to help this client succeed.`;
           "Let me know if you have questions.",
           "Happy to schedule a call to discuss."
         ],
-        closing: "Best regards,\nJorge Ochoa",
+        closing: "Best regards,\nBusiness Development Specialist",
         ps_note: ""
       }
     });
