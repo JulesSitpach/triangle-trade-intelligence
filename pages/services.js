@@ -215,14 +215,14 @@ export default function ProfessionalServices() {
           </div>
 
           <h1 className="hero-main-title">
-            Jorge & Cristina: Your Mexico Trade Team
+            Your Mexico Trade Team
           </h1>
           <h2 className="hero-sub-title">
             Expert <span className="hero-gradient-text">Trade Consulting & USMCA Optimization</span>
           </h2>
 
           <p className="hero-description-text">
-            All services delivered through team collaboration - combining Jorge's SMB operational experience and Mexico market expertise with Cristina's 17 years of enterprise logistics and compliance knowledge.
+            All services delivered through expert team collaboration - combining SMB operational experience and Mexico market expertise with 17 years of enterprise logistics and compliance knowledge.
           </p>
 
           <div className="hero-button-group">
