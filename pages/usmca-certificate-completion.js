@@ -19,6 +19,8 @@ export default function USMCACertificateCompletion() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [generatedPDF, setGeneratedPDF] = useState(null);
+  const [userTier, setUserTier] = useState('Trial'); // Default to Trial for safety
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [certificateData, setCertificateData] = useState({
     company_info: {},
     product_details: {},
@@ -28,6 +30,28 @@ export default function USMCACertificateCompletion() {
       end_date: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
     }
   });
+
+  // Fetch user subscription tier on mount
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      try {
+        const response = await fetch('/api/dashboard-data', {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const tier = data.user_profile?.subscription_tier || 'Trial';
+          setUserTier(tier);
+          console.log('User subscription tier:', tier);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user tier:', error);
+        // Default to Trial on error for safety
+        setUserTier('Trial');
+      }
+    };
+    fetchUserTier();
+  }, []);
 
   useEffect(() => {
     // Load workflow data from localStorage
@@ -213,12 +237,21 @@ export default function USMCACertificateCompletion() {
     }
   };
 
-  const generatePDFFromCertificate = async (professionalCertificate) => {
-    // Use the official USMCA PDF generator that matches the preview format
-    return await generateUSMCACertificatePDF(professionalCertificate);
+  const generatePDFFromCertificate = async (professionalCertificate, options = {}) => {
+    // Use the official USMCA PDF generator with userTier for watermarking
+    return await generateUSMCACertificatePDF(professionalCertificate, {
+      userTier: userTier,
+      ...options
+    });
   };
 
   const handleDownloadCertificate = async () => {
+    // Check if user is on Trial tier
+    if (userTier === 'Trial') {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     if (previewData?.professional_certificate) {
       try {
         const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
@@ -227,7 +260,8 @@ export default function USMCACertificateCompletion() {
         const a = document.createElement('a');
         a.href = url;
         const certificateNumber = previewData.professional_certificate.certificate_number || 'Certificate';
-        a.download = `USMCA_Certificate_${certificateNumber}.pdf`;
+        const filename = pdfBlob.filename || `USMCA_Certificate_${certificateNumber}.pdf`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -241,7 +275,33 @@ export default function USMCACertificateCompletion() {
     }
   };
 
+  const handlePreviewCertificate = async () => {
+    // Allow preview for all users (including Trial)
+    if (previewData?.professional_certificate) {
+      try {
+        const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
+
+        const url = URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank');
+
+        // Clean up after a delay
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (error) {
+        console.error('Error generating preview:', error);
+        alert('Error previewing certificate. Please try again.');
+      }
+    } else {
+      alert('Please generate the certificate first');
+    }
+  };
+
   const handleEmailToImporter = async (authData) => {
+    // Check if user is on Trial tier
+    if (userTier === 'Trial') {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     if (previewData?.professional_certificate && authData?.importer_email) {
       try {
         const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
@@ -250,7 +310,8 @@ export default function USMCACertificateCompletion() {
         const a = document.createElement('a');
         a.href = url;
         const certificateNumber = previewData.professional_certificate.certificate_number || 'Certificate';
-        a.download = `USMCA_Certificate_${certificateNumber}.pdf`;
+        const filename = pdfBlob.filename || `USMCA_Certificate_${certificateNumber}.pdf`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -328,6 +389,69 @@ export default function USMCACertificateCompletion() {
           previewData={previewData}
           generatedPDF={generatedPDF}
         />
+
+          {/* Upgrade Modal for Trial Users */}
+          {showUpgradeModal && (
+            <div className="modal-overlay" onClick={() => setShowUpgradeModal(false)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>🚀 Upgrade Required for Certificate Download</h2>
+                  <button onClick={() => setShowUpgradeModal(false)} className="modal-close">×</button>
+                </div>
+                <div className="modal-body">
+                  <div className="alert alert-warning">
+                    <div className="alert-content">
+                      <div className="alert-title">Free Trial - Preview Only</div>
+                      <div className="text-body">
+                        Your free trial allows you to preview the certificate with a watermark,
+                        but downloading official certificates requires a paid subscription.
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-body">
+                    Official USMCA certificates must be accepted by customs authorities.
+                    Subscribe to download certificates that are valid for customs submissions
+                    and backed by professional compliance verification.
+                  </p>
+
+                  <div style={{background: '#f3f4f6', padding: '1.5rem', borderRadius: '8px', marginBottom: '1rem'}}>
+                    <h3 style={{marginTop: 0}}>Starter Plan - $99/mo</h3>
+                    <ul style={{marginBottom: 0}}>
+                      <li>✓ 10 USMCA analyses per month</li>
+                      <li>✓ 10 components per analysis</li>
+                      <li>✓ Full certificate download (no watermark)</li>
+                      <li>✓ Email crisis alerts (high/critical)</li>
+                      <li>✓ Valid for customs submissions</li>
+                    </ul>
+                  </div>
+
+                  <div style={{background: '#ede9fe', padding: '1.5rem', borderRadius: '8px'}}>
+                    <h3 style={{marginTop: 0}}>
+                      Professional Plan - $299/mo
+                      <span style={{background: '#8b5cf6', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '4px', marginLeft: '0.5rem', fontSize: '0.875rem'}}>POPULAR</span>
+                    </h3>
+                    <ul style={{marginBottom: 0}}>
+                      <li>✓ Unlimited USMCA analyses</li>
+                      <li>✓ 25 components per analysis</li>
+                      <li>✓ Full certificate download</li>
+                      <li>✓ All email alerts</li>
+                      <li>✓ 15% service discounts</li>
+                      <li>✓ Priority support (48hr)</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button onClick={handlePreviewCertificate} className="btn-secondary">
+                    Preview with Watermark
+                  </button>
+                  <a href="/pricing" className="btn-primary">
+                    View Plans &amp; Upgrade
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </TriangleLayout>
