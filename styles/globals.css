@@ -729,23 +729,38 @@ select.form-input {
 /* Select dropdown options - force white backgrounds */
 select.form-input option,
 select option {
+  background: white !important;
   background-color: white !important;
-  color: var(--gray-900) !important;
+  color: #1f2937 !important;
   padding: 0.5rem;
 }
 
-/* Remove any blue backgrounds from option elements */
+/* Hover and focus states for options */
+select.form-input option:hover,
+select option:hover,
+select.form-input option:focus,
+select option:focus {
+  background: #f3f4f6 !important;
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+/* Selected/checked option state */
 select.form-input option:checked,
-select option:checked {
+select option:checked,
+select.form-input option[selected],
+select option[selected] {
+  background: #e0f2fe !important;
   background-color: #e0f2fe !important;
-  color: var(--gray-900) !important;
+  color: #1f2937 !important;
 }
 
 /* Optgroup labels */
 select.form-input optgroup,
 select optgroup {
+  background: white !important;
   background-color: white !important;
-  color: var(--gray-700);
+  color: #374151;
   font-weight: 600;
 }
 
