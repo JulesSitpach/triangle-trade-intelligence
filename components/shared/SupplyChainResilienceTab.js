@@ -190,6 +190,8 @@ export default function SupplyChainResilienceTab({ requests: propRequests, onReq
               const contactName = request.contact_name || data.contact_name || 'Contact not provided';
               const productDescription = data.product_description || 'Product details not provided';
               const tradeVolume = data.trade_volume ? `$${Number(data.trade_volume).toLocaleString()}` : 'Not specified';
+              const businessType = data.business_type || 'Not specified';
+              const industrySector = data.industry_sector || data.industry || 'Not specified';
 
               return (
                 <tr key={request.id}>
@@ -197,6 +199,7 @@ export default function SupplyChainResilienceTab({ requests: propRequests, onReq
                     <div className="client-info">
                       <strong>{request.client_company || 'Unknown Company'}</strong>
                       <div className="contact-name">{contactName}</div>
+                      <div className="business-classification">{businessType} • {industrySector}</div>
                     </div>
                   </td>
                   <td>
@@ -401,8 +404,12 @@ function RiskAssessmentStage({ request, subscriberData, serviceDetails, onComple
             <span>${subscriberData.trade_volume}</span>
           </div>
           <div className="data-item">
-            <strong>Business Type:</strong>
+            <strong>Business Type (Role):</strong>
             <span>{subscriberData.business_type}</span>
+          </div>
+          <div className="data-item">
+            <strong>Industry Sector:</strong>
+            <span>{subscriberData.industry_sector || subscriberData.industry || 'Not specified'}</span>
           </div>
           <div className="data-item">
             <strong>USMCA Status:</strong>

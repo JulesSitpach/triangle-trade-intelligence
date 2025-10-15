@@ -78,7 +78,7 @@ export default function Pricing() {
       monthlyPrice: 99,
       annualPrice: 950,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Essential USMCA compliance tools for small importers',
+      description: 'Essential USMCA compliance tools for Small & Medium importers',
       features: [
         '10 USMCA analyses per month',
         'Basic trade alerts',
@@ -185,9 +185,9 @@ export default function Pricing() {
   return (
     <>
       <Head>
-        <title>USMCA Compliance Platform Pricing | Affordable Plans for Small Importers</title>
-        <meta name="description" content="Affordable USMCA compliance for small importers. Plans starting at $99/month with expert trade consulting support. Save $10k-20k/year in time." />
-        <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, small business trade platform, trade consulting services" />
+        <title>USMCA Compliance Platform Pricing | Affordable Plans for Small & Medium Importers</title>
+        <meta name="description" content="Affordable USMCA compliance for Small & Medium importers. Plans starting at $99/month with expert trade consulting support. Save $10k-20k/year in time." />
+        <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, Small & Medium business trade platform, trade consulting services" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -259,16 +259,16 @@ export default function Pricing() {
           </h2>
 
           <p className="hero-description-text">
-            Affordable USMCA compliance for small businesses who can't afford full-time trade compliance teams. Plans start at $99/month with expert trade consulting support.
+            Affordable USMCA compliance for Small & Medium businesses who can't afford full-time trade compliance teams. Plans start at $99/month with expert trade consulting support.
           </p>
           
           <div className="hero-button-group">
             <Link
-              href="/login"
+              href="/signup"
               className="hero-primary-button"
-              aria-label="Sign in to subscribe"
+              aria-label="Start free trial - no credit card required"
             >
-              Sign In to Subscribe
+              Try Free - No Credit Card
             </Link>
             <Link
               href="#pricing"
@@ -277,6 +277,14 @@ export default function Pricing() {
             >
               View Plans
             </Link>
+          </div>
+
+          {/* Trial Benefits */}
+          <div className="hero-trial-benefits">
+            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+            <div className="trial-benefit-item">✓ 3 components analyzed</div>
+            <div className="trial-benefit-item">✓ Certificate preview</div>
+            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>
@@ -503,7 +511,7 @@ export default function Pricing() {
 
             <div className="content-card">
               <div className="content-card-icon">$</div>
-              <h3 className="content-card-title">ROI for Small Importers</h3>
+              <h3 className="content-card-title">ROI for Small & Medium Importers</h3>
               <p className="content-card-description">
                 DIY USMCA compliance costs $50-100/hr of your time. Hiring a customs
                 broker full-time: $60k+/year. Our platform: $299-599/month with
@@ -632,11 +640,11 @@ export default function Pricing() {
             </p>
             <div className="hero-button-group">
               <Link
-                href="/login"
+                href="/signup"
                 className="hero-primary-button"
-                aria-label="Sign in to get started"
+                aria-label="Start free trial"
               >
-                Sign In to Get Started
+                Get Started
               </Link>
               <Link
                 href="/services"

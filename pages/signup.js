@@ -102,8 +102,8 @@ export default function Signup() {
               <Link href="/">
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-title">Create Account</h1>
-              <p className="text-body">Subscribe to access professional USMCA compliance tools</p>
+              <h1 className="section-title">Start Your Free Trial</h1>
+              <p className="text-body">Try Triangle Trade Intelligence free - no credit card required</p>
             </div>
 
             {/* Error Message */}
@@ -228,9 +228,28 @@ export default function Signup() {
                 disabled={isLoading}
                 className="btn-primary"
               >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {isLoading ? 'Creating Account...' : 'Start Free Trial'}
               </button>
             </form>
+
+            {/* Trial Benefits Section */}
+            <div className="content-card">
+              <h3 className="card-title">Your Free Trial Includes:</h3>
+              <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+              <div className="trial-benefit-item">✓ 3 components analyzed</div>
+              <div className="trial-benefit-item">✓ Certificate preview (watermarked)</div>
+              <div className="trial-benefit-item">✓ Access to crisis alerts dashboard</div>
+              <div className="trial-benefit-item">✓ Can purchase services at full price</div>
+
+              <div className="status-success">
+                <p className="text-body">
+                  <strong>After Trial:</strong> Subscribe for unlimited analyses
+                </p>
+                <p className="text-body">
+                  Plans from $99/month • Cancel anytime
+                </p>
+              </div>
+            </div>
 
             {/* Already have account */}
             <div className="element-spacing">

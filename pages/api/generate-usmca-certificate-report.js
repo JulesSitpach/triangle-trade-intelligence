@@ -89,10 +89,15 @@ export default async function handler(req, res) {
     const chinaTariffRate = subscriberData.china_tariff_rate
       || 0.25; // Current Section 301 tariff rate for many Chinese goods
 
-    // Get USMCA threshold from subscriber data or use product-specific defaults
+    // Get USMCA threshold from AI-researched subscriber data (no hardcoded fallbacks)
+    // This value should have been researched and saved by ai-usmca-complete-analysis.js
     const usmcaThreshold = subscriberData.usmca_threshold
       || subscriberData.rvc_requirement
-      || 75; // USMCA default for most products (automotive can be 75%, textiles 85%, etc.)
+      || subscriberData.required_threshold; // From workflow_sessions table
+
+    if (!usmcaThreshold) {
+      throw new Error('USMCA threshold not found in subscriber data. Workflow analysis must be completed first.');
+    }
 
     const partialThreshold = usmcaThreshold * 0.833; // 83.3% of full threshold (e.g., 62.5% for 75% threshold)
 
@@ -364,7 +369,7 @@ Format as a formal business report with clear headers, bullet points for key fin
       <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
       <strong>Service Type:</strong> Consulting and Guidance (USMCA Optimization Assessment)<br>
       <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
-      <strong>Note:</strong> For official USMCA certificates, we partner with licensed customs brokers
+      <strong>Note:</strong> For official USMCA certificates, we partner with trade compliance experts
     </div>
 
     <div class="section">
@@ -381,7 +386,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official USMCA certificates and formal compliance documents, we partner with licensed customs brokers. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official USMCA certificates and formal compliance documents, we partner with trade compliance experts. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
   </div>
 </body>

@@ -322,7 +322,7 @@ INSERT INTO crisis_messages (message_key, message_type, content_en, content_es, 
 -- Hero messages
 ('hero_title_main', 'hero', 'Avoid {trump_tariff_rate}% Trump Tariff Penalties with Professional USMCA Compliance', 'Evita las Penalidades Arancelarias de Trump del {trump_tariff_rate}% con Cumplimiento USMCA Profesional', '{"trump_tariff_rate": "crisis_config.trump_tariff_rate.rate"}', 'landing_page', 100),
 
-('hero_subtitle', 'hero', 'While your competitors face {trump_tariff_rate}% penalties, you pay 0% with licensed customs broker validation', 'Mientras tus competidores enfrentan penalidades del {trump_tariff_rate}%, tú pagas 0% con validación de corredor aduanal licenciado', '{"trump_tariff_rate": "crisis_config.trump_tariff_rate.rate"}', 'landing_page', 90),
+('hero_subtitle', 'hero', 'While your competitors face {trump_tariff_rate}% penalties, you pay 0% with trade compliance expert validation', 'Mientras tus competidores enfrentan penalidades del {trump_tariff_rate}%, tú pagas 0% con validación de corredor aduanal licenciado', '{"trump_tariff_rate": "crisis_config.trump_tariff_rate.rate"}', 'landing_page', 90),
 
 -- Warning messages  
 ('penalty_warning', 'warning', 'One documentation error = ${penalty_amount} penalty on single shipment', 'Un error de documentación = penalidad de ${penalty_amount} en un solo envío', '{"penalty_amount": "calculated_from_trade_volume"}', 'calculator', 100),
@@ -335,16 +335,16 @@ INSERT INTO crisis_messages (message_key, message_type, content_en, content_es, 
 ('cta_professional', 'cta', 'Start Professional Protection - ${protection_price}/month', 'Comienza Protección Profesional - ${protection_price}/mes', '{"protection_price": "service_pricing.protection_plan.base_price"}', 'pricing_section', 90),
 
 -- Benefits
-('benefit_professional', 'benefit', 'Validated by {validator_name}, Licensed Mexican Customs Broker #{license_number}', 'Validado por {validator_name}, Corredor Aduanal Mexicano Licenciado #{license_number}', '{"validator_name": "professional_validators.primary.validator_name", "license_number": "professional_validators.primary.license_number"}', 'validation_section', 100),
+('benefit_professional', 'benefit', 'Validated by {validator_name}, Trade Compliance Expert #{license_number}', 'Validado por {validator_name}, Experta en Cumplimiento Comercial Certificada #{license_number}', '{"validator_name": "professional_validators.primary.validator_name", "license_number": "professional_validators.primary.license_number"}', 'validation_section', 100),
 
 ('benefit_experience', 'benefit', '{experience_years} years of Mexico-US trade expertise backing every recommendation', '{experience_years} años de experiencia en comercio México-US respaldando cada recomendación', '{"experience_years": "professional_validators.primary.experience_years"}', 'credibility_section', 80);
 
 -- Professional Validators (NO HARDCODED Cristina details)
 INSERT INTO professional_validators (validator_name, license_number, license_type, license_country, specializations, languages, experience_years, hourly_rate, liability_coverage, active, available_for_emergency, bio_en, bio_es) VALUES 
 
-('Cristina Escalante', '4601913', 'customs_broker', 'MX', ARRAY['USMCA', 'Mexico_Trade', 'Supply_Chain', 'CBP_Compliance', 'Automotive', 'Electronics'], ARRAY['Spanish', 'English'], 17, 500.00, true, true, true, 
-'Licensed Mexican Customs Broker with 17 years of experience in Mexico-US trade. Former senior roles at Motorola, Arris, and Tekmovil. Specialized in USMCA compliance, supply chain optimization, and CBP audit preparation.', 
-'Corredor Aduanal Mexicano Licenciado con 17 años de experiencia en comercio México-EE.UU. Roles senior anteriores en Motorola, Arris y Tekmovil. Especializada en cumplimiento USMCA, optimización de cadena de suministro y preparación de auditorías CBP.');
+('Cristina Escalante', '4601913', 'certified_professional', 'MX', ARRAY['USMCA', 'Mexico_Trade', 'Supply_Chain', 'CBP_Compliance', 'Automotive', 'Electronics'], ARRAY['Spanish', 'English'], 17, 500.00, true, true, true, 
+'Trade Compliance Expert with 17 years of experience in Mexico-US trade. Former senior roles at Motorola, Arris, and Tekmovil. Specialized in USMCA compliance, supply chain optimization, and CBP audit preparation.', 
+'Experta en Cumplimiento Comercial Certificada con 17 años de experiencia en comercio México-EE.UU. Roles senior anteriores en Motorola, Arris y Tekmovil. Especializada en cumplimiento USMCA, optimización de cadena de suministro y preparación de auditorías CBP.');
 
 -- Localization Content (Key UI elements)
 INSERT INTO localization_content (content_key, locale, content_type, content_value, content_context) VALUES 

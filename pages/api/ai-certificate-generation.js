@@ -46,7 +46,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const prompt = `You are Cristina Rodriguez, a licensed customs broker specializing in USMCA certificates.
+    const prompt = `You are Cristina Rodriguez, a trade compliance expert specializing in USMCA certificates.
 
 Generate a professional USMCA Certificate of Origin report for this client request:
 

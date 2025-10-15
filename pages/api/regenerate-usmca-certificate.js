@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         preference_criterion: certificateData.supply_chain?.preference_criterion || 'B',
         component_origins: certificateData.supply_chain?.component_origins || [],
         rule: certificateData.supply_chain?.rule || 'Regional Value Content',
-        threshold_applied: certificateData.supply_chain?.threshold_applied || 65
+        threshold_applied: certificateData.supply_chain?.threshold_applied || certificateData.supply_chain?.required_threshold
       };
 
       companyName = subscriberData.company_name;
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       // Add professional enhancements (optional for regular workflow certificates)
       ...(professional_adjustments && Object.keys(professional_adjustments).length > 0 && {
         professional_validation: {
-          cristina_license: '4601913',
+          professional_certification: '4601913',
           validation_date: new Date().toISOString(),
           confidence_level: professional_adjustments.compliance_confidence_level,
           professional_notes: professional_adjustments.professional_recommendations,
@@ -122,7 +122,7 @@ Confidence Level: ${professional_adjustments.compliance_confidence_level}
 Professional Notes: ${professional_adjustments.professional_recommendations}
 Customs Broker Guarantee: ${professional_adjustments.customs_broker_guarantee}
 
-TASK: As Licensed Customs Broker Cristina (License #4601913) with 17 years electronics/telecom experience, generate a professionally enhanced USMCA Certificate of Origin that includes:
+TASK: As Trade Compliance Expert Cristina (Professional Certification #4601913) with 17 years electronics/telecom logistics experience, generate a professionally enhanced USMCA Certificate of Origin that includes:
 
 1. Enhanced product description with regulatory compliance language
 2. Precise regional value content calculation methodology
@@ -203,7 +203,7 @@ Return a JSON object with:
         generated_date: new Date().toISOString(),
         generated_by: 'Triangle Trade Intelligence Platform',
         validated_by: correctedData.hs_code_corrected_by_professional
-          ? 'Licensed Customs Broker Trade Compliance Expert #4601913'
+          ? 'Trade Compliance Expert (Professional Certification #4601913)'
           : 'AI-powered USMCA compliance engine (OpenRouter API)'
       },
 
@@ -239,9 +239,9 @@ Return a JSON object with:
       hs_classification: {
         code: correctedData.classified_hs_code || hsCode,
         verified: true,
-        source: correctedData.hs_code_corrected_by_professional ? 'Professional customs broker classification' : 'AI classification',
+        source: correctedData.hs_code_corrected_by_professional ? 'Professional trade compliance expert classification' : 'AI classification',
         verification_source: correctedData.hs_code_corrected_by_professional
-          ? 'Professionally verified by Licensed Customs Broker Trade Compliance Expert #4601913'
+          ? 'Professionally verified by Trade Compliance Expert (Professional Certification #4601913)'
           : 'AI-classified via OpenRouter API (Claude 3.5 Sonnet)'
       },
 
@@ -291,7 +291,7 @@ Return a JSON object with:
       // Field 9 - Qualification Method (frontend expects this name, not method_of_qualification)
       qualification_method: {
         method: correctedData.rule || certificateData?.supply_chain?.rule || 'Regional Value Content',
-        description: `Product qualifies under Criterion ${aiEnhancements?.preference_criterion || correctedData.preference_criterion || certificateData?.supply_chain?.preference_criterion || 'B'} (Regional Value Content method) with ${correctedData.north_american_content || certificateData?.supply_chain?.regional_value_content || 0}% regional content (threshold: ${correctedData.threshold_applied || certificateData?.supply_chain?.threshold_applied || 65}%)`,
+        description: `Product qualifies under Criterion ${aiEnhancements?.preference_criterion || correctedData.preference_criterion || certificateData?.supply_chain?.preference_criterion || 'B'} (Regional Value Content method) with ${correctedData.north_american_content || certificateData?.supply_chain?.regional_value_content || 0}% regional content (threshold: ${correctedData.threshold_applied || certificateData?.supply_chain?.threshold_applied || certificateData?.supply_chain?.required_threshold}%)`,
         preference_criterion: aiEnhancements?.preference_criterion || correctedData.preference_criterion || certificateData?.supply_chain?.preference_criterion || 'B'
       },
 
@@ -309,8 +309,8 @@ Return a JSON object with:
 
       // Professional backing
       professional_validation: correctedData.professional_validation,
-      customs_broker_license: '4601913',
-      professional_guarantee: 'This certificate is professionally backed by Licensed Customs Broker Trade Compliance Expert, License #4601913',
+      professional_certification: '4601913',
+      professional_guarantee: 'This certificate is professionally backed by Trade Compliance Expert (Professional Certification #4601913)',
 
       // AI-enhanced features
       audit_defense_notes: aiEnhancements?.audit_defense_notes || [
@@ -386,11 +386,11 @@ Return a JSON object with:
         'Product description regulatory compliance enhancement',
         'Manufacturing location confirmation',
         'Professional liability backing applied',
-        'Customs broker license guarantee added',
+        'Customs professional certification guarantee added',
         aiAnalysisPerformed ? 'AI-powered regulatory analysis completed' : 'Professional template applied'
       ],
       cristina_validation: {
-        license_number: '4601913',
+        professional_certification: '4601913',
         validation_timestamp: new Date().toISOString(),
         professional_confidence: aiEnhancements?.estimated_qualification_confidence || 'High',
         liability_coverage: 'Active',

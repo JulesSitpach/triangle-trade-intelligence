@@ -24,6 +24,7 @@ export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
   const hasLoadedResultsRef = useRef(false);
+  const [userTier, setUserTier] = React.useState('Trial'); // Default to Trial
 
   const {
     currentStep,
@@ -51,6 +52,31 @@ export default function USMCAWorkflowOrchestrator() {
   } = useWorkflowState();
 
   const { trustIndicators } = useTrustIndicators();
+
+  // Fetch user's subscription tier on mount
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      try {
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
+        const data = await response.json();
+
+        if (data.authenticated && data.user) {
+          // User is authenticated, get their subscription tier
+          const tier = data.user.subscription_tier || 'Trial';
+          console.log('👤 User subscription tier:', tier);
+          setUserTier(tier);
+        } else {
+          // Not authenticated, default to Trial
+          setUserTier('Trial');
+        }
+      } catch (error) {
+        console.error('Failed to fetch user tier:', error);
+        setUserTier('Trial');
+      }
+    };
+
+    fetchUserTier();
+  }, []);
 
   // Handle "New Analysis" reset trigger (prevent infinite loop with ref)
   useEffect(() => {
@@ -477,6 +503,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             isLoadingOptions={isLoadingOptions}
             onNext={nextStep}
             isStepValid={() => isStepValid(1)}
+            onNewAnalysis={resetWorkflow}
           />
         )}
 
@@ -491,6 +518,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onProcessWorkflow={handleProcessStep2}
             isFormValid={isFormValid}
             isLoading={isLoading}
+            userTier={userTier}
           />
         )}
 

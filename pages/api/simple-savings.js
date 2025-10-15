@@ -17,7 +17,7 @@ function generateSystemResponse(confidence, response, context = {}) {
       systemDecision: 'PROFESSIONAL_VERIFICATION_REQUIRED',
       confidence: Math.round(confidence),
       message: 'Professional tariff verification required for accurate analysis',
-      recommendedAction: 'Contact licensed customs broker for verified calculations',
+      recommendedAction: 'Contact trade compliance expert for verified calculations',
       context,
       disclaimer: 'System confidence below threshold - professional review required'
     };

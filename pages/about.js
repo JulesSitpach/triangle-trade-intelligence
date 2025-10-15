@@ -86,6 +86,31 @@ export default function About() {
           <p className="hero-description-text">
             North American business standards combined with Mexico market access and insights. Professional USMCA compliance platform with bilingual expert team support.
           </p>
+
+          <div className="hero-button-group">
+            <Link
+              href="/signup"
+              className="hero-primary-button"
+              aria-label="Start free trial - no credit card required"
+            >
+              Try Free - No Credit Card
+            </Link>
+            <Link
+              href="/services"
+              className="hero-secondary-button"
+              aria-label="View professional services"
+            >
+              View All Services
+            </Link>
+          </div>
+
+          {/* Trial Benefits */}
+          <div className="hero-trial-benefits">
+            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+            <div className="trial-benefit-item">✓ 3 components analyzed</div>
+            <div className="trial-benefit-item">✓ Certificate preview</div>
+            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
+          </div>
         </div>
       </section>
 
@@ -118,9 +143,9 @@ export default function About() {
 
             <div className="content-card">
               <div className="content-card-icon">T</div>
-              <h3 className="content-card-title">Trust Factor</h3>
+              <h3 className="content-card-title">Cross-Border Expertise</h3>
               <p className="content-card-description">
-                Canadian ownership provides North American companies confidence in professional standards and business practices, while Mexico operations deliver local insights and relationships that distant consultants cannot provide.
+                Combining Canadian and Mexican business perspectives to bridge North American trade. We understand both sides of the border - the regulatory requirements and the on-the-ground realities that make trade successful.
               </p>
             </div>
 
@@ -238,7 +263,7 @@ export default function About() {
             <div className="content-card-icon">P</div>
             <h3 className="content-card-title">Partner Network for Official Services</h3>
             <p className="content-card-description">
-              For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide expert guidance and assessment to prepare you for these official processes, but official certifications require licensed customs brokers.
+              For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide expert guidance and assessment to prepare you for these official processes, but official certifications require trade compliance experts.
             </p>
           </div>
         </div>

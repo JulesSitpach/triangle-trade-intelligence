@@ -42,7 +42,7 @@ export default function ProfessionalServices() {
       premiumPrice: 131,       // 25% off
       description: 'Product audit and USMCA qualification roadmap led by Cristina with Jorge\'s support.',
       expert: 'Cristina Lead (70%) • Jorge Support (30%)',
-      disclaimer: 'For official USMCA certificates, we partner with licensed customs brokers',
+      disclaimer: 'For official USMCA certificates, we partner with trade compliance experts',
       features: [
         'Complete USMCA qualification assessment',
         'Compliance gap analysis',
@@ -228,11 +228,11 @@ export default function ProfessionalServices() {
 
           <div className="hero-button-group">
             <Link
-              href="/services/request-form"
+              href="/signup"
               className="hero-primary-button"
-              aria-label="Start with Trade Health Check"
+              aria-label="Start free trial - no credit card required"
             >
-              Start with $99 Health Check
+              Try Free - No Credit Card
             </Link>
             <Link
               href="#services"
@@ -241,6 +241,14 @@ export default function ProfessionalServices() {
             >
               View All Services
             </Link>
+          </div>
+
+          {/* Trial Benefits */}
+          <div className="hero-trial-benefits">
+            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+            <div className="trial-benefit-item">✓ 3 components analyzed</div>
+            <div className="trial-benefit-item">✓ Certificate preview</div>
+            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>

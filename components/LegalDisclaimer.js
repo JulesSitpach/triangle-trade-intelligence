@@ -16,7 +16,7 @@ export default function LegalDisclaimer({ variant = 'default' }) {
           <div className="text-body">
             <strong>What We Provide:</strong> Trade consulting, USMCA assessment guidance, and strategic recommendations.
             <br />
-            <strong>What We Don't Provide:</strong> We are not licensed customs brokers. Official customs declarations and legal certifications require licensed professionals.
+            <strong>What We Don't Provide:</strong> We are not trade compliance experts. Official customs declarations and legal certifications require licensed professionals.
           </div>
         </div>
       </div>
@@ -34,7 +34,7 @@ export default function LegalDisclaimer({ variant = 'default' }) {
             logistics planning recommendations, supply chain analysis, and market entry strategy support.
           </p>
           <p style={{marginBottom: '0.75rem'}}>
-            <strong>What We Don't Provide:</strong> We are not licensed customs brokers. Official customs declarations,
+            <strong>What We Don't Provide:</strong> We are not trade compliance experts. Official customs declarations,
             legal USMCA certifications, and formal compliance documents require partnership with licensed professionals.
           </p>
           <p style={{marginBottom: '0'}}>

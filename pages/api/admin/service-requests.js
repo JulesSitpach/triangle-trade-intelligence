@@ -425,9 +425,9 @@ function calculateAdminIntelligenceMetrics(requests) {
     // RVC optimization check
     if (analysis.qualification_status === 'QUALIFIED') {
       // Check if close to threshold (within 15% margin)
-      const rvc = parseFloat(analysis.component_origins?.[0]?.regional_value_content || 0);
-      const threshold = 60; // Standard USMCA threshold
-      if (rvc < threshold + 15) {
+      const rvc = parseFloat(analysis.regional_content_percentage || 0);
+      const threshold = analysis.required_threshold || analysis.usmca_threshold || 0; // AI-researched threshold from workflow
+      if (threshold > 0 && rvc < threshold + 15) {
         hasRVCOpportunity = true;
       }
     }

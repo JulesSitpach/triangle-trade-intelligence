@@ -63,7 +63,8 @@ export function useWorkflowState() {
   const [formData, setFormData] = useState({
       // Company Information
       company_name: '',
-      business_type: '',
+      business_type: '',  // Business role: Importer, Exporter, Manufacturer, Distributor
+      industry_sector: '',  // Industry classification: Automotive, Electronics, etc.
       supplier_country: '',
       trade_volume: '',
       destination_country: '',
@@ -158,6 +159,7 @@ export function useWorkflowState() {
             ...prev,
             company_name: parsed.company?.name || parsed.company?.company_name || prev.company_name,
             business_type: parsed.company?.business_type || prev.business_type,
+            industry_sector: parsed.company?.industry_sector || prev.industry_sector,
             trade_volume: parsed.company?.trade_volume || prev.trade_volume,
             company_address: parsed.company?.company_address || parsed.company?.address || prev.company_address,
             tax_id: parsed.company?.tax_id || prev.tax_id,
@@ -421,6 +423,7 @@ export function useWorkflowState() {
     setFormData({
       company_name: '',
       business_type: '',
+      industry_sector: '',
       supplier_country: 'CN',
       trade_volume: '',
       destination_country: 'US',
@@ -516,8 +519,9 @@ export function useWorkflowState() {
   const isStepValid = useCallback((step) => {
     switch (step) {
       case 1:
-        return formData.company_name.length > 2 && 
-               formData.business_type && 
+        return formData.company_name.length > 2 &&
+               formData.business_type &&
+               formData.industry_sector &&
                formData.trade_volume &&
                formData.company_address &&
                formData.contact_person &&
@@ -586,6 +590,7 @@ export function useWorkflowState() {
       ...prev,
       company_name: workflow.company_name || workflowData.company?.name || '',
       business_type: workflow.business_type || workflowData.company?.business_type || '',
+      industry_sector: workflow.industry_sector || workflowData.company?.industry_sector || '',
       trade_volume: workflow.trade_volume || workflowData.company?.trade_volume || '',
       company_address: workflowData.company?.company_address || workflowData.company?.address || '',
       tax_id: workflowData.company?.tax_id || '',

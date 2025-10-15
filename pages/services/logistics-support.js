@@ -82,7 +82,7 @@ export default function ProfessionalServices() {
         'Delivered within 1 week'
       ],
       whyNeed: 'Don\'t qualify for USMCA benefits? Need professional guidance to restructure supply chain?',
-      disclaimer: 'For official USMCA certificates, we partner with licensed customs brokers'
+      disclaimer: 'For official USMCA certificates, we partner with trade compliance experts'
     },
     {
       id: 'supply-chain-optimization',

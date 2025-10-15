@@ -3,6 +3,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import TriangleLayout from './TriangleLayout';
+import { SERVICE_CONFIGURATIONS, calculateServicePrice } from '../config/service-configurations';
+import { SUBSCRIPTION_TIERS } from '../config/subscription-limits';
 
 export default function UserDashboard({ user }) {
   const router = useRouter();
@@ -161,47 +163,37 @@ export default function UserDashboard({ user }) {
     // Get the selected workflow object
     const selectedWorkflow = workflows.find(w => w.id === selectedWorkflowId);
 
-    // Service options with base pricing
-    const services = [
-      { id: 'trade-health-check', name: '🏥 Trade Health Check', basePrice: 99, noDiscount: true },
-      { id: 'usmca-advantage', name: '📜 USMCA Advantage Sprint', basePrice: 175 },
-      { id: 'supply-chain-optimization', name: '🔧 Supply Chain Optimization', basePrice: 275 },
-      { id: 'pathfinder', name: '🚀 Pathfinder Market Entry', basePrice: 350 },
-      { id: 'supply-chain-resilience', name: '🛡️ Supply Chain Resilience', basePrice: 450 },
-      { id: 'crisis-navigator', name: '🆘 Crisis Navigator', basePrice: 200, recurring: true }
-    ];
+    // Build services array dynamically from config (FLEXIBLE & DYNAMIC)
+    const services = Object.entries(SERVICE_CONFIGURATIONS).map(([serviceType, config]) => ({
+      id: serviceType,
+      name: `${config.icon} ${config.name}`,
+      basePrice: config.price,
+      recurring: config.isRecurring || false,
+      // Trade Health Check and Crisis Navigator have no discounts
+      noDiscount: serviceType === 'trade-health-check' || serviceType === 'crisis-navigator'
+    }));
 
-    // Calculate discounted price based on subscription tier
+    // Use centralized pricing calculation (FLEXIBLE & DYNAMIC)
     const calculatePrice = (service) => {
-      const tier = user?.subscription_tier || 'Starter';
+      const tier = user?.subscription_tier || SUBSCRIPTION_TIERS.FREE_TRIAL;
 
-      // No discounts for Trade Health Check and Crisis Navigator
-      if (service.noDiscount) {
-        return service.basePrice;
-      }
-
-      const discounts = {
-        'Starter': 0,          // No discount
-        'Professional': 0.15,  // 15% off
-        'Premium': 0.25        // 25% off
-      };
-
-      const discount = discounts[tier] || 0;
-      return Math.round(service.basePrice * (1 - discount));
+      // Use config helper function for consistent pricing
+      const priceInfo = calculateServicePrice(service.id, tier);
+      return priceInfo ? priceInfo.finalPrice : service.basePrice;
     };
 
-    // Get discount label for display
+    // Get discount label for display (DYNAMIC - no hardcoding)
     const getDiscountLabel = (service) => {
-      const tier = user?.subscription_tier || 'Starter';
+      const tier = user?.subscription_tier || SUBSCRIPTION_TIERS.FREE_TRIAL;
 
       if (service.noDiscount) {
         return '(No subscriber discounts)';
       }
 
-      if (tier === 'Professional') {
-        return '(15% off)';
-      } else if (tier === 'Premium') {
-        return '(25% off)';
+      // Use config helper to get discount percentage dynamically
+      const priceInfo = calculateServicePrice(service.id, tier);
+      if (priceInfo && priceInfo.discount > 0) {
+        return `(${priceInfo.discountPercentage}% off)`;
       }
 
       return '';

@@ -79,7 +79,7 @@ export default async function handler(req, res) {
       disclaimers: [
         'This certificate is generated for informational purposes only',
         'Final USMCA qualification requires customs authority verification',
-        'Consult with licensed customs broker for official certification'
+        'Consult with trade compliance expert for official certification'
       ]
     };
 

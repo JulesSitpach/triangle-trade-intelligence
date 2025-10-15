@@ -137,7 +137,7 @@ export default async function handler(req, res) {
         error: MESSAGES.errors.professionalRequired,
         expert_status: 'system_error_occurred',
         technical_error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-        fallback: 'Contact licensed customs broker directly',
+        fallback: 'Contact trade compliance expert directly',
         expert_service_status: await getExpertServiceStatus(),
         timestamp: new Date().toISOString()
       });
@@ -234,7 +234,7 @@ async function handleExpertValidationRequest(data) {
     return {
       success: false,
       error: 'Expert validation system unavailable',
-      fallback: 'Contact licensed customs broker directly',
+      fallback: 'Contact trade compliance expert directly',
       system_error: true
     };
   }
@@ -281,7 +281,7 @@ async function handleValidationStatusCheck(data) {
       statusResult.expert_review = {
         approved: true,
         confidence_rating: 0.95,
-        expert_notes: 'Classification verified and approved by licensed customs broker',
+        expert_notes: 'Classification verified and approved by trade compliance expert',
         recommendations: ['Proceed with confidence', 'Documentation supports USMCA qualification'],
         review_completion_date: new Date().toISOString()
       };
@@ -594,7 +594,7 @@ function getStatusDescription(status) {
     'pending_review': 'Waiting for expert assignment and initial review',
     'in_review': 'Expert is actively reviewing your classification',
     'review_complete': 'Expert review completed, final validation in progress',
-    'expert_approved': 'Classification approved by licensed customs broker'
+    'expert_approved': 'Classification approved by trade compliance expert'
   };
   
   return descriptions[status] || 'Status information unavailable';

@@ -200,7 +200,7 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
               1. Complete any missing company details<br />
               2. Review your certificate preview<br />
               3. Download your USMCA certificate PDF<br /><br />
-              <strong>Need audit-proof certification?</strong> Request our professional service ($250) backed by a licensed customs broker.
+              <strong>Need audit-proof certification?</strong> Request our professional service ($250) backed by a trade compliance expert.
             </div>
           </div>
         </div>

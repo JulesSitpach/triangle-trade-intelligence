@@ -34,7 +34,7 @@ export default function WorkflowError({ error, onDismiss, onRetry }) {
       <div className="error-support">
         <p className="text-body">
           <strong>Professional Support Available:</strong> If this error persists,
-          consider consulting with a licensed customs broker for manual classification.
+          consider consulting with a trade compliance expert for manual classification.
         </p>
       </div>
     </div>

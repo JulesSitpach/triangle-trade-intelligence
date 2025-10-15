@@ -123,7 +123,8 @@ export default function JorgeClientIntakeStage({ request, subscriberData, servic
                 <div className="data-row"><span>Company:</span> <span>{request?.company_name || 'Not provided'}</span></div>
                 <div className="data-row"><span>Contact:</span> <span>{request?.contact_name || 'Not provided'}</span></div>
                 <div className="data-row"><span>Email:</span> <span>{serviceDetails?.contact_email || request?.email || 'Not provided'}</span></div>
-                <div className="data-row"><span>Business Type:</span> <span>{serviceDetails?.business_type || request?.industry || 'Not provided'}</span></div>
+                <div className="data-row"><span>Business Type (Role):</span> <span>{serviceDetails?.business_type || 'Not provided'}</span></div>
+                <div className="data-row"><span>Industry Sector:</span> <span>{serviceDetails?.industry_sector || serviceDetails?.industry || 'Not provided'}</span></div>
               </div>
 
               <div className="data-section">

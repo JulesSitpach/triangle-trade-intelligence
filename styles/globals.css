@@ -430,6 +430,33 @@ a:hover {
   transform: translateY(-2px);
 }
 
+/* Trial Benefits Display */
+.hero-trial-benefits {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  margin-top: -2rem;
+  margin-bottom: 2rem;
+}
+
+.trial-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.trial-benefit-item::before {
+  content: attr(data-check);
+  font-weight: 700;
+  color: #22c55e;
+}
+
 /* ================== 6. CONTENT CARDS ================== */
 
 .content-card {
@@ -912,6 +939,12 @@ textarea.form-input {
     max-width: 320px;
     text-align: center;
     padding: 0.875rem 1.75rem;
+  }
+
+  .hero-trial-benefits {
+    font-size: 0.8rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .grid-2-cols,

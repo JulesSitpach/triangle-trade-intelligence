@@ -173,7 +173,7 @@ export const TRUST_MESSAGES = {
 
   expertValidation: {
     expertReviewRequested: getTrustEnvValue('MSG_EXPERT_REVIEW_REQUESTED', 'Expert validation requested - response within {hours} hours'),
-    expertApproved: getTrustEnvValue('MSG_EXPERT_APPROVED', 'Classification approved by licensed customs broker #{id}'),
+    expertApproved: getTrustEnvValue('MSG_EXPERT_APPROVED', 'Classification approved by trade compliance expert #{id}'),
     expertRejected: getTrustEnvValue('MSG_EXPERT_REJECTED', 'Expert review suggests alternative classification'),
     awaitingExpertReview: getTrustEnvValue('MSG_AWAITING_EXPERT', 'Awaiting expert validation - confidence below threshold')
   },

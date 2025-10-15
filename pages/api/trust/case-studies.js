@@ -122,7 +122,7 @@ export default async function handler(req, res) {
         success: false,
         error: MESSAGES.errors.professionalRequired,
         technical_error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-        fallback: 'Contact licensed customs broker for case study assistance'
+        fallback: 'Contact trade compliance expert for case study assistance'
       });
     }
   }
@@ -157,7 +157,7 @@ async function handleCaseStudySubmission(data) {
     return {
       success: false,
       error: 'Case study submission failed',
-      fallback: 'Submit case study through licensed customs broker portal'
+      fallback: 'Submit case study through trade compliance expert portal'
     };
   }
 }
@@ -190,7 +190,7 @@ async function handleCaseStudiesRetrieval(data) {
     return {
       success: false,
       error: 'Case studies retrieval failed',
-      fallback: 'Request case studies from licensed customs broker'
+      fallback: 'Request case studies from trade compliance expert'
     };
   }
 }
@@ -224,7 +224,7 @@ async function handleCaseStudyValidation(data) {
     return {
       success: false,
       error: 'Case study validation failed',
-      fallback: 'Contact licensed customs broker for manual validation'
+      fallback: 'Contact trade compliance expert for manual validation'
     };
   }
 }

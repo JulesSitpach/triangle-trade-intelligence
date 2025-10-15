@@ -4,11 +4,11 @@
  */
 
 export const BROKER_CONFIG = {
-  // Licensed Customs Broker Information
-  license: {
-    number: process.env.BROKER_LICENSE_NUMBER || '4601913',
-    name: process.env.BROKER_NAME || 'Cristina',
-    country: process.env.BROKER_COUNTRY || 'Mexico'
+  // Trade Compliance Expert Information
+  professional_certification: {
+    number: process.env.PROFESSIONAL_CERTIFICATION_NUMBER || '4601913',
+    name: process.env.COMPLIANCE_EXPERT_NAME || 'Cristina',
+    country: process.env.COMPLIANCE_EXPERT_COUNTRY || 'Mexico'
   },
 
   // Service type mappings

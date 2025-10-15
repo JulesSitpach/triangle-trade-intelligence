@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
+import { BUSINESS_TYPES } from '../../config/business-types.js';
 
 // Professional SVG icons for form fields
 // Icons removed - no longer using icon placeholders
@@ -16,7 +17,8 @@ export default function CompanyInformationStep({
   dropdownOptions,
   isLoadingOptions,
   onNext,
-  isStepValid
+  isStepValid,
+  onNewAnalysis
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
@@ -34,6 +36,7 @@ export default function CompanyInformationStep({
       const stillMissing = [];
       if (!formData.company_name) stillMissing.push('Company Name');
       if (!formData.business_type) stillMissing.push('Business Type');
+      if (!formData.industry_sector) stillMissing.push('Industry Sector');
       if (!formData.company_address) stillMissing.push('Company Address');
       if (!formData.contact_person) stillMissing.push('Contact Person');
       if (!formData.contact_phone) stillMissing.push('Contact Phone');
@@ -49,6 +52,7 @@ export default function CompanyInformationStep({
 
   const isNextDisabled = !isClient || !formData.company_name ||
                         !formData.business_type ||
+                        !formData.industry_sector ||
                         !formData.trade_volume ||
                         !formData.company_address ||
                         !formData.contact_person ||
@@ -62,6 +66,7 @@ export default function CompanyInformationStep({
     const missingFields = [];
     if (!formData.company_name) missingFields.push('Company Name');
     if (!formData.business_type) missingFields.push('Business Type');
+    if (!formData.industry_sector) missingFields.push('Industry Sector');
     if (!formData.company_address) missingFields.push('Company Address');
     if (!formData.contact_person) missingFields.push('Contact Person');
     if (!formData.contact_phone) missingFields.push('Contact Phone');
@@ -84,7 +89,21 @@ export default function CompanyInformationStep({
 
   return (
     <>
-      <h2 className="form-section-title">Company Information</h2>
+      <div className="dashboard-actions">
+        <div className="dashboard-actions-left">
+          <h2 className="form-section-title">Company Information</h2>
+        </div>
+        {onNewAnalysis && (
+          <div className="dashboard-actions-right">
+            <button
+              onClick={onNewAnalysis}
+              className="btn-primary"
+            >
+              + New Analysis
+            </button>
+          </div>
+        )}
+      </div>
       <p className="form-section-description">Step 1 of 3 - Business profile for compliance analysis</p>
 
         <div className="form-grid-2">
@@ -109,16 +128,34 @@ export default function CompanyInformationStep({
               onChange={(e) => updateFormData('business_type', e.target.value)}
               required
             >
-              <option value="">Select primary business activity</option>
+              <option value="">Select business role</option>
+              {BUSINESS_TYPES.map(type => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+            <div className="form-help">Your role in the supply chain</div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Industry Sector</label>
+            <select
+              className={`form-select ${formData.industry_sector ? 'has-value' : ''}`}
+              value={formData.industry_sector || ''}
+              onChange={(e) => updateFormData('industry_sector', e.target.value)}
+              required
+            >
+              <option value="">Select industry</option>
               {isLoadingOptions ? (
-                <option disabled>Loading business types...</option>
+                <option disabled>Loading industries...</option>
               ) : (
                 dropdownOptions.businessTypes?.map(type => (
                   <option key={type.value} value={type.value}>{type.label}</option>
                 )) || []
               )}
             </select>
-            <div className="form-help">Primary activity for trade classification</div>
+            <div className="form-help">Primary product category for HS classification</div>
           </div>
         </div>
 

@@ -168,7 +168,7 @@ export default async function handler(req, res) {
       verified: false,
       error: 'Verification service unavailable',
       trust_score: 0.0,
-      fallback: 'Contact licensed customs broker for verification'
+      fallback: 'Contact trade compliance expert for verification'
     });
   }
 }

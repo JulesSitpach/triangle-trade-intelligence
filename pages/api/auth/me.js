@@ -5,6 +5,12 @@
 
 import { parse } from 'cookie';
 import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 function verifySession(cookieValue) {
   try {
@@ -53,6 +59,17 @@ export default async function handler(req, res) {
       });
     }
 
+    // Fetch user profile from database to get subscription tier
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('subscription_tier')
+      .eq('user_id', session.userId)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error fetching user profile:', profileError);
+    }
+
     return res.status(200).json({
       success: true,
       authenticated: true,
@@ -60,7 +77,8 @@ export default async function handler(req, res) {
         id: session.userId,
         email: session.email,
         isAdmin: session.isAdmin,
-        company_name: session.companyName
+        company_name: session.companyName,
+        subscription_tier: profile?.subscription_tier || 'Trial'
       }
     });
 

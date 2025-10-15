@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import TriangleLayout from '../components/TriangleLayout'
@@ -8,18 +8,6 @@ import Footer from '../components/Footer'
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-  useEffect(() => {
-    // Check if user is logged in
-    const checkAuth = () => {
-      const currentUser = localStorage.getItem('current_user')
-      const userSession = localStorage.getItem('triangle_user_session')
-      setIsLoggedIn(!!(currentUser || userSession))
-    }
-
-    checkAuth()
-  }, [])
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)
@@ -115,20 +103,12 @@ export default function HomePage() {
             <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               About
             </Link>
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
-                My Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
-                  Get Started
-                </Link>
-                <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-                  Sign In
-                </Link>
-              </>
-            )}
+            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+              Get Started
+            </Link>
+            <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+              Sign In
+            </Link>
           </div>
         </div>
       </nav>
@@ -172,34 +152,32 @@ export default function HomePage() {
           </h2>
 
           <p className="hero-description-text">
-            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for small manufacturers and importers who can&apos;t afford full-time trade compliance teams.
+            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for Small & Medium manufacturers and importers who can&apos;t afford full-time trade compliance teams.
           </p>
           
           <div className="hero-button-group">
             <Link
-              href="/usmca-workflow?reset=true"
+              href="/signup"
               className="hero-primary-button"
-              aria-label="Start USMCA qualification analysis"
+              aria-label="Start free trial - no credit card required"
             >
-              Start USMCA Analysis
+              Try Free - No Credit Card
             </Link>
-            {isLoggedIn ? (
-              <Link
-                href="/dashboard"
-                className="hero-secondary-button"
-                aria-label="Go to my dashboard"
-              >
-                My Dashboard
-              </Link>
-            ) : (
-              <Link
-                href="/pricing"
-                className="hero-secondary-button"
-                aria-label="View pricing plans"
-              >
-                View Pricing
-              </Link>
-            )}
+            <Link
+              href="/services"
+              className="hero-secondary-button"
+              aria-label="View professional services"
+            >
+              View All Services
+            </Link>
+          </div>
+
+          {/* Trial Benefits */}
+          <div className="hero-trial-benefits">
+            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+            <div className="trial-benefit-item">✓ 3 components analyzed</div>
+            <div className="trial-benefit-item">✓ Certificate preview</div>
+            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>
@@ -214,7 +192,7 @@ export default function HomePage() {
       <section className="main-content">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Why Small Manufacturers Need USMCA Compliance</h2>
+            <h2 className="section-header-title">Why Small & Medium Manufacturers Need USMCA Compliance</h2>
             <p className="section-header-subtitle">
               You can&apos;t afford a full-time compliance team, but you can&apos;t afford to ignore USMCA benefits either.
             </p>
@@ -276,8 +254,8 @@ export default function HomePage() {
               Canadian-owned platform with Mexico-based bilingual experts (Jorge & Cristina). We combine AI-powered analysis with 15+ years of trade expertise—at SMB-friendly prices starting at $99/month.
             </p>
             <div className="hero-button-group">
-              <Link href="/usmca-workflow?reset=true" className="btn-primary">
-                Check If You Qualify
+              <Link href="/signup" className="btn-primary">
+                Try Free Analysis
               </Link>
               <Link href="/services" className="btn-secondary">
                 View Expert Services
@@ -306,8 +284,8 @@ export default function HomePage() {
               <Link href="/pricing" className="btn-primary">
                 View All Plans
               </Link>
-              <Link href="/usmca-workflow?reset=true" className="btn-secondary">
-                Try Analysis First
+              <Link href="/signup" className="btn-secondary">
+                Try Free Analysis
               </Link>
             </div>
           </div>
@@ -384,8 +362,8 @@ export default function HomePage() {
                 Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers. Find out if you qualify in under 5 minutes.
               </p>
               <div className="insights-button-group">
-                <Link href="/usmca-workflow?reset=true" className="btn-primary">
-                  Start Your Analysis
+                <Link href="/signup" className="btn-primary">
+                  Try Free Analysis
                 </Link>
               </div>
             </div>

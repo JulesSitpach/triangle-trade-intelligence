@@ -14,6 +14,9 @@ export default function RecommendedActions({ results }) {
   const hasBusinessIntelligence = results?.business_intelligence && results.business_intelligence.length > 0;
   const hasAIRecommendations = !isQualified && results?.recommendations && results.recommendations.length > 0;
 
+  // Get trade volume for calculations
+  const tradeVolume = results?.company?.trade_volume || results?.company?.annual_trade_volume || 0;
+
   if (!showRecommendations) return null;
 
   return (
@@ -105,22 +108,31 @@ export default function RecommendedActions({ results }) {
             <p className="text-body">Additional savings through Canada-Mexico routing</p>
           </div>
           <div className="element-spacing">
-            {results.triangle_opportunities.map((opportunity, index) => (
-              <div key={index} className="status-card success">
-                <div className="header-actions">
-                  <div>
-                    <div className="text-bold">{opportunity.route}</div>
-                    <div className="text-body">
-                      {opportunity.savings_percent}% savings • ${opportunity.annual_savings?.toLocaleString() || 'TBD'} annually
+            {results.triangle_opportunities.map((opportunity, index) => {
+              // Calculate annual savings if not provided
+              const annualSavings = opportunity.annual_savings ||
+                (tradeVolume > 0 && opportunity.savings_percent
+                  ? Math.round(tradeVolume * (opportunity.savings_percent / 100))
+                  : null);
+
+              return (
+                <div key={index} className="status-card success">
+                  <div className="header-actions">
+                    <div>
+                      <div className="text-bold">{opportunity.route}</div>
+                      <div className="text-body">
+                        {opportunity.savings_percent}% savings
+                        {annualSavings && ` • $${annualSavings.toLocaleString()} annually`}
+                      </div>
+                      <div className="text-body">{opportunity.benefits}</div>
+                      {opportunity.timeline && (
+                        <div className="text-small">Timeline: {opportunity.timeline}</div>
+                      )}
                     </div>
-                    <div className="text-body">{opportunity.benefits}</div>
-                    {opportunity.timeline && (
-                      <div className="text-small">Timeline: {opportunity.timeline}</div>
-                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -133,26 +145,35 @@ export default function RecommendedActions({ results }) {
             <p className="text-body">Industry-specific USMCA insights</p>
           </div>
           <div className="element-spacing">
-            {results.business_intelligence.map((intel, index) => (
-              <div key={index} className={`status-card ${intel.priority === 'high' ? 'urgent' : 'info'}`}>
-                <div className="header-actions">
-                  <div>
-                    <div className="text-bold">{intel.recommendation}</div>
-                    <div className="text-body">
-                      Priority: {intel.priority} • Potential: ${intel.savings_potential?.toLocaleString() || 'TBD'}
-                    </div>
-                    {intel.timeline && (
-                      <div className="text-small">Timeline: {intel.timeline}</div>
-                    )}
-                    {intel.implementation_steps && intel.implementation_steps.length > 0 && (
-                      <div className="text-small">
-                        Next steps: {intel.implementation_steps.slice(0, 2).join(', ')}
+            {results.business_intelligence.map((intel, index) => {
+              // Calculate savings potential if not provided and we have a savings percentage
+              const savingsPotential = intel.savings_potential ||
+                (tradeVolume > 0 && intel.savings_percent
+                  ? Math.round(tradeVolume * (intel.savings_percent / 100))
+                  : null);
+
+              return (
+                <div key={index} className={`status-card ${intel.priority === 'high' ? 'urgent' : 'info'}`}>
+                  <div className="header-actions">
+                    <div>
+                      <div className="text-bold">{intel.recommendation}</div>
+                      <div className="text-body">
+                        Priority: {intel.priority}
+                        {savingsPotential && ` • Potential: $${savingsPotential.toLocaleString()}`}
                       </div>
-                    )}
+                      {intel.timeline && (
+                        <div className="text-small">Timeline: {intel.timeline}</div>
+                      )}
+                      {intel.implementation_steps && intel.implementation_steps.length > 0 && (
+                        <div className="text-small">
+                          Next steps: {intel.implementation_steps.slice(0, 2).join(', ')}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

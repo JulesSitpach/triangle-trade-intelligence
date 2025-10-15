@@ -273,7 +273,7 @@ CRITICAL: These are Cristina's professional recommendations based on her 17 year
 
 "${validationData.compliance_recommendations}"
 
-Format this exactly as she wrote it. If she numbered them, keep the numbers. If she used bullet points, keep the bullets. This is her professional opinion backed by her customs broker license.
+Format this exactly as she wrote it. If she numbered them, keep the numbers. If she used bullet points, keep the bullets. This is her professional opinion backed by her customs professional certification.
 
 ## 5. CRISTINA'S AUDIT DEFENSE STRATEGY
 
@@ -380,7 +380,7 @@ Format as a formal business report with clear headers, bullet points for key fin
       <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
       <strong>Service Type:</strong> Consulting and Guidance (HS Classification Research)<br>
       <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
-      <strong>Note:</strong> For official HS code certifications, we partner with licensed customs brokers
+      <strong>Note:</strong> For official HS code certifications, we partner with trade compliance experts
     </div>
 
     <div class="section">
@@ -395,7 +395,7 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official HS code certifications and formal compliance documents, we partner with licensed customs brokers. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official HS code certifications and formal compliance documents, we partner with trade compliance experts. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
 
     <div class="section" style="background: #f0f9ff; padding: 20px; border-left: 4px solid #2563eb; margin-top: 30px;">
@@ -407,7 +407,7 @@ Format as a formal business report with clear headers, bullet points for key fin
           View USMCA Assessment
         </a>
       </p>
-      <p style="font-size: 14px; color: #6b7280;">This assessment includes strategic recommendations from our team. For official USMCA certificates, we partner with licensed customs brokers.</p>
+      <p style="font-size: 14px; color: #6b7280;">This assessment includes strategic recommendations from our team. For official USMCA certificates, we partner with trade compliance experts.</p>
     </div>
   </div>
 </body>

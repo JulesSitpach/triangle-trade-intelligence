@@ -318,6 +318,8 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
               const contactName = request.contact_name || data.contact_name || 'Contact not provided';
               const productDescription = data.product_description || 'Product details not provided';
               const tradeVolume = data.trade_volume || data.annual_trade_volume;
+              const businessType = data.business_type || 'Not specified';
+              const industrySector = data.industry_sector || data.industry || 'Not specified';
 
               return (
                 <tr key={request.id}>
@@ -325,6 +327,7 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
                     <div className="client-info">
                       <strong>{request.company_name}</strong>
                       <div className="contact-name">{contactName}</div>
+                      <div className="business-classification">{businessType} • {industrySector}</div>
                     </div>
                   </td>
                   <td>

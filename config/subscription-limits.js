@@ -15,9 +15,12 @@ export const SUBSCRIPTION_TIERS = {
 
 export const TIER_LIMITS = {
   [SUBSCRIPTION_TIERS.FREE_TRIAL]: {
+    // 7-Day Free Trial
+    trial_duration_days: 7,
+
     // USMCA Analysis
     components_per_analysis: 3,
-    analyses_per_month: 1,
+    analyses_total: 1,  // 1 analysis total during 7-day trial
     certificate_download: false,
     certificate_preview: true,
     preview_watermarked: true,
@@ -38,7 +41,7 @@ export const TIER_LIMITS = {
 
     // Conversion messaging
     upgrade_cta: 'Subscribe to download certificate and get email alerts',
-    tier_label: 'Free Trial',
+    tier_label: '7-Day Free Trial',
     tier_color: '#6b7280'
   },
 
@@ -278,12 +281,12 @@ export function getTierComparison() {
   return [
     {
       tier: SUBSCRIPTION_TIERS.FREE_TRIAL,
-      name: 'Free Trial',
+      name: '7-Day Free Trial',
       price: '$0',
       features: [
-        '1 USMCA analysis',
-        '3 components max',
-        'Certificate preview only',
+        '7 days to explore platform',
+        '1 USMCA analysis (3 components)',
+        'Certificate preview (watermarked)',
         'View alerts (no email)',
         'No service discounts'
       ]

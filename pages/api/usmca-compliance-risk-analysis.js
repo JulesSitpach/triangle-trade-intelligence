@@ -68,7 +68,7 @@ ${Array.isArray(subscriberData.vulnerability_factors) ? subscriberData.vulnerabi
 - Brings Fortune 500 logistics best practices to SMB scale
 - Can review compliance in Spanish and English (bilingual advantage)
 - Time zone aligned with US/Canada clients
-- **NOT a licensed customs broker** - provides compliance optimization guidance, partners with licensed professionals when needed
+- **NOT a trade compliance expert** - provides compliance optimization guidance, partners with licensed professionals when needed
 
 **CRISTINA'S TASK**: Validate Jorge's document analysis and provide professional compliance risk assessment focusing on what's REALISTIC for an SMB to address without $10K+ in fees.
 
@@ -79,7 +79,7 @@ Current HS Code: ${subscriberData.classified_hs_code || subscriberData.hs_code |
 Product: ${subscriberData.product_description || 'Not specified'}
 - Does this HS code make sense for this product? (Cristina's strongest skill)
 - Are there classification risks that could disqualify USMCA status?
-- Should client verify with licensed customs broker?
+- Should client verify with trade compliance expert?
 
 **COMPLIANCE RISK PRIORITIES** (Cristina's 17 years of experience):
 1. HTS code accuracy (misclassification = biggest compliance risk)
@@ -117,7 +117,7 @@ Provide detailed compliance risk analysis in this EXACT JSON structure:
     "cristina_assessment": "Does this HS code accurately reflect the product? (Cristina's strongest skill)",
     "classification_risks": ["List specific classification risks that could cause audit issues"],
     "alternative_codes_consider": ["Suggest 1-2 alternative HS codes to research if current seems wrong"],
-    "requires_customs_broker_validation": "true/false - Does Cristina recommend licensed customs broker validation?"
+    "requires_customs_broker_validation": "true/false - Does Cristina recommend trade compliance expert validation?"
   },
   "tariff_exposure": "Calculate potential tariff exposure if USMCA qualification is challenged (use real trade volume)",
   "recommendations": [
@@ -134,7 +134,7 @@ Provide detailed compliance risk analysis in this EXACT JSON structure:
   }
 }
 
-**CRISTINA'S REALITY CHECK**: Focus on compliance risks that SMBs can actually fix. If something requires a licensed customs broker, say so explicitly. Bring Fortune 500 rigor to SMB budget constraints.
+**CRISTINA'S REALITY CHECK**: Focus on compliance risks that SMBs can actually fix. If something requires a trade compliance expert, say so explicitly. Bring Fortune 500 rigor to SMB budget constraints.
 
 Return ONLY valid JSON, no markdown formatting.`;
 

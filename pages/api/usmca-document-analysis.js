@@ -53,7 +53,7 @@ export default async function handler(req, res) {
 - Don't ask for documents that cost $10,000+ to produce (SMBs can't afford that)
 - Focus on supplier certificates they likely already have (most suppliers maintain these)
 - Prioritize documents that save money IMMEDIATELY (ROI matters)
-- Flag if client needs licensed customs broker partner (some docs require legal expertise)
+- Flag if client needs trade compliance expert partner (some docs require legal expertise)
 - Estimate realistic timeline (Jorge knows suppliers take 2-3 weeks to respond, not 2 days)
 
 **COMPLIANCE DOCUMENTS TO EVALUATE**:
@@ -115,7 +115,7 @@ RETURN JSON FORMAT:
   }
 }
 
-**JORGE'S REALITY CHECK**: Focus on documents that are FREE or low-cost and available within 2-4 weeks. If something requires $5K+ or 6 months, flag it as "Consider licensed customs broker partner for this."`;
+**JORGE'S REALITY CHECK**: Focus on documents that are FREE or low-cost and available within 2-4 weeks. If something requires $5K+ or 6 months, flag it as "Consider trade compliance expert partner for this."`;
 
 
     // Call OpenRouter API

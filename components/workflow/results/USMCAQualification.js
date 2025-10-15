@@ -50,7 +50,14 @@ export default function USMCAQualification({ results }) {
     const targetComponent = nonUsmcaComponents[0];
     if (!targetComponent) return null;
 
-    const potentialSavings = results.savings?.annual_savings || 0;
+    // Calculate potential savings from trade volume and gap
+    const tradeVolume = results.company?.trade_volume || results.company?.annual_trade_volume || 0;
+    const avgTariffRate = results.product?.mfn_rate || 0.025; // Use product's MFN rate or 2.5% average
+
+    // If they close the gap, calculate savings on the additional qualifying percentage
+    const potentialSavings = tradeVolume > 0 && avgTariffRate > 0
+      ? Math.round((tradeVolume * (gap / 100) * avgTariffRate))
+      : results.savings?.annual_savings || 0;
 
     return {
       gap,
@@ -437,7 +444,11 @@ export default function USMCAQualification({ results }) {
             <div className="status-grid">
               <div className="status-card">
                 <div className="status-label">Potential Savings</div>
-                <div className="status-value">${gapAnalysis.potentialSavings > 0 ? gapAnalysis.potentialSavings.toLocaleString() : 'TBD'}</div>
+                <div className="status-value">
+                  {gapAnalysis.potentialSavings > 0
+                    ? `$${gapAnalysis.potentialSavings.toLocaleString()}`
+                    : 'Contact us for detailed analysis'}
+                </div>
               </div>
               <div className="status-card">
                 <div className="status-label">Estimated Timeline</div>

@@ -46,7 +46,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const prompt = `You are Cristina Rodriguez, a licensed customs broker and HS code classification expert.
+    const prompt = `You are Cristina Rodriguez, a trade compliance expert and HS code classification expert.
 
 Generate a professional HS Code Classification Report for this client request:
 

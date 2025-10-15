@@ -449,7 +449,7 @@ function generateBrokerRecommendation(supplier) {
   const recommendations = [];
   
   if (supplier.broker_verified) {
-    recommendations.push("✅ Personally verified by licensed customs broker");
+    recommendations.push("✅ Personally verified by trade compliance expert");
   }
   
   if (supplier.pricing_premium_percent < 15) {

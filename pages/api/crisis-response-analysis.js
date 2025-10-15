@@ -214,12 +214,12 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
         title: 'Professional Validation & Execution',
         description: 'Cristina reviews AI analysis and adds professional crisis management execution plan',
         expert: 'Trade Compliance Expert',
-        credentials: 'Licensed Customs Broker #4601913, 17 years logistics & crisis management'
+        credentials: 'Professional Certification #4601913, 17 years logistics & crisis management experience'
       },
       professional_value_add: {
         what_ai_provides: 'Comprehensive analysis based on business intelligence',
         what_cristina_adds: [
-          'Professional validation with customs broker license backing',
+          'Professional validation with 17 years logistics expertise',
           'Direct regulatory agency relationships and contacts',
           'Hands-on crisis execution coordination',
           'Legal liability coverage for professional recommendations',

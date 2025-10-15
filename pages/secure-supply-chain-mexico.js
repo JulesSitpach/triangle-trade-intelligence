@@ -260,7 +260,7 @@ export default function SecureSupplyChainMexico() {
               <div className="text-body">
                 <p><strong>$250</strong> (15% off for Professional, 25% off for Premium subscribers)</p>
                 <ul>
-                  <li>Professional certification by licensed customs broker</li>
+                  <li>Professional certification by trade compliance expert</li>
                   <li>Regulatory compliance validation and risk assessment</li>
                   <li>Official PDF certificate for customs clearance</li>
                   <li>Expert guidance on documentation requirements</li>

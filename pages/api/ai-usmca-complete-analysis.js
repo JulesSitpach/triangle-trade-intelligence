@@ -32,10 +32,10 @@ export default protectedApiHandler({
     });
 
     // Validate required fields
-    if (!formData.company_name || !formData.business_type || !formData.component_origins || formData.component_origins.length === 0) {
+    if (!formData.company_name || !formData.business_type || !formData.industry_sector || !formData.component_origins || formData.component_origins.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: company_name, business_type, component_origins'
+        error: 'Missing required fields: company_name, business_type, industry_sector, component_origins'
       });
     }
 
@@ -114,7 +114,8 @@ export default protectedApiHandler({
       company: {
         name: formData.company_name,
         company_name: formData.company_name, // Alias for compatibility
-        business_type: formData.business_type,
+        business_type: formData.business_type,  // Business role: Importer/Exporter/etc
+        industry_sector: formData.industry_sector,  // Industry classification
         trade_volume: formData.trade_volume,
         supplier_country: formData.supplier_country,
         destination_country: formData.destination_country,
@@ -192,7 +193,7 @@ export default protectedApiHandler({
         ai_powered: true,
         model: 'claude-3.5-sonnet',
         confidence_score: analysis.confidence_score || 85,
-        disclaimer: 'AI-powered analysis for informational purposes. Consult licensed customs broker for official compliance.'
+        disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
     };
 
@@ -204,8 +205,10 @@ export default protectedApiHandler({
     const fullBusinessContext = {
       product_description: formData.product_description,
       company_name: formData.company_name,
-      business_type: formData.business_type,
-      industry: formData.industry || extractIndustryFromBusinessType(formData.business_type),
+      business_type: formData.business_type,  // Business role: Importer/Exporter/etc
+      business_role: formData.business_type,  // Alias for clarity in component enrichment
+      industry_sector: formData.industry_sector,  // Industry classification for HS codes
+      industry: formData.industry_sector || formData.industry || extractIndustryFromBusinessType(formData.business_type), // Fallback for old data
       manufacturing_location: formData.manufacturing_location,
       end_use: formData.end_use || 'commercial',
       trade_volume: formData.trade_volume
@@ -239,7 +242,7 @@ export default protectedApiHandler({
       processing_time: result.processing_time_ms
     });
 
-    // Save workflow to database for dashboard display with ENRICHED components
+    // Save workflow to database for dashboard display with ENRICHED components + AI threshold research
     try {
       const { error: insertError } = await supabase
         .from('workflow_sessions')
@@ -247,7 +250,8 @@ export default protectedApiHandler({
           user_id: userId,
           session_id: `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           company_name: formData.company_name,
-          business_type: formData.business_type,
+          business_type: formData.business_type,  // Business role
+          industry_sector: formData.industry_sector,  // Industry classification
           manufacturing_location: formData.manufacturing_location,
           trade_volume: formData.trade_volume ? parseFloat(formData.trade_volume.replace(/[^0-9.-]+/g, '')) : null,
           product_description: formData.product_description,
@@ -256,6 +260,8 @@ export default protectedApiHandler({
           qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
           regional_content_percentage: result.usmca.north_american_content,
           required_threshold: result.usmca.threshold_applied,
+          threshold_source: analysis.usmca?.threshold_source || null, // AI research citation
+          threshold_reasoning: analysis.usmca?.threshold_reasoning || null, // Why this threshold applies
           compliance_gaps: result.usmca.qualified ? null : { gap: `${result.usmca.gap}% gap from ${result.usmca.threshold_applied}% threshold` },
           completed_at: new Date().toISOString()
         });
@@ -322,6 +328,7 @@ Business Context:
 
 ===== PRODUCT DETAILS =====
 Product: ${formData.product_description}
+Industry Sector: ${formData.industry_sector || 'Not specified'}
 
 ===== COMPONENT BREAKDOWN =====
 ${componentBreakdown}
@@ -329,29 +336,28 @@ ${componentBreakdown}
 Total Components: ${formData.component_origins?.length || 0}
 Total Percentage: ${formData.component_origins?.reduce((sum, c) => sum + (parseFloat(c.value_percentage) || 0), 0)}%
 
-USMCA THRESHOLD RULES (Official Treaty Standards):
-1. **Textiles & Apparel**: 55% regional content threshold (yarn-forward rule applies)
-2. **Automotive & Transportation**: 75% regional content threshold (strict requirements)
-3. **Electronics & Technology**: 65% regional content threshold
-4. **Machinery & Equipment**: 60% regional content threshold
-5. **Chemicals & Pharmaceuticals**: 62.5% regional content threshold
-6. **Food & Agriculture**: 60% regional content threshold (product-specific rules may apply)
-7. **General Manufacturing**: 62.5% regional content threshold (default)
-
 USMCA MEMBER COUNTRIES:
 - United States (US)
 - Mexico (MX)
 - Canada (CA)
 
+===== USMCA TREATY RESEARCH REQUIRED =====
+Use your expert knowledge of the USMCA (United States-Mexico-Canada Agreement) treaty to:
+1. Research the correct Regional Value Content (RVC) threshold for this specific product category
+2. Consult USMCA Annex 4-B (Product-Specific Rules of Origin) for product-specific requirements
+3. Reference the appropriate USMCA chapter, article, or annex that defines this threshold
+4. Provide the official treaty citation for your threshold determination
+
 ===== YOUR EXPERT ANALYSIS TASK =====
 
 Use your 20+ years of expertise to perform a comprehensive USMCA qualification analysis:
 
-1. **Industry Threshold Determination**:
-   - Analyze the business type and product category
-   - Apply the correct USMCA threshold (55%, 60%, 62.5%, 65%, or 75%)
-   - Consider any product-specific rules or exceptions
-   - Explain WHY this threshold applies
+1. **Research & Determine Correct Threshold**:
+   - Research USMCA treaty requirements for this specific product category
+   - Determine the Regional Value Content (RVC) threshold from official USMCA rules
+   - Check product-specific rules in USMCA Annex 4-B if applicable
+   - Cite which USMCA chapter, article, or annex applies
+   - Explain WHY this specific threshold is correct for this product
 
 2. **Precise Regional Content Calculation**:
    - Calculate North American content: SUM(all components from US + MX + CA)
@@ -393,11 +399,13 @@ REQUIRED OUTPUT FORMAT (JSON):
   },
   "usmca": {
     "qualified": true or false,
-    "threshold_applied": number (e.g., 55, 60, 62.5, 65, or 75),
+    "threshold_applied": number (researched threshold percentage),
+    "threshold_source": "USMCA Chapter/Article/Annex citation (e.g., 'Annex 4-B, Article 4.5')",
+    "threshold_reasoning": "Explain why this threshold applies to this product category",
     "north_american_content": number (calculated percentage),
     "gap": number (threshold - content, or 0 if qualified),
     "rule": "Regional Value Content (XX% required)",
-    "reason": "Product meets/does not meet required XX% North American content threshold.",
+    "reason": "Product meets/does not meet required XX% North American content threshold based on USMCA [citation].",
     "component_breakdown": [
       {
         "description": "component description",
