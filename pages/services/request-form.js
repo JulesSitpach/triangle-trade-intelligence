@@ -1,6 +1,6 @@
 /**
  * Professional Service Request Form - Non-Subscribers
- * Full business information form with direct payment
+ * Compact, efficient form aligned with admin API expectations
  */
 
 import { useState, useEffect } from 'react';
@@ -12,50 +12,47 @@ export default function ServiceRequestForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [privacyConsent, setPrivacyConsent] = useState(true); // Default to YES
+  const [privacyConsent, setPrivacyConsent] = useState(true);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [formData, setFormData] = useState({
     service_type: '',
-    // Step 1: Company Information
+    // Company Information
     company_name: '',
-    business_type: '',
+    business_type: '', // Business role: Importer, Exporter, etc.
+    industry_sector: '', // Industry sector: Agriculture, Automotive, etc.
     company_address: '',
     tax_id: '',
     contact_name: '',
     contact_phone: '',
     contact_email: '',
+    // Trade Information
     primary_supplier_country: '',
     destination_market: 'United States',
-    annual_trade_volume: '',
-    // Step 2: Product Overview
+    trade_volume: '', // Matches admin expectation
+    // Product Information
     product_description: '',
     manufacturing_location: '',
-    current_qualification_status: '',
+    qualification_status: '', // Matches admin expectation
     qualification_problem: '',
-    // Step 3: Component Breakdown
-    components: [
+    // Component Origins (matches admin expectation)
+    component_origins: [
       { description: '', origin_country: '', value_percentage: '', hs_code: '' }
     ]
   });
 
-  // Check if user is authenticated - redirect subscribers to dashboard
+  // Check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/me', {
-          credentials: 'include'
-        });
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
         const data = await response.json();
 
         if (data.authenticated && data.user) {
-          // User is a subscriber - redirect to dashboard where they get discounts
           router.push('/dashboard');
         } else {
-          // Not authenticated - allow access to public form
           setCheckingAuth(false);
         }
       } catch (error) {
-        // Error checking auth - allow access to form
         setCheckingAuth(false);
       }
     };
@@ -78,27 +75,26 @@ export default function ServiceRequestForm() {
   };
 
   const handleComponentChange = (index, field, value) => {
-    const updatedComponents = [...formData.components];
+    const updatedComponents = [...formData.component_origins];
     updatedComponents[index][field] = value;
-    setFormData(prev => ({ ...prev, components: updatedComponents }));
+    setFormData(prev => ({ ...prev, component_origins: updatedComponents }));
   };
 
   const addComponent = () => {
     setFormData(prev => ({
       ...prev,
-      components: [...prev.components, { description: '', origin_country: '', value_percentage: '', hs_code: '' }]
+      component_origins: [...prev.component_origins, { description: '', origin_country: '', value_percentage: '', hs_code: '' }]
     }));
   };
 
   const removeComponent = (index) => {
-    if (formData.components.length > 1) {
+    if (formData.component_origins.length > 1) {
       setFormData(prev => ({
         ...prev,
-        components: prev.components.filter((_, i) => i !== index)
+        component_origins: prev.component_origins.filter((_, i) => i !== index)
       }));
     }
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,7 +114,6 @@ export default function ServiceRequestForm() {
       const data = await response.json();
 
       if (response.ok && data.url) {
-        // Redirect to Stripe TEST checkout (using test keys from .env.local)
         window.location.href = data.url;
       } else {
         throw new Error(data.error || 'Failed to create checkout session');
@@ -133,7 +128,6 @@ export default function ServiceRequestForm() {
 
   const selectedService = services[formData.service_type];
 
-  // Show loading while checking auth
   if (checkingAuth) {
     return (
       <>
@@ -170,7 +164,6 @@ export default function ServiceRequestForm() {
             </div>
           </Link>
 
-          {/* Mobile Menu Button */}
           <button
             className="nav-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -224,84 +217,146 @@ export default function ServiceRequestForm() {
 
             {/* Price Display */}
             {selectedService && (
-              <div className="content-card" style={{backgroundColor: '#f0f9ff', marginBottom: '1.5rem'}}>
-                <div className="header-actions">
+              <div className="content-card" style={{backgroundColor: '#f0f9ff', marginBottom: '1.5rem', padding: '1rem'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                   <div>
-                    <h3 className="content-card-title">{selectedService.name}</h3>
-                    <p className="content-card-description">Non-subscriber pricing</p>
+                    <h3 style={{margin: 0, fontSize: '1.125rem'}}>{selectedService.name}</h3>
+                    <p style={{margin: 0, fontSize: '0.875rem', color: '#6b7280'}}>Non-subscriber pricing</p>
                   </div>
-                  <div className="text-bold" style={{fontSize: '1.5rem', color: '#134169'}}>
+                  <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#134169'}}>
                     ${selectedService.price}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Step 1: Company Information */}
-            <h3 className="content-card-title">Step 1 of 3 - Company Information</h3>
-            <p className="text-small" style={{marginBottom: '1.5rem', color: '#6b7280'}}>
-              Establish your business profile for compliance analysis
-            </p>
+            {/* Step 1: Company & Contact Information */}
+            <h3 className="content-card-title">Step 1 of 3 - Company & Contact Information</h3>
+
+            <div className="grid-2-cols">
+              <div className="form-group">
+                <label className="form-label">Company Name *</label>
+                <input
+                  type="text"
+                  name="company_name"
+                  className="form-input"
+                  placeholder="Legal entity name"
+                  value={formData.company_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Business Type *</label>
+                <select
+                  name="business_type"
+                  className="form-input"
+                  value={formData.business_type}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select business type</option>
+                  <option value="Importer">Importer</option>
+                  <option value="Exporter">Exporter</option>
+                  <option value="Manufacturer">Manufacturer</option>
+                  <option value="Distributor">Distributor</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Industry Sector</label>
+                <select
+                  name="industry_sector"
+                  className="form-input"
+                  value={formData.industry_sector}
+                  onChange={handleChange}
+                >
+                  <option value="">Select industry (optional)</option>
+                  <option value="Agriculture & Food">Agriculture & Food</option>
+                  <option value="Automotive">Automotive</option>
+                  <option value="Electronics & Technology">Electronics & Technology</option>
+                  <option value="Energy Equipment">Energy Equipment</option>
+                  <option value="General">General</option>
+                  <option value="General Manufacturing">General Manufacturing</option>
+                  <option value="Machinery & Equipment">Machinery & Equipment</option>
+                  <option value="Other">Other</option>
+                  <option value="Textiles & Apparel">Textiles & Apparel</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid-2-cols">
+              <div className="form-group">
+                <label className="form-label">Company Address *</label>
+                <input
+                  type="text"
+                  name="company_address"
+                  className="form-input"
+                  placeholder="Street, City, State"
+                  value={formData.company_address}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Tax ID / EIN *</label>
+                <input
+                  type="text"
+                  name="tax_id"
+                  className="form-input"
+                  placeholder="Tax identification number"
+                  value={formData.tax_id}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid-2-cols">
+              <div className="form-group">
+                <label className="form-label">Contact Person *</label>
+                <input
+                  type="text"
+                  name="contact_name"
+                  className="form-input"
+                  placeholder="Primary contact name"
+                  value={formData.contact_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Contact Email *</label>
+                <input
+                  type="email"
+                  name="contact_email"
+                  className="form-input"
+                  placeholder="email@company.com"
+                  value={formData.contact_email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
 
             <div className="form-group">
-              <label className="form-label">Company Name *</label>
+              <label className="form-label">Contact Phone *</label>
               <input
-                type="text"
-                name="company_name"
+                type="tel"
+                name="contact_phone"
                 className="form-input"
-                placeholder="Enter your legal entity name"
-                value={formData.company_name}
+                placeholder="(555) 123-4567"
+                value={formData.contact_phone}
                 onChange={handleChange}
                 required
               />
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Legal entity name as registered with authorities</p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Business Type *</label>
-              <select
-                name="business_type"
-                className="form-input"
-                value={formData.business_type}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select your primary business activity</option>
-                <option value="Importer">Importer</option>
-                <option value="Exporter">Exporter</option>
-                <option value="Manufacturer">Manufacturer</option>
-                <option value="Distributor">Distributor</option>
-              </select>
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Primary business activity for accurate trade classification</p>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Company Address *</label>
-              <input
-                type="text"
-                name="company_address"
-                className="form-input"
-                placeholder="Street address, City, State/Province"
-                value={formData.company_address}
-                onChange={handleChange}
-                required
-              />
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Physical business address for certificate documentation</p>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Tax ID / EIN *</label>
-              <input
-                type="text"
-                name="tax_id"
-                className="form-input"
-                placeholder="Tax identification number"
-                value={formData.tax_id}
-                onChange={handleChange}
-                required
-              />
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Federal tax ID or employer identification number</p>
-            </div>
+            {/* Step 2: Trade & Product Information */}
+            <h3 className="content-card-title" style={{marginTop: '2rem'}}>Step 2 of 3 - Trade & Product Information</h3>
 
             <div className="grid-2-cols">
               <div className="form-group">
@@ -325,7 +380,6 @@ export default function ServiceRequestForm() {
                   <option value="India">India</option>
                   <option value="Other">Other</option>
                 </select>
-                <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Country where products originate</p>
               </div>
 
               <div className="form-group">
@@ -341,101 +395,95 @@ export default function ServiceRequestForm() {
                   <option value="Canada">Canada</option>
                   <option value="Mexico">Mexico</option>
                 </select>
-                <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Where will the finished product be imported?</p>
+              </div>
+            </div>
+
+            <div className="grid-2-cols">
+              <div className="form-group">
+                <label className="form-label">Annual Trade Volume *</label>
+                <input
+                  type="text"
+                  name="trade_volume"
+                  className="form-input"
+                  placeholder="$4,800,000 or 4800000"
+                  value={formData.trade_volume}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Manufacturing Location *</label>
+                <select
+                  name="manufacturing_location"
+                  className="form-input"
+                  value={formData.manufacturing_location}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select location</option>
+                  <option value="Mexico">Mexico</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="China">China</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Annual Trade Volume *</label>
-              <input
-                type="text"
-                name="annual_trade_volume"
-                className="form-input"
-                placeholder="$4,800,000 or 4800000"
-                value={formData.annual_trade_volume}
-                onChange={handleChange}
-                required
-              />
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Enter your estimated annual import value (accepts commas: $4,800,000 or plain: 4800000)</p>
-            </div>
-
-            {/* Step 2: Product Overview */}
-            <h3 className="content-card-title" style={{marginTop: '2rem'}}>Step 2 of 3 - Product Overview</h3>
-
-            <div className="form-group">
-              <label className="form-label">Complete Product Description *</label>
+              <label className="form-label">Product Description *</label>
               <textarea
                 name="product_description"
                 className="form-input"
-                rows="4"
-                placeholder="Provide detailed product description including material composition, style, and specifications (e.g., '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric')"
+                rows="3"
+                placeholder="Describe your product including materials, construction, and key features"
                 value={formData.product_description}
                 onChange={handleChange}
                 required
               />
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Detailed product description including materials, construction, and key features for accurate classification</p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Manufacturing/Assembly Location *</label>
-              <select
-                name="manufacturing_location"
-                className="form-input"
-                value={formData.manufacturing_location}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select manufacturing location</option>
-                <option value="Mexico">Mexico</option>
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="China">China</option>
-                <option value="Other">Other</option>
-              </select>
-              <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Where is the final product assembled/manufactured?</p>
-            </div>
+            <div className="grid-2-cols">
+              <div className="form-group">
+                <label className="form-label">Current USMCA Qualification Status *</label>
+                <select
+                  name="qualification_status"
+                  className="form-input"
+                  value={formData.qualification_status}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select status</option>
+                  <option value="QUALIFIED">Qualified</option>
+                  <option value="NOT_QUALIFIED">Not Qualified</option>
+                  <option value="UNKNOWN">Unknown</option>
+                  <option value="PARTIAL">Partial Qualification</option>
+                </select>
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Current USMCA Qualification Status *</label>
-              <select
-                name="current_qualification_status"
-                className="form-input"
-                value={formData.current_qualification_status}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select status</option>
-                <option value="Qualified">Qualified</option>
-                <option value="Not Qualified">Not Qualified</option>
-                <option value="Unknown">Unknown</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">What problem are you trying to solve? *</label>
-              <textarea
-                name="qualification_problem"
-                className="form-input"
-                rows="3"
-                placeholder="Example: 'Too much content from China, need Mexico suppliers' or 'Facing new tariffs, need crisis response'"
-                value={formData.qualification_problem}
-                onChange={handleChange}
-                required
-              />
+              <div className="form-group">
+                <label className="form-label">Problem You're Solving *</label>
+                <input
+                  type="text"
+                  name="qualification_problem"
+                  className="form-input"
+                  placeholder="e.g., Too much China content, need Mexico suppliers"
+                  value={formData.qualification_problem}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
             {/* Step 3: Component Breakdown */}
             <h3 className="content-card-title" style={{marginTop: '2rem'}}>Step 3 of 3 - Component Breakdown</h3>
-            <p className="text-small" style={{marginBottom: '1rem', color: '#6b7280'}}>
-              Break down your product into its major components. Each component should represent a significant portion of the product's value.
-            </p>
 
-            {formData.components.map((component, index) => (
-              <div key={index} className="content-card" style={{backgroundColor: '#f9fafb', marginBottom: '1rem', padding: '1rem'}}>
-                <div className="header-actions" style={{marginBottom: '1rem'}}>
-                  <h4 className="text-bold">Component {index + 1}</h4>
-                  {formData.components.length > 1 && (
+            {formData.component_origins.map((component, index) => (
+              <div key={index} style={{backgroundColor: '#f9fafb', borderRadius: '8px', padding: '1rem', marginBottom: '1rem'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
+                  <h4 style={{margin: 0, fontSize: '1rem', fontWeight: '600'}}>Component {index + 1}</h4>
+                  {formData.component_origins.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeComponent(index)}
@@ -447,19 +495,19 @@ export default function ServiceRequestForm() {
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Component Description *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Describe this component in detail"
-                    value={component.description}
-                    onChange={(e) => handleComponentChange(index, 'description', e.target.value)}
-                    required
-                  />
-                </div>
-
                 <div className="grid-2-cols">
+                  <div className="form-group">
+                    <label className="form-label">Component Description *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Describe this component"
+                      value={component.description}
+                      onChange={(e) => handleComponentChange(index, 'description', e.target.value)}
+                      required
+                    />
+                  </div>
+
                   <div className="form-group">
                     <label className="form-label">Origin Country *</label>
                     <select
@@ -468,7 +516,7 @@ export default function ServiceRequestForm() {
                       onChange={(e) => handleComponentChange(index, 'origin_country', e.target.value)}
                       required
                     >
-                      <option value="">Select origin country...</option>
+                      <option value="">Select country</option>
                       <option value="China">China</option>
                       <option value="Mexico">Mexico</option>
                       <option value="United States">United States</option>
@@ -481,9 +529,11 @@ export default function ServiceRequestForm() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
+                </div>
 
+                <div className="grid-2-cols">
                   <div className="form-group">
-                    <label className="form-label">Value Percentage * (%)</label>
+                    <label className="form-label">Value Percentage (%) *</label>
                     <input
                       type="number"
                       className="form-input"
@@ -495,17 +545,17 @@ export default function ServiceRequestForm() {
                       required
                     />
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">HS Code (Optional)</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g., 8708.30.50"
-                    value={component.hs_code}
-                    onChange={(e) => handleComponentChange(index, 'hs_code', e.target.value)}
-                  />
+                  <div className="form-group">
+                    <label className="form-label">HS Code (Optional)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g., 8708.30.50"
+                      value={component.hs_code}
+                      onChange={(e) => handleComponentChange(index, 'hs_code', e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -514,60 +564,13 @@ export default function ServiceRequestForm() {
               type="button"
               onClick={addComponent}
               className="btn-secondary"
-              style={{marginBottom: '2rem'}}
+              style={{marginBottom: '1.5rem'}}
             >
               + Add Another Component
             </button>
 
-            {/* Contact Information */}
-            <h3 className="content-card-title">Contact Information</h3>
-
-            <div className="grid-2-cols">
-              <div className="form-group">
-                <label className="form-label">Contact Person *</label>
-                <input
-                  type="text"
-                  name="contact_name"
-                  className="form-input"
-                  placeholder="Primary contact for trade matters"
-                  value={formData.contact_name}
-                  onChange={handleChange}
-                  required
-                />
-                <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Person responsible for trade compliance</p>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Contact Phone *</label>
-                <input
-                  type="tel"
-                  name="contact_phone"
-                  className="form-input"
-                  placeholder="(214) 555-0147"
-                  value={formData.contact_phone}
-                  onChange={handleChange}
-                  required
-                />
-                <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Business phone number for certificate documentation</p>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Contact Email *</label>
-                <input
-                  type="email"
-                  name="contact_email"
-                  className="form-input"
-                  placeholder="compliance@company.com"
-                  value={formData.contact_email}
-                  onChange={handleChange}
-                  required
-                />
-                <p className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>Business email for official correspondence and certificate delivery</p>
-              </div>
-            </div>
-
             {/* Privacy Consent */}
-            <div className="content-card" style={{backgroundColor: '#f0f9ff', marginTop: '2rem', padding: '1rem'}}>
+            <div style={{backgroundColor: '#f0f9ff', borderRadius: '8px', padding: '1rem', marginBottom: '1rem'}}>
               <div style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem'}}>
                 <input
                   type="checkbox"
@@ -577,28 +580,26 @@ export default function ServiceRequestForm() {
                   style={{marginTop: '0.25rem', width: '18px', height: '18px', cursor: 'pointer'}}
                 />
                 <label htmlFor="privacy-consent" style={{flex: 1, cursor: 'pointer', fontSize: '0.9rem', lineHeight: '1.5'}}>
-                  <span style={{fontWeight: '600', color: '#134169'}}>Save my business information for better service delivery</span>
-                  <br/>
+                  <span style={{fontWeight: '600', color: '#134169'}}>Save my business information</span>
+                  {' '}
                   <span style={{color: '#6b7280', fontSize: '0.85rem'}}>
-                    We'll securely store your company details, product information, and component breakdown to help our experts deliver your service efficiently and provide better support if you return. Uncheck this if you prefer one-time use only (your data will be processed for service fulfillment but not permanently stored in our system).
+                    for better service delivery. Uncheck for one-time use only.
                   </span>
                 </label>
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className="hero-buttons" style={{marginTop: '1rem'}}>
-              <button
-                type="submit"
-                disabled={isSubmitting || !formData.service_type}
-                className="btn-primary"
-                style={{width: '100%', padding: '1rem', fontSize: '1.125rem'}}
-              >
-                {isSubmitting ? 'Processing...' : `Continue to Payment ${selectedService ? `($${selectedService.price})` : ''}`}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting || !formData.service_type}
+              className="btn-primary"
+              style={{width: '100%', padding: '1rem', fontSize: '1.125rem'}}
+            >
+              {isSubmitting ? 'Processing...' : `Continue to Payment ${selectedService ? `($${selectedService.price})` : ''}`}
+            </button>
 
-            <p className="text-small" style={{textAlign: 'center', marginTop: '1rem', color: '#6b7280'}}>
+            <p style={{textAlign: 'center', marginTop: '1rem', color: '#6b7280', fontSize: '0.875rem'}}>
               🔒 Secure payment via Stripe • Expert assigned within 24 hours
             </p>
           </form>
