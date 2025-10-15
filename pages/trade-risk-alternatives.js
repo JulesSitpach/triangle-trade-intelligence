@@ -865,120 +865,79 @@ export default function TradeRiskAlternatives() {
           </div>
         )}
 
-        {aiVulnerabilityAnalysis && (
-          <div className="form-section">
-            <h2 className="form-section-title">🤖 AI Vulnerability Analysis</h2>
-            <p className="text-body">Powered by Claude 3.5 Sonnet</p>
-            <div className="status-grid">
-              <div className="status-card">
-                <div className="status-label">Overall Risk Level</div>
-                <div className={`status-value ${aiVulnerabilityAnalysis.vulnerability_analysis?.overall_risk_level === 'HIGH' ? 'error' : 'warning'}`}>
-                  {aiVulnerabilityAnalysis.vulnerability_analysis?.overall_risk_level || 'MODERATE'}
+        {/* We're Monitoring For You */}
+        <div className="form-section">
+          <h2 className="form-section-title">📡 We're Monitoring For You</h2>
+          <p className="text-body">
+            Real-time surveillance of trade policy changes affecting your specific components and supply chain.
+          </p>
+
+          <div className="status-grid">
+            <div className="status-card">
+              <div className="status-label">Section 301 Tariffs</div>
+              <div className="status-value">✓ Checking Daily</div>
+              <p className="form-help">Monitoring USTR announcements affecting {userProfile.componentOrigins?.filter(c => c.origin_country === 'CN' || c.country === 'CN').length || 0} Chinese components</p>
+            </div>
+            <div className="status-card">
+              <div className="status-label">USMCA Renegotiations</div>
+              <div className="status-value">✓ Checking Daily</div>
+              <p className="form-help">Tracking bilateral trade deal proposals and USMCA changes</p>
+            </div>
+            <div className="status-card">
+              <div className="status-label">HS Code Changes</div>
+              <div className="status-value">✓ Checking Weekly</div>
+              <p className="form-help">Federal Register CBP monitoring for HS {userProfile.hsCode} reclassifications</p>
+            </div>
+            <div className="status-card">
+              <div className="status-label">Port Fee Updates</div>
+              <div className="status-value">✓ Checking Monthly</div>
+              <p className="form-help">Commerce ITA tracking port fees and shipping cost changes</p>
+            </div>
+          </div>
+
+          {/* Email Notification Preferences */}
+          <div className="alert alert-info" style={{ marginTop: '1rem' }}>
+            <div className="alert-content">
+              <div className="alert-title">📧 Email Notification Settings</div>
+              <div className="text-body">
+                <p>Choose how you want to receive alerts about changes affecting <strong>{userProfile.companyName}</strong>&apos;s trade profile:</p>
+
+                <div style={{ marginTop: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      defaultChecked={true}
+                      style={{ marginRight: '0.5rem' }}
+                    />
+                    <span>Email me when government policy alerts affect my components</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      defaultChecked={true}
+                      style={{ marginRight: '0.5rem' }}
+                    />
+                    <span>Email me when tariff rates change for my HS codes</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      defaultChecked={false}
+                      style={{ marginRight: '0.5rem' }}
+                    />
+                    <span>Email me weekly summary of all monitored sources</span>
+                  </label>
                 </div>
-              </div>
-              <div className="status-card">
-                <div className="status-label">Risk Score</div>
-                <div className="status-value">{aiVulnerabilityAnalysis.vulnerability_analysis?.risk_score || 50}/100</div>
-              </div>
-              <div className="status-card">
-                <div className="status-label">Alerts Generated</div>
-                <div className="status-value">{aiVulnerabilityAnalysis.alerts?.length || 0}</div>
-              </div>
-              <div className="status-card">
-                <div className="status-label">AI Confidence</div>
-                <div className="status-value">{aiVulnerabilityAnalysis.trust?.confidence_score || 85}% confidence in risk assessment</div>
+
+                <p className="form-help" style={{ marginTop: '1rem' }}>
+                  💡 Tip: You can update these preferences anytime in your account settings. We only send alerts relevant to your specific trade profile.
+                </p>
               </div>
             </div>
-            {aiVulnerabilityAnalysis.vulnerability_analysis?.primary_vulnerabilities && (
-              <div className="text-body">
-                <h4><strong>Primary Vulnerabilities:</strong></h4>
-                <ul>
-                  {aiVulnerabilityAnalysis.vulnerability_analysis.primary_vulnerabilities.map((vuln, i) => (
-                    <li key={i}>
-                      <strong>{vuln.vulnerability_type?.toUpperCase()}:</strong> {vuln.description}
-                      {vuln.affected_components && <span> (Affects: {vuln.affected_components.join(', ')})</span>}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* AI-Recommended Professional Services - The Value You're Paying For! */}
-            {aiVulnerabilityAnalysis.recommendations?.professional_services && aiVulnerabilityAnalysis.recommendations.professional_services.length > 0 && (
-              <div className="element-spacing">
-                <h3 className="card-title">💼 AI-Recommended Professional Services</h3>
-                <p className="text-body">Based on your specific vulnerabilities, our AI recommends these expert services:</p>
-
-                <div className="form-grid-2">
-                  {aiVulnerabilityAnalysis.recommendations.professional_services.map((service, i) => (
-                    <div key={i} className={`alert ${service.urgency === 'HIGH' ? 'alert-error' : 'alert-warning'}`}>
-                      <div className="alert-content">
-                        <div className="alert-title">{service.service_name}</div>
-                        <div className="text-body">
-                          <p><strong>Why AI Recommends This:</strong> {service.why_recommended}</p>
-                          <p><strong>Expected Outcome:</strong> {service.expected_outcome}</p>
-                          <p><strong>Urgency:</strong> <span className={service.urgency === 'HIGH' ? 'status-value error' : 'status-value warning'}>{service.urgency}</span></p>
-                        </div>
-                        <div className="hero-buttons">
-                          <button
-                            className="btn-primary"
-                            onClick={() => window.location.href = '/services/request-form'}
-                          >
-                            🎯 Request {service.service_name}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* AI Immediate Actions */}
-            {aiVulnerabilityAnalysis.recommendations?.immediate_actions && aiVulnerabilityAnalysis.recommendations.immediate_actions.length > 0 && (
-              <div className="element-spacing">
-                <h4><strong>⚡ Immediate Actions Recommended:</strong></h4>
-                <ul>
-                  {aiVulnerabilityAnalysis.recommendations.immediate_actions.map((action, i) => (
-                    <li key={i}>{action}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* AI Diversification Strategies - Don't Put All Eggs in One Basket */}
-            {aiVulnerabilityAnalysis.recommendations?.diversification_strategies && aiVulnerabilityAnalysis.recommendations.diversification_strategies.length > 0 && (
-              <div className="element-spacing">
-                <h4><strong>🛡️ Don&apos;t Put All Your Eggs in One Basket:</strong></h4>
-                <ul>
-                  {aiVulnerabilityAnalysis.recommendations.diversification_strategies.map((strategy, i) => (
-                    <li key={i}>{strategy}</li>
-                  ))}
-                </ul>
-                <div className="hero-buttons">
-                  <button
-                    className="btn-primary"
-                    onClick={() => window.location.href = '/services/request-form'}
-                  >
-                    🎯 Get Expert Help with Supply Chain Diversification
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* AI Monitoring Priorities */}
-            {aiVulnerabilityAnalysis.recommendations?.monitoring_priorities && aiVulnerabilityAnalysis.recommendations.monitoring_priorities.length > 0 && (
-              <div className="element-spacing">
-                <h4><strong>📊 What to Monitor:</strong></h4>
-                <ul>
-                  {aiVulnerabilityAnalysis.recommendations.monitoring_priorities.map((priority, i) => (
-                    <li key={i}>{priority}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </div>
-        )}
+        </div>
 
         {/* Dynamic Risk Analysis */}
         <div className="form-section">
