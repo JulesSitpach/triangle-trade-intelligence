@@ -1,0 +1,50 @@
+name: RSS Feed Polling
+
+# Run every 30 minutes to check government RSS feeds for crisis alerts
+on:
+  schedule:
+    # Runs every 30 minutes (same as Vercel cron we removed)
+    - cron: '*/30 * * * *'
+
+  # Allow manual triggering from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  poll-rss-feeds:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Poll RSS Feeds
+        run: |
+          echo "🔍 Polling government RSS feeds for crisis alerts..."
+
+          # Call the RSS polling endpoint on production
+          response=$(curl -s -w "\n%{http_code}" \
+            -X GET \
+            "https://triangle-trade-intelligence.vercel.app/api/cron/rss-polling")
+
+          # Extract HTTP status code (last line)
+          http_code=$(echo "$response" | tail -n1)
+
+          # Extract response body (everything except last line)
+          body=$(echo "$response" | sed '$d')
+
+          echo "📊 HTTP Status: $http_code"
+          echo "📄 Response: $body"
+
+          # Check if request was successful
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ RSS polling completed successfully"
+            echo "$body" | jq '.' || echo "$body"
+          else
+            echo "❌ RSS polling failed with status $http_code"
+            echo "$body"
+            exit 1
+          fi
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ RSS polling job completed"
+          echo "🕐 Next run: in 30 minutes"
+          echo "📊 Check Supabase crisis_alerts table for new alerts"

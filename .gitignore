@@ -159,7 +159,7 @@ google-service-account.json
 .claude/
 .claude-flow/
 .githooks/
-.github/
+# .github/ - REMOVED: Need GitHub Actions workflows for RSS polling
 .superdesign/
 .swarm/
 .swc/

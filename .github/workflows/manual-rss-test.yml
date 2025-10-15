@@ -1,0 +1,79 @@
+name: Manual RSS Test
+
+# Allows you to manually trigger RSS polling from GitHub Actions tab
+# Useful for testing without waiting 30 minutes
+on:
+  workflow_dispatch:
+    inputs:
+      verbose:
+        description: 'Show detailed output'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  test-rss-polling:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test RSS Polling Endpoint
+        run: |
+          echo "🧪 Testing RSS polling endpoint..."
+          echo "🌐 Target: https://triangle-trade-intelligence.vercel.app/api/cron/rss-polling"
+          echo ""
+
+          # Call the RSS polling endpoint
+          response=$(curl -s -w "\n%{http_code}" \
+            -X GET \
+            "https://triangle-trade-intelligence.vercel.app/api/cron/rss-polling")
+
+          # Extract HTTP status and body
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "📊 HTTP Status: $http_code"
+          echo ""
+
+          if [ "${{ inputs.verbose }}" == "true" ]; then
+            echo "📄 Full Response:"
+            echo "$body" | jq '.' 2>/dev/null || echo "$body"
+          fi
+
+          # Check success
+          if [ "$http_code" -eq 200 ]; then
+            echo ""
+            echo "✅ RSS polling test PASSED"
+
+            # Try to extract key metrics if JSON response
+            feeds_processed=$(echo "$body" | jq -r '.feeds_processed // "N/A"' 2>/dev/null)
+            items_found=$(echo "$body" | jq -r '.total_items // "N/A"' 2>/dev/null)
+            alerts_created=$(echo "$body" | jq -r '.crisis_alerts_created // "N/A"' 2>/dev/null)
+
+            echo "📈 Feeds Processed: $feeds_processed"
+            echo "📰 Items Found: $items_found"
+            echo "🚨 Alerts Created: $alerts_created"
+          else
+            echo ""
+            echo "❌ RSS polling test FAILED"
+            exit 1
+          fi
+
+      - name: Test RSS Diagnostic Endpoint
+        run: |
+          echo ""
+          echo "🔍 Testing RSS diagnostic endpoint..."
+
+          response=$(curl -s -w "\n%{http_code}" \
+            -X GET \
+            "https://triangle-trade-intelligence.vercel.app/api/rss-diagnostic")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Diagnostic endpoint working"
+            echo "$body" | jq '.feeds.total, .items.total_fetched, .crisis_alerts.total' 2>/dev/null || echo "Response received"
+          else
+            echo "⚠️  Diagnostic endpoint returned: $http_code"
+            echo "   (May not be deployed yet)"
+          fi
