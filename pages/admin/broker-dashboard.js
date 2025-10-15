@@ -20,6 +20,7 @@ import SupplyChainResilienceTab from '../../components/shared/SupplyChainResilie
 import CrisisNavigatorTab from '../../components/shared/CrisisNavigatorTab';
 import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
 import AdminIntelligenceMetrics from '../../components/admin/AdminIntelligenceMetrics';
+import TariffPolicyUpdatesManager from '../../components/admin/TariffPolicyUpdatesManager';
 
 export default function CristinaDashboardModular() {
   const router = useRouter();
@@ -119,6 +120,8 @@ export default function CristinaDashboardModular() {
         return <SupplyChainResilienceTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
       case 'crisis-navigator':
         return <CrisisNavigatorTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} />;
+      case 'policy-updates':
+        return <TariffPolicyUpdatesManager />;
       default:
         return <TradeHealthCheckTab requests={serviceRequests} onRequestUpdate={handleRequestUpdate} currentUser="Cristina" />;
     }
@@ -222,6 +225,13 @@ export default function CristinaDashboardModular() {
                 data-tab="crisis-navigator"
               >
                 🆘 Crisis Navigator <span className="service-price">$200/mo</span>
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'policy-updates' ? 'active' : ''}`}
+                onClick={() => setActiveTab('policy-updates')}
+                data-tab="policy-updates"
+              >
+                🎯 Policy Updates <span className="badge badge-new">NEW</span>
               </button>
             </div>
 
