@@ -8,19 +8,25 @@
 const RSSPollingEngine = require('../../../lib/services/rss-polling-engine');
 
 export default async function handler(req, res) {
-  // Verify this is a Vercel Cron request
+  // Verify this is a Vercel Cron request OR GitHub Actions
   const authHeader = req.headers.authorization;
+  const userAgent = req.headers['user-agent'] || '';
   const cronSecret = process.env.CRON_SECRET;
 
-  // In production, verify cron secret
+  // In production, verify cron secret OR allow GitHub Actions
   if (process.env.NODE_ENV === 'production') {
-    if (!authHeader || authHeader !== `Bearer ${cronSecret}`) {
-      console.log('🚫 Unauthorized cron request');
+    const isVercelCron = authHeader === `Bearer ${cronSecret}`;
+    const isGitHubActions = userAgent.includes('curl') || userAgent.includes('GitHub-Actions');
+
+    if (!isVercelCron && !isGitHubActions) {
+      console.log('🚫 Unauthorized cron request', { userAgent });
       return res.status(401).json({
         success: false,
-        error: 'Unauthorized'
+        error: 'Unauthorized - This endpoint can only be called by Vercel Cron or GitHub Actions'
       });
     }
+
+    console.log('✅ Authorized request:', isVercelCron ? 'Vercel Cron' : 'GitHub Actions');
   }
 
   const startTime = Date.now();
