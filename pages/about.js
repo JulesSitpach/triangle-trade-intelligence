@@ -148,58 +148,52 @@ export default function About() {
           <div className="grid-3-cols">
             {/* Founder */}
             <div className="content-card">
-              <div className="card-icon">👨‍💼</div>
+              <div className="content-card-icon">F</div>
               <h3 className="content-card-title">Platform Founder</h3>
               <p className="content-card-description">
                 <strong>Canadian from Ottawa, living in Mexico</strong>
               </p>
-              <div style={{marginTop: '12px'}}>
-                <p className="text-body">✓ 15+ years high-tech experience</p>
-                <p className="text-body">✓ IBM, Cognos, Mitel, LinkedIn, Level Platform</p>
-                <p className="text-body">✓ Video production specialist (enterprise-quality)</p>
-                <p className="text-body">✓ Platform developer and architect</p>
-                <p className="text-body">✓ Marketing strategy and execution</p>
-                <p className="text-body">✓ Bilingual: English/French (Quebec market access)</p>
-              </div>
+              <p className="text-body">✓ 15+ years high-tech experience</p>
+              <p className="text-body">✓ IBM, Cognos, Mitel, LinkedIn, Level Platform</p>
+              <p className="text-body">✓ Video production specialist (enterprise-quality)</p>
+              <p className="text-body">✓ Platform developer and architect</p>
+              <p className="text-body">✓ Marketing strategy and execution</p>
+              <p className="text-body">✓ Bilingual: English/French (Quebec market access)</p>
             </div>
 
             {/* Jorge Ochoa */}
             <div className="content-card">
-              <div className="card-icon">🚀</div>
+              <div className="content-card-icon">J</div>
               <h3 className="content-card-title">Jorge Ochoa</h3>
               <p className="content-card-description">
                 <strong>Business Development Specialist</strong>
               </p>
-              <div style={{marginTop: '12px'}}>
-                <p className="text-body">✓ B2B sales expert with 7+ years as business owner</p>
-                <p className="text-body">✓ Proven SMB operational experience (Art Printing)</p>
-                <p className="text-body">✓ Consultative selling methodology</p>
-                <p className="text-body">✓ Bilingual: Spanish/English (native speaker)</p>
-                <p className="text-body">✓ Mexico supplier relationships and sourcing</p>
-                <p className="text-body">✓ Cultural bridge for North American companies</p>
-              </div>
-              <p className="text-body" style={{marginTop: '12px', fontWeight: 'bold', color: '#134169'}}>
-                Leads: Pathfinder Market Entry, Supply Chain Resilience
+              <p className="text-body">✓ B2B sales expert with 7+ years as business owner</p>
+              <p className="text-body">✓ Proven SMB operational experience (Art Printing)</p>
+              <p className="text-body">✓ Consultative selling methodology</p>
+              <p className="text-body">✓ Bilingual: Spanish/English (native speaker)</p>
+              <p className="text-body">✓ Mexico supplier relationships and sourcing</p>
+              <p className="text-body">✓ Cultural bridge for North American companies</p>
+              <p className="content-card-description">
+                <strong>Leads: Pathfinder Market Entry, Supply Chain Resilience</strong>
               </p>
             </div>
 
             {/* Cristina Escalante */}
             <div className="content-card">
-              <div className="card-icon">📊</div>
+              <div className="content-card-icon">C</div>
               <h3 className="content-card-title">Cristina Escalante</h3>
               <p className="content-card-description">
                 <strong>Trade Compliance Expert</strong>
               </p>
-              <div style={{marginTop: '12px'}}>
-                <p className="text-body">✓ 17-year logistics expert</p>
-                <p className="text-body">✓ Enterprise experience: Motorola, Arris, Tekmovil</p>
-                <p className="text-body">✓ International Commerce degree</p>
-                <p className="text-body">✓ HTS codes and INCOTERMS specialist</p>
-                <p className="text-body">✓ License #4601913 (professional certification)</p>
-                <p className="text-body">✓ Native Spanish with advanced English</p>
-              </div>
-              <p className="text-body" style={{marginTop: '12px', fontWeight: 'bold', color: '#134169'}}>
-                Leads: USMCA Advantage, Supply Chain Optimization, Crisis Navigator
+              <p className="text-body">✓ 17-year logistics expert</p>
+              <p className="text-body">✓ Enterprise experience: Motorola, Arris, Tekmovil</p>
+              <p className="text-body">✓ International Commerce degree</p>
+              <p className="text-body">✓ HTS codes and INCOTERMS specialist</p>
+              <p className="text-body">✓ License #4601913 (professional certification)</p>
+              <p className="text-body">✓ Native Spanish with advanced English</p>
+              <p className="content-card-description">
+                <strong>Leads: USMCA Advantage, Supply Chain Optimization, Crisis Navigator</strong>
               </p>
             </div>
           </div>
@@ -218,33 +212,32 @@ export default function About() {
 
           <div className="grid-2-cols">
             <div className="content-card">
-              <h3 className="content-card-title" style={{color: '#16a34a'}}>✅ What We Provide</h3>
-              <div style={{marginTop: '12px'}}>
-                <p className="text-body">✓ Trade process consulting and optimization guidance</p>
-                <p className="text-body">✓ USMCA qualification assessment and recommendations</p>
-                <p className="text-body">✓ Logistics planning and strategic recommendations</p>
-                <p className="text-body">✓ Supply chain analysis and process improvement</p>
-                <p className="text-body">✓ Market entry strategy and business development support</p>
-                <p className="text-body">✓ HS code classification guidance (non-binding recommendations)</p>
-              </div>
+              <div className="content-card-icon">✓</div>
+              <h3 className="content-card-title">What We Provide</h3>
+              <p className="text-body">✓ Trade process consulting and optimization guidance</p>
+              <p className="text-body">✓ USMCA qualification assessment and recommendations</p>
+              <p className="text-body">✓ Logistics planning and strategic recommendations</p>
+              <p className="text-body">✓ Supply chain analysis and process improvement</p>
+              <p className="text-body">✓ Market entry strategy and business development support</p>
+              <p className="text-body">✓ HS code classification guidance (non-binding recommendations)</p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title" style={{color: '#dc2626'}}>❌ What We Do Not Provide</h3>
-              <div style={{marginTop: '12px'}}>
-                <p className="text-body">✗ Licensed customs broker services</p>
-                <p className="text-body">✗ Official USMCA certificate preparation (legal documents)</p>
-                <p className="text-body">✗ Formal legal compliance certifications</p>
-                <p className="text-body">✗ Official customs declarations</p>
-                <p className="text-body">✗ Binding legal or regulatory advice</p>
-                <p className="text-body">✗ Representation before customs authorities</p>
-              </div>
+              <div className="content-card-icon">✗</div>
+              <h3 className="content-card-title">What We Do Not Provide</h3>
+              <p className="text-body">✗ Licensed customs broker services</p>
+              <p className="text-body">✗ Official USMCA certificate preparation (legal documents)</p>
+              <p className="text-body">✗ Formal legal compliance certifications</p>
+              <p className="text-body">✗ Official customs declarations</p>
+              <p className="text-body">✗ Binding legal or regulatory advice</p>
+              <p className="text-body">✗ Representation before customs authorities</p>
             </div>
           </div>
 
-          <div className="content-card" style={{marginTop: '2rem', backgroundColor: '#fef3c7'}}>
-            <h3 className="content-card-title" style={{color: '#92400e'}}>🤝 Partner Network for Official Services</h3>
-            <p className="content-card-description" style={{color: '#92400e'}}>
+          <div className="content-card">
+            <div className="content-card-icon">P</div>
+            <h3 className="content-card-title">Partner Network for Official Services</h3>
+            <p className="content-card-description">
               For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide expert guidance and assessment to prepare you for these official processes, but official certifications require licensed customs brokers.
             </p>
           </div>
