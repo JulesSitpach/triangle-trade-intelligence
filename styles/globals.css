@@ -726,11 +726,27 @@ select.form-input {
   appearance: none;
 }
 
-/* Select dropdown options */
-select.form-input option {
-  background-color: white;
-  color: var(--gray-900);
+/* Select dropdown options - force white backgrounds */
+select.form-input option,
+select option {
+  background-color: white !important;
+  color: var(--gray-900) !important;
   padding: 0.5rem;
+}
+
+/* Remove any blue backgrounds from option elements */
+select.form-input option:checked,
+select option:checked {
+  background-color: #e0f2fe !important;
+  color: var(--gray-900) !important;
+}
+
+/* Optgroup labels */
+select.form-input optgroup,
+select optgroup {
+  background-color: white !important;
+  color: var(--gray-700);
+  font-weight: 600;
 }
 
 /* Textarea */
