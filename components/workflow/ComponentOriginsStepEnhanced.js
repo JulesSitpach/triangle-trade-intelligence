@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
+import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -18,7 +19,8 @@ export default function ComponentOriginsStepEnhanced({
   onPrevious,
   onProcessWorkflow,
   isFormValid,
-  isLoading
+  isLoading,
+  userTier = SUBSCRIPTION_TIERS.FREE_TRIAL
 }) {
   const [components, setComponents] = useState(() => {
     // FORCE EMPTY DEFAULTS - ignore any existing data
@@ -38,6 +40,7 @@ export default function ComponentOriginsStepEnhanced({
   const [agentSuggestions, setAgentSuggestions] = useState({});
   const [validationResult, setValidationResult] = useState(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Update parent form data when components change
   useEffect(() => {
@@ -221,6 +224,12 @@ export default function ComponentOriginsStepEnhanced({
   };
 
   const addComponent = () => {
+    // Check component limit before adding
+    if (!canAddComponent(userTier, components.length)) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setComponents([...components, {
       description: '',
       origin_country: '',
@@ -673,14 +682,24 @@ export default function ComponentOriginsStepEnhanced({
           </div>
         ))}
 
-        {/* Add Component Button */}
-        <button
-          type="button"
-          onClick={addComponent}
-          className="btn-secondary add-component-button"
-        >
-          Add Component
-        </button>
+        {/* Add Component Button with Limit Status */}
+        <div className="element-spacing">
+          <button
+            type="button"
+            onClick={addComponent}
+            className="btn-secondary add-component-button"
+          >
+            Add Component
+          </button>
+          <div className="form-help" style={{marginTop: '0.5rem', textAlign: 'center'}}>
+            {getComponentLimitMessage(userTier, components.length)}
+            {!canAddComponent(userTier, components.length) && (
+              <span style={{color: '#f59e0b', marginLeft: '0.5rem'}}>
+                {getUpgradeMessage(userTier, 'component_limit')}
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Total Percentage Display */}
         <div className={getTotalPercentage() === 100 ? 'percentage-summary success' : 'percentage-summary warning'}>
@@ -743,6 +762,69 @@ export default function ComponentOriginsStepEnhanced({
           )}
         </button>
       </div>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="modal-overlay" onClick={() => setShowUpgradeModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>🚀 Component Limit Reached</h2>
+              <button onClick={() => setShowUpgradeModal(false)} className="modal-close">×</button>
+            </div>
+
+            <div className="modal-body">
+              <p className="text-body" style={{marginBottom: '1.5rem'}}>
+                Your product needs more than 3 components for complete analysis?
+                Most products require 5-7 components for accurate USMCA qualification.
+              </p>
+
+              <div style={{background: '#f3f4f6', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
+                <h3 style={{fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem'}}>Starter Plan - $99/mo</h3>
+                <ul style={{listStyle: 'none', padding: 0, margin: 0}}>
+                  <li style={{marginBottom: '0.5rem'}}>✓ 10 components per analysis</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ 10 analyses per month</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ Full certificate download</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ Email crisis alerts</li>
+                </ul>
+              </div>
+
+              <div style={{background: '#ede9fe', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
+                <div style={{display: 'flex', alignItems: 'center', marginBottom: '0.75rem'}}>
+                  <h3 style={{fontSize: '1.125rem', fontWeight: 600, margin: 0}}>Professional Plan - $299/mo</h3>
+                  <span style={{
+                    background: '#8b5cf6',
+                    color: 'white',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '12px',
+                    fontSize: '0.75rem',
+                    marginLeft: '0.75rem'
+                  }}>POPULAR</span>
+                </div>
+                <ul style={{listStyle: 'none', padding: 0, margin: 0}}>
+                  <li style={{marginBottom: '0.5rem'}}>✓ 25 components per analysis</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ Unlimited analyses</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ 15% service discounts</li>
+                  <li style={{marginBottom: '0.5rem'}}>✓ Priority support (48hr)</li>
+                </ul>
+              </div>
+
+              <p className="form-help" style={{textAlign: 'center', marginBottom: '1rem'}}>
+                💡 Pro Tip: You can continue with 3 components to get started,
+                but complex products need full analysis for accurate USMCA qualification.
+              </p>
+            </div>
+
+            <div className="modal-footer">
+              <button onClick={() => setShowUpgradeModal(false)} className="btn-secondary">
+                Continue with 3 Components
+              </button>
+              <a href="/pricing" className="btn-primary">
+                View Plans & Upgrade
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
