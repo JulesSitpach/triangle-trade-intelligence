@@ -178,8 +178,9 @@ export default function ProfessionalServices() {
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
-            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+            <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+            <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
       </nav>
@@ -218,7 +219,7 @@ export default function ProfessionalServices() {
             Your Mexico Trade Team
           </h1>
           <h2 className="hero-sub-title">
-            Expert <span className="hero-gradient-text">Trade Consulting & USMCA Optimization</span>
+            Expert <span className="hero-yellow-highlight">Trade Consulting & USMCA Optimization</span>
           </h2>
 
           <p className="hero-description-text">
@@ -262,9 +263,19 @@ export default function ProfessionalServices() {
           </div>
 
           <div className="grid-3-cols">
-            {serviceTiers.map((service, index) => (
-              <div key={index} className="content-card">
-                <h3 className="content-card-title">{service.name}</h3>
+            {serviceTiers.map((service, index) => {
+              const iconMap = {
+                'trade-health-check': 'H',
+                'usmca-advantage': 'U',
+                'supply-chain-optimization': 'O',
+                'pathfinder': 'P',
+                'supply-chain-resilience': 'R',
+                'crisis-navigator': 'C'
+              };
+              return (
+                <div key={index} className="content-card">
+                  <div className="content-card-icon">{iconMap[service.serviceId]}</div>
+                  <h3 className="content-card-title">{service.name.substring(3)}</h3>
 
                 <div style={{marginBottom: '12px'}}>
                   <div style={{fontSize: '2rem', fontWeight: 'bold', color: '#134169'}}>
@@ -312,7 +323,8 @@ export default function ProfessionalServices() {
                   Request Service
                 </Link>
               </div>
-            ))}
+            );
+            })}
           </div>
         </div>
       </section>

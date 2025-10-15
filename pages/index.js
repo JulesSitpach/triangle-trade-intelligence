@@ -31,20 +31,6 @@ export default function HomePage() {
         <title>Triangle Trade Intelligence | USMCA Compliance & Supply Chain Optimization</title>
         <meta name="description" content="Professional trade services platform delivering comprehensive USMCA compliance analysis and supply chain optimization for North American manufacturers and importers." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style>{`
-          .pain-points-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-bottom: 3rem;
-          }
-          @media (max-width: 768px) {
-            .pain-points-grid {
-              grid-template-columns: 1fr;
-              gap: 1.5rem;
-            }
-          }
-        `}</style>
         <meta property="og:title" content="Triangle Trade Intelligence | USMCA Compliance Platform" />
         <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for small manufacturers and importers." />
 
@@ -126,17 +112,20 @@ export default function HomePage() {
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
+            <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+              About
+            </Link>
             {isLoggedIn ? (
               <Link href="/dashboard" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
                 My Dashboard
               </Link>
             ) : (
               <>
-                <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
-                  Sign In
+                <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+                  Get Started
                 </Link>
-                <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-                  Sign Up
+                <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
                 </Link>
               </>
             )}
@@ -178,8 +167,8 @@ export default function HomePage() {
             Move The World
           </h1>
           <h2 className="hero-sub-title">
-            Small Business <span className="hero-gradient-text">USMCA Compliance</span><br/>
-            <span>& Supply Chain Optimization</span>
+            <span className="hero-yellow-highlight">Small & Medium Business</span><br/>
+            <span>USMCA Compliance & Supply Chain Optimization</span>
           </h2>
 
           <p className="hero-description-text">
@@ -231,9 +220,9 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="pain-points-grid">
+          <div className="grid-3-cols">
             <div className="content-card">
-              <div className="card-icon">💸</div>
+              <div className="content-card-icon">$</div>
               <h3 className="content-card-title">Losing Money on Tariffs</h3>
               <p className="content-card-description">
                 Many SMBs pay 6-25% tariffs on imports from China, Mexico, or Canada without realizing they could qualify for 0% tariffs under USMCA.
@@ -241,7 +230,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">❓</div>
+              <div className="content-card-icon">?</div>
               <h3 className="content-card-title">Don&apos;t Know If You Qualify</h3>
               <p className="content-card-description">
                 USMCA rules are complex. You need 55-75% regional content, but calculating this requires expertise you don&apos;t have in-house.
@@ -249,7 +238,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">⚠️</div>
+              <div className="content-card-icon">⚠</div>
               <h3 className="content-card-title">Supply Chain at Risk</h3>
               <p className="content-card-description">
                 Tariff changes, trade disputes, and supplier disruptions can destroy your margins overnight. You need early warning and alternatives.
@@ -257,7 +246,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">📄</div>
+              <div className="content-card-icon">C</div>
               <h3 className="content-card-title">Certificate Confusion</h3>
               <p className="content-card-description">
                 Need a USMCA certificate but don&apos;t know where to start? Wrong paperwork means customs delays and lost revenue.
@@ -265,7 +254,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">🌎</div>
+              <div className="content-card-icon">M</div>
               <h3 className="content-card-title">Want to Enter Mexico Market</h3>
               <p className="content-card-description">
                 Mexico offers huge opportunities, but finding reliable suppliers or distributors without local connections is nearly impossible.
@@ -273,7 +262,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">🚨</div>
+              <div className="content-card-icon">!</div>
               <h3 className="content-card-title">No Emergency Plan</h3>
               <p className="content-card-description">
                 When customs holds your shipment or tariffs spike, you need expert help immediately—but hiring a consultant takes weeks.
@@ -337,7 +326,7 @@ export default function HomePage() {
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <div className="card-icon">🏥</div>
+              <div className="content-card-icon">H</div>
               <h3 className="content-card-title">Trade Health Check</h3>
               <p className="content-card-description">
                 Complete assessment with prioritized action plan. Starting at $99.
@@ -345,7 +334,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">📜</div>
+              <div className="content-card-icon">U</div>
               <h3 className="content-card-title">USMCA Qualification</h3>
               <p className="content-card-description">
                 Gap analysis and roadmap to achieve compliance. Starting at $175.
@@ -353,7 +342,7 @@ export default function HomePage() {
             </div>
 
             <div className="content-card">
-              <div className="card-icon">🛡️</div>
+              <div className="content-card-icon">S</div>
               <h3 className="content-card-title">Supply Chain Services</h3>
               <p className="content-card-description">
                 Alternative suppliers, Mexico sourcing, crisis response. Starting at $275.

@@ -214,8 +214,9 @@ export default function Pricing() {
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
-            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+            <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
+            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+            <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
       </nav>
@@ -254,7 +255,7 @@ export default function Pricing() {
             Professional Trade Compliance
           </h1>
           <h2 className="hero-sub-title">
-            For Small <span className="hero-gradient-text">Importers</span>
+            For <span className="hero-yellow-highlight">Small & Medium Importers</span>
           </h2>
 
           <p className="hero-description-text">
@@ -481,7 +482,8 @@ export default function Pricing() {
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <h3 className="content-card-title">🔍 AI Supply Chain Analysis</h3>
+              <div className="content-card-icon">A</div>
+              <h3 className="content-card-title">AI Supply Chain Analysis</h3>
               <p className="content-card-description">
                 AI analyzes your component origins to identify geopolitical risks,
                 tariff exposure, and supply chain vulnerabilities. Get specific,
@@ -490,7 +492,8 @@ export default function Pricing() {
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">📊 Unlimited USMCA Checks</h3>
+              <div className="content-card-icon">∞</div>
+              <h3 className="content-card-title">Unlimited USMCA Checks</h3>
               <p className="content-card-description">
                 Run unlimited qualification analyses. Check every product, every
                 scenario, every supplier. Instant AI-powered HS code suggestions
@@ -499,7 +502,8 @@ export default function Pricing() {
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">💰 ROI for Small Importers</h3>
+              <div className="content-card-icon">$</div>
+              <h3 className="content-card-title">ROI for Small Importers</h3>
               <p className="content-card-description">
                 DIY USMCA compliance costs $50-100/hr of your time. Hiring a customs
                 broker full-time: $60k+/year. Our platform: $299-599/month with
@@ -578,31 +582,37 @@ export default function Pricing() {
 
           <div className="grid-3-cols">
             <div className="content-card">
+              <div className="content-card-icon">1</div>
               <h3 className="content-card-title">Month 1: Start with Starter</h3>
               <p className="content-card-description">$99/month for 10 analyses - learn the basics and test USMCA qualification</p>
             </div>
 
             <div className="content-card">
+              <div className="content-card-icon">2</div>
               <h3 className="content-card-title">Month 2-3: Upgrade to Professional</h3>
               <p className="content-card-description">$299/month for unlimited analyses + 15% service discount when you need expert help</p>
             </div>
 
             <div className="content-card">
+              <div className="content-card-icon">H</div>
               <h3 className="content-card-title">Start with Health Check</h3>
               <p className="content-card-description">$99 (no discounts) - Expert team assesses your trade opportunities</p>
             </div>
 
             <div className="content-card">
+              <div className="content-card-icon">U</div>
               <h3 className="content-card-title">Need USMCA Help?</h3>
               <p className="content-card-description">$175 base / $149 Professional / $131 Premium - Compliance-led qualification roadmap</p>
             </div>
 
             <div className="content-card">
+              <div className="content-card-icon">S</div>
               <h3 className="content-card-title">Supply Chain Issues?</h3>
               <p className="content-card-description">$450 base / $383 Professional / $338 Premium - Sourcing specialist finds alternative Mexico suppliers</p>
             </div>
 
             <div className="content-card">
+              <div className="content-card-icon">P</div>
               <h3 className="content-card-title">Upgrade to Premium</h3>
               <p className="content-card-description">$599/month - 25% service discount + quarterly strategy calls with our expert team</p>
             </div>

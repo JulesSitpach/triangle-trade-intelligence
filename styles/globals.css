@@ -368,6 +368,15 @@ a:hover {
   background-clip: text;
 }
 
+.hero-yellow-highlight {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
 .hero-description-text {
   font-size: 1.25rem;
   opacity: 0.9;
@@ -460,21 +469,24 @@ a:hover {
 .content-card-icon {
   width: 48px;
   height: 48px;
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #134169 0%, #009CEB 50%, #012A49 100%);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: #fbbf24;
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-family: 'Roboto', Arial, sans-serif;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 156, 235, 0.2);
 }
 
 .content-card:hover .content-card-icon {
   transform: scale(1.1);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 4px 12px rgba(0, 156, 235, 0.4);
+  color: #ffffff;
 }
 
 .content-card-title {
