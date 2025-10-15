@@ -1,11 +1,11 @@
 /**
  * VERCEL CRON JOB - RSS POLLING
- * Called every 30 minutes by Vercel Cron
+ * Called every 4 hours by Vercel Cron (cost-optimized until user base grows)
  * Polls Bloomberg, Reuters, and Federal Register for trade policy updates
  * Part of referral trial activation - real-time monitoring for Adam & Anthony
  */
 
-const RSSPollingEngine = require('../../../lib/services/rss-polling-engine');
+import RSSPollingEngine from '../../../lib/services/rss-polling-engine.js';
 
 export default async function handler(req, res) {
   // Verify this is a Vercel Cron request OR GitHub Actions
