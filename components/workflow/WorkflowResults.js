@@ -338,25 +338,74 @@ export default function WorkflowResults({
     // CRITICAL: Normalize all components to preserve enrichment data
     let rawComponents = results.component_origins || results.components || [];
 
-    // AUTOMATIC FIX: If components are empty or missing enrichment, fetch from database
+    // AUTOMATIC FIX: If components are empty or missing enrichment
     if (rawComponents.length === 0 || !rawComponents[0]?.hs_code) {
-      console.log('⚠️ Components missing or not enriched - fetching from database...');
-      try {
-        const response = await fetch('/api/dashboard-data', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          const latestWorkflow = data.workflows?.[0];
-          if (latestWorkflow && latestWorkflow.component_origins) {
-            console.log('✅ Fetched enriched components from database:', latestWorkflow.component_origins.length);
-            rawComponents = latestWorkflow.component_origins;
+      console.log('⚠️ Components missing or not enriched - attempting to recover...');
 
-            // Update results object so future operations use enriched data
-            results.component_origins = rawComponents;
-            results.components = rawComponents;
+      // Check if user saved to database
+      const savedChoice = localStorage.getItem('save_data_consent');
+
+      if (savedChoice === 'save') {
+        // User chose to save - fetch from database
+        console.log('🔄 User saved to database - fetching enriched components...');
+        try {
+          const response = await fetch('/api/dashboard-data', { credentials: 'include' });
+          if (response.ok) {
+            const data = await response.json();
+            const latestWorkflow = data.workflows?.[0];
+            if (latestWorkflow && latestWorkflow.component_origins) {
+              console.log('✅ Fetched enriched components from database:', latestWorkflow.component_origins.length);
+              rawComponents = latestWorkflow.component_origins;
+
+              // Update results object so future operations use enriched data
+              results.component_origins = rawComponents;
+              results.components = rawComponents;
+            } else {
+              console.error('❌ No workflow found in database');
+              alert('⚠️ Component data not found in database. Please complete the workflow again to set up alerts.');
+              return;
+            }
+          } else {
+            console.error('❌ Failed to fetch from database');
+            alert('⚠️ Unable to fetch component data from database. Please try again or redo the workflow.');
+            return;
           }
+        } catch (error) {
+          console.error('❌ Database fetch error:', error);
+          alert('⚠️ Error fetching component data. Please complete the workflow again.');
+          return;
         }
-      } catch (error) {
-        console.error('❌ Failed to fetch from database:', error);
+      } else {
+        // User chose NOT to save - data should be in results prop (memory) or localStorage
+        console.log('⚠️ User did NOT save to database - checking localStorage...');
+
+        // Try to get from localStorage (might have enriched data from this session)
+        const localStorageData = localStorage.getItem('usmca_workflow_results');
+        if (localStorageData) {
+          try {
+            const parsed = JSON.parse(localStorageData);
+            const localComponents = parsed.component_origins || parsed.components || [];
+
+            if (localComponents.length > 0 && localComponents[0]?.hs_code) {
+              console.log('✅ Found enriched components in localStorage:', localComponents.length);
+              rawComponents = localComponents;
+              results.component_origins = rawComponents;
+              results.components = rawComponents;
+            } else {
+              console.error('❌ localStorage has components but they are not enriched');
+              alert('⚠️ Component enrichment data is missing.\n\nTo set up alerts, you need to:\n1. Complete a new workflow analysis, OR\n2. Choose "Save to Database" to preserve enriched data\n\nWithout saving to database, enriched data is lost after closing the browser.');
+              return;
+            }
+          } catch (e) {
+            console.error('❌ Failed to parse localStorage:', e);
+            alert('⚠️ Unable to recover component data. Please complete the workflow again.');
+            return;
+          }
+        } else {
+          console.error('❌ No data in localStorage');
+          alert('⚠️ Component data not found.\n\nTo set up alerts, please:\n1. Complete the workflow analysis again, OR\n2. Choose "Save to Database" to preserve your data across sessions');
+          return;
+        }
       }
     }
 
