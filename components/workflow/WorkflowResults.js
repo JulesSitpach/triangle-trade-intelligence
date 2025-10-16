@@ -423,10 +423,10 @@ export default function WorkflowResults({
   const modalContent = showSaveConsentModal && (
     <div className="consent-modal">
       <h2 className="consent-modal-title">
-        Save to Dashboard?
+        💾 Save Analysis to Database?
       </h2>
       <p className="consent-modal-description">
-        All features work either way - choose how to handle your data
+        <strong>Why save?</strong> Your tariff analysis includes valuable HS code classifications, component enrichment data, and USMCA qualification results. Saving to database enables persistent alerts, pre-filled service requests, and certificate access from any device.
       </p>
 
       <div className="consent-modal-options">
@@ -441,13 +441,14 @@ export default function WorkflowResults({
               checked={modalChoice === 'save'}
               onChange={() => setModalChoice('save')}
             />
-            SAVE - Keep everything for later
+            SAVE TO DATABASE (Recommended)
           </div>
           <div className="consent-option-details">
-            • Certificate saved to dashboard (download anytime)<br/>
-            • Alerts persist after logout<br/>
-            • Service requests with pre-filled data<br/>
-            • Access this analysis anytime from dashboard
+            ✅ <strong>Database storage</strong> - Access from any device, anytime<br/>
+            ✅ <strong>Persistent alerts</strong> - Get notified of tariff changes even after logout<br/>
+            ✅ <strong>Pre-filled service requests</strong> - No re-entering company/product data<br/>
+            ✅ <strong>Certificate archive</strong> - Download past certificates from dashboard<br/>
+            ✅ <strong>Component enrichment preserved</strong> - HS codes, tariff rates, savings calculations
           </div>
         </div>
 
@@ -462,13 +463,14 @@ export default function WorkflowResults({
               checked={modalChoice === 'dont-save'}
               onChange={() => setModalChoice('dont-save')}
             />
-            DON&apos;T SAVE - Use now, delete after
+            DON&apos;T SAVE (Browser only, temporary)
           </div>
           <div className="consent-option-details">
-            • Certificate generates but NOT saved to dashboard<br/>
-            • Alerts work now but deleted on logout<br/>
-            • Services work but no saved data<br/>
-            • Must redo workflow for another certificate
+            ⚠️ <strong>Browser storage only</strong> - Lost on logout or browser clear<br/>
+            ⚠️ <strong>Alerts deleted</strong> - Must set up alerts again on next visit<br/>
+            ⚠️ <strong>No service pre-fill</strong> - Re-enter all data for service requests<br/>
+            ⚠️ <strong>Certificate not archived</strong> - Must regenerate analysis for new certificate<br/>
+            ⚠️ <strong>Component data lost</strong> - AI enrichment (HS codes, rates) not preserved
           </div>
         </div>
       </div>
@@ -479,12 +481,11 @@ export default function WorkflowResults({
         }}
         className="consent-modal-button"
       >
-        CONFIRM {modalChoice === 'save' ? 'SAVE' : "DON&apos;T SAVE"}
+        {modalChoice === 'save' ? '💾 SAVE TO DATABASE' : "🔒 DON'T SAVE (TEMPORARY)"}
       </button>
 
       <p className="consent-modal-privacy">
-        <strong>Privacy Notice:</strong> You can delete all saved data anytime from Account Settings.
-        We never share your data with third parties.
+        <strong>Privacy:</strong> Saved data is encrypted in our secure PostgreSQL database. You can delete ALL saved data anytime from Account Settings. We never share your trade data with third parties.
       </p>
     </div>
   );
@@ -762,7 +763,7 @@ export default function WorkflowResults({
       <div className="form-section">
         <h2 className="form-section-title">Next Steps</h2>
         <p className="text-body">
-          All features are available - certificates, alerts, and services work either way. Choose whether to save for later access or use once and delete.
+          Your USMCA analysis is complete with AI-enriched component data (HS codes, tariff rates, savings calculations). Choose how to store this valuable intelligence.
         </p>
         <div>
           {/* Privacy & Save Information Card - Always show with checkbox */}
@@ -776,26 +777,29 @@ export default function WorkflowResults({
                 className="privacy-info-checkbox"
               />
               <label htmlFor="saveConsent" className="privacy-info-label">
-                <div className="privacy-info-title">💾 Save to Dashboard (Recommended)</div>
+                <div className="privacy-info-title">💾 Save to Database (Recommended)</div>
                 <div className="privacy-info-text">
-                  Saving allows you to:
+                  <strong>What gets saved:</strong> Your complete analysis including company info, product classification, AI-enriched component data (HS codes, tariff rates, savings), USMCA qualification results, and certificate data.
+                  <br/><br/>
+                  <strong>Why save to database:</strong>
                   <ul className="privacy-info-list">
-                    <li>Download certificates anytime from your dashboard</li>
-                    <li>Keep alerts active after logout</li>
-                    <li>Request services with pre-filled data</li>
-                    <li>Access analysis history whenever needed</li>
+                    <li><strong>Persistent storage</strong> - Access from any device, survives browser clears</li>
+                    <li><strong>Alert monitoring</strong> - Get notified of tariff changes affecting YOUR components</li>
+                    <li><strong>Service pre-fill</strong> - Request expert services without re-entering data</li>
+                    <li><strong>Certificate archive</strong> - Download certificates anytime from dashboard</li>
+                    <li><strong>Component enrichment preserved</strong> - HS codes, tariff rates, AI confidence scores</li>
                   </ul>
-                  <strong>Not saving?</strong> Features still work but data is deleted immediately after use.
+                  <strong>Not saving?</strong> Data stays in browser only (temporary) - lost on logout or browser clear.
                 </div>
                 <div className="privacy-info-disclaimer">
-                  Privacy: You can delete all saved data anytime from Account Settings
+                  <strong>Privacy:</strong> Encrypted PostgreSQL database. Delete anytime from Account Settings. Never shared with third parties.
                 </div>
               </label>
             </div>
           </div>
 
           <div className="hero-buttons">
-            {/* Button 1: Save to Dashboard (ALWAYS AVAILABLE) */}
+            {/* Button 1: Save to Database (ALWAYS AVAILABLE) */}
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -805,7 +809,7 @@ export default function WorkflowResults({
               }}
               className="btn-primary"
             >
-              {userMadeChoice ? '✅ Saved to Dashboard (Change)' : '☐ Save to Dashboard'}
+              {userMadeChoice ? '✅ Saved to Database (Change)' : '💾 Save to Database'}
             </button>
 
             {/* Button 2: Generate Certificate (if qualified) */}
