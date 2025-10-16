@@ -63,6 +63,7 @@ export function useWorkflowState() {
   const [formData, setFormData] = useState({
       // Company Information
       company_name: '',
+      company_country: '',  // CRITICAL: Company's country for certificate (Box 2, 3, 4)
       business_type: '',  // Business role: Importer, Exporter, Manufacturer, Distributor
       industry_sector: '',  // Industry classification: Automotive, Electronics, etc.
       supplier_country: '',
@@ -434,6 +435,7 @@ export function useWorkflowState() {
     // Complete form reset - clear ALL fields for new analysis
     setFormData({
       company_name: '',
+      company_country: '',  // CRITICAL: Reset company country for certificate
       business_type: '',
       industry_sector: '',
       supplier_country: 'CN',
@@ -532,6 +534,7 @@ export function useWorkflowState() {
     switch (step) {
       case 1:
         return formData.company_name.length > 2 &&
+               formData.company_country &&  // CRITICAL: Validate company country for certificate
                formData.business_type &&
                formData.industry_sector &&
                formData.trade_volume &&
