@@ -731,6 +731,55 @@ COMPONENT TO CLASSIFY:
 
 ${policyContext}
 
+===== 🚨 CRITICAL: 2025 TRUMP TARIFF LANDSCAPE (EXTREMELY VOLATILE) =====
+
+CURRENT SITUATION (October 2025):
+⚠️ Trump administration changing tariffs WEEKLY on ALL countries - not just China!
+⚠️ Recent changes: Canada, Mexico, China, EU - all affected
+⚠️ Port fees increased, Chinese shipping surcharges added
+⚠️ Threatened additional tariffs up to +100% could hit at any time
+
+YOUR TASK - APPLY CURRENT 2025 TARIFF KNOWLEDGE:
+For origin_country "${component.origin_country}":
+
+1. Use your knowledge of CURRENT 2025 tariff rates (not historical/outdated rates)
+2. Check if this country has recent tariff changes from Trump administration
+3. Include ALL applicable tariffs:
+   - Base MFN rate from HTS
+   - Section 232 (steel/aluminum)
+   - Section 301 (China tech/strategic goods: typically +25-50%)
+   - Country-specific tariffs (if Trump added new ones)
+   - Port fees and shipping surcharges (especially China)
+
+4. Report the EFFECTIVE TOTAL RATE in mfn_rate field
+5. List all adjustments in policy_adjustments array
+
+EXAMPLES (CORRECT FORMAT - October 2025):
+- HS 8542.31.00 Microcontrollers from CN:
+  - Base MFN: 0%
+  - Section 301: +25%
+  - Chinese port fees: +3% estimated
+  - mfn_rate: 28.0 (NOT 0.0!)
+  - policy_adjustments: ["Section 301 China +25%", "Port surcharge ~3%"]
+
+- HS 8708.30.50 Brake parts from MX:
+  - Base MFN: 2.5%
+  - Recent tariff threats: monitoring
+  - mfn_rate: 2.5 (current, subject to change)
+  - usmca_rate: 0.0 (if qualifies)
+
+- HS 7208.52.00 Steel from CA:
+  - Base MFN: 0%
+  - Section 232 steel: varies by agreement
+  - mfn_rate: 0.0-25.0 (depends on exemptions)
+
+🚫 CRITICAL: NEVER use 0% for countries with known Section 301/232 tariffs
+✅ ALWAYS research current 2025 rates for origin country "${component.origin_country}"
+✅ When in doubt, estimate conservatively (better to overestimate than report 0%)
+
+For US/MX/CA with USMCA qualification: usmca_rate = 0% (duty-free)
+For non-USMCA: usmca_rate = 0% (field not applicable, they pay mfn_rate)
+
 ===== YOUR EXPERT TASK =====
 Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
 
