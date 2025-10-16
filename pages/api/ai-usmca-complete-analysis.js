@@ -862,47 +862,58 @@ CRITICAL: Be precise and accurate. Apply current 2025 policy adjustments. This d
     const result = await response.json();
     const aiText = result.choices?.[0]?.message?.content;
 
-    // Multi-strategy JSON extraction with detailed logging
-    let classification;
+    // Multi-strategy JSON extraction with control character sanitization
+    let jsonString = null;
+    let extractionMethod = '';
 
-    // Strategy 1: Try parsing directly (AI might return clean JSON)
-    try {
-      classification = JSON.parse(aiText);
-      console.log('✅ JSON parsed directly (clean AI response)');
-    } catch (e1) {
-      // Strategy 2: Extract from markdown code blocks
-      try {
-        const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-        if (codeBlockMatch) {
-          classification = JSON.parse(codeBlockMatch[1].trim());
-          console.log('✅ JSON extracted from markdown code block');
-        } else {
-          throw new Error('No code block found');
-        }
-      } catch (e2) {
-        // Strategy 3: Extract JSON object (between first { and last })
-        try {
-          const firstBrace = aiText.indexOf('{');
-          const lastBrace = aiText.lastIndexOf('}');
-          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-            const jsonStr = aiText.substring(firstBrace, lastBrace + 1);
-            classification = JSON.parse(jsonStr);
-            console.log('✅ JSON extracted by brace matching');
-          } else {
-            throw new Error('No JSON object boundaries found');
-          }
-        } catch (e3) {
-          // All strategies failed - log and throw
-          console.error('❌ All JSON extraction strategies failed');
-          console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
-          console.error('Parse errors:', {
-            direct: e1.message,
-            codeBlock: e2.message,
-            braceMatch: e3.message
-          });
-          throw new Error(`Failed to extract JSON from AI response: ${e3.message}`);
+    // Strategy 1: Try direct extraction
+    if (aiText.trim().startsWith('{')) {
+      jsonString = aiText;
+      extractionMethod = 'direct';
+    }
+    // Strategy 2: Extract from markdown code blocks
+    else {
+      const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        jsonString = codeBlockMatch[1];
+        extractionMethod = 'code_block';
+      }
+      // Strategy 3: Extract JSON object (between first { and last })
+      else {
+        const firstBrace = aiText.indexOf('{');
+        const lastBrace = aiText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+          jsonString = aiText.substring(firstBrace, lastBrace + 1);
+          extractionMethod = 'brace_matching';
         }
       }
+    }
+
+    if (!jsonString) {
+      console.error('❌ No JSON found in AI response');
+      console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
+      throw new Error('No JSON found in AI response');
+    }
+
+    // CRITICAL: Sanitize control characters BEFORE parsing
+    // Replace literal control characters with escaped versions
+    const sanitizedJSON = jsonString
+      .replace(/\r\n/g, ' ')  // Replace Windows line breaks with space
+      .replace(/\n/g, ' ')    // Replace Unix line breaks with space
+      .replace(/\r/g, ' ')    // Replace Mac line breaks with space
+      .replace(/\t/g, ' ')    // Replace tabs with space
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove other control characters
+
+    // Parse the sanitized JSON
+    let classification;
+    try {
+      classification = JSON.parse(sanitizedJSON.trim());
+      console.log(`✅ JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
+    } catch (parseError) {
+      console.error('❌ JSON parsing failed after sanitization');
+      console.error('Sanitized JSON (first 500 chars):', sanitizedJSON.substring(0, 500));
+      console.error('Parse error:', parseError.message);
+      throw new Error(`Failed to parse JSON: ${parseError.message}`);
     }
 
     return {
