@@ -188,6 +188,15 @@ export default protectedApiHandler({
       // AI-generated recommendations
       recommendations: analysis.recommendations || [],
 
+      // Detailed analysis (NEW - rich insights from AI)
+      detailed_analysis: analysis.detailed_analysis || {
+        threshold_research: analysis.usmca?.threshold_reasoning || '',
+        calculation_breakdown: analysis.usmca?.reason || '',
+        qualification_reasoning: analysis.usmca?.reason || '',
+        strategic_insights: analysis.recommendations?.join('\n\n') || '',
+        savings_analysis: ''
+      },
+
       // Trust indicators
       trust: {
         ai_powered: true,
@@ -420,13 +429,21 @@ REQUIRED OUTPUT FORMAT (JSON):
     "monthly_savings": estimated number,
     "savings_percentage": estimated percentage,
     "mfn_rate": estimated rate,
-    "usmca_rate": 0
+    "usmca_rate": 0,
+    "potential_savings_if_qualified": number (if not qualified, what savings would be if they qualified)
   },
   "recommendations": [
     "specific recommendation 1",
     "specific recommendation 2",
     "specific recommendation 3"
   ],
+  "detailed_analysis": {
+    "threshold_research": "Detailed explanation of why this threshold applies (category, USMCA chapter, reasoning)",
+    "calculation_breakdown": "Step-by-step calculation showing how you arrived at the North American content percentage",
+    "qualification_reasoning": "Clear explanation of why they do or don't qualify, including the gap",
+    "strategic_insights": "Deeper strategic recommendations beyond the simple list - explain WHY these changes matter",
+    "savings_analysis": "Detailed tariff savings breakdown with MFN rates, USMCA rates, and dollar calculations"
+  },
   "confidence_score": 85
 }
 
