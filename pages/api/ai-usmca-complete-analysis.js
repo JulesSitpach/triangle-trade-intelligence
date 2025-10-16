@@ -73,23 +73,52 @@ export default protectedApiHandler({
     console.log(aiText);
     console.log('========== END RAW RESPONSE ==========');
 
-    // Parse AI response (expecting JSON)
+    // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
     try {
-      // Extract JSON from markdown code blocks if present
-      const jsonMatch = aiText.match(/```json\s*([\s\S]*?)\s*```/) || aiText.match(/```\s*([\s\S]*?)\s*```/);
-      let jsonText = jsonMatch ? jsonMatch[1] : aiText;
+      // Multi-strategy JSON extraction (same as classifyComponentHS and batch lookup)
+      let jsonString = null;
+      let extractionMethod = '';
 
-      // If parsing fails, try to extract just the JSON object (between first { and last })
-      if (!jsonMatch) {
-        const firstBrace = jsonText.indexOf('{');
-        const lastBrace = jsonText.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          jsonText = jsonText.substring(firstBrace, lastBrace + 1);                                     
+      // Strategy 1: Try direct extraction
+      if (aiText.trim().startsWith('{')) {
+        jsonString = aiText;
+        extractionMethod = 'direct';
+      }
+      // Strategy 2: Extract from markdown code blocks
+      else {
+        const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch) {
+          jsonString = codeBlockMatch[1];
+          extractionMethod = 'code_block';
+        }
+        // Strategy 3: Extract JSON object (between first { and last })
+        else {
+          const firstBrace = aiText.indexOf('{');
+          const lastBrace = aiText.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            jsonString = aiText.substring(firstBrace, lastBrace + 1);
+            extractionMethod = 'brace_matching';
+          }
         }
       }
 
-      analysis = JSON.parse(jsonText.trim());
+      if (!jsonString) {
+        console.error('❌ No JSON found in Results AI response');
+        console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
+        throw new Error('No JSON found in AI response');
+      }
+
+      // CRITICAL: Sanitize control characters BEFORE parsing
+      const sanitizedJSON = jsonString
+        .replace(/\r\n/g, ' ')  // Replace Windows line breaks with space
+        .replace(/\n/g, ' ')    // Replace Unix line breaks with space
+        .replace(/\r/g, ' ')    // Replace Mac line breaks with space
+        .replace(/\t/g, ' ')    // Replace tabs with space
+        .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove other control characters
+
+      analysis = JSON.parse(sanitizedJSON.trim());
+      console.log(`✅ Results JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
     } catch (parseError) {
       console.error('❌ Failed to parse AI response:', parseError);
       throw new Error(`AI response parsing failed: ${parseError.message}`);
