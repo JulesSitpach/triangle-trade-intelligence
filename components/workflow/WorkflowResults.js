@@ -311,7 +311,7 @@ export default function WorkflowResults({
     }, 1000);
   };
 
-  const handleSetUpAlerts = () => {
+  const handleSetUpAlerts = async () => {
     // Check if user has consented to save data
     const savedChoice = localStorage.getItem('save_data_consent');
     if (savedChoice !== 'save') {
@@ -336,7 +336,30 @@ export default function WorkflowResults({
     });
 
     // CRITICAL: Normalize all components to preserve enrichment data
-    const rawComponents = results.component_origins || results.components || [];
+    let rawComponents = results.component_origins || results.components || [];
+
+    // AUTOMATIC FIX: If components are empty or missing enrichment, fetch from database
+    if (rawComponents.length === 0 || !rawComponents[0]?.hs_code) {
+      console.log('⚠️ Components missing or not enriched - fetching from database...');
+      try {
+        const response = await fetch('/api/dashboard-data', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          const latestWorkflow = data.workflows?.[0];
+          if (latestWorkflow && latestWorkflow.component_origins) {
+            console.log('✅ Fetched enriched components from database:', latestWorkflow.component_origins.length);
+            rawComponents = latestWorkflow.component_origins;
+
+            // Update results object so future operations use enriched data
+            results.component_origins = rawComponents;
+            results.components = rawComponents;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch from database:', error);
+      }
+    }
+
     const normalizedComponents = rawComponents.map(c => normalizeComponent(c));
 
     // Validate enrichment is preserved
