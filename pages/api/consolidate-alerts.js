@@ -253,11 +253,12 @@ CRITICAL RULES:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-sonnet",
+        model: "anthropic/claude-sonnet-4.5", // Sonnet 4.5 for intelligent consolidation (user-facing)
         messages: [{
           role: "user",
           content: prompt
-        }]
+        }],
+        temperature: 0.3 // Slight creativity for professional consolidation while staying accurate
       })
     });
 

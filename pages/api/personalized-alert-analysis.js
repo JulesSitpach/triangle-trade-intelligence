@@ -154,11 +154,12 @@ IMPORTANT:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3-haiku",
+        model: "anthropic/claude-sonnet-4.5", // Sonnet 4.5 for professional alert summaries (user-facing)
         messages: [{
           role: "user",
           content: prompt
-        }]
+        }],
+        temperature: 0.3 // Slight creativity for professional writing while staying accurate
       })
     });
 
