@@ -1026,36 +1026,39 @@ ${policyContext}
 
 CRITICAL INSTRUCTIONS:
 - Return tariff rates for ALL ${components.length} components above
-- Use the HS code and origin country to determine rates
+- Use the EXACT HS code and origin country to determine rates
+- IMPORTANT: Use the COMPLETE HS code as the key (e.g., "8537.10.91", NOT "8537.10")
 - Apply policy adjustments based on origin country
-- Return a JSON object mapping HS codes to their rates
+- Return a JSON object mapping EXACT HS codes to their rates
 
-Return valid JSON in this EXACT format:
+Return valid JSON in this EXACT format (use FULL HS codes as keys):
 {
   "rates": {
-    "HS_CODE_1": {
+    "8542.31.00": {
       "mfn_rate": 0.0,
       "usmca_rate": 0.0,
       "policy_adjustments": []
     },
-    "HS_CODE_2": {
-      "mfn_rate": 0.0,
+    "8537.10.91": {
+      "mfn_rate": 2.7,
       "usmca_rate": 0.0,
       "policy_adjustments": []
     }
   }
 }
 
-EXAMPLE for China microcontrollers (HS 8542.31):
+EXAMPLE for China microcontrollers (HS 8542.31.00) - use FULL code:
 {
   "rates": {
-    "8542.31": {
+    "8542.31.00": {
       "mfn_rate": 103.0,
       "usmca_rate": 0.0,
       "policy_adjustments": ["Section 301 China +100%", "Port fees +3%"]
     }
   }
-}`;
+}
+
+CRITICAL: The HS code keys MUST EXACTLY match the HS codes in the components list above!`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -1129,6 +1132,13 @@ EXAMPLE for China microcontrollers (HS 8542.31):
       console.error('Parse error:', parseError.message);
       return {};
     }
+
+    // Log the HS codes returned by AI to verify they match input codes
+    const returnedCodes = Object.keys(batchResult.rates || {});
+    const requestedCodes = components.map(c => c.hs_code || c.classified_hs_code);
+    console.log(`🔍 Batch lookup: Requested ${requestedCodes.length} codes, AI returned ${returnedCodes.length} codes`);
+    console.log(`   Requested: [${requestedCodes.join(', ')}]`);
+    console.log(`   Returned:  [${returnedCodes.join(', ')}]`);
 
     // Return the rates object (HS code → rates mapping)
     return batchResult.rates || {};
