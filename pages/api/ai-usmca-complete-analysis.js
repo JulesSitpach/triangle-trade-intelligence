@@ -691,18 +691,51 @@ async function classifyComponentHS(componentDescription, businessContext, compon
     // Build dynamic policy context from database
     const policyContext = await buildDynamicPolicyContext(component.origin_country);
 
-    const classificationPrompt = `You are an HS code classification expert. Classify THIS COMPONENT ONLY based on what it is, not what it's used in.
+    const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience. Use COMPLETE business context for accurate classification.
 
-COMPONENT TO CLASSIFY:
-Component: "${componentDescription}"
-Origin: ${component.origin_country}
-Used in: ${context.product_description}
+===== COMPLETE BUSINESS CONTEXT =====
+Company: ${context.company_name || 'Not specified'}
+Business Type: ${context.business_type || context.business_role || 'Not specified'}
+Industry Sector: ${context.industry_sector || context.industry || 'Not specified'}
+Trade Volume: ${context.trade_volume || 'Not specified'}
+End Use: ${context.end_use || 'commercial'}
+
+FINAL PRODUCT:
+Product: ${context.product_description}
+Manufacturing Location: ${context.manufacturing_location || 'Not specified'}
+
+===== COMPONENT TO CLASSIFY =====
+Component Description: "${componentDescription}"
+Component Origin: ${component.origin_country}
+Component Value: ${component.value_percentage}% of total product value
+Role in Final Product: Part of ${context.product_description}
 
 ${policyContext}
 
-CLASSIFICATION RULES:
-1. Classify the COMPONENT itself (e.g., "Circuit Board Assembly" → PCB codes, NOT control panel codes)
-2. Component origin: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'US/MX/CA (DOMESTIC - no import tariffs)' : component.origin_country + ' (IMPORTED - apply policy adjustments)'}
+CLASSIFICATION RULES (USE FULL CONTEXT):
+1. **Use business context**: Industry sector determines HS code selection (e.g., electronics vs automotive)
+2. **Consider end-use**: Same component has different codes based on final product application
+3. **Product integration**: "Circuit Board Assembly" in computer equipment = 8473.30, in control panels = 8537.10
+4. Component origin: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'US/MX/CA (DOMESTIC - no import tariffs)' : component.origin_country + ' (IMPORTED - apply policy adjustments)'}
+
+CONTEXT-AWARE CLASSIFICATION EXAMPLES:
+Example 1: "Microcontrollers" for "Industrial Control Panel"
+- Industry: Industrial Equipment → Use 8537.10.90 (control panel parts)
+- NOT 8542.31 (standalone processors) because they're integrated into control systems
+
+Example 2: "Microcontrollers" for "Gaming Console" or "Computer Equipment"
+- Industry: Electronics/Technology → Use 8542.31 (processors and controllers)
+- NOT 8537 (control panels) because gaming/computers use different classification
+
+Example 3: "Circuit Board Assembly" for "Manufacturing Equipment"
+- Industry: Machinery → Use 8537.10.90 (assembled control boards for industrial use)
+- NOT 8534.00 (bare PCBs) because it's assembled, not bare
+
+Example 4: "Circuit Board Assembly" for "Consumer Electronics"
+- Industry: Electronics → Use 8473.30.51 (parts for computer/electronics)
+- NOT 8537 (industrial control) because it's consumer electronics context
+
+YOUR TASK: Classify "${componentDescription}" considering it's used in "${context.product_description}" within ${context.industry_sector || context.industry || 'general'} industry.
 
 TARIFF CALCULATION (CRITICAL):
 ${['US', 'MX', 'CA'].includes(component.origin_country) ?
@@ -738,8 +771,8 @@ Return ONLY valid JSON (no markdown, no extra text):
   "policy_adjustments": [],
   "confidence": 85,
   "last_updated": "2025-10-15",
-  "reasoning": "Brief explanation of classification and tariff rates",
-  "alternative_codes": []
+  "reasoning": "MUST explain: (1) Why this HS code based on industry/end-use context, (2) How business context influenced classification, (3) Tariff calculation logic including any policy adjustments",
+  "alternative_codes": ["List other possible codes that were considered but rejected"]
 }`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
