@@ -713,166 +713,36 @@ async function classifyComponentHS(componentDescription, businessContext, compon
     // Build dynamic policy context from database
     const policyContext = await buildDynamicPolicyContext(component.origin_country);
 
-    const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience in international trade, USMCA compliance, and tariff analysis. You have deep knowledge of the Harmonized Tariff Schedule and trade agreements.
-
-===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
-
-COMPANY & INDUSTRY:
-- Company: ${context.company_name || 'Not specified'}
-- Business Type: ${context.business_type || 'Not specified'}
-- Industry Sector: ${context.industry || extractIndustryFromBusinessType(context.business_type) || 'Not specified'}
-- Manufacturing Location: ${context.manufacturing_location || 'Not specified'}
-- Trade Volume: ${context.trade_volume || 'Not specified'}
-
-END PRODUCT APPLICATION:
-- Product Description: ${context.product_description}
-- End Use: ${context.end_use || 'Commercial/Industrial'}
-- Target Market: ${context.target_market || 'North America'}
+    const classificationPrompt = `You are an HS code classification expert. Classify THIS COMPONENT ONLY based on what it is, not what it's used in.
 
 COMPONENT TO CLASSIFY:
-- Component Description: "${componentDescription}"
-- Origin Country: ${component.origin_country}
-- Value Percentage: ${component.value_percentage}% of total product value
-- USMCA Member Source: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES' : 'NO'}
+Component: "${componentDescription}"
+Origin: ${component.origin_country}
+Used in: ${context.product_description}
 
 ${policyContext}
 
-===== 🚨 CRITICAL: 2025 TRUMP TARIFF LANDSCAPE (EXTREMELY VOLATILE) =====
+CLASSIFICATION RULES:
+1. Classify the COMPONENT itself (e.g., "Circuit Board Assembly" → PCB codes, NOT control panel codes)
+2. Component origin: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'US/MX/CA (DOMESTIC - no import tariffs)' : component.origin_country + ' (IMPORTED - apply policy adjustments)'}
 
-CURRENT SITUATION (October 2025):
-⚠️ Trump administration changing tariffs WEEKLY on ALL countries - not just China!
-⚠️ Recent changes: Canada, Mexico, China, EU - all affected
-⚠️ Port fees increased, Chinese shipping surcharges added
-⚠️ Threatened additional tariffs up to +100% could hit at any time
+TARIFF RATES:
+- If US/MX/CA origin: Use base HTS rate only, NO Section 301/232, policy_adjustments = []
+- If imported (non-USMCA): Apply Section 301/232 if applicable, include policy_adjustments
 
-🚫 CRITICAL: DOMESTIC VS IMPORTED COMPONENTS
-Component origin: "${component.origin_country}"
-USMCA Member: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES - DOMESTIC' : 'NO - IMPORTED'}
-
-IF ORIGIN = US/MX/CA (USMCA MEMBERS):
-✅ These are DOMESTIC components within North America
-✅ NO Section 301 Chinese tariffs (those only apply to Chinese imports!)
-✅ NO port fees or shipping surcharges (not imported from overseas!)
-✅ Use ONLY the base HTS tariff rate (typically 0-2.5% for domestic goods)
-✅ mfn_rate = base_mfn_rate (NO policy adjustments)
-✅ policy_adjustments = [] (empty array - domestic sourcing)
-
-IF ORIGIN = CHINA OR OTHER NON-USMCA:
-⚠️ These are IMPORTED components from overseas
-⚠️ Apply Section 301/232 tariffs if applicable
-⚠️ Apply port fees and shipping surcharges
-⚠️ mfn_rate = base_mfn_rate + all policy adjustments
-
-YOUR TASK - APPLY CURRENT 2025 TARIFF KNOWLEDGE:
-For origin_country "${component.origin_country}":
-
-1. First check: Is this US/MX/CA? If YES → DOMESTIC (no import tariffs!)
-2. If DOMESTIC: Use only base HTS rate, NO Section 301, NO port fees
-3. If IMPORTED (non-USMCA): Check recent tariff changes from Trump administration
-4. For IMPORTED components, include applicable tariffs:
-   - Base MFN rate from HTS
-   - Section 232 (steel/aluminum from imports)
-   - Section 301 (China tech/strategic goods: typically +25-100%)
-   - Country-specific tariffs (if Trump added new ones)
-   - Port fees and shipping surcharges (China/Asia imports)
-
-5. Report the EFFECTIVE TOTAL RATE in mfn_rate field
-6. List all adjustments in policy_adjustments array (empty if domestic)
-
-EXAMPLES (CORRECT FORMAT - October 2025):
-
-DOMESTIC COMPONENTS (US/MX/CA):
-- HS 8537.10.80 Control panels from US:
-  - Base MFN: 2.7%
-  - NO Section 301 (domestic, not imported!)
-  - NO port fees (domestic sourcing)
-  - mfn_rate: 2.7 (ONLY base rate)
-  - policy_adjustments: [] (empty - domestic)
-  - usmca_rate: 0.0 (qualifies for USMCA)
-
-- HS 8708.30.50 Brake parts from MX:
-  - Base MFN: 2.5%
-  - NO import tariffs (USMCA domestic)
-  - mfn_rate: 2.5 (ONLY base rate)
-  - policy_adjustments: [] (empty - domestic)
-  - usmca_rate: 0.0 (qualifies for USMCA)
-
-IMPORTED COMPONENTS (NON-USMCA):
-- HS 8542.31.00 Microcontrollers from CN:
-  - Base MFN: 0%
-  - Section 301: +25%
-  - Chinese port fees: +3% estimated
-  - mfn_rate: 28.0 (base + adjustments)
-  - policy_adjustments: ["Section 301 China +25%", "Port surcharge ~3%"]
-
-- HS 7208.52.00 Steel from EU:
-  - Base MFN: 0%
-  - Section 232 steel: +25% (if no exemption)
-  - mfn_rate: 25.0 (base + adjustment)
-  - policy_adjustments: ["Section 232 steel tariff +25%"]
-
-🚫 CRITICAL RULES:
-- US/MX/CA components: NEVER apply Section 301/232 or port fees (domestic!)
-- Imported components: Apply Section 301/232 if applicable
-- NEVER use 0% for imported goods with known tariffs
-✅ ALWAYS check if component is domestic (US/MX/CA) FIRST
-✅ When in doubt about import tariffs, estimate conservatively
-
-For US/MX/CA with USMCA qualification: usmca_rate = 0% (duty-free)
-For non-USMCA: usmca_rate = 0% (field not applicable, they pay mfn_rate)
-
-===== YOUR EXPERT TASK =====
-Provide the MOST ACCURATE classification for this component with complete tariff intelligence:
-
-1. **HS Code Classification**:
-   - **CRITICAL**: Use the END PRODUCT CONTEXT to inform component chemistry/specification
-   - Consider how this component FUNCTIONS within the ${context.product_description}
-   - Consider the INDUSTRY requirements (${context.business_type || 'industrial'} applications)
-   - Use the END USE to guide material specifications (e.g., marine = corrosion-resistant, automotive = high-performance)
-   - Example: "Polymer resins" for "marine coating" = epoxy/polyurethane (NOT urea resins for wood/furniture)
-   - Example: "Additives" for "industrial coating" = general mixed preparations (NOT hyper-specific catalysts unless description indicates)
-   - Avoid generic "parts" classifications when product context suggests specific chemistry
-
-2. **Tariff Rate Analysis**:
-   - MFN Rate: Standard Most Favored Nation tariff rate (percentage)
-   - USMCA Rate: Preferential rate under USMCA treaty (typically 0% for qualifying goods from US/MX/CA)
-   - Consider the actual tariff schedule for this specific product category
-
-3. **Confidence Assessment**:
-   - Rate your confidence based on description clarity and classification complexity
-   - High confidence (90-100%): Clear, unambiguous classification
-   - Medium confidence (75-89%): Some interpretation needed
-   - Low confidence (50-74%): Multiple possible classifications
-
-4. **Expert Reasoning**:
-   - Explain WHY this HS code is correct
-   - Note any alternative classifications considered
-   - Mention relevant USMCA rules or special considerations
-
-Return ONLY a JSON object in this exact format (no other text):
+Return ONLY valid JSON (no markdown, no extra text):
 {
   "hs_code": "XXXX.XX",
-  "base_mfn_rate": 5.0,
-  "policy_adjusted_mfn_rate": 105.0,
-  "mfn_rate": 105.0,
+  "base_mfn_rate": 0.0,
+  "policy_adjusted_mfn_rate": 0.0,
+  "mfn_rate": 0.0,
   "usmca_rate": 0.0,
-  "policy_adjustments": [
-    "Section 301 China +100%: 5.0% → 105.0%",
-    "Port fee estimate: +3% on landed cost"
-  ],
+  "policy_adjustments": [],
   "confidence": 85,
   "last_updated": "2025-10-15",
-  "reasoning": "Detailed expert reasoning explaining classification, current tariff rates with policy adjustments, and any special considerations for USMCA qualification",
-  "alternative_codes": [
-    {
-      "code": "XXXX.XX",
-      "confidence": 75,
-      "reason": "When to use this alternative code instead"
-    }
-  ]
-}
-
-CRITICAL: Be precise and accurate. Apply current 2025 policy adjustments. This data will be used for compliance decisions and saved to build our database.`;
+  "reasoning": "Brief explanation of classification and tariff rates",
+  "alternative_codes": []
+}`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
