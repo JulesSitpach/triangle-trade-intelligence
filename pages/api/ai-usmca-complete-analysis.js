@@ -8,7 +8,6 @@
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
-import { lookupHTSTariffRates } from '../../lib/tariff/hts-lookup.js';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 
 const supabase = createClient(
@@ -318,29 +317,17 @@ function buildComprehensiveUSMCAPrompt(formData) {
     .map((c, i) => `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}`)
     .join('\n');
 
-  const prompt = `You are a senior USMCA trade compliance expert with 20+ years of experience in North American trade, customs regulations, and supply chain optimization. You have deep expertise in USMCA treaty requirements, HTS classification, and tariff analysis.
+  const prompt = `You are a senior USMCA trade compliance expert. Determine if this product qualifies for USMCA based on its component origins.
 
-===== COMPLETE COMPANY INTELLIGENCE =====
-Company Name: ${formData.company_name}
-Business Type: ${formData.business_type}
-Annual Trade Volume: ${formData.trade_volume || 'Not specified'}
-
-Supply Chain Details:
-- Primary Supplier Country: ${formData.primary_supplier_country || formData.supplier_country || 'Not specified'}
-- Manufacturing/Assembly Location: ${formData.manufacturing_location || 'Not specified'}
-- Export Destination: ${formData.export_destination || formData.destination_country || 'United States'}
-
-${formData.company_address ? `Company Location: ${formData.company_address}` : ''}
-${formData.tax_id ? `Tax ID: ${formData.tax_id}` : ''}
-
-Business Context:
-- This analysis is for ${formData.business_type} operations
-- Trade volume indicates ${formData.trade_volume ? 'established' : 'new/growing'} import/export activity
-- ${['US', 'MX', 'CA'].includes(formData.manufacturing_location) ? 'Manufacturing is already in USMCA region' : 'Manufacturing is outside USMCA region'}
-
-===== PRODUCT DETAILS =====
+===== PRODUCT ANALYSIS =====
 Product: ${formData.product_description}
-Industry Sector: ${formData.industry_sector || 'Not specified'}
+Industry Sector: ${formData.industry_sector}
+Manufacturing Location: ${formData.manufacturing_location || 'Not specified'}
+
+Supply Chain Flow:
+- Primary Supplier Country: ${formData.supplier_country || 'Not specified'}
+- Export Destination: ${formData.destination_country || 'Not specified'}
+- Annual Trade Volume: ${formData.trade_volume || 'Not specified'}
 
 ===== COMPONENT BREAKDOWN =====
 ${componentBreakdown}
@@ -463,113 +450,90 @@ Perform the analysis now:`;
  * @returns {Array} Enriched components with tariff intelligence
  */
 async function enrichComponentsWithTariffIntelligence(components, businessContext) {
-  // Extract product description for backward compatibility
   const productContext = typeof businessContext === 'string' ? businessContext : businessContext.product_description;
-
-  // PROGRESSIVE CONTEXT STRATEGY: Classify components sequentially so each component knows about previous ones
-  // This provides MAXIMUM context for accurate HS code selection
-  // Example: Component 2 (Circuit Board) sees that Component 1 (Microcontrollers 8542.31) was already classified
-  // Result: AI knows "Circuit board houses 8542.31 processors" → More accurate classification
-  console.log(`🔗 Sequential enrichment with progressive context for ${components.length} components...`);
-
-  // SEQUENTIAL processing with progressive context (not parallel)
-  const enrichedComponents = [];
   const usmcaCountries = ['US', 'MX', 'CA'];
 
-  for (let i = 0; i < components.length; i++) {
-    const component = components[i];
+  console.log(`📦 Batch enrichment for ${components.length} components...`);
 
+  // Separate components into those with/without tariff rates
+  const componentsNeedingRates = components.filter(c => {
+    const hasHsCode = c.hs_code || c.classified_hs_code;
+    const hasTariffRates = c.mfn_rate !== undefined && c.mfn_rate !== null && c.mfn_rate !== 'Not available';
+    return hasHsCode && !hasTariffRates;
+  });
+
+  console.log(`   ${componentsNeedingRates.length} components need tariff rates`);
+  console.log(`   ${components.length - componentsNeedingRates.length} components already have rates or missing HS codes`);
+
+  // Batch fetch tariff rates for all components needing them in ONE AI call
+  let batchRates = {};
+  if (componentsNeedingRates.length > 0) {
+    console.log(`🔍 Fetching ALL tariff rates in single AI call...`);
+    batchRates = await lookupBatchTariffRates(componentsNeedingRates);
+    console.log(`✅ Batch rates fetched for ${Object.keys(batchRates).length} components`);
+  }
+
+  // Enrich all components with tariff intelligence
+  const enrichedComponents = components.map((component, index) => {
     try {
       const enriched = { ...component };
 
-      // Step 1: AI Classification with progressive context from previously classified components
-      // CRITICAL: Always use AI for non-USMCA countries - Trump changing tariffs WEEKLY
-      // Database rates are stale (Jan 2025) - don't include 2025 Trump policy changes
-      const isNonUSMCA = !usmcaCountries.includes(component.origin_country);
-      const needsAIClassification = !component.hs_code || !component.classified_hs_code || isNonUSMCA;
+      // Case 1: No HS code at all
+      if (!component.hs_code && !component.classified_hs_code) {
+        console.warn(`⚠️ Component "${component.description}" missing HS code`);
+        enriched.hs_code = '';
+        enriched.confidence = 0;
+        enriched.mfn_rate = 0;
+        enriched.usmca_rate = 0;
+        enriched.savings_percent = 0;
+        enriched.rate_source = 'missing';
+        enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
+        return enriched;
+      }
 
-      if (needsAIClassification) {
-        console.log(`📋 AI Classifying component ${i + 1}/${components.length}: "${component.description}" from ${component.origin_country} (with context from ${enrichedComponents.length} previous components)`);
+      // Case 2: Has HS code - process tariff rates
+      enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
+      enriched.hs_code = component.hs_code || component.classified_hs_code;
+      enriched.confidence = component.confidence || 100;
+      enriched.hs_description = component.hs_description || component.description || 'AI classification';
 
-        // Pass previously enriched components for relationship context
-        const classificationResult = await classifyComponentHS(
-          component.description,
-          businessContext,
-          component,
-          enrichedComponents  // NEW: Previously classified components
-        );
+      // Check if component already has tariff rates
+      const hasTariffRates = component.mfn_rate !== undefined && component.mfn_rate !== null && component.mfn_rate !== 'Not available';
 
-        if (classificationResult.success) {
-          // AI classified the HS code
-          enriched.classified_hs_code = classificationResult.hs_code;
-          enriched.hs_code = classificationResult.hs_code;
-          enriched.confidence = classificationResult.confidence;
-          enriched.ai_reasoning = classificationResult.reasoning; // Store AI reasoning for UI display
-          enriched.alternative_codes = classificationResult.alternative_codes || []; // Store alternative codes if provided
-
-          // Step 2: Use AI-provided rates (PRIMARY - includes 2025 policy adjustments)
-          enriched.mfn_rate = classificationResult.mfn_rate;
-          enriched.base_mfn_rate = classificationResult.base_mfn_rate || classificationResult.mfn_rate;
-          enriched.policy_adjusted_mfn_rate = classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate;
-          enriched.usmca_rate = classificationResult.usmca_rate;
-          enriched.policy_adjustments = classificationResult.policy_adjustments || [];
-          enriched.tariff_rates = {
-            mfn_rate: classificationResult.mfn_rate,
-            usmca_rate: classificationResult.usmca_rate,
-            policy_adjusted: classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate
-          };
-          enriched.savings_percent = classificationResult.mfn_rate - classificationResult.usmca_rate;
-          enriched.rate_source = 'ai_current_2025'; // AI with 2025 policy context
-          enriched.last_updated = classificationResult.last_updated || new Date().toISOString().split('T')[0];
-
-          console.log(`✅ AI Classification with 2025 Policy: "${component.description}" → HS ${classificationResult.hs_code}`);
-          console.log(`   💰 Base MFN: ${enriched.base_mfn_rate}% | Adjusted: ${enriched.policy_adjusted_mfn_rate}% | USMCA: ${classificationResult.usmca_rate}%`);
-          if (enriched.policy_adjustments.length > 0) {
-            console.log(`   📊 Policy Adjustments: ${enriched.policy_adjustments.join(', ')}`);
-          }
-          console.log(`   🎯 AI Confidence: ${classificationResult.confidence}%`);
+      if (hasTariffRates) {
+        // Use existing tariff rates
+        const mfnStr = String(component.mfn_rate).replace('%', '');
+        const usmcaStr = String(component.usmca_rate).replace('%', '');
+        enriched.mfn_rate = parseFloat(mfnStr) || 0;
+        enriched.usmca_rate = parseFloat(usmcaStr) || 0;
+        enriched.rate_source = 'existing';
+        console.log(`   ✅ Component ${index + 1}: Using existing rates (MFN ${enriched.mfn_rate}%)`);
+      } else {
+        // Get rates from batch lookup
+        const rates = batchRates[enriched.hs_code];
+        if (rates) {
+          enriched.mfn_rate = rates.mfn_rate || 0;
+          enriched.usmca_rate = rates.usmca_rate || 0;
+          enriched.rate_source = 'batch_lookup';
+          console.log(`   ✅ Component ${index + 1}: Batch rates applied (MFN ${enriched.mfn_rate}%)`);
         } else {
-          console.log(`⚠️ AI Classification failed for "${component.description}"`);
-          enriched.confidence = 0;
+          // Batch lookup failed or didn't return this HS code
           enriched.mfn_rate = 0;
           enriched.usmca_rate = 0;
-          enriched.savings_percent = 0;
-          enriched.rate_source = 'unavailable';
-        }
-      } else {
-        // Use existing HS code (user-provided)
-        enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
-        enriched.hs_code = component.hs_code || component.classified_hs_code;
-        enriched.confidence = component.confidence || 100;
-
-        // Try database lookup for user-provided HS code
-        const htsLookup = await lookupHTSTariffRates(enriched.hs_code);
-        if (htsLookup.success) {
-          enriched.mfn_rate = htsLookup.mfn_rate;
-          enriched.usmca_rate = htsLookup.usmca_rate;
-          enriched.savings_percent = htsLookup.mfn_rate - htsLookup.usmca_rate;
-          enriched.rate_source = 'official_hts_2025';
-          enriched.hs_description = htsLookup.description;
-          enriched.last_updated = htsLookup.last_updated;
-        } else {
-          // Fallback to component values
-          enriched.mfn_rate = component.mfn_rate || 0;
-          enriched.usmca_rate = component.usmca_rate || 0;
-          enriched.savings_percent = (component.mfn_rate || 0) - (component.usmca_rate || 0);
-          enriched.rate_source = 'user_provided';
+          enriched.rate_source = 'lookup_failed';
+          console.log(`   ❌ Component ${index + 1}: No rates in batch response`);
         }
       }
 
-      // Step 2: Determine USMCA member status
+      enriched.savings_percent = enriched.mfn_rate - enriched.usmca_rate;
+      enriched.last_updated = component.last_updated || new Date().toISOString().split('T')[0];
       enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
 
-      // Add to enriched components array for next component's context
-      enrichedComponents.push(enriched);
+      return enriched;
 
     } catch (error) {
       console.error(`❌ Error enriching component "${component.description}":`, error);
-      // Add basic component to array even if enrichment fails
-      const basicEnriched = {
+      return {
         ...component,
         confidence: 0,
         mfn_rate: 0,
@@ -577,12 +541,10 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         savings_percent: 0,
         is_usmca_member: usmcaCountries.includes(component.origin_country)
       };
-      enrichedComponents.push(basicEnriched);
     }
-  }
+  });
 
-  console.log(`✅ Sequential enrichment complete: ${enrichedComponents.length} components classified with progressive context`);
-
+  console.log(`✅ Batch enrichment complete: ${enrichedComponents.length} components processed`);
   return enrichedComponents;
 }
 
@@ -902,6 +864,201 @@ Return ONLY valid JSON (no markdown, no extra text):
       success: false,
       error: error.message
     };
+  }
+}
+
+/**
+ * Lookup ONLY tariff rates for a given HS code (NO HS code classification)
+ * This is called when component already has HS code but rates are missing
+ * @param {string} hsCode - HS code to lookup rates for
+ * @param {string} originCountry - Component origin country for policy adjustments
+ * @returns {Object} Tariff rates only
+ */
+async function lookupTariffRatesOnly(hsCode, originCountry) {
+  try {
+    const policyContext = await buildDynamicPolicyContext(originCountry);
+
+    const ratesPrompt = `You are a tariff rate specialist. Lookup ONLY the tariff rates for this HS code.
+
+HS CODE: ${hsCode}
+ORIGIN COUNTRY: ${originCountry}
+
+${policyContext}
+
+CRITICAL: Return ONLY tariff rates, NOT HS code classification.
+
+Return valid JSON:
+{
+  "mfn_rate": 0.0,
+  "base_mfn_rate": 0.0,
+  "policy_adjusted_mfn_rate": 0.0,
+  "usmca_rate": 0.0,
+  "policy_adjustments": [],
+  "last_updated": "2025-10-15"
+}`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-3-haiku',
+        messages: [{ role: 'user', content: ratesPrompt }],
+        temperature: 0
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const aiText = result.choices?.[0]?.message?.content;
+
+    // Extract JSON (same logic as classifyComponentHS)
+    let jsonString = aiText.trim().startsWith('{') ? aiText : null;
+    if (!jsonString) {
+      const match = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match) {
+        jsonString = match[1];
+      } else {
+        const firstBrace = aiText.indexOf('{');
+        const lastBrace = aiText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          jsonString = aiText.substring(firstBrace, lastBrace + 1);
+        }
+      }
+    }
+
+    if (!jsonString) {
+      throw new Error('No JSON in AI response');
+    }
+
+    const rates = JSON.parse(jsonString.trim());
+
+    return {
+      success: true,
+      mfn_rate: rates.mfn_rate || 0,
+      usmca_rate: rates.usmca_rate || 0,
+      base_mfn_rate: rates.base_mfn_rate || rates.mfn_rate || 0,
+      policy_adjusted_mfn_rate: rates.policy_adjusted_mfn_rate || rates.mfn_rate || 0,
+      policy_adjustments: rates.policy_adjustments || [],
+      last_updated: rates.last_updated || new Date().toISOString().split('T')[0]
+    };
+  } catch (error) {
+    console.error('Tariff rates lookup failed:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Batch lookup tariff rates for multiple HS codes in a SINGLE AI call
+ * This is MUCH more efficient than sequential lookupTariffRatesOnly() calls
+ * @param {Array} components - Array of components with HS codes
+ * @returns {Object} Map of HS code → tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
+ */
+async function lookupBatchTariffRates(components) {
+  try {
+    // Build list of HS codes with origin countries
+    const componentList = components.map((c, idx) => {
+      const hsCode = c.hs_code || c.classified_hs_code;
+      return `${idx + 1}. HS Code: ${hsCode} | Origin: ${c.origin_country} | Description: "${c.description}"`;
+    }).join('\n');
+
+    // Get policy context for first component's origin (or could loop through unique origins)
+    const uniqueOrigins = [...new Set(components.map(c => c.origin_country))];
+    const policyContext = await buildDynamicPolicyContext(uniqueOrigins[0]);
+
+    const batchPrompt = `You are a tariff rate specialist. Lookup tariff rates for ALL components below in a SINGLE response.
+
+===== COMPONENTS TO LOOKUP (${components.length} total) =====
+${componentList}
+
+${policyContext}
+
+CRITICAL INSTRUCTIONS:
+- Return tariff rates for ALL ${components.length} components above
+- Use the HS code and origin country to determine rates
+- Apply policy adjustments based on origin country
+- Return a JSON object mapping HS codes to their rates
+
+Return valid JSON in this EXACT format:
+{
+  "rates": {
+    "HS_CODE_1": {
+      "mfn_rate": 0.0,
+      "usmca_rate": 0.0,
+      "policy_adjustments": []
+    },
+    "HS_CODE_2": {
+      "mfn_rate": 0.0,
+      "usmca_rate": 0.0,
+      "policy_adjustments": []
+    }
+  }
+}
+
+EXAMPLE for China microcontrollers (HS 8542.31):
+{
+  "rates": {
+    "8542.31": {
+      "mfn_rate": 103.0,
+      "usmca_rate": 0.0,
+      "policy_adjustments": ["Section 301 China +100%", "Port fees +3%"]
+    }
+  }
+}`;
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-3-haiku',
+        messages: [{ role: 'user', content: batchPrompt }],
+        temperature: 0
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenRouter API failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const aiText = result.choices?.[0]?.message?.content;
+
+    // Extract JSON (same logic as other functions)
+    let jsonString = aiText.trim().startsWith('{') ? aiText : null;
+    if (!jsonString) {
+      const match = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (match) {
+        jsonString = match[1];
+      } else {
+        const firstBrace = aiText.indexOf('{');
+        const lastBrace = aiText.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          jsonString = aiText.substring(firstBrace, lastBrace + 1);
+        }
+      }
+    }
+
+    if (!jsonString) {
+      console.error('❌ No JSON in batch tariff lookup response');
+      return {};
+    }
+
+    const batchResult = JSON.parse(jsonString.trim());
+
+    // Return the rates object (HS code → rates mapping)
+    return batchResult.rates || {};
+
+  } catch (error) {
+    console.error('❌ Batch tariff rates lookup failed:', error);
+    return {};
   }
 }
 
