@@ -358,14 +358,18 @@ export function useWorkflowState() {
           product: workflowResult.product,
           usmca: workflowResult.usmca,
           trust: workflowResult.trust,
-          components: formData.component_origins,
+          // CRITICAL FIX: Use ENRICHED components from API, not original formData
+          component_origins: workflowResult.component_origins || workflowResult.components || formData.component_origins,
+          components: workflowResult.component_origins || workflowResult.components || formData.component_origins,
           timestamp: Date.now()
         };
 
         localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
-        console.log('✅ Workflow data saved to localStorage for certificate page', {
+        console.log('✅ Workflow data saved to localStorage with ENRICHED components:', {
           has_company_country: !!workflowData.company.company_country,
-          has_certifier_type: !!workflowData.company.certifier_type
+          has_certifier_type: !!workflowData.company.certifier_type,
+          enriched_components_count: workflowData.component_origins?.length,
+          has_enrichment: workflowData.component_origins?.[0]?.hs_code ? true : false
         });
 
         setCurrentStep(5); // Results step (updated for 5-step workflow)
