@@ -475,8 +475,15 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
       const enriched = { ...component };
 
       // Step 1: AI Classification (using complete business context)
-      if (!component.hs_code && !component.classified_hs_code) {
-        console.log(`📋 AI Classifying component: "${component.description}"`);
+      // CRITICAL: Always use AI for non-USMCA countries - Trump changing tariffs WEEKLY
+      // Database rates are stale (Jan 2025) - don't include 2025 Trump policy changes
+      const usmcaCountries = ['US', 'MX', 'CA'];
+      const isNonUSMCA = !usmcaCountries.includes(component.origin_country);
+      const needsAIClassification = !component.hs_code || !component.classified_hs_code || isNonUSMCA;
+
+      if (needsAIClassification) {
+        console.log(`📋 AI Classifying component: "${component.description}" from ${component.origin_country} (volatile tariffs)`);
+
 
         const classificationResult = await classifyComponentHS(component.description, businessContext, component);
 
