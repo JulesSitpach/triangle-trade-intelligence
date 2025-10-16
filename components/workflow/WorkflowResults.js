@@ -15,6 +15,7 @@ import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
+import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 
 export default function WorkflowResults({
   results,
@@ -141,6 +142,16 @@ export default function WorkflowResults({
     if (shouldSave) {
       console.log('✅ User chose to SAVE data for alerts and services');
       console.log('📊 Saving workflow to database...');
+      // CRITICAL: Normalize all components to preserve enrichment data
+      const rawComponents = results.component_origins || results.components || [];
+      const normalizedComponents = rawComponents.map(c => normalizeComponent(c));
+
+      // Validate enrichment is preserved
+      const validation = logComponentValidation(normalizedComponents, 'WorkflowResults Save');
+      if (validation.invalid > 0) {
+        console.error(`❌ DATA LOSS: ${validation.invalid} components missing enrichment when saving to localStorage!`);
+      }
+
       // If user chose to save, prepare data for alerts
       const alertData = {
         company: {
@@ -163,8 +174,8 @@ export default function WorkflowResults({
           threshold_applied: results.usmca?.threshold_applied,
           gap: results.usmca?.gap || 0
         },
-        component_origins: results.component_origins || results.components || [],
-        components: results.component_origins || results.components || [],
+        component_origins: normalizedComponents, // CRITICAL: Use normalized components with ALL fields
+        components: normalizedComponents,        // CRITICAL: Use normalized components with ALL fields
         savings: {
           total_savings: results.savings?.annual_savings || 0,
           annual_savings: results.savings?.annual_savings || 0
@@ -324,6 +335,16 @@ export default function WorkflowResults({
       component_origins_data: results.component_origins || results.components
     });
 
+    // CRITICAL: Normalize all components to preserve enrichment data
+    const rawComponents = results.component_origins || results.components || [];
+    const normalizedComponents = rawComponents.map(c => normalizeComponent(c));
+
+    // Validate enrichment is preserved
+    const validation = logComponentValidation(normalizedComponents, 'Alerts Setup');
+    if (validation.invalid > 0) {
+      console.error(`❌ DATA LOSS: ${validation.invalid} components missing enrichment for alerts!`);
+    }
+
     // Prepare complete workflow data for AI vulnerability analysis
     const alertData = {
       company: {
@@ -346,8 +367,8 @@ export default function WorkflowResults({
         threshold_applied: results.usmca?.threshold_applied,
         gap: results.usmca?.gap || 0
       },
-      component_origins: results.component_origins || results.components || [],
-      components: results.component_origins || results.components || [],
+      component_origins: normalizedComponents, // CRITICAL: Use normalized components
+      components: normalizedComponents,        // CRITICAL: Use normalized components
       savings: {
         total_savings: results.savings?.annual_savings || 0,
         annual_savings: results.savings?.annual_savings || 0

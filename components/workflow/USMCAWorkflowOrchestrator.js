@@ -566,10 +566,11 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                 }
               }}
               certificateData={{
+                certifier_type: formData.certifier_type || 'EXPORTER',  // Pass certifier_type from Step 1
                 company_info: {
                   exporter_name: formData.company_name,
                   exporter_address: formData.company_address,
-                  exporter_country: formData.supplier_country,
+                  exporter_country: formData.company_country,  // FIXED: Use company's country, not supplier country
                   exporter_tax_id: formData.tax_id,
                   importer_name: formData.importer_name,
                   importer_address: formData.importer_address,
@@ -687,10 +688,11 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                 }
               }}
               certificateData={{
+                certifier_type: formData.certifier_type || 'EXPORTER',  // Pass certifier_type from Step 1
                 company_info: {
                   exporter_name: formData.company_name,
                   exporter_address: formData.company_address,
-                  exporter_country: formData.supplier_country,
+                  exporter_country: formData.company_country,  // FIXED: Use company's country, not supplier country
                   exporter_tax_id: formData.tax_id,
                   importer_name: formData.importer_name,
                   importer_address: formData.importer_address,

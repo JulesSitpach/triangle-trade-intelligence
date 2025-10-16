@@ -27,7 +27,7 @@ export default function AdminNavigation({ user }) {
   return (
     <nav className="nav-fixed">
       <div className="nav-container">
-        <Link href="/admin/dev-dashboard" className="nav-logo-link">
+        <Link href="/admin/dev-issues" className="nav-logo-link">
           <div className="nav-logo-icon">T</div>
           <div>
             <div className="nav-logo-text">Triangle Trade Intelligence</div>
@@ -47,8 +47,8 @@ export default function AdminNavigation({ user }) {
 
         <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <Link
-            href="/admin/dev-dashboard"
-            className={`nav-menu-link ${router.pathname === '/admin/dev-dashboard' ? 'active' : ''}`}
+            href="/admin/dev-issues"
+            className={`nav-menu-link ${router.pathname === '/admin/dev-issues' ? 'active' : ''}`}
             onClick={() => setMobileMenuOpen(false)}
           >
             Development

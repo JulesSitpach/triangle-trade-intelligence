@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
-import { BUSINESS_TYPES } from '../../config/business-types.js';
+import { BUSINESS_TYPES, CERTIFIER_TYPES, mapBusinessTypeToCertifierType } from '../../config/business-types.js';
 
 // Professional SVG icons for form fields
 // Icons removed - no longer using icon placeholders
@@ -36,8 +36,10 @@ export default function CompanyInformationStep({
       const stillMissing = [];
       if (!formData.company_name) stillMissing.push('Company Name');
       if (!formData.business_type) stillMissing.push('Business Type');
+      if (!formData.certifier_type) stillMissing.push('Certifier Type');
       if (!formData.industry_sector) stillMissing.push('Industry Sector');
       if (!formData.company_address) stillMissing.push('Company Address');
+      if (!formData.company_country) stillMissing.push('Company Country');
       if (!formData.contact_person) stillMissing.push('Contact Person');
       if (!formData.contact_phone) stillMissing.push('Contact Phone');
       if (!formData.contact_email) stillMissing.push('Contact Email');
@@ -52,9 +54,11 @@ export default function CompanyInformationStep({
 
   const isNextDisabled = !isClient || !formData.company_name ||
                         !formData.business_type ||
+                        !formData.certifier_type ||
                         !formData.industry_sector ||
                         !formData.trade_volume ||
                         !formData.company_address ||
+                        !formData.company_country ||
                         !formData.contact_person ||
                         !formData.contact_phone ||
                         !formData.contact_email;
@@ -66,8 +70,10 @@ export default function CompanyInformationStep({
     const missingFields = [];
     if (!formData.company_name) missingFields.push('Company Name');
     if (!formData.business_type) missingFields.push('Business Type');
+    if (!formData.certifier_type) missingFields.push('Certifier Type');
     if (!formData.industry_sector) missingFields.push('Industry Sector');
     if (!formData.company_address) missingFields.push('Company Address');
+    if (!formData.company_country) missingFields.push('Company Country');
     if (!formData.contact_person) missingFields.push('Contact Person');
     if (!formData.contact_phone) missingFields.push('Contact Phone');
     if (!formData.contact_email) missingFields.push('Contact Email');
@@ -125,17 +131,26 @@ export default function CompanyInformationStep({
             <select
               className={`form-select ${formData.business_type ? 'has-value' : ''}`}
               value={formData.business_type || ''}
-              onChange={(e) => updateFormData('business_type', e.target.value)}
+              onChange={(e) => {
+                const newBusinessType = e.target.value;
+                updateFormData('business_type', newBusinessType);
+
+                // Automatically set certifier type based on business type
+                if (newBusinessType) {
+                  const certifierType = mapBusinessTypeToCertifierType(newBusinessType);
+                  updateFormData('certifier_type', certifierType);
+                }
+              }}
               required
             >
               <option value="">Select business role</option>
               {BUSINESS_TYPES.map(type => (
                 <option key={type.value} value={type.value}>
-                  {type.label}
+                  {type.label_with_cert}
                 </option>
               ))}
             </select>
-            <div className="form-help">Your role in the supply chain</div>
+            <div className="form-help">Your role in the supply chain - certificate type shown in parentheses</div>
           </div>
 
           <div className="form-group">
@@ -173,6 +188,39 @@ export default function CompanyInformationStep({
             <div className="form-help">Physical business address</div>
           </div>
 
+          <div className="form-group">
+            <label className="form-label required">Company Country</label>
+            <select
+              className={`form-select ${formData.company_country ? 'has-value' : ''}`}
+              value={formData.company_country || ''}
+              onChange={(e) => updateFormData('company_country', e.target.value)}
+              required
+            >
+              <option value="">Select country</option>
+              {dropdownOptions.usmcaCountries?.map(country => {
+                const countryCode = country.code || country.value;
+                const countryName = country.label || country.name;
+                return (
+                  <option key={countryCode} value={countryName}>{countryName}</option>
+                );
+              })}
+              <optgroup label="Other Countries">
+                {dropdownOptions.countries?.filter(country => {
+                  const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                  return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
+                }).map(country => {
+                  const countryName = typeof country === 'string' ? country : country.name || country.label;
+                  return (
+                    <option key={countryName} value={countryName}>{countryName}</option>
+                  );
+                })}
+              </optgroup>
+            </select>
+            <div className="form-help">Country where your company is registered</div>
+          </div>
+        </div>
+
+        <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label">Tax ID / EIN</label>
             <input
@@ -269,7 +317,7 @@ export default function CompanyInformationStep({
                 </>
               )}
             </select>
-            <div className="form-help">Where products originate</div>
+            <div className="form-help">Where you purchase raw materials or components from</div>
           </div>
 
           <div className="form-group">

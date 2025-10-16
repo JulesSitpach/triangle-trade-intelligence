@@ -8,6 +8,8 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
+import PersonalizedPolicyAlert from '../components/alerts/PersonalizedPolicyAlert';
+import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAlert';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -17,70 +19,33 @@ import TRADE_RISK_CONFIG, {
 
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
-  const [dynamicRisks, setDynamicRisks] = useState([]);
-  const [dynamicAlternatives, setDynamicAlternatives] = useState([]);
-  const [teamRecommendations, setTeamRecommendations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showDetailedConsent, setShowDetailedConsent] = useState(false);
-  const [hasDetailedConsent, setHasDetailedConsent] = useState(false);
-  const [expandedDetails, setExpandedDetails] = useState({});
-  const [aiVulnerabilityAnalysis, setAiVulnerabilityAnalysis] = useState(null);
-  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState(null);
 
-  // Real policy alerts state (NEW - fetched from database)
+  // Real policy alerts state
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
   const [isLoadingPolicyAlerts, setIsLoadingPolicyAlerts] = useState(false);
 
+  // Consolidated alerts state (intelligent alert grouping)
+  const [consolidatedAlerts, setConsolidatedAlerts] = useState([]);
+  const [isConsolidating, setIsConsolidating] = useState(false);
+  const [originalAlertCount, setOriginalAlertCount] = useState(0);
+
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
-  const [, setHasSaveDataConsent] = useState(false); // hasSaveDataConsent not used, only setter
+  const [, setHasSaveDataConsent] = useState(false);
   const [pendingProfile, setPendingProfile] = useState(null);
 
   const { user } = useSimpleAuth();
 
   useEffect(() => {
     loadUserData();
-    // Check if user has given detailed consent before
-    const consent = localStorage.getItem('detailed_alerts_consent');
-    setHasDetailedConsent(consent === 'true');
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load real policy alerts when user profile is available
   useEffect(() => {
     if (userProfile && userProfile.componentOrigins) {
       loadRealPolicyAlerts(userProfile);
     }
   }, [userProfile]);
-
-  const handleSeeMoreDetails = (riskIndex) => {
-    if (!hasDetailedConsent) {
-      setShowDetailedConsent(true);
-      return;
-    }
-
-    setExpandedDetails(prev => ({
-      ...prev,
-      [riskIndex]: !prev[riskIndex]
-    }));
-  };
-
-  const handleDetailedConsent = (granted) => {
-    setHasDetailedConsent(granted);
-    localStorage.setItem('detailed_alerts_consent', granted.toString());
-
-    if (granted) {
-      setShowDetailedConsent(false);
-      // Show details for all risks
-      const allExpanded = {};
-      dynamicRisks.forEach((_, index) => {
-        allExpanded[index] = true;
-      });
-      setExpandedDetails(allExpanded);
-    } else {
-      setShowDetailedConsent(false);
-    }
-  };
 
   const loadUserData = async () => {
     if (!user) {
@@ -88,23 +53,7 @@ export default function TradeRiskAlternatives() {
       return;
     }
 
-    // Load user's subscription tier
-    try {
-      const response = await fetch('/api/dashboard-data', {
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const dashboardData = await response.json();
-        const tier = dashboardData.user_profile?.subscription_tier;
-        setSubscriptionTier(tier);
-        console.log('✅ Subscription tier loaded:', tier);
-      }
-    } catch (error) {
-      console.error('Failed to load subscription tier:', error);
-    }
-
-    try {
+    try{
       // Check if loading specific alert from dashboard
       const urlParams = new URLSearchParams(window.location.search);
       const analysisId = urlParams.get('analysis_id');
@@ -121,10 +70,37 @@ export default function TradeRiskAlternatives() {
           const alert = dashboardData.alerts?.find(a => a.id === analysisId);
 
           if (alert) {
-            console.log('✅ Found alert data:', alert);
+            console.log('✅ Found alert data from database:', alert);
 
             // Get supplier country from component origins
             const components = alert.component_origins || [];
+
+            // Check for schema mismatches in database data
+            const hasOriginCountry = components.length > 0 && components[0].origin_country;
+            const hasCountryFallback = components.length > 0 && components[0].country;
+
+            if (components.length > 0 && !hasOriginCountry && hasCountryFallback) {
+              console.warn('⚠️ Database schema mismatch: component has "country" but not "origin_country"', components[0]);
+
+              // Log to admin dashboard (non-blocking)
+              fetch('/api/admin/log-dev-issue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  issue_type: 'schema_mismatch',
+                  severity: 'medium',
+                  component: 'alerts_database_loader',
+                  message: 'Database component uses "country" field instead of "origin_country"',
+                  context_data: {
+                    alert_id: analysisId,
+                    component_sample: components[0],
+                    expected_field: 'origin_country',
+                    found_field: 'country'
+                  }
+                })
+              }).catch(err => console.error('Failed to log dev issue:', err));
+            }
+
             const primarySupplier = components.length > 0
               ? (components[0].origin_country || components[0].country)
               : 'Not specified';
@@ -144,29 +120,6 @@ export default function TradeRiskAlternatives() {
             };
 
             setUserProfile(profile);
-
-            // Set alternatives from database if available
-            if (alert.recommendations?.diversification_strategies && alert.recommendations.diversification_strategies.length > 0) {
-              setDynamicAlternatives(alert.recommendations.diversification_strategies);
-            }
-
-            // Set risks from database if available
-            if (alert.alerts && alert.alerts.length > 0) {
-              const aiRisks = alert.alerts.map(a => ({
-                title: a.title,
-                severity: a.severity,
-                generalImpact: a.description,
-                detailedImpact: a.potential_impact,
-                probability: 'AI-Analyzed',
-                timeframe: 'Real-time monitoring',
-                description: a.description,
-                detailedInfo: a.monitoring_guidance,
-                aiGenerated: true
-              }));
-              setDynamicRisks(aiRisks);
-            }
-
-            generateDynamicContent(profile);
             setIsLoading(false);
             return;
           }
@@ -219,22 +172,64 @@ export default function TradeRiskAlternatives() {
         ? parseFloat(rawTradeVolume.replace(/,/g, ''))
         : rawTradeVolume;
 
+      // NO FALLBACKS - Expose missing data as dev issue
       const profile = {
-        companyName: userData.company?.name || userData.company?.company_name || 'Your Company',
-        businessType: userData.company?.business_type || userData.company?.businessType,
-        hsCode: userData.product?.hs_code || userData.classification?.hs_code,
-        productDescription: userData.product?.description || userData.product?.product_description || userData.classification?.description,
+        companyName: userData.company?.company_name || userData.company?.name,
+        businessType: userData.company?.business_type,
+        hsCode: userData.product?.hs_code,
+        productDescription: userData.product?.description,
         tradeVolume: parsedTradeVolume,
-        supplierCountry: userData.component_origins?.[0]?.origin_country || userData.components?.[0]?.country || userData.company?.supplier_country,
-        qualificationStatus: userData.certificate?.qualification_result || userData.usmca?.qualification_status || userData.usmca?.qualified === true ? 'QUALIFIED' : 'NOT_QUALIFIED',
-        savings: userData.certificate?.savings || userData.savings?.total_savings || userData.savings?.annual_savings || 0,
-        componentOrigins: userData.component_origins || userData.components || []
+        supplierCountry: userData.components?.[0]?.origin_country,  // Match saved key: "components"
+        qualificationStatus: userData.usmca?.qualification_status,
+        savings: userData.savings?.annual_savings || 0,
+        componentOrigins: userData.components || []  // Match saved key: "components"
       };
 
-      setUserProfile(profile);
-      generateDynamicContent(profile);
+      // Log missing data to admin dashboard
+      const missingFields = [];
+      if (!profile.companyName) missingFields.push('company_name');
+      if (!profile.businessType) missingFields.push('business_type');
+      if (!profile.hsCode) missingFields.push('hs_code');
+      if (!profile.productDescription) missingFields.push('product_description');
+      if (!profile.supplierCountry && userData.components?.length > 0) missingFields.push('component origin_country');
+      if (!profile.qualificationStatus) missingFields.push('qualification_status');
+      if (profile.componentOrigins.length === 0) missingFields.push('component_origins array');
 
-      // NEW: Show consent modal instead of automatically saving
+      if (missingFields.length > 0) {
+        console.error('🚨 DEV ISSUE: Missing workflow data in alerts page', {
+          missing_fields: missingFields,
+          userData_keys: Object.keys(userData),
+          company_keys: userData.company ? Object.keys(userData.company) : [],
+          product_keys: userData.product ? Object.keys(userData.product) : [],
+          usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
+          components_count: userData.components?.length || 0
+        });
+
+        // Log to admin dashboard (non-blocking)
+        fetch('/api/admin/log-dev-issue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            issue_type: 'missing_data',
+            severity: 'high',
+            component: 'trade_alerts_page',
+            message: `Missing ${missingFields.length} required fields in alerts page data flow`,
+            context_data: {
+              missing_fields: missingFields,
+              userData_structure: {
+                company_keys: userData.company ? Object.keys(userData.company) : [],
+                product_keys: userData.product ? Object.keys(userData.product) : [],
+                usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
+                components_count: userData.components?.length || 0
+              }
+            }
+          })
+        }).catch(err => console.error('Failed to log dev issue:', err));
+      }
+
+      setUserProfile(profile);
+
+      // Show consent modal instead of automatically saving
       // Check if user is authenticated (cookie-based auth)
       const savedConsent = localStorage.getItem('save_data_consent');
       const isAuthenticated = !!user; // Simple check - user exists means authenticated
@@ -347,281 +342,6 @@ export default function TradeRiskAlternatives() {
     }, 1000);
   };
 
-  const generateDynamicContent = async (profile) => {
-    // Try to get AI-powered vulnerability analysis if we have workflow results
-    const resultsData = localStorage.getItem('usmca_workflow_results');
-
-    console.log('📥 ========== LOADING WORKFLOW DATA FOR ALERTS ==========');
-    console.log('localStorage keys:', Object.keys(localStorage).filter(k => k.includes('usmca')));
-    console.log('usmca_workflow_results exists:', !!resultsData);
-
-    if (resultsData) {
-      try {
-        const workflowResults = JSON.parse(resultsData);
-
-        console.log('📊 Workflow data parsed:', {
-          has_component_origins: !!(workflowResults.component_origins),
-          has_components: !!(workflowResults.components),
-          component_origins_length: (workflowResults.component_origins || []).length,
-          components_length: (workflowResults.components || []).length,
-          data_sample: workflowResults.component_origins || workflowResults.components
-        });
-
-        // Check if we have component origins data for AI analysis
-        if (workflowResults.component_origins || workflowResults.components) {
-          console.log('🤖 ========== AI VULNERABILITY ANALYSIS STARTING ==========');
-          console.log('Component origins found, requesting AI vulnerability analysis...');
-
-          const aiSucceeded = await generateAIVulnerabilityAlerts(workflowResults);
-
-          if (aiSucceeded) {
-            console.log('✅ AI analysis succeeded - using AI-generated alerts');
-            // AI set the dynamic risks, alternatives, and recommendations
-            // No need to set generic ones
-            setIsLoading(false);
-            return; // Exit early - AI has set everything
-          } else {
-            console.log('⚠️ AI analysis failed - falling back to rule-based alerts');
-          }
-        } else {
-          console.log('⚠️ No component origins found in workflow data - using rule-based alerts');
-          console.log('Workflow data keys:', Object.keys(workflowResults));
-        }
-      } catch (error) {
-        console.error('❌ Error checking for AI analysis capability:', error);
-      }
-    } else {
-      console.log('⚠️ No workflow results data in localStorage');
-    }
-
-    // Generate traditional risks based on profile (ONLY as fallback if AI didn't work)
-    console.log('📊 Using fallback rule-based alerts');
-    const risks = generateRisksFromProfile(profile);
-    const alternatives = generateAlternativesFromProfile(profile);
-    const teamRecs = generateTeamRecommendationsFromProfile(profile);
-
-    setDynamicRisks(risks);
-    setDynamicAlternatives(alternatives);
-    setTeamRecommendations(teamRecs);
-    setIsLoading(false);
-  };
-
-  const generateAIVulnerabilityAlerts = async (workflowResults) => {
-    setIsAiAnalyzing(true);
-
-    try {
-      console.log('📤 Sending workflow data to AI vulnerability endpoint...');
-
-      const response = await fetch('/api/ai-vulnerability-alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(workflowResults)
-      });
-
-      if (!response.ok) {
-        throw new Error(`AI analysis failed: ${response.status}`);
-      }
-
-      const aiAnalysis = await response.json();
-
-      console.log('✅ AI vulnerability analysis received:', {
-        alert_count: aiAnalysis.alerts?.length,
-        risk_level: aiAnalysis.vulnerability_analysis?.overall_risk_level,
-        confidence: aiAnalysis.trust?.confidence_score
-      });
-
-      setAiVulnerabilityAnalysis(aiAnalysis);
-
-      // Replace dynamic risks with AI-generated alerts
-      if (aiAnalysis.alerts && aiAnalysis.alerts.length > 0) {
-        const aiRisks = aiAnalysis.alerts.map(alert => ({
-          title: alert.title,
-          severity: alert.severity,
-          generalImpact: alert.description,
-          detailedImpact: alert.potential_impact,
-          probability: 'AI-Analyzed',
-          timeframe: 'Real-time monitoring',
-          description: alert.description,
-          detailedInfo: `${alert.description}\n\nAffected Components: ${alert.affected_components?.join(', ') || 'Multiple'}\n\nRecommended Action: ${alert.recommended_action}\n\nMonitoring Guidance: ${alert.monitoring_guidance}`,
-          aiGenerated: true,
-          alertTriggers: alert.alert_triggers || []
-        }));
-
-        console.log('🚨 Setting AI-generated risks to replace generic ones:', {
-          ai_risk_count: aiRisks.length,
-          ai_risk_titles: aiRisks.map(r => r.title)
-        });
-        setDynamicRisks(aiRisks);
-        setIsAiAnalyzing(false);
-        return true; // Success - AI alerts set
-      }
-
-      setIsAiAnalyzing(false);
-      return false; // No alerts generated
-
-    } catch (error) {
-      console.error('❌ AI vulnerability analysis failed:', error);
-      setIsAiAnalyzing(false);
-      return false; // Failed - fall back to rule-based alerts
-    }
-  };
-
-  const generateRisksFromProfile = (profile) => {
-    const risks = [];
-
-    // Risk based on supplier country
-    if (profile.supplierCountry === 'CN') {
-      risks.push({
-        title: `Section 301 Tariffs on Chinese Imports`,
-        severity: "HIGH",
-        generalImpact: "Up to 25% additional tariffs on your imports",
-        detailedImpact: `Potential ${formatCurrency(calculateRiskImpact(profile.tradeVolume, TRADE_RISK_CONFIG.tariffRates.section301))} annual cost increase`,
-        probability: TRADE_RISK_CONFIG.probabilities.section301,
-        timeframe: "Next 30-60 days",
-        description: `Your HS code ${profile.hsCode} is specifically targeted in proposed Section 301 tariff expansions`,
-        detailedInfo: `Based on your annual trade volume of ${formatCurrency(profile.tradeVolume)}, a 25% tariff would cost you ${formatCurrency(profile.tradeVolume * TRADE_RISK_CONFIG.tariffRates.section301)} per year. This calculation assumes your current import pattern continues.`
-      });
-    }
-
-    // Risk based on USMCA qualification
-    if (profile.qualificationStatus === 'NOT_QUALIFIED') {
-      risks.push({
-        title: "USMCA Qualification Gap",
-        severity: "CRITICAL",
-        generalImpact: "Missing significant USMCA savings opportunities",
-        detailedImpact: `Missing ${formatCurrency(profile.savings)} in annual savings`,
-        probability: "Current",
-        timeframe: "Immediate",
-        description: "Your current supply chain doesn't qualify for USMCA benefits",
-        detailedInfo: `USMCA qualification could save you ${formatCurrency(profile.savings)} annually through duty-free access. Mexico manufacturing partnership is typically the fastest path to qualification for ${profile.businessType} companies.`
-      });
-    }
-
-    // Risk based on business type
-    if (profile.businessType === 'Electronics' || profile.businessType === 'ElectronicsTechnology') {
-      risks.push({
-        title: "Electronics Industry Targeting",
-        severity: "HIGH",
-        generalImpact: "Additional compliance requirements and potential restrictions",
-        detailedImpact: "Additional compliance requirements and potential restrictions",
-        probability: TRADE_RISK_CONFIG.probabilities.electronics,
-        timeframe: "Next 3-6 months",
-        description: "Electronics imports face increased scrutiny and potential new restrictions",
-        detailedInfo: "Electronics companies are seeing increased audits, longer customs processing times, and new documentation requirements. Consider establishing USMCA-compliant manufacturing to avoid these restrictions."
-      });
-    }
-
-    // Generic supply chain concentration risk
-    risks.push({
-      title: "Supply Chain Concentration Risk",
-      severity: "MEDIUM",
-      generalImpact: "Business continuity threat",
-      detailedImpact: "Business continuity threat and potential supply disruptions",
-      probability: "Ongoing",
-      timeframe: "Continuous",
-      description: `Heavy reliance on ${profile.supplierCountry || 'single country'} creates vulnerability to policy changes`,
-      detailedInfo: `Single-country sourcing creates vulnerability to trade policy changes, natural disasters, and geopolitical tensions. Diversifying across multiple countries reduces these risks significantly.`
-    });
-
-    return risks;
-  };
-
-  const generateAlternativesFromProfile = (profile) => {
-    const alternatives = [];
-
-    // Mexico alternatives (Jorge's specialty)
-    if (profile.supplierCountry === 'CN' || profile.qualificationStatus === 'NOT_QUALIFIED') {
-      alternatives.push({
-        strategy: "Mexico Manufacturing Partnership",
-        benefit: "USMCA-protected production with duty-free access",
-        implementation: `Jorge specializes in Mexico partnerships for ${profile.businessType} companies`,
-        timeline: TRADE_RISK_CONFIG.timelines.mexico,
-        riskReduction: TRADE_RISK_CONFIG.riskReduction.mexicoManufacturing,
-        relevantTeam: "Jorge"
-      });
-    }
-
-    // Latin America diversification (Jorge's specialty)
-    if (profile.tradeVolume > TRADE_RISK_CONFIG.thresholds.highVolumeTrader) {
-      alternatives.push({
-        strategy: "Latin America Supply Network",
-        benefit: "Diversify across Mexico, Colombia, Brazil to reduce single-country risk",
-        implementation: "Jorge has established supplier networks throughout Latin America",
-        timeline: TRADE_RISK_CONFIG.timelines.latinAmerica,
-        riskReduction: TRADE_RISK_CONFIG.riskReduction.latinAmericaNetwork,
-        relevantTeam: "Jorge"
-      });
-    }
-
-    // Logistics optimization (Cristina's specialty)
-    alternatives.push({
-      strategy: "Multi-Route Logistics Strategy",
-      benefit: "Backup shipping routes and customs procedures",
-      implementation: "Cristina designs complex routing strategies for business continuity",
-      timeline: TRADE_RISK_CONFIG.timelines.logistics,
-      riskReduction: TRADE_RISK_CONFIG.riskReduction.multiRouteLogistics,
-      relevantTeam: "Cristina"
-    });
-
-    // Canada routing for USMCA
-    if (profile.qualificationStatus !== 'QUALIFIED') {
-      alternatives.push({
-        strategy: "Canada USMCA Entry Point",
-        benefit: "Alternative USMCA qualification route",
-        implementation: "Cristina handles Canada-Mexico-US triangle routing setup",
-        timeline: TRADE_RISK_CONFIG.timelines.canada,
-        riskReduction: TRADE_RISK_CONFIG.riskReduction.canadaRouting,
-        relevantTeam: "Cristina"
-      });
-    }
-
-    return alternatives;
-  };
-
-  const generateTeamRecommendationsFromProfile = (profile) => {
-    const recommendations = [];
-
-    // Jorge recommendations (Latin America focus)
-    const needsLatinAmerica = profile.supplierCountry === 'CN' ||
-                             profile.qualificationStatus === 'NOT_QUALIFIED' ||
-                             profile.tradeVolume > TRADE_RISK_CONFIG.thresholds.highVolumeTrader;
-
-    if (needsLatinAmerica) {
-      recommendations.push({
-        teamMember: "Jorge",
-        title: "Latin America Trade Specialist",
-        expertise: "Mexico, Brazil, Colombia, Chile partnerships and USMCA manufacturing",
-        relevantTo: getJorgeRelevance(profile),
-        contactReason: getJorgeContactReason(profile)
-      });
-    }
-
-    // Cristina recommendations (Logistics/Broker)
-    recommendations.push({
-      teamMember: "Cristina",
-      title: "Customs Broker & Logistics Specialist",
-      expertise: "Complex routing, customs compliance, and multi-country logistics",
-      relevantTo: "All importers need backup logistics strategies",
-      contactReason: getCristinaContactReason(profile)
-    });
-
-    return recommendations;
-  };
-
-  const getJorgeRelevance = (profile) => {
-    if (profile.supplierCountry === 'CN') return "Reduce China dependency through Latin America sourcing";
-    if (profile.qualificationStatus === 'NOT_QUALIFIED') return "Establish USMCA-qualifying Mexico manufacturing";
-    return "Diversify supply chain across Latin America";
-  };
-
-  const getJorgeContactReason = (profile) => {
-    return `Jorge can help you establish ${profile.businessType} partnerships in Mexico and Latin America to reduce your current supply chain risks`;
-  };
-
-  const getCristinaContactReason = (profile) => {
-    return `Cristina can design backup logistics strategies for your ${formatCurrency(profile.tradeVolume)} annual trade volume`;
-  };
-
   /**
    * Load REAL tariff policy alerts from database
    * Filters by user's component origins and HS codes for relevance
@@ -680,12 +400,56 @@ export default function TradeRiskAlternatives() {
 
         console.log(`🎯 ${relevantAlerts.length} alerts relevant to your trade profile`);
         setRealPolicyAlerts(relevantAlerts);
+        setOriginalAlertCount(relevantAlerts.length);
+
+        // Consolidate alerts intelligently (group related issues)
+        if (relevantAlerts.length > 0) {
+          await consolidateAlerts(relevantAlerts, profile);
+        }
       }
     } catch (error) {
       console.error('❌ Error loading real policy alerts:', error);
       setRealPolicyAlerts([]);
     } finally {
       setIsLoadingPolicyAlerts(false);
+    }
+  };
+
+  /**
+   * Consolidate related alerts into intelligent groups
+   * Example: 3 alerts about Chinese components → 1 consolidated "China Risk"
+   */
+  const consolidateAlerts = async (alerts, profile) => {
+    setIsConsolidating(true);
+
+    try {
+      console.log(`🧠 Consolidating ${alerts.length} alerts...`);
+
+      const response = await fetch('/api/consolidate-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          alerts: alerts,
+          user_profile: profile
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Consolidation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.consolidated_alerts) {
+        console.log(`✅ Consolidated ${data.original_count} alerts → ${data.consolidated_count} groups`);
+        setConsolidatedAlerts(data.consolidated_alerts);
+      }
+    } catch (error) {
+      console.error('❌ Alert consolidation failed:', error);
+      // Fallback: show individual alerts if consolidation fails
+      setConsolidatedAlerts([]);
+    } finally {
+      setIsConsolidating(false);
     }
   };
 
@@ -723,12 +487,6 @@ export default function TradeRiskAlternatives() {
       </TriangleLayout>
     );
   }
-
-  // Check tier-based alert access
-  // Don't show upgrade message while subscription tier is still loading
-  const isTrialUser = subscriptionTier === 'Trial';
-  const isStarterUser = subscriptionTier === 'Starter';
-  const hasPremiumAccess = subscriptionTier === 'Professional' || subscriptionTier === 'Premium' || subscriptionTier === 'Enterprise';
 
   return (
     <TriangleLayout>
@@ -852,19 +610,6 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* AI Vulnerability Analysis Status */}
-        {isAiAnalyzing && (
-          <div className="alert alert-info">
-            <div className="alert-content">
-              <div className="alert-title">
-                🤖 AI Analyzing Your Supply Chain...
-                <span className="spinner-inline"></span>
-              </div>
-              <p className="text-body">Claude is analyzing your component origins for geopolitical and tariff vulnerabilities...</p>
-            </div>
-          </div>
-        )}
-
         {/* We're Monitoring For You */}
         <div className="form-section">
           <h2 className="form-section-title">📡 We're Monitoring For You</h2>
@@ -939,167 +684,6 @@ export default function TradeRiskAlternatives() {
           </div>
         </div>
 
-        {/* Dynamic Risk Analysis */}
-        <div className="form-section">
-          <h2 className="form-section-title">
-            🚨 Current Threats to Your Trade
-            {aiVulnerabilityAnalysis && <span> (AI-Powered)</span>}
-          </h2>
-          <p className="text-body">
-            {aiVulnerabilityAnalysis
-              ? 'AI-generated alerts specific to your component origins and supply chain'
-              : 'Issues specifically affecting your business profile'}
-          </p>
-
-          {dynamicRisks.map((risk, index) => (
-            <div key={index} className={`alert alert-${risk.severity === 'CRITICAL' ? 'error' : risk.severity === 'HIGH' ? 'warning' : 'info'}`}>
-              <div className="alert-content">
-                <div className="alert-title">
-                  {risk.title}
-                  {risk.category && (
-                    <span className="form-help"> • {risk.category.toUpperCase()}</span>
-                  )}
-                </div>
-                <div className="text-body">{risk.description}</div>
-
-                {/* Enhanced Component Details - HS Codes and Tariff Exposure */}
-                {(risk.affected_hs_codes || risk.tariff_exposure || risk.ai_confidence || risk.rvc_details) && (
-                  <div className="element-spacing">
-                    <div className="status-grid">
-                      {/* HS Codes for Affected Components */}
-                      {risk.affected_hs_codes && risk.affected_hs_codes.length > 0 && (
-                        <div className="status-card">
-                          <div className="status-label">Affected HS Codes</div>
-                          <div className="status-value" style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                            {risk.affected_hs_codes.join(', ')}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Tariff Rate Exposure */}
-                      {risk.tariff_exposure && (
-                        <>
-                          <div className="status-card">
-                            <div className="status-label">MFN Rate</div>
-                            <div className="status-value" style={{ color: '#dc2626' }}>
-                              {risk.tariff_exposure.mfn_rate?.toFixed(1)}%
-                            </div>
-                          </div>
-                          <div className="status-card">
-                            <div className="status-label">USMCA Rate</div>
-                            <div className="status-value" style={{ color: '#059669' }}>
-                              {risk.tariff_exposure.usmca_rate?.toFixed(1)}%
-                            </div>
-                          </div>
-                          {risk.tariff_exposure.savings_potential > 0 && (
-                            <div className="status-card">
-                              <div className="status-label">Tariff Savings</div>
-                              <div className="status-value" style={{ color: '#059669' }}>
-                                {risk.tariff_exposure.savings_potential?.toFixed(1)}%
-                              </div>
-                            </div>
-                          )}
-                          {hasDetailedConsent && risk.tariff_exposure.annual_dollar_impact && (
-                            <div className="status-card">
-                              <div className="status-label">Annual Dollar Impact</div>
-                              <div className="status-value">
-                                ${risk.tariff_exposure.annual_dollar_impact.toLocaleString()}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* AI Confidence Warning */}
-                      {risk.ai_confidence && (
-                        <div className="status-card">
-                          <div className="status-label">AI Classification Confidence</div>
-                          <div className="status-value" style={{ color: risk.ai_confidence < 80 ? '#f59e0b' : '#059669' }}>
-                            {risk.ai_confidence}%
-                            {risk.ai_confidence < 80 && ' ⚠️ Low Confidence'}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* RVC Optimization Details */}
-                      {risk.rvc_details && (
-                        <>
-                          <div className="status-card">
-                            <div className="status-label">Current RVC</div>
-                            <div className="status-value">
-                              {risk.rvc_details.current_rvc?.toFixed(1)}%
-                            </div>
-                          </div>
-                          <div className="status-card">
-                            <div className="status-label">RVC Threshold</div>
-                            <div className="status-value">
-                              {risk.rvc_details.threshold?.toFixed(1)}%
-                            </div>
-                          </div>
-                          {risk.rvc_details.potential_rvc && (
-                            <div className="status-card">
-                              <div className="status-label">Potential RVC</div>
-                              <div className="status-value" style={{ color: '#059669' }}>
-                                {risk.rvc_details.potential_rvc?.toFixed(1)}%
-                                {risk.rvc_details.safety_margin && ` (+${risk.rvc_details.safety_margin?.toFixed(1)}% margin)`}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Original Status Grid */}
-                <div className="element-spacing">
-                  <div className="status-grid">
-                    <div className="status-card">
-                      <div className="status-label">Financial Impact</div>
-                      <div className="status-value">
-                        {hasDetailedConsent && expandedDetails[index]
-                          ? (risk.detailedImpact || risk.generalImpact)
-                          : (risk.generalImpact || 'Not specified')}
-                      </div>
-                    </div>
-                    <div className="status-card">
-                      <div className="status-label">Probability</div>
-                      <div className="status-value">{risk.probability || 'Unknown'}</div>
-                    </div>
-                    <div className="status-card">
-                      <div className="status-label">Timeline</div>
-                      <div className="status-value">{risk.timeframe || 'Unknown'}</div>
-                    </div>
-                  </div>
-
-                  {/* See More Details Button */}
-                  <div className="element-spacing">
-                    <button
-                      onClick={() => handleSeeMoreDetails(index)}
-                      className="btn-secondary"
-                    >
-                      {hasDetailedConsent && expandedDetails[index] ?
-                        '▲ Show Less Details' :
-                        '▼ See More Details'
-                      }
-                    </button>
-                  </div>
-
-                  {/* Detailed Information */}
-                  {hasDetailedConsent && expandedDetails[index] && risk.detailedInfo && (
-                    <div className="form-section">
-                      <div className="text-body">
-                        <strong>Detailed Analysis:</strong> {risk.detailedInfo}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-
         {/* Action Items */}
         <div className="form-section">
           <h2 className="form-section-title">✅ Next Steps for {userProfile.companyName}</h2>
@@ -1137,21 +721,30 @@ export default function TradeRiskAlternatives() {
           <h2 className="form-section-title">🚨 Government Policy Alerts Affecting Your Trade</h2>
           <p className="text-body">
             Real tariff and trade policy changes from official U.S. government sources that directly impact your components and supply chain.
-            {realPolicyAlerts.length > 0 && ` Showing ${realPolicyAlerts.length} alerts relevant to your trade profile.`}
+            {consolidatedAlerts.length > 0 && originalAlertCount > consolidatedAlerts.length && (
+              <span style={{ color: '#059669', fontWeight: 500 }}>
+                {' '}Consolidated {originalAlertCount} related policies → {consolidatedAlerts.length} actionable alerts
+              </span>
+            )}
           </p>
 
-          {isLoadingPolicyAlerts && (
+          {(isLoadingPolicyAlerts || isConsolidating) && (
             <div className="alert alert-info">
               <div className="alert-content">
                 <div className="alert-title">
-                  Loading government policy alerts...
+                  {isConsolidating ? '🧠 Consolidating related alerts...' : 'Loading government policy alerts...'}
                   <span className="spinner-inline"></span>
                 </div>
+                {isConsolidating && (
+                  <div className="text-body">
+                    Grouping related policies and calculating consolidated impact...
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && realPolicyAlerts.length === 0 && (
+          {!isLoadingPolicyAlerts && !isConsolidating && realPolicyAlerts.length === 0 && (
             <div className="alert alert-success">
               <div className="alert-content">
                 <div className="alert-title">✅ No Critical Policy Changes Affecting Your Trade</div>
@@ -1162,146 +755,35 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && realPolicyAlerts.length > 0 && (
+          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
             <div className="element-spacing">
-              {realPolicyAlerts.map((alert, idx) => (
-                <div
+              {consolidatedAlerts.map((alert, idx) => (
+                <ConsolidatedPolicyAlert
                   key={idx}
-                  className={`alert alert-${alert.severity === 'CRITICAL' ? 'error' : alert.severity === 'HIGH' ? 'warning' : 'info'}`}
-                >
-                  <div className="alert-content">
-                    <div className="alert-title">
-                      {alert.title}
-                      <span className="form-help"> • {alert.severity}</span>
-                    </div>
+                  consolidatedAlert={alert}
+                  userProfile={userProfile}
+                />
+              ))}
+            </div>
+          )}
 
-                    <div className="text-body">
-                      <p><strong>{alert.description}</strong></p>
-                    </div>
-
-                    {/* Policy Details Grid */}
-                    <div className="element-spacing">
-                      <div className="status-grid">
-                        {alert.category && (
-                          <div className="status-card">
-                            <div className="status-label">Policy Type</div>
-                            <div className="status-value">{alert.category}</div>
-                          </div>
-                        )}
-
-                        {alert.effective_date && (
-                          <div className="status-card">
-                            <div className="status-label">Effective Date</div>
-                            <div className="status-value">
-                              {new Date(alert.effective_date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {alert.tariff_adjustment && (
-                          <div className="status-card">
-                            <div className="status-label">Tariff Change</div>
-                            <div className="status-value" style={{ color: '#dc2626', fontWeight: 'bold' }}>
-                              {alert.tariff_adjustment}
-                            </div>
-                          </div>
-                        )}
-
-                        {alert.adjustment_percentage && (
-                          <div className="status-card">
-                            <div className="status-label">Rate Increase</div>
-                            <div className="status-value" style={{ color: '#dc2626' }}>
-                              +{alert.adjustment_percentage}%
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Affected Countries */}
-                    {alert.affected_countries && alert.affected_countries.length > 0 && (
-                      <div className="element-spacing">
-                        <div className="text-body">
-                          <strong>Affected Countries:</strong>{' '}
-                          {alert.affected_countries.map((country, i) => (
-                            <span key={i} className="form-help" style={{ marginRight: '8px' }}>
-                              🌍 {country}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Affected HS Codes */}
-                    {alert.affected_hs_codes && alert.affected_hs_codes.length > 0 && (
-                      <div className="element-spacing">
-                        <div className="text-body">
-                          <strong>Affected HS Codes:</strong>{' '}
-                          {alert.affected_hs_codes.map((code, i) => (
-                            <span key={i} style={{ fontFamily: 'monospace', marginRight: '8px', fontSize: '0.9rem' }}>
-                              {code}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Impact Summary */}
-                    {alert.impact_summary && (
-                      <div className="element-spacing">
-                        <div className="text-body">
-                          <strong>Impact on Your Trade:</strong>
-                          <p>{alert.impact_summary}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Source Link */}
-                    {alert.source_url && (
-                      <div className="element-spacing">
-                        <div className="text-body">
-                          <strong>Official Source:</strong>{' '}
-                          <a href={alert.source_url} target="_blank" rel="noopener noreferrer" className="nav-link">
-                            {alert.source_feed || 'View Government Announcement'} →
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Last Updated */}
-                    {alert.last_updated && (
-                      <div className="form-help">
-                        Last updated: {new Date(alert.last_updated).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="hero-buttons">
-                      <button
-                        onClick={() => window.location.href = '/services/request-form'}
-                        className="btn-primary"
-                      >
-                        🎯 Get Expert Help with This Policy Change
-                      </button>
-                      {alert.source_url && (
-                        <button
-                          onClick={() => window.open(alert.source_url, '_blank')}
-                          className="btn-secondary"
-                        >
-                          📄 Read Official Announcement
-                        </button>
-                      )}
-                    </div>
+          {/* Fallback: Show individual alerts if consolidation failed */}
+          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
+            <div className="element-spacing">
+              <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
+                <div className="alert-content">
+                  <div className="alert-title">⚠️ Alert Consolidation Unavailable</div>
+                  <div className="text-body">
+                    Showing individual alerts. Smart consolidation temporarily unavailable.
                   </div>
                 </div>
+              </div>
+              {realPolicyAlerts.map((alert, idx) => (
+                <PersonalizedPolicyAlert
+                  key={idx}
+                  alert={alert}
+                  userProfile={userProfile}
+                />
               ))}
             </div>
           )}
@@ -1317,87 +799,6 @@ export default function TradeRiskAlternatives() {
             🔄 Update Trade Profile
           </button>
         </div>
-
-        {/* Detailed Consent Modal */}
-        {showDetailedConsent && (
-          <div className="modal-overlay" style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}>
-            <div className="content-card" style={{
-              maxWidth: '500px',
-              margin: '20px',
-              maxHeight: '80vh',
-              overflow: 'auto'
-            }}>
-              <div className="section-header">
-                <h2 className="section-title">💰 See Detailed Financial Impact?</h2>
-                <p className="text-body">
-                  We can show you specific dollar amounts and volume-based recommendations, but this requires temporarily storing your business data.
-                </p>
-              </div>
-
-              <div className="card">
-                <h3 className="card-title">Our Transparency Promise</h3>
-                <div className="text-body">
-                  <p><strong>What we&apos;ll store:</strong></p>
-                  <ul>
-                    <li>Your trade volume amounts</li>
-                    <li>Calculated savings figures</li>
-                    <li>Volume-based recommendations</li>
-                  </ul>
-
-                  <p><strong>How we protect it:</strong></p>
-                  <ul>
-                    <li>🔒 Encrypted in secure database</li>
-                    <li>👤 Only you can access it</li>
-                    <li>🗑️ Delete anytime in account settings</li>
-                    <li>⏰ Auto-deleted after 90 days of inactivity</li>
-                  </ul>
-
-                  <p><strong>Your control:</strong></p>
-                  <ul>
-                    <li>✅ Say &quot;Yes&quot; - See detailed dollar impacts</li>
-                    <li>❌ Say &quot;No&quot; - Keep seeing general percentages</li>
-                    <li>🔄 Change your mind anytime</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="hero-buttons">
-                <button
-                  onClick={() => handleDetailedConsent(true)}
-                  className="btn-primary"
-                >
-                  Yes, Show Me Details
-                </button>
-                <button
-                  onClick={() => handleDetailedConsent(false)}
-                  className="btn-secondary"
-                >
-                  No Thanks, Keep It General
-                </button>
-              </div>
-
-              <div className="element-spacing">
-                <button
-                  onClick={() => setShowDetailedConsent(false)}
-                  className="text-body"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Save Data Consent Modal - Privacy First with Alerts Context */}
         <SaveDataConsentModal

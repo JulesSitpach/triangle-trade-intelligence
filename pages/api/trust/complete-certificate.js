@@ -20,7 +20,8 @@ export default async function handler(req, res) {
       company_info,
       product_details,
       supply_chain,
-      authorization
+      authorization,
+      certifier_type  // NEW: Get certifier_type from workflow Step 1
     } = certificateData;
 
     // Generate certificate number
@@ -45,9 +46,9 @@ export default async function handler(req, res) {
         email: company_info.exporter_email ?? ''
       },
 
-      // Certifier (same as exporter for most cases)
+      // Certifier - Use actual certifier_type from workflow Step 1
       certifier: {
-        type: 'EXPORTER',
+        type: certifier_type || 'EXPORTER',  // Use workflow data, fallback to EXPORTER only if missing
         name: company_info.exporter_name,
         address: company_info.exporter_address,
         country: company_info.exporter_country || 'Not specified',

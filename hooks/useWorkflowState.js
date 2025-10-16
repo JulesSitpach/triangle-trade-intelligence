@@ -349,7 +349,12 @@ export function useWorkflowState() {
 
         // Save to localStorage for certificate completion page
         const workflowData = {
-          company: workflowResult.company,
+          company: {
+            ...workflowResult.company,
+            // CRITICAL: Ensure company_country and certifier_type flow through
+            company_country: formData.company_country || workflowResult.company?.company_country,
+            certifier_type: formData.certifier_type || workflowResult.company?.certifier_type
+          },
           product: workflowResult.product,
           usmca: workflowResult.usmca,
           trust: workflowResult.trust,
@@ -358,7 +363,10 @@ export function useWorkflowState() {
         };
 
         localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
-        console.log('✅ Workflow data saved to localStorage for certificate page');
+        console.log('✅ Workflow data saved to localStorage for certificate page', {
+          has_company_country: !!workflowData.company.company_country,
+          has_certifier_type: !!workflowData.company.certifier_type
+        });
 
         setCurrentStep(5); // Results step (updated for 5-step workflow)
       } else {

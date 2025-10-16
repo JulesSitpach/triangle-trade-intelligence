@@ -96,7 +96,7 @@ export default function USMCACertificateCompletion() {
           company_info: {
             exporter_name: initialData.company?.name || initialData.company?.company_name || '',
             exporter_address: initialData.company?.company_address || initialData.company?.address || '',
-            exporter_country: initialData.company?.country || '',
+            exporter_country: initialData.company?.company_country || '',  // FIXED: Use company_country field
             exporter_tax_id: initialData.company?.tax_id || '',
             exporter_phone: initialData.company?.contact_phone || '',
             exporter_email: initialData.company?.contact_email || '',
@@ -139,10 +139,11 @@ export default function USMCACertificateCompletion() {
         body: JSON.stringify({
           action: 'generate_certificate',
           certificateData: {
+            certifier_type: workflowData?.company?.certifier_type || 'EXPORTER',  // NEW: Pass certifier_type from Step 1
             company_info: {
               exporter_name: workflowData?.company?.company_name || workflowData?.company?.name || '',
               exporter_address: workflowData?.company?.company_address || '',
-              exporter_country: workflowData?.usmca?.manufacturing_location || '',
+              exporter_country: workflowData?.company?.company_country || '',  // FIXED: Use company's country, not manufacturing location
               exporter_tax_id: workflowData?.company?.tax_id || '',
               exporter_phone: workflowData?.company?.contact_phone || '',
               exporter_email: workflowData?.company?.contact_email || '',

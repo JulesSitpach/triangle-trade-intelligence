@@ -19,7 +19,13 @@ function verifySession(cookieValue) {
     const decoded = Buffer.from(cookieValue, 'base64').toString('utf-8');
     const { data, sig } = JSON.parse(decoded);
 
-    const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      console.error('CRITICAL: JWT_SECRET environment variable must be configured');
+      return null;
+    }
+
     const expectedSig = crypto.createHmac('sha256', secret)
       .update(JSON.stringify(data))
       .digest('hex');

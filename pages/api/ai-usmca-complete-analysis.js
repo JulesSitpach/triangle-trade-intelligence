@@ -9,6 +9,7 @@ import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { lookupHTSTariffRates } from '../../lib/tariff/hts-lookup.js';
+import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -220,13 +221,24 @@ export default protectedApiHandler({
       enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length
     });
 
+    // CRITICAL: Normalize all components to ensure consistent field names
+    // This creates BOTH display names (savings_percentage, ai_confidence)
+    // AND API names (savings_percent, confidence) for compatibility
+    const normalizedComponents = enrichedComponents.map(c => normalizeComponent(c));
+
+    // Validate enrichment completeness
+    const validation = logComponentValidation(normalizedComponents, 'AI Enrichment Output');
+    if (validation.invalid > 0) {
+      console.warn(`⚠️ ${validation.invalid} components missing enrichment data - check logs above`);
+    }
+
     // Store enriched component origins for results/certificate display
-    result.component_origins = enrichedComponents;
-    result.components = enrichedComponents; // Alias
+    result.component_origins = normalizedComponents;
+    result.components = normalizedComponents; // Alias
 
     // CRITICAL: Update component_breakdown with enriched data
     // USMCAQualification.js reads from result.usmca.component_breakdown
-    result.usmca.component_breakdown = enrichedComponents;
+    result.usmca.component_breakdown = normalizedComponents;
 
     result.manufacturing_location = formData.manufacturing_location;
     result.workflow_data = {
@@ -256,7 +268,7 @@ export default protectedApiHandler({
           trade_volume: formData.trade_volume ? parseFloat(formData.trade_volume.replace(/[^0-9.-]+/g, '')) : null,
           product_description: formData.product_description,
           hs_code: result.product.hs_code,
-          component_origins: enrichedComponents, // CRITICAL: Save enriched components with tariff intelligence
+          component_origins: normalizedComponents, // CRITICAL: Save NORMALIZED enriched components with tariff intelligence
           qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
           regional_content_percentage: result.usmca.north_american_content,
           required_threshold: result.usmca.threshold_applied,

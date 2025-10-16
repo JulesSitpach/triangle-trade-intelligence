@@ -5,6 +5,11 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import {
+  normalizeSubscriberData,
+  validateSubscriberData,
+  logValidationWarnings
+} from '../../../lib/validation/normalize-subscriber-data.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -62,8 +67,9 @@ async function handleCreateServiceRequest(req, res) {
       intelligence_priorities,
       preferred_locations,
       setup_timeline,
-      // Comprehensive workflow data (when user consents to professional service)
-      workflow_data,
+      // Comprehensive subscriber workflow data (when user consents to professional service)
+      subscriber_data,
+      workflow_data, // Legacy field - kept for backwards compatibility
       // Client consent fields
       data_storage_consent,
       consent_timestamp,
@@ -83,6 +89,11 @@ async function handleCreateServiceRequest(req, res) {
     const assigned_to = 'Jorge';
     const status = 'consultation_scheduled'; // 15-minute consultation first
     const priority = determinePriority(trade_volume, timeline, budget_range);
+
+    // Normalize and validate subscriber_data before saving
+    const normalizedSubscriberData = normalizeSubscriberData(subscriber_data || workflow_data || {});
+    const validation = validateSubscriberData(normalizedSubscriberData);
+    logValidationWarnings(validation, 'Service Request API');
 
     // Create service request record
     const serviceRequest = {
@@ -132,8 +143,10 @@ async function handleCreateServiceRequest(req, res) {
         setup_timeline
       },
 
-      // Complete USMCA workflow data (for professional certificate services)
-      workflow_data: workflow_data || null,
+      // Complete USMCA workflow data (PRIMARY FIELD - for professional certificate services)
+      // CRITICAL: Use normalized data to ensure correct field names (components → component_origins)
+      subscriber_data: normalizedSubscriberData,
+      workflow_data: workflow_data || null, // Legacy field - kept for backwards compatibility
 
       // Consultation scheduling info
       consultation_status: 'pending_schedule',

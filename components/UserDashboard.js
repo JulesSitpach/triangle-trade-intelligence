@@ -65,6 +65,47 @@ export default function UserDashboard({ user }) {
         console.log('⚠️ No stored certificate - generating from workflow data...');
         const workflowData = workflow.workflow_data || {};
 
+        // Track missing fields for dev issue logging
+        const missingFields = [];
+        if (!workflow.company_name && !workflowData.company?.name) missingFields.push('company_name');
+        if (!workflowData.company?.company_address && !workflowData.company?.address) missingFields.push('company_address');
+        if (!workflowData.company?.tax_id) missingFields.push('tax_id');
+        if (!workflowData.company?.contact_phone && !workflowData.company?.phone) missingFields.push('contact_phone');
+        if (!workflowData.company?.contact_email && !workflowData.company?.email) missingFields.push('contact_email');
+        if (!workflow.hs_code && !workflowData.product?.hs_code) missingFields.push('hs_code');
+        if (!workflow.product_description && !workflowData.product?.description) missingFields.push('product_description');
+        if (!workflowData.company?.contact_person && !workflow.company_name) missingFields.push('contact_person');
+        if (!workflow.manufacturing_location) missingFields.push('manufacturing_location');
+
+        if (missingFields.length > 0) {
+          console.error('🚨 DEV ISSUE: Missing workflow data in dashboard certificate generation', {
+            workflow_id: workflow.id,
+            missing_fields: missingFields,
+            workflow_has_workflow_data: !!workflow.workflow_data
+          });
+
+          // Log to admin dashboard (non-blocking)
+          fetch('/api/admin/log-dev-issue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              issue_type: 'missing_data',
+              severity: 'high',
+              component: 'dashboard_certificate_generator',
+              message: `Missing ${missingFields.length} required fields when generating certificate from dashboard`,
+              context_data: {
+                workflow_id: workflow.id,
+                missing_fields: missingFields,
+                workflow_structure: {
+                  has_workflow_data: !!workflow.workflow_data,
+                  has_company: !!workflowData.company,
+                  has_product: !!workflowData.product
+                }
+              }
+            })
+          }).catch(err => console.error('Failed to log dev issue:', err));
+        }
+
         certificateData = {
           certificate_number: `USMCA-${Date.now()}`,
           exporter: {
