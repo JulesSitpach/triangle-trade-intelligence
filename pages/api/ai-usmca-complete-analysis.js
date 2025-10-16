@@ -570,8 +570,7 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         }
       }
 
-      // Step 2: Determine USMCA member status
-      const usmcaCountries = ['US', 'MX', 'CA'];
+      // Step 2: Determine USMCA member status (using usmcaCountries from line 480)
       enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
 
       return enriched;
