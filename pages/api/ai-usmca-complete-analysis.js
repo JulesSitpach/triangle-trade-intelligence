@@ -54,7 +54,7 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet', // Use more powerful model for complex analysis
+        model: 'anthropic/claude-3.5-sonnet:beta', // Latest beta version - better structured output
         messages: [{
           role: 'user',
           content: prompt
@@ -192,7 +192,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'claude-3.5-sonnet',
+        model: 'claude-3.5-sonnet:beta',
         confidence_score: analysis.confidence_score || 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
