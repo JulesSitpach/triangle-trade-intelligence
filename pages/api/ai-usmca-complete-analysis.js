@@ -862,28 +862,48 @@ CRITICAL: Be precise and accurate. Apply current 2025 policy adjustments. This d
     const result = await response.json();
     const aiText = result.choices?.[0]?.message?.content;
 
-    // Parse JSON response with control character sanitization
-    const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in AI response');
+    // Multi-strategy JSON extraction with detailed logging
+    let classification;
+
+    // Strategy 1: Try parsing directly (AI might return clean JSON)
+    try {
+      classification = JSON.parse(aiText);
+      console.log('✅ JSON parsed directly (clean AI response)');
+    } catch (e1) {
+      // Strategy 2: Extract from markdown code blocks
+      try {
+        const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch) {
+          classification = JSON.parse(codeBlockMatch[1].trim());
+          console.log('✅ JSON extracted from markdown code block');
+        } else {
+          throw new Error('No code block found');
+        }
+      } catch (e2) {
+        // Strategy 3: Extract JSON object (between first { and last })
+        try {
+          const firstBrace = aiText.indexOf('{');
+          const lastBrace = aiText.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+            const jsonStr = aiText.substring(firstBrace, lastBrace + 1);
+            classification = JSON.parse(jsonStr);
+            console.log('✅ JSON extracted by brace matching');
+          } else {
+            throw new Error('No JSON object boundaries found');
+          }
+        } catch (e3) {
+          // All strategies failed - log and throw
+          console.error('❌ All JSON extraction strategies failed');
+          console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
+          console.error('Parse errors:', {
+            direct: e1.message,
+            codeBlock: e2.message,
+            braceMatch: e3.message
+          });
+          throw new Error(`Failed to extract JSON from AI response: ${e3.message}`);
+        }
+      }
     }
-
-    // Sanitize JSON string to handle control characters from AI
-    // Replace control characters that break JSON.parse (newlines, tabs, etc.)
-    let jsonString = jsonMatch[0]
-      .replace(/[\u0000-\u001F\u007F-\u009F]/g, (match) => {
-        // Escape control characters properly
-        const escapeMap = {
-          '\n': '\\n',
-          '\r': '\\r',
-          '\t': '\\t',
-          '\b': '\\b',
-          '\f': '\\f'
-        };
-        return escapeMap[match] || '';
-      });
-
-    const classification = JSON.parse(jsonString);
 
     return {
       success: true,
