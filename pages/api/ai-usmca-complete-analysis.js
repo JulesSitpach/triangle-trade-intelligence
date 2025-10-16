@@ -745,43 +745,78 @@ CURRENT SITUATION (October 2025):
 ⚠️ Port fees increased, Chinese shipping surcharges added
 ⚠️ Threatened additional tariffs up to +100% could hit at any time
 
+🚫 CRITICAL: DOMESTIC VS IMPORTED COMPONENTS
+Component origin: "${component.origin_country}"
+USMCA Member: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'YES - DOMESTIC' : 'NO - IMPORTED'}
+
+IF ORIGIN = US/MX/CA (USMCA MEMBERS):
+✅ These are DOMESTIC components within North America
+✅ NO Section 301 Chinese tariffs (those only apply to Chinese imports!)
+✅ NO port fees or shipping surcharges (not imported from overseas!)
+✅ Use ONLY the base HTS tariff rate (typically 0-2.5% for domestic goods)
+✅ mfn_rate = base_mfn_rate (NO policy adjustments)
+✅ policy_adjustments = [] (empty array - domestic sourcing)
+
+IF ORIGIN = CHINA OR OTHER NON-USMCA:
+⚠️ These are IMPORTED components from overseas
+⚠️ Apply Section 301/232 tariffs if applicable
+⚠️ Apply port fees and shipping surcharges
+⚠️ mfn_rate = base_mfn_rate + all policy adjustments
+
 YOUR TASK - APPLY CURRENT 2025 TARIFF KNOWLEDGE:
 For origin_country "${component.origin_country}":
 
-1. Use your knowledge of CURRENT 2025 tariff rates (not historical/outdated rates)
-2. Check if this country has recent tariff changes from Trump administration
-3. Include ALL applicable tariffs:
+1. First check: Is this US/MX/CA? If YES → DOMESTIC (no import tariffs!)
+2. If DOMESTIC: Use only base HTS rate, NO Section 301, NO port fees
+3. If IMPORTED (non-USMCA): Check recent tariff changes from Trump administration
+4. For IMPORTED components, include applicable tariffs:
    - Base MFN rate from HTS
-   - Section 232 (steel/aluminum)
-   - Section 301 (China tech/strategic goods: typically +25-50%)
+   - Section 232 (steel/aluminum from imports)
+   - Section 301 (China tech/strategic goods: typically +25-100%)
    - Country-specific tariffs (if Trump added new ones)
-   - Port fees and shipping surcharges (especially China)
+   - Port fees and shipping surcharges (China/Asia imports)
 
-4. Report the EFFECTIVE TOTAL RATE in mfn_rate field
-5. List all adjustments in policy_adjustments array
+5. Report the EFFECTIVE TOTAL RATE in mfn_rate field
+6. List all adjustments in policy_adjustments array (empty if domestic)
 
 EXAMPLES (CORRECT FORMAT - October 2025):
+
+DOMESTIC COMPONENTS (US/MX/CA):
+- HS 8537.10.80 Control panels from US:
+  - Base MFN: 2.7%
+  - NO Section 301 (domestic, not imported!)
+  - NO port fees (domestic sourcing)
+  - mfn_rate: 2.7 (ONLY base rate)
+  - policy_adjustments: [] (empty - domestic)
+  - usmca_rate: 0.0 (qualifies for USMCA)
+
+- HS 8708.30.50 Brake parts from MX:
+  - Base MFN: 2.5%
+  - NO import tariffs (USMCA domestic)
+  - mfn_rate: 2.5 (ONLY base rate)
+  - policy_adjustments: [] (empty - domestic)
+  - usmca_rate: 0.0 (qualifies for USMCA)
+
+IMPORTED COMPONENTS (NON-USMCA):
 - HS 8542.31.00 Microcontrollers from CN:
   - Base MFN: 0%
   - Section 301: +25%
   - Chinese port fees: +3% estimated
-  - mfn_rate: 28.0 (NOT 0.0!)
+  - mfn_rate: 28.0 (base + adjustments)
   - policy_adjustments: ["Section 301 China +25%", "Port surcharge ~3%"]
 
-- HS 8708.30.50 Brake parts from MX:
-  - Base MFN: 2.5%
-  - Recent tariff threats: monitoring
-  - mfn_rate: 2.5 (current, subject to change)
-  - usmca_rate: 0.0 (if qualifies)
-
-- HS 7208.52.00 Steel from CA:
+- HS 7208.52.00 Steel from EU:
   - Base MFN: 0%
-  - Section 232 steel: varies by agreement
-  - mfn_rate: 0.0-25.0 (depends on exemptions)
+  - Section 232 steel: +25% (if no exemption)
+  - mfn_rate: 25.0 (base + adjustment)
+  - policy_adjustments: ["Section 232 steel tariff +25%"]
 
-🚫 CRITICAL: NEVER use 0% for countries with known Section 301/232 tariffs
-✅ ALWAYS research current 2025 rates for origin country "${component.origin_country}"
-✅ When in doubt, estimate conservatively (better to overestimate than report 0%)
+🚫 CRITICAL RULES:
+- US/MX/CA components: NEVER apply Section 301/232 or port fees (domestic!)
+- Imported components: Apply Section 301/232 if applicable
+- NEVER use 0% for imported goods with known tariffs
+✅ ALWAYS check if component is domestic (US/MX/CA) FIRST
+✅ When in doubt about import tariffs, estimate conservatively
 
 For US/MX/CA with USMCA qualification: usmca_rate = 0% (duty-free)
 For non-USMCA: usmca_rate = 0% (field not applicable, they pay mfn_rate)
