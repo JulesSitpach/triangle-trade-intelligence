@@ -572,6 +572,8 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                   exporter_address: formData.company_address,
                   exporter_country: formData.company_country,  // FIXED: Use company's country, not supplier country
                   exporter_tax_id: formData.tax_id,
+                  exporter_phone: formData.contact_phone,  // FIXED: Map contact_phone to exporter_phone
+                  exporter_email: formData.contact_email,  // FIXED: Map contact_email to exporter_email
                   importer_name: formData.importer_name,
                   importer_address: formData.importer_address,
                   importer_country: formData.importer_country,
@@ -694,6 +696,8 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                   exporter_address: formData.company_address,
                   exporter_country: formData.company_country,  // FIXED: Use company's country, not supplier country
                   exporter_tax_id: formData.tax_id,
+                  exporter_phone: formData.contact_phone,  // FIXED: Map contact_phone to exporter_phone
+                  exporter_email: formData.contact_email,  // FIXED: Map contact_email to exporter_email
                   importer_name: formData.importer_name,
                   importer_address: formData.importer_address,
                   importer_country: formData.importer_country,

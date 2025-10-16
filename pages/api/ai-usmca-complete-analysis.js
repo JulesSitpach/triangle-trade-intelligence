@@ -516,28 +516,6 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
             console.log(`   📊 Policy Adjustments: ${enriched.policy_adjustments.join(', ')}`);
           }
           console.log(`   🎯 AI Confidence: ${classificationResult.confidence}%`);
-
-          // OPTIONAL: Try database lookup for comparison (STALE DATA - Jan 2025)
-          // This is a fallback ONLY if AI fails or for verification purposes
-          // Database data is outdated and does NOT include 2025 policy changes
-          try {
-            const htsLookup = await lookupHTSTariffRates(classificationResult.hs_code);
-            if (htsLookup.success) {
-              enriched.database_comparison = {
-                mfn_rate: htsLookup.mfn_rate,
-                usmca_rate: htsLookup.usmca_rate,
-                last_updated: htsLookup.last_updated,
-                note: 'STALE DATA - Does not include 2025 policy changes (China +100%, port fees, etc.)'
-              };
-              console.log(`   📚 Database (STALE): MFN ${htsLookup.mfn_rate}% (Jan 2025 data, not current)`);
-            }
-          } catch (dbError) {
-            // Database lookup failed - not critical since we have AI rates
-            console.log(`   ⚠️ Database lookup failed (not critical, using AI rates)`);
-          }
-
-          // Save AI-generated data to database to BUILD the database
-          await saveAIDataToDatabase(classificationResult, component);
         } else {
           console.log(`⚠️ AI Classification failed for "${component.description}"`);
           enriched.confidence = 0;
@@ -726,9 +704,29 @@ CLASSIFICATION RULES:
 1. Classify the COMPONENT itself (e.g., "Circuit Board Assembly" → PCB codes, NOT control panel codes)
 2. Component origin: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'US/MX/CA (DOMESTIC - no import tariffs)' : component.origin_country + ' (IMPORTED - apply policy adjustments)'}
 
-TARIFF RATES:
-- If US/MX/CA origin: Use base HTS rate only, NO Section 301/232, policy_adjustments = []
-- If imported (non-USMCA): Apply Section 301/232 if applicable, include policy_adjustments
+TARIFF CALCULATION (CRITICAL):
+${['US', 'MX', 'CA'].includes(component.origin_country) ?
+`DOMESTIC (US/MX/CA):
+- base_mfn_rate = HTS base rate (e.g., 2.7%)
+- policy_adjusted_mfn_rate = base_mfn_rate (NO adjustments for domestic)
+- mfn_rate = base_mfn_rate
+- usmca_rate = 0.0 (qualifies for USMCA)
+- policy_adjustments = []` :
+`IMPORTED (${component.origin_country}):
+- base_mfn_rate = HTS base rate (e.g., 0% for microcontrollers)
+- ADD policy adjustments: Section 301 China +100% = 0% + 100% = 100%
+- ADD port fees: 100% + 3% = 103%
+- policy_adjusted_mfn_rate = 103.0
+- mfn_rate = 103.0 (MUST equal policy_adjusted_mfn_rate)
+- usmca_rate = 0.0
+- policy_adjustments = ["Section 301 China +100%", "Port fees +3%"]
+
+CALCULATION EXAMPLE (China microcontrollers):
+base_mfn_rate: 0.0 (duty-free HTS base)
++ Section 301: 100.0
++ Port fees: 3.0
+= policy_adjusted_mfn_rate: 103.0
+= mfn_rate: 103.0 ✓ CORRECT`}
 
 Return ONLY valid JSON (no markdown, no extra text):
 {
@@ -876,7 +874,7 @@ function extractIndustryFromBusinessType(businessType) {
 async function saveAIDataToDatabase(classificationResult, component) {
   try {
     // Save to ai_classifications table to build our database over time
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('ai_classifications')
       .insert({
         hs_code: classificationResult.hs_code,
@@ -896,13 +894,22 @@ async function saveAIDataToDatabase(classificationResult, component) {
       });
 
     if (error) {
-      // Don't fail the request - just log the error
-      console.log(`⚠️ Failed to save AI data to database:`, error.message);
+      // IMPROVED ERROR LOGGING: Log full error object to diagnose issue
+      console.error(`⚠️ Failed to save AI data to database:`, {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        full_error: JSON.stringify(error, null, 2)
+      });
     } else {
       console.log(`💾 Saved AI classification to database: HS ${classificationResult.hs_code} (verified: false)`);
     }
   } catch (error) {
-    // Don't fail the request - just log the error
-    console.log(`⚠️ Database save error:`, error.message);
+    // Catch any unexpected errors
+    console.error(`⚠️ Database save exception:`, {
+      message: error.message,
+      stack: error.stack
+    });
   }
 }
