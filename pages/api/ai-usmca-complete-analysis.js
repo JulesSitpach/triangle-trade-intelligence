@@ -466,26 +466,38 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
   // Extract product description for backward compatibility
   const productContext = typeof businessContext === 'string' ? businessContext : businessContext.product_description;
 
-  // PERFORMANCE IMPROVEMENT: Parallelize AI classification calls
-  // Instead of sequential (15 seconds for 3 components), run in parallel (~6 seconds)
-  console.log(`🚀 Parallelizing AI classification for ${components.length} components...`);
+  // PROGRESSIVE CONTEXT STRATEGY: Classify components sequentially so each component knows about previous ones
+  // This provides MAXIMUM context for accurate HS code selection
+  // Example: Component 2 (Circuit Board) sees that Component 1 (Microcontrollers 8542.31) was already classified
+  // Result: AI knows "Circuit board houses 8542.31 processors" → More accurate classification
+  console.log(`🔗 Sequential enrichment with progressive context for ${components.length} components...`);
 
-  const enrichmentPromises = components.map(async (component) => {
+  // SEQUENTIAL processing with progressive context (not parallel)
+  const enrichedComponents = [];
+  const usmcaCountries = ['US', 'MX', 'CA'];
+
+  for (let i = 0; i < components.length; i++) {
+    const component = components[i];
+
     try {
       const enriched = { ...component };
 
-      // Step 1: AI Classification (using complete business context)
+      // Step 1: AI Classification with progressive context from previously classified components
       // CRITICAL: Always use AI for non-USMCA countries - Trump changing tariffs WEEKLY
       // Database rates are stale (Jan 2025) - don't include 2025 Trump policy changes
-      const usmcaCountries = ['US', 'MX', 'CA'];
       const isNonUSMCA = !usmcaCountries.includes(component.origin_country);
       const needsAIClassification = !component.hs_code || !component.classified_hs_code || isNonUSMCA;
 
       if (needsAIClassification) {
-        console.log(`📋 AI Classifying component: "${component.description}" from ${component.origin_country} (volatile tariffs)`);
+        console.log(`📋 AI Classifying component ${i + 1}/${components.length}: "${component.description}" from ${component.origin_country} (with context from ${enrichedComponents.length} previous components)`);
 
-
-        const classificationResult = await classifyComponentHS(component.description, businessContext, component);
+        // Pass previously enriched components for relationship context
+        const classificationResult = await classifyComponentHS(
+          component.description,
+          businessContext,
+          component,
+          enrichedComponents  // NEW: Previously classified components
+        );
 
         if (classificationResult.success) {
           // AI classified the HS code
@@ -548,29 +560,28 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         }
       }
 
-      // Step 2: Determine USMCA member status (using usmcaCountries from line 480)
+      // Step 2: Determine USMCA member status
       enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
 
-      return enriched;
+      // Add to enriched components array for next component's context
+      enrichedComponents.push(enriched);
 
     } catch (error) {
       console.error(`❌ Error enriching component "${component.description}":`, error);
-      // Return component with basic data if enrichment fails
-      return {
+      // Add basic component to array even if enrichment fails
+      const basicEnriched = {
         ...component,
         confidence: 0,
         mfn_rate: 0,
         usmca_rate: 0,
         savings_percent: 0,
-        is_usmca_member: ['US', 'MX', 'CA'].includes(component.origin_country)
+        is_usmca_member: usmcaCountries.includes(component.origin_country)
       };
+      enrichedComponents.push(basicEnriched);
     }
-  });
+  }
 
-  // Wait for all component enrichments to complete in parallel
-  const enrichedComponents = await Promise.all(enrichmentPromises);
-
-  console.log(`⚡ Parallel enrichment complete in ~${Math.max(...components.map(() => 6))}s (vs ${components.length * 5}s sequential)`);
+  console.log(`✅ Sequential enrichment complete: ${enrichedComponents.length} components classified with progressive context`);
 
   return enrichedComponents;
 }
@@ -675,13 +686,14 @@ SOURCE: Policies approved by admin from Global Trade Alert API, government RSS f
 }
 
 /**
- * Classify component description to HS code using AI (100% AI-powered - NO database lookups)
+ * Classify component description to HS code using AI with progressive context
  * @param {string} componentDescription - Component description to classify
  * @param {Object|string} businessContext - Full business context or just product description (backward compatible)
  * @param {Object} component - Component data with origin and percentage
+ * @param {Array} previousComponents - Previously classified components for relationship context (optional)
  * @returns {Object} Classification result with hs_code, tariff rates, and confidence
  */
-async function classifyComponentHS(componentDescription, businessContext, component) {
+async function classifyComponentHS(componentDescription, businessContext, component, previousComponents = []) {
   try {
     // Extract context fields (support both object and string for backward compatibility)
     const context = typeof businessContext === 'string'
@@ -690,6 +702,24 @@ async function classifyComponentHS(componentDescription, businessContext, compon
 
     // Build dynamic policy context from database
     const policyContext = await buildDynamicPolicyContext(component.origin_country);
+
+    // Build progressive component context (previously classified components)
+    let previousComponentsContext = '';
+    if (previousComponents.length > 0) {
+      previousComponentsContext = `\n===== PREVIOUSLY CLASSIFIED COMPONENTS (for relationship context) =====
+${previousComponents.map((prev, idx) =>
+  `Component ${idx + 1}: "${prev.description}" from ${prev.origin_country}
+  → Classified as: HS ${prev.classified_hs_code || prev.hs_code || 'pending'}
+  → Purpose: ${prev.value_percentage}% of final product value`
+).join('\n')}
+
+IMPORTANT: Consider how this new component relates to the previously classified components.
+- If components work together (e.g., microcontrollers + circuit board), use consistent classification family
+- If circuit board houses processors (8542.31), classify board appropriately for electronics
+- If enclosure contains electronics, classify as electronics housing (8538.90) not generic
+
+===== CURRENT COMPONENT TO CLASSIFY =====`;
+    }
 
     const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience. Use COMPLETE business context for accurate classification.
 
@@ -703,8 +733,8 @@ End Use: ${context.end_use || 'commercial'}
 FINAL PRODUCT:
 Product: ${context.product_description}
 Manufacturing Location: ${context.manufacturing_location || 'Not specified'}
-
-===== COMPONENT TO CLASSIFY =====
+${previousComponentsContext}
+${previousComponentsContext ? '' : '===== COMPONENT TO CLASSIFY ====='}
 Component Description: "${componentDescription}"
 Component Origin: ${component.origin_country}
 Component Value: ${component.value_percentage}% of total product value
