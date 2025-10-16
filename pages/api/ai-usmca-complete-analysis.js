@@ -1031,27 +1031,58 @@ EXAMPLE for China microcontrollers (HS 8542.31):
     const result = await response.json();
     const aiText = result.choices?.[0]?.message?.content;
 
-    // Extract JSON (same logic as other functions)
-    let jsonString = aiText.trim().startsWith('{') ? aiText : null;
-    if (!jsonString) {
-      const match = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (match) {
-        jsonString = match[1];
-      } else {
+    // Multi-strategy JSON extraction (same as classifyComponentHS)
+    let jsonString = null;
+    let extractionMethod = '';
+
+    // Strategy 1: Try direct extraction
+    if (aiText.trim().startsWith('{')) {
+      jsonString = aiText;
+      extractionMethod = 'direct';
+    }
+    // Strategy 2: Extract from markdown code blocks
+    else {
+      const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        jsonString = codeBlockMatch[1];
+        extractionMethod = 'code_block';
+      }
+      // Strategy 3: Extract JSON object (between first { and last })
+      else {
         const firstBrace = aiText.indexOf('{');
         const lastBrace = aiText.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1) {
+        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
           jsonString = aiText.substring(firstBrace, lastBrace + 1);
+          extractionMethod = 'brace_matching';
         }
       }
     }
 
     if (!jsonString) {
       console.error('❌ No JSON in batch tariff lookup response');
+      console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
       return {};
     }
 
-    const batchResult = JSON.parse(jsonString.trim());
+    // CRITICAL: Sanitize control characters BEFORE parsing (same as classifyComponentHS)
+    const sanitizedJSON = jsonString
+      .replace(/\r\n/g, ' ')  // Replace Windows line breaks with space
+      .replace(/\n/g, ' ')    // Replace Unix line breaks with space
+      .replace(/\r/g, ' ')    // Replace Mac line breaks with space
+      .replace(/\t/g, ' ')    // Replace tabs with space
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove other control characters
+
+    // Parse the sanitized JSON
+    let batchResult;
+    try {
+      batchResult = JSON.parse(sanitizedJSON.trim());
+      console.log(`✅ Batch JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
+    } catch (parseError) {
+      console.error('❌ Batch JSON parsing failed after sanitization');
+      console.error('Sanitized JSON (first 500 chars):', sanitizedJSON.substring(0, 500));
+      console.error('Parse error:', parseError.message);
+      return {};
+    }
 
     // Return the rates object (HS code → rates mapping)
     return batchResult.rates || {};
