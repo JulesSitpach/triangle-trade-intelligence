@@ -862,13 +862,28 @@ CRITICAL: Be precise and accurate. Apply current 2025 policy adjustments. This d
     const result = await response.json();
     const aiText = result.choices?.[0]?.message?.content;
 
-    // Parse JSON response
+    // Parse JSON response with control character sanitization
     const jsonMatch = aiText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON found in AI response');
     }
 
-    const classification = JSON.parse(jsonMatch[0]);
+    // Sanitize JSON string to handle control characters from AI
+    // Replace control characters that break JSON.parse (newlines, tabs, etc.)
+    let jsonString = jsonMatch[0]
+      .replace(/[\u0000-\u001F\u007F-\u009F]/g, (match) => {
+        // Escape control characters properly
+        const escapeMap = {
+          '\n': '\\n',
+          '\r': '\\r',
+          '\t': '\\t',
+          '\b': '\\b',
+          '\f': '\\f'
+        };
+        return escapeMap[match] || '';
+      });
+
+    const classification = JSON.parse(jsonString);
 
     return {
       success: true,
