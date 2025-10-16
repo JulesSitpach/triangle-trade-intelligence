@@ -53,7 +53,7 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet:beta', // Latest beta version - better structured output
+        model: 'anthropic/claude-3-haiku', // Haiku is perfect for qualification analysis (fast + cheap)
         messages: [{
           role: 'user',
           content: prompt
@@ -191,7 +191,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'claude-3.5-sonnet:beta',
+        model: 'claude-3-haiku',
         confidence_score: analysis.confidence_score || 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
