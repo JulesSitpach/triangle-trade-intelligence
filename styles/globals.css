@@ -2889,3 +2889,6 @@ textarea.form-input {
 
 /* ================== END OF MINIMAL GLOBALS CSS ================== */
 /* Total: ~1500 lines - Added Platform Capabilities Showcase for Trade Health Check */
+
+/* ================== BROKER CHATBOT STYLES ================== */
+@import './broker-chatbot.css';

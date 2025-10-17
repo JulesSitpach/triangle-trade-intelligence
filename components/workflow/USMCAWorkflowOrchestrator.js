@@ -19,6 +19,7 @@ import WorkflowError from './WorkflowError';
 import CrisisCalculatorResults from './CrisisCalculatorResults';
 import WorkflowPathSelection from './WorkflowPathSelection';
 import AuthorizationStep from './AuthorizationStep';
+import BrokerChatbot from '../chatbot/BrokerChatbot';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default function USMCAWorkflowOrchestrator() {
@@ -488,6 +489,26 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     processWorkflow('certificate');
   };
 
+  // Get current form field for chatbot context
+  const getCurrentFormField = () => {
+    // Map current step to form field context
+    if (currentStep === 1) {
+      return 'company_information';
+    } else if (currentStep === 2) {
+      return 'component_origins';
+    } else if (currentStep === 3) {
+      return 'supply_chain';
+    } else if (currentStep === 4) {
+      return 'authorization';
+    }
+    return 'general';
+  };
+
+  // Get workflow session ID for chatbot
+  const workflowSessionId = typeof window !== 'undefined'
+    ? localStorage.getItem('workflow_session_id') || `chat_${Date.now()}`
+    : `chat_${Date.now()}`;
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -758,6 +779,12 @@ NOTE: Complete all fields and obtain proper signatures before submission.
 
       {/* Loading Overlay */}
       <WorkflowLoading isVisible={isLoading} />
+
+      {/* Global Broker Chatbot - Available Throughout Journey */}
+      <BrokerChatbot
+        currentFormField={getCurrentFormField()}
+        sessionId={workflowSessionId}
+      />
     </div>
   );
 }
