@@ -30,6 +30,12 @@ export default protectedApiHandler({
     // Validate required fields
     validateRequiredFields({ sessionId }, ['sessionId']);
 
+    // CRITICAL: Check if user is authenticated before querying
+    if (!userId) {
+      logError('Workflow session retrieval failed - no authentication', { sessionId });
+      throw new ApiError('Authentication required', 401);
+    }
+
     // Try workflow_sessions first for in-progress workflows
     let { data, error } = await supabase
       .from('workflow_sessions')
