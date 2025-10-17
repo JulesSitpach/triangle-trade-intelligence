@@ -30,10 +30,10 @@ export default protectedApiHandler({
     // Validate required fields
     validateRequiredFields({ sessionId }, ['sessionId']);
 
-    // CRITICAL: Check if user is authenticated before querying
+    // Gracefully handle non-authenticated users - they use localStorage only
     if (!userId) {
-      logError('Workflow session retrieval failed - no authentication', { sessionId });
-      throw new ApiError('Authentication required', 401);
+      logInfo('Workflow session not found - user not authenticated (localStorage mode)', { sessionId });
+      throw new ApiError('Session not found', 404);
     }
 
     // Try workflow_sessions first for in-progress workflows
