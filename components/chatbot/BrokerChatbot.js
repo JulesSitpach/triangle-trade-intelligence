@@ -16,11 +16,13 @@ export default function BrokerChatbot({ currentFormField, sessionId }) {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const lastMessageRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to TOP of new message when it arrives (better UX)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, [messages]);
 
   // Generate session ID if not provided
@@ -162,7 +164,11 @@ export default function BrokerChatbot({ currentFormField, sessionId }) {
         {/* Messages */}
         <div className="chatbot-messages">
           {messages.map((msg, index) => (
-            <div key={index} className={`chat-message chat-message-${msg.type}`}>
+            <div
+              key={index}
+              className={`chat-message chat-message-${msg.type}`}
+              ref={index === messages.length - 1 ? lastMessageRef : null}
+            >
               <div className="chat-message-content">
                 <div className="chat-message-text">
                   {msg.text.split('\n').map((line, i) => (
@@ -254,8 +260,6 @@ export default function BrokerChatbot({ currentFormField, sessionId }) {
               </div>
             </div>
           )}
-
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Quick Questions */}
