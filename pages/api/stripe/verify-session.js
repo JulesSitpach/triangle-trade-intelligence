@@ -1,6 +1,7 @@
 import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 /**
  * Verify Stripe checkout session and get subscription details
@@ -11,6 +12,7 @@ export default protectedApiHandler({
     const { session_id } = req.query;
 
     if (!session_id) {
+      await DevIssue.missingData('verify_session', 'session_id', { query: req.query });
       throw new ApiError('Session ID is required', 400, {
         field: 'session_id'
       });
@@ -21,6 +23,13 @@ export default protectedApiHandler({
       const session = await stripe.checkout.sessions.retrieve(session_id);
 
       if (!session) {
+        await logDevIssue({
+          type: 'missing_data',
+          severity: 'high',
+          component: 'verify_session',
+          message: 'Stripe session not found',
+          data: { session_id, userId: req.user.id }
+        });
         throw new ApiError('Session not found', 404);
       }
 
@@ -50,6 +59,12 @@ export default protectedApiHandler({
         } : null
       });
     } catch (stripeError) {
+      await DevIssue.apiError('verify_session', '/api/stripe/verify-session', stripeError, {
+        session_id,
+        userId: req.user.id,
+        stripeErrorType: stripeError.type,
+        stripeErrorCode: stripeError.code
+      });
       console.error('Stripe session verification error:', stripeError);
       throw new ApiError('Failed to verify session', 500, {
         message: stripeError.message,

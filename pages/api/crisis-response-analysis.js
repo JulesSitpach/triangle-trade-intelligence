@@ -3,7 +3,13 @@
  * Used by Cristina's CrisisResponseTab - 3-stage workflow
  * Stage 2: AI analysis with FULL business intelligence context
  * Stage 3: Cristina's professional validation and execution
+ *
+ * 🔄 3-Tier Fallback Architecture:
+ * TIER 1: OpenRouter → TIER 2: Anthropic → TIER 3: Graceful fail
  */
+
+import { executeAIWithFallback, parseAIResponse } from '../../lib/ai-helpers.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,10 +19,38 @@ export default async function handler(req, res) {
   try {
     const { original_request, crisis_assessment, professional_input } = req.body;
 
+    // ✅ VALIDATION: Fail loudly if required data is missing (AI Fallback Architecture Rule 1)
+    if (!original_request || !original_request.subscriber_data) {
+      await DevIssue.missingData('crisis_response_api', 'original_request.subscriber_data', {
+        endpoint: '/api/crisis-response-analysis',
+        requestBody: req.body
+      });
+      return res.status(400).json({ error: 'Missing required field: original_request.subscriber_data' });
+    }
+    if (!original_request.subscriber_data.company_name) {
+      await DevIssue.missingData('crisis_response_api', 'subscriber_data.company_name', {
+        subscriberData: original_request.subscriber_data
+      });
+      return res.status(400).json({ error: 'Missing required field: company_name' });
+    }
+    if (!original_request.subscriber_data.product_description) {
+      await DevIssue.missingData('crisis_response_api', 'subscriber_data.product_description', {
+        company: original_request.subscriber_data.company_name
+      });
+      return res.status(400).json({ error: 'Missing required field: product_description' });
+    }
+    if (!crisis_assessment || !crisis_assessment.crisis_type) {
+      await DevIssue.missingData('crisis_response_api', 'crisis_assessment.crisis_type', {
+        company: original_request.subscriber_data.company_name,
+        hasAssessment: !!crisis_assessment
+      });
+      return res.status(400).json({ error: 'Missing required field: crisis_assessment.crisis_type' });
+    }
+
     // Extract comprehensive subscriber data and crisis details
-    const subscriberData = original_request?.subscriber_data || {};
-    const serviceDetails = original_request?.service_details || {};
-    const crisisDetails = crisis_assessment || {};
+    const subscriberData = original_request.subscriber_data;
+    const serviceDetails = original_request.service_details || {};
+    const crisisDetails = crisis_assessment;
 
     // Build comprehensive business context for AI analysis
     const businessContext = {
@@ -143,53 +177,69 @@ Provide a comprehensive crisis response analysis that Cristina can review and va
 
 Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_factors (array), action_plan (object with immediate_actions, short_term_actions, long_term_strategy arrays), financial_mitigation (array), regulatory_steps (array), supply_chain_recommendations (array).`;
 
-    console.log('[CRISIS RESPONSE] Calling OpenRouter API with comprehensive business context...');
+    console.log('[CRISIS RESPONSE] Calling AI with 3-tier fallback architecture...');
 
-    // Call OpenRouter API with full business intelligence
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-        'X-Title': 'Triangle Trade Intelligence - Crisis Response Analysis'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku',
-        messages: [{
-          role: 'user',
-          content: aiPrompt
-        }],
-        temperature: 0.7,
-        max_tokens: 2500
-      })
+    // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    const aiResult = await executeAIWithFallback({
+      prompt: aiPrompt,
+      model: 'anthropic/claude-3.5-haiku',
+      maxTokens: 2500
     });
 
-    if (!openRouterResponse.ok) {
-      throw new Error(`OpenRouter API error: ${openRouterResponse.status} ${openRouterResponse.statusText}`);
+    if (!aiResult.success) {
+      console.error('All AI tiers failed:', aiResult.error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'crisis_response_api',
+        message: 'AI crisis analysis failed for all tiers',
+        data: {
+          error: aiResult.error,
+          company: businessContext.company.name,
+          crisisType: businessContext.crisis.type,
+          componentCount: businessContext.product.component_origins?.length || 0
+        }
+      });
+      throw new Error(aiResult.error);
     }
 
-    const openRouterData = await openRouterResponse.json();
-    const aiResponseText = openRouterData.choices[0]?.message?.content || '';
+    console.log(`[CRISIS RESPONSE] Using ${aiResult.provider} (Tier ${aiResult.tier}) - ${aiResult.duration}ms`);
 
-    console.log('[CRISIS RESPONSE] OpenRouter API response received');
-
-    // Parse AI response (try JSON first, fallback to text parsing)
+    // Parse AI response with robust error handling
     let aiAnalysis;
     try {
-      // Try to extract JSON from response
-      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        aiAnalysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in response');
+      aiAnalysis = parseAIResponse(aiResult.content);
+
+      if (aiAnalysis.parseError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'crisis_response_api',
+          message: 'AI response parsing failed - using fallback',
+          data: {
+            company: businessContext.company.name,
+            crisisType: businessContext.crisis.type,
+            responsePreview: aiResult.content?.substring(0, 200)
+          }
+        });
+        throw new Error('Failed to parse AI response');
       }
     } catch (parseError) {
       console.log('[CRISIS RESPONSE] JSON parse failed, using structured fallback');
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'medium',
+        component: 'crisis_response_api',
+        message: 'JSON parsing failed - using structured fallback',
+        data: {
+          company: businessContext.company.name,
+          parseError: parseError.message
+        }
+      });
       // Fallback: structure the text response
       aiAnalysis = {
         crisis_severity: 'High',
-        immediate_impact: aiResponseText.substring(0, 200),
+        immediate_impact: 'AI analysis provided - requires Cristina\'s professional review',
         risk_factors: ['AI analysis provided - requires professional review'],
         action_plan: {
           immediate_actions: ['Review AI analysis below', 'Validate with business context'],
@@ -199,7 +249,7 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
         financial_mitigation: ['Minimize tariff exposure', 'Diversify supply chain'],
         regulatory_steps: ['Ensure compliance with regulations'],
         supply_chain_recommendations: ['Reduce concentration risk'],
-        raw_ai_analysis: aiResponseText
+        raw_ai_analysis: aiResult.content
       };
     }
 
@@ -230,6 +280,12 @@ Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_fa
 
   } catch (error) {
     console.error('Crisis response analysis error:', error);
+    await DevIssue.apiError('crisis_response_api', '/api/crisis-response-analysis', error, {
+      hasOriginalRequest: !!req.body.original_request,
+      hasSubscriberData: !!req.body.original_request?.subscriber_data,
+      hasCrisisAssessment: !!req.body.crisis_assessment,
+      company: req.body.original_request?.subscriber_data?.company_name || 'unknown'
+    });
     res.status(500).json({
       error: 'Crisis response analysis failed',
       message: error.message,

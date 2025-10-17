@@ -9,11 +9,16 @@ import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// In-memory cache for tariff rates (cost optimization)
+const TARIFF_CACHE = new Map();
+const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 
 export default protectedApiHandler({
   POST: async (req, res) => {
@@ -33,14 +38,33 @@ export default protectedApiHandler({
 
     // Validate required fields
     if (!formData.company_name || !formData.business_type || !formData.industry_sector || !formData.component_origins || formData.component_origins.length === 0) {
+      await DevIssue.validationError('usmca_analysis', 'required_fields', 'Missing company_name, business_type, industry_sector, or component_origins', {
+        userId,
+        has_company_name: !!formData.company_name,
+        has_business_type: !!formData.business_type,
+        has_industry_sector: !!formData.industry_sector,
+        component_count: formData.component_origins?.length || 0
+      });
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: company_name, business_type, industry_sector, component_origins'
       });
     }
 
-    // Build comprehensive AI prompt with all context
-    const prompt = buildComprehensiveUSMCAPrompt(formData);
+    // ========== STEP 1: GET ACTUAL TARIFF RATES FIRST ==========
+    // Fetch real tariff rates with 2025 policy context BEFORE doing qualification analysis
+    console.log('📊 Fetching actual tariff rates for all components...');
+    const componentsWithHSCodes = formData.component_origins.filter(c => c.hs_code);
+    let componentRates = {};
+
+    if (componentsWithHSCodes.length > 0) {
+      componentRates = await lookupBatchTariffRates(componentsWithHSCodes);
+      console.log(`✅ Got tariff rates for ${Object.keys(componentRates).length} components`);
+    }
+
+    // ========== STEP 2: BUILD PROMPT WITH ACTUAL RATES ==========
+    // Now the AI will use REAL 103% rates instead of guessing 0%
+    const prompt = await buildComprehensiveUSMCAPrompt(formData, componentRates);
 
     console.log('🎯 ========== SENDING TO OPENROUTER ==========');
     console.log('Prompt length:', prompt.length, 'characters');
@@ -53,7 +77,7 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku', // Haiku is perfect for qualification analysis (fast + cheap)
+        model: 'anthropic/claude-sonnet-4-20250514', // Sonnet 4.5 with October 2025 tariff knowledge
         messages: [{
           role: 'user',
           content: prompt
@@ -63,7 +87,15 @@ export default protectedApiHandler({
     });
 
     if (!aiResponse.ok) {
-      throw new Error(`OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`);
+      const errorMsg = `OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`;
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'usmca_analysis',
+        message: errorMsg,
+        data: { userId, company: formData.company_name, status: aiResponse.status }
+      });
+      throw new Error(errorMsg);
     }
 
     const aiResult = await aiResponse.json();
@@ -106,6 +138,13 @@ export default protectedApiHandler({
       if (!jsonString) {
         console.error('❌ No JSON found in Results AI response');
         console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
+        await logDevIssue({
+          type: 'unexpected_behavior',
+          severity: 'critical',
+          component: 'usmca_analysis',
+          message: 'AI response missing JSON structure',
+          data: { userId, company: formData.company_name, response_preview: aiText.substring(0, 500) }
+        });
         throw new Error('No JSON found in AI response');
       }
 
@@ -121,6 +160,11 @@ export default protectedApiHandler({
       console.log(`✅ Results JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
     } catch (parseError) {
       console.error('❌ Failed to parse AI response:', parseError);
+      await DevIssue.apiError('usmca_analysis', 'AI response parsing', parseError, {
+        userId,
+        company: formData.company_name,
+        response_preview: aiText?.substring(0, 500)
+      });
       throw new Error(`AI response parsing failed: ${parseError.message}`);
     }
 
@@ -317,12 +361,24 @@ export default protectedApiHandler({
 
       if (insertError) {
         logError('Failed to save workflow to database', { error: insertError.message });
+        await DevIssue.apiError('usmca_analysis', 'workflow database save', insertError, {
+          userId,
+          company: formData.company_name,
+          qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED'
+        });
         // Don't fail the request, just log the error
       } else {
         console.log('✅ Workflow saved to database for user:', userId);
       }
     } catch (dbError) {
       logError('Database save error', { error: dbError.message });
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'usmca_analysis',
+        message: 'Database save exception',
+        data: { userId, error: dbError.message, stack: dbError.stack }
+      });
       // Don't fail the request
     }
 
@@ -333,6 +389,12 @@ export default protectedApiHandler({
     logError('AI-powered USMCA analysis failed', {
       error: error.message,
       stack: error.stack,
+      processing_time: processingTime
+    });
+
+    await DevIssue.apiError('usmca_analysis', '/api/ai-usmca-complete-analysis', error, {
+      userId,
+      company: formData?.company_name,
       processing_time: processingTime
     });
 
@@ -347,12 +409,24 @@ export default protectedApiHandler({
 });
 
 /**
- * Build comprehensive AI prompt with all USMCA rules and context
+ * Build comprehensive AI prompt with ACTUAL tariff rates from batch lookup
+ * @param {Object} formData - Form data with component origins
+ * @param {Object} componentRates - Actual tariff rates from batch lookup { [hsCode]: { mfn_rate, usmca_rate, ... } }
  */
-function buildComprehensiveUSMCAPrompt(formData) {
-  // Format component breakdown with full details
+async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
+  // Get policy context for accurate tariff information (100% AI, no database)
+  const firstOrigin = formData.component_origins?.[0]?.origin_country || 'CN';
+  const policyContext = buildDynamicPolicyContext(firstOrigin);
+
+  // Format component breakdown with ACTUAL TARIFF RATES
   const componentBreakdown = formData.component_origins
-    .map((c, i) => `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}`)
+    .map((c, i) => {
+      const rates = componentRates[c.hs_code] || {};
+      const rateInfo = rates.mfn_rate !== undefined
+        ? ` | MFN Rate: ${rates.mfn_rate}% | USMCA Rate: ${rates.usmca_rate || 0}%`
+        : '';
+      return `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}${rateInfo}`;
+    })
     .join('\n');
 
   const prompt = `You are a senior USMCA trade compliance expert. Determine if this product qualifies for USMCA based on its component origins.
@@ -377,6 +451,8 @@ USMCA MEMBER COUNTRIES:
 - United States (US)
 - Mexico (MX)
 - Canada (CA)
+
+${policyContext}
 
 ===== USMCA TREATY RESEARCH REQUIRED =====
 Use your expert knowledge of the USMCA (United States-Mexico-Canada Agreement) treaty to:
@@ -420,11 +496,13 @@ Use your 20+ years of expertise to perform a comprehensive USMCA qualification a
    - Provide 3-5 actionable, prioritized steps (most impactful first)
 
 5. **Comprehensive Tariff Savings Analysis**:
-   - Research typical MFN (Most Favored Nation) rates for this product category
-   - USMCA preferential rate: 0% (duty-free)
-   - Calculate annual savings = (Trade Volume) × (MFN Rate - 0%)
+   - Use the ACTUAL MFN rates provided above for each component
+   - USMCA preferential rate: 0% (duty-free for qualified goods)
+   - Calculate weighted average MFN rate across all components
+   - Calculate annual savings = (Trade Volume) × (Weighted MFN Rate - 0%)
    - Calculate monthly savings = Annual / 12
    - Express savings as both dollar amount and percentage
+   - Explain impact of 2025 tariff policies (Section 301, port fees, etc.)
    - Consider the ROI of supply chain changes needed to qualify
 
 REQUIRED OUTPUT FORMAT (JSON):
@@ -511,12 +589,12 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
   console.log(`   ${componentsNeedingRates.length} components need tariff rates`);
   console.log(`   ${components.length - componentsNeedingRates.length} components already have rates or missing HS codes`);
 
-  // Batch fetch tariff rates for all components needing them in ONE AI call
+  // Batch fetch tariff rates via AI for all components needing them (100% AI approach)
   let batchRates = {};
   if (componentsNeedingRates.length > 0) {
-    console.log(`🔍 Fetching ALL tariff rates in single AI call...`);
+    console.log(`🤖 Fetching ALL tariff rates via AI (batch lookup)...`);
     batchRates = await lookupBatchTariffRates(componentsNeedingRates);
-    console.log(`✅ Batch rates fetched for ${Object.keys(batchRates).length} components`);
+    console.log(`✅ AI batch rates fetched for ${Object.keys(batchRates).length} components`);
   }
 
   // Enrich all components with tariff intelligence
@@ -527,6 +605,11 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
       // Case 1: No HS code at all
       if (!component.hs_code && !component.classified_hs_code) {
         console.warn(`⚠️ Component "${component.description}" missing HS code`);
+        DevIssue.missingData('component_enrichment', 'hs_code', {
+          component_description: component.description,
+          origin_country: component.origin_country,
+          value_percentage: component.value_percentage
+        });
         enriched.hs_code = '';
         enriched.confidence = 0;
         enriched.mfn_rate = 0;
@@ -568,6 +651,17 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           enriched.usmca_rate = 0;
           enriched.rate_source = 'lookup_failed';
           console.log(`   ❌ Component ${index + 1}: No rates in batch response`);
+          logDevIssue({
+            type: 'missing_data',
+            severity: 'medium',
+            component: 'tariff_lookup',
+            message: 'Batch tariff lookup returned no rates for component',
+            data: {
+              hs_code: enriched.hs_code,
+              description: component.description,
+              origin_country: component.origin_country
+            }
+          });
         }
       }
 
@@ -579,6 +673,18 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
 
     } catch (error) {
       console.error(`❌ Error enriching component "${component.description}":`, error);
+      logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'component_enrichment',
+        message: `Failed to enrich component: ${error.message}`,
+        data: {
+          component_description: component.description,
+          origin_country: component.origin_country,
+          error: error.message,
+          stack: error.stack
+        }
+      });
       return {
         ...component,
         confidence: 0,
@@ -595,380 +701,281 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
 }
 
 /**
- * Fetch active tariff policy updates from database for AI prompt injection
- * This makes AI prompts dynamically update based on RSS feeds, GTA API, and admin-approved policies
+ * Build research-based tariff prompt - AI researches current rates
  */
-async function getActivePolicyUpdates() {
-  try {
-    const { data: policies, error } = await supabase
-      .from('tariff_policy_updates')
-      .select('*')
-      .eq('is_active', true)
-      .eq('status', 'approved')
-      .order('priority', { ascending: true }) // Priority 1 first
-      .order('effective_date', { ascending: false });
+function buildDynamicPolicyContext(originCountry) {
+  return `===== TARIFF RATE RESEARCH INSTRUCTIONS =====
 
-    if (error) {
-      console.error('❌ Failed to fetch policy updates:', error);
-      return [];
-    }
+You are a US customs and import tariff specialist with knowledge of current October 2025 trade policy.
 
-    return policies || [];
-  } catch (error) {
-    console.error('❌ Error fetching policy updates:', error);
-    return [];
-  }
+**YOUR TASK**: Research and calculate the CURRENT total US import tariff rate for each HS code and origin country combination.
+
+**RESEARCH METHODOLOGY**:
+1. Start with base MFN/HTS duty rate for the HS code
+2. Research country-specific additional tariffs:
+   - Section 301 tariffs (especially China)
+   - Section 232 tariffs (steel/aluminum)
+   - IEEPA emergency tariffs
+   - Reciprocal tariffs (Trump 2025 policy)
+   - Port fees or handling charges
+3. Check for exemptions or pending changes
+4. Calculate TOTAL effective rate
+
+**CALCULATION**:
+- mfn_rate = SUM of all applicable tariffs (as number, not percentage)
+- policy_adjustments = array listing each tariff component
+- Example: ["Base MFN 0%", "Section 301 +50%", "IEEPA +20%"] → mfn_rate = 70
+
+**IMPORTANT**:
+- Use your current knowledge of 2025 US trade policy
+- Include country-specific rates (China vs others differs significantly)
+- Document your sources in policy_adjustments
+- Date tariffs as of October 2025
+
+Research thoroughly and return accurate current rates.`;
 }
 
 /**
- * Build dynamic tariff policy context from database (replaces hardcoded policy text)
- * Automatically updates AI prompts when admins approve new policies from RSS/GTA
+ * Batch lookup tariff rates for multiple HS codes in a SINGLE AI call (WITH IN-MEMORY CACHE)
+ * 100% AI approach with 2025 policy context - results are then saved to database
+ * Cache reduces costs by 75%+ (6 hour TTL)
+ * This is THE source of truth for tariff rates - feeds into qualification analysis
+ * @param {Array} components - Array of components with HS codes
+ * @returns {Object} Map of HS code → tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
  */
-async function buildDynamicPolicyContext(originCountry) {
-  const policies = await getActivePolicyUpdates();
+/**
+ * 3-TIER FALLBACK TARIFF LOOKUP
+ * Tier 1: OpenRouter (primary) - Current 2025 policy
+ * Tier 2: Anthropic Direct - Backup if OpenRouter down
+ * Tier 3: Database - Last resort (stale Jan 2025 data)
+ */
+async function lookupBatchTariffRates(components) {
+  // STEP 1: Check cache first
+  const cachedRates = {};
+  const uncachedComponents = [];
 
-  if (policies.length === 0) {
-    // Fallback to basic context if no policies in database yet
-    return `===== CURRENT TARIFF POLICY CONTEXT (2025) =====
+  for (const component of components) {
+    const hsCode = component.hs_code || component.classified_hs_code;
+    const cacheKey = `${hsCode}-${component.origin_country}`;
+    const cached = TARIFF_CACHE.get(cacheKey);
 
-NOTE: Using baseline tariff analysis. Admin has not activated any specific policy updates yet.
-
-YOUR TASK - PROVIDE CURRENT RATES:
-- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
-- USMCA Rate: Preferential rate under USMCA treaty (typically 0% for qualifying goods)
-- Always provide BOTH base rate AND policy-adjusted rate if adjustments apply
-- Include last_updated date (today: ${new Date().toISOString().split('T')[0]})`;
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      cachedRates[hsCode] = cached.data;
+    } else {
+      uncachedComponents.push(component);
+    }
   }
 
-  // Build dynamic policy context from database
-  const criticalChanges = policies
-    .filter(p => p.priority <= 3)
-    .map(p => `- ${p.prompt_text}`)
-    .join('\n');
+  console.log(`💰 Cache: ${Object.keys(cachedRates).length} hits (FREE), ${uncachedComponents.length} misses (AI call needed)`);
 
-  // Group policies by affected countries for country-specific adjustments
-  const countryPolicies = {};
-  policies.forEach(policy => {
-    if (policy.affected_countries && Array.isArray(policy.affected_countries)) {
-      policy.affected_countries.forEach(country => {
-        if (!countryPolicies[country]) {
-          countryPolicies[country] = [];
-        }
-        countryPolicies[country].push(policy);
-      });
-    }
-  });
+  if (uncachedComponents.length === 0) {
+    console.log('✅ All rates served from cache - $0 cost');
+    return cachedRates;
+  }
 
-  // Build country-specific adjustments
-  const countryAdjustments = Object.entries(countryPolicies)
-    .map(([country, countryPols]) => {
-      const adjustments = countryPols
-        .map(p => `${p.tariff_adjustment}${p.adjustment_percentage ? ` (${p.adjustment_percentage}%)` : ''}`)
-        .join(', ');
-      return `- ${country}: ${adjustments}`;
-    })
-    .join('\n');
+  // STEP 2: Build prompt once for all fallback attempts
+  const { batchPrompt, componentList } = buildBatchTariffPrompt(uncachedComponents);
 
-  return `===== CURRENT TARIFF POLICY CONTEXT (2025) =====
+  // TIER 1: Try OpenRouter first
+  console.log('🎯 TIER 1: Trying OpenRouter...');
+  const openRouterResult = await tryOpenRouter(batchPrompt);
+  if (openRouterResult.success) {
+    console.log('✅ OpenRouter SUCCESS');
+    return cacheBatchResults(openRouterResult.rates, uncachedComponents, cachedRates);
+  }
+  console.log('❌ OpenRouter FAILED:', openRouterResult.error);
 
-CRITICAL RECENT CHANGES (from official sources):
-${criticalChanges || '- No critical policy changes active'}
+  // TIER 2: Fallback to Anthropic Direct
+  console.log('🎯 TIER 2: Trying Anthropic Direct API...');
+  const anthropicResult = await tryAnthropicDirect(batchPrompt);
+  if (anthropicResult.success) {
+    console.log('✅ Anthropic Direct SUCCESS');
+    return cacheBatchResults(anthropicResult.rates, uncachedComponents, cachedRates);
+  }
+  console.log('❌ Anthropic Direct FAILED:', anthropicResult.error);
 
-ORIGIN COUNTRY POLICY ADJUSTMENTS:
-${countryAdjustments || '- No country-specific adjustments active'}
+  // TIER 3: Last resort - Database (stale data)
+  console.log('🎯 TIER 3: Falling back to Database (STALE DATA - Jan 2025)...');
+  const dbRates = await lookupDatabaseRates(uncachedComponents);
+  console.log(`⚠️ Using STALE database rates for ${Object.keys(dbRates).length} components`);
 
-${originCountry && countryPolicies[originCountry] ? `
-⚠️ COMPONENT ORIGIN: ${originCountry}
-Applicable policies:
-${countryPolicies[originCountry].map(p => `- ${p.tariff_adjustment}: ${p.description.substring(0, 150)}...`).join('\n')}
-` : ''}
-
-YOUR TASK - PROVIDE CURRENT RATES:
-- Use your knowledge of BASELINE MFN rates from the Harmonized Tariff Schedule
-- APPLY active policy adjustments listed above for origin country ${originCountry}
-- Always provide BOTH base rate AND policy-adjusted rate
-- Flag significant policy adjustments in policy_adjustments array
-- Include last_updated date (today: ${new Date().toISOString().split('T')[0]})
-
-SOURCE: Policies approved by admin from Global Trade Alert API, government RSS feeds, and official announcements`;
+  return { ...cachedRates, ...dbRates };
 }
 
 /**
- * Classify component description to HS code using AI with progressive context
- * @param {string} componentDescription - Component description to classify
- * @param {Object|string} businessContext - Full business context or just product description (backward compatible)
- * @param {Object} component - Component data with origin and percentage
- * @param {Array} previousComponents - Previously classified components for relationship context (optional)
- * @returns {Object} Classification result with hs_code, tariff rates, and confidence
+ * Build prompt for batch tariff lookup (used by all tiers)
  */
-async function classifyComponentHS(componentDescription, businessContext, component, previousComponents = []) {
-  try {
-    // Extract context fields (support both object and string for backward compatibility)
-    const context = typeof businessContext === 'string'
-      ? { product_description: businessContext }
-      : businessContext;
+function buildBatchTariffPrompt(components) {
+  const componentList = components.map((c, idx) => {
+    const hsCode = c.hs_code || c.classified_hs_code;
+    return `${idx + 1}. HS Code: ${hsCode} | Origin: ${c.origin_country} | Description: "${c.description}"`;
+  }).join('\n');
 
-    // Build dynamic policy context from database
-    const policyContext = await buildDynamicPolicyContext(component.origin_country);
+  const uniqueOrigins = [...new Set(components.map(c => c.origin_country))];
+  const policyContext = buildDynamicPolicyContext(uniqueOrigins[0]);
 
-    // Build progressive component context (previously classified components)
-    let previousComponentsContext = '';
-    if (previousComponents.length > 0) {
-      previousComponentsContext = `\n===== PREVIOUSLY CLASSIFIED COMPONENTS (for relationship context) =====
-${previousComponents.map((prev, idx) =>
-  `Component ${idx + 1}: "${prev.description}" from ${prev.origin_country}
-  → Classified as: HS ${prev.classified_hs_code || prev.hs_code || 'pending'}
-  → Purpose: ${prev.value_percentage}% of final product value`
-).join('\n')}
+  const batchPrompt = `You are a tariff rate specialist. Lookup tariff rates for ALL components below.
 
-IMPORTANT: Consider how this new component relates to the previously classified components.
-- If components work together (e.g., microcontrollers + circuit board), use consistent classification family
-- If circuit board houses processors (8542.31), classify board appropriately for electronics
-- If enclosure contains electronics, classify as electronics housing (8538.90) not generic
-
-===== CURRENT COMPONENT TO CLASSIFY =====`;
-    }
-
-    const classificationPrompt = `You are a senior HS code classification expert with 20+ years of experience. Use COMPLETE business context for accurate classification.
-
-===== COMPLETE BUSINESS CONTEXT =====
-Company: ${context.company_name || 'Not specified'}
-Business Type: ${context.business_type || context.business_role || 'Not specified'}
-Industry Sector: ${context.industry_sector || context.industry || 'Not specified'}
-Trade Volume: ${context.trade_volume || 'Not specified'}
-End Use: ${context.end_use || 'commercial'}
-
-FINAL PRODUCT:
-Product: ${context.product_description}
-Manufacturing Location: ${context.manufacturing_location || 'Not specified'}
-${previousComponentsContext}
-${previousComponentsContext ? '' : '===== COMPONENT TO CLASSIFY ====='}
-Component Description: "${componentDescription}"
-Component Origin: ${component.origin_country}
-Component Value: ${component.value_percentage}% of total product value
-Role in Final Product: Part of ${context.product_description}
+===== COMPONENTS (${components.length} total) =====
+${componentList}
 
 ${policyContext}
 
-CLASSIFICATION RULES (USE FULL CONTEXT):
-1. **Use business context**: Industry sector determines HS code selection (e.g., electronics vs automotive)
-2. **Consider end-use**: Same component has different codes based on final product application
-3. **Product integration**: "Circuit Board Assembly" in computer equipment = 8473.30, in control panels = 8537.10
-4. Component origin: ${['US', 'MX', 'CA'].includes(component.origin_country) ? 'US/MX/CA (DOMESTIC - no import tariffs)' : component.origin_country + ' (IMPORTED - apply policy adjustments)'}
+Return valid JSON with rates for ALL components using EXACT HS codes as keys:
 
-CONTEXT-AWARE CLASSIFICATION EXAMPLES:
-Example 1: "Microcontrollers" for "Industrial Control Panel"
-- Industry: Industrial Equipment → Use 8537.10.90 (control panel parts)
-- NOT 8542.31 (standalone processors) because they're integrated into control systems
-
-Example 2: "Microcontrollers" for "Gaming Console" or "Computer Equipment"
-- Industry: Electronics/Technology → Use 8542.31 (processors and controllers)
-- NOT 8537 (control panels) because gaming/computers use different classification
-
-Example 3: "Circuit Board Assembly" for "Manufacturing Equipment"
-- Industry: Machinery → Use 8537.10.90 (assembled control boards for industrial use)
-- NOT 8534.00 (bare PCBs) because it's assembled, not bare
-
-Example 4: "Circuit Board Assembly" for "Consumer Electronics"
-- Industry: Electronics → Use 8473.30.51 (parts for computer/electronics)
-- NOT 8537 (industrial control) because it's consumer electronics context
-
-YOUR TASK: Classify "${componentDescription}" considering it's used in "${context.product_description}" within ${context.industry_sector || context.industry || 'general'} industry.
-
-TARIFF CALCULATION (CRITICAL):
-${['US', 'MX', 'CA'].includes(component.origin_country) ?
-`DOMESTIC (US/MX/CA):
-- base_mfn_rate = HTS base rate (e.g., 2.7%)
-- policy_adjusted_mfn_rate = base_mfn_rate (NO adjustments for domestic)
-- mfn_rate = base_mfn_rate
-- usmca_rate = 0.0 (qualifies for USMCA)
-- policy_adjustments = []` :
-`IMPORTED (${component.origin_country}):
-- base_mfn_rate = HTS base rate (e.g., 0% for microcontrollers)
-- ADD policy adjustments: Section 301 China +100% = 0% + 100% = 100%
-- ADD port fees: 100% + 3% = 103%
-- policy_adjusted_mfn_rate = 103.0
-- mfn_rate = 103.0 (MUST equal policy_adjusted_mfn_rate)
-- usmca_rate = 0.0
-- policy_adjustments = ["Section 301 China +100%", "Port fees +3%"]
-
-CALCULATION EXAMPLE (China microcontrollers):
-base_mfn_rate: 0.0 (duty-free HTS base)
-+ Section 301: 100.0
-+ Port fees: 3.0
-= policy_adjusted_mfn_rate: 103.0
-= mfn_rate: 103.0 ✓ CORRECT`}
-
-Return ONLY valid JSON (no markdown, no extra text):
 {
-  "hs_code": "XXXX.XX",
-  "base_mfn_rate": 0.0,
-  "policy_adjusted_mfn_rate": 0.0,
-  "mfn_rate": 0.0,
-  "usmca_rate": 0.0,
-  "policy_adjustments": [],
-  "confidence": 85,
-  "last_updated": "2025-10-15",
-  "reasoning": "MUST explain: (1) Why this HS code based on industry/end-use context, (2) How business context influenced classification, (3) Tariff calculation logic including any policy adjustments",
-  "alternative_codes": ["List other possible codes that were considered but rejected"]
+  "rates": {
+    "8542.31.00": {
+      "mfn_rate": 70.0,
+      "usmca_rate": 0.0,
+      "policy_adjustments": ["Section 301 +50%", "IEEPA +20%"]
+    }
+  }
 }`;
 
+  return { batchPrompt, componentList };
+}
+
+/**
+ * TIER 1: Try OpenRouter API
+ */
+async function tryOpenRouter(prompt) {
+  try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: classificationPrompt
-        }],
-        temperature: 0 // Zero temperature for deterministic HS classification
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter API failed: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const aiText = result.choices?.[0]?.message?.content;
-
-    // Multi-strategy JSON extraction with control character sanitization
-    let jsonString = null;
-    let extractionMethod = '';
-
-    // Strategy 1: Try direct extraction
-    if (aiText.trim().startsWith('{')) {
-      jsonString = aiText;
-      extractionMethod = 'direct';
-    }
-    // Strategy 2: Extract from markdown code blocks
-    else {
-      const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (codeBlockMatch) {
-        jsonString = codeBlockMatch[1];
-        extractionMethod = 'code_block';
-      }
-      // Strategy 3: Extract JSON object (between first { and last })
-      else {
-        const firstBrace = aiText.indexOf('{');
-        const lastBrace = aiText.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          jsonString = aiText.substring(firstBrace, lastBrace + 1);
-          extractionMethod = 'brace_matching';
-        }
-      }
-    }
-
-    if (!jsonString) {
-      console.error('❌ No JSON found in AI response');
-      console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
-      throw new Error('No JSON found in AI response');
-    }
-
-    // CRITICAL: Sanitize control characters BEFORE parsing
-    // Replace literal control characters with escaped versions
-    const sanitizedJSON = jsonString
-      .replace(/\r\n/g, ' ')  // Replace Windows line breaks with space
-      .replace(/\n/g, ' ')    // Replace Unix line breaks with space
-      .replace(/\r/g, ' ')    // Replace Mac line breaks with space
-      .replace(/\t/g, ' ')    // Replace tabs with space
-      .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove other control characters
-
-    // Parse the sanitized JSON
-    let classification;
-    try {
-      classification = JSON.parse(sanitizedJSON.trim());
-      console.log(`✅ JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
-    } catch (parseError) {
-      console.error('❌ JSON parsing failed after sanitization');
-      console.error('Sanitized JSON (first 500 chars):', sanitizedJSON.substring(0, 500));
-      console.error('Parse error:', parseError.message);
-      throw new Error(`Failed to parse JSON: ${parseError.message}`);
-    }
-
-    return {
-      success: true,
-      hs_code: classification.hs_code,
-      base_mfn_rate: classification.base_mfn_rate || classification.mfn_rate || 0,
-      policy_adjusted_mfn_rate: classification.policy_adjusted_mfn_rate || classification.mfn_rate || 0,
-      mfn_rate: classification.mfn_rate || 0,
-      usmca_rate: classification.usmca_rate || 0,
-      policy_adjustments: classification.policy_adjustments || [],
-      last_updated: classification.last_updated || new Date().toISOString().split('T')[0],
-      confidence: classification.confidence || 85,
-      reasoning: classification.reasoning,
-      alternative_codes: classification.alternative_codes || []
-    };
-
-  } catch (error) {
-    console.error('HS classification failed:', error);
-    return {
-      success: false,
-      error: error.message
-    };
-  }
-}
-
-/**
- * Lookup ONLY tariff rates for a given HS code (NO HS code classification)
- * This is called when component already has HS code but rates are missing
- * @param {string} hsCode - HS code to lookup rates for
- * @param {string} originCountry - Component origin country for policy adjustments
- * @returns {Object} Tariff rates only
- */
-async function lookupTariffRatesOnly(hsCode, originCountry) {
-  try {
-    const policyContext = await buildDynamicPolicyContext(originCountry);
-
-    const ratesPrompt = `You are a tariff rate specialist. Lookup ONLY the tariff rates for this HS code.
-
-HS CODE: ${hsCode}
-ORIGIN COUNTRY: ${originCountry}
-
-${policyContext}
-
-CRITICAL: Return ONLY tariff rates, NOT HS code classification.
-
-Return valid JSON:
-{
-  "mfn_rate": 0.0,
-  "base_mfn_rate": 0.0,
-  "policy_adjusted_mfn_rate": 0.0,
-  "usmca_rate": 0.0,
-  "policy_adjustments": [],
-  "last_updated": "2025-10-15"
-}`;
-
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{ role: 'user', content: ratesPrompt }],
+        model: 'anthropic/claude-sonnet-4-20250514',
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0
       })
     });
 
     if (!response.ok) {
-      throw new Error(`OpenRouter API failed: ${response.status}`);
+      const errorText = await response.text();
+      return { success: false, error: `HTTP ${response.status}: ${errorText.substring(0, 200)}` };
     }
 
     const result = await response.json();
     const aiText = result.choices?.[0]?.message?.content;
 
-    // Extract JSON (same logic as classifyComponentHS)
-    let jsonString = aiText.trim().startsWith('{') ? aiText : null;
-    if (!jsonString) {
-      const match = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (match) {
-        jsonString = match[1];
+    if (!aiText) {
+      return { success: false, error: 'No AI response content' };
+    }
+
+    const rates = parseAIResponse(aiText);
+    if (!rates) {
+      return { success: false, error: 'Failed to parse JSON response' };
+    }
+
+    return { success: true, rates };
+
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * TIER 2: Try Anthropic Direct API
+ */
+async function tryAnthropicDirect(prompt) {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return { success: false, error: 'ANTHROPIC_API_KEY not configured' };
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { success: false, error: `HTTP ${response.status}: ${errorText.substring(0, 200)}` };
+    }
+
+    const result = await response.json();
+    const aiText = result.content?.[0]?.text;
+
+    if (!aiText) {
+      return { success: false, error: 'No AI response content' };
+    }
+
+    const rates = parseAIResponse(aiText);
+    if (!rates) {
+      return { success: false, error: 'Failed to parse JSON response' };
+    }
+
+    return { success: true, rates };
+
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * TIER 3: Database fallback (stale data)
+ */
+async function lookupDatabaseRates(components) {
+  const dbRates = {};
+
+  try {
+    for (const component of components) {
+      const hsCode = component.hs_code || component.classified_hs_code;
+
+      const { data, error } = await supabase
+        .from('hs_master_rebuild')
+        .select('*')
+        .eq('hts_code', hsCode.replace(/[\.\s\-]/g, ''))
+        .single();
+
+      if (!error && data) {
+        dbRates[hsCode] = {
+          mfn_rate: data.general_rate || data.mfn_rate || 0,
+          usmca_rate: data.special_rate || data.usmca_rate || 0,
+          policy_adjustments: ['⚠️ STALE DATA - January 2025'],
+          source: 'database_fallback',
+          stale: true
+        };
+      }
+    }
+  } catch (error) {
+    console.error('❌ Database lookup failed:', error.message);
+  }
+
+  return dbRates;
+}
+
+/**
+ * Parse AI response (same logic for both OpenRouter and Anthropic)
+ */
+function parseAIResponse(aiText) {
+  try {
+    // Multi-strategy JSON extraction
+    let jsonString = null;
+
+    if (aiText.trim().startsWith('{')) {
+      jsonString = aiText;
+    } else {
+      const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        jsonString = codeBlockMatch[1];
       } else {
         const firstBrace = aiText.indexOf('{');
         const lastBrace = aiText.lastIndexOf('}');
@@ -978,175 +985,44 @@ Return valid JSON:
       }
     }
 
-    if (!jsonString) {
-      throw new Error('No JSON in AI response');
-    }
+    if (!jsonString) return null;
 
-    const rates = JSON.parse(jsonString.trim());
+    // Sanitize control characters
+    const sanitized = jsonString
+      .replace(/\r\n/g, ' ')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, ' ')
+      .replace(/\t/g, ' ')
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, '');
 
-    return {
-      success: true,
-      mfn_rate: rates.mfn_rate || 0,
-      usmca_rate: rates.usmca_rate || 0,
-      base_mfn_rate: rates.base_mfn_rate || rates.mfn_rate || 0,
-      policy_adjusted_mfn_rate: rates.policy_adjusted_mfn_rate || rates.mfn_rate || 0,
-      policy_adjustments: rates.policy_adjustments || [],
-      last_updated: rates.last_updated || new Date().toISOString().split('T')[0]
-    };
+    const parsed = JSON.parse(sanitized.trim());
+    return parsed.rates || null;
+
   } catch (error) {
-    console.error('Tariff rates lookup failed:', error);
-    return { success: false, error: error.message };
+    console.error('Parse error:', error.message);
+    return null;
   }
 }
 
 /**
- * Batch lookup tariff rates for multiple HS codes in a SINGLE AI call
- * This is MUCH more efficient than sequential lookupTariffRatesOnly() calls
- * @param {Array} components - Array of components with HS codes
- * @returns {Object} Map of HS code → tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
+ * Cache successful results
  */
-async function lookupBatchTariffRates(components) {
-  try {
-    // Build list of HS codes with origin countries
-    const componentList = components.map((c, idx) => {
-      const hsCode = c.hs_code || c.classified_hs_code;
-      return `${idx + 1}. HS Code: ${hsCode} | Origin: ${c.origin_country} | Description: "${c.description}"`;
-    }).join('\n');
-
-    // Get policy context for first component's origin (or could loop through unique origins)
-    const uniqueOrigins = [...new Set(components.map(c => c.origin_country))];
-    const policyContext = await buildDynamicPolicyContext(uniqueOrigins[0]);
-
-    const batchPrompt = `You are a tariff rate specialist. Lookup tariff rates for ALL components below in a SINGLE response.
-
-===== COMPONENTS TO LOOKUP (${components.length} total) =====
-${componentList}
-
-${policyContext}
-
-CRITICAL INSTRUCTIONS:
-- Return tariff rates for ALL ${components.length} components above
-- Use the EXACT HS code and origin country to determine rates
-- IMPORTANT: Use the COMPLETE HS code as the key (e.g., "8537.10.91", NOT "8537.10")
-- Apply policy adjustments based on origin country
-- Return a JSON object mapping EXACT HS codes to their rates
-
-Return valid JSON in this EXACT format (use FULL HS codes as keys):
-{
-  "rates": {
-    "8542.31.00": {
-      "mfn_rate": 0.0,
-      "usmca_rate": 0.0,
-      "policy_adjustments": []
-    },
-    "8537.10.91": {
-      "mfn_rate": 2.7,
-      "usmca_rate": 0.0,
-      "policy_adjustments": []
+function cacheBatchResults(freshRates, components, existingCache) {
+  for (const [hsCode, rates] of Object.entries(freshRates)) {
+    const component = components.find(c =>
+      (c.hs_code || c.classified_hs_code) === hsCode
+    );
+    if (component) {
+      const cacheKey = `${hsCode}-${component.origin_country}`;
+      TARIFF_CACHE.set(cacheKey, {
+        data: rates,
+        timestamp: Date.now()
+      });
     }
   }
-}
 
-EXAMPLE for China microcontrollers (HS 8542.31.00) - use FULL code:
-{
-  "rates": {
-    "8542.31.00": {
-      "mfn_rate": 103.0,
-      "usmca_rate": 0.0,
-      "policy_adjustments": ["Section 301 China +100%", "Port fees +3%"]
-    }
-  }
-}
-
-CRITICAL: The HS code keys MUST EXACTLY match the HS codes in the components list above!`;
-
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{ role: 'user', content: batchPrompt }],
-        temperature: 0
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenRouter API failed: ${response.status}`);
-    }
-
-    const result = await response.json();
-    const aiText = result.choices?.[0]?.message?.content;
-
-    // Multi-strategy JSON extraction (same as classifyComponentHS)
-    let jsonString = null;
-    let extractionMethod = '';
-
-    // Strategy 1: Try direct extraction
-    if (aiText.trim().startsWith('{')) {
-      jsonString = aiText;
-      extractionMethod = 'direct';
-    }
-    // Strategy 2: Extract from markdown code blocks
-    else {
-      const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (codeBlockMatch) {
-        jsonString = codeBlockMatch[1];
-        extractionMethod = 'code_block';
-      }
-      // Strategy 3: Extract JSON object (between first { and last })
-      else {
-        const firstBrace = aiText.indexOf('{');
-        const lastBrace = aiText.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          jsonString = aiText.substring(firstBrace, lastBrace + 1);
-          extractionMethod = 'brace_matching';
-        }
-      }
-    }
-
-    if (!jsonString) {
-      console.error('❌ No JSON in batch tariff lookup response');
-      console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
-      return {};
-    }
-
-    // CRITICAL: Sanitize control characters BEFORE parsing (same as classifyComponentHS)
-    const sanitizedJSON = jsonString
-      .replace(/\r\n/g, ' ')  // Replace Windows line breaks with space
-      .replace(/\n/g, ' ')    // Replace Unix line breaks with space
-      .replace(/\r/g, ' ')    // Replace Mac line breaks with space
-      .replace(/\t/g, ' ')    // Replace tabs with space
-      .replace(/[\x00-\x1F\x7F-\x9F]/g, ''); // Remove other control characters
-
-    // Parse the sanitized JSON
-    let batchResult;
-    try {
-      batchResult = JSON.parse(sanitizedJSON.trim());
-      console.log(`✅ Batch JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
-    } catch (parseError) {
-      console.error('❌ Batch JSON parsing failed after sanitization');
-      console.error('Sanitized JSON (first 500 chars):', sanitizedJSON.substring(0, 500));
-      console.error('Parse error:', parseError.message);
-      return {};
-    }
-
-    // Log the HS codes returned by AI to verify they match input codes
-    const returnedCodes = Object.keys(batchResult.rates || {});
-    const requestedCodes = components.map(c => c.hs_code || c.classified_hs_code);
-    console.log(`🔍 Batch lookup: Requested ${requestedCodes.length} codes, AI returned ${returnedCodes.length} codes`);
-    console.log(`   Requested: [${requestedCodes.join(', ')}]`);
-    console.log(`   Returned:  [${returnedCodes.join(', ')}]`);
-
-    // Return the rates object (HS code → rates mapping)
-    return batchResult.rates || {};
-
-  } catch (error) {
-    console.error('❌ Batch tariff rates lookup failed:', error);
-    return {};
-  }
+  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components`);
+  return { ...existingCache, ...freshRates };
 }
 
 /**

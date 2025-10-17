@@ -2,6 +2,7 @@ import { apiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -52,6 +53,10 @@ export default apiHandler({
 
     // Validate service ID
     if (!NON_SUBSCRIBER_PRICES[service_id]) {
+      await DevIssue.validationError('public_service_checkout', 'service_id', service_id, {
+        provided: service_id,
+        validServices: Object.keys(NON_SUBSCRIBER_PRICES)
+      });
       throw new ApiError('Invalid service ID', 400, {
         field: 'service_id',
         provided: service_id,
@@ -94,6 +99,18 @@ export default apiHandler({
       .single();
 
     if (requestError) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'public_service_checkout',
+        message: 'Failed to create public service request before payment',
+        data: {
+          service_id,
+          company_name: service_request_data.company_name,
+          error: requestError.message,
+          consent_to_store
+        }
+      });
       console.error('Failed to create service request:', requestError);
       throw new ApiError('Failed to save service request', 500, {
         error: requestError.message
@@ -158,6 +175,14 @@ export default apiHandler({
         price: servicePrice / 100 // Return price in dollars
       });
     } catch (stripeError) {
+      await DevIssue.apiError('public_service_checkout', '/api/stripe/create-public-service-checkout', stripeError, {
+        service_id,
+        servicePrice: servicePrice / 100,
+        company_name: service_request_data.company_name,
+        serviceRequestId,
+        stripeErrorType: stripeError.type,
+        stripeErrorCode: stripeError.code
+      });
       console.error('Stripe checkout session creation error:', stripeError);
       throw new ApiError('Failed to create checkout session', 500, {
         message: stripeError.message,

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import AdminNavigation from '../../components/AdminNavigation';
+import { requireAdminAuth } from '../../lib/auth/serverAuth';
 
 const TrendingUp = ({ className }) => (
   <span className={className}>[trending-up]</span>
@@ -34,7 +35,7 @@ const Clock = ({ className }) => (
   <span className={className}>[clock]</span>
 );
 
-export default function Analytics() {
+export default function Analytics({ session }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [metrics, setMetrics] = useState({});
   const [performanceData, setPerformanceData] = useState({});
@@ -672,4 +673,9 @@ function ActivityTab({ userActivity }) {
       </div>
     </div>
   );
+}
+
+// Server-side authentication protection
+export async function getServerSideProps(context) {
+  return requireAdminAuth(context);
 }

@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { serialize } from 'cookie';
 import crypto from 'crypto';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 // Admin client for user profile lookup
 const supabaseAdmin = createClient(
@@ -23,16 +24,29 @@ const supabaseAuth = createClient(
 );
 
 // Secure session signing - NO FALLBACK
+// Store stringified data to avoid JSON.stringify order issues
 function signSession(sessionData) {
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {
+    logDevIssue({
+      type: 'api_error',
+      severity: 'critical',
+      component: 'auth_api',
+      message: 'JWT_SECRET environment variable not configured',
+      data: { endpoint: '/api/auth/login' }
+    });
     throw new Error('CRITICAL: JWT_SECRET environment variable must be configured');
   }
 
-  const data = JSON.stringify(sessionData);
-  const signature = crypto.createHmac('sha256', secret).update(data).digest('hex');
-  return Buffer.from(JSON.stringify({ data: sessionData, sig: signature })).toString('base64');
+  // Stringify once and sign the string (not the object)
+  const dataString = JSON.stringify(sessionData);
+  const signature = crypto.createHmac('sha256', secret)
+    .update(dataString)
+    .digest('hex');
+
+  // Store the string and signature
+  return Buffer.from(JSON.stringify({ data: dataString, sig: signature })).toString('base64');
 }
 
 export default async function handler(req, res) {
@@ -41,6 +55,16 @@ export default async function handler(req, res) {
     await applyRateLimit(authLimiter)(req, res);
   } catch (error) {
     console.log('🛡️ Rate limit exceeded for login attempt');
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'medium',
+      component: 'auth_api',
+      message: 'Rate limit exceeded for login',
+      data: {
+        endpoint: '/api/auth/login',
+        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      }
+    });
     return res.status(429).json({
       success: false,
       error: 'Too many failed login attempts. Please try again in 15 minutes.'
@@ -48,12 +72,21 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
+    await DevIssue.validationError('auth_api', 'HTTP method', req.method, {
+      endpoint: '/api/auth/login',
+      allowedMethod: 'POST'
+    });
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
   const { email, password } = req.body;
 
   if (!email || !password) {
+    await DevIssue.missingData('auth_api', 'email or password', {
+      endpoint: '/api/auth/login',
+      hasEmail: !!email,
+      hasPassword: !!password
+    });
     return res.status(400).json({ success: false, error: 'Email and password required' });
   }
 
@@ -68,6 +101,18 @@ export default async function handler(req, res) {
 
     if (authError || !authData.user) {
       console.log('❌ Authentication failed:', email, authError?.message);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'auth_api',
+        message: 'Failed login attempt - invalid credentials',
+        data: {
+          endpoint: '/api/auth/login',
+          email,
+          errorMessage: authError?.message,
+          attemptedAt: new Date().toISOString()
+        }
+      });
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
@@ -82,6 +127,12 @@ export default async function handler(req, res) {
 
     if (profileError || !user) {
       console.log('❌ User profile not found:', email);
+      await DevIssue.missingData('auth_api', 'user_profile', {
+        endpoint: '/api/auth/login',
+        email,
+        authUserId: authData.user.id,
+        profileError: profileError?.message
+      });
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
@@ -130,6 +181,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('💥 Login error:', error);
+    await DevIssue.apiError('auth_api', '/api/auth/login', error, {
+      email: req.body?.email,
+      attemptedAt: new Date().toISOString()
+    });
     return res.status(500).json({ success: false, error: 'Login failed' });
   }
 }

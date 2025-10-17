@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -14,6 +15,10 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
+    await DevIssue.validationError('admin_api', 'request_method', req.method, {
+      endpoint: '/api/admin/analytics',
+      allowed_methods: ['GET']
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -62,6 +67,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Admin analytics API error:', error);
+    await DevIssue.apiError('admin_api', '/api/admin/analytics', error, {
+      timeframe: req.query.timeframe
+    });
     return res.status(500).json({
       error: 'Internal server error',
       message: error.message
@@ -92,11 +100,25 @@ async function queryUserProfiles() {
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching users:', error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'medium',
+        component: 'admin_api',
+        message: 'Failed to query user_profiles for analytics',
+        data: { error: error.message, errorCode: error.code }
+      });
       return { data: null, error };
     }
 
     return { data: data || [], error: null };
   } catch (e) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'medium',
+      component: 'admin_api',
+      message: 'Exception in queryUserProfiles',
+      data: { error: e.message }
+    });
     return { data: [], error: null };
   }
 }

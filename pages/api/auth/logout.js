@@ -4,9 +4,14 @@
  */
 
 import { serialize } from 'cookie';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
+    await DevIssue.validationError('auth_api', 'HTTP method', req.method, {
+      endpoint: '/api/auth/logout',
+      allowedMethod: 'POST'
+    });
     return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
@@ -30,6 +35,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('💥 Logout error:', error);
+    await DevIssue.apiError('auth_api', '/api/auth/logout', error, {});
     return res.status(500).json({ success: false, error: 'Logout failed' });
   }
 }

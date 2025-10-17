@@ -10,6 +10,7 @@ import {
   validateSubscriberData,
   logValidationWarnings
 } from '../../../lib/validation/normalize-subscriber-data.js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,6 +25,10 @@ export default async function handler(req, res) {
   } else if (req.method === 'PATCH') {
     return handleUpdateServiceRequest(req, res);
   } else {
+    await DevIssue.validationError('admin_api', 'request_method', req.method, {
+      endpoint: '/api/admin/service-requests',
+      allowed_methods: ['POST', 'GET', 'PATCH']
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 }
@@ -78,6 +83,11 @@ async function handleCreateServiceRequest(req, res) {
 
     // Validate client consent for database storage
     if (!data_storage_consent) {
+      await DevIssue.validationError('admin_api', 'data_storage_consent', 'missing', {
+        service_type,
+        company_name,
+        email
+      });
       return res.status(400).json({
         success: false,
         error: 'Database storage consent required',
@@ -94,6 +104,22 @@ async function handleCreateServiceRequest(req, res) {
     const normalizedSubscriberData = normalizeSubscriberData(subscriber_data || workflow_data || {});
     const validation = validateSubscriberData(normalizedSubscriberData);
     logValidationWarnings(validation, 'Service Request API');
+
+    // Log missing critical subscriber data fields
+    if (!normalizedSubscriberData.company_name) {
+      await DevIssue.missingData('admin_api', 'subscriber_data.company_name', {
+        service_type,
+        contact_name,
+        email
+      });
+    }
+    if (!normalizedSubscriberData.product_description) {
+      await DevIssue.missingData('admin_api', 'subscriber_data.product_description', {
+        service_type,
+        company_name,
+        email
+      });
+    }
 
     // Create service request record
     const serviceRequest = {
@@ -165,7 +191,19 @@ async function handleCreateServiceRequest(req, res) {
         if (error) throw error;
 
         console.log(`✅ Service request created for ${company_name} - assigned to Jorge (with client consent)`);
-      } catch {
+      } catch (dbError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'admin_api',
+          message: 'Failed to insert service request into database',
+          data: {
+            company_name,
+            service_type,
+            error: dbError.message,
+            request_id: serviceRequest.id
+          }
+        });
         console.log('📋 Database unavailable, request logged locally');
         // Continue with response even if database fails
       }
@@ -195,6 +233,11 @@ async function handleCreateServiceRequest(req, res) {
 
   } catch (error) {
     console.error('❌ Error creating service request:', error);
+    await DevIssue.apiError('admin_api', '/api/admin/service-requests POST', error, {
+      service_type: req.body.service_type,
+      company_name: req.body.company_name,
+      email: req.body.email
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to create service request',
@@ -269,6 +312,16 @@ async function handleGetServiceRequests(req, res) {
             }
           }
         } catch (analysisError) {
+          await logDevIssue({
+            type: 'api_error',
+            severity: 'medium',
+            component: 'admin_api',
+            message: 'Failed to load vulnerability analyses for service requests',
+            data: {
+              error: analysisError.message,
+              userEmailCount: userEmails?.length || 0
+            }
+          });
           console.log('⚠️ Could not load vulnerability analyses:', analysisError.message);
           // Continue without vulnerability data
         }
@@ -310,6 +363,9 @@ async function handleGetServiceRequests(req, res) {
 
   } catch (error) {
     console.error('❌ Error fetching service requests:', error);
+    await DevIssue.apiError('admin_api', '/api/admin/service-requests GET', error, {
+      assigned_to: req.query.assigned_to
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to fetch service requests',
@@ -327,6 +383,10 @@ async function handleUpdateServiceRequest(req, res) {
     const { id, status, ...updateFields } = req.body;
 
     if (!id) {
+      await DevIssue.missingData('admin_api', 'service_request_id', {
+        endpoint: '/api/admin/service-requests PATCH',
+        updateFields: Object.keys(updateFields)
+      });
       return res.status(400).json({
         success: false,
         error: 'Service request ID is required'
@@ -359,7 +419,19 @@ async function handleUpdateServiceRequest(req, res) {
         message: 'Service request updated successfully',
         updated_record: data[0]
       });
-    } catch {
+    } catch (dbError) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'admin_api',
+        message: 'Failed to update service request in database',
+        data: {
+          request_id: id,
+          status: status || 'unchanged',
+          error: dbError.message,
+          updateFields: Object.keys(updateFields)
+        }
+      });
       console.log('📋 Database unavailable - update logged locally');
       res.status(200).json({
         success: true,
@@ -370,6 +442,10 @@ async function handleUpdateServiceRequest(req, res) {
 
   } catch (error) {
     console.error('❌ Error updating service request:', error);
+    await DevIssue.apiError('admin_api', '/api/admin/service-requests PATCH', error, {
+      request_id: req.body.id,
+      status: req.body.status
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to update service request',

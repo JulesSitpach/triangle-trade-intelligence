@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
 import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 // Service role client for user_profiles operations
 const supabaseAdmin = createClient(
@@ -16,6 +17,16 @@ export default async function handler(req, res) {
     await applyRateLimit(authLimiter)(req, res);
   } catch (error) {
     console.log('🛡️ Rate limit exceeded for referral signup attempt');
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'medium',
+      component: 'auth_api',
+      message: 'Rate limit exceeded for referral signup',
+      data: {
+        endpoint: '/api/auth/signup-referral',
+        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      }
+    });
     return res.status(429).json({
       success: false,
       error: 'Too many registration attempts. Please try again in 15 minutes.'
@@ -23,6 +34,10 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
+    await DevIssue.validationError('auth_api', 'HTTP method', req.method, {
+      endpoint: '/api/auth/signup-referral',
+      allowedMethod: 'POST'
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -38,6 +53,13 @@ export default async function handler(req, res) {
 
   // Validate required fields
   if (!email || !password || !company_name) {
+    await DevIssue.missingData('auth_api', 'required referral signup fields', {
+      endpoint: '/api/auth/signup-referral',
+      hasEmail: !!email,
+      hasPassword: !!password,
+      hasCompanyName: !!company_name,
+      referredBy: referred_by
+    });
     return res.status(400).json({
       error: 'Email, password, and company name are required'
     });
@@ -94,6 +116,12 @@ export default async function handler(req, res) {
 
     if (insertError || !newUser) {
       console.error('💥 User profile creation failed:', insertError);
+      await DevIssue.apiError('auth_api', '/api/auth/signup-referral', insertError, {
+        email,
+        referredBy: referred_by,
+        errorCode: insertError?.code,
+        errorMessage: insertError?.message
+      });
       return res.status(500).json({
         error: 'Failed to create user profile',
         details: insertError?.message
@@ -147,6 +175,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('💥 Referral signup error:', error);
+    await DevIssue.apiError('auth_api', '/api/auth/signup-referral', error, {
+      email: req.body?.email,
+      referredBy: req.body?.referred_by,
+      attemptedAt: new Date().toISOString()
+    });
     return res.status(500).json({ error: 'Registration failed' });
   }
 }

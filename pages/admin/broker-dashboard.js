@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
-import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
+import { requireAdminAuth } from '../../lib/auth/serverAuth';
 
 // Import shared service tab components (Team Collaboration Model)
 import TradeHealthCheckTab from '../../components/shared/TradeHealthCheckTab';
@@ -22,9 +22,8 @@ import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
 import AdminIntelligenceMetrics from '../../components/admin/AdminIntelligenceMetrics';
 import TariffPolicyUpdatesManager from '../../components/admin/TariffPolicyUpdatesManager';
 
-export default function CristinaDashboardModular() {
+export default function CristinaDashboardModular({ session }) {
   const router = useRouter();
-  const { user, loading: authLoading } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('trade-health-check');
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -33,19 +32,8 @@ export default function CristinaDashboardModular() {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      // Wait for auth context to finish loading
-      if (authLoading) {
-        return;
-      }
-
-      // Check if user is authenticated
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
       try {
-        // Load service requests for Cristina
+        // Session is already verified server-side, just load data
         await loadServiceRequests();
         setLoading(false);
       } catch (error) {
@@ -55,7 +43,7 @@ export default function CristinaDashboardModular() {
     };
 
     initializeDashboard();
-  }, [user, authLoading, router]);
+  }, []);
 
   const loadServiceRequests = async () => {
     try {
@@ -127,11 +115,11 @@ export default function CristinaDashboardModular() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="dashboard-loading">
         <div className="loading-spinner">
-          {authLoading ? 'Verifying authentication...' : 'Loading Cristina\'s Dashboard...'}
+          Loading Cristina's Dashboard...
         </div>
       </div>
     );
@@ -245,4 +233,9 @@ export default function CristinaDashboardModular() {
       </div>
     </>
   );
+}
+
+// Server-side authentication protection
+export async function getServerSideProps(context) {
+  return requireAdminAuth(context);
 }

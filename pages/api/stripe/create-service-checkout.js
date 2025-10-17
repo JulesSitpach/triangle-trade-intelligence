@@ -2,6 +2,7 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe, getOrCreateStripeCustomer } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -64,6 +65,11 @@ export default protectedApiHandler({
 
     // Validate service ID
     if (!SERVICE_PRICES[service_id]) {
+      await DevIssue.validationError('service_checkout', 'service_id', service_id, {
+        userId,
+        provided: service_id,
+        validServices: Object.keys(SERVICE_PRICES)
+      });
       throw new ApiError('Invalid service ID', 400, {
         field: 'service_id',
         provided: service_id,
@@ -79,6 +85,13 @@ export default protectedApiHandler({
       .single();
 
     if (userError || !user) {
+      await logDevIssue({
+        type: 'missing_data',
+        severity: 'critical',
+        component: 'service_checkout',
+        message: 'User not found in database during service checkout',
+        data: { userId, service_id, error: userError?.message }
+      });
       throw new ApiError('User not found', 404, {
         userId,
         error: userError?.message
@@ -125,6 +138,19 @@ export default protectedApiHandler({
         .single();
 
       if (requestError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'critical',
+          component: 'service_checkout',
+          message: 'Failed to create service request in database before payment',
+          data: {
+            userId,
+            service_id,
+            servicePrice: servicePrice / 100,
+            error: requestError.message,
+            service_request_data
+          }
+        });
         console.error('Failed to create service request:', requestError);
         throw new ApiError('Failed to save service request', 500, {
           error: requestError.message
@@ -186,6 +212,17 @@ export default protectedApiHandler({
         subscriber_tier: userTier
       });
     } catch (stripeError) {
+      await DevIssue.apiError('service_checkout', '/api/stripe/create-service-checkout', stripeError, {
+        userId,
+        service_id,
+        servicePrice: servicePrice / 100,
+        basePrice: basePrice / 100,
+        userTier,
+        discount,
+        serviceRequestId,
+        stripeErrorType: stripeError.type,
+        stripeErrorCode: stripeError.code
+      });
       console.error('Stripe checkout session creation error:', stripeError);
       throw new ApiError('Failed to create checkout session', 500, {
         message: stripeError.message,

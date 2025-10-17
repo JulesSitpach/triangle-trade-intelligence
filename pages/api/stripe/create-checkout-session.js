@@ -2,6 +2,7 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe, STRIPE_PRICES, getOrCreateStripeCustomer } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -26,6 +27,11 @@ export default protectedApiHandler({
 
     // Validate tier
     if (!['starter', 'professional', 'premium'].includes(tier)) {
+      await DevIssue.validationError('subscription_checkout', 'tier', tier, {
+        userId,
+        provided: tier,
+        valid_tiers: ['starter', 'professional', 'premium']
+      });
       throw new ApiError('Invalid subscription tier. Must be: starter, professional, or premium', 400, {
         field: 'tier',
         provided: tier
@@ -34,6 +40,11 @@ export default protectedApiHandler({
 
     // Validate billing period
     if (!['monthly', 'annual'].includes(billing_period)) {
+      await DevIssue.validationError('subscription_checkout', 'billing_period', billing_period, {
+        userId,
+        provided: billing_period,
+        valid_periods: ['monthly', 'annual']
+      });
       throw new ApiError('Invalid billing period. Must be: monthly or annual', 400, {
         field: 'billing_period',
         provided: billing_period
@@ -48,6 +59,13 @@ export default protectedApiHandler({
       .single();
 
     if (userError || !user) {
+      await logDevIssue({
+        type: 'missing_data',
+        severity: 'critical',
+        component: 'subscription_checkout',
+        message: 'User not found in database during subscription checkout',
+        data: { userId, error: userError?.message }
+      });
       throw new ApiError('User not found', 404, {
         userId,
         error: userError?.message
@@ -61,6 +79,13 @@ export default protectedApiHandler({
     const priceId = STRIPE_PRICES[tier]?.[billing_period];
 
     if (!priceId) {
+      await logDevIssue({
+        type: 'missing_data',
+        severity: 'critical',
+        component: 'subscription_checkout',
+        message: 'Stripe price ID not configured for tier/period combination',
+        data: { tier, billing_period, userId, STRIPE_PRICES }
+      });
       throw new ApiError('Subscription plan not available', 400, {
         tier,
         billing_period,
@@ -105,6 +130,15 @@ export default protectedApiHandler({
         billing_period: billing_period
       });
     } catch (stripeError) {
+      await DevIssue.apiError('subscription_checkout', '/api/stripe/create-checkout-session', stripeError, {
+        userId,
+        tier,
+        billing_period,
+        priceId,
+        customerId,
+        stripeErrorType: stripeError.type,
+        stripeErrorCode: stripeError.code
+      });
       console.error('Stripe checkout session creation error:', stripeError);
       throw new ApiError('Failed to create checkout session', 500, {
         message: stripeError.message,

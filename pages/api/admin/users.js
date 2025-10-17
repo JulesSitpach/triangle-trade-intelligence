@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -14,6 +15,10 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
+    await DevIssue.validationError('admin_api', 'request_method', req.method, {
+      endpoint: '/api/admin/users',
+      allowed_methods: ['GET']
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -46,6 +51,18 @@ export default async function handler(req, res) {
 
     // If database error or no table, return empty data
     if (usersError || !users || users.length === 0) {
+      if (usersError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'medium',
+          component: 'admin_api',
+          message: 'Failed to query user_profiles table',
+          data: {
+            error: usersError.message,
+            errorCode: usersError.code
+          }
+        });
+      }
       console.log('Users table empty, returning empty data');
 
       return res.status(200).json({
@@ -121,9 +138,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Admin users API error:', error);
-    return res.status(500).json({ 
+    await DevIssue.apiError('admin_api', '/api/admin/users', error, {});
+    return res.status(500).json({
       error: 'Internal server error',
-      message: error.message 
+      message: error.message
     });
   }
 }

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 // Service role client for user_profiles operations
 const supabaseAdmin = createClient(
@@ -21,6 +22,16 @@ export default async function handler(req, res) {
     await applyRateLimit(authLimiter)(req, res);
   } catch (error) {
     console.log('🛡️ Rate limit exceeded for registration attempt');
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'medium',
+      component: 'auth_api',
+      message: 'Rate limit exceeded for registration',
+      data: {
+        endpoint: '/api/auth/register',
+        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      }
+    });
     return res.status(429).json({
       success: false,
       error: 'Too many registration attempts. Please try again in 15 minutes.'
@@ -28,6 +39,10 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
+    await DevIssue.validationError('auth_api', 'HTTP method', req.method, {
+      endpoint: '/api/auth/register',
+      allowedMethod: 'POST'
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -35,6 +50,12 @@ export default async function handler(req, res) {
 
   // Validate required fields
   if (!email || !password || !company_name) {
+    await DevIssue.missingData('auth_api', 'required registration fields', {
+      endpoint: '/api/auth/register',
+      hasEmail: !!email,
+      hasPassword: !!password,
+      hasCompanyName: !!company_name
+    });
     return res.status(400).json({
       error: 'Email, password, and company name are required'
     });
@@ -42,6 +63,10 @@ export default async function handler(req, res) {
 
   // Validate terms acceptance
   if (!accept_terms) {
+    await DevIssue.validationError('auth_api', 'accept_terms', accept_terms, {
+      endpoint: '/api/auth/register',
+      email
+    });
     return res.status(400).json({
       error: 'You must accept the Terms of Service and Privacy Policy to register'
     });
@@ -83,6 +108,11 @@ export default async function handler(req, res) {
 
     if (authError || !authData.user) {
       console.error('💥 Auth user creation failed:', authError);
+      await DevIssue.apiError('auth_api', '/api/auth/register', authError, {
+        email,
+        errorCode: authError?.code,
+        errorMessage: authError?.message
+      });
       return res.status(500).json({
         error: 'Failed to create auth user',
         details: authError?.message
@@ -107,6 +137,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('💥 Registration error:', error);
+    await DevIssue.apiError('auth_api', '/api/auth/register', error, {
+      email: req.body?.email,
+      attemptedAt: new Date().toISOString()
+    });
     return res.status(500).json({ error: 'Registration failed' });
   }
 }

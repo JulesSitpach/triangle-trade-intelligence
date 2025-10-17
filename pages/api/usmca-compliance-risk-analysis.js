@@ -3,7 +3,13 @@
  * AI prepares compliance analysis → Cristina validates with 17 years logistics expertise
  * Following the AI + Human pattern: AI identifies issues → Professional validates
  * Professional License #4601913 (International Commerce Degree - Cristina)
+ *
+ * 🔄 3-Tier Fallback Architecture:
+ * TIER 1: OpenRouter → TIER 2: Anthropic → TIER 3: Graceful fail
  */
+
+import { executeAIWithFallback, parseAIResponse } from '../../lib/ai-helpers.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -12,6 +18,28 @@ export default async function handler(req, res) {
 
   try {
     const { serviceRequestId, subscriberData, stage1Data } = req.body;
+
+    // ✅ VALIDATION: Fail loudly if required data is missing (AI Fallback Architecture Rule 1)
+    if (!subscriberData) {
+      await DevIssue.missingData('compliance_risk_analysis', 'subscriberData', { serviceRequestId });
+      return res.status(400).json({ error: 'Subscriber data is required' });
+    }
+    if (!subscriberData.company_name) {
+      await DevIssue.missingData('compliance_risk_analysis', 'company_name', { serviceRequestId });
+      return res.status(400).json({ error: 'Missing required field: company_name' });
+    }
+    if (!subscriberData.product_description) {
+      await DevIssue.missingData('compliance_risk_analysis', 'product_description', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: product_description' });
+    }
+    if (!subscriberData.component_origins || subscriberData.component_origins.length === 0) {
+      await DevIssue.missingData('compliance_risk_analysis', 'component_origins', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: component_origins' });
+    }
+    if (!subscriberData.business_type) {
+      await DevIssue.missingData('compliance_risk_analysis', 'business_type', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: business_type' });
+    }
 
     console.log('[USMCA RISK ANALYSIS] Starting AI compliance risk analysis:', {
       serviceRequestId,
@@ -24,33 +52,31 @@ export default async function handler(req, res) {
     // Prepare comprehensive context for AI analysis
     const businessContext = `
 BUSINESS CONTEXT:
-Company: ${subscriberData.company_name || 'Company name not available'}
-Product: ${subscriberData.product_description || 'Product not specified'}
-HS Code: ${subscriberData.classified_hs_code || subscriberData.hs_code || 'Not classified'}
-USMCA Qualification Status: ${subscriberData.qualification_status || 'Not assessed'}
-Annual Trade Volume: $${(subscriberData.trade_volume || 0).toLocaleString()}
-Manufacturing Location: ${subscriberData.manufacturing_location || 'Not specified'}
+Company: ${subscriberData.company_name}
+Product: ${subscriberData.product_description}
+${subscriberData.classified_hs_code || subscriberData.hs_code ? `HS Code: ${subscriberData.classified_hs_code || subscriberData.hs_code}` : ''}
+${subscriberData.qualification_status ? `USMCA Qualification Status: ${subscriberData.qualification_status}` : ''}
+${subscriberData.trade_volume ? `Annual Trade Volume: $${subscriberData.trade_volume.toLocaleString()}` : ''}
+${subscriberData.manufacturing_location ? `Manufacturing Location: ${subscriberData.manufacturing_location}` : ''}
 
 COMPONENT ORIGINS:
-${Array.isArray(subscriberData.component_origins) ? subscriberData.component_origins.map(comp =>
+${subscriberData.component_origins.map(comp =>
   `- ${comp.origin_country || comp.country}: ${comp.value_percentage || comp.percentage}% (${comp.description || comp.component_type || 'Component'})`
-).join('\n') : 'No component breakdown available'}
+).join('\n')}
 
-USMCA QUALIFICATION DATA:
-- Regional Value Content: ${subscriberData.north_american_content || 'Not calculated'}%
-- Non-originating Materials: ${subscriberData.non_originating_percentage || 'Not calculated'}%
-- Qualification Status: ${subscriberData.qualification_status || 'Unknown'}
+${subscriberData.north_american_content || subscriberData.non_originating_percentage || subscriberData.qualification_status ? `USMCA QUALIFICATION DATA:` : ''}
+${subscriberData.north_american_content ? `- Regional Value Content: ${subscriberData.north_american_content}%` : ''}
+${subscriberData.non_originating_percentage ? `- Non-originating Materials: ${subscriberData.non_originating_percentage}%` : ''}
+${subscriberData.qualification_status ? `- Qualification Status: ${subscriberData.qualification_status}` : ''}
 
-FINANCIAL IMPACT:
-- Annual Tariff Cost: $${(subscriberData.annual_tariff_cost || 0).toLocaleString()}
-- Potential USMCA Savings: $${(subscriberData.potential_usmca_savings || 0).toLocaleString()}
-- Cost Analysis: ${subscriberData.cost_analysis ? JSON.stringify(subscriberData.cost_analysis) : 'Not available'}
+${subscriberData.annual_tariff_cost || subscriberData.potential_usmca_savings || subscriberData.cost_analysis ? `FINANCIAL IMPACT:` : ''}
+${subscriberData.annual_tariff_cost ? `- Annual Tariff Cost: $${subscriberData.annual_tariff_cost.toLocaleString()}` : ''}
+${subscriberData.potential_usmca_savings ? `- Potential USMCA Savings: $${subscriberData.potential_usmca_savings.toLocaleString()}` : ''}
+${subscriberData.cost_analysis ? `- Cost Analysis: ${JSON.stringify(subscriberData.cost_analysis)}` : ''}
 
-COMPLIANCE GAPS IDENTIFIED:
-${Array.isArray(subscriberData.compliance_gaps) ? subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n') : 'No gaps identified yet'}
+${Array.isArray(subscriberData.compliance_gaps) && subscriberData.compliance_gaps.length > 0 ? `COMPLIANCE GAPS IDENTIFIED:\n${subscriberData.compliance_gaps.map(gap => `- ${gap}`).join('\n')}` : ''}
 
-VULNERABILITY FACTORS:
-${Array.isArray(subscriberData.vulnerability_factors) ? subscriberData.vulnerability_factors.map(factor => `- ${factor}`).join('\n') : 'No vulnerabilities identified yet'}
+${Array.isArray(subscriberData.vulnerability_factors) && subscriberData.vulnerability_factors.length > 0 ? `VULNERABILITY FACTORS:\n${subscriberData.vulnerability_factors.map(factor => `- ${factor}`).join('\n')}` : ''}
 `;
 
     const prompt = `You are Cristina's AI assistant for USMCA compliance risk analysis.
@@ -75,8 +101,8 @@ ${Array.isArray(subscriberData.vulnerability_factors) ? subscriberData.vulnerabi
 ${businessContext}
 
 **CRISTINA'S HTS CLASSIFICATION FOCUS**:
-Current HS Code: ${subscriberData.classified_hs_code || subscriberData.hs_code || 'Not classified'}
-Product: ${subscriberData.product_description || 'Not specified'}
+${subscriberData.classified_hs_code || subscriberData.hs_code ? `Current HS Code: ${subscriberData.classified_hs_code || subscriberData.hs_code}` : 'No HS code classified yet'}
+Product: ${subscriberData.product_description}
 - Does this HS code make sense for this product? (Cristina's strongest skill)
 - Are there classification risks that could disqualify USMCA status?
 - Should client verify with trade compliance expert?
@@ -89,14 +115,14 @@ Product: ${subscriberData.product_description || 'Not specified'}
 5. Audit defense readiness (Fortune 500 best practices)
 
 **MARKETPLACE INTELLIGENCE TO COLLECT**:
-- Which compliance risks are most common in ${subscriberData.business_type || 'this industry'}?
+- Which compliance risks are most common in ${subscriberData.business_type}?
 - Which documentation gaps are hardest to fix?
 - Which countries in their supply chain have higher audit risk?
 - What's the realistic cost to fix each compliance gap?
 
 **PREPARE FOR USMCA POLICY CHANGES**:
 - If trilateral becomes bilateral (Canada drops out), how vulnerable is this company?
-- Can they replace ${subscriberData.component_origins ? subscriberData.component_origins.filter(c => c.origin_country === 'Canada').map(c => c.value_percentage + '%').join(', ') || '0%' : '0%'} Canada sourcing with Mexico?
+- Can they replace ${subscriberData.component_origins.filter(c => c.origin_country === 'Canada').map(c => c.value_percentage + '%').join(', ') || '0%'} Canada sourcing with Mexico?
 - Geographic diversification: Are they too dependent on one country?
 
 Provide detailed compliance risk analysis in this EXACT JSON structure:
@@ -113,7 +139,7 @@ Provide detailed compliance risk analysis in this EXACT JSON structure:
     "Flag components that could disqualify USMCA status"
   ],
   "hs_code_validation": {
-    "current_classification": "${subscriberData.classified_hs_code || subscriberData.hs_code || 'Unknown'}",
+    "current_classification": "${subscriberData.classified_hs_code || subscriberData.hs_code || 'Not yet classified'}",
     "cristina_assessment": "Does this HS code accurately reflect the product? (Cristina's strongest skill)",
     "classification_risks": ["List specific classification risks that could cause audit issues"],
     "alternative_codes_consider": ["Suggest 1-2 alternative HS codes to research if current seems wrong"],
@@ -128,9 +154,9 @@ Provide detailed compliance risk analysis in this EXACT JSON structure:
   "risk_score": "HIGH/MEDIUM/LOW (Cristina's professional assessment)",
   "audit_readiness": "How prepared is this company for customs audit? (Be specific about gaps)",
   "marketplace_insights": {
-    "common_industry_risks": "What compliance risks are typical in ${subscriberData.business_type || 'this industry'}?",
+    "common_industry_risks": "What compliance risks are typical in ${subscriberData.business_type}?",
     "documentation_difficulty": "Which missing docs are hardest for SMBs to obtain?",
-    "canada_dependency": "If USMCA becomes bilateral, can they replace ${subscriberData.component_origins ? subscriberData.component_origins.filter(c => c.origin_country === 'Canada').map(c => c.value_percentage + '%').join(', ') || '0%' : '0%'} Canada with Mexico?"
+    "canada_dependency": "If USMCA becomes bilateral, can they replace ${subscriberData.component_origins.filter(c => c.origin_country === 'Canada').map(c => c.value_percentage + '%').join(', ') || '0%'} Canada with Mexico?"
   }
 }
 
@@ -138,52 +164,59 @@ Provide detailed compliance risk analysis in this EXACT JSON structure:
 
 Return ONLY valid JSON, no markdown formatting.`;
 
-    // Call OpenRouter API with Claude model
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [{
-          role: 'user',
-          content: prompt
-        }]
-      })
+    // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    const aiResult = await executeAIWithFallback({
+      prompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 2500
     });
 
-    if (!openRouterResponse.ok) {
-      throw new Error(`OpenRouter API failed: ${openRouterResponse.status}`);
+    if (!aiResult.success) {
+      console.error('All AI tiers failed:', aiResult.error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'compliance_risk_analysis',
+        message: 'All AI tiers failed',
+        data: { serviceRequestId, company: subscriberData?.company_name, error: aiResult.error }
+      });
+      throw new Error(aiResult.error);
     }
 
-    const aiResult = await openRouterResponse.json();
-    const aiAnalysis = aiResult.choices[0].message.content;
+    console.log(`[USMCA RISK ANALYSIS] Using ${aiResult.provider} (Tier ${aiResult.tier}) - ${aiResult.duration}ms`);
+    const aiAnalysis = aiResult.content;
 
-    console.log('[USMCA RISK ANALYSIS] OpenRouter raw response:', aiAnalysis);
-
-    // Parse AI response
+    // Parse AI response with robust error handling
     let analysisData;
     try {
-      // Remove markdown code blocks if present
-      const cleanedResponse = aiAnalysis.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      analysisData = JSON.parse(cleanedResponse);
+      analysisData = parseAIResponse(aiAnalysis);
+
+      if (analysisData.parseError) {
+        await logDevIssue({
+          type: 'unexpected_behavior',
+          severity: 'high',
+          component: 'compliance_risk_analysis',
+          message: 'AI response parse error',
+          data: { serviceRequestId, company: subscriberData?.company_name }
+        });
+        throw new Error('Failed to parse AI response');
+      }
     } catch (parseError) {
       console.error('[USMCA RISK ANALYSIS] Failed to parse AI response:', parseError);
+      await DevIssue.apiError('compliance_risk_analysis', 'AI response parsing', parseError, { serviceRequestId, company: subscriberData?.company_name });
 
       // Fallback structured response (Cristina's professional assessment)
       analysisData = {
         compliance_risks: [
           'Unable to complete full AI analysis - Cristina will manually review with 17 years logistics expertise',
-          `Product: ${subscriberData.product_description || 'Unknown'} requires HTS classification verification (Cristina's specialty)`,
-          `Component origins from ${subscriberData.component_origins?.length || 0} countries need documentation verification`
+          `Product: ${subscriberData.product_description} requires HTS classification verification (Cristina's specialty)`,
+          `Component origins from ${subscriberData.component_origins.length} countries need documentation verification`
         ],
-        component_risks: Array.isArray(subscriberData.component_origins) ? subscriberData.component_origins.map(comp =>
+        component_risks: subscriberData.component_origins.map(comp =>
           `${comp.origin_country || comp.country} sourcing at ${comp.value_percentage || comp.percentage}% requires supplier verification`
-        ) : [],
+        ),
         hs_code_validation: {
-          current_classification: subscriberData.classified_hs_code || subscriberData.hs_code || 'Unknown',
+          current_classification: subscriberData.classified_hs_code || subscriberData.hs_code || 'Not yet classified',
           cristina_assessment: 'Manual HTS validation required - Cristina will review with her classification expertise',
           classification_risks: ['Unable to auto-assess - requires professional review'],
           alternative_codes_consider: [],
@@ -218,7 +251,7 @@ Return ONLY valid JSON, no markdown formatting.`;
       compliance_risks: analysisData.compliance_risks || [],
       component_risks: analysisData.component_risks || [],
       hs_code_validation: analysisData.hs_code_validation || {
-        current_classification: subscriberData.classified_hs_code || 'Unknown',
+        current_classification: subscriberData.classified_hs_code || subscriberData.hs_code || 'Not yet classified',
         cristina_assessment: 'Requires Cristina\'s manual HTS review',
         classification_risks: [],
         alternative_codes_consider: [],
@@ -239,6 +272,10 @@ Return ONLY valid JSON, no markdown formatting.`;
 
   } catch (error) {
     console.error('[USMCA RISK ANALYSIS] Error:', error);
+    await DevIssue.apiError('compliance_risk_analysis', '/api/usmca-compliance-risk-analysis', error, {
+      serviceRequestId: req.body?.serviceRequestId,
+      company: req.body?.subscriberData?.company_name
+    });
     return res.status(500).json({
       error: 'Failed to complete compliance risk analysis',
       details: error.message

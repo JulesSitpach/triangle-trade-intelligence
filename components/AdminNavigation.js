@@ -67,6 +67,13 @@ export default function AdminNavigation({ user }) {
           >
             Cristina
           </Link>
+          <Link
+            href="/admin/marketplace-intelligence"
+            className={`nav-menu-link ${router.pathname === '/admin/marketplace-intelligence' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            📊 Marketplace
+          </Link>
           <button onClick={signOut} className="nav-cta-button">
             Sign Out
           </button>

@@ -16,6 +16,7 @@ import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default function WorkflowResults({
   results,
@@ -115,6 +116,10 @@ export default function WorkflowResults({
 
     } catch (error) {
       console.error('Failed to send certificate data to alerts system:', error);
+      await DevIssue.apiError('workflow_component', 'sendCertificateDataToAlerts', error, {
+        company: completionResults.company?.name,
+        product: completionResults.product?.description
+      });
     }
   };
 
@@ -150,6 +155,11 @@ export default function WorkflowResults({
       const validation = logComponentValidation(normalizedComponents, 'WorkflowResults Save');
       if (validation.invalid > 0) {
         console.error(`❌ DATA LOSS: ${validation.invalid} components missing enrichment when saving to localStorage!`);
+        await DevIssue.unexpectedBehavior('workflow_results', `${validation.invalid} components missing enrichment data when saving`, {
+          totalComponents: normalizedComponents.length,
+          invalidCount: validation.invalid,
+          validation
+        });
       }
 
       // If user chose to save, prepare data for alerts
@@ -269,11 +279,21 @@ export default function WorkflowResults({
             alert('✅ Analysis saved to your dashboard!\n\nYou can now:\n• View it anytime from your Dashboard\n• Set up trade risk alerts\n• Request professional services');
           }
         } else {
-          console.error('⚠️ Failed to save workflow to database:', await response.text());
+          const errorText = await response.text();
+          console.error('⚠️ Failed to save workflow to database:', errorText);
+          await DevIssue.apiError('workflow_results', 'workflow-session-save', new Error(errorText), {
+            status: response.status,
+            company: results.company?.name,
+            product: results.product?.description
+          });
           alert('⚠️ Unable to save to database. Please try again or contact support.');
         }
       } catch (error) {
         console.error('❌ Error saving workflow to database:', error);
+        await DevIssue.apiError('workflow_results', 'workflow-session-api', error, {
+          company: results.company?.name,
+          product: results.product?.description
+        });
       }
 
       // Check if user was trying to set up alerts
@@ -362,16 +382,26 @@ export default function WorkflowResults({
               results.components = rawComponents;
             } else {
               console.error('❌ No workflow found in database');
+              await DevIssue.missingData('workflow_results', 'enriched_components_from_db', {
+                userSaved: true,
+                attemptedFetch: true
+              });
               alert('⚠️ Component data not found in database. Please complete the workflow again to set up alerts.');
               return;
             }
           } else {
             console.error('❌ Failed to fetch from database');
+            await DevIssue.apiError('workflow_results', 'dashboard-data-fetch', new Error(`HTTP ${response.status}`), {
+              status: response.status
+            });
             alert('⚠️ Unable to fetch component data from database. Please try again or redo the workflow.');
             return;
           }
         } catch (error) {
           console.error('❌ Database fetch error:', error);
+          await DevIssue.apiError('workflow_results', 'dashboard-data-api', error, {
+            userSaved: true
+          });
           alert('⚠️ Error fetching component data. Please complete the workflow again.');
           return;
         }
@@ -393,16 +423,28 @@ export default function WorkflowResults({
               results.components = rawComponents;
             } else {
               console.error('❌ localStorage has components but they are not enriched');
+              await DevIssue.unexpectedBehavior('workflow_results', 'Components in localStorage not enriched', {
+                componentCount: localComponents.length,
+                hasHsCode: !!localComponents[0]?.hs_code,
+                userSaved: false
+              });
               alert('⚠️ Component enrichment data is missing.\n\nTo set up alerts, you need to:\n1. Complete a new workflow analysis, OR\n2. Choose "Save to Database" to preserve enriched data\n\nWithout saving to database, enriched data is lost after closing the browser.');
               return;
             }
           } catch (e) {
             console.error('❌ Failed to parse localStorage:', e);
+            await DevIssue.apiError('workflow_results', 'localStorage-parse', e, {
+              userSaved: false
+            });
             alert('⚠️ Unable to recover component data. Please complete the workflow again.');
             return;
           }
         } else {
           console.error('❌ No data in localStorage');
+          await DevIssue.missingData('workflow_results', 'localStorage_workflow_data', {
+            userSaved: false,
+            attemptedAlertSetup: true
+          });
           alert('⚠️ Component data not found.\n\nTo set up alerts, please:\n1. Complete the workflow analysis again, OR\n2. Choose "Save to Database" to preserve your data across sessions');
           return;
         }
@@ -415,6 +457,11 @@ export default function WorkflowResults({
     const validation = logComponentValidation(normalizedComponents, 'Alerts Setup');
     if (validation.invalid > 0) {
       console.error(`❌ DATA LOSS: ${validation.invalid} components missing enrichment for alerts!`);
+      await DevIssue.unexpectedBehavior('workflow_results', `${validation.invalid} components missing enrichment for alert setup`, {
+        totalComponents: normalizedComponents.length,
+        invalidCount: validation.invalid,
+        validation
+      });
     }
 
     // Prepare complete workflow data for AI vulnerability analysis
@@ -751,6 +798,68 @@ export default function WorkflowResults({
         <div className="form-section">
           <h2 className="form-section-title">Financial Impact</h2>
           <TariffSavings results={results} />
+        </div>
+      )}
+
+      {/* DETAILED AI ANALYSIS - Rich insights from Claude */}
+      {results.detailed_analysis && (
+        <div className="form-section">
+          <h2 className="form-section-title">📊 Detailed USMCA Analysis</h2>
+          <p className="form-section-description">
+            AI-powered deep dive into your product&apos;s USMCA qualification and strategic opportunities
+          </p>
+
+          {/* Threshold Research */}
+          {results.detailed_analysis.threshold_research && (
+            <div className="service-request-card">
+              <h3 className="content-card-title">🔍 Treaty Rule Analysis</h3>
+              <p className="text-body">
+                {results.detailed_analysis.threshold_research}
+              </p>
+            </div>
+          )}
+
+          {/* Calculation Breakdown */}
+          {results.detailed_analysis.calculation_breakdown && (
+            <div className="service-request-card">
+              <h3 className="content-card-title">🧮 Regional Content Calculation</h3>
+              <p className="text-body">
+                {results.detailed_analysis.calculation_breakdown}
+              </p>
+            </div>
+          )}
+
+          {/* Qualification Reasoning */}
+          {results.detailed_analysis.qualification_reasoning && (
+            <div className="service-request-card">
+              <h3 className="content-card-title">
+                {results.usmca?.qualified ? '✅ Qualification Validation' : '❌ Qualification Assessment'}
+              </h3>
+              <p className="text-body">
+                {results.detailed_analysis.qualification_reasoning}
+              </p>
+            </div>
+          )}
+
+          {/* Strategic Insights */}
+          {results.detailed_analysis.strategic_insights && (
+            <div className="service-request-card border-left-amber">
+              <h3 className="content-card-title">💡 Strategic Insights & Next Steps</h3>
+              <p className="text-body">
+                {results.detailed_analysis.strategic_insights}
+              </p>
+            </div>
+          )}
+
+          {/* Savings Analysis */}
+          {results.detailed_analysis.savings_analysis && (
+            <div className="service-request-card border-left-green">
+              <h3 className="content-card-title">💰 Financial Impact Analysis</h3>
+              <p className="text-body">
+                {results.detailed_analysis.savings_analysis}
+              </p>
+            </div>
+          )}
         </div>
       )}
 

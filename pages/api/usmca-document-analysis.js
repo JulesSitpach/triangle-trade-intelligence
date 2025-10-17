@@ -4,7 +4,13 @@
  *
  * Input: Subscriber workflow data
  * Output: Document completeness analysis, missing items, extracted key data
+ *
+ * 🔄 3-Tier Fallback Architecture:
+ * TIER 1: OpenRouter → TIER 2: Anthropic → TIER 3: Graceful fail
  */
+
+import { executeAIWithFallback, parseAIResponse } from '../../lib/ai-helpers.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,8 +20,47 @@ export default async function handler(req, res) {
   try {
     const { serviceRequestId, subscriberData } = req.body;
 
+    // ✅ VALIDATION: Fail loudly if required data is missing (AI Fallback Architecture Rule 1)
     if (!subscriberData) {
+      await DevIssue.missingData('document_analysis', 'subscriberData', { serviceRequestId });
       return res.status(400).json({ error: 'Subscriber data is required' });
+    }
+    if (!subscriberData.company_name) {
+      await DevIssue.missingData('document_analysis', 'company_name', { serviceRequestId });
+      return res.status(400).json({ error: 'Missing required field: company_name' });
+    }
+    if (!subscriberData.product_description) {
+      await DevIssue.missingData('document_analysis', 'product_description', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: product_description' });
+    }
+    if (!subscriberData.component_origins || subscriberData.component_origins.length === 0) {
+      await DevIssue.missingData('document_analysis', 'component_origins', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: component_origins' });
+    }
+    if (!subscriberData.business_type) {
+      await DevIssue.missingData('document_analysis', 'business_type', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: business_type' });
+    }
+    if (!subscriberData.trade_volume) {
+      await DevIssue.missingData('document_analysis', 'trade_volume', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: trade_volume' });
+    }
+    if (!subscriberData.manufacturing_location) {
+      await DevIssue.missingData('document_analysis', 'manufacturing_location', { serviceRequestId, company: subscriberData.company_name });
+      return res.status(400).json({ error: 'Missing required field: manufacturing_location' });
+    }
+
+    // Validate component origins have required fields
+    for (let i = 0; i < subscriberData.component_origins.length; i++) {
+      const comp = subscriberData.component_origins[i];
+      if (!comp.origin_country) {
+        await DevIssue.missingData('document_analysis', `component[${i}].origin_country`, { serviceRequestId, company: subscriberData.company_name, component: comp });
+        return res.status(400).json({ error: `Missing origin_country for component ${i}` });
+      }
+      if (comp.value_percentage === undefined || comp.value_percentage === null) {
+        await DevIssue.missingData('document_analysis', `component[${i}].value_percentage`, { serviceRequestId, company: subscriberData.company_name, component: comp });
+        return res.status(400).json({ error: `Missing value_percentage for component ${i}` });
+      }
     }
 
     // Build enhanced AI prompt leveraging Jorge's Mexico-based SMB expertise
@@ -36,18 +81,18 @@ export default async function handler(req, res) {
 **JORGE'S TASK**: Identify what compliance documents are missing, focusing on what's REALISTIC for an SMB to obtain without breaking the bank.
 
 ✅ **BUSINESS DATA ALREADY COLLECTED (DO NOT REQUEST AGAIN):**
-- Company Name: ${subscriberData.company_name || 'Not provided'}
-- Contact Info: ${subscriberData.contact_person || 'Not provided'} (${subscriberData.contact_email || 'Not provided'})
-- Business Type: ${subscriberData.business_type || 'Not provided'}
-- Product Description: ${subscriberData.product_description || 'Not provided'}
-- HS Code (AI-generated): ${subscriberData.classified_hs_code || subscriberData.hs_code || 'Not provided'}
-- Annual Trade Volume: $${subscriberData.trade_volume || 'Not provided'}
-- Manufacturing Location: ${subscriberData.manufacturing_location || 'Not provided'}
-- Component Origins: ${subscriberData.component_origins ? subscriberData.component_origins.map((comp, idx) =>
+- Company Name: ${subscriberData.company_name}
+${subscriberData.contact_person || subscriberData.contact_email ? `- Contact Info: ${subscriberData.contact_person || ''} ${subscriberData.contact_email ? `(${subscriberData.contact_email})` : ''}`.trim() : ''}
+- Business Type: ${subscriberData.business_type}
+- Product Description: ${subscriberData.product_description}
+${subscriberData.classified_hs_code || subscriberData.hs_code ? `- HS Code (AI-generated): ${subscriberData.classified_hs_code || subscriberData.hs_code}` : ''}
+- Annual Trade Volume: $${subscriberData.trade_volume}
+- Manufacturing Location: ${subscriberData.manufacturing_location}
+- Component Origins: ${subscriberData.component_origins.map((comp, idx) =>
   `${comp.origin_country} ${comp.value_percentage}% (${comp.description || comp.component_type || 'component'})`
-).join(', ') : 'Not provided'}
-- USMCA Qualification Status: ${subscriberData.qualification_status || 'Not assessed'}
-- Potential Savings: $${subscriberData.potential_usmca_savings || 'Not calculated'}/year
+).join(', ')}
+${subscriberData.qualification_status ? `- USMCA Qualification Status: ${subscriberData.qualification_status}` : ''}
+${subscriberData.potential_usmca_savings ? `- Potential Savings: $${subscriberData.potential_usmca_savings}/year` : ''}
 
 **JORGE'S SMB BUSINESS OWNER PERSPECTIVE** (7 years running Art Printing):
 - Don't ask for documents that cost $10,000+ to produce (SMBs can't afford that)
@@ -117,46 +162,41 @@ RETURN JSON FORMAT:
 
 **JORGE'S REALITY CHECK**: Focus on documents that are FREE or low-cost and available within 2-4 weeks. If something requires $5K+ or 6 months, flag it as "Consider trade compliance expert partner for this."`;
 
-
-    // Call OpenRouter API
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app',
-        'X-Title': 'Triangle Trade Intelligence - USMCA Document Analysis'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
-        messages: [
-          {
-            role: 'user',
-            content: analysisPrompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2500  // Increased for marketplace insights + Jorge's detailed SMB analysis
-      })
+    // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    const aiResult = await executeAIWithFallback({
+      prompt: analysisPrompt,
+      model: 'anthropic/claude-3-haiku',
+      maxTokens: 2500  // Increased for marketplace insights + Jorge's detailed SMB analysis
     });
 
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
-      console.error('OpenRouter API Error:', errorText);
-      throw new Error(`OpenRouter API failed: ${openRouterResponse.status}`);
+    if (!aiResult.success) {
+      console.error('All AI tiers failed:', aiResult.error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'document_analysis',
+        message: 'All AI tiers failed',
+        data: { serviceRequestId, company: subscriberData?.company_name, error: aiResult.error }
+      });
+      throw new Error(aiResult.error);
     }
 
-    const aiResult = await openRouterResponse.json();
-    const aiContent = aiResult.choices[0].message.content;
+    console.log(`[USMCA DOCUMENT ANALYSIS] Using ${aiResult.provider} (Tier ${aiResult.tier}) - ${aiResult.duration}ms`);
+    const aiContent = aiResult.content;
 
-    // Parse AI response
+    // Parse AI response with robust error handling
     let analysisResult;
     try {
-      // Try to extract JSON from AI response
-      const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysisResult = JSON.parse(jsonMatch[0]);
-      } else {
+      analysisResult = parseAIResponse(aiContent);
+
+      if (analysisResult.parseError) {
+        await logDevIssue({
+          type: 'unexpected_behavior',
+          severity: 'high',
+          component: 'document_analysis',
+          message: 'AI response parse error - using fallback',
+          data: { serviceRequestId, company: subscriberData?.company_name }
+        });
         // Fallback if AI didn't return proper JSON
         analysisResult = {
           documents_present: ['Product description', 'Company information', 'Component origins'],
@@ -178,6 +218,7 @@ RETURN JSON FORMAT:
       }
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
+      await DevIssue.apiError('document_analysis', 'AI response parsing', parseError, { serviceRequestId, company: subscriberData?.company_name });
       analysisResult = {
         documents_present: ['Product description', 'Company information', 'Component origins'],
         documents_missing: ['Unable to analyze - Jorge will review manually'],
@@ -209,6 +250,10 @@ RETURN JSON FORMAT:
 
   } catch (error) {
     console.error('Document analysis error:', error);
+    await DevIssue.apiError('document_analysis', '/api/usmca-document-analysis', error, {
+      serviceRequestId: req.body?.serviceRequestId,
+      company: req.body?.subscriberData?.company_name
+    });
     return res.status(500).json({
       success: false,
       error: error.message,

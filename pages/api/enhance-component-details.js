@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -227,7 +228,10 @@ export default async function handler(req, res) {
       .eq('company_name', 'AutoParts Corp')
       .select();
 
-    if (error) throw error;
+    if (error) {
+      await DevIssue.apiError('enhance_components', 'database update', error, { company: 'AutoParts Corp' });
+      throw error;
+    }
 
     console.log(`✅ Enhanced ${data?.length || 0} AutoParts Corp records with detailed component analysis`);
 
@@ -254,6 +258,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Error enhancing component details:', error);
+    await DevIssue.apiError('enhance_components', '/api/enhance-component-details', error, { company: 'AutoParts Corp' });
     res.status(500).json({
       success: false,
       error: error.message

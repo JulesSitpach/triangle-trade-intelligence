@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -22,6 +23,12 @@ export default async function handler(req, res) {
     const { alerts, user_profile } = req.body;
 
     if (!alerts || !user_profile) {
+      await DevIssue.missingData('consolidate_alerts_api', 'alerts or user_profile', {
+        endpoint: '/api/consolidate-alerts',
+        hasAlerts: !!alerts,
+        hasUserProfile: !!user_profile,
+        alertsCount: alerts?.length || 0
+      });
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: alerts and user_profile'
@@ -55,6 +62,12 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Error consolidating alerts:', error);
+    await DevIssue.apiError('consolidate_alerts_api', '/api/consolidate-alerts', error, {
+      hasAlerts: !!req.body?.alerts,
+      hasUserProfile: !!req.body?.user_profile,
+      alertsCount: req.body?.alerts?.length || 0,
+      company: req.body?.user_profile?.companyName || 'unknown'
+    });
     return res.status(500).json({
       success: false,
       message: 'Failed to consolidate alerts',
@@ -263,6 +276,17 @@ CRITICAL RULES:
     });
 
     if (!response.ok) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'consolidate_alerts_api',
+        message: 'OpenRouter API failed for alert consolidation',
+        data: {
+          status: response.status,
+          company: userProfile.companyName,
+          alertCount: alerts.length
+        }
+      });
       throw new Error(`OpenRouter API error: ${response.status}`);
     }
 
@@ -270,6 +294,16 @@ CRITICAL RULES:
     const aiResponse = data.choices[0]?.message?.content;
 
     if (!aiResponse) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'consolidate_alerts_api',
+        message: 'Empty AI response for alert consolidation',
+        data: {
+          company: userProfile.companyName,
+          alertCount: alerts.length
+        }
+      });
       throw new Error('No response from AI');
     }
 
@@ -284,6 +318,11 @@ CRITICAL RULES:
       }
     } catch (parseError) {
       console.error('❌ Failed to parse AI response:', aiResponse);
+      await DevIssue.apiError('consolidate_alerts_api', 'analyzeAlertGroup (parsing)', parseError, {
+        company: userProfile.companyName,
+        alertCount: alerts.length,
+        responsePreview: aiResponse?.substring(0, 200)
+      });
       throw new Error('Invalid JSON from AI');
     }
 

@@ -1,6 +1,7 @@
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendCustomerConfirmationEmail, sendAdminNotificationEmail } from '../../../lib/services/email-service';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -46,11 +47,25 @@ export default async function handler(req, res) {
   const sig = req.headers['stripe-signature'];
 
   if (!sig) {
+    await logDevIssue({
+      type: 'missing_data',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Missing stripe-signature header in webhook request',
+      data: { headers: req.headers }
+    });
     console.error('Missing stripe-signature header');
     return res.status(400).json({ error: 'Missing stripe-signature header' });
   }
 
   if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    await logDevIssue({
+      type: 'missing_data',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'STRIPE_WEBHOOK_SECRET environment variable not configured',
+      data: { environment: process.env.NODE_ENV }
+    });
     console.error('Missing STRIPE_WEBHOOK_SECRET environment variable');
     return res.status(500).json({ error: 'Webhook secret not configured' });
   }
@@ -65,6 +80,17 @@ export default async function handler(req, res) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
+    await logDevIssue({
+      type: 'validation_error',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Webhook signature verification failed - possible security issue',
+      data: {
+        error: err.message,
+        signature: sig?.substring(0, 20) + '...',
+        bufferLength: buf?.length
+      }
+    });
     console.error('Webhook signature verification failed:', err.message);
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
@@ -104,6 +130,18 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: `Webhook handler failed for event type: ${event?.type || 'unknown'}`,
+      data: {
+        eventType: event?.type,
+        eventId: event?.id,
+        error: error.message,
+        stack: error.stack
+      }
+    });
     console.error('Webhook handler error:', error);
     return res.status(500).json({ error: 'Webhook handler failed' });
   }
@@ -119,6 +157,17 @@ async function handleCheckoutSessionCompleted(session) {
   const serviceId = session.metadata?.service_id;
 
   if (!userId) {
+    await logDevIssue({
+      type: 'missing_data',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Missing user_id in checkout session metadata',
+      data: {
+        sessionId: session.id,
+        metadata: session.metadata,
+        mode: session.mode
+      }
+    });
     console.error('No user_id in session metadata');
     return;
   }
@@ -163,6 +212,19 @@ async function handleServicePaymentCompleted(session) {
       .single();
 
     if (updateError) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'stripe_webhook',
+        message: 'Failed to update service request after successful payment - FINANCIAL DATA MISMATCH',
+        data: {
+          service_request_id,
+          sessionId: session.id,
+          service_id,
+          error: updateError.message,
+          payment_intent: session.payment_intent
+        }
+      });
       console.error('Failed to update service request:', updateError);
       throw updateError;
     }
@@ -200,6 +262,19 @@ async function handleServicePaymentCompleted(session) {
     });
 
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Service payment processing failed after successful Stripe payment',
+      data: {
+        sessionId: session.id,
+        service_id: session.metadata?.service_id,
+        service_request_id: session.metadata?.service_request_id,
+        error: error.message,
+        stack: error.stack
+      }
+    });
     console.error('Error processing service payment:', error);
     throw error;
   }
@@ -249,6 +324,19 @@ async function handleSubscriptionPurchase(session, userId) {
 
     console.log('Subscription record updated for user:', userId);
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Failed to save subscription to database after successful payment',
+      data: {
+        userId,
+        sessionId: session.id,
+        subscriptionId: session.subscription,
+        tier: session.metadata?.tier,
+        error: error.message
+      }
+    });
     console.error('Error updating subscription:', error);
     throw error;
   }
@@ -266,6 +354,16 @@ async function handleSubscriptionCreated(subscription) {
     const userId = customer.metadata?.user_id;
 
     if (!userId) {
+      await logDevIssue({
+        type: 'missing_data',
+        severity: 'high',
+        component: 'stripe_webhook',
+        message: 'Missing user_id in customer metadata for subscription.created',
+        data: {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer
+        }
+      });
       console.error('No user_id in customer metadata');
       return;
     }
@@ -282,9 +380,30 @@ async function handleSubscriptionCreated(subscription) {
       .eq('stripe_subscription_id', subscription.id);
 
     if (error) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'stripe_webhook',
+        message: 'Failed to update subscription periods in database',
+        data: {
+          subscriptionId: subscription.id,
+          userId,
+          error: error.message
+        }
+      });
       console.error('Error updating subscription periods:', error);
     }
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'high',
+      component: 'stripe_webhook',
+      message: 'Error in subscription.created handler',
+      data: {
+        subscriptionId: subscription.id,
+        error: error.message
+      }
+    });
     console.error('Error in subscription.created handler:', error);
   }
 }
@@ -382,6 +501,23 @@ async function handleInvoicePaymentSucceeded(invoice) {
 async function handleInvoicePaymentFailed(invoice) {
   console.log('Processing invoice.payment_failed:', invoice.id);
 
+  // Log critical payment failure
+  await logDevIssue({
+    type: 'api_error',
+    severity: 'critical',
+    component: 'stripe_webhook',
+    message: 'PAYMENT FAILED - Customer payment attempt failed',
+    data: {
+      invoiceId: invoice.id,
+      customerId: invoice.customer,
+      subscriptionId: invoice.subscription,
+      amount: invoice.amount_due / 100,
+      currency: invoice.currency,
+      attemptCount: invoice.attempt_count,
+      nextPaymentAttempt: invoice.next_payment_attempt
+    }
+  });
+
   try {
     // Record failed payment
     const { error } = await supabase
@@ -399,12 +535,32 @@ async function handleInvoicePaymentFailed(invoice) {
       }]);
 
     if (error) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'stripe_webhook',
+        message: 'Failed to record failed invoice in database - FINANCIAL DATA LOSS RISK',
+        data: {
+          invoiceId: invoice.id,
+          error: error.message
+        }
+      });
       console.error('Error recording failed invoice:', error);
     }
 
     // TODO: Send email notification to user about failed payment
     console.log('Payment failed for invoice:', invoice.id);
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'critical',
+      component: 'stripe_webhook',
+      message: 'Error in invoice.payment_failed handler',
+      data: {
+        invoiceId: invoice.id,
+        error: error.message
+      }
+    });
     console.error('Error in invoice.payment_failed handler:', error);
   }
 }

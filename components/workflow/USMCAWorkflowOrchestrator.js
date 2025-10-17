@@ -19,6 +19,7 @@ import WorkflowError from './WorkflowError';
 import CrisisCalculatorResults from './CrisisCalculatorResults';
 import WorkflowPathSelection from './WorkflowPathSelection';
 import AuthorizationStep from './AuthorizationStep';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
@@ -71,6 +72,9 @@ export default function USMCAWorkflowOrchestrator() {
         }
       } catch (error) {
         console.error('Failed to fetch user tier:', error);
+        await DevIssue.apiError('workflow_orchestrator', '/api/auth/me', error, {
+          attemptedAction: 'fetchUserTier'
+        });
         setUserTier('Trial');
       }
     };
@@ -108,7 +112,12 @@ export default function USMCAWorkflowOrchestrator() {
             loadSavedWorkflow(workflow);
           }
         })
-        .catch(err => console.error('Failed to load workflow:', err));
+        .catch(async (err) => {
+          console.error('Failed to load workflow:', err);
+          await DevIssue.apiError('workflow_orchestrator', 'load-saved-workflow', err, {
+            workflowId
+          });
+        });
 
       // Clean up URL
       router.replace('/usmca-workflow', undefined, { shallow: true });
@@ -150,6 +159,9 @@ export default function USMCAWorkflowOrchestrator() {
         console.log(`Trust-verified certificate downloaded: ${filename}`);
       } catch (error) {
         console.error('Certificate download failed:', error);
+        DevIssue.apiError('workflow_orchestrator', 'certificate-download', error, {
+          certificateId: results.certificate?.certificate_id
+        });
         // Fallback to simple certificate
         handleDownloadSimpleCertificate();
       }
@@ -365,6 +377,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         
       } catch (dbError) {
         console.error('❌ WorkflowDataConnector failed (continuing with certificate):', dbError);
+        await DevIssue.apiError('workflow_orchestrator', 'workflow-data-connector', dbError, {
+          sessionId: localStorage.getItem('workflow_session_id'),
+          company: formData.company_name
+        });
       }
       
       // Use the trust verification service to generate certificate
@@ -399,6 +415,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       }
     } catch (error) {
       console.error('Certificate generation error:', error);
+      await DevIssue.apiError('workflow_orchestrator', 'generate-certificate', error, {
+        company: formData.company_name,
+        product: formData.product_description
+      });
       alert('Error generating certificate. Please try again.');
     }
   };

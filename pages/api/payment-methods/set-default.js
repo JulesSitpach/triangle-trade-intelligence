@@ -2,6 +2,7 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -46,6 +47,10 @@ export default protectedApiHandler({
         message: 'Default payment method updated successfully'
       });
     } catch (error) {
+      await DevIssue.apiError('payment_methods', '/api/payment-methods/set-default', error, {
+        userId: req.user.id,
+        payment_method_id: req.body.payment_method_id
+      });
       console.error('Error setting default payment method:', error);
       throw new ApiError('Failed to set default payment method', 500, {
         error: error.message

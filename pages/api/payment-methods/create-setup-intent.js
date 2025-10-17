@@ -2,6 +2,7 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError } from '../../../lib/api/errorHandler';
 import { stripe, getOrCreateStripeCustomer } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -27,6 +28,13 @@ export default protectedApiHandler({
         .single();
 
       if (userError || !user) {
+        await logDevIssue({
+          type: 'missing_data',
+          severity: 'high',
+          component: 'payment_methods',
+          message: 'User not found when creating setup intent',
+          data: { userId, error: userError?.message }
+        });
         throw new ApiError('User not found', 404);
       }
 
@@ -48,6 +56,9 @@ export default protectedApiHandler({
         setup_intent_id: setupIntent.id
       });
     } catch (error) {
+      await DevIssue.apiError('payment_methods', '/api/payment-methods/create-setup-intent', error, {
+        userId: req.user.id
+      });
       console.error('Error creating setup intent:', error);
       throw new ApiError('Failed to create setup intent', 500, {
         error: error.message

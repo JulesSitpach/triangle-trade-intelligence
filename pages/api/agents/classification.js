@@ -5,6 +5,7 @@
 import EnhancedClassificationAgent from '../../../lib/agents/enhanced-classification-agent.js';
 import { ClassificationAgent } from '../../../lib/agents/classification-agent.js'; // Fallback
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
 function extractShortDescription(explanation, productDescription) {
   if (!explanation) return productDescription || 'Product classification';
@@ -21,6 +22,7 @@ function extractShortDescription(explanation, productDescription) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
+    await DevIssue.validationError('classification_api', 'http_method', req.method, { endpoint: '/api/agents/classification' });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -41,6 +43,18 @@ export default async function handler(req, res) {
       const aiResult = await agent.suggestHSCode(productDescription, componentOrigins, additionalContext);
 
       if (!aiResult.success) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'critical',
+          component: 'classification_api',
+          message: 'AI classification failed',
+          data: {
+            productDescription,
+            error: aiResult.error,
+            userId,
+            componentOrigins
+          }
+        });
         return res.status(500).json({
           success: false,
           error: 'AI classification failed',
@@ -49,6 +63,7 @@ export default async function handler(req, res) {
       }
 
       // Transform AI result to match UI expectations
+      // CLASSIFICATION ONLY - NO TARIFF RATES (separation of concerns)
       const response = {
         success: true,
 
@@ -59,17 +74,6 @@ export default async function handler(req, res) {
           confidence: `${Math.round(aiResult.data.confidence || 0)}%`,
           verification_status: aiResult.data.databaseMatch ? 'database_verified' : 'ai_generated',
           usmca_qualification: aiResult.data.usmcaQualification
-        },
-
-        // Tariff analysis
-        tariff_analysis: {
-          mfn_rate: aiResult.data.mfnRate ? `${(aiResult.data.mfnRate * 100).toFixed(2)}%` : 'Not available',
-          usmca_rate: aiResult.data.usmcaRate !== undefined && aiResult.data.usmcaRate !== null
-            ? `${(aiResult.data.usmcaRate * 100).toFixed(2)}%`
-            : 'Not available',
-          qualifies_for_usmca: aiResult.data.usmcaRate !== undefined && aiResult.data.mfnRate
-            ? aiResult.data.usmcaRate < aiResult.data.mfnRate
-            : false
         },
 
         // Additional AI insights
@@ -114,6 +118,7 @@ export default async function handler(req, res) {
     switch (action) {
       case 'search_similar':
         if (!productDescription) {
+          await DevIssue.missingData('classification_api', 'productDescription', { action, userId });
           return res.status(400).json({ error: 'productDescription required' });
         }
 
@@ -134,6 +139,12 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('[ENHANCED CLASSIFICATION API] Error:', error);
+
+    await DevIssue.apiError('classification_api', '/api/agents/classification', error, {
+      action: req.body.action,
+      userId: req.body.userId,
+      productDescription: req.body.productDescription
+    });
 
     return res.status(500).json({
       error: 'Classification processing failed',

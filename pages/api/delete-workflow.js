@@ -5,6 +5,7 @@
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -21,6 +22,7 @@ export default protectedApiHandler({
       console.log('🗑️ Delete request for workflow:', id, 'by user:', userId);
 
       if (!id) {
+        await DevIssue.validationError('delete_workflow', 'workflow_id', 'missing', { userId });
         return res.status(400).json({ error: 'Workflow ID required' });
       }
 
@@ -47,6 +49,18 @@ export default protectedApiHandler({
         console.error('❌ Delete failed from both tables:');
         console.error('  - workflow_sessions error:', sessionError);
         console.error('  - workflow_completions error:', completionError);
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'delete_workflow',
+          message: 'Workflow not found in either table',
+          data: {
+            userId,
+            workflowId: id,
+            sessionError: sessionError.message,
+            completionError: completionError.message
+          }
+        });
         return res.status(500).json({
           error: 'Failed to delete workflow',
           details: 'Not found in workflow_sessions or workflow_completions',
@@ -67,6 +81,10 @@ export default protectedApiHandler({
 
     } catch (error) {
       console.error('❌ Unexpected error in delete-workflow:', error);
+      await DevIssue.apiError('delete_workflow', '/api/delete-workflow', error, {
+        userId: req.user?.id,
+        workflowId: req.query?.id
+      });
       return res.status(500).json({
         error: 'Server error',
         details: error.message,

@@ -2,8 +2,13 @@
  * POST /api/personalized-alert-analysis
  * Analyze tariff policy alerts with user's specific business context
  * Returns personalized impact assessment with dollar amounts and recommendations
+ *
+ * 🔄 3-Tier Fallback Architecture:
+ * TIER 1: OpenRouter → TIER 2: Anthropic → TIER 3: Graceful fail
  */
 
+import { executeAIWithFallback, parseAIResponse } from '../../lib/ai-helpers.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -20,6 +25,11 @@ export default async function handler(req, res) {
     const { policy_alert, user_profile } = req.body;
 
     if (!policy_alert || !user_profile) {
+      await DevIssue.missingData('personalized_alert_api', 'policy_alert or user_profile', {
+        endpoint: '/api/personalized-alert-analysis',
+        hasPolicyAlert: !!policy_alert,
+        hasUserProfile: !!user_profile
+      });
       return res.status(400).json({
         success: false,
         message: 'Missing required fields: policy_alert and user_profile'
@@ -38,6 +48,11 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Error in personalized alert analysis:', error);
+    await DevIssue.apiError('personalized_alert_api', '/api/personalized-alert-analysis', error, {
+      hasPolicyAlert: !!req.body?.policy_alert,
+      hasUserProfile: !!req.body?.user_profile,
+      company: req.body?.user_profile?.companyName || 'unknown'
+    });
     return res.status(500).json({
       success: false,
       message: 'Failed to analyze alert impact',
@@ -147,44 +162,57 @@ IMPORTANT:
 - If the policy does NOT affect them, say so clearly (low relevance score)
 - Keep explanation concise (1-2 sentences max)`;
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4.5", // Sonnet 4.5 for professional alert summaries (user-facing)
-        messages: [{
-          role: "user",
-          content: prompt
-        }],
-        temperature: 0.3 // Slight creativity for professional writing while staying accurate
-      })
+    // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    const aiResult = await executeAIWithFallback({
+      prompt,
+      model: 'anthropic/claude-sonnet-4.5', // Sonnet 4.5 for professional alert summaries (user-facing)
+      maxTokens: 2000
     });
 
-    if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.status}`);
+    if (!aiResult.success) {
+      console.error('All AI tiers failed:', aiResult.error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'personalized_alert_api',
+        message: 'AI personalized alert analysis failed for all tiers',
+        data: {
+          error: aiResult.error,
+          company: user_profile.companyName,
+          policyAlertTitle: policy_alert.title,
+          componentCount: user_profile.componentOrigins?.length || 0
+        }
+      });
+      throw new Error(aiResult.error);
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices[0]?.message?.content;
+    console.log(`✅ Alert analysis from ${aiResult.provider} (Tier ${aiResult.tier}) - ${aiResult.duration}ms`);
 
-    if (!aiResponse) {
-      throw new Error('No response from AI');
-    }
-
-    // Parse AI response (extract JSON from markdown code blocks if present)
+    // Parse AI response with robust error handling
     let analysis;
     try {
-      const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
-      if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[1]);
-      } else {
-        analysis = JSON.parse(aiResponse);
+      analysis = parseAIResponse(aiResult.content);
+
+      if (analysis.parseError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'personalized_alert_api',
+          message: 'AI response parsing failed',
+          data: {
+            company: user_profile.companyName,
+            policyAlert: policy_alert.title,
+            responsePreview: aiResult.content?.substring(0, 200)
+          }
+        });
+        throw new Error('Failed to parse AI response');
       }
     } catch (parseError) {
-      console.error('❌ Failed to parse AI response:', aiResponse);
+      console.error('❌ Failed to parse AI response');
+      await DevIssue.apiError('personalized_alert_api', '/api/personalized-alert-analysis (parsing)', parseError, {
+        company: user_profile.companyName,
+        policyAlert: policy_alert.title
+      });
       throw new Error('Invalid JSON from AI');
     }
 
@@ -204,6 +232,10 @@ IMPORTANT:
 
   } catch (error) {
     console.error('❌ AI analysis error:', error.message);
+    await DevIssue.apiError('personalized_alert_api', 'analyzeImpactForUser', error, {
+      company: user_profile.companyName,
+      policyAlert: policy_alert.title
+    });
     return {
       success: false,
       error: error.message,

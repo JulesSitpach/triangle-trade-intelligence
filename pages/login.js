@@ -13,17 +13,9 @@ export default function Login() {
   const { user, login } = useSimpleAuth();
   const router = useRouter();
 
-  // If already logged in, redirect immediately
-  useEffect(() => {
-    if (user) {
-      console.log('User already logged in, redirecting...');
-      if (user.isAdmin) {
-        router.replace('/admin/broker-dashboard');
-      } else {
-        router.replace('/dashboard');
-      }
-    }
-  }, [user, router]);
+  // Note: Removed automatic redirect on page load
+  // Server-side authentication handles redirects properly now
+  // This prevents infinite redirect loops
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,8 +34,13 @@ export default function Login() {
       if (result.error) {
         setError(result.error);
       } else {
-        // Success - redirect will happen via useEffect when user state updates
-        console.log('Login successful, waiting for redirect...');
+        // Success - redirect based on user role
+        console.log('Login successful, redirecting...');
+        if (result.user && result.user.isAdmin) {
+          router.push('/admin/broker-dashboard');
+        } else {
+          router.push('/dashboard');
+        }
       }
     } catch {
       setError('An unexpected error occurred');

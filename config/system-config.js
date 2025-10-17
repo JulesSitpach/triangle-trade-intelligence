@@ -140,7 +140,7 @@ export const SYSTEM_CONFIG = {
     // Standard country code mappings
     codeMappings: {
       'China': 'CN',
-      'Mexico': 'MX', 
+      'Mexico': 'MX',
       'Canada': 'CA',
       'United States': 'US',
       'India': 'IN',
@@ -152,7 +152,13 @@ export const SYSTEM_CONFIG = {
       'Malaysia': 'MY',
       'Singapore': 'SG',
       'Indonesia': 'ID',
+      'Philippines': 'PH',
+      'Bangladesh': 'BD',
+      'Pakistan': 'PK',
       'Turkey': 'TR',
+      'Poland': 'PL',
+      'Romania': 'RO',
+      'Czech Republic': 'CZ',
       'Brazil': 'BR',
       'Italy': 'IT',
       'United Kingdom': 'GB',

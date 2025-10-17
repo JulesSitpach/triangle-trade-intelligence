@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import TriangleLayout from './TriangleLayout';
 import { SERVICE_CONFIGURATIONS, calculateServicePrice } from '../config/service-configurations';
 import { SUBSCRIPTION_TIERS } from '../config/subscription-limits';
+import { logDevIssue, DevIssue } from '../lib/utils/logDevIssue.js';
 
 export default function UserDashboard({ user }) {
   const router = useRouter();
@@ -44,6 +45,9 @@ export default function UserDashboard({ user }) {
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      await DevIssue.apiError('user_dashboard', '/api/dashboard-data', error, {
+        userId: user?.id
+      });
       setDashboardData({
         workflows: [],
         alerts: [],
@@ -84,26 +88,16 @@ export default function UserDashboard({ user }) {
             workflow_has_workflow_data: !!workflow.workflow_data
           });
 
-          // Log to admin dashboard (non-blocking)
-          fetch('/api/admin/log-dev-issue', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              issue_type: 'missing_data',
-              severity: 'high',
-              component: 'dashboard_certificate_generator',
-              message: `Missing ${missingFields.length} required fields when generating certificate from dashboard`,
-              context_data: {
-                workflow_id: workflow.id,
-                missing_fields: missingFields,
-                workflow_structure: {
-                  has_workflow_data: !!workflow.workflow_data,
-                  has_company: !!workflowData.company,
-                  has_product: !!workflowData.product
-                }
-              }
-            })
-          }).catch(err => console.error('Failed to log dev issue:', err));
+          // Log using DevIssue helper
+          await DevIssue.missingData('dashboard_certificate_generator', 'certificate_workflow_fields', {
+            workflow_id: workflow.id,
+            missing_fields: missingFields,
+            workflow_structure: {
+              has_workflow_data: !!workflow.workflow_data,
+              has_company: !!workflowData.company,
+              has_product: !!workflowData.product
+            }
+          });
         }
 
         certificateData = {
@@ -158,6 +152,10 @@ export default function UserDashboard({ user }) {
       console.log('✅ Certificate downloaded successfully');
     } catch (error) {
       console.error('❌ Error downloading certificate:', error);
+      await DevIssue.apiError('user_dashboard', 'certificate-download', error, {
+        workflowId: workflow.id,
+        productDescription: workflow.product_description
+      });
       alert('Failed to download certificate. Please try again.');
     }
   };
@@ -309,6 +307,10 @@ export default function UserDashboard({ user }) {
 
       } catch (error) {
         console.error('❌ Service request error:', error);
+        await DevIssue.apiError('user_dashboard', '/api/stripe/create-service-checkout', error, {
+          serviceId: selectedService,
+          workflowId: selectedWorkflowId
+        });
         alert(`Failed to create service request: ${error.message}`);
         setIsProcessing(false);
       }

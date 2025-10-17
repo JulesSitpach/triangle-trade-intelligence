@@ -13,6 +13,7 @@
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -151,6 +152,7 @@ export default protectedApiHandler({
 
           if (alertsError) {
             console.error('Crisis alerts query error:', alertsError);
+            await DevIssue.apiError('dashboard_data', 'crisis alerts query', alertsError, { userId });
             // Continue without alerts rather than failing
           } else {
 
@@ -221,6 +223,13 @@ export default protectedApiHandler({
           }
         } catch (alertError) {
           console.error('Crisis alerts fetch failed:', alertError);
+          await logDevIssue({
+            type: 'api_error',
+            severity: 'medium',
+            component: 'dashboard_data',
+            message: 'Crisis alerts fetch failed',
+            data: { userId, error: alertError.message, userHSCodes }
+          });
           // Continue without alerts - don't fail the entire dashboard
           crisisAlerts = [];
         }
@@ -242,6 +251,7 @@ export default protectedApiHandler({
 
     } catch (error) {
       console.error('Dashboard data fetch error:', error);
+      await DevIssue.apiError('dashboard_data', '/api/dashboard-data', error, { userId });
       return res.status(500).json({
         error: 'Failed to load dashboard data',
         details: error.message

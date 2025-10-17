@@ -2,6 +2,7 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
+import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -38,6 +39,18 @@ export default protectedApiHandler({
       const paymentMethod = await stripe.paymentMethods.retrieve(payment_method_id);
 
       if (paymentMethod.customer !== user.stripe_customer_id) {
+        await logDevIssue({
+          type: 'validation_error',
+          severity: 'high',
+          component: 'payment_methods',
+          message: 'User attempted to remove payment method that does not belong to them',
+          data: {
+            userId,
+            payment_method_id,
+            paymentMethodCustomer: paymentMethod.customer,
+            userCustomerId: user.stripe_customer_id
+          }
+        });
         throw new ApiError('Payment method does not belong to this customer', 403);
       }
 
@@ -49,6 +62,10 @@ export default protectedApiHandler({
         message: 'Payment method removed successfully'
       });
     } catch (error) {
+      await DevIssue.apiError('payment_methods', '/api/payment-methods/remove', error, {
+        userId: req.user.id,
+        payment_method_id: req.body.payment_method_id
+      });
       console.error('Error removing payment method:', error);
       throw new ApiError('Failed to remove payment method', 500, {
         error: error.message

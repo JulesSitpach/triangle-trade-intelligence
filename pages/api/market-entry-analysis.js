@@ -3,7 +3,13 @@
  * Used by Jorge's MarketEntryTab - 3-stage workflow
  * Stage 2: AI analysis with FULL business intelligence context
  * Stage 3: Jorge's B2B relationship building and Mexico market execution
+ *
+ * 🔄 3-Tier Fallback Architecture:
+ * TIER 1: OpenRouter → TIER 2: Anthropic → TIER 3: Graceful fail
  */
+
+import { executeAIWithFallback, parseAIResponse } from '../../lib/ai-helpers.js';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,9 +19,29 @@ export default async function handler(req, res) {
   try {
     const { original_request, market_strategy } = req.body;
 
+    // ✅ VALIDATION: Fail loudly if required data is missing (AI Fallback Architecture Rule 1)
+    if (!original_request || !original_request.subscriber_data) {
+      await DevIssue.missingData('market_entry_api', 'original_request.subscriber_data', {
+        endpoint: '/api/market-entry-analysis'
+      });
+      return res.status(400).json({ error: 'Missing required field: original_request.subscriber_data' });
+    }
+    if (!original_request.subscriber_data.company_name) {
+      await DevIssue.missingData('market_entry_api', 'subscriber_data.company_name', {
+        subscriberData: original_request.subscriber_data
+      });
+      return res.status(400).json({ error: 'Missing required field: company_name' });
+    }
+    if (!original_request.subscriber_data.product_description) {
+      await DevIssue.missingData('market_entry_api', 'subscriber_data.product_description', {
+        company: original_request.subscriber_data.company_name
+      });
+      return res.status(400).json({ error: 'Missing required field: product_description' });
+    }
+
     // Extract comprehensive subscriber data and market strategy context
-    const subscriberData = original_request?.subscriber_data || {};
-    const serviceDetails = original_request?.service_details || {};
+    const subscriberData = original_request.subscriber_data;
+    const serviceDetails = original_request.service_details || {};
     const marketContext = market_strategy || {};
 
     // Build comprehensive business context for AI analysis
@@ -184,53 +210,67 @@ Provide comprehensive Mexico market entry analysis that Jorge can use for B2B pa
 
 Format as JSON with these exact keys: market_opportunity (object with market_size, growth_rate, target_segments, distribution_channels, regulatory_overview), competitive_analysis (object with key_competitors, market_positioning, pricing_dynamics, barriers_to_entry, usmca_advantages), entry_strategy (object with recommended_approach, distribution_strategy, partnership_vs_direct, investment_requirements, revenue_trajectory), partnership_strategy (object with partner_types, ideal_profiles, value_proposition, negotiation_considerations, cultural_practices), implementation_phases (object with phase1, phase2, phase3, critical_milestones arrays), risk_mitigation (array with risk_category, specific_risks, mitigation_strategies), financial_projections (object with investment_breakdown, revenue_projections, profitability_timeline, roi_analysis), jorge_execution_approach (object with partner_outreach, relationship_building, cultural_navigation, negotiation_strategy, ongoing_management arrays).`;
 
-    console.log('[MARKET ENTRY] Calling OpenRouter API with comprehensive business context...');
+    console.log('[MARKET ENTRY] Calling AI with 3-tier fallback architecture...');
 
-    // Call OpenRouter API with full business intelligence
-    const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-        'X-Title': 'Triangle Trade Intelligence - Market Entry Analysis'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku',
-        messages: [{
-          role: 'user',
-          content: aiPrompt
-        }],
-        temperature: 0.7,
-        max_tokens: 4000
-      })
+    // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    const aiResult = await executeAIWithFallback({
+      prompt: aiPrompt,
+      model: 'anthropic/claude-3.5-haiku',
+      maxTokens: 4000
     });
 
-    if (!openRouterResponse.ok) {
-      throw new Error(`OpenRouter API error: ${openRouterResponse.status} ${openRouterResponse.statusText}`);
+    if (!aiResult.success) {
+      console.error('All AI tiers failed:', aiResult.error);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'market_entry_api',
+        message: 'AI market entry analysis failed for all tiers',
+        data: {
+          error: aiResult.error,
+          company: businessContext.company.name,
+          entryApproach: businessContext.market_entry_goals.entry_approach
+        }
+      });
+      throw new Error(aiResult.error);
     }
 
-    const openRouterData = await openRouterResponse.json();
-    const aiResponseText = openRouterData.choices[0]?.message?.content || '';
+    console.log(`[MARKET ENTRY] Using ${aiResult.provider} (Tier ${aiResult.tier}) - ${aiResult.duration}ms`);
 
-    console.log('[MARKET ENTRY] OpenRouter API response received');
-
-    // Parse AI response (try JSON first, fallback to text parsing)
+    // Parse AI response with robust error handling
     let aiAnalysis;
     try {
-      // Try to extract JSON from response
-      const jsonMatch = aiResponseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        aiAnalysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in response');
+      aiAnalysis = parseAIResponse(aiResult.content);
+
+      if (aiAnalysis.parseError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'market_entry_api',
+          message: 'AI response parsing failed',
+          data: {
+            company: businessContext.company.name,
+            responsePreview: aiResult.content?.substring(0, 200)
+          }
+        });
+        throw new Error('Failed to parse AI response');
       }
     } catch (parseError) {
       console.log('[MARKET ENTRY] JSON parse failed, using structured fallback');
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'medium',
+        component: 'market_entry_api',
+        message: 'JSON parsing failed - using structured fallback',
+        data: {
+          company: businessContext.company.name,
+          parseError: parseError.message
+        }
+      });
       // Fallback: structure the text response
       aiAnalysis = {
         market_opportunity: {
-          market_size: 'Analysis pending',
+          market_size: 'Analysis pending - Jorge will provide professional market research',
           growth_rate: 'Analysis pending',
           target_segments: [],
           distribution_channels: [],
@@ -250,7 +290,7 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
           roi_analysis: businessContext.financial_impact.potential_usmca_savings || 0
         },
         jorge_execution_approach: {},
-        raw_ai_analysis: aiResponseText
+        raw_ai_analysis: aiResult.content
       };
     }
 
@@ -299,6 +339,11 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
 
   } catch (error) {
     console.error('Market entry analysis error:', error);
+    await DevIssue.apiError('market_entry_api', '/api/market-entry-analysis', error, {
+      hasOriginalRequest: !!req.body.original_request,
+      hasSubscriberData: !!req.body.original_request?.subscriber_data,
+      company: req.body.original_request?.subscriber_data?.company_name || 'unknown'
+    });
     res.status(500).json({
       error: 'Market entry analysis failed',
       message: error.message,

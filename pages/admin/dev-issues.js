@@ -6,8 +6,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
+import AdminNavigation from '../../components/AdminNavigation';
+import { requireAdminAuth } from '../../lib/auth/serverAuth';
 
-export default function DevIssuesDashboard() {
+export default function DevIssuesDashboard({ session }) {
   const router = useRouter();
   const [issues, setIssues] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,14 +71,22 @@ export default function DevIssuesDashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">🐛 Development Issues</h1>
-        <p className="dashboard-subtitle">
-          Code bugs and missing data exposed by "fail loudly" strategy - NOT user errors
-        </p>
-      </div>
+    <>
+      <Head>
+        <title>Development Issues - Admin Dashboard</title>
+      </Head>
+
+      <div className="admin-main">
+        <AdminNavigation />
+
+        <div className="dashboard-container">
+          {/* Header */}
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">🐛 Development Issues</h1>
+            <p className="dashboard-subtitle">
+              Code bugs and missing data exposed by "fail loudly" strategy - NOT user errors
+            </p>
+          </div>
 
       {/* Filters */}
       <div className="dashboard-actions">
@@ -268,6 +279,13 @@ export default function DevIssuesDashboard() {
           </div>
         )}
       </div>
-    </div>
+        </div>
+      </div>
+    </>
   );
+}
+
+// Server-side authentication protection
+export async function getServerSideProps(context) {
+  return requireAdminAuth(context);
 }

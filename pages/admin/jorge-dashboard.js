@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import AdminNavigation from '../../components/AdminNavigation';
 import Head from 'next/head';
-import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
+import { requireAdminAuth } from '../../lib/auth/serverAuth';
 
 // Import shared service tab components (used by both Jorge and Cristina)
 import TradeHealthCheckTab from '../../components/shared/TradeHealthCheckTab';
@@ -21,9 +21,8 @@ import CrisisNavigatorTab from '../../components/shared/CrisisNavigatorTab';
 import FloatingTeamChat from '../../components/shared/FloatingTeamChat';
 import AdminIntelligenceMetrics from '../../components/admin/AdminIntelligenceMetrics';
 
-export default function JorgeDashboardCleanModular() {
+export default function JorgeDashboardCleanModular({ session }) {
   const router = useRouter();
-  const { user, loading: authLoading } = useSimpleAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('trade-health-check');
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -31,19 +30,8 @@ export default function JorgeDashboardCleanModular() {
 
   useEffect(() => {
     const initializeDashboard = async () => {
-      // Wait for auth context to finish loading
-      if (authLoading) {
-        return;
-      }
-
-      // Check if user is authenticated
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
       try {
-        // Load service requests
+        // Session is already verified server-side, just load data
         await loadServiceRequests();
         setLoading(false);
       } catch (error) {
@@ -53,7 +41,7 @@ export default function JorgeDashboardCleanModular() {
     };
 
     initializeDashboard();
-  }, [user, authLoading, router]);
+  }, []);
 
   const loadServiceRequests = async () => {
     try {
@@ -108,11 +96,11 @@ export default function JorgeDashboardCleanModular() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="dashboard-loading">
         <div className="loading-spinner">
-          {authLoading ? 'Verifying authentication...' : 'Loading Jorge\'s Dashboard...'}
+          Loading Jorge's Dashboard...
         </div>
       </div>
     );
@@ -213,4 +201,9 @@ export default function JorgeDashboardCleanModular() {
       </div>
     </>
   );
+}
+
+// Server-side authentication protection
+export async function getServerSideProps(context) {
+  return requireAdminAuth(context);
 }
