@@ -24,9 +24,9 @@ export default protectedApiHandler({
   POST: async (req, res) => {
     const startTime = Date.now();
     const userId = req.user.id;
+    const formData = req.body; // Move outside try block for error handler access
 
   try {
-    const formData = req.body;
 
     console.log('🤖 ========== AI-POWERED USMCA ANALYSIS: START ==========');
     console.log('📥 Received request:', {
@@ -77,7 +77,7 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4-20250514', // Sonnet 4.5 with October 2025 tariff knowledge
+        model: 'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet (latest available on OpenRouter)
         messages: [{
           role: 'user',
           content: prompt
@@ -849,7 +849,7 @@ async function tryOpenRouter(prompt) {
         'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4-20250514',
+        model: 'anthropic/claude-3.5-sonnet',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0
       })
@@ -896,7 +896,7 @@ async function tryAnthropicDirect(prompt) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 4000,
         messages: [{
           role: 'user',
