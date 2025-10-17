@@ -59,7 +59,9 @@ export default protectedApiHandler({
 
     if (error) {
       if (error.code === 'PGRST116') {
-        throw new ApiError('Session not found', 404);
+        // Session not found - return success with null (graceful for frontend)
+        logInfo('Workflow session not found in database - returning null', { sessionId, userId });
+        return sendSuccess(res, null, 'No session found - starting fresh');
       }
 
       logError('Failed to retrieve workflow session', { error: error.message, sessionId });
