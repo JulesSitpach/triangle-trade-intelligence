@@ -7,7 +7,8 @@
 import { useState } from 'react';
 
 export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }) {
-  const [showDetails, setShowDetails] = useState(false);
+  // EDUCATIONAL: Start EXPANDED so users see reasoning immediately
+  const [showDetails, setShowDetails] = useState(true);
 
   if (!suggestion || !suggestion.data) return null;
 
@@ -60,43 +61,102 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
           </div>
         )}
 
+        {/* EDUCATIONAL: Required Documentation - PROACTIVE DISPLAY */}
+        {suggestion.data.requiredDocumentation && suggestion.data.requiredDocumentation.length > 0 && (
+          <div className="documentation-section" style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem',
+            backgroundColor: '#eff6ff',
+            borderRadius: '4px',
+            borderLeft: '3px solid #3b82f6'
+          }}>
+            <h4 className="section-title" style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#1e40af', marginBottom: '0.5rem' }}>
+              📄 Required Customs Documentation:
+            </h4>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
+              {suggestion.data.requiredDocumentation.map((doc, idx) => (
+                <li key={idx} style={{ marginBottom: '0.25rem' }}>{doc}</li>
+              ))}
+            </ul>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#3730a3', fontStyle: 'italic' }}>
+              💡 Prepare these documents before customs filing to avoid delays
+            </div>
+          </div>
+        )}
+
         {/* Expandable Details Section */}
         {(hasExplanation || hasAlternatives) && (
           <div className="suggestion-details">
             <button
               className="btn-link"
               onClick={() => setShowDetails(!showDetails)}
+              style={{ fontSize: '0.8125rem', color: '#3b82f6', marginTop: '0.5rem' }}
             >
-              {showDetails ? '▼ Hide Details' : '▶ View Full Analysis'}
+              {showDetails ? '▲ Hide AI Analysis' : '▼ Show AI Analysis'}
             </button>
 
             {showDetails && (
               <div className="details-content">
-                {/* Full Explanation */}
+                {/* Full Explanation - EDUCATIONAL FORMAT */}
                 {hasExplanation && (
-                  <div className="explanation-section">
-                    <h4 className="section-title">Classification Reasoning:</h4>
-                    <p className="text-body">{suggestion.data.explanation}</p>
+                  <div className="explanation-section" style={{
+                    marginTop: '0.75rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#f0f9ff',
+                    borderRadius: '4px',
+                    borderLeft: '3px solid #0ea5e9'
+                  }}>
+                    <h4 className="section-title" style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#075985', marginBottom: '0.5rem' }}>
+                      🧠 Why We Classified This Way:
+                    </h4>
+                    <p className="text-body" style={{ fontSize: '0.8125rem', color: '#0c4a6e', lineHeight: '1.6', margin: 0 }}>
+                      {suggestion.data.explanation}
+                    </p>
                   </div>
                 )}
 
-                {/* Alternative Codes */}
+                {/* Alternative Codes - EDUCATIONAL FORMAT */}
                 {hasAlternatives && (
-                  <div className="alternatives-section">
-                    <h4 className="section-title">Alternative HS Codes:</h4>
-                    <ul className="alternatives-list">
+                  <div className="alternatives-section" style={{
+                    marginTop: '0.75rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#fef3c7',
+                    borderRadius: '4px',
+                    borderLeft: '3px solid #f59e0b'
+                  }}>
+                    <h4 className="section-title" style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
+                      🔄 Other Options to Consider:
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {suggestion.data.alternativeCodes.map((alt, idx) => (
-                        <li key={idx} className="alternative-item">
-                          <div className="alt-code">
-                            <strong>{alt.code}</strong>
-                            <span className={`confidence-badge confidence-${alt.confidence >= 70 ? 'yellow' : 'red'}`}>
-                              {alt.confidence}%
+                        <div
+                          key={idx}
+                          style={{
+                            padding: '0.5rem',
+                            backgroundColor: '#ffffff',
+                            borderRadius: '4px',
+                            border: '1px solid #fde68a'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                            <strong style={{ fontFamily: 'monospace', color: '#78350f' }}>{alt.code}</strong>
+                            <span style={{
+                              fontSize: '0.75rem',
+                              padding: '0.125rem 0.5rem',
+                              borderRadius: '12px',
+                              backgroundColor: alt.confidence >= 70 ? '#fef3c7' : '#fee2e2',
+                              color: alt.confidence >= 70 ? '#92400e' : '#991b1b'
+                            }}>
+                              {alt.confidence}% match
                             </span>
                           </div>
-                          <div className="alt-reason">{alt.reason}</div>
-                        </li>
+                          <div style={{ fontSize: '0.75rem', color: '#92400e' }}>{alt.reason}</div>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
+                      💡 Consider these if your product specs change or for different use cases
+                    </div>
                   </div>
                 )}
               </div>

@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
+import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -89,6 +90,7 @@ export default function ComponentOriginsStepEnhanced({
           additionalContext: {
             // Complete product context from Step 1
             overallProduct: formData.product_description,
+            industryContext: formData.business_type || 'General Manufacturing', // REQUIRED by classification agent
             businessType: formData.business_type,
             manufacturingLocation: formData.manufacturing_location,
             exportDestination: formData.export_destination,
@@ -96,12 +98,16 @@ export default function ComponentOriginsStepEnhanced({
             companyName: formData.company_name,
             primarySupplier: formData.primary_supplier_country,
 
-            // All components for context
-            allComponents: components.map(c => ({
-              description: c.description,
-              origin: c.origin_country,
-              percentage: c.value_percentage
-            })).filter(c => c.description) // Only send filled components
+            // PROGRESSIVE CONTEXT: Send previously classified components (before this index)
+            // This prevents duplicate HS codes - AI knows what codes it already assigned
+            previouslyClassifiedComponents: components.slice(0, index)
+              .filter(c => c.description && c.hs_code) // Only components with HS codes
+              .map(c => ({
+                description: c.description,
+                origin_country: c.origin_country,
+                value_percentage: c.value_percentage,
+                hs_code: c.hs_code
+              }))
           }
         })
       });
@@ -116,11 +122,8 @@ export default function ComponentOriginsStepEnhanced({
           confidence: result.data.confidence || result.data.adjustedConfidence,
           explanation: result.data.reasoning || result.data.explanation,
           source: 'AI Classification Agent',
-          // Enhanced features from API (we're paying for this data - show it!)
-          alternativeCodes: result.enhanced_features?.alternative_codes || [],
-          mfnRate: result.tariff_analysis?.mfn_rate || null,
-          usmcaRate: result.tariff_analysis?.usmca_rate || null,
-          qualifiesForUSMCA: result.tariff_analysis?.qualifies_for_usmca || false
+          // Enhanced features from API - HS CLASSIFICATION ONLY (tariff rates looked up separately)
+          alternativeCodes: result.enhanced_features?.alternative_codes || []
         };
         console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
         setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
@@ -129,6 +132,11 @@ export default function ComponentOriginsStepEnhanced({
       }
     } catch (error) {
       console.error(`Agent classification error for component ${index + 1}:`, error);
+      await DevIssue.apiError('component_origins_step', '/api/agents/classification', error, {
+        componentIndex: index,
+        componentDescription: component.description,
+        originCountry: component.origin_country
+      });
     } finally {
       setSearchingHS(prev => ({ ...prev, [index]: false }));
     }
@@ -188,6 +196,10 @@ export default function ComponentOriginsStepEnhanced({
       }
     } catch (error) {
       console.error('HS code lookup failed:', error);
+      await DevIssue.apiError('component_origins_step', '/api/lightweight-hs-lookup', error, {
+        componentIndex: index,
+        productDescription: component.description
+      });
       alert('HS code lookup failed. Please try again or enter the code manually.');
     } finally {
       setSearchingHS({ ...searchingHS, [index]: false });
@@ -219,7 +231,7 @@ export default function ComponentOriginsStepEnhanced({
       }
     } catch (error) {
       console.error('Failed to capture HS code:', error);
-      // Fail silently - don't disrupt user experience
+      // Fail silently - don't disrupt user experience (no dev issue log needed for optional feature)
     }
   };
 
@@ -486,41 +498,47 @@ export default function ComponentOriginsStepEnhanced({
           {/* Origin Criterion - USMCA Certificate Field #8 */}
           <div className="form-group">
             <label className="form-label">
-              Origin Criterion
+              Origin Criterion <span style={{ fontSize: '0.8125rem', fontWeight: '400', color: '#6b7280' }}>(Optional - AI will determine this)</span>
             </label>
             <select
               value={formData.origin_criterion || ''}
               onChange={(e) => updateFormData('origin_criterion', e.target.value)}
               className={`form-select ${formData.origin_criterion ? 'has-value' : ''}`}
             >
-              <option value="">Select origin criterion...</option>
-              <option value="A">A - Wholly Obtained</option>
-              <option value="B">B - Tariff Shift and Regional Value Content</option>
-              <option value="C">C - Specific Processing/Value Requirement</option>
+              <option value="">Skip - AI will determine...</option>
+              <option value="A">A - Product made entirely in North America (rare)</option>
+              <option value="B">B - Product changed category + meets % threshold (most common)</option>
+              <option value="C">C - Product meets specific processing rules (industry-specific)</option>
             </select>
-            <div className="form-help">
-              How does your product qualify under USMCA? (Certificate Field #8)
+            <div className="form-help" style={{ padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '4px', marginTop: '0.5rem' }}>
+              <strong style={{ color: '#1e40af' }}>💡 Don't worry about this!</strong>
+              <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
+                Our AI will analyze your components and tell you which criterion applies. Most products use <strong>Criterion B</strong> (tariff shift + regional content).
+              </div>
             </div>
           </div>
 
           {/* Method of Qualification - USMCA Certificate Field #10 */}
           <div className="form-group">
             <label className="form-label">
-              Method of Qualification
+              Method of Qualification <span style={{ fontSize: '0.8125rem', fontWeight: '400', color: '#6b7280' }}>(Optional - AI will calculate)</span>
             </label>
             <select
               value={formData.method_of_qualification || ''}
               onChange={(e) => updateFormData('method_of_qualification', e.target.value)}
               className={`form-select ${formData.method_of_qualification ? 'has-value' : ''}`}
             >
-              <option value="">Select calculation method...</option>
-              <option value="TS">TS - Tariff Shift</option>
-              <option value="TV">TV - Transaction Value (RVC)</option>
-              <option value="NC">NC - Net Cost (RVC)</option>
-              <option value="NO">NO - No Requirement</option>
+              <option value="">Skip - AI will calculate...</option>
+              <option value="TV">TV - Based on your selling price (easiest, most common)</option>
+              <option value="NC">NC - Based on production costs (detailed accounting needed)</option>
+              <option value="TS">TS - Product changed enough to qualify (no math needed)</option>
+              <option value="NO">NO - Product qualifies automatically (rare cases)</option>
             </select>
-            <div className="form-help">
-              Method used to calculate regional value content (Certificate Field #10)
+            <div className="form-help" style={{ padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '4px', marginTop: '0.5rem' }}>
+              <strong style={{ color: '#1e40af' }}>💡 We'll calculate this for you!</strong>
+              <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
+                Our AI uses <strong>Transaction Value (TV)</strong> by default - this means we calculate based on your component percentages. No accounting records needed.
+              </div>
             </div>
           </div>
         </div>
@@ -661,13 +679,21 @@ export default function ComponentOriginsStepEnhanced({
                     explanation: agentSuggestions[index].explanation,
                     source: agentSuggestions[index].source,
                     alternativeCodes: agentSuggestions[index].alternativeCodes,
-                    mfnRate: agentSuggestions[index].mfnRate,
-                    usmcaRate: agentSuggestions[index].usmcaRate,
-                    qualifiesForUSMCA: agentSuggestions[index].qualifiesForUSMCA
+                    requiredDocumentation: agentSuggestions[index].requiredDocumentation
                   }
                 }}
                 onAccept={() => {
-                  updateComponent(index, 'hs_code', agentSuggestions[index].hsCode);
+                  // EDUCATIONAL: Preserve AI reasoning in component data
+                  const suggestion = agentSuggestions[index];
+                  updateComponent(index, 'hs_code', suggestion.hsCode);
+                  updateComponent(index, 'hs_description', suggestion.description);
+                  updateComponent(index, 'ai_reasoning', suggestion.explanation);
+                  updateComponent(index, 'confidence', suggestion.confidence);
+                  updateComponent(index, 'alternative_codes', suggestion.alternativeCodes || []);
+                  updateComponent(index, 'required_documentation', suggestion.requiredDocumentation || []);
+                  updateComponent(index, 'classification_source', 'ai_agent');
+
+                  // Clear the suggestion badge (user accepted it)
                   const newSuggestions = { ...agentSuggestions };
                   delete newSuggestions[index];
                   setAgentSuggestions(newSuggestions);
@@ -678,6 +704,45 @@ export default function ComponentOriginsStepEnhanced({
                   setAgentSuggestions(newSuggestions);
                 }}
               />
+            )}
+
+            {/* EDUCATIONAL: Show AI classification indicator after acceptance */}
+            {!agentSuggestions[index] && component.classification_source === 'ai_agent' && component.hs_code && (
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.5rem 0.75rem',
+                backgroundColor: '#f0f9ff',
+                borderRadius: '4px',
+                borderLeft: '3px solid #0ea5e9',
+                fontSize: '0.8125rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#075985' }}>
+                  <span>🤖</span>
+                  <span style={{ fontWeight: '500' }}>
+                    AI-classified ({component.confidence}% confidence)
+                  </span>
+                  {component.ai_reasoning && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Show reasoning in alert for now (could be a modal in future)
+                        alert(`AI Classification Reasoning:\n\n${component.ai_reasoning}\n\nRequired Documentation:\n${(component.required_documentation || []).map((doc, i) => `${i + 1}. ${doc}`).join('\n')}`);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#0ea5e9',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontSize: '0.75rem',
+                        padding: 0
+                      }}
+                    >
+                      View reasoning
+                    </button>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         ))}

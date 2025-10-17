@@ -7,6 +7,54 @@
 import React from 'react';
 import Link from 'next/link';
 
+// EDUCATIONAL: Simple tooltip component for trade terminology
+const Tooltip = ({ text, children }) => {
+  const [show, setShow] = React.useState(false);
+
+  return (
+    <span style={{ position: 'relative', display: 'inline-block' }}>
+      <span
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        style={{ borderBottom: '1px dotted #6b7280', cursor: 'help' }}
+      >
+        {children}
+      </span>
+      {show && (
+        <span style={{
+          position: 'absolute',
+          bottom: '100%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '0.5rem',
+          backgroundColor: '#1f2937',
+          color: '#ffffff',
+          fontSize: '0.75rem',
+          borderRadius: '4px',
+          whiteSpace: 'normal',
+          width: '200px',
+          zIndex: 1000,
+          marginBottom: '0.5rem',
+          lineHeight: '1.4'
+        }}>
+          {text}
+          <span style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '5px solid #1f2937'
+          }} />
+        </span>
+      )}
+    </span>
+  );
+};
+
 export default function USMCAQualification({ results }) {
   console.log('🚨 USMCAQualification component called with:', results);
   const [expandedComponents, setExpandedComponents] = React.useState({});
@@ -90,12 +138,28 @@ export default function USMCAQualification({ results }) {
             <thead>
               <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
                 <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Component</th>
-                <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>HS Code</th>
+                <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Harmonized System code - international standard for classifying traded products">
+                    HS Code
+                  </Tooltip>
+                </th>
                 <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Origin</th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Value %</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>MFN Rate</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>USMCA Rate</th>
-                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Savings</th>
+                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Most Favored Nation rate - standard import duty without trade agreement benefits. May include Section 301, IEEPA, or other policy adjustments">
+                    MFN Rate
+                  </Tooltip>
+                </th>
+                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Preferential duty rate for USMCA-qualified goods. Usually 0% (duty-free) when your product qualifies">
+                    USMCA Rate
+                  </Tooltip>
+                </th>
+                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Tariff savings if you qualify for USMCA (MFN Rate - USMCA Rate)">
+                    Savings
+                  </Tooltip>
+                </th>
                 <th style={{ textAlign: 'center', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Status</th>
               </tr>
             </thead>
@@ -143,8 +207,47 @@ export default function USMCAQualification({ results }) {
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
                         {component.value_percentage}%
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        {hasRates ? `${mfnRate.toFixed(1)}%` : '—'}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                          <span style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
+                            {hasRates ? `${mfnRate.toFixed(1)}%` : '—'}
+                          </span>
+                          {/* EDUCATIONAL: Show policy breakdown proactively */}
+                          {component.policy_adjustments && component.policy_adjustments.length > 0 && (
+                            <div style={{
+                              fontSize: '0.6875rem',
+                              color: '#6b7280',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.125rem',
+                              alignItems: 'flex-end'
+                            }}>
+                              {component.policy_adjustments.slice(0, 3).map((adj, idx) => (
+                                <span key={idx} style={{
+                                  whiteSpace: 'nowrap',
+                                  backgroundColor: '#fef3c7',
+                                  padding: '0.125rem 0.375rem',
+                                  borderRadius: '3px',
+                                  color: '#92400e'
+                                }}>
+                                  {adj}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {/* Data freshness indicator */}
+                          {component.rate_source && (
+                            <span style={{
+                              fontSize: '0.6875rem',
+                              color: component.rate_source === 'database_fallback' || component.stale ? '#d97706' : '#059669',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {component.rate_source === 'database_fallback' || component.stale
+                                ? '⚠️ Jan 2025 data'
+                                : '✓ Current 2025'}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         {hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}
@@ -169,13 +272,22 @@ export default function USMCAQualification({ results }) {
                             {/* AI Confidence */}
                             {component.confidence && (
                               <div style={{ marginBottom: '0.75rem' }}>
-                                <strong style={{ color: '#374151' }}>AI Confidence:</strong>{' '}
+                                <strong style={{ color: '#374151' }}>
+                                  <Tooltip text="90-100%: High confidence - AI found exact database match | 75-89%: Medium - AI validated by similar products | <75%: Low - Professional review recommended before customs filing">
+                                    AI Confidence:
+                                  </Tooltip>
+                                </strong>{' '}
                                 <span style={{
                                   color: component.confidence >= 90 ? '#059669' : component.confidence >= 75 ? '#d97706' : '#6b7280',
                                   fontWeight: '500'
                                 }}>
                                   {component.confidence}% {component.confidence >= 90 ? '(High)' : component.confidence >= 75 ? '(Medium)' : '(Low)'}
                                 </span>
+                                {component.confidence < 75 && (
+                                  <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#d97706', fontStyle: 'italic' }}>
+                                    ⚠️ Consider professional validation before customs filing
+                                  </div>
+                                )}
                               </div>
                             )}
 
@@ -222,6 +334,34 @@ export default function USMCAQualification({ results }) {
                                     <div style={{ fontWeight: '600', color: '#059669' }}>{((component.mfn_rate || 0) - (component.usmca_rate || 0)).toFixed(1)}%</div>
                                   </div>
                                 </div>
+
+                                {/* EDUCATIONAL: Policy Breakdown Explanation */}
+                                {component.policy_adjustments && component.policy_adjustments.length > 0 && (
+                                  <div style={{
+                                    marginTop: '0.75rem',
+                                    padding: '0.75rem',
+                                    backgroundColor: '#fffbeb',
+                                    borderRadius: '4px',
+                                    borderLeft: '3px solid #f59e0b'
+                                  }}>
+                                    <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
+                                      📊 How We Calculate {(component.mfn_rate || 0).toFixed(1)}% Total Rate:
+                                    </div>
+                                    <div style={{ fontSize: '0.8125rem', color: '#78350f', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                      {component.policy_adjustments.map((adj, idx) => (
+                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                          <span style={{ color: '#f59e0b' }}>•</span>
+                                          <span>{adj}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
+                                      {component.rate_source === 'database_fallback' || component.stale
+                                        ? '⚠️ Data from January 2025 - may not reflect current policy changes'
+                                        : '✅ Current October 2025 policy (updated via AI research)'}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
 
@@ -284,15 +424,27 @@ export default function USMCAQualification({ results }) {
           {/* Summary Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>North American Content</div>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                <Tooltip text="Total value percentage from US, Mexico, or Canada sources">
+                  North American Content
+                </Tooltip>
+              </div>
               <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{(results.usmca.north_american_content || 0).toFixed(1)}%</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Required Threshold</div>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                <Tooltip text="Minimum North American content required for your product category under USMCA treaty rules">
+                  Required Threshold
+                </Tooltip>
+              </div>
               <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{results.usmca.threshold_applied}%</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Qualifying Components</div>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                <Tooltip text="Number of components sourced from USMCA countries (US, Mexico, Canada)">
+                  Qualifying Components
+                </Tooltip>
+              </div>
               <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
                 {results.usmca.component_breakdown.filter(c => c.is_usmca_member).length} of {results.usmca.component_breakdown.length}
               </div>

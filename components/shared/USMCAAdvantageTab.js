@@ -1176,8 +1176,49 @@ function ComplianceRiskAnalysisStage({ request, subscriberData, serviceDetails, 
                         <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace' }}>
                           {hsCode}
                         </td>
-                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#dc2626' }}>
-                          {mfnRate > 0 ? `${mfnRate.toFixed(1)}%` : '—'}
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                            <span style={{ color: '#dc2626', fontWeight: '500' }}>
+                              {mfnRate > 0 ? `${mfnRate.toFixed(1)}%` : '—'}
+                            </span>
+                            {/* ADMIN INTELLIGENCE: Show policy breakdown for client explanations */}
+                            {comp.policy_adjustments && comp.policy_adjustments.length > 0 && (
+                              <div style={{
+                                fontSize: '0.6875rem',
+                                color: '#6b7280',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.125rem',
+                                alignItems: 'flex-end'
+                              }}>
+                                {comp.policy_adjustments.slice(0, 2).map((adj, adjIdx) => (
+                                  <span key={adjIdx} style={{
+                                    whiteSpace: 'nowrap',
+                                    backgroundColor: '#fef3c7',
+                                    padding: '0.125rem 0.375rem',
+                                    borderRadius: '3px',
+                                    color: '#92400e'
+                                  }}>
+                                    {adj}
+                                  </span>
+                                ))}
+                                {comp.policy_adjustments.length > 2 && (
+                                  <span style={{ fontSize: '0.625rem', color: '#9ca3af' }}>
+                                    +{comp.policy_adjustments.length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {/* Data source indicator */}
+                            {comp.rate_source && (
+                              <span style={{
+                                fontSize: '0.625rem',
+                                color: comp.rate_source === 'database_fallback' || comp.stale ? '#d97706' : '#059669'
+                              }}>
+                                {comp.rate_source === 'database_fallback' || comp.stale ? '⚠️ Stale' : '✓ Current'}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td style={{ textAlign: 'right', padding: '0.5rem', color: '#059669' }}>
                           {usmcaRate >= 0 ? `${usmcaRate.toFixed(1)}%` : '—'}
