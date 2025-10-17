@@ -10,6 +10,7 @@ import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
 import PersonalizedPolicyAlert from '../components/alerts/PersonalizedPolicyAlert';
 import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAlert';
+import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -809,6 +810,12 @@ export default function TradeRiskAlternatives() {
           context="alerts"
         />
       </div>
+
+      {/* Global Broker Chatbot - Available on Alerts Page */}
+      <BrokerChatbot
+        currentFormField="trade_alerts"
+        sessionId={user ? `alerts_${user.id}` : `alerts_guest_${Date.now()}`}
+      />
     </TriangleLayout>
   );
 }

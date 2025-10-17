@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import UserDashboard from '../components/UserDashboard';
+import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
@@ -71,5 +72,10 @@ export default function Dashboard() {
   }
 
   // Show user dashboard for regular users
-  return <UserDashboard key={refreshKey} user={user} profile={user} />;
+  return (
+    <>
+      <UserDashboard key={refreshKey} user={user} profile={user} />
+      <BrokerChatbot currentFormField="dashboard" sessionId={`dash_${user.id}`} />
+    </>
+  );
 }
