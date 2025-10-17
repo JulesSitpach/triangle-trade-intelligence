@@ -95,9 +95,9 @@ export default function Pricing() {
       monthlyPrice: 299,
       annualPrice: 2850,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Unlimited analyses with AI-powered risk assessment',
+      description: '100 analyses/month with AI-powered risk assessment',
       features: [
-        'Unlimited USMCA analyses',
+        '100 USMCA analyses per month',
         'AI supply chain vulnerability analysis',
         '15% discount on professional services',
         'Priority support (48hr response)',
@@ -501,11 +501,11 @@ export default function Pricing() {
 
             <div className="content-card">
               <div className="content-card-icon">∞</div>
-              <h3 className="content-card-title">Unlimited USMCA Checks</h3>
+              <h3 className="content-card-title">High-Volume USMCA Checks</h3>
               <p className="content-card-description">
-                Run unlimited qualification analyses. Check every product, every
-                scenario, every supplier. Instant AI-powered HS code suggestions
-                and qualification calculations. No per-analysis fees.
+                Professional tier: 100 analyses/month. Premium tier: Unlimited analyses.
+                Check multiple products, scenarios, and suppliers. Instant AI-powered HS code suggestions
+                and qualification calculations. No hidden per-analysis fees.
               </p>
             </div>
 
@@ -571,7 +571,7 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">What's included in my subscription vs paid separately?</h3>
               <p className="content-card-description">
-                <strong>Subscription ($99-599/mo):</strong> AI tools for qualification checks, HS code suggestions, certificate templates, and alerts (10/mo on Starter, unlimited on Professional/Premium). <strong>Professional Services:</strong> Paid separately when you need Jorge or Cristina to do work for you. Professional tier gets 15% discount, Premium gets 25% discount.
+                <strong>Subscription ($99-599/mo):</strong> AI tools for qualification checks, HS code suggestions, certificate templates, and alerts (10/mo on Starter, 100/mo on Professional, unlimited on Premium). <strong>Professional Services:</strong> Paid separately when you need Jorge or Cristina to do work for you. Professional tier gets 15% discount, Premium gets 25% discount.
               </p>
             </div>
           </div>
@@ -598,7 +598,7 @@ export default function Pricing() {
             <div className="content-card">
               <div className="content-card-icon">2</div>
               <h3 className="content-card-title">Month 2-3: Upgrade to Professional</h3>
-              <p className="content-card-description">$299/month for unlimited analyses + 15% service discount when you need expert help</p>
+              <p className="content-card-description">$299/month for 100 analyses/month + 15% service discount when you need expert help</p>
             </div>
 
             <div className="content-card">

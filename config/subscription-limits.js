@@ -77,7 +77,7 @@ export const TIER_LIMITS = {
   [SUBSCRIPTION_TIERS.PROFESSIONAL]: {
     // USMCA Analysis
     components_per_analysis: 25,
-    analyses_per_month: null, // Unlimited
+    analyses_per_month: 100, // 100 analyses per month
     certificate_download: true,
     certificate_preview: true,
     preview_watermarked: false,
@@ -309,7 +309,7 @@ export function getTierComparison() {
       name: 'Professional',
       price: '$299/mo',
       features: [
-        'Unlimited analyses',
+        '100 analyses per month',
         '25 components per analysis',
         'Full certificate download',
         'All email alerts',
