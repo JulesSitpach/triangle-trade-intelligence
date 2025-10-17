@@ -1,7 +1,7 @@
 /**
  * Seed Broker Chat Responses
- * Loads 16 essential trade terms with friendly broker personality
- * Includes Mexico Triangle Routing advantages for educational marketing
+ * Loads 22 trade terms with friendly broker personality
+ * Includes Mexico Triangle Routing advantages + Professional Services referrals
  * Run with: node scripts/seed-broker-chat.js
  */
 
@@ -435,6 +435,199 @@ Work with reputable suppliers who respect worker rights, and you'll never hear a
     related_questions: ['Do I need to audit suppliers?', 'What certifications should I look for?', 'Does this affect costs?'],
     next_steps: ['Request supplier environmental certifications', 'Review USMCA environmental chapter'],
     difficulty_level: 'intermediate',
+    form_field: null
+  },
+
+  // ============ PROFESSIONAL SERVICES REFERRALS ============
+
+  {
+    term: 'Getting Expert Help',
+    keywords: ['need help', 'expert help', 'professional help', 'hire expert', 'get assistance', 'need consultant', 'trade expert', 'customs broker help'],
+    category: 'services',
+    broker_response: `Smart move asking for help! Trade compliance can get complex fast. 💼
+
+**Here's what we offer at Triangle Trade Intelligence:**
+
+**🏥 Trade Health Check ($99)** - Quick assessment of your trade setup
+**📜 USMCA Advantage Sprint ($175)** - Get USMCA-qualified with expert guidance
+**🔧 Supply Chain Optimization ($275)** - Reduce costs and improve efficiency
+**🚀 Pathfinder Market Entry ($350)** - Expert Mexico market entry strategy
+**🛡️ Supply Chain Resilience ($450)** - Find alternative suppliers, reduce risk
+**🆘 Crisis Navigator ($200/month)** - Ongoing support for trade emergencies
+
+**My team (Cristina & Jorge):**
+- 17+ years combined trade experience
+- Mexico-based with US market expertise
+- Bilingual (Spanish/English)
+- Real SMB owners who understand your challenges`,
+    quick_tip: 'Professional subscribers get 15-25% off all services! If you\'re doing regular trade, the subscription pays for itself quickly.',
+    real_example: 'Had a client last month unsure about USMCA qualification. They got our USMCA Advantage Sprint ($175) - we had them qualified and certified in 2 days. Saved them $50K annually in tariffs!',
+    encouragement: 'You don\'t have to figure this out alone! We\'re here to help. 🤝',
+    related_questions: ['Which service is right for me?', 'Do you offer custom packages?', 'What about ongoing support?'],
+    next_steps: ['View all services at /services', 'Book a Trade Health Check', 'Talk to Cristina or Jorge'],
+    difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  {
+    term: 'Finding Suppliers',
+    keywords: ['find suppliers', 'supplier sourcing', 'mexico suppliers', 'manufacturer search', 'finding manufacturers', 'supplier directory', 'contract manufacturing'],
+    category: 'services',
+    broker_response: `Finding the right suppliers is SO key! You're in the right place. 🔍
+
+**The USMCA advantage:**
+The agreement has really opened up new possibilities for sourcing from Mexico and Canada. A lot of my clients are taking advantage of Mexico's Maquiladora program and IMMEX manufacturing zones. These allow you to import materials duty-free, manufacture in Mexico, then export to the US at 0% tariffs under USMCA.
+
+**We can help with this!**
+Our **🚀 Pathfinder Market Entry service ($350)** specializes in Mexico supplier research and market entry strategy. Cristina and Jorge have deep Mexico connections and can point you to vetted IMMEX-certified manufacturers.
+
+**Or for supply chain issues:**
+**🛡️ Supply Chain Resilience ($450)** - We research alternative suppliers, assess USMCA qualification, and build your resilient North American supply chain.
+
+So you've got a whole network of Mexico-based suppliers ready to partner with small and medium businesses like yours!`,
+    quick_tip: 'Check out the Maquiladora and IMMEX info in my database - that\'s a great starting point for understanding Mexico-based suppliers that can help you maximize your USMCA benefits.',
+    real_example: 'Had a client last year that moved their electronics assembly from China to a Maquiladora facility in Tijuana. They cut their costs by 40% and got 0% tariffs shipping back to the US. Game-changer!',
+    encouragement: 'Don\'t be intimidated by all the Mexico trade programs - my team and I are here to guide you through it. Let\'s find some awesome suppliers that can help you take advantage of USMCA! 💪',
+    related_questions: ['What is the Maquiladora program?', 'How does IMMEX work?', 'What are the benefits of Mexico sourcing?'],
+    next_steps: ['Book Pathfinder Market Entry service', 'Explore Supply Chain Resilience', 'Learn about IMMEX'],
+    difficulty_level: 'intermediate',
+    form_field: null
+  },
+
+  {
+    term: 'USMCA Qualification Help',
+    keywords: ['qualify for usmca', 'usmca help', 'qualification assistance', 'certificate help', 'how to qualify', 'usmca support', 'need usmca help'],
+    category: 'services',
+    broker_response: `Getting USMCA-qualified? Let me help! 🎯
+
+**Our platform guides you through it:**
+1. Fill out the USMCA workflow (company info + components)
+2. Our AI analyzes your qualification status
+3. Get instant results and recommendations
+4. Generate your USMCA certificate if qualified
+
+**But if you want EXPERT guidance:**
+**📜 USMCA Advantage Sprint ($175)** is our most popular service!
+
+Cristina (17-year customs expert) personally reviews your:
+- Product classification
+- Component origin verification
+- RVC (Regional Value Content) calculations
+- Qualification status and optimization tips
+- Professional certificate validation
+
+**Typical turnaround: 24-48 hours!**`,
+    quick_tip: 'Professional/Premium subscribers get 15-25% off the USMCA Advantage Sprint. That brings it down to $149 or $131!',
+    real_example: 'Electronics client was confused about which USMCA criterion to use. Got our Sprint service - Cristina identified they qualified under Criterion B (instead of A they were trying). Certified in 36 hours!',
+    encouragement: 'The DIY workflow is great for straightforward cases. But if you\'re unsure or want expert validation? The Sprint service is worth every penny. 💪',
+    related_questions: ['What\'s included in USMCA Advantage Sprint?', 'How long does it take?', 'Do I get a certificate?'],
+    next_steps: ['Try the free workflow first', 'Book USMCA Advantage Sprint', 'Talk to Cristina'],
+    difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  {
+    term: 'Tariff Crisis Help',
+    keywords: ['tariff emergency', 'crisis help', 'urgent tariff', 'emergency support', 'tariff spike', 'trade emergency', 'crisis response'],
+    category: 'services',
+    broker_response: `Tariff crisis? I feel you - 2025 has been WILD. 🚨
+
+**If you need URGENT help:**
+**🆘 Crisis Navigator ($200/month ongoing)** is exactly for this!
+
+What you get:
+- Priority emergency response (24-48 hours)
+- Real-time tariff change monitoring
+- Crisis impact analysis and action plan
+- Alternative sourcing strategies
+- Direct access to Cristina & Jorge
+
+**Led by Cristina (60%) with Jorge support (40%)**
+
+This isn't a one-time fix - it's ongoing protection. We monitor for you, alert you to threats, and help you respond FAST when tariffs spike or trade rules change.
+
+**Perfect for:**
+- High-volume importers
+- Companies with China exposure (Section 301 risks)
+- Businesses needing reliable supply chains
+- Anyone who can't afford surprises`,
+    quick_tip: 'Many of our Premium subscribers add Crisis Navigator because they\'re already getting 25% off ($150/month instead of $200). Worth it for peace of mind!',
+    real_example: 'Steel importer client: Section 301 tariffs jumped overnight. We had them on Crisis Navigator - we called them at 8am with alternative Mexico suppliers already researched. They pivoted in 72 hours. Saved their quarter!',
+    encouragement: 'You can\'t predict tariff changes, but you CAN be ready for them. That\'s what we do! 💪',
+    related_questions: ['What makes Crisis Navigator different?', 'Can I cancel anytime?', 'Do you handle emergencies?'],
+    next_steps: ['Book Crisis Navigator', 'Get emergency assessment', 'Talk to Cristina'],
+    difficulty_level: 'advanced',
+    form_field: null
+  },
+
+  {
+    term: 'Supply Chain Problems',
+    keywords: ['supply chain issues', 'logistics problems', 'supply chain help', 'optimization help', 'reduce costs', 'improve efficiency', 'supply chain support'],
+    category: 'services',
+    broker_response: `Supply chain headaches? You're not alone - everyone's dealing with this in 2025. 📦
+
+**We have TWO services for this:**
+
+**🔧 Supply Chain Optimization ($275)**
+- Complete audit of your current supply chain
+- Cost reduction opportunities
+- Lead time improvements
+- Logistics efficiency analysis
+- Actionable recommendations
+**Led by Cristina (60%) with Jorge support (40%)**
+
+**🛡️ Supply Chain Resilience ($450)**
+- Alternative supplier research
+- Mexico/Canada sourcing options
+- USMCA qualification assessment
+- Risk mitigation strategy
+- Build backup supply chains
+**Led by Jorge (60%) with Cristina support (40%)**
+
+**Which one?**
+- **Optimization** = Fix what you have, make it better
+- **Resilience** = Build alternatives, reduce risk`,
+    quick_tip: 'Most clients start with Optimization to understand their current state, then add Resilience to build backups. But you can do either one first!',
+    real_example: 'Furniture importer: Supply chain mess, high costs, long lead times. Got our Optimization service - we found 3 ways to cut costs 30% and reduce lead time from 45 days to 12 days with Mexico sourcing!',
+    encouragement: 'Supply chain problems feel overwhelming, but they\'re fixable! We do this every day. Let\'s get you sorted. 💪',
+    related_questions: ['Which service should I choose?', 'Can I get both?', 'How long does it take?'],
+    next_steps: ['Book Supply Chain Optimization', 'Book Supply Chain Resilience', 'Get Trade Health Check first ($99)'],
+    difficulty_level: 'intermediate',
+    form_field: null
+  },
+
+  {
+    term: 'Trade Health Check',
+    keywords: ['trade assessment', 'health check', 'trade audit', 'quick assessment', 'starting point', 'trade review', 'where to start'],
+    category: 'services',
+    broker_response: `Not sure where to start? Trade Health Check is PERFECT for you! 🏥
+
+**🏥 Trade Health Check ($99)**
+**Led equally by Cristina & Jorge (50% each)**
+
+**What you get:**
+- Complete assessment of your current trade setup
+- Identify biggest cost savings opportunities
+- USMCA qualification quick-check
+- Tariff exposure analysis
+- Prioritized action plan (what to fix first)
+- Recommendations for next steps
+
+**Turnaround: 24-48 hours!**
+
+Think of it like a doctor's annual physical, but for your trade operations. We look at EVERYTHING and tell you what's working, what's broken, and what's costing you money.
+
+**Perfect for:**
+- New importers/exporters
+- Companies unsure about USMCA
+- Businesses wanting a second opinion
+- Anyone needing a roadmap`,
+    quick_tip: 'Trade Health Check is our ONLY service with no subscriber discount - $99 for everyone. It\'s our "try us out" offer!',
+    real_example: 'Manufacturing client thought they needed full supply chain overhaul. Health Check revealed they were 90% USMCA-qualified already - just needed minor component sourcing tweaks. Saved them $15K on services they didn\'t need!',
+    encouragement: 'This is the best bang-for-buck starting point. For $99, you get a complete roadmap. Then you decide what to tackle! 💪',
+    related_questions: ['What\'s included?', 'How fast is it?', 'What happens after?'],
+    next_steps: ['Book Trade Health Check', 'Learn about other services', 'Talk to Cristina & Jorge'],
+    difficulty_level: 'beginner',
     form_field: null
   }
 ];
