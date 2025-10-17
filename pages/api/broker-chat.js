@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         "X-Title": "Triangle Trade Intelligence - Broker Chat"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3-haiku",
+        model: "anthropic/claude-haiku-4.5",
         messages: [{
           role: "user",
           content: `You are a friendly customs broker with 17 years of experience helping SMB importers understand trade terminology. You use real examples, encourage users, and keep things practical.

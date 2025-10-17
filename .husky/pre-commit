@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Prevent commits with known broken field names
+echo "🔍 Checking for field name mismatches..."
+
+# Check for non-existent formData fields
+BROKEN_FIELDS=$(grep -r "formData\.annual_trade_volume\|formData\.export_destination\|formData\.primary_supplier_country" --include="*.js" --include="*.jsx" components/ pages/ lib/ 2>/dev/null || true)
+
+if [ ! -z "$BROKEN_FIELDS" ]; then
+  echo "❌ COMMIT BLOCKED: Found broken field names that don't exist in formData:"
+  echo "$BROKEN_FIELDS"
+  echo ""
+  echo "These fields don't exist. Use instead:"
+  echo "  annual_trade_volume → trade_volume"
+  echo "  export_destination → destination_country"
+  echo "  primary_supplier_country → supplier_country"
+  exit 1
+fi
+
+echo "✅ Field names validated"

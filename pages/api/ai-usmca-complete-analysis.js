@@ -77,7 +77,7 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet', // Claude 3.5 Sonnet (latest available on OpenRouter)
+        model: 'anthropic/claude-sonnet-4.5', // Sonnet 4.5 - 72.7% SWE-bench, best for complex USMCA reasoning
         messages: [{
           role: 'user',
           content: prompt
@@ -273,7 +273,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'claude-3-haiku',
+        model: 'claude-sonnet-4.5',
         confidence_score: analysis.confidence_score || 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
@@ -849,7 +849,7 @@ async function tryOpenRouter(prompt) {
         'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: 'anthropic/claude-sonnet-4.5',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0
       })
@@ -896,7 +896,7 @@ async function tryAnthropicDirect(prompt) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
         messages: [{
           role: 'user',
