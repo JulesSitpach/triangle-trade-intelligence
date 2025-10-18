@@ -10,6 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -35,6 +36,37 @@ export default protectedApiHandler({
       product: formData.product_description,
       component_count: formData.component_origins?.length
     });
+
+    // ========== STEP 0: CHECK USAGE LIMITS ==========
+    // Get user's subscription tier from database
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('subscription_tier')
+      .eq('id', userId)
+      .single();
+
+    const subscriptionTier = userProfile?.subscription_tier || 'Trial';
+
+    // Check if user can perform this analysis
+    const usageStatus = await checkAnalysisLimit(userId, subscriptionTier);
+
+    if (!usageStatus.canProceed) {
+      console.log(`❌ Analysis limit reached for user ${userId} (${subscriptionTier}): ${usageStatus.currentCount}/${usageStatus.tierLimit}`);
+      return res.status(429).json({
+        success: false,
+        error: 'Monthly analysis limit reached',
+        limit_info: {
+          tier: subscriptionTier,
+          current_count: usageStatus.currentCount,
+          tier_limit: usageStatus.tierLimit,
+          remaining: usageStatus.remaining
+        },
+        upgrade_required: true,
+        upgrade_url: '/pricing'
+      });
+    }
+
+    console.log(`✅ Usage check passed: ${usageStatus.currentCount}/${usageStatus.tierLimit} (${usageStatus.remaining} remaining)`);
 
     // Validate required fields
     if (!formData.company_name || !formData.business_type || !formData.industry_sector || !formData.component_origins || formData.component_origins.length === 0) {
@@ -380,6 +412,24 @@ export default protectedApiHandler({
         data: { userId, error: dbError.message, stack: dbError.stack }
       });
       // Don't fail the request
+    }
+
+    // ========== INCREMENT USAGE COUNT ==========
+    // Track this analysis in monthly usage
+    try {
+      const incrementResult = await incrementAnalysisCount(userId, subscriptionTier);
+      if (incrementResult.success) {
+        console.log(`✅ Usage tracked: ${incrementResult.currentCount}/${incrementResult.tierLimit}`);
+        result.usage_info = {
+          current_count: incrementResult.currentCount,
+          tier_limit: incrementResult.tierLimit,
+          remaining: incrementResult.tierLimit - incrementResult.currentCount,
+          tier: subscriptionTier
+        };
+      }
+    } catch (usageError) {
+      // Don't fail the request if usage tracking fails
+      console.error('⚠️ Usage tracking failed:', usageError);
     }
 
     return res.status(200).json(result);
