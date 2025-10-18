@@ -135,7 +135,7 @@ Create a professional report that includes:
 Make this report worth $800 in professional value. Include specific findings from document analysis. Format professionally for client delivery.`;
 
   const response = await anthropic.messages.create({
-    model: 'claude-3-sonnet-20240229',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 3000,
     messages: [{ role: 'user', content: prompt }]
   });
@@ -182,7 +182,7 @@ Create a professional market entry strategy report that includes:
 Make this report worth $${Math.max(consultationFee, 2000)} in professional value. Include specific insights from document analysis and consultation sessions.`;
 
   const response = await anthropic.messages.create({
-    model: 'claude-3-sonnet-20240229',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }]
   });
@@ -221,7 +221,7 @@ Create a professional intelligence briefing that includes:
 Focus on actionable insights for Mexico trade routes, USMCA compliance, and partnership opportunities. Make this briefing worth $500 in strategic value.`;
 
   const response = await anthropic.messages.create({
-    model: 'claude-3-sonnet-20240229',
+    model: 'claude-sonnet-4-20250514',
     max_tokens: 3000,
     messages: [{ role: 'user', content: prompt }]
   });

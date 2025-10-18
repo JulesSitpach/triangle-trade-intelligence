@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         "X-Title": "Triangle Trade Intelligence Supplier Recommendations"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-haiku",
+        model: "anthropic/claude-haiku-4.5",
         messages: [{
           role: "user",
           content: `Based on the search query "${query}" for ${product || 'manufacturing'}, suggest 5-7 plausible Mexico-based suppliers that Jorge should research and validate using his CCVIAL network.

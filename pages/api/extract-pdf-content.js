@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     // Use Claude to extract and analyze relevant information
     const response = await anthropic.messages.create({
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
       messages: [{ role: 'user', content: prompt }]
     });

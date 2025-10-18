@@ -302,7 +302,7 @@ Format as a formal business report with clear headers, bullet points for key fin
 
     const aiResult = await executeWithFallback({
       prompt: reportPrompt,
-      model: 'anthropic/claude-3-haiku',
+      model: 'anthropic/claude-haiku-4.5',
       maxTokens: 4000,
       cacheOptions: {
         table: 'usmca_certificate_reports_cache',

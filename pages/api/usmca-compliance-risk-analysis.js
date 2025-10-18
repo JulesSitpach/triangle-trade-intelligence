@@ -167,7 +167,7 @@ Return ONLY valid JSON, no markdown formatting.`;
     // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
     const aiResult = await executeAIWithFallback({
       prompt,
-      model: 'anthropic/claude-3-haiku',
+      model: 'anthropic/claude-haiku-4.5',
       maxTokens: 2500
     });
 

@@ -74,7 +74,7 @@ Write as if you're Jorge personally reaching out to help this client succeed.`;
         'X-Title': 'Triangle Trade Intelligence - Client Communication Draft'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
+        model: 'anthropic/claude-haiku-4.5',
         messages: [
           {
             role: 'user',

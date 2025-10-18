@@ -106,7 +106,7 @@ Be specific with dollar amounts, timelines, and actionable steps. Focus on what 
         'X-Title': 'Triangle Trade Intelligence - USMCA Roadmap Generation'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3-haiku',
+        model: 'anthropic/claude-haiku-4.5',
         messages: [
           {
             role: 'user',

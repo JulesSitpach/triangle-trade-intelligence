@@ -168,7 +168,7 @@ Format as JSON with these exact keys: feasibility_score (1-10), recommended_loca
         'X-Title': 'Triangle Trade Intelligence - Manufacturing Feasibility Analysis'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku',
+        model: 'anthropic/claude-haiku-4.5',
         messages: [{
           role: 'user',
           content: aiPrompt

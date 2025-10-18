@@ -95,7 +95,7 @@ Keep it under 500 words. Focus on ACTION, not analysis. Client needs to know: "W
 
     const aiResult = await executeWithFallback({
       prompt: reportPrompt,
-      model: 'anthropic/claude-3-haiku',
+      model: 'anthropic/claude-haiku-4.5',
       maxTokens: 4000,
       cacheOptions: {
         table: 'supplier_sourcing_reports_cache',

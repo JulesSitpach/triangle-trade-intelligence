@@ -215,7 +215,7 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
     // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
     const aiResult = await executeAIWithFallback({
       prompt: aiPrompt,
-      model: 'anthropic/claude-3.5-haiku',
+      model: 'anthropic/claude-haiku-4.5',
       maxTokens: 4000
     });
 
