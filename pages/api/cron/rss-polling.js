@@ -1,8 +1,8 @@
 /**
  * VERCEL CRON JOB - RSS POLLING
- * Called every 4 hours by Vercel Cron (cost-optimized until user base grows)
- * Polls Bloomberg, Reuters, and Federal Register for trade policy updates
- * Part of referral trial activation - real-time monitoring for Adam & Anthony
+ * Called every 2 hours by Vercel Cron (Pro Plan - faster alerts for competitive advantage)
+ * Polls USITC, USTR, Federal Register, and Financial Times for tariff policy updates
+ * Laser-focused keywords: tariff announcements, Section 301/232, USMCA changes, port fees
  */
 
 import RSSPollingEngine from '../../../lib/services/rss-polling-engine.js';
