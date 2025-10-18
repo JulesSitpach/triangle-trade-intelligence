@@ -121,14 +121,46 @@ export default async function handler(req, res) {
 
     const userId = authData.user.id;
     console.log('✅ Auth user created with ID:', userId);
-    console.log('📧 Email confirmation required - user profile will be created after email verification');
 
-    // Don't create profile yet - wait for email confirmation
-    // The callback page will create the profile after email verification
+    // CRITICAL: Create user_profiles record IMMEDIATELY (don't wait for email confirmation)
+    // If we wait, user_id stays NULL and dashboard breaks
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .insert({
+        user_id: userId,
+        email: email.toLowerCase(),
+        company_name: company_name,
+        full_name: full_name || 'New User',
+        subscription_tier: 'Trial',
+        status: 'trial',
+        terms_accepted_at: termsAcceptedAt,
+        privacy_accepted_at: termsAcceptedAt
+      })
+      .select()
+      .single();
 
-    console.log('✅ Registration initiated for:', email);
+    if (profileError) {
+      console.error('💥 Failed to create user profile:', profileError);
+      await DevIssue.apiError('auth_api', '/api/auth/register - profile creation', profileError, {
+        userId,
+        email,
+        errorCode: profileError?.code
+      });
 
-    // Return success but indicate email verification needed
+      // CRITICAL: If profile creation fails, delete auth user to maintain data integrity
+      console.log('🔄 Rolling back auth user creation...');
+      await supabaseAuth.auth.admin.deleteUser(userId);
+
+      return res.status(500).json({
+        error: 'Failed to create user profile',
+        details: profileError.message
+      });
+    }
+
+    console.log('✅ User profile created:', profile.id);
+    console.log('📧 Email confirmation sent - user can login after verification');
+
+    // Return success with email verification notice
     return res.status(201).json({
       message: 'Registration successful! Please check your email to confirm your account.',
       email_confirmation_required: true,

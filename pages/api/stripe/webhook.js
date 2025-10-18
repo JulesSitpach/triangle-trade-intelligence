@@ -287,9 +287,12 @@ async function handleSubscriptionPurchase(session, userId) {
   const tier = session.metadata?.tier;
   const billingPeriod = session.metadata?.billing_period;
 
-  console.log(`Processing subscription purchase for user: ${userId}`);
+  console.log(`Processing subscription purchase for user: ${userId}, tier: ${tier}`);
 
   try {
+    // Get tier name for display (capitalize first letter)
+    const tierName = tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Professional';
+
     // Update or create subscription record in database
     const { data: existingSubscription } = await supabase
       .from('subscriptions')
@@ -301,7 +304,8 @@ async function handleSubscriptionPurchase(session, userId) {
       user_id: userId,
       stripe_customer_id: session.customer,
       stripe_subscription_id: session.subscription,
-      tier: tier || 'professional',
+      tier_id: tier || 'professional',           // ✅ FIXED: Use tier_id not tier
+      tier_name: tierName,                       // ✅ FIXED: Use tier_name
       billing_period: billingPeriod || 'monthly',
       status: 'active',
       current_period_start: new Date().toISOString(),
@@ -322,7 +326,37 @@ async function handleSubscriptionPurchase(session, userId) {
         .insert([{ ...subscriptionData, created_at: new Date().toISOString() }]);
     }
 
-    console.log('Subscription record updated for user:', userId);
+    console.log('✅ Subscription record updated for user:', userId);
+
+    // 🚨 CRITICAL FIX: Update user_profiles.subscription_tier to match
+    // Without this, users pay but stay on Trial tier!
+    const { error: profileError } = await supabase
+      .from('user_profiles')
+      .update({
+        subscription_tier: tierName,
+        status: 'active'
+      })
+      .eq('user_id', userId);
+
+    if (profileError) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'stripe_webhook',
+        message: 'CRITICAL: Failed to update user_profiles.subscription_tier after payment',
+        data: {
+          userId,
+          tier: tierName,
+          sessionId: session.id,
+          error: profileError.message
+        }
+      });
+      console.error('💥 Failed to update user profile tier:', profileError);
+      // Don't throw - subscription was saved, this is a secondary update
+    } else {
+      console.log('✅ User profile subscription_tier updated to:', tierName);
+    }
+
   } catch (error) {
     await logDevIssue({
       type: 'api_error',
