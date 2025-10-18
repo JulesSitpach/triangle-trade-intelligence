@@ -175,10 +175,10 @@ export default function Pricing() {
       name: '🆘 Crisis Navigator',
       serviceId: 'crisis-navigator',
       basePrice: 200,
-      professionalPrice: 200,  // Monthly retainer (no percentage discount applies)
-      premiumPrice: 200,       // Monthly retainer (no percentage discount applies)
-      description: 'Ongoing monthly retainer for emergency response and regulatory monitoring led by compliance expert',
-      recurring: true
+      professionalPrice: 200,  // No subscriber discount
+      premiumPrice: 200,       // No subscriber discount
+      description: 'Priority emergency response for urgent trade crises and compliance issues led by compliance expert',
+      recurring: false
     }
   ]
 

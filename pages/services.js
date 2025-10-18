@@ -107,18 +107,17 @@ export default function ProfessionalServices() {
       name: '🆘 Crisis Navigator',
       serviceId: 'crisis-navigator',
       basePrice: 200,
-      professionalPrice: 200,  // Monthly retainer (no percentage discount applies)
-      premiumPrice: 200,       // Monthly retainer (no percentage discount applies)
-      recurring: true,
-      description: 'Ongoing monthly retainer for emergency response and regulatory monitoring led by Cristina.',
+      professionalPrice: 200,  // No subscriber discount
+      premiumPrice: 200,       // No subscriber discount
+      description: 'Priority emergency response for urgent trade crises and compliance issues led by Cristina.',
       expert: 'Cristina Lead (60%) • Jorge Support (40%)',
       features: [
-        'Priority 4-hour emergency response time',
-        'Monthly regulatory updates and monitoring',
-        'Unlimited trade consultation',
-        'Emergency compliance resolution',
-        'Proactive risk alerts',
-        '$200/month ongoing retainer'
+        'Priority 24-48 hour emergency response',
+        'Crisis assessment and root cause analysis',
+        'Immediate action plan and resolution strategy',
+        'Emergency compliance issue resolution',
+        'Prevention measures and risk mitigation',
+        '$200 one-time (no subscriber discounts)'
       ]
     }
   ]
@@ -387,7 +386,7 @@ export default function ProfessionalServices() {
             <div className="content-card">
               <h3 className="content-card-title">3. Request Services as Needed</h3>
               <p className="content-card-description">
-                Services range from $175-$450 one-time or $200/month for Crisis Navigator. Subscribers save automatically at checkout.
+                Services range from $99-$450 one-time. Professional and Premium subscribers save 15-25% automatically at checkout.
               </p>
             </div>
           </div>

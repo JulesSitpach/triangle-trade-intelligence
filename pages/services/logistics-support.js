@@ -151,19 +151,19 @@ export default function ProfessionalServices() {
       price: 200,
       displayPrice: 200,
       expert: 'Cristina Lead (60%) • Jorge Support (40%)',
-      recurring: true,
+      recurring: false,
       benefits: [
-        'Priority 4-hour emergency response',
-        'Monthly regulatory updates',
-        'Unlimited trade consultation',
-        'Emergency compliance resolution'
+        'Priority 24-48 hour emergency response',
+        'Crisis assessment and root cause analysis',
+        'Immediate action plan and resolution strategy',
+        'Prevention measures and risk mitigation'
       ],
       deliverables: [
-        'Priority emergency response (4-hour SLA)',
-        'Monthly regulatory monitoring',
-        '$200/month ongoing retainer'
+        'Emergency crisis assessment',
+        'Immediate resolution action plan',
+        '$200 one-time (no subscriber discounts)'
       ],
-      whyNeed: 'Shipment held at customs? Tariffs changed overnight? Get emergency response.'
+      whyNeed: 'Shipment held at customs? Tariffs changed overnight? Get emergency crisis response.'
     }
   ];
 
