@@ -98,10 +98,10 @@ export default function Pricing() {
       description: '100 analyses/month with AI-powered risk assessment',
       features: [
         '100 USMCA analyses per month',
-        'AI supply chain vulnerability analysis',
+        'Real-time crisis alerts with AI impact scoring',
         '15% discount on professional services',
         'Priority support (48hr response)',
-        'Advanced trade policy analysis'
+        'Detailed AI-powered compliance guidance'
       ],
       cta: 'Subscribe to Professional',
       popular: true
@@ -117,7 +117,7 @@ export default function Pricing() {
         'Everything in Professional',
         'Quarterly strategy calls with our expert team',
         '25% discount on professional services',
-        'Dedicated Slack/email support',
+        'Dedicated email support',
         'Custom trade intelligence reports'
       ],
       cta: 'Subscribe to Premium',

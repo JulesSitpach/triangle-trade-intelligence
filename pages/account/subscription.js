@@ -102,14 +102,14 @@ export default function SubscriptionManagement() {
         'Unlimited certificate generation',
         '15% discount on all professional services',
         'Priority email support (48hr response)',
-        'Real-time crisis alerts',
-        'Advanced trade policy analysis'
+        'Real-time crisis alerts with AI impact scoring',
+        'Detailed AI-powered compliance guidance'
       ],
       premium: [
         'Everything in Professional',
         '25% discount on all professional services',
         'Quarterly 1-on-1 strategy calls with Jorge & Cristina',
-        'Dedicated Slack/email support',
+        'Dedicated email support',
         'Custom trade intelligence reports',
         'Priority feature requests'
       ],
