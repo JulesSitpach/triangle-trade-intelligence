@@ -23,8 +23,8 @@ export default function ProfessionalServices() {
       basePrice: 99,
       professionalPrice: 99,  // No discount on this service
       premiumPrice: 99,       // No discount on this service
-      description: 'Collaborative assessment by Jorge & Cristina to identify trade optimization opportunities.',
-      expert: 'Team Collaboration - Jorge & Cristina (50% each)',
+      description: 'Collaborative assessment by our expert team to identify trade optimization opportunities.',
+      expert: 'Team Collaboration - Trade Specialist & Compliance Expert',
       features: [
         'Complete trade health assessment',
         'Prioritized improvement recommendations',
@@ -40,8 +40,8 @@ export default function ProfessionalServices() {
       basePrice: 175,
       professionalPrice: 149,  // 15% off
       premiumPrice: 131,       // 25% off
-      description: 'Product audit and USMCA qualification roadmap led by Cristina with Jorge\'s support.',
-      expert: 'Cristina Lead (70%) • Jorge Support (30%)',
+      description: 'Product audit and USMCA qualification roadmap led by our compliance team.',
+      expert: 'Compliance Expert Lead • Trade Specialist Support',
       disclaimer: 'For official USMCA certificates, we partner with trade compliance experts',
       features: [
         'Complete USMCA qualification assessment',
@@ -58,8 +58,8 @@ export default function ProfessionalServices() {
       basePrice: 275,
       professionalPrice: 234,  // 15% off
       premiumPrice: 206,       // 25% off
-      description: 'Complete supply chain efficiency audit led by Cristina with Jorge\'s sourcing insights.',
-      expert: 'Cristina Lead (60%) • Jorge Support (40%)',
+      description: 'Complete supply chain efficiency audit led by our compliance team.',
+      expert: 'Compliance Expert Lead • Trade Specialist Support',
       features: [
         'AI analysis validated by compliance expert',
         'Cost reduction opportunities identified',
@@ -75,8 +75,8 @@ export default function ProfessionalServices() {
       basePrice: 350,
       professionalPrice: 298,  // 15% off
       premiumPrice: 263,       // 25% off
-      description: 'Mexico market entry strategy led by Jorge with Cristina\'s regulatory compliance expertise.',
-      expert: 'Jorge Lead (65%) • Cristina Support (35%)',
+      description: 'Mexico market entry strategy led by our trade team.',
+      expert: 'Trade Specialist Lead • Compliance Expert Support',
       features: [
         'Complete Mexico market analysis',
         'Distribution partner recommendations',
@@ -92,8 +92,8 @@ export default function ProfessionalServices() {
       basePrice: 450,
       professionalPrice: 383,  // 15% off
       premiumPrice: 338,       // 25% off
-      description: 'Alternative supplier discovery and risk mitigation led by Jorge with Cristina\'s compliance verification.',
-      expert: 'Jorge Lead (60%) • Cristina Support (40%)',
+      description: 'Alternative supplier discovery and risk mitigation led by our trade team.',
+      expert: 'Trade Specialist Lead • Compliance Expert Support',
       features: [
         '3-5 verified alternative supplier options',
         'USMCA qualification status for each',
@@ -109,8 +109,8 @@ export default function ProfessionalServices() {
       basePrice: 200,
       professionalPrice: 200,  // No subscriber discount
       premiumPrice: 200,       // No subscriber discount
-      description: 'Priority emergency response for urgent trade crises and compliance issues led by Cristina.',
-      expert: 'Cristina Lead (60%) • Jorge Support (40%)',
+      description: 'Priority emergency response for urgent trade crises and compliance issues.',
+      expert: 'Compliance Expert Lead • Trade Specialist Support',
       features: [
         'Priority 24-48 hour emergency response',
         'Crisis assessment and root cause analysis',
@@ -126,7 +126,7 @@ export default function ProfessionalServices() {
     {
       icon: 'TT',
       title: 'Team Collaboration',
-      description: 'All services delivered through Jorge & Cristina collaboration - combining SMB operational experience with enterprise logistics expertise.'
+      description: 'All services delivered through expert team collaboration - combining SMB operational experience with enterprise logistics expertise.'
     },
     {
       icon: 'MX',

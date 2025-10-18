@@ -529,7 +529,7 @@ export default function Pricing() {
             <div className="alert-content">
               <div className="alert-title">🤝 Need Expert Help?</div>
               <div className="text-body">
-                <p><strong>Professional & Premium subscribers save 15-25% on all expert services.</strong> Our Mexico-based team (Jorge & Cristina) provides trade consulting, USMCA optimization, supplier sourcing, and crisis response - pay only when you need help.</p>
+                <p><strong>Professional & Premium subscribers save 15-25% on all expert services.</strong> Our Mexico-based expert team provides trade consulting, USMCA optimization, supplier sourcing, and crisis response - pay only when you need help.</p>
                 <Link href="/services" className="btn-primary" style={{marginTop: '12px', display: 'inline-block'}}>
                   View All Professional Services
                 </Link>
@@ -571,7 +571,7 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">What's included in my subscription vs paid separately?</h3>
               <p className="content-card-description">
-                <strong>Subscription ($99-599/mo):</strong> AI tools for qualification checks, HS code suggestions, certificate templates, and alerts (10/mo on Starter, 100/mo on Professional, unlimited on Premium). <strong>Professional Services:</strong> Paid separately when you need Jorge or Cristina to do work for you. Professional tier gets 15% discount, Premium gets 25% discount.
+                <strong>Subscription ($99-599/mo):</strong> AI tools for qualification checks, HS code suggestions, certificate templates, and alerts (10/mo on Starter, 100/mo on Professional, unlimited on Premium). <strong>Professional Services:</strong> Paid separately when you need our expert team to do work for you. Professional tier gets 15% discount, Premium gets 25% discount.
               </p>
             </div>
           </div>

@@ -108,7 +108,7 @@ export default function SubscriptionManagement() {
       premium: [
         'Everything in Professional',
         '25% discount on all professional services',
-        'Quarterly 1-on-1 strategy calls with Jorge & Cristina',
+        'Quarterly 1-on-1 strategy calls with our expert team',
         'Dedicated email support',
         'Custom trade intelligence reports',
         'Priority feature requests'
