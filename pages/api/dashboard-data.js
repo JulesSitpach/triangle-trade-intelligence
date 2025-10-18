@@ -21,8 +21,9 @@ const supabase = createClient(
 );
 
 const SUBSCRIPTION_LIMITS = {
+  'Trial': 1,           // 1 analysis total (7-day trial)
   'Starter': 10,        // 10 analyses per month
-  'Professional': null, // Unlimited
+  'Professional': 100,  // 100 analyses per month
   'Premium': null       // Unlimited
 };
 
