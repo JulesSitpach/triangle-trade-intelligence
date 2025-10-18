@@ -1,35 +1,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import UserDashboard from '../components/UserDashboard';
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  // Use shared auth context instead of redundant API call
+  const { user, loading } = useSimpleAuth();
+
+  // Redirect if not authenticated (only runs after auth check completes)
   useEffect(() => {
-    // Check cookie-based session via API
-    fetch('/api/auth/me', {
-      credentials: 'include'
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.authenticated && data.user) {
-        setUser(data.user);
-        console.log('✅ Dashboard access granted for:', data.user.isAdmin ? 'admin' : 'user');
-        setLoading(false);
-      } else {
-        console.log('❌ No valid session, redirecting to login');
-        router.push('/login');
-      }
-    })
-    .catch(error => {
-      console.error('Auth check failed:', error);
+    if (!loading && !user) {
+      console.log('❌ No valid session, redirecting to login');
       router.push('/login');
-    });
-  }, []);
+    } else if (!loading && user) {
+      console.log('✅ Dashboard access granted for:', user.isAdmin ? 'admin' : 'user');
+    }
+  }, [loading, user, router]);
 
   // Force refresh when navigating to dashboard
   useEffect(() => {

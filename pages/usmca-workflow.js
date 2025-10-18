@@ -5,38 +5,27 @@
  * PROTECTED: Requires authentication
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import Head from 'next/head';
 import Link from 'next/link';
 import TriangleLayout from '../components/TriangleLayout';
 import USMCAWorkflowOrchestrator from '../components/workflow/USMCAWorkflowOrchestrator';
 
 export default function USMCAWorkflow() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Use shared auth context instead of redundant API call
+  const { user, loading } = useSimpleAuth();
+
+  // Redirect if not authenticated (only runs after auth check completes)
   useEffect(() => {
-    // Check cookie-based session via API
-    fetch('/api/auth/me', {
-      credentials: 'include'
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.authenticated && data.user) {
-        setUser(data.user);
-        setLoading(false);
-      } else {
-        // Not authenticated - redirect to login
-        router.push('/login?redirect=/usmca-workflow');
-      }
-    })
-    .catch(error => {
-      console.error('Auth check failed:', error);
+    if (!loading && !user) {
+      console.log('❌ No valid session, redirecting to login');
       router.push('/login?redirect=/usmca-workflow');
-    });
-  }, []);
+    }
+  }, [loading, user, router]);
 
   // Show loading while checking authentication
   if (loading) {

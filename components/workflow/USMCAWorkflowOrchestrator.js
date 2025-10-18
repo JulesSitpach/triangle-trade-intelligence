@@ -6,6 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 import { useWorkflowState } from '../../hooks/useWorkflowState';
 import { useTrustIndicators } from '../../hooks/useTrustIndicators';
 import { trustVerifiedCertificateFormatter } from '../../lib/utils/trust-verified-certificate-formatter';
@@ -26,7 +27,9 @@ export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
   const hasLoadedResultsRef = useRef(false);
-  const [userTier, setUserTier] = React.useState('Trial'); // Default to Trial
+
+  // Use shared auth context (eliminates redundant API call)
+  const { subscriptionTier: userTier } = useSimpleAuth();
 
   const {
     currentStep,
@@ -55,33 +58,8 @@ export default function USMCAWorkflowOrchestrator() {
 
   const { trustIndicators } = useTrustIndicators();
 
-  // Fetch user's subscription tier on mount
-  useEffect(() => {
-    const fetchUserTier = async () => {
-      try {
-        const response = await fetch('/api/auth/me', { credentials: 'include' });
-        const data = await response.json();
-
-        if (data.authenticated && data.user) {
-          // User is authenticated, get their subscription tier
-          const tier = data.user.subscription_tier || 'Trial';
-          console.log('👤 User subscription tier:', tier);
-          setUserTier(tier);
-        } else {
-          // Not authenticated, default to Trial
-          setUserTier('Trial');
-        }
-      } catch (error) {
-        console.error('Failed to fetch user tier:', error);
-        await DevIssue.apiError('workflow_orchestrator', '/api/auth/me', error, {
-          attemptedAction: 'fetchUserTier'
-        });
-        setUserTier('Trial');
-      }
-    };
-
-    fetchUserTier();
-  }, []);
+  // ✅ REMOVED REDUNDANT API CALL - Now using shared auth context (subscriptionTier from SimpleAuthContext)
+  // Previously was calling /api/auth/me independently, causing excessive subscription checking
 
   // Handle "New Analysis" reset trigger (prevent infinite loop with ref)
   useEffect(() => {
