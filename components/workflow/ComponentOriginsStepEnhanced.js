@@ -46,7 +46,7 @@ export default function ComponentOriginsStepEnhanced({
   // Update parent form data when components change
   useEffect(() => {
     updateFormData('component_origins', components);
-  }, [components]);
+  }, [components, updateFormData]);
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];
