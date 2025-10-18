@@ -17,6 +17,7 @@ import CristinaDocumentReviewStage from './stages/CristinaDocumentReviewStage';
 import AIAnalysisValidationStage from './stages/AIAnalysisValidationStage';
 import ReportGenerationStage from './stages/ReportGenerationStage';
 import { filterByServiceType } from '../../lib/utils/service-type-mapping';
+import AIResearchAssistant from '../admin/AIResearchAssistant';
 
 export default function TradeHealthCheckTab({ requests: propRequests, onRequestUpdate, currentUser = 'Jorge' }) {
   const [serviceRequests, setServiceRequests] = useState(propRequests || []);
@@ -349,19 +350,22 @@ export default function TradeHealthCheckTab({ requests: propRequests, onRequestU
                     </span>
                   </td>
                   <td>
-                    {(() => {
-                      const buttonState = getButtonState(request);
-                      return (
-                        <button
-                          className={buttonState.className}
-                          onClick={() => startWorkflow(request, buttonState.mode)}
-                          disabled={buttonState.disabled}
-                          title={buttonState.mode === 'readonly' ? `Waiting for ${request.current_assigned_to || 'team member'}` : ''}
-                        >
-                          {buttonState.label}
-                        </button>
-                      );
-                    })()}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {(() => {
+                        const buttonState = getButtonState(request);
+                        return (
+                          <button
+                            className={buttonState.className}
+                            onClick={() => startWorkflow(request, buttonState.mode)}
+                            disabled={buttonState.disabled}
+                            title={buttonState.mode === 'readonly' ? `Waiting for ${request.current_assigned_to || 'team member'}` : ''}
+                          >
+                            {buttonState.label}
+                          </button>
+                        );
+                      })()}
+                      <AIResearchAssistant serviceRequest={request} />
+                    </div>
                   </td>
                 </tr>
               );

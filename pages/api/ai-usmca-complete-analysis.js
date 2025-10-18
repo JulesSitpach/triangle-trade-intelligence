@@ -331,7 +331,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'claude-sonnet-4.5',
+        model: 'anthropic/claude-sonnet-4.5',
         confidence_score: analysis.confidence_score || 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
@@ -972,7 +972,7 @@ async function tryAnthropicDirect(prompt) {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'anthropic/claude-sonnet-4.5',
         max_tokens: 4000,
         messages: [{
           role: 'user',
@@ -1081,9 +1081,10 @@ function parseAIResponse(aiText) {
 }
 
 /**
- * Cache successful results
+ * Cache successful results AND save to database for future use
  */
 function cacheBatchResults(freshRates, components, existingCache) {
+  // Save to in-memory cache (6-hour TTL)
   for (const [hsCode, rates] of Object.entries(freshRates)) {
     const component = components.find(c =>
       (c.hs_code || c.classified_hs_code) === hsCode
@@ -1097,7 +1098,12 @@ function cacheBatchResults(freshRates, components, existingCache) {
     }
   }
 
-  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components`);
+  // 💾 SAVE AI RESULTS TO DATABASE (non-blocking)
+  saveTariffRatesToDatabase(freshRates, components).catch(err => {
+    console.error('⚠️ Background database save failed:', err.message);
+  });
+
+  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components (cached + saved to DB)`);
   return { ...existingCache, ...freshRates };
 }
 
@@ -1170,5 +1176,59 @@ async function saveAIDataToDatabase(classificationResult, component) {
       message: error.message,
       stack: error.stack
     });
+  }
+}
+
+/**
+ * Save tariff rates from AI lookups to database (builds database over time)
+ * Called after TIER 1 (OpenRouter) or TIER 2 (Anthropic) success
+ * @param {Object} freshRates - AI-generated tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
+ * @param {Array} components - Component data with descriptions and origins
+ */
+async function saveTariffRatesToDatabase(freshRates, components) {
+  console.log(`💾 Saving ${Object.keys(freshRates).length} AI tariff rates to database...`);
+
+  try {
+    const savePromises = [];
+
+    for (const [hsCode, rates] of Object.entries(freshRates)) {
+      const component = components.find(c =>
+        (c.hs_code || c.classified_hs_code) === hsCode
+      );
+
+      if (!component) continue;
+
+      // Save each rate to ai_classifications table
+      savePromises.push(
+        supabase
+          .from('ai_classifications')
+          .insert({
+            hs_code: hsCode,
+            component_description: component.description || 'AI tariff lookup',
+            mfn_rate: rates.mfn_rate || 0,
+            base_mfn_rate: rates.base_mfn_rate || rates.mfn_rate || 0,
+            policy_adjusted_mfn_rate: rates.mfn_rate || 0,
+            usmca_rate: rates.usmca_rate || 0,
+            policy_adjustments: rates.policy_adjustments || [],
+            origin_country: component.origin_country,
+            confidence: 95, // AI tariff lookup is high confidence
+            verified: false, // AI-generated, not human-verified
+            last_updated: new Date().toISOString().split('T')[0],
+            created_at: new Date().toISOString()
+          })
+          .then(({ error }) => {
+            if (error && error.code !== '23505') { // Ignore duplicate errors
+              console.error(`⚠️ Failed to save ${hsCode}:`, error.message);
+            }
+          })
+      );
+    }
+
+    await Promise.all(savePromises);
+    console.log(`✅ Successfully saved ${savePromises.length} AI tariff rates to database`);
+
+  } catch (error) {
+    // Non-blocking - don't fail the request if DB save fails
+    console.error('⚠️ Database save error:', error.message);
   }
 }

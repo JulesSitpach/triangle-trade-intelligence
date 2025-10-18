@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         "X-Title": "Triangle Trade Intelligence - Broker Chat"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-haiku-4.5",
+        model: "anthropic/claude-haiku-4.5",  // ✅ FIXED: Latest Haiku (Oct 2024)
         messages: [{
           role: "user",
           content: `You are a friendly customs broker with 17 years of experience helping SMB importers understand trade terminology. You use real examples, encourage users, and keep things practical.
@@ -100,12 +100,31 @@ Respond with ONLY the JSON object, no other text.`
     const aiResult = await aiResponse.json();
     const aiMessage = aiResult.choices[0].message.content;
 
-    // Parse AI response (should be JSON)
+    // Parse AI response (should be JSON) - Multi-strategy extraction
     let parsedResponse;
     try {
-      parsedResponse = JSON.parse(aiMessage);
+      // Strategy 1: Direct JSON parse
+      if (aiMessage.trim().startsWith('{')) {
+        parsedResponse = JSON.parse(aiMessage);
+      } else {
+        // Strategy 2: Extract from code block
+        const codeBlockMatch = aiMessage.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch) {
+          parsedResponse = JSON.parse(codeBlockMatch[1]);
+        } else {
+          // Strategy 3: Find JSON between first { and last }
+          const firstBrace = aiMessage.indexOf('{');
+          const lastBrace = aiMessage.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1) {
+            const jsonString = aiMessage.substring(firstBrace, lastBrace + 1);
+            parsedResponse = JSON.parse(jsonString);
+          } else {
+            throw new Error('No JSON found in response');
+          }
+        }
+      }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', aiMessage);
+      console.error('Failed to parse AI response:', aiMessage.substring(0, 200));
       // Fallback to simple response
       parsedResponse = {
         broker_response: aiMessage,

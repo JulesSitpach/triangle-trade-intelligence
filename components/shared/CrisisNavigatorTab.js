@@ -12,6 +12,7 @@ import ServiceWorkflowModal from '../shared/ServiceWorkflowModal';
 import ToastNotification from '../shared/ToastNotification';
 import MarketplaceIntelligenceForm from '../shared/MarketplaceIntelligenceForm';
 import { filterByServiceType } from '../../lib/utils/service-type-mapping';
+import AIResearchAssistant from '../admin/AIResearchAssistant';
 
 export default function CrisisNavigatorTab({ requests: propRequests, onRequestUpdate }) {
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -218,14 +219,17 @@ export default function CrisisNavigatorTab({ requests: propRequests, onRequestUp
                   </span>
                 </td>
                 <td>
-                  <button
-                    className="btn-primary"
-                    onClick={() => handleStartService(request)}
-                    disabled={request.status === 'completed'}
-                  >
-                    {request.status === 'completed' ? 'Resolved' :
-                     request.status === 'in_progress' ? 'Continue Response' : 'Begin Crisis Response'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <button
+                      className="btn-primary"
+                      onClick={() => handleStartService(request)}
+                      disabled={request.status === 'completed'}
+                    >
+                      {request.status === 'completed' ? 'Resolved' :
+                       request.status === 'in_progress' ? 'Continue Response' : 'Begin Crisis Response'}
+                    </button>
+                    <AIResearchAssistant serviceRequest={request} />
+                  </div>
                 </td>
               </tr>
             );

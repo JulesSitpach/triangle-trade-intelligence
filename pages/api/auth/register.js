@@ -124,6 +124,10 @@ export default async function handler(req, res) {
 
     // CRITICAL: Create user_profiles record IMMEDIATELY (don't wait for email confirmation)
     // If we wait, user_id stays NULL and dashboard breaks
+    // Calculate trial end date (7 days from now)
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 7);
+
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .insert({
@@ -133,6 +137,7 @@ export default async function handler(req, res) {
         full_name: full_name || 'New User',
         subscription_tier: 'Trial',
         status: 'trial',
+        trial_ends_at: trialEndsAt.toISOString(),
         terms_accepted_at: termsAcceptedAt,
         privacy_accepted_at: termsAcceptedAt
       })

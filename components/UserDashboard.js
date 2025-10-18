@@ -471,6 +471,10 @@ export default function UserDashboard({ user }) {
   const workflows = dashboardData?.workflows || [];
   const alerts = dashboardData?.alerts || [];
 
+  // Check if trial has expired
+  const isTrialExpired = user?.trial_expired === true;
+  const subscriptionTier = user?.subscription_tier || 'Trial';
+
   return (
     <TriangleLayout user={user}>
       <Head>
@@ -483,6 +487,24 @@ export default function UserDashboard({ user }) {
           <p className="dashboard-subtitle">Welcome back, {user?.email?.split('@')[0] || 'User'}</p>
         </div>
 
+        {/* TRIAL EXPIRED BANNER */}
+        {isTrialExpired && (
+          <div className="form-section" style={{ backgroundColor: '#FFF3E0', border: '2px solid #FF9800', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+            <h2 className="form-section-title" style={{ color: '#E65100', marginTop: '0' }}>⏰ Your 7-Day Free Trial Has Expired</h2>
+            <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
+              Your trial period has ended. Upgrade now to continue creating USMCA analyses, viewing alerts, and downloading certificates.
+            </p>
+            <div className="action-buttons">
+              <Link href="/pricing" className="btn-primary" style={{ fontSize: '18px', padding: '12px 30px' }}>
+                🚀 Upgrade Now - Plans from $99/month
+              </Link>
+            </div>
+            <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
+              ✅ Keep all your existing data • ✅ Same login credentials • ✅ Instant access after upgrade
+            </p>
+          </div>
+        )}
+
         {/* MY WORKFLOWS */}
         <div className="form-section">
           <div className="dashboard-actions">
@@ -490,7 +512,7 @@ export default function UserDashboard({ user }) {
               <h2 className="form-section-title">My Certificates</h2>
             </div>
             <div className="dashboard-actions-right">
-              {workflows.length > 0 && (
+              {!isTrialExpired && workflows.length > 0 && (
                 <button
                   onClick={async () => {
                     if (confirm(`Delete ALL certificates?\n\nThis will permanently remove ${workflows.length} certificate${workflows.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
@@ -529,16 +551,32 @@ export default function UserDashboard({ user }) {
                   🗑️ Clear All
                 </button>
               )}
-              <Link
-                href="/usmca-workflow?reset=true"
-                className="btn-primary"
-              >
-                + New Analysis
-              </Link>
+              {!isTrialExpired && (
+                <Link
+                  href="/usmca-workflow?reset=true"
+                  className="btn-primary"
+                >
+                  + New Analysis
+                </Link>
+              )}
             </div>
           </div>
 
-          {workflows.length === 0 ? (
+          {isTrialExpired ? (
+            <div style={{ padding: '30px', textAlign: 'center', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+              <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
+                🔒 <strong>Workflows disabled - Trial expired</strong>
+              </p>
+              <p className="text-body">
+                Upgrade to view your past analyses and create new USMCA certifications.
+              </p>
+              <div className="action-buttons" style={{ marginTop: '20px' }}>
+                <Link href="/pricing" className="btn-primary">
+                  View Pricing Plans
+                </Link>
+              </div>
+            </div>
+          ) : workflows.length === 0 ? (
             <p className="text-body">No certificates yet. Run your first USMCA analysis to generate a certificate.</p>
           ) : (
             <>
@@ -590,31 +628,38 @@ export default function UserDashboard({ user }) {
                     </div>
 
                     <div className="action-buttons">
-                      {/* QUALIFIED: Download Certificate only */}
+                      {/* QUALIFIED: Download Certificate only (disabled for expired trials) */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <button
-                          onClick={() => handleDownloadCertificate(selectedWorkflow)}
+                          onClick={() => !isTrialExpired && handleDownloadCertificate(selectedWorkflow)}
                           className="btn-primary"
+                          disabled={isTrialExpired}
+                          style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                          title={isTrialExpired ? 'Upgrade to download certificates' : ''}
                         >
-                          📥 Download Certificate
+                          📥 Download Certificate {isTrialExpired && '(Upgrade Required)'}
                         </button>
                       )}
 
-                      {/* NOT QUALIFIED: [View Analysis] [Get Help to Qualify] */}
+                      {/* NOT QUALIFIED: [View Analysis] [Get Help to Qualify] (disabled for expired trials) */}
                       {selectedWorkflow.qualification_status !== 'QUALIFIED' && (
                         <>
-                          <Link
-                            href={`/usmca-workflow?view_results=${selectedWorkflow.id}`}
+                          <button
+                            onClick={() => !isTrialExpired && router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
                             className="btn-primary"
+                            disabled={isTrialExpired}
+                            style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                           >
-                            📊 View Analysis
-                          </Link>
+                            📊 View Analysis {isTrialExpired && '(Upgrade Required)'}
+                          </button>
 
                           <button
-                            onClick={() => scrollToServiceRequest(selectedWorkflow.id, 'usmca-advantage')}
+                            onClick={() => !isTrialExpired && scrollToServiceRequest(selectedWorkflow.id, 'usmca-advantage')}
                             className="btn-primary"
+                            disabled={isTrialExpired}
+                            style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                           >
-                            🇲🇽 Get Help to Qualify
+                            🇲🇽 Get Help to Qualify {isTrialExpired && '(Upgrade Required)'}
                           </button>
                         </>
                       )}
@@ -685,7 +730,7 @@ export default function UserDashboard({ user }) {
               <h2 className="form-section-title">Trade Alerts</h2>
             </div>
             <div className="dashboard-actions-right">
-              {alerts.length > 0 && (
+              {!isTrialExpired && alerts.length > 0 && (
                 <button
                   onClick={async () => {
                     if (confirm(`Delete ALL alerts?\n\nThis will permanently remove ${alerts.length} alert${alerts.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
@@ -727,7 +772,21 @@ export default function UserDashboard({ user }) {
             </div>
           </div>
 
-          {alerts.length === 0 ? (
+          {isTrialExpired ? (
+            <div style={{ padding: '30px', textAlign: 'center', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
+              <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
+                🔒 <strong>Alerts disabled - Trial expired</strong>
+              </p>
+              <p className="text-body">
+                Upgrade to view and manage trade alerts for supply chain risk monitoring.
+              </p>
+              <div className="action-buttons" style={{ marginTop: '20px' }}>
+                <Link href="/pricing" className="btn-primary">
+                  View Pricing Plans
+                </Link>
+              </div>
+            </div>
+          ) : alerts.length === 0 ? (
             <p className="text-body">No alerts yet. Run a vulnerability analysis to monitor supply chain risks.</p>
           ) : (
             <>
@@ -791,23 +850,29 @@ export default function UserDashboard({ user }) {
 
                     <div className="action-buttons">
                       <button
-                        onClick={() => handleViewAlert(selectedAlert.id)}
+                        onClick={() => !isTrialExpired && handleViewAlert(selectedAlert.id)}
                         className="btn-primary"
+                        disabled={isTrialExpired}
+                        style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                       >
-                        View Full Alert
+                        View Full Alert {isTrialExpired && '(Upgrade Required)'}
                       </button>
                       <button
                         onClick={() => {
-                          // Find the workflow associated with this alert
-                          const relatedWorkflow = workflows.find(w =>
-                            w.product_description === selectedAlert.product_description ||
-                            w.company_name === selectedAlert.company_name
-                          );
-                          scrollToServiceRequest(relatedWorkflow?.id, 'crisis-navigator');
+                          if (!isTrialExpired) {
+                            // Find the workflow associated with this alert
+                            const relatedWorkflow = workflows.find(w =>
+                              w.product_description === selectedAlert.product_description ||
+                              w.company_name === selectedAlert.company_name
+                            );
+                            scrollToServiceRequest(relatedWorkflow?.id, 'crisis-navigator');
+                          }
                         }}
                         className="btn-primary"
+                        disabled={isTrialExpired}
+                        style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                       >
-                        Get Professional Help
+                        Get Professional Help {isTrialExpired && '(Upgrade Required)'}
                       </button>
 
                       {/* Delete Alert Button */}
@@ -864,7 +929,7 @@ export default function UserDashboard({ user }) {
 
             {usageStats.limit_reached && !usageStats.is_unlimited && (
               <div className="hero-buttons">
-                <Link href="/pricing" className="btn-primary">
+                <Link href="/account/subscription" className="btn-primary">
                   Upgrade for More Analyses
                 </Link>
               </div>

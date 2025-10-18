@@ -104,7 +104,7 @@ Format as professional PDF-ready content. Focus on actionable insights that just
   // ✅ AI FALLBACK CHAIN: OpenRouter → Anthropic → Database Cache
   const aiResult = await executeWithFallback({
     prompt: synthesisPrompt,
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'anthropic/claude-sonnet-4.5',
     maxTokens: 4000
   });
 

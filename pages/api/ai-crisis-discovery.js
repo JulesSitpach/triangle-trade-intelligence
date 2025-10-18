@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const message = await anthropic.messages.create({
-          model: 'claude-haiku-4-20250514',
+          model: 'anthropic/claude-haiku-4.5',
           max_tokens: 3000,
           messages: [{
             role: 'user',

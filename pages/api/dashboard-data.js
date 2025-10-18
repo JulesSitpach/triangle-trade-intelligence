@@ -46,6 +46,13 @@ export default protectedApiHandler({
         .eq('user_id', userId)
         .single();
 
+      console.log('📊 Dashboard Usage Check:', {
+        userId,
+        email: profile?.email,
+        tier: profile?.subscription_tier,
+        tierLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier]
+      });
+
       const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined
         ? SUBSCRIPTION_LIMITS[profile?.subscription_tier]
         : 10; // Default to Starter limit

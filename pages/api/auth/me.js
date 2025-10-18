@@ -132,10 +132,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // Fetch user profile from database to get subscription tier
+    // Fetch user profile from database to get subscription tier and trial expiration
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('subscription_tier')
+      .select('subscription_tier, trial_ends_at')
       .eq('user_id', session.userId)
       .single();
 
@@ -147,6 +147,11 @@ export default async function handler(req, res) {
       });
     }
 
+    // Calculate if trial has expired
+    const subscriptionTier = profile?.subscription_tier || 'Trial';
+    const trialEndsAt = profile?.trial_ends_at;
+    const isTrialExpired = subscriptionTier === 'Trial' && trialEndsAt && new Date(trialEndsAt) < new Date();
+
     return res.status(200).json({
       success: true,
       authenticated: true,
@@ -155,7 +160,9 @@ export default async function handler(req, res) {
         email: session.email,
         isAdmin: session.isAdmin,
         company_name: session.companyName,
-        subscription_tier: profile?.subscription_tier || 'Trial'
+        subscription_tier: subscriptionTier,
+        trial_ends_at: trialEndsAt,
+        trial_expired: isTrialExpired
       }
     });
 

@@ -11,6 +11,7 @@ import ServiceWorkflowModal from '../shared/ServiceWorkflowModal';
 import { useToast, ToastContainer } from '../shared/ToastNotification';
 import MarketplaceIntelligenceForm from '../shared/MarketplaceIntelligenceForm';
 import { filterByServiceType } from '../../lib/utils/service-type-mapping';
+import AIResearchAssistant from '../admin/AIResearchAssistant';
 
 export default function USMCACertificateTab({ userRole = 'Cristina' }) {
   const [serviceRequests, setServiceRequests] = useState([]);
@@ -384,13 +385,16 @@ export default function USMCACertificateTab({ userRole = 'Cristina' }) {
                     </span>
                   </td>
                   <td>
-                    <button
-                      className="btn-primary"
-                      onClick={() => startWorkflow(request)}
-                      disabled={request.status === 'completed'}
-                    >
-                      {request.status === 'completed' ? 'Completed' : 'Start Service'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button
+                        className="btn-primary"
+                        onClick={() => startWorkflow(request)}
+                        disabled={request.status === 'completed'}
+                      >
+                        {request.status === 'completed' ? 'Completed' : 'Start Service'}
+                      </button>
+                      <AIResearchAssistant serviceRequest={request} />
+                    </div>
                   </td>
                 </tr>
               ))}
