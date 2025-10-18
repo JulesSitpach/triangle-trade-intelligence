@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     console.log('📰 Fetching high-score RSS items for policy update candidates...');
 
-    // Query RSS feed activities with high crisis scores (≥7)
+    // Query RSS feed activities with high crisis scores (≥5)
     // These are likely to be significant policy announcements
     const { data: rssItems, error } = await supabase
       .from('rss_feed_activities')
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
           category
         )
       `)
-      .gte('crisis_score', 7) // High-score items only
+      .gte('crisis_score', 5) // High-score items only (realistic threshold based on actual data)
       .order('pub_date', { ascending: false })
       .order('crisis_score', { ascending: false })
       .limit(50); // Last 50 high-score items
