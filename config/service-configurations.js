@@ -245,16 +245,15 @@ export const SERVICE_CONFIGURATIONS = {
     ]
   },
 
-  // ========== SERVICE 6: CRISIS NAVIGATOR ($200/month) ==========
+  // ========== SERVICE 6: CRISIS NAVIGATOR ($200) ==========
   'crisis-navigator': {
     type: 'crisis-navigator',
     name: 'Crisis Navigator',
     icon: '🆘',
-    description: 'Priority emergency response and regulatory monitoring',
+    description: 'Priority emergency response for trade crises and compliance issues',
     price: 200,
     basePrice: 200,
-    isRecurring: true,
-    monthlyCapacity: 20,
+    monthlyCapacity: 15,
     avgCompletion: '24-48 hours',
     teamLead: 'Cristina', // Cristina leads 60%
     cristinaEffort: 60,
