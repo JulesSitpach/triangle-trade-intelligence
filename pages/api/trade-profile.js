@@ -22,16 +22,19 @@ function verifySession(cookieValue) {
 
     const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
     const expectedSig = crypto.createHmac('sha256', secret)
-      .update(JSON.stringify(data))
+      .update(data)  // FIX: data is already a JSON string, don't double-stringify
       .digest('hex');
 
     if (sig !== expectedSig) return null;
 
+    // Parse the data string to get the actual session object
+    const sessionData = JSON.parse(data);
+
     // Check expiration (7 days)
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-    if (Date.now() - data.timestamp > sevenDaysMs) return null;
+    if (Date.now() - sessionData.timestamp > sevenDaysMs) return null;
 
-    return data;
+    return sessionData;  // Return the parsed session data
   } catch (error) {
     return null;
   }
