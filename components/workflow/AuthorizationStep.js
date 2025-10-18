@@ -80,7 +80,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         company_name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
         business_type: workflowData?.company?.business_type,
         trade_volume: workflowData?.company?.trade_volume,
-        annual_trade_volume: workflowData?.company?.trade_volume
+        annual_trade_volume: workflowData?.company?.trade_volume,
+        company_country: workflowData?.company?.company_country  // FIX: Include country for certificate generation
       },
       product: {
         hs_code: workflowData?.product?.hs_code || previewData?.professional_certificate?.hs_classification?.code,

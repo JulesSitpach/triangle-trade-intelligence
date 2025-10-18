@@ -170,7 +170,8 @@ export default function WorkflowResults({
           business_type: results.company?.business_type,
           industry_sector: results.company?.industry_sector,
           trade_volume: results.company?.trade_volume,
-          annual_trade_volume: results.company?.trade_volume
+          annual_trade_volume: results.company?.trade_volume,
+          company_country: results.company?.company_country  // FIX: Include country for certificate generation
         },
         product: {
           hs_code: results.product?.hs_code,
