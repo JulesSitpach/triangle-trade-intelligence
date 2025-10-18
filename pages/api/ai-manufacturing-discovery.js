@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,6 +20,27 @@ export default async function handler(req, res) {
 
   if (!clientRequirements) {
     return res.status(400).json({ error: 'Manufacturing feasibility requirements are required' });
+  }
+
+  // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
+  const missingOptionalFields = [];
+
+  if (!clientRequirements.product_description) missingOptionalFields.push('product_description');
+  if (!clientRequirements.industry) missingOptionalFields.push('industry');
+  if (!clientRequirements.volume) missingOptionalFields.push('volume');
+  if (!clientRequirements.quality_standards) missingOptionalFields.push('quality_standards');
+  if (!clientRequirements.budget) missingOptionalFields.push('budget');
+  if (!clientRequirements.timeline) missingOptionalFields.push('timeline');
+
+  if (missingOptionalFields.length > 0) {
+    // Log to admin dashboard (non-blocking)
+    await DevIssue.missingData('manufacturing_discovery', missingOptionalFields.join(', '), {
+      service_type: 'Manufacturing Feasibility',
+      workflow_step: 'ai_facility_search',
+      impact: 'AI manufacturing recommendations quality may be reduced due to missing context',
+      missing_fields: missingOptionalFields
+    });
+    console.log(`⚠️  Missing optional fields: ${missingOptionalFields.join(', ')} - AI quality may be reduced`);
   }
 
   async function callAnthropicWithRetry(prompt, maxRetries = 3) {

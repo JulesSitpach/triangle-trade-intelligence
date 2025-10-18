@@ -70,7 +70,7 @@ Write as if you're Jorge personally reaching out to help this client succeed.`;
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://triangle-trade-intelligence.vercel.app',
         'X-Title': 'Triangle Trade Intelligence - Client Communication Draft'
       },
       body: JSON.stringify({

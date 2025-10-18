@@ -182,6 +182,79 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Mexico Trade Bridge - Competitive Advantage Section */}
+      <section className="main-content" style={{background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'}}>
+        <div className="container-app">
+          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
+            <h2 className="section-header-title" style={{color: '#fff', fontSize: '2.5rem'}}>
+              Your Mexico Trade Bridge Advantage
+            </h2>
+            <p className="section-header-subtitle" style={{color: '#e0f2fe', fontSize: '1.25rem', maxWidth: '800px', margin: '0 auto'}}>
+              Canadian-owned platform with Mexico-based operations delivering North American business standards with Mexico market access and insights.
+            </p>
+          </div>
+
+          <div className="feature-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
+            {/* USMCA Triangle Routing */}
+            <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🔺</div>
+              <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
+                USMCA Triangle Routing
+              </h3>
+              <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
+                Maximize tariff savings through strategic Canada → Mexico → US/Latin America routing. Leverage USMCA&apos;s 0% preferential rates and Mexico&apos;s geographic advantages.
+              </p>
+              <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
+                <li>Zero tariffs on USMCA-qualified goods</li>
+                <li>Shorter lead times vs. Asian suppliers</li>
+                <li>Same-time-zone collaboration</li>
+              </ul>
+            </div>
+
+            {/* Mexico Nearshoring */}
+            <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🇲🇽</div>
+              <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
+                Mexico Nearshoring Benefits
+              </h3>
+              <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
+                Access Mexico&apos;s skilled workforce and manufacturing infrastructure with our bilingual team (Spanish/English) providing complete USMCA market coverage.
+              </p>
+              <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
+                <li>17-year enterprise logistics expertise</li>
+                <li>Fortune 500 best practices at SMB scale</li>
+                <li>Mexico supplier relationships ready</li>
+              </ul>
+            </div>
+
+            {/* Future-Proof Strategy */}
+            <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🛡️</div>
+              <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
+                Future-Proof Your Supply Chain
+              </h3>
+              <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
+                Mexico proximity benefits remain regardless of trade agreements. Build relationships now for resilience against tariff volatility and geopolitical shifts.
+              </p>
+              <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
+                <li>Reduce dependency on distant suppliers</li>
+                <li>3-5 day shipping vs 30-45 from Asia</li>
+                <li>Agile response to market changes</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Trust Factor Banner */}
+          <div className="card" style={{background: 'rgba(255, 255, 255, 0.1)', border: '2px solid rgba(255,255,255,0.3)', padding: '2rem', marginTop: '3rem', textAlign: 'center'}}>
+            <p style={{color: '#e0f2fe', fontSize: '1.1rem', lineHeight: '1.8', margin: 0}}>
+              <strong style={{color: '#fff', fontSize: '1.3rem'}}>Canadian-Founded, Mexico-Based Excellence:</strong><br/>
+              15+ years high-tech experience (IBM, Cognos, Mitel, LinkedIn) combined with Mexico-based bilingual trade experts.
+              North American business standards with Mexico market access and cultural insights.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section id="calculator" className="main-content gradient-subtle">
         <div className="container-app">
           <SimpleSavingsCalculator />

@@ -65,7 +65,7 @@ export default async function handler(req, res) {
     }
 
     // Generate reset link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
 
     // TODO: Send email with reset link

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,6 +20,27 @@ export default async function handler(req, res) {
 
   if (!clientRequirements) {
     return res.status(400).json({ error: 'Market entry requirements are required' });
+  }
+
+  // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
+  const missingOptionalFields = [];
+
+  if (!clientRequirements.target_market) missingOptionalFields.push('target_market');
+  if (!clientRequirements.product_description) missingOptionalFields.push('product_description');
+  if (!clientRequirements.industry) missingOptionalFields.push('industry');
+  if (!clientRequirements.budget) missingOptionalFields.push('budget');
+  if (!clientRequirements.timeline) missingOptionalFields.push('timeline');
+  if (!clientRequirements.entry_strategy) missingOptionalFields.push('entry_strategy');
+
+  if (missingOptionalFields.length > 0) {
+    // Log to admin dashboard (non-blocking)
+    await DevIssue.missingData('market_entry_discovery', missingOptionalFields.join(', '), {
+      service_type: 'Pathfinder Market Entry',
+      workflow_step: 'ai_market_analysis',
+      impact: 'AI market entry recommendations quality may be reduced due to missing context',
+      missing_fields: missingOptionalFields
+    });
+    console.log(`⚠️  Missing optional fields: ${missingOptionalFields.join(', ')} - AI quality may be reduced`);
   }
 
   async function callAnthropicWithRetry(prompt, maxRetries = 3) {

@@ -114,7 +114,7 @@ Return ONLY a JSON array, no other text:
         headers: {
           'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
           'Content-Type': 'application/json',
-          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
           'X-Title': 'Triangle Trade Intelligence - Supplier Discovery'
         },
         body: JSON.stringify({

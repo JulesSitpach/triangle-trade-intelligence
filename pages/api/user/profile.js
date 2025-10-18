@@ -20,7 +20,7 @@ export default protectedApiHandler({
       const { data: profile, error } = await supabase
         .from('user_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error || !profile) {
@@ -95,7 +95,7 @@ export default protectedApiHandler({
       const { data: updatedProfile, error } = await supabase
         .from('user_profiles')
         .update(updateData)
-        .eq('id', userId)
+        .eq('user_id', userId)
         .select()
         .single();
 

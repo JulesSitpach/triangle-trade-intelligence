@@ -55,7 +55,7 @@ export default protectedApiHandler({
     const { data: user, error: userError } = await supabase
       .from('user_profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (userError || !user) {

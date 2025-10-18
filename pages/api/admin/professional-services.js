@@ -33,7 +33,7 @@ async function integrateWithCollaborationHub(serviceData) {
   try {
     // Create collaboration queue item for Jorge → Cristina handoffs
     if (serviceData.service_type === 'custom_integration' && serviceData.estimated_value > 10000) {
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/collaboration-mcp`, {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/collaboration-mcp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -50,7 +50,7 @@ async function integrateWithCollaborationHub(serviceData) {
     }
 
     // Update business analytics with revenue attribution
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/business-opportunity-analytics`, {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/business-opportunity-analytics`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

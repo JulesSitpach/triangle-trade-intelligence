@@ -43,7 +43,7 @@ export default protectedApiHandler({
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('subscription_tier, status, email')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined

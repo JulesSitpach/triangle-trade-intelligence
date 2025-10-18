@@ -41,36 +41,61 @@ export const SubscriptionProvider = ({ children }) => {
     try {
       setLoading(true);
 
-      // For now, use demo/development data
-      // In production, this would fetch from your subscription API
-      const mockSubscription = {
-        plan: 'professional',
-        plan_name: 'Professional Plan',
-        usage_remaining: '150 classifications',
+      // Fetch real subscription data from authentication endpoint
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include' // Include cookies for session auth
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user subscription data');
+      }
+
+      const { user: authUser, authenticated } = await response.json();
+
+      if (!authenticated || !authUser) {
+        throw new Error('User not authenticated');
+      }
+
+      // Map subscription tier to feature access
+      const tierFeatures = {
+        'Trial': ['basic_classification'],
+        'Starter': ['basic_classification', 'certificate_generation'],
+        'Professional': ['basic_classification', 'web_verification', 'confidence_scoring', 'certificate_generation', 'expert_validation'],
+        'Premium': ['basic_classification', 'web_verification', 'confidence_scoring', 'certificate_generation', 'expert_validation', 'priority_support']
+      };
+
+      const tierLimits = {
+        'Trial': { classifications: 1, certificates: 0 },
+        'Starter': { classifications: 10, certificates: 10 },
+        'Professional': { classifications: Infinity, certificates: Infinity },
+        'Premium': { classifications: Infinity, certificates: Infinity }
+      };
+
+      const userTier = authUser.subscription_tier || 'Trial';
+      const limits = tierLimits[userTier] || tierLimits['Trial'];
+
+      const realSubscription = {
+        plan: userTier.toLowerCase(),
+        plan_name: `${userTier} Plan`,
+        usage_remaining: limits.classifications === Infinity ? 'Unlimited' : `${limits.classifications} remaining`,
         usage_status: 'active',
-        upgrade_needed: false,
-        features_available: [
-          'basic_classification',
-          'web_verification',
-          'confidence_scoring',
-          'certificate_generation',
-          'expert_validation'
-        ],
-        certificates_used: 3,
-        certificates_limit: 25,
-        trial_days_remaining: null // Not on trial
+        upgrade_needed: userTier === 'Trial',
+        features_available: tierFeatures[userTier] || tierFeatures['Trial'],
+        certificates_used: 0, // TODO: Fetch from usage tracking table
+        certificates_limit: limits.certificates,
+        trial_days_remaining: userTier === 'Trial' ? 7 : null
       };
 
-      const mockUser = {
-        id: 'jorge-expert-001',
-        email: 'jorge@triangleintel.com',
-        role: 'expert',
-        name: 'Jorge Martinez',
-        specialization: 'Mexico Trade & Manufacturing'
+      const realUser = {
+        id: authUser.id,
+        email: authUser.email,
+        role: authUser.isAdmin ? 'admin' : 'user',
+        name: authUser.company_name || authUser.email.split('@')[0],
+        subscription_tier: userTier
       };
 
-      setSubscription(mockSubscription);
-      setUser(mockUser);
+      setSubscription(realSubscription);
+      setUser(realUser);
       setError(null);
 
     } catch (err) {

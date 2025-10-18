@@ -102,7 +102,7 @@ Be specific with dollar amounts, timelines, and actionable steps. Focus on what 
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://triangle-trade-intelligence.vercel.app',
         'X-Title': 'Triangle Trade Intelligence - USMCA Roadmap Generation'
       },
       body: JSON.stringify({

@@ -336,7 +336,7 @@ async function handleCompleteWorkflow(req, res) {
   try {
     // Step 1: Classify product using NEW agent system
     console.log('🔍 Step 1: Classifying product with AI agent...');
-    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/agents/classification`, {
+    const classificationResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/agents/classification`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

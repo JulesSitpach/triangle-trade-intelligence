@@ -133,7 +133,7 @@ async function sendTariffDiscrepancyAlert(discrepancies) {
           Confidence: ${Math.round(d.confidence_score * 100)}%
       `).join('\n')}
 
-      Review and approve updates at: ${process.env.NEXT_PUBLIC_BASE_URL}/admin/tariff-staging
+      Review and approve updates at: ${process.env.NEXT_PUBLIC_APP_URL}/admin/tariff-staging
     `
   }
 

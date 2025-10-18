@@ -42,7 +42,7 @@ export default protectedApiHandler({
     const { data: userProfile } = await supabase
       .from('user_profiles')
       .select('subscription_tier')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     const subscriptionTier = userProfile?.subscription_tier || 'Trial';
@@ -81,6 +81,32 @@ export default protectedApiHandler({
         success: false,
         error: 'Missing required fields: company_name, business_type, industry_sector, component_origins'
       });
+    }
+
+    // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
+    const missingOptionalFields = [];
+
+    if (!formData.manufacturing_location) missingOptionalFields.push('manufacturing_location');
+    if (!formData.supplier_country) missingOptionalFields.push('supplier_country');
+    if (!formData.destination_country) missingOptionalFields.push('destination_country');
+    if (!formData.trade_volume) missingOptionalFields.push('trade_volume');
+
+    // Check for components missing descriptions
+    const componentsWithoutDesc = formData.component_origins.filter(c => !c.description || c.description.length < 10);
+    if (componentsWithoutDesc.length > 0) {
+      missingOptionalFields.push(`${componentsWithoutDesc.length} components missing detailed descriptions`);
+    }
+
+    if (missingOptionalFields.length > 0) {
+      // Log to admin dashboard (non-blocking)
+      await DevIssue.missingData('usmca_analysis', missingOptionalFields.join(', '), {
+        user_id: userId,
+        company: formData.company_name,
+        workflow_step: 'ai_usmca_analysis',
+        impact: 'AI analysis quality may be reduced due to missing optional context',
+        missing_fields: missingOptionalFields
+      });
+      console.log(`⚠️  Missing optional fields: ${missingOptionalFields.join(', ')} - AI quality may be reduced`);
     }
 
     // ========== STEP 1: GET ACTUAL TARIFF RATES FIRST ==========
@@ -896,7 +922,7 @@ async function tryOpenRouter(prompt) {
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://triangle-trade-intelligence.vercel.app'
+        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://triangle-trade-intelligence.vercel.app'
       },
       body: JSON.stringify({
         model: 'anthropic/claude-sonnet-4.5',

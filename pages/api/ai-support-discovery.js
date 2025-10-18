@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
+import { DevIssue } from '../../lib/utils/logDevIssue.js';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -19,6 +20,27 @@ export default async function handler(req, res) {
 
   if (!clientRequirements) {
     return res.status(400).json({ error: 'Client support requirements are required' });
+  }
+
+  // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
+  const missingOptionalFields = [];
+
+  if (!clientRequirements.company_name) missingOptionalFields.push('company_name');
+  if (!clientRequirements.industry) missingOptionalFields.push('industry');
+  if (!clientRequirements.support_type) missingOptionalFields.push('support_type');
+  if (!clientRequirements.current_challenges) missingOptionalFields.push('current_challenges');
+  if (!clientRequirements.trade_volume) missingOptionalFields.push('trade_volume');
+  if (!clientRequirements.goals) missingOptionalFields.push('goals');
+
+  if (missingOptionalFields.length > 0) {
+    // Log to admin dashboard (non-blocking)
+    await DevIssue.missingData('support_discovery', missingOptionalFields.join(', '), {
+      service_type: 'Crisis Navigator',
+      workflow_step: 'ai_support_planning',
+      impact: 'AI support recommendations quality may be reduced due to missing context',
+      missing_fields: missingOptionalFields
+    });
+    console.log(`⚠️  Missing optional fields: ${missingOptionalFields.join(', ')} - AI quality may be reduced`);
   }
 
   async function callAnthropicWithRetry(prompt, maxRetries = 3) {

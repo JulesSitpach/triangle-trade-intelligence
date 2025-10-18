@@ -72,6 +72,13 @@ export default function ComponentOriginsStepEnhanced({
       return;
     }
 
+    // CRITICAL: Validate formData business_type (REQUIRED by AI classification agent)
+    if (!formData.business_type) {
+      console.error('❌ Cannot classify component: business_type is required from Step 1');
+      alert('Please complete company information (business type) in Step 1 before requesting AI classification.');
+      return;
+    }
+
     setSearchingHS(prev => ({ ...prev, [index]: true }));
 
     try {
@@ -90,7 +97,7 @@ export default function ComponentOriginsStepEnhanced({
           additionalContext: {
             // Complete product context from Step 1
             overallProduct: formData.product_description,
-            industryContext: formData.business_type || 'General Manufacturing', // REQUIRED by classification agent
+            industryContext: formData.business_type, // Required field, validated above
             businessType: formData.business_type,
             manufacturingLocation: formData.manufacturing_location,
             exportDestination: formData.export_destination,
@@ -145,22 +152,29 @@ export default function ComponentOriginsStepEnhanced({
   // Manual HS Code lookup function
   const lookupHSCode = async (index) => {
     const component = components[index];
-    
+
     if (!component.description || component.description.length < 3) {
       alert('Please enter a product description first');
       return;
     }
-    
+
+    // CRITICAL: Validate formData business_type (improves AI accuracy)
+    if (!formData.business_type) {
+      console.error('❌ Cannot lookup HS code: business_type missing from Step 1');
+      alert('Please complete company information (business type) in Step 1 for better HS code accuracy.');
+      return;
+    }
+
     setSearchingHS({ ...searchingHS, [index]: true });
-    
+
     try {
       const response = await fetch('/api/lightweight-hs-lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productDescription: component.description,
-          businessContext: { 
-            companyType: formData.business_type || 'Manufacturing'
+          businessContext: {
+            companyType: formData.business_type // Required field, validated above
           }
         })
       });
@@ -209,7 +223,13 @@ export default function ComponentOriginsStepEnhanced({
   // Function to capture user-contributed HS codes
   const captureUserHSCode = async (hsCode, description) => {
     if (!hsCode || !description) return;
-    
+
+    // CRITICAL: Validate required fields before calling API (Fail Loudly Protocol)
+    if (!formData.company_name) {
+      console.error('❌ Cannot capture HS code: company_name is required');
+      return; // Skip optional HS code capture if company data is missing
+    }
+
     try {
       const response = await fetch('/api/user-contributed-hs-code', {
         method: 'POST',
@@ -220,7 +240,7 @@ export default function ComponentOriginsStepEnhanced({
           hs_code: hsCode,
           product_description: description,
           business_type: formData.business_type || 'general',
-          company_name: formData.company_name || 'Unknown',
+          company_name: formData.company_name, // Required field, validated above
           user_confidence: 8 // User-provided codes have high confidence
         })
       });
