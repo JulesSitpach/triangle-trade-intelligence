@@ -707,7 +707,7 @@ export default function ComponentOriginsStepEnhanced({
                   Don't know your HS code? Get AI suggestion below.
                 </div>
 
-                {/* Get AI Suggestion Button */}
+                {/* Get AI Suggestion Button - Turns BLUE when fields are filled */}
                 <button
                   type="button"
                   onClick={() => getComponentHSSuggestion(index)}
@@ -718,7 +718,12 @@ export default function ComponentOriginsStepEnhanced({
                     !component.value_percentage ||
                     searchingHS[index]
                   }
-                  className="btn-secondary btn-ai-suggestion"
+                  className={
+                    component.description && component.description.length >= 10 &&
+                    component.origin_country && component.value_percentage && !searchingHS[index]
+                      ? 'btn-primary btn-ai-suggestion'  // BLUE when ready
+                      : 'btn-secondary btn-ai-suggestion'  // Gray when not ready
+                  }
                 >
                   {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
                 </button>
@@ -806,12 +811,22 @@ export default function ComponentOriginsStepEnhanced({
           </div>
         ))}
 
-        {/* Add Component Button with Limit Status */}
+        {/* Add Component Button with Limit Status - Turns BLUE when last component is filled */}
         <div className="element-spacing">
           <button
             type="button"
             onClick={addComponent}
-            className="btn-secondary add-component-button"
+            className={(() => {
+              // Check if last component is fully filled
+              const lastComponent = components[components.length - 1];
+              const isLastComponentComplete = lastComponent &&
+                lastComponent.description && lastComponent.description.trim().length >= 10 &&
+                lastComponent.origin_country &&
+                lastComponent.value_percentage > 0 &&
+                lastComponent.hs_code;
+
+              return isLastComponentComplete ? 'btn-primary add-component-button' : 'btn-secondary add-component-button';
+            })()}
           >
             Add Component
           </button>
@@ -868,7 +883,7 @@ export default function ComponentOriginsStepEnhanced({
       <div className="dashboard-actions section-spacing">
         <button
           onClick={onPrevious}
-          className="btn-secondary"
+          className="btn-primary"
         >
           ← Previous
         </button>
