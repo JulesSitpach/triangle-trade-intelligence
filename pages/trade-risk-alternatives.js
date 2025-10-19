@@ -632,38 +632,6 @@ export default function TradeRiskAlternatives() {
           </div>
         </div>
 
-        {/* Action Items */}
-        <div className="form-section">
-          <h2 className="form-section-title">✅ Next Steps for {userProfile.companyName}</h2>
-
-          <div className="alert alert-warning">
-            <div className="alert-content">
-              <div className="alert-title">Priority Actions Based on Your Profile</div>
-              <div className="text-body">
-                <ol>
-                  {userProfile.supplierCountry === 'CN' && (
-                    <li><strong>Immediate:</strong> Identify alternative suppliers to reduce single-country dependency</li>
-                  )}
-                  {userProfile.qualificationStatus !== 'QUALIFIED' && (
-                    <li><strong>This week:</strong> Explore Mexico manufacturing options for USMCA qualification</li>
-                  )}
-                  <li><strong>This month:</strong> Map backup logistics routes for {userProfile.productDescription}</li>
-                  <li><strong>Ongoing:</strong> Monitor trade policy changes affecting HS code {userProfile.hsCode}</li>
-                </ol>
-              </div>
-              <div className="hero-buttons">
-                <button
-                  className="btn-primary"
-                  onClick={() => window.location.href = '/services/request-form'}
-                >
-                  🎯 Request Expert Consultation
-                </button>
-                <button className="btn-secondary">📋 Download Risk Assessment</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
         <div className="form-section">
           <h2 className="form-section-title">🚨 Government Policy Alerts Affecting Your Trade</h2>
@@ -737,6 +705,37 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
+        {/* Next Steps - After Reviewing Alerts */}
+        <div className="form-section">
+          <h2 className="form-section-title">✅ Next Steps for {userProfile.companyName}</h2>
+
+          <div className="alert alert-warning">
+            <div className="alert-content">
+              <div className="alert-title">Priority Actions Based on Your Profile</div>
+              <div className="text-body">
+                <ol>
+                  {userProfile.supplierCountry === 'CN' && (
+                    <li><strong>Immediate:</strong> Identify alternative suppliers to reduce single-country dependency</li>
+                  )}
+                  {userProfile.qualificationStatus !== 'QUALIFIED' && (
+                    <li><strong>This week:</strong> Explore Mexico manufacturing options for USMCA qualification</li>
+                  )}
+                  <li><strong>This month:</strong> Map backup logistics routes for {userProfile.productDescription}</li>
+                  <li><strong>Ongoing:</strong> Monitor trade policy changes affecting HS code {userProfile.hsCode}</li>
+                </ol>
+              </div>
+              <div className="hero-buttons">
+                <button
+                  className="btn-primary"
+                  onClick={() => window.location.href = '/services/request-form'}
+                >
+                  🎯 Request Expert Consultation
+                </button>
+                <button className="btn-secondary">📋 Download Risk Assessment</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="hero-buttons">
