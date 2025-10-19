@@ -611,76 +611,23 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* We're Monitoring For You */}
-        <div className="form-section">
-          <h2 className="form-section-title">📡 We're Monitoring For You</h2>
-          <p className="text-body">
-            Real-time surveillance of trade policy changes affecting your specific components and supply chain.
-          </p>
-
-          <div className="status-grid">
-            <div className="status-card">
-              <div className="status-label">Section 301 Tariffs</div>
-              <div className="status-value">✓ Checking Daily</div>
-              <p className="form-help">Monitoring USTR announcements affecting {userProfile.componentOrigins?.filter(c => c.origin_country === 'CN' || c.country === 'CN').length || 0} Chinese components</p>
-            </div>
-            <div className="status-card">
-              <div className="status-label">USMCA Renegotiations</div>
-              <div className="status-value">✓ Checking Daily</div>
-              <p className="form-help">Tracking bilateral trade deal proposals and USMCA changes</p>
-            </div>
-            <div className="status-card">
-              <div className="status-label">HS Code Changes</div>
-              <div className="status-value">✓ Checking Weekly</div>
-              <p className="form-help">Federal Register CBP monitoring for HS {userProfile.hsCode} reclassifications</p>
-            </div>
-            <div className="status-card">
-              <div className="status-label">Port Fee Updates</div>
-              <div className="status-value">✓ Checking Monthly</div>
-              <p className="form-help">Commerce ITA tracking port fees and shipping cost changes</p>
-            </div>
-          </div>
-
-          {/* Email Notification Preferences */}
-          <div className="alert alert-info" style={{ marginTop: '1rem' }}>
-            <div className="alert-content">
-              <div className="alert-title">📧 Email Notification Settings</div>
-              <div className="text-body">
-                <p>Choose how you want to receive alerts about changes affecting <strong>{userProfile.companyName}</strong>&apos;s trade profile:</p>
-
-                <div style={{ marginTop: '1rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      style={{ marginRight: '0.5rem' }}
-                    />
-                    <span>Email me when government policy alerts affect my components</span>
-                  </label>
-
-                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      defaultChecked={true}
-                      style={{ marginRight: '0.5rem' }}
-                    />
-                    <span>Email me when tariff rates change for my HS codes</span>
-                  </label>
-
-                  <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      defaultChecked={false}
-                      style={{ marginRight: '0.5rem' }}
-                    />
-                    <span>Email me weekly summary of all monitored sources</span>
-                  </label>
-                </div>
-
-                <p className="form-help" style={{ marginTop: '1rem' }}>
-                  💡 Tip: You can update these preferences anytime in your account settings. We only send alerts relevant to your specific trade profile.
+        {/* Compact Monitoring Notification */}
+        <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
+          <div className="alert-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div className="alert-title">📡 We're Monitoring For You</div>
+                <p className="text-body">
+                  Real-time surveillance of Section 301 tariffs, USMCA changes, HS code updates, and port fees affecting your {userProfile.componentOrigins?.length || 0} components.
                 </p>
               </div>
+              <button
+                onClick={() => window.location.href = '/account/settings'}
+                className="btn-secondary"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                ⚙️ Email Preferences
+              </button>
             </div>
           </div>
         </div>

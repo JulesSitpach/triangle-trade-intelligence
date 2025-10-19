@@ -132,6 +132,59 @@ export default function AccountSettings() {
           </div>
 
           <div className="content-card">
+            <h3 className="content-card-title">📧 Email Notification Preferences</h3>
+            <p className="text-body">
+              Choose how you want to receive alerts about trade policy changes affecting your supply chain:
+            </p>
+
+            <div style={{ marginTop: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  defaultChecked={true}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                <span className="text-body">Email me when government policy alerts affect my components</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  defaultChecked={true}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                <span className="text-body">Email me when tariff rates change for my HS codes</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  defaultChecked={false}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                <span className="text-body">Email me weekly summary of all monitored sources</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  defaultChecked={true}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                <span className="text-body">Email me when new professional services match my profile</span>
+              </label>
+            </div>
+
+            <p className="form-help" style={{ marginTop: '1rem' }}>
+              💡 We only send alerts relevant to your specific trade profile. You can change these preferences anytime.
+            </p>
+
+            <button className="btn-primary" style={{ marginTop: '1rem' }}>
+              Save Notification Preferences
+            </button>
+          </div>
+
+          <div className="content-card">
             <h3 className="content-card-title">Account Information</h3>
             <div className="text-body">
               <p><strong>Email:</strong> {user?.email}</p>
