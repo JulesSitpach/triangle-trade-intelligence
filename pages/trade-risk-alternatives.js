@@ -500,6 +500,27 @@ export default function TradeRiskAlternatives() {
           </p>
         </div>
 
+        {/* Compact Monitoring Notification - At Top for Reassurance */}
+        <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
+          <div className="alert-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div className="alert-title">📡 We're Monitoring For You</div>
+                <p className="text-body">
+                  Real-time surveillance of Section 301 tariffs, USMCA changes, HS code updates, and port fees affecting your {userProfile.componentOrigins?.length || 0} components.
+                </p>
+              </div>
+              <button
+                onClick={() => window.location.href = '/account/settings'}
+                className="btn-secondary"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                ⚙️ Email Preferences
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Dynamic User Trade Profile */}
         <div className="form-section">
           <h2 className="form-section-title">Your Trade Profile</h2>
@@ -599,27 +620,6 @@ export default function TradeRiskAlternatives() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Compact Monitoring Notification */}
-        <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
-          <div className="alert-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <div className="alert-title">📡 We're Monitoring For You</div>
-                <p className="text-body">
-                  Real-time surveillance of Section 301 tariffs, USMCA changes, HS code updates, and port fees affecting your {userProfile.componentOrigins?.length || 0} components.
-                </p>
-              </div>
-              <button
-                onClick={() => window.location.href = '/account/settings'}
-                className="btn-secondary"
-                style={{ whiteSpace: 'nowrap' }}
-              >
-                ⚙️ Email Preferences
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
