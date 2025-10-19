@@ -63,79 +63,27 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
           </div>
         )}
 
-        {/* Urgency Level with Timeline and Effective Date */}
+        {/* Compact Quick Facts - Urgency, Timeline, Effective Date */}
         <div className="element-spacing">
-          <div className="status-card" style={{
-            backgroundColor: consolidatedAlert.urgency === 'URGENT' ? '#fee2e2' :
-                            consolidatedAlert.urgency === 'HIGH' ? '#fef3c7' :
-                            '#e0f2fe',
-            borderLeft: `4px solid ${
-              consolidatedAlert.urgency === 'URGENT' ? '#dc2626' :
-              consolidatedAlert.urgency === 'HIGH' ? '#f59e0b' :
-              '#3b82f6'
-            }`
-          }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-              <div>
-                <div className="status-label">Urgency Level</div>
-                <div className="status-value" style={{ fontWeight: 'bold' }}>
-                  {consolidatedAlert.urgency}
-                </div>
-              </div>
-              {consolidatedAlert.timeline && (
-                <div>
-                  <div className="status-label">Timeline</div>
-                  <div className="status-value" style={{ fontWeight: 'bold' }}>
-                    {consolidatedAlert.timeline}
-                  </div>
-                </div>
-              )}
-              {consolidatedAlert.effective_date && (
-                <div>
-                  <div className="status-label">Effective Date</div>
-                  <div className="status-value" style={{ fontWeight: 'bold', color: '#dc2626' }}>
-                    {consolidatedAlert.effective_date}
-                  </div>
-                </div>
-              )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', fontSize: '0.875rem' }}>
+            <div style={{ padding: '0.5rem', backgroundColor: '#fef3c7', borderRadius: '4px', borderLeft: '3px solid #f59e0b' }}>
+              <div style={{ fontSize: '0.75rem', color: '#92400e', marginBottom: '0.25rem' }}>Urgency</div>
+              <div style={{ fontWeight: 'bold', color: '#92400e' }}>{consolidatedAlert.urgency}</div>
             </div>
-            {consolidatedAlert.urgency_reasoning && (
-              <div className="form-help" style={{ marginTop: '0.5rem' }}>
-                {consolidatedAlert.urgency_reasoning}
+            {consolidatedAlert.timeline && (
+              <div style={{ padding: '0.5rem', backgroundColor: '#e0f2fe', borderRadius: '4px', borderLeft: '3px solid #3b82f6' }}>
+                <div style={{ fontSize: '0.75rem', color: '#0c4a6e', marginBottom: '0.25rem' }}>Timeline</div>
+                <div style={{ fontWeight: 'bold', color: '#0c4a6e' }}>{consolidatedAlert.timeline}</div>
+              </div>
+            )}
+            {consolidatedAlert.effective_date && (
+              <div style={{ padding: '0.5rem', backgroundColor: '#fee2e2', borderRadius: '4px', borderLeft: '3px solid #dc2626' }}>
+                <div style={{ fontSize: '0.75rem', color: '#991b1b', marginBottom: '0.25rem' }}>Effective Date</div>
+                <div style={{ fontWeight: 'bold', color: '#991b1b' }}>{consolidatedAlert.effective_date}</div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Consolidated Explanation */}
-        {consolidatedAlert.explanation && (
-          <div className="text-body" style={{ marginTop: '1rem', fontWeight: 500 }}>
-            <strong>Impact on {userProfile.companyName}:</strong>
-            <p style={{ marginTop: '0.5rem' }}>{consolidatedAlert.explanation}</p>
-          </div>
-        )}
-
-        {/* Affected Components */}
-        {consolidatedAlert.affected_components && consolidatedAlert.affected_components.length > 0 && (
-          <div className="element-spacing">
-            <div className="text-body">
-              <strong>Your Affected Components:</strong>
-            </div>
-            <div className="status-grid" style={{ marginTop: '0.5rem' }}>
-              {consolidatedAlert.affected_components.map((comp, idx) => (
-                <div key={idx} className="status-card">
-                  <div className="status-label">{comp.component}</div>
-                  <div className="status-value">
-                    {comp.percentage}% from {comp.origin}
-                  </div>
-                  {comp.hs_code && (
-                    <div className="form-help">HS {comp.hs_code}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Consolidated Financial Impact - THE MONEY SHOT */}
         {consolidatedAlert.consolidated_impact && (

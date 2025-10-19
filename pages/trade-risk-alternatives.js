@@ -624,15 +624,14 @@ export default function TradeRiskAlternatives() {
 
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
         <div className="form-section">
-          <h2 className="form-section-title">🚨 Government Policy Alerts Affecting Your Trade</h2>
-          <p className="text-body">
-            Real tariff and trade policy changes from official U.S. government sources that directly impact your components and supply chain.
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h2 className="form-section-title" style={{ margin: 0 }}>🚨 Government Policy Alerts</h2>
             {consolidatedAlerts.length > 0 && originalAlertCount > consolidatedAlerts.length && (
-              <span style={{ color: '#059669', fontWeight: 500 }}>
-                {' '}Consolidated {originalAlertCount} related policies → {consolidatedAlerts.length} actionable alerts
+              <span style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 500 }}>
+                Consolidated {originalAlertCount} policies → {consolidatedAlerts.length} alert{consolidatedAlerts.length !== 1 ? 's' : ''}
               </span>
             )}
-          </p>
+          </div>
 
           {(isLoadingPolicyAlerts || isConsolidating) && (
             <div className="alert alert-info">
