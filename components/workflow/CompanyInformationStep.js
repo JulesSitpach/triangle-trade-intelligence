@@ -18,16 +18,46 @@ export default function CompanyInformationStep({
   isLoadingOptions,
   onNext,
   isStepValid,
-  onNewAnalysis
+  onNewAnalysis,
+  saveWorkflowToDatabase
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
   const [validationError, setValidationError] = useState(null);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Auto-calculate trade flow type and cache strategy when countries are selected
+  useEffect(() => {
+    if (formData.company_country && formData.destination_country) {
+      // Normalize country codes
+      const normalizeCountryCode = (country) => {
+        if (country.includes('Canada') || country === 'CA') return 'CA';
+        if (country.includes('Mexico') || country === 'MX') return 'MX';
+        if (country.includes('United States') || country.includes('USA') || country === 'US') return 'US';
+        return country;
+      };
+
+      const originCode = normalizeCountryCode(formData.company_country);
+      const destCode = normalizeCountryCode(formData.destination_country);
+
+      // Calculate trade flow type (e.g., "CA→MX", "MX→US")
+      const tradeFlowType = `${originCode}→${destCode}`;
+
+      // Determine tariff cache strategy based on destination
+      const cacheStrategy = destCode === 'MX' ? 'database' :
+                           destCode === 'CA' ? 'ai_90day' :
+                           destCode === 'US' ? 'ai_24hr' : 'ai_24hr';
+
+      // Update form data with calculated values
+      updateFormData('trade_flow_type', tradeFlowType);
+      updateFormData('tariff_cache_strategy', cacheStrategy);
+    }
+  }, [formData.company_country, formData.destination_country, updateFormData]);
 
   // Clear validation error when user starts filling in fields
   useEffect(() => {
@@ -40,6 +70,7 @@ export default function CompanyInformationStep({
       if (!formData.industry_sector) stillMissing.push('Industry Sector');
       if (!formData.company_address) stillMissing.push('Company Address');
       if (!formData.company_country) stillMissing.push('Company Country');
+      if (!formData.destination_country) stillMissing.push('Destination Market');  // NEW: Required
       if (!formData.contact_person) stillMissing.push('Contact Person');
       if (!formData.contact_phone) stillMissing.push('Contact Phone');
       if (!formData.contact_email) stillMissing.push('Contact Email');
@@ -59,14 +90,15 @@ export default function CompanyInformationStep({
                         !formData.trade_volume ||
                         !formData.company_address ||
                         !formData.company_country ||
+                        !formData.destination_country ||  // NEW: Required for tariff intelligence
                         !formData.contact_person ||
                         !formData.contact_phone ||
                         !formData.contact_email;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     setAttemptedSubmit(true);
 
-    // Check which required fields are missing
+    // Check which required fields are missing (ALL 13 fields)
     const missingFields = [];
     if (!formData.company_name) missingFields.push('Company Name');
     if (!formData.business_type) missingFields.push('Business Type');
@@ -74,10 +106,13 @@ export default function CompanyInformationStep({
     if (!formData.industry_sector) missingFields.push('Industry Sector');
     if (!formData.company_address) missingFields.push('Company Address');
     if (!formData.company_country) missingFields.push('Company Country');
+    if (!formData.tax_id) missingFields.push('Tax ID / EIN');
     if (!formData.contact_person) missingFields.push('Contact Person');
     if (!formData.contact_phone) missingFields.push('Contact Phone');
     if (!formData.contact_email) missingFields.push('Contact Email');
     if (!formData.trade_volume) missingFields.push('Annual Trade Volume');
+    if (!formData.supplier_country) missingFields.push('Primary Supplier Country');
+    if (!formData.destination_country) missingFields.push('Destination Market');
 
     if (missingFields.length > 0) {
       setValidationError(missingFields);
@@ -85,7 +120,19 @@ export default function CompanyInformationStep({
     }
 
     setValidationError(null);
-    onNext();
+
+    // ✅ Save to database before proceeding (1 save instead of 150+)
+    setIsSaving(true);
+    const saveResult = await saveWorkflowToDatabase();
+    setIsSaving(false);
+
+    if (saveResult.success) {
+      console.log('✅ Company data saved, proceeding to components step');
+      onNext();
+    } else {
+      console.warn('⚠️ Save failed but proceeding anyway (localStorage has data)');
+      onNext(); // Still proceed - localStorage has the data
+    }
   };
 
   const getCountryCode = (countryName) => {
@@ -222,15 +269,16 @@ export default function CompanyInformationStep({
 
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label">Tax ID / EIN</label>
+            <label className="form-label required">Tax ID / EIN</label>
             <input
               type="text"
               className="form-input"
               value={formData.tax_id || ''}
               onChange={(e) => updateFormData('tax_id', e.target.value)}
               placeholder="Tax identification number"
+              required
             />
-            <div className="form-help">Federal tax ID or EIN</div>
+            <div className="form-help">Federal tax ID or EIN (required for certificates)</div>
           </div>
         </div>
 
@@ -284,23 +332,28 @@ export default function CompanyInformationStep({
                 type="text"
                 className="form-input"
                 value={formData.trade_volume || ''}
-                onChange={(e) => updateFormData('trade_volume', e.target.value)}
+                onChange={(e) => {
+                  // Only allow numbers and commas
+                  const value = e.target.value.replace(/[^0-9,]/g, '');
+                  updateFormData('trade_volume', value);
+                }}
                 placeholder="4,800,000"
                 required
               />
             </div>
-            <div className="form-help">Estimated annual import value</div>
+            <div className="form-help">Estimated annual import/export value (numbers only)</div>
           </div>
         </div>
 
         <h3 className="form-section-title">Trade Routes</h3>
         <div className="form-grid-2">
           <div className="form-group">
-            <label className="form-label">Primary Supplier Country</label>
+            <label className="form-label required">Primary Supplier Country</label>
             <select
               className={`form-select ${formData.supplier_country ? 'has-value' : ''}`}
               value={formData.supplier_country || ''}
               onChange={(e) => updateFormData('supplier_country', e.target.value)}
+              required
             >
               {isLoadingOptions ? (
                 <option disabled>Loading...</option>
@@ -317,15 +370,16 @@ export default function CompanyInformationStep({
                 </>
               )}
             </select>
-            <div className="form-help">Where you purchase raw materials or components from</div>
+            <div className="form-help">Where you purchase raw materials or components from (required for AI analysis)</div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Destination Market</label>
+            <label className="form-label required">Destination Market</label>
             <select
               className="form-select"
               value={formData.destination_country || SYSTEM_CONFIG.countries.defaultDestination}
               onChange={(e) => updateFormData('destination_country', e.target.value)}
+              required
             >
               {dropdownOptions.usmcaCountries?.map(country => {
                 const countryCode = country.code || country.value;
@@ -347,7 +401,7 @@ export default function CompanyInformationStep({
                 })}
               </optgroup>
             </select>
-            <div className="form-help">Import destination country</div>
+            <div className="form-help">Where goods are exported to (determines tariff rates and compliance rules)</div>
           </div>
         </div>
 
@@ -397,8 +451,9 @@ export default function CompanyInformationStep({
             <button
               onClick={handleContinue}
               className="btn-primary"
+              disabled={isSaving}
             >
-              Continue to Product Details
+              {isSaving ? '💾 Saving...' : 'Continue to Product Details'}
             </button>
           </div>
         </div>

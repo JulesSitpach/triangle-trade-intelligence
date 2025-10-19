@@ -95,7 +95,55 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
-  console.log(`Received Stripe webhook event: ${event.type}`);
+  console.log(`Received Stripe webhook event: ${event.type} (ID: ${event.id})`);
+
+  // IDEMPOTENCY CHECK: Prevent duplicate event processing
+  try {
+    const { data: existingEvent, error: checkError } = await supabase
+      .from('webhook_events')
+      .select('event_id, processed_at')
+      .eq('event_id', event.id)
+      .single();
+
+    if (existingEvent) {
+      console.log(`⚠️ Webhook event ${event.id} already processed at ${existingEvent.processed_at} - skipping`);
+      return res.status(200).json({
+        received: true,
+        message: 'Event already processed (idempotent)',
+        event_id: event.id,
+        processed_at: existingEvent.processed_at
+      });
+    }
+
+    // Event not processed yet, record it
+    const { error: insertError } = await supabase
+      .from('webhook_events')
+      .insert({
+        event_id: event.id,
+        event_type: event.type,
+        payload: event.data.object
+      });
+
+    if (insertError && insertError.code === '23505') {
+      // Unique constraint violation - race condition, event was just processed
+      console.log(`⚠️ Race condition: Event ${event.id} was processed by another instance - skipping`);
+      return res.status(200).json({
+        received: true,
+        message: 'Event already processed (race condition)',
+        event_id: event.id
+      });
+    }
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    console.log(`✅ Event ${event.id} recorded for processing`);
+
+  } catch (error) {
+    console.error('Idempotency check error:', error);
+    // Continue processing - don't block on idempotency errors
+  }
 
   try {
     // Handle different event types

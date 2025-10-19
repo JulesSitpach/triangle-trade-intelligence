@@ -141,11 +141,20 @@ export default protectedApiHandler({
       }
     } else {
       // Save in-progress workflow to workflow_sessions
+      // Extract company data from workflow for dedicated columns
+      const companyData = workflowData.company || {};
+
       const sessionRecord = {
         user_id: userId,
         session_id: sessionId,
         state: 'in_progress',
         data: workflowData,
+
+        // NEW: Destination-aware tariff intelligence fields
+        destination_country: companyData.destination_country || workflowData.destination_country || null,
+        trade_flow_type: companyData.trade_flow_type || workflowData.trade_flow_type || null,
+        tariff_cache_strategy: companyData.tariff_cache_strategy || workflowData.tariff_cache_strategy || null,
+
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
       };

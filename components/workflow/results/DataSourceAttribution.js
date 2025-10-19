@@ -7,7 +7,8 @@ import React from 'react';
 
 export default function DataSourceAttribution({ results, trustIndicators }) {
   // Confidence is already stored as percentage (95), not decimal (0.95)
-  const confidence = results?.product?.classification_confidence || results?.product?.confidence || 95;
+  // Ensure confidence is always a valid number (AI might return string "85" instead of 85)
+  const confidence = Number(results?.product?.classification_confidence || results?.product?.confidence || 95);
 
   return (
     <div className="element-spacing">

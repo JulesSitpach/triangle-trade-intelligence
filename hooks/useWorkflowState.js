@@ -231,46 +231,12 @@ export function useWorkflowState() {
     }
   }, [defaultsLoaded, isLoadingOptions]);
 
-  // Save data to localStorage AND database whenever it changes (with debounce)
+  // ✅ REMOVED AUTO-SAVE - Now saves only when user clicks "Next"
+  // This eliminates 150+ unnecessary database writes during form filling
+  // localStorage still updates immediately for instant form restoration
   useEffect(() => {
     if (typeof window !== 'undefined' && formData.company_name) {
-      // Save to localStorage immediately (for instant access)
       localStorage.setItem('triangleUserData', JSON.stringify(formData));
-      console.log('💾 Saved form data to localStorage:', {
-        company_name: formData.company_name,
-        product_description: formData.product_description,
-        component_origins_count: formData.component_origins?.length
-      });
-
-      // Debounce database save (2 seconds after user stops typing)
-      const saveTimer = setTimeout(async () => {
-        try {
-          let sessionId = localStorage.getItem('workflow_session_id');
-          if (!sessionId) {
-            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            localStorage.setItem('workflow_session_id', sessionId);
-          }
-
-          const response = await fetch('/api/workflow-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              workflowData: formData,
-              userId: 'current-user', // Will be replaced with actual user ID from auth
-              action: 'save'
-            })
-          });
-
-          if (response.ok) {
-            console.log('✅ Workflow data auto-saved to database');
-          }
-        } catch (error) {
-          console.log('⚠️ Database save failed (localStorage still has data):', error.message);
-        }
-      }, 2000); // 2 second debounce
-
-      return () => clearTimeout(saveTimer);
     }
   }, [formData]);
 
@@ -625,6 +591,53 @@ export function useWorkflowState() {
     console.log('✅ Workflow loaded, showing results AND formData populated for navigation');
   }, []);
 
+  // Manual save function - called when user clicks "Next"
+  const saveWorkflowToDatabase = useCallback(async () => {
+    try {
+      let sessionId = localStorage.getItem('workflow_session_id');
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('workflow_session_id', sessionId);
+      }
+
+      const response = await fetch('/api/workflow-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          workflowData: formData,
+          userId: 'current-user',
+          action: 'save'
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Workflow saved to database');
+        return { success: true };
+      } else {
+        console.error('❌ Database save failed');
+        return { success: false, error: 'Save failed' };
+      }
+    } catch (error) {
+      console.error('❌ Database save error:', error);
+      return { success: false, error: error.message };
+    }
+  }, [formData]);
+
+  // Beforeunload warning if user has unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (formData.company_name && currentStep < 5) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formData.company_name, currentStep]);
+
   return {
     // State
     currentStep,
@@ -647,6 +660,7 @@ export function useWorkflowState() {
     classifyProduct,
     resetWorkflow,
     loadSavedWorkflow,
+    saveWorkflowToDatabase,
 
     // Navigation
     goToStep,

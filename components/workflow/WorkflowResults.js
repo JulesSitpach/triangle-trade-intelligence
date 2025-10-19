@@ -815,7 +815,9 @@ export default function WorkflowResults({
             <div className="service-request-card">
               <h3 className="content-card-title">🔍 Treaty Rule Analysis</h3>
               <p className="text-body">
-                {results.detailed_analysis.threshold_research}
+                {typeof results.detailed_analysis.threshold_research === 'string'
+                  ? results.detailed_analysis.threshold_research
+                  : JSON.stringify(results.detailed_analysis.threshold_research)}
               </p>
             </div>
           )}
@@ -825,7 +827,9 @@ export default function WorkflowResults({
             <div className="service-request-card">
               <h3 className="content-card-title">🧮 Regional Content Calculation</h3>
               <p className="text-body">
-                {results.detailed_analysis.calculation_breakdown}
+                {typeof results.detailed_analysis.calculation_breakdown === 'string'
+                  ? results.detailed_analysis.calculation_breakdown
+                  : JSON.stringify(results.detailed_analysis.calculation_breakdown)}
               </p>
             </div>
           )}
@@ -837,7 +841,9 @@ export default function WorkflowResults({
                 {results.usmca?.qualified ? '✅ Qualification Validation' : '❌ Qualification Assessment'}
               </h3>
               <p className="text-body">
-                {results.detailed_analysis.qualification_reasoning}
+                {typeof results.detailed_analysis.qualification_reasoning === 'string'
+                  ? results.detailed_analysis.qualification_reasoning
+                  : JSON.stringify(results.detailed_analysis.qualification_reasoning)}
               </p>
             </div>
           )}
@@ -847,7 +853,9 @@ export default function WorkflowResults({
             <div className="service-request-card border-left-amber">
               <h3 className="content-card-title">💡 Strategic Insights & Next Steps</h3>
               <p className="text-body">
-                {results.detailed_analysis.strategic_insights}
+                {typeof results.detailed_analysis.strategic_insights === 'string'
+                  ? results.detailed_analysis.strategic_insights
+                  : JSON.stringify(results.detailed_analysis.strategic_insights)}
               </p>
             </div>
           )}
@@ -857,7 +865,9 @@ export default function WorkflowResults({
             <div className="service-request-card border-left-green">
               <h3 className="content-card-title">💰 Financial Impact Analysis</h3>
               <p className="text-body">
-                {results.detailed_analysis.savings_analysis}
+                {typeof results.detailed_analysis.savings_analysis === 'string'
+                  ? results.detailed_analysis.savings_analysis
+                  : JSON.stringify(results.detailed_analysis.savings_analysis)}
               </p>
             </div>
           )}
@@ -895,9 +905,27 @@ export default function WorkflowResults({
                 }}>
                   {idx + 1}
                 </span>
-                <span className="text-body" style={{flex: 1, lineHeight: '1.6'}}>
-                  {rec}
-                </span>
+                <div style={{flex: 1}}>
+                  {typeof rec === 'string' ? (
+                    <span className="text-body" style={{lineHeight: '1.6'}}>{rec}</span>
+                  ) : (
+                    <>
+                      <div className="text-body" style={{fontWeight: 600, marginBottom: '0.25rem', lineHeight: '1.6'}}>
+                        {rec.action}
+                      </div>
+                      {rec.detail && (
+                        <div className="text-body" style={{fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.5'}}>
+                          {rec.detail}
+                        </div>
+                      )}
+                      {rec.impact && (
+                        <div className="text-body" style={{fontSize: '0.875rem', color: '#059669', marginTop: '0.25rem', lineHeight: '1.5'}}>
+                          💡 Impact: {rec.impact}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>

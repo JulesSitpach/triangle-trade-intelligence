@@ -7,17 +7,26 @@
 import { useState } from 'react';
 
 export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }) {
-  // EDUCATIONAL: Start EXPANDED so users see reasoning immediately
-  const [showDetails, setShowDetails] = useState(true);
+  // ✅ START COLLAPSED - User can expand if they want details
+  const [showDetails, setShowDetails] = useState(false);
 
   if (!suggestion || !suggestion.data) return null;
 
-  const confidence = suggestion.data.confidence || suggestion.confidence || 0;
+  // ✅ SAFETY: Normalize all values to prevent React "object as child" errors
+  const confidence = Number(suggestion.data.confidence || suggestion.confidence || 0);
   const confidenceColor = confidence >= 85 ? 'green' : confidence >= 70 ? 'yellow' : 'red';
 
+  const hsCode = String(suggestion.data.suggestion || suggestion.data.value || suggestion.data.hsCode || '');
+  const description = String(suggestion.data.description || '');
+
+  // ✅ SAFETY: Use JSON.stringify for objects (String(object) produces "[object Object]")
+  const rawExplanation = suggestion.data.explanation || '';
+  const explanation = typeof rawExplanation === 'string'
+    ? rawExplanation
+    : JSON.stringify(rawExplanation);
+
   const hasAlternatives = suggestion.data.alternativeCodes?.length > 0;
-  const hasTariffData = suggestion.data.mfnRate || suggestion.data.usmcaRate;
-  const hasExplanation = suggestion.data.explanation;
+  const hasExplanation = explanation.length > 0;
 
   return (
     <div className={`agent-suggestion-badge agent-${confidenceColor}`}>
@@ -31,58 +40,17 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
 
       <div className="agent-content">
         <div className="suggestion-value">
-          {suggestion.data.suggestion || suggestion.data.value || suggestion.data.hsCode}
+          {hsCode}
         </div>
-        {suggestion.data.description && (
+        {description && (
           <div className="suggestion-explanation">
-            {suggestion.data.description}
+            {description}
           </div>
         )}
 
-        {/* Tariff Comparison */}
-        {hasTariffData && (
-          <div className="tariff-comparison">
-            <strong>Tariff Rates:</strong>
-            {suggestion.data.mfnRate && suggestion.data.mfnRate !== 'Not available' && (
-              <span className="tariff-item">MFN: {suggestion.data.mfnRate}</span>
-            )}
-            {suggestion.data.usmcaRate && suggestion.data.usmcaRate !== 'Not available' ? (
-              <>
-                <span className="tariff-item">USMCA: {suggestion.data.usmcaRate}</span>
-                {suggestion.data.qualifiesForUSMCA && (
-                  <span className="qualification-badge">✅ Qualifies for USMCA</span>
-                )}
-              </>
-            ) : (
-              suggestion.data.mfnRate && suggestion.data.mfnRate !== 'Not available' && (
-                <span className="tariff-note">Complete workflow for USMCA qualification analysis</span>
-              )
-            )}
-          </div>
-        )}
-
-        {/* EDUCATIONAL: Required Documentation - PROACTIVE DISPLAY */}
-        {suggestion.data.requiredDocumentation && suggestion.data.requiredDocumentation.length > 0 && (
-          <div className="documentation-section" style={{
-            marginTop: '0.75rem',
-            padding: '0.75rem',
-            backgroundColor: '#eff6ff',
-            borderRadius: '4px',
-            borderLeft: '3px solid #3b82f6'
-          }}>
-            <h4 className="section-title" style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#1e40af', marginBottom: '0.5rem' }}>
-              📄 Required Customs Documentation:
-            </h4>
-            <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
-              {suggestion.data.requiredDocumentation.map((doc, idx) => (
-                <li key={idx} style={{ marginBottom: '0.25rem' }}>{doc}</li>
-              ))}
-            </ul>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#3730a3', fontStyle: 'italic' }}>
-              💡 Prepare these documents before customs filing to avoid delays
-            </div>
-          </div>
-        )}
+        {/* ✅ REMOVED: Tariff rates (shown later in enrichment)
+                      REMOVED: Documentation (shown in final results)
+            Focus: Just HS code classification */}
 
         {/* Expandable Details Section */}
         {(hasExplanation || hasAlternatives) && (
@@ -110,7 +78,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
                       🧠 Why We Classified This Way:
                     </h4>
                     <p className="text-body" style={{ fontSize: '0.8125rem', color: '#0c4a6e', lineHeight: '1.6', margin: 0 }}>
-                      {suggestion.data.explanation}
+                      {explanation}
                     </p>
                   </div>
                 )}
@@ -128,31 +96,38 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
                       🔄 Other Options to Consider:
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {suggestion.data.alternativeCodes.map((alt, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            padding: '0.5rem',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '4px',
-                            border: '1px solid #fde68a'
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                            <strong style={{ fontFamily: 'monospace', color: '#78350f' }}>{alt.code}</strong>
-                            <span style={{
-                              fontSize: '0.75rem',
-                              padding: '0.125rem 0.5rem',
-                              borderRadius: '12px',
-                              backgroundColor: alt.confidence >= 70 ? '#fef3c7' : '#fee2e2',
-                              color: alt.confidence >= 70 ? '#92400e' : '#991b1b'
-                            }}>
-                              {alt.confidence}% match
-                            </span>
+                      {suggestion.data.alternativeCodes.map((alt, idx) => {
+                        // ✅ SAFETY: Ensure code and reason are always strings (AI might return objects)
+                        const safeCode = typeof alt.code === 'string' ? alt.code : String(alt.code || '');
+                        const safeReason = typeof alt.reason === 'string' ? alt.reason : (alt.reason?.status || 'Alternative classification option');
+                        const safeConfidence = Number(alt.confidence) || 0;
+
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              padding: '0.5rem',
+                              backgroundColor: '#ffffff',
+                              borderRadius: '4px',
+                              border: '1px solid #fde68a'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                              <strong style={{ fontFamily: 'monospace', color: '#78350f' }}>{safeCode}</strong>
+                              <span style={{
+                                fontSize: '0.75rem',
+                                padding: '0.125rem 0.5rem',
+                                borderRadius: '12px',
+                                backgroundColor: safeConfidence >= 70 ? '#fef3c7' : '#fee2e2',
+                                color: safeConfidence >= 70 ? '#92400e' : '#991b1b'
+                              }}>
+                                {safeConfidence}% match
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#92400e' }}>{safeReason}</div>
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: '#92400e' }}>{alt.reason}</div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
                       💡 Consider these if your product specs change or for different use cases

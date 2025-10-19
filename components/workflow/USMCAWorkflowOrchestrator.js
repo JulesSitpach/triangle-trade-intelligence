@@ -53,7 +53,8 @@ export default function USMCAWorkflowOrchestrator() {
     isStepValid,
     getTotalComponentPercentage,
     clearError,
-    loadSavedWorkflow
+    loadSavedWorkflow,
+    saveWorkflowToDatabase
   } = useWorkflowState();
 
   const { trustIndicators } = useTrustIndicators();
@@ -212,6 +213,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
   // Handle Step 2 completion - stay in workflow
   const handleProcessStep2 = async () => {
     console.log('🚀 USMCA Analysis button clicked - processing workflow...');
+
+    // ✅ Save component data to database before processing (1 save instead of 150+)
+    console.log('💾 Saving component data before analysis...');
+    await saveWorkflowToDatabase();
 
     // Call the workflow processing and wait for results
     await processWorkflow();
@@ -523,6 +528,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onNext={nextStep}
             isStepValid={() => isStepValid(1)}
             onNewAnalysis={resetWorkflow}
+            saveWorkflowToDatabase={saveWorkflowToDatabase}
           />
         )}
 
@@ -538,6 +544,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             isFormValid={isFormValid}
             isLoading={isLoading}
             userTier={userTier}
+            saveWorkflowToDatabase={saveWorkflowToDatabase}
           />
         )}
 

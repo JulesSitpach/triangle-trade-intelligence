@@ -222,17 +222,21 @@ export default function USMCAQualification({ results }) {
                               gap: '0.125rem',
                               alignItems: 'flex-end'
                             }}>
-                              {component.policy_adjustments.slice(0, 3).map((adj, idx) => (
-                                <span key={idx} style={{
-                                  whiteSpace: 'nowrap',
-                                  backgroundColor: '#fef3c7',
-                                  padding: '0.125rem 0.375rem',
-                                  borderRadius: '3px',
-                                  color: '#92400e'
-                                }}>
-                                  {adj}
-                                </span>
-                              ))}
+                              {component.policy_adjustments.slice(0, 3).map((adj, idx) => {
+                                // ✅ SAFETY: Ensure adj is always a string (AI/DB might return objects)
+                                const safeAdj = typeof adj === 'string' ? adj : JSON.stringify(adj);
+                                return (
+                                  <span key={idx} style={{
+                                    whiteSpace: 'nowrap',
+                                    backgroundColor: '#fef3c7',
+                                    padding: '0.125rem 0.375rem',
+                                    borderRadius: '3px',
+                                    color: '#92400e'
+                                  }}>
+                                    {safeAdj}
+                                  </span>
+                                );
+                              })}
                             </div>
                           )}
                           {/* Data freshness indicator */}
@@ -348,12 +352,16 @@ export default function USMCAQualification({ results }) {
                                       📊 How We Calculate {(component.mfn_rate || 0).toFixed(1)}% Total Rate:
                                     </div>
                                     <div style={{ fontSize: '0.8125rem', color: '#78350f', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                      {component.policy_adjustments.map((adj, idx) => (
-                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                          <span style={{ color: '#f59e0b' }}>•</span>
-                                          <span>{adj}</span>
-                                        </div>
-                                      ))}
+                                      {component.policy_adjustments.map((adj, idx) => {
+                                        // ✅ SAFETY: Ensure adj is always a string (AI/DB might return objects)
+                                        const safeAdj = typeof adj === 'string' ? adj : JSON.stringify(adj);
+                                        return (
+                                          <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <span style={{ color: '#f59e0b' }}>•</span>
+                                            <span>{safeAdj}</span>
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                     <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
                                       {component.rate_source === 'database_fallback' || component.stale

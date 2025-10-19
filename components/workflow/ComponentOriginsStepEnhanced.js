@@ -123,17 +123,33 @@ export default function ComponentOriginsStepEnhanced({
       console.log(`🤖 Agent Classification Result for Component ${index + 1}:`, result);
 
       if (result.success && result.data) {
+        // ✅ SAFETY: Ensure explanation is always a string (AI might return objects)
+        const rawExplanation = result.data.reasoning || result.data.explanation;
+        const safeExplanation = typeof rawExplanation === 'string'
+          ? rawExplanation
+          : JSON.stringify(rawExplanation || 'AI classification completed');
+
+        // ✅ SAFETY: Ensure alternativeCodes are safe (normalize any nested objects)
+        const safeAlternativeCodes = (result.enhanced_features?.alternative_codes || []).map(alt => ({
+          code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
+          reason: typeof alt.reason === 'string' ? alt.reason : (alt.reason?.status || String(alt.reason || 'Alternative option')),
+          confidence: Number(alt.confidence) || 0
+        }));
+
         const suggestion = {
           hsCode: result.data.hsCode,
           description: result.data.description, // ✅ REAL HTS DESCRIPTION
           confidence: result.data.confidence || result.data.adjustedConfidence,
-          explanation: result.data.reasoning || result.data.explanation,
+          explanation: safeExplanation,
           source: 'AI Classification Agent',
           // Enhanced features from API - HS CLASSIFICATION ONLY (tariff rates looked up separately)
-          alternativeCodes: result.enhanced_features?.alternative_codes || []
+          alternativeCodes: safeAlternativeCodes
         };
         console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
         setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
+
+        // ✅ REMOVED AUTO-ACCEPT - User now sees suggestion and decides to accept or not
+        // This gives user time to read AI explanation before committing
       } else {
         console.log(`❌ No valid suggestion returned for component ${index + 1}`);
       }
@@ -491,15 +507,17 @@ export default function ComponentOriginsStepEnhanced({
 
           {/* Manufacturing Location */}
           <div className="form-group">
-            <label className="form-label">
+            <label className="form-label required">
               Manufacturing/Assembly Location
             </label>
             <select
               value={formData.manufacturing_location || ''}
               onChange={(e) => updateFormData('manufacturing_location', e.target.value)}
               className={`form-select ${formData.manufacturing_location ? 'has-value' : ''}`}
+              required
             >
               <option value="">Select manufacturing country...</option>
+              <option value="DOES_NOT_APPLY">Does Not Apply (Imported/Distributed Only)</option>
               {dropdownOptions.countries?.map(country => {
                 const countryCode = typeof country === 'string' ? country : country.value || country.code;
                 const countryName = typeof country === 'string' ? country : country.label || country.name;
@@ -511,8 +529,29 @@ export default function ComponentOriginsStepEnhanced({
               })}
             </select>
             <div className="form-help">
-              Where is the final product assembled/manufactured?
+              Where is the final product assembled/manufactured? (Select "Does Not Apply" if you import/distribute only)
             </div>
+
+            {/* Substantial Transformation Checkbox - Only show for USMCA countries */}
+            {formData.manufacturing_location && ['US', 'MX', 'CA'].includes(formData.manufacturing_location) && (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.substantial_transformation || false}
+                    onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
+                    style={{ marginTop: '0.125rem', marginRight: '0.5rem', flexShrink: 0 }}
+                  />
+                  <span style={{ color: '#0c4a6e', lineHeight: '1.5' }}>
+                    <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
+                    <br />
+                    <span style={{ fontSize: '0.8125rem', color: '#075985', fontStyle: 'italic' }}>
+                      Check this if your manufacturing process creates significant value beyond basic assembly (welding, forming, heat treatment, etc.)
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
           </div>
 
           {/* Origin Criterion - USMCA Certificate Field #8 */}

@@ -33,7 +33,15 @@ export default function ProductClassification({ results, onClassificationAction 
   };
 
   // Handle both new AI API format and legacy format
-  const confidence = results.product.classification_confidence || results.product.confidence || 0;
+  // Ensure confidence is always a valid number (AI might return string "85" instead of 85)
+  let confidence = Number(results.product.classification_confidence || results.product.confidence || 0);
+
+  // ✅ FIX: AI might return decimal (0.95) instead of percentage (95)
+  // Convert 0-1 scale to 0-100 percentage
+  if (confidence > 0 && confidence <= 1) {
+    confidence = confidence * 100;
+  }
+
   const hsCode = results.product.hs_code || results.product.classified_hs_code;
   const description = results.product.description || results.product.product_description;
   const method = results.product.classification_method || 'ai_enhanced';

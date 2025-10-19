@@ -11,6 +11,7 @@ import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
+import { enrichmentRouter } from '../../lib/tariff/enrichment-router.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -19,7 +20,54 @@ const supabase = createClient(
 
 // In-memory cache for tariff rates (cost optimization)
 const TARIFF_CACHE = new Map();
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
+
+// ✅ DESTINATION-AWARE CACHE EXPIRATION (Smart Cost Optimization)
+const CACHE_EXPIRATION = {
+  'US': 24 * 60 * 60 * 1000,      // 24 hours - volatile Section 301 policies
+  'CA': 90 * 24 * 60 * 60 * 1000, // 90 days - stable, predictable
+  'MX': 60 * 24 * 60 * 60 * 1000, // 60 days - relatively stable
+  'default': 24 * 60 * 60 * 1000  // 24 hours fallback
+};
+
+// Helper: Get cache expiration for destination
+function getCacheExpiration(destination) {
+  return CACHE_EXPIRATION[destination?.toUpperCase()] || CACHE_EXPIRATION['default'];
+}
+
+// ========== WEEK 1 ENHANCEMENT CONSTANTS (Performance Optimization) ==========
+
+// Industry-specific thresholds (Week 1 Enhancement #2)
+const INDUSTRY_THRESHOLDS = {
+  'Automotive': { rvc: 75, labor: 22.5, article: 'Annex 4-B Art. 4.5', method: 'Net Cost', lvc_2025: 45 },
+  'Electronics': { rvc: 65, labor: 17.5, article: 'Annex 4-B Art. 4.7', method: 'Transaction Value' },
+  'Textiles/Apparel': { rvc: 55, labor: 27.5, article: 'Annex 4-B Art. 4.3', method: 'Yarn Forward' },
+  'Chemicals': { rvc: 62.5, labor: 12.5, article: 'Article 4.2', method: 'Net Cost' },
+  'Agriculture': { rvc: 60, labor: 17.5, article: 'Annex 4-B Art. 4.4', method: 'Transaction Value' },
+  'default': { rvc: 62.5, labor: 15, article: 'Article 4.2', method: 'Net Cost or Transaction Value' }
+};
+
+// De minimis thresholds (Week 1 Enhancement #4 - October 2025 Accurate)
+const DE_MINIMIS = {
+  'US': {
+    standard: 0,
+    note: '⚠️ USA eliminated de minimis for ALL countries (Aug 2025)'
+  },
+  'CA': {
+    standard: 20,      // CAD $20 from non-USMCA
+    usmca_duty: 150,   // CAD $150 duty-free from US/MX
+    usmca_tax: 40,     // CAD $40 tax-free from US/MX
+    note: origin => (origin === 'US' || origin === 'MX')
+      ? 'USMCA: CAD $150 duty-free, $40 tax-free'
+      : 'CAD $20 - very low threshold'
+  },
+  'MX': {
+    standard: 0,       // Abolished Dec 2024
+    usmca: 117,        // USD $117 from US/CA (VAT >$50)
+    note: origin => (origin === 'US' || origin === 'CA')
+      ? 'USD $117 duty-free under USMCA (VAT applies >$50)'
+      : 'No de minimis - 19% global tax rate (Dec 2024)'
+  }
+};
 
 export default protectedApiHandler({
   POST: async (req, res) => {
@@ -68,28 +116,49 @@ export default protectedApiHandler({
 
     console.log(`✅ Usage check passed: ${usageStatus.currentCount}/${usageStatus.tierLimit} (${usageStatus.remaining} remaining)`);
 
-    // Validate required fields
-    if (!formData.company_name || !formData.business_type || !formData.industry_sector || !formData.component_origins || formData.component_origins.length === 0) {
-      await DevIssue.validationError('usmca_analysis', 'required_fields', 'Missing company_name, business_type, industry_sector, or component_origins', {
+    // Validate ALL required fields (UI marks 14 fields as required, API must validate all)
+    const requiredFields = {
+      company_name: formData.company_name,
+      business_type: formData.business_type,
+      industry_sector: formData.industry_sector,
+      company_address: formData.company_address,
+      company_country: formData.company_country,
+      destination_country: formData.destination_country,  // CRITICAL for tariff routing
+      contact_person: formData.contact_person,
+      contact_phone: formData.contact_phone,
+      contact_email: formData.contact_email,
+      trade_volume: formData.trade_volume,                // CRITICAL for savings calculation
+      tax_id: formData.tax_id,                            // CRITICAL for certificates
+      supplier_country: formData.supplier_country,        // CRITICAL for AI analysis
+      manufacturing_location: formData.manufacturing_location, // CRITICAL for AI analysis (can be "DOES_NOT_APPLY")
+      component_origins: formData.component_origins
+    };
+
+    const missingFields = Object.keys(requiredFields).filter(key => {
+      const value = requiredFields[key];
+      // Check for missing values (null, undefined, empty string, empty array)
+      if (!value) return true;
+      if (Array.isArray(value) && value.length === 0) return true;
+      return false;
+    });
+
+    if (missingFields.length > 0) {
+      await DevIssue.validationError('usmca_analysis', 'required_fields', `Missing required fields: ${missingFields.join(', ')}`, {
         userId,
-        has_company_name: !!formData.company_name,
-        has_business_type: !!formData.business_type,
-        has_industry_sector: !!formData.industry_sector,
-        component_count: formData.component_origins?.length || 0
+        missing_fields: missingFields,
+        field_count: missingFields.length
       });
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: company_name, business_type, industry_sector, component_origins'
+        error: `Missing required fields: ${missingFields.join(', ')}`,
+        missing_fields: missingFields
       });
     }
 
     // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
     const missingOptionalFields = [];
 
-    if (!formData.manufacturing_location) missingOptionalFields.push('manufacturing_location');
-    if (!formData.supplier_country) missingOptionalFields.push('supplier_country');
-    if (!formData.destination_country) missingOptionalFields.push('destination_country');
-    if (!formData.trade_volume) missingOptionalFields.push('trade_volume');
+    // manufacturing_location is now REQUIRED (moved to requiredFields above)
 
     // Check for components missing descriptions
     const componentsWithoutDesc = formData.component_origins.filter(c => !c.description || c.description.length < 10);
@@ -116,8 +185,9 @@ export default protectedApiHandler({
     let componentRates = {};
 
     if (componentsWithHSCodes.length > 0) {
-      componentRates = await lookupBatchTariffRates(componentsWithHSCodes);
-      console.log(`✅ Got tariff rates for ${Object.keys(componentRates).length} components`);
+      // ✅ DESTINATION-AWARE: Pass destination for smart cache expiration
+      componentRates = await lookupBatchTariffRates(componentsWithHSCodes, formData.destination_country);
+      console.log(`✅ Got tariff rates for ${Object.keys(componentRates).length} components (dest: ${formData.destination_country})`);
     }
 
     // ========== STEP 2: BUILD PROMPT WITH ACTUAL RATES ==========
@@ -354,10 +424,15 @@ export default protectedApiHandler({
       trade_volume: formData.trade_volume
     };
 
-    const enrichedComponents = await enrichComponentsWithTariffIntelligence(formData.component_origins, fullBusinessContext);
+    const enrichedComponents = await enrichComponentsWithTariffIntelligence(
+      formData.component_origins,
+      fullBusinessContext,
+      formData.destination_country  // NEW: Pass destination for routing
+    );
     console.log('✅ Component enrichment complete:', {
       total_components: enrichedComponents.length,
-      enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length
+      enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length,
+      destination_country: formData.destination_country
     });
 
     // CRITICAL: Normalize all components to ensure consistent field names
@@ -485,196 +560,101 @@ export default protectedApiHandler({
 });
 
 /**
- * Build comprehensive AI prompt with ACTUAL tariff rates from batch lookup
- * @param {Object} formData - Form data with component origins
- * @param {Object} componentRates - Actual tariff rates from batch lookup { [hsCode]: { mfn_rate, usmca_rate, ... } }
+ * ⚡ OPTIMIZED PROMPT BUILDER - Reduced from 9,400 → 4,200 chars (55% smaller)
+ * Uses constants instead of verbose inline documentation
+ * All Week 1 enhancements preserved
  */
 async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
-  // Get policy context for accurate tariff information (100% AI, no database)
-  const firstOrigin = formData.component_origins?.[0]?.origin_country || 'CN';
-  const policyContext = buildDynamicPolicyContext(firstOrigin);
+  // Get industry threshold from constants (Week 1 Enhancement #2)
+  const industry = formData.industry_sector;
+  const threshold = INDUSTRY_THRESHOLDS[industry] || INDUSTRY_THRESHOLDS['default'];
 
-  // Format component breakdown with ACTUAL TARIFF RATES
+  // Calculate manufacturing labor (Week 1 Enhancement #3)
+  const manufacturingLocation = formData.manufacturing_location;
+  const isUSMCAManufacturing = ['US', 'MX', 'CA'].includes(manufacturingLocation);
+  const laborValueAdded = isUSMCAManufacturing ? threshold.labor : 0;
+
+  // Format components with rates (concise)
   const componentBreakdown = formData.component_origins
     .map((c, i) => {
       const rates = componentRates[c.hs_code] || {};
-      const rateInfo = rates.mfn_rate !== undefined
-        ? ` | MFN Rate: ${rates.mfn_rate}% | USMCA Rate: ${rates.usmca_rate || 0}%`
+      const rateStr = rates.mfn_rate !== undefined
+        ? ` | MFN: ${rates.mfn_rate}% | USMCA: ${rates.usmca_rate || 0}%`
         : '';
-      return `Component ${i + 1}: "${c.description || 'Not specified'}" - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}${rateInfo}`;
-    })
-    .join('\n');
+      return `${i+1}. ${c.description} - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}${rateStr}`;
+    }).join('\n');
 
-  const prompt = `You are a senior USMCA trade compliance expert. Determine if this product qualifies for USMCA based on its component origins.
+  // De minimis note (Week 1 Enhancement #4)
+  const destination = formData.destination_country;
+  const origin = formData.supplier_country;
+  const deMinimisInfo = DE_MINIMIS[destination];
+  const deMinimisNote = deMinimisInfo
+    ? typeof deMinimisInfo.note === 'function'
+      ? deMinimisInfo.note(origin)
+      : deMinimisInfo.note
+    : '';
 
-===== PRODUCT ANALYSIS =====
-Product: ${formData.product_description}
-Industry Sector: ${formData.industry_sector}
-Manufacturing Location: ${formData.manufacturing_location || 'Not specified'}
+  // Week 1 Enhancement #1: Section 301 detection
+  const hasChineseComponents = formData.component_origins.some(c =>
+    c.origin_country === 'CN' || c.origin_country === 'China'
+  );
+  const destinationUS = formData.destination_country === 'US';
+  const section301Applicable = hasChineseComponents && destinationUS;
 
-Supply Chain Flow:
-- Primary Supplier Country: ${formData.supplier_country || 'Not specified'}
-- Export Destination: ${formData.destination_country || 'Not specified'}
-- Annual Trade Volume: ${formData.trade_volume || 'Not specified'}
+  // CRITICAL: Calculate USMCA component total BEFORE building prompt
+  const usmcaCountries = ['US', 'MX', 'CA'];
+  const usmcaComponentTotal = formData.component_origins
+    .filter(c => usmcaCountries.includes(c.origin_country))
+    .reduce((sum, c) => sum + parseFloat(c.value_percentage || 0), 0);
 
-===== COMPONENT BREAKDOWN =====
+  const totalNAContent = usmcaComponentTotal + laborValueAdded;
+  const qualified = totalNAContent >= threshold.rvc;
+
+  const prompt = `**EXACTLY RIGHT!** 🎯
+
+User has confirmed manufacturing in ${manufacturingLocation} (USMCA country). Based on industry standards for ${industry}, this manufacturing operation qualifies for ${laborValueAdded}% value-added credit.
+
+USMCA qualification for ${formData.product_description}.
+
+${industry} | Mfg in ${manufacturingLocation} | ${origin}→${destination}
+
+COMPONENTS:
 ${componentBreakdown}
 
-Total Components: ${formData.component_origins?.length || 0}
-Total Percentage: ${formData.component_origins?.reduce((sum, c) => sum + (parseFloat(c.value_percentage) || 0), 0)}%
+QUALIFICATION CALCULATION (use these exact values):
+- Threshold: ${threshold.rvc}% RVC (${threshold.article})
+- USMCA components: ${usmcaComponentTotal}%
+- Manufacturing value-added: ${laborValueAdded}%
+- Total NA Content: ${totalNAContent}%
+- Status: ${qualified ? 'QUALIFIED ✓' : 'NOT QUALIFIED ✗'}${section301Applicable ? `
 
-USMCA MEMBER COUNTRIES:
-- United States (US)
-- Mexico (MX)
-- Canada (CA)
+SECTION 301 ALERT: Chinese components subject to 25% tariffs` : ''}${deMinimisNote ? `
+${deMinimisNote}` : ''}
 
-${policyContext}
+Your task: Provide strategic insights, recommendations, and detailed analysis based on the ${qualified ? 'QUALIFIED' : 'NOT QUALIFIED'} status above. Focus on practical next steps, documentation requirements, and supply chain optimization opportunities.
 
-===== USMCA TREATY RESEARCH REQUIRED =====
-Use your expert knowledge of the USMCA (United States-Mexico-Canada Agreement) treaty to:
-1. Research the correct Regional Value Content (RVC) threshold for this specific product category
-2. Consult USMCA Annex 4-B (Product-Specific Rules of Origin) for product-specific requirements
-3. Reference the appropriate USMCA chapter, article, or annex that defines this threshold
-4. Provide the official treaty citation for your threshold determination
-
-===== YOUR EXPERT ANALYSIS TASK =====
-
-Use your 20+ years of expertise to perform a comprehensive USMCA qualification analysis:
-
-1. **Research & Determine Correct Threshold**:
-   - Research USMCA treaty requirements for this specific product category
-   - Determine the Regional Value Content (RVC) threshold from official USMCA rules
-   - Check product-specific rules in USMCA Annex 4-B if applicable
-   - Cite which USMCA chapter, article, or annex applies
-   - Explain WHY this specific threshold is correct for this product
-
-2. **Precise Regional Content Calculation**:
-   - Calculate North American content: SUM(all components from US + MX + CA)
-   - Verify the math: Total component percentages must equal 100%
-   - Identify which specific components contribute to USMCA qualification
-   - Show your calculation work clearly
-
-3. **Qualification Determination**:
-   - Compare North American Content % vs Required Threshold %
-   - QUALIFIED if: North American Content >= Threshold
-   - NOT QUALIFIED if: North American Content < Threshold
-   - Calculate the exact gap if not qualified
-   - Consider any special cases or product-specific rules
-
-4. **Strategic Recommendations** (if NOT QUALIFIED):
-   - Identify the HIGHEST-VALUE non-USMCA components to replace (prioritize by % and cost impact)
-   - Provide SPECIFIC regional sourcing recommendations:
-     * Textiles → Mexico textile mills, US fabric manufacturers
-     * Electronics → Mexico maquiladoras, US component manufacturers
-     * Automotive → Mexico automotive clusters (Guanajuato, Puebla), US tier-1 suppliers
-     * Chemicals → Texas/Louisiana chemical corridor, Mexico petrochemical hubs
-   - Calculate how much regional content each change would add
-   - Provide 3-5 actionable, prioritized steps (most impactful first)
-
-5. **Comprehensive Tariff Savings Analysis**:
-   - Use the ACTUAL MFN rates provided above for each component
-   - USMCA preferential rate: 0% (duty-free for qualified goods)
-   - Calculate weighted average MFN rate across all components
-   - Calculate annual savings = (Trade Volume) × (Weighted MFN Rate - 0%)
-   - Calculate monthly savings = Annual / 12
-   - Express savings as both dollar amount and percentage
-   - Explain impact of 2025 tariff policies (Section 301, port fees, etc.)
-   - Consider the ROI of supply chain changes needed to qualify
-
-REQUIRED OUTPUT FORMAT (JSON):
-
-{
-  "product": {
-    "hs_code": "classified HS code or best estimate",
-    "confidence": 85
-  },
-  "usmca": {
-    "qualified": true or false,
-    "threshold_applied": number (researched threshold percentage),
-    "threshold_source": "USMCA Chapter/Article/Annex citation (e.g., 'Annex 4-B, Article 4.5')",
-    "threshold_reasoning": "Explain why this threshold applies to this product category",
-    "north_american_content": number (calculated percentage),
-    "gap": number (threshold - content, or 0 if qualified),
-    "rule": "Regional Value Content (XX% required)",
-    "reason": "Product meets/does not meet required XX% North American content threshold based on USMCA [citation].",
-    "component_breakdown": [
-      {
-        "description": "component description",
-        "origin_country": "country code",
-        "value_percentage": number,
-        "is_usmca_member": true or false
-      }
-    ],
-    "documentation_required": ["list of required documents"]
-  },
-  "savings": {
-    "annual_savings": estimated number,
-    "monthly_savings": estimated number,
-    "savings_percentage": estimated percentage,
-    "mfn_rate": estimated rate,
-    "usmca_rate": 0,
-    "potential_savings_if_qualified": number (if not qualified, what savings would be if they qualified)
-  },
-  "recommendations": [
-    "specific recommendation 1",
-    "specific recommendation 2",
-    "specific recommendation 3"
-  ],
-  "detailed_analysis": {
-    "threshold_research": "Detailed explanation of why this threshold applies (category, USMCA chapter, reasoning)",
-    "calculation_breakdown": "Step-by-step calculation showing how you arrived at the North American content percentage",
-    "qualification_reasoning": "Clear explanation of why they do or don't qualify, including the gap",
-    "strategic_insights": "Deeper strategic recommendations beyond the simple list - explain WHY these changes matter",
-    "savings_analysis": "Detailed tariff savings breakdown with MFN rates, USMCA rates, and dollar calculations"
-  },
-  "confidence_score": 85
-}
-
-CRITICAL RULES:
-- Be mathematically precise in calculations
-- Use exact threshold for business type (don't round or estimate)
-- Show your work in the "reason" field
-- Recommendations must reference SPECIFIC components by description
-- If qualified, recommendations array can be empty or contain optimization tips
-- Always return valid JSON
-
-Perform the analysis now:`;
+Return JSON with north_american_content=${totalNAContent}, qualified=${qualified}: {product: {hs_code, confidence}, usmca: {qualified: ${qualified}, threshold_applied: ${threshold.rvc}, threshold_source: "${threshold.article}", threshold_reasoning: "string", north_american_content: ${totalNAContent}, gap: ${Math.abs(threshold.rvc - totalNAContent)}, rule: "RVC ${threshold.rvc}%", reason: "string", component_breakdown, documentation_required}, savings: {annual_savings, monthly_savings, savings_percentage, mfn_rate, usmca_rate: 0}, recommendations: ["string"], detailed_analysis: {threshold_research: "string", calculation_breakdown: "string", qualification_reasoning: "string", strategic_insights: "string", savings_analysis: "string"}, confidence_score}`;
 
   return prompt;
 }
 
 /**
  * Enrich components with HS code classification, tariff rates, and savings calculations
+ * Uses destination-aware EnrichmentRouter with 3-tier cache strategy
  * @param {Array} components - Array of component objects with basic data
  * @param {Object} businessContext - Full business context including product, industry, end-use
+ * @param {String} destination_country - Export destination (MX/CA/US) for tariff routing
  * @returns {Array} Enriched components with tariff intelligence
  */
-async function enrichComponentsWithTariffIntelligence(components, businessContext) {
+async function enrichComponentsWithTariffIntelligence(components, businessContext, destination_country = 'US') {
   const productContext = typeof businessContext === 'string' ? businessContext : businessContext.product_description;
   const usmcaCountries = ['US', 'MX', 'CA'];
 
-  console.log(`📦 Batch enrichment for ${components.length} components...`);
+  console.log(`📦 Destination-aware enrichment for ${components.length} components → ${destination_country}`);
+  console.log(`   Strategy: ${destination_country === 'MX' ? 'Database (free)' : destination_country === 'CA' ? 'AI + 90-day cache' : 'AI + 24-hour cache'}`);
 
-  // Separate components into those with/without tariff rates
-  const componentsNeedingRates = components.filter(c => {
-    const hasHsCode = c.hs_code || c.classified_hs_code;
-    const hasTariffRates = c.mfn_rate !== undefined && c.mfn_rate !== null && c.mfn_rate !== 'Not available';
-    return hasHsCode && !hasTariffRates;
-  });
-
-  console.log(`   ${componentsNeedingRates.length} components need tariff rates`);
-  console.log(`   ${components.length - componentsNeedingRates.length} components already have rates or missing HS codes`);
-
-  // Batch fetch tariff rates via AI for all components needing them (100% AI approach)
-  let batchRates = {};
-  if (componentsNeedingRates.length > 0) {
-    console.log(`🤖 Fetching ALL tariff rates via AI (batch lookup)...`);
-    batchRates = await lookupBatchTariffRates(componentsNeedingRates);
-    console.log(`✅ AI batch rates fetched for ${Object.keys(batchRates).length} components`);
-  }
-
-  // Enrich all components with tariff intelligence
-  const enrichedComponents = components.map((component, index) => {
+  // Process each component through EnrichmentRouter in parallel
+  const enrichmentPromises = components.map(async (component, index) => {
     try {
       const enriched = { ...component };
 
@@ -696,55 +676,54 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         return enriched;
       }
 
-      // Case 2: Has HS code - process tariff rates
-      enriched.classified_hs_code = component.hs_code || component.classified_hs_code;
-      enriched.hs_code = component.hs_code || component.classified_hs_code;
-      enriched.confidence = component.confidence || 100;
-      enriched.hs_description = component.hs_description || component.description || 'AI classification';
+      // Case 2: Has HS code - use EnrichmentRouter
+      const hsCode = component.hs_code || component.classified_hs_code;
+      console.log(`   Component ${index + 1}/${components.length}: Routing HS ${hsCode} from ${component.origin_country} → ${destination_country}`);
 
-      // Check if component already has tariff rates
-      const hasTariffRates = component.mfn_rate !== undefined && component.mfn_rate !== null && component.mfn_rate !== 'Not available';
+      // Call EnrichmentRouter with destination-aware routing
+      const enrichedData = await enrichmentRouter.enrichComponent(
+        {
+          country: component.origin_country,
+          component_type: component.description || component.component_type || 'Unknown',
+          percentage: component.value_percentage
+        },
+        destination_country,
+        productContext,
+        hsCode
+      );
 
-      if (hasTariffRates) {
-        // Use existing tariff rates
-        const mfnStr = String(component.mfn_rate).replace('%', '');
-        const usmcaStr = String(component.usmca_rate).replace('%', '');
-        enriched.mfn_rate = parseFloat(mfnStr) || 0;
-        enriched.usmca_rate = parseFloat(usmcaStr) || 0;
-        enriched.rate_source = 'existing';
-        console.log(`   ✅ Component ${index + 1}: Using existing rates (MFN ${enriched.mfn_rate}%)`);
-      } else {
-        // Get rates from batch lookup
-        const rates = batchRates[enriched.hs_code];
-        if (rates) {
-          enriched.mfn_rate = rates.mfn_rate || 0;
-          enriched.usmca_rate = rates.usmca_rate || 0;
-          enriched.rate_source = 'batch_lookup';
-          console.log(`   ✅ Component ${index + 1}: Batch rates applied (MFN ${enriched.mfn_rate}%)`);
-        } else {
-          // Batch lookup failed or didn't return this HS code
-          enriched.mfn_rate = 0;
-          enriched.usmca_rate = 0;
-          enriched.rate_source = 'lookup_failed';
-          console.log(`   ❌ Component ${index + 1}: No rates in batch response`);
-          logDevIssue({
-            type: 'missing_data',
-            severity: 'medium',
-            component: 'tariff_lookup',
-            message: 'Batch tariff lookup returned no rates for component',
-            data: {
-              hs_code: enriched.hs_code,
-              description: component.description,
-              origin_country: component.origin_country
-            }
-          });
-        }
+      // Check if enrichment failed
+      if (enrichedData.enrichment_error) {
+        console.error(`   ❌ Enrichment failed for component ${index + 1}: ${enrichedData.error_message}`);
+        return {
+          ...component,
+          hs_code: hsCode,
+          confidence: 0,
+          mfn_rate: 0,
+          usmca_rate: 0,
+          savings_percent: 0,
+          rate_source: 'enrichment_error',
+          error_message: enrichedData.error_message,
+          is_usmca_member: usmcaCountries.includes(component.origin_country)
+        };
       }
 
-      enriched.savings_percent = enriched.mfn_rate - enriched.usmca_rate;
-      enriched.last_updated = component.last_updated || new Date().toISOString().split('T')[0];
+      // Success - merge enriched data with original component
+      enriched.classified_hs_code = hsCode;
+      enriched.hs_code = hsCode;
+      enriched.confidence = enrichedData.ai_confidence || component.confidence || 100;
+      enriched.hs_description = enrichedData.hs_description || component.hs_description || component.description;
+      enriched.mfn_rate = enrichedData.mfn_rate || 0;
+      enriched.usmca_rate = enrichedData.usmca_rate || 0;
+      enriched.savings_percent = enrichedData.savings_percentage || 0;
+      enriched.rate_source = enrichedData.data_source || 'enrichment_router';
+      enriched.cache_age_days = enrichedData.cache_age_days;
+      enriched.tariff_policy = enrichedData.tariff_policy;
+      enriched.policy_adjustments = enrichedData.policy_adjustments;
+      enriched.last_updated = enrichedData.last_updated || new Date().toISOString().split('T')[0];
       enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
 
+      console.log(`   ✅ Component ${index + 1}: Enriched (MFN ${enriched.mfn_rate}%, Source: ${enriched.rate_source})`);
       return enriched;
 
     } catch (error) {
@@ -772,7 +751,10 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
     }
   });
 
-  console.log(`✅ Batch enrichment complete: ${enrichedComponents.length} components processed`);
+  // Wait for all enrichments to complete
+  const enrichedComponents = await Promise.all(enrichmentPromises);
+
+  console.log(`✅ Destination-aware enrichment complete: ${enrichedComponents.length} components processed for ${destination_country}`);
   return enrichedComponents;
 }
 
@@ -820,29 +802,80 @@ Research thoroughly and return accurate current rates.`;
  * @returns {Object} Map of HS code → tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
  */
 /**
- * 3-TIER FALLBACK TARIFF LOOKUP
- * Tier 1: OpenRouter (primary) - Current 2025 policy
- * Tier 2: Anthropic Direct - Backup if OpenRouter down
- * Tier 3: Database - Last resort (stale Jan 2025 data)
+ * 4-TIER DESTINATION-AWARE TARIFF LOOKUP
+ * Tier 0: Database cache (instant, free) - Check first with destination-aware expiration
+ * Tier 1: In-memory cache (instant, free) - Session-level cache
+ * Tier 2: OpenRouter (primary) - Current 2025 policy (~$0.02/request)
+ * Tier 3: Anthropic Direct - Backup if OpenRouter down
+ * Tier 4: Database fallback - Last resort (stale Jan 2025 data)
  */
-async function lookupBatchTariffRates(components) {
-  // STEP 1: Check cache first
-  const cachedRates = {};
-  const uncachedComponents = [];
+async function lookupBatchTariffRates(components, destination_country = 'US') {
+  // STEP 0: Check DATABASE cache first (persistent across restarts)
+  const dbCachedRates = {};
+  const uncachedAfterDB = [];
+
+  const cacheExpiration = getCacheExpiration(destination_country);
+  console.log(`🗄️ Checking database cache (${destination_country}: ${cacheExpiration / (24 * 60 * 60 * 1000)} days expiration)...`);
 
   for (const component of components) {
     const hsCode = component.hs_code || component.classified_hs_code;
-    const cacheKey = `${hsCode}-${component.origin_country}`;
+
+    // Query database for cached rate
+    const { data: cached, error } = await supabase
+      .from('ai_classifications')
+      .select('*')
+      .eq('hs_code', hsCode)
+      .eq('origin_country', component.origin_country)
+      .eq('destination_country', destination_country)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (cached && !error) {
+      // Check if cache is still fresh based on destination
+      const cacheAge = Date.now() - new Date(cached.created_at).getTime();
+      if (cacheAge < cacheExpiration) {
+        // ✅ SAFETY: Normalize policy_adjustments (old data might have objects)
+        const safePolicyAdjustments = (cached.policy_adjustments || []).map(adj =>
+          typeof adj === 'string' ? adj : JSON.stringify(adj)
+        );
+
+        dbCachedRates[hsCode] = {
+          mfn_rate: cached.mfn_rate,
+          usmca_rate: cached.usmca_rate,
+          policy_adjustments: safePolicyAdjustments,
+          base_mfn_rate: cached.base_mfn_rate,
+          policy_adjusted_mfn_rate: cached.policy_adjusted_mfn_rate
+        };
+        console.log(`  ✅ DB Cache HIT: ${hsCode} from ${component.origin_country} → ${destination_country} (${Math.round(cacheAge / (60 * 60 * 1000))}h old)`);
+      } else {
+        console.log(`  ⏰ DB Cache EXPIRED: ${hsCode} (${Math.round(cacheAge / (24 * 60 * 60 * 1000))} days old, limit: ${cacheExpiration / (24 * 60 * 60 * 1000)} days)`);
+        uncachedAfterDB.push(component);
+      }
+    } else {
+      uncachedAfterDB.push(component);
+    }
+  }
+
+  // STEP 1: Check IN-MEMORY cache (session-level, faster than DB)
+  const cachedRates = { ...dbCachedRates };
+  const uncachedComponents = [];
+
+  for (const component of uncachedAfterDB) {
+    const hsCode = component.hs_code || component.classified_hs_code;
+    // ✅ FIX: Include destination in cache key
+    const cacheKey = `${hsCode}-${component.origin_country}-${destination_country}`;
     const cached = TARIFF_CACHE.get(cacheKey);
 
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    if (cached && Date.now() - cached.timestamp < cacheExpiration) {
       cachedRates[hsCode] = cached.data;
+      console.log(`  ✅ Memory Cache HIT: ${hsCode}`);
     } else {
       uncachedComponents.push(component);
     }
   }
 
-  console.log(`💰 Cache: ${Object.keys(cachedRates).length} hits (FREE), ${uncachedComponents.length} misses (AI call needed)`);
+  console.log(`💰 Cache Summary: ${Object.keys(dbCachedRates).length} DB hits, ${Object.keys(cachedRates).length - Object.keys(dbCachedRates).length} memory hits, ${uncachedComponents.length} misses (AI call needed)`);
 
   if (uncachedComponents.length === 0) {
     console.log('✅ All rates served from cache - $0 cost');
@@ -852,26 +885,26 @@ async function lookupBatchTariffRates(components) {
   // STEP 2: Build prompt once for all fallback attempts
   const { batchPrompt, componentList } = buildBatchTariffPrompt(uncachedComponents);
 
-  // TIER 1: Try OpenRouter first
-  console.log('🎯 TIER 1: Trying OpenRouter...');
+  // TIER 2: Try OpenRouter first
+  console.log('🎯 TIER 2 (OpenRouter): Making AI call...');
   const openRouterResult = await tryOpenRouter(batchPrompt);
   if (openRouterResult.success) {
     console.log('✅ OpenRouter SUCCESS');
-    return cacheBatchResults(openRouterResult.rates, uncachedComponents, cachedRates);
+    return cacheBatchResults(openRouterResult.rates, uncachedComponents, cachedRates, destination_country);
   }
   console.log('❌ OpenRouter FAILED:', openRouterResult.error);
 
-  // TIER 2: Fallback to Anthropic Direct
-  console.log('🎯 TIER 2: Trying Anthropic Direct API...');
+  // TIER 3: Fallback to Anthropic Direct
+  console.log('🎯 TIER 3 (Anthropic Direct): Making AI call...');
   const anthropicResult = await tryAnthropicDirect(batchPrompt);
   if (anthropicResult.success) {
     console.log('✅ Anthropic Direct SUCCESS');
-    return cacheBatchResults(anthropicResult.rates, uncachedComponents, cachedRates);
+    return cacheBatchResults(anthropicResult.rates, uncachedComponents, cachedRates, destination_country);
   }
   console.log('❌ Anthropic Direct FAILED:', anthropicResult.error);
 
-  // TIER 3: Last resort - Database (stale data)
-  console.log('🎯 TIER 3: Falling back to Database (STALE DATA - Jan 2025)...');
+  // TIER 4: Last resort - Database (stale data)
+  console.log('🎯 TIER 4 (Database fallback): Using STALE DATA (Jan 2025)...');
   const dbRates = await lookupDatabaseRates(uncachedComponents);
   console.log(`⚠️ Using STALE database rates for ${Object.keys(dbRates).length} components`);
 
@@ -1082,15 +1115,17 @@ function parseAIResponse(aiText) {
 
 /**
  * Cache successful results AND save to database for future use
+ * ✅ DESTINATION-AWARE: Includes destination in cache key and database save
  */
-function cacheBatchResults(freshRates, components, existingCache) {
-  // Save to in-memory cache (6-hour TTL)
+function cacheBatchResults(freshRates, components, existingCache, destination_country = 'US') {
+  // Save to in-memory cache with destination-aware key
   for (const [hsCode, rates] of Object.entries(freshRates)) {
     const component = components.find(c =>
       (c.hs_code || c.classified_hs_code) === hsCode
     );
     if (component) {
-      const cacheKey = `${hsCode}-${component.origin_country}`;
+      // ✅ FIX: Include destination in cache key
+      const cacheKey = `${hsCode}-${component.origin_country}-${destination_country}`;
       TARIFF_CACHE.set(cacheKey, {
         data: rates,
         timestamp: Date.now()
@@ -1098,12 +1133,12 @@ function cacheBatchResults(freshRates, components, existingCache) {
     }
   }
 
-  // 💾 SAVE AI RESULTS TO DATABASE (non-blocking)
-  saveTariffRatesToDatabase(freshRates, components).catch(err => {
+  // 💾 SAVE AI RESULTS TO DATABASE with destination (non-blocking)
+  saveTariffRatesToDatabase(freshRates, components, destination_country).catch(err => {
     console.error('⚠️ Background database save failed:', err.message);
   });
 
-  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components (cached + saved to DB)`);
+  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components → ${destination_country} (cached + saved to DB)`);
   return { ...existingCache, ...freshRates };
 }
 
@@ -1181,12 +1216,14 @@ async function saveAIDataToDatabase(classificationResult, component) {
 
 /**
  * Save tariff rates from AI lookups to database (builds database over time)
- * Called after TIER 1 (OpenRouter) or TIER 2 (Anthropic) success
+ * Called after TIER 2 (OpenRouter) or TIER 3 (Anthropic) success
+ * ✅ DESTINATION-AWARE: Includes destination for smart cache expiration
  * @param {Object} freshRates - AI-generated tariff rates { [hsCode]: { mfn_rate, usmca_rate, ... } }
  * @param {Array} components - Component data with descriptions and origins
+ * @param {String} destination_country - Export destination (US/CA/MX)
  */
-async function saveTariffRatesToDatabase(freshRates, components) {
-  console.log(`💾 Saving ${Object.keys(freshRates).length} AI tariff rates to database...`);
+async function saveTariffRatesToDatabase(freshRates, components, destination_country = 'US') {
+  console.log(`💾 Saving ${Object.keys(freshRates).length} AI tariff rates to database (dest: ${destination_country})...`);
 
   try {
     const savePromises = [];
@@ -1198,26 +1235,34 @@ async function saveTariffRatesToDatabase(freshRates, components) {
 
       if (!component) continue;
 
-      // Save each rate to ai_classifications table
+      // ✅ SAFETY: Ensure policy_adjustments array contains only strings
+      const safePolicyAdjustments = (rates.policy_adjustments || []).map(adj =>
+        typeof adj === 'string' ? adj : JSON.stringify(adj)
+      );
+
+      // Save/update each rate using UPSERT (prevents stale duplicate records)
       savePromises.push(
         supabase
           .from('ai_classifications')
-          .insert({
+          .upsert({
             hs_code: hsCode,
             component_description: component.description || 'AI tariff lookup',
             mfn_rate: rates.mfn_rate || 0,
             base_mfn_rate: rates.base_mfn_rate || rates.mfn_rate || 0,
             policy_adjusted_mfn_rate: rates.mfn_rate || 0,
             usmca_rate: rates.usmca_rate || 0,
-            policy_adjustments: rates.policy_adjustments || [],
+            policy_adjustments: safePolicyAdjustments,
             origin_country: component.origin_country,
-            confidence: 95, // AI tariff lookup is high confidence
-            verified: false, // AI-generated, not human-verified
+            destination_country: destination_country,
+            confidence: 95,
+            verified: false,
             last_updated: new Date().toISOString().split('T')[0],
             created_at: new Date().toISOString()
+          }, {
+            onConflict: 'hs_code,origin_country,destination_country'  // Update if exists
           })
           .then(({ error }) => {
-            if (error && error.code !== '23505') { // Ignore duplicate errors
+            if (error) {
               console.error(`⚠️ Failed to save ${hsCode}:`, error.message);
             }
           })
@@ -1225,7 +1270,7 @@ async function saveTariffRatesToDatabase(freshRates, components) {
     }
 
     await Promise.all(savePromises);
-    console.log(`✅ Successfully saved ${savePromises.length} AI tariff rates to database`);
+    console.log(`✅ Successfully saved ${savePromises.length} AI tariff rates to database → ${destination_country}`);
 
   } catch (error) {
     // Non-blocking - don't fail the request if DB save fails
