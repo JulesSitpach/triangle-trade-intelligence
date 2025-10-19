@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile }) {
   const [showDetails, setShowDetails] = useState(false);
+  const [showBrokerSummary, setShowBrokerSummary] = useState(true);
 
   // Map urgency to alert class
   const alertClass = consolidatedAlert.urgency === 'URGENT' ? 'alert-error' :
@@ -31,7 +32,38 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
           )}
         </div>
 
-        {/* Urgency Level with Reasoning */}
+        {/* BROKER SUMMARY - Conversational Plain-English Summary */}
+        {consolidatedAlert.broker_summary && (
+          <div className="element-spacing">
+            <div className="status-card" style={{
+              backgroundColor: '#f0f9ff',
+              borderLeft: '4px solid #3b82f6',
+              cursor: 'pointer'
+            }} onClick={() => setShowBrokerSummary(!showBrokerSummary)}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="text-body" style={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                  💬 BROKER SUMMARY
+                </div>
+                <button className="btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>
+                  {showBrokerSummary ? '▼ Hide' : '▶ Show'}
+                </button>
+              </div>
+              {showBrokerSummary && (
+                <div className="text-body" style={{
+                  marginTop: '1rem',
+                  fontSize: '1rem',
+                  lineHeight: '1.6',
+                  color: '#1f2937',
+                  whiteSpace: 'pre-wrap'
+                }}>
+                  {consolidatedAlert.broker_summary}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Urgency Level with Timeline and Effective Date */}
         <div className="element-spacing">
           <div className="status-card" style={{
             backgroundColor: consolidatedAlert.urgency === 'URGENT' ? '#fee2e2' :
@@ -43,9 +75,29 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
               '#3b82f6'
             }`
           }}>
-            <div className="status-label">Urgency Level</div>
-            <div className="status-value" style={{ fontWeight: 'bold' }}>
-              {consolidatedAlert.urgency}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+              <div>
+                <div className="status-label">Urgency Level</div>
+                <div className="status-value" style={{ fontWeight: 'bold' }}>
+                  {consolidatedAlert.urgency}
+                </div>
+              </div>
+              {consolidatedAlert.timeline && (
+                <div>
+                  <div className="status-label">Timeline</div>
+                  <div className="status-value" style={{ fontWeight: 'bold' }}>
+                    {consolidatedAlert.timeline}
+                  </div>
+                </div>
+              )}
+              {consolidatedAlert.effective_date && (
+                <div>
+                  <div className="status-label">Effective Date</div>
+                  <div className="status-value" style={{ fontWeight: 'bold', color: '#dc2626' }}>
+                    {consolidatedAlert.effective_date}
+                  </div>
+                </div>
+              )}
             </div>
             {consolidatedAlert.urgency_reasoning && (
               <div className="form-help" style={{ marginTop: '0.5rem' }}>
@@ -106,9 +158,21 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
                     <strong>How costs stack:</strong> {consolidatedAlert.consolidated_impact.stack_explanation}
                   </div>
                 )}
-                <div className="form-help" style={{ marginTop: '0.5rem' }}>
-                  Confidence: {consolidatedAlert.consolidated_impact.confidence || 'medium'}
-                </div>
+                {consolidatedAlert.consolidated_impact.confidence_explanation && (
+                  <div className="status-card" style={{ marginTop: '0.75rem', backgroundColor: '#f0fdf4', padding: '0.75rem' }}>
+                    <div className="form-help" style={{ fontSize: '0.875rem', marginBottom: '0.25rem', fontWeight: 'bold' }}>
+                      Confidence: {consolidatedAlert.consolidated_impact.confidence || 'medium'}
+                    </div>
+                    <div className="text-body" style={{ fontSize: '0.875rem', color: '#166534' }}>
+                      {consolidatedAlert.consolidated_impact.confidence_explanation}
+                    </div>
+                  </div>
+                )}
+                {!consolidatedAlert.consolidated_impact.confidence_explanation && (
+                  <div className="form-help" style={{ marginTop: '0.5rem' }}>
+                    Confidence: {consolidatedAlert.consolidated_impact.confidence || 'medium'}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -143,6 +207,91 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
                 </li>
               ))}
             </ol>
+          </div>
+        )}
+
+        {/* Mitigation Scenarios - Strategic Options Comparison */}
+        {consolidatedAlert.mitigation_scenarios && consolidatedAlert.mitigation_scenarios.length > 0 && (
+          <div className="element-spacing">
+            <div className="text-body" style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
+              <strong>🎯 Your Options (Side-by-Side Comparison):</strong>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {consolidatedAlert.mitigation_scenarios.map((scenario, idx) => (
+                <div key={idx} className="status-card" style={{
+                  backgroundColor: scenario.recommended ? '#f0fdf4' : '#f9fafb',
+                  border: scenario.recommended ? '2px solid #10b981' : '1px solid #e5e7eb',
+                  padding: '1rem'
+                }}>
+                  {/* Scenario Header */}
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div className="status-label" style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      Option {idx + 1}
+                    </div>
+                    <div className="status-value" style={{ fontSize: '1rem', fontWeight: 'bold', color: '#1f2937' }}>
+                      {scenario.title}
+                      {scenario.recommended && (
+                        <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: '#10b981', fontWeight: 'normal' }}>
+                          ⭐ Recommended
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Cost Impact */}
+                  {scenario.cost_impact && (
+                    <div style={{ marginBottom: '0.5rem', padding: '0.5rem', backgroundColor: '#fef3c7', borderRadius: '4px' }}>
+                      <div className="form-help" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                        Cost Impact
+                      </div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#92400e' }}>
+                        {scenario.cost_impact}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Timeline */}
+                  {scenario.timeline && (
+                    <div style={{ marginBottom: '0.5rem', padding: '0.5rem', backgroundColor: '#e0f2fe', borderRadius: '4px' }}>
+                      <div className="form-help" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                        Timeline
+                      </div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#0c4a6e' }}>
+                        {scenario.timeline}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Benefit */}
+                  {scenario.benefit && (
+                    <div style={{ marginBottom: '0.5rem', padding: '0.5rem', backgroundColor: '#f0fdf4', borderRadius: '4px' }}>
+                      <div className="form-help" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                        Benefit
+                      </div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#166534' }}>
+                        {scenario.benefit}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tradeoffs */}
+                  {scenario.tradeoffs && scenario.tradeoffs.length > 0 && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <div className="form-help" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                        Consider:
+                      </div>
+                      <ul style={{ fontSize: '0.8125rem', paddingLeft: '1.25rem', margin: 0 }}>
+                        {scenario.tradeoffs.map((tradeoff, tIdx) => (
+                          <li key={tIdx} style={{ marginBottom: '0.25rem', color: '#6b7280' }}>
+                            {tradeoff}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
