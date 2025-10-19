@@ -584,29 +584,19 @@ export default function TradeRiskAlternatives() {
                 </table>
               </div>
 
-              {/* Insights from Component Data */}
-              {userProfile.componentOrigins.some(c => c.ai_confidence && c.ai_confidence < 80) && (
-                <div className="alert alert-warning" style={{ marginTop: '1rem' }}>
-                  <div className="alert-content">
-                    <div className="alert-title">⚠️ Low Confidence Classifications Detected</div>
-                    <div className="text-body">
-                      Some components have low AI confidence scores. Consider requesting professional verification for accurate tariff calculations.
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {userProfile.componentOrigins.some(c => c.savings_percentage > 5) && (
-                <div className="alert alert-success" style={{ marginTop: '1rem' }}>
-                  <div className="alert-content">
-                    <div className="alert-title">💰 Significant Tariff Savings Identified</div>
-                    <div className="text-body">
-                      Your components show strong tariff savings potential through USMCA qualification.
-                      {userProfile.qualificationStatus !== 'QUALIFIED' && ' Consider supply chain optimization to unlock these savings.'}
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Compact insights - only show if actionable */}
+              <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
+                {userProfile.componentOrigins.some(c => c.ai_confidence && c.ai_confidence < 80) && (
+                  <span style={{ marginRight: '1.5rem' }}>
+                    ⚠️ {userProfile.componentOrigins.filter(c => c.ai_confidence && c.ai_confidence < 80).length} component(s) flagged for expert review
+                  </span>
+                )}
+                {userProfile.componentOrigins.some(c => c.savings_percentage > 5) && (
+                  <span>
+                    💰 Avg savings: {(userProfile.componentOrigins.reduce((sum, c) => sum + (c.savings_percentage || 0), 0) / userProfile.componentOrigins.length).toFixed(1)}%
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
