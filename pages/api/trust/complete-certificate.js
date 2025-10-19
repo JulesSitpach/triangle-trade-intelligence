@@ -27,6 +27,13 @@ export default async function handler(req, res) {
     // Generate certificate number
     const certificateNumber = `USMCA-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
+    // CRITICAL FIX: Log incoming country data for debugging
+    console.log('🔍 Certificate API - Incoming country data:', {
+      exporter_country: company_info.exporter_country,
+      importer_country: company_info.importer_country,
+      full_company_info: company_info
+    });
+
     // Build professional certificate response
     const professionalCertificate = {
       certificate_number: certificateNumber,
@@ -36,11 +43,11 @@ export default async function handler(req, res) {
         version: 'V3'
       },
 
-      // Exporter Information
+      // Exporter Information - NEVER use fallback for country (let PDF generator handle errors)
       exporter: {
         name: company_info.exporter_name,
         address: company_info.exporter_address,
-        country: company_info.exporter_country || 'Not specified',
+        country: company_info.exporter_country || '',  // Empty string instead of 'Not specified'
         tax_id: company_info.exporter_tax_id || 'Not specified',
         phone: company_info.exporter_phone ?? '',
         email: company_info.exporter_email ?? ''
@@ -51,7 +58,7 @@ export default async function handler(req, res) {
         type: certifier_type || 'EXPORTER',  // Use workflow data, fallback to EXPORTER only if missing
         name: company_info.exporter_name,
         address: company_info.exporter_address,
-        country: company_info.exporter_country || 'Not specified',
+        country: company_info.exporter_country || '',  // Empty string instead of 'Not specified'
         tax_id: company_info.exporter_tax_id || 'Not specified',
         phone: company_info.exporter_phone ?? '',
         email: company_info.exporter_email ?? ''
@@ -62,7 +69,7 @@ export default async function handler(req, res) {
         same_as_exporter: true,
         name: company_info.exporter_name,
         address: company_info.exporter_address,
-        country: company_info.exporter_country || 'Not specified',
+        country: company_info.exporter_country || '',  // Empty string instead of 'Not specified'
         tax_id: company_info.exporter_tax_id || 'Not specified',
         phone: company_info.exporter_phone ?? '',
         email: company_info.exporter_email ?? ''
@@ -72,7 +79,7 @@ export default async function handler(req, res) {
       importer: {
         name: company_info.importer_name,
         address: company_info.importer_address,
-        country: company_info.importer_country,
+        country: company_info.importer_country || '',  // Empty string instead of undefined
         tax_id: company_info.importer_tax_id || 'Not specified',
         phone: authorization.importer_phone ?? company_info.importer_phone ?? '',
         email: authorization.importer_email ?? company_info.importer_email ?? ''
