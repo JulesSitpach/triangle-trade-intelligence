@@ -731,6 +731,9 @@ async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
     .filter(c => usmcaCountries.includes(c.origin_country))
     .reduce((sum, c) => sum + parseFloat(c.value_percentage || 0), 0);
 
+  // Calculate total North American content (components + labor)
+  const totalNAContent = usmcaComponentTotal + laborValueAdded;
+
   const prompt = `You are a USMCA trade compliance expert analyzing qualification for ${formData.product_description}.
 
 Analyze whether this product qualifies for USMCA preferential treatment and provide educational explanations for an SMB owner juggling their business.
@@ -739,6 +742,22 @@ PRODUCT & BUSINESS CONTEXT:
 - Industry: ${industry} (Threshold: ${threshold.rvc}% RVC per ${threshold.article})
 - Manufacturing: ${manufacturingLocation} (Labor credit: ${laborValueAdded}%)
 - Trade Flow: ${origin}→${destination}${formData.trade_volume ? ` | Annual Volume: $${formData.trade_volume}` : ''}
+
+AUTHORITATIVE TARIFF DATA SOURCES (2025 Policy - Use in Priority Order):
+🚀 Tier 1 (Speed): Trump 2.0 Tracker - https://www.piie.com/trump-trade-tracker
+   Use this for immediate answers on current tariff rates, Section 301 status, and recent policy changes.
+   This tracker is updated weekly and provides human-readable summaries of tariff actions.
+
+📜 Tier 2 (Verification): Federal Register - Official Government Source
+   Confirm rates are official and cite specific Federal Register documents when available.
+   - Tariff notices: https://www.federalregister.gov/api/v1/documents.rss?conditions[search_type_id]=3&conditions[term]=tariff
+   - Section 301: https://www.federalregister.gov/api/v1/documents.rss?conditions[search_type_id]=3&conditions[term]=Section+301
+   - Duties: https://www.federalregister.gov/api/v1/documents.rss?conditions[search_type_id]=3&conditions[term]=duties
+
+🏭 Industry-Specific: RVIA Tariff Developments - https://www.rvia.org/news-insights/latest-tariff-developments
+   For automotive, RV, and vehicle-related components.
+
+CRITICAL: Always cite your source when stating tariff rates. If using Trump Tracker data, mention it was verified against Federal Register when possible.
 
 COMPONENTS:
 ${componentBreakdown}
@@ -1011,12 +1030,28 @@ async function lookupBatchTariffRates(components, destination_country = 'US') {
           typeof adj === 'string' ? adj : JSON.stringify(adj)
         );
 
+        // ✅ FIX: Parse Section 301 from policy_adjustments array
+        let section301Rate = 0;
+        for (const adjustment of safePolicyAdjustments) {
+          const match = adjustment.match(/Section 301.*?(\d+(?:\.\d+)?)%/i);
+          if (match) {
+            section301Rate = parseFloat(match[1]);
+            break;
+          }
+        }
+
+        // ✅ FIX: Calculate total_rate from policy_adjusted_mfn_rate or base + section301
+        const totalRate = cached.policy_adjusted_mfn_rate ||
+                         (cached.base_mfn_rate || cached.mfn_rate) + section301Rate;
+
         dbCachedRates[hsCode] = {
           mfn_rate: cached.mfn_rate,
           usmca_rate: cached.usmca_rate,
           policy_adjustments: safePolicyAdjustments,
           base_mfn_rate: cached.base_mfn_rate,
-          policy_adjusted_mfn_rate: cached.policy_adjusted_mfn_rate
+          policy_adjusted_mfn_rate: cached.policy_adjusted_mfn_rate,
+          section_301: section301Rate,  // ✅ FIX: Parse from policy_adjustments
+          total_rate: totalRate  // ✅ FIX: Calculate from policy_adjusted or base+301
         };
         console.log(`  ✅ DB Cache HIT: ${hsCode} from ${component.origin_country} → ${destination_country} (${Math.round(cacheAge / (60 * 60 * 1000))}h old)`);
       } else {
