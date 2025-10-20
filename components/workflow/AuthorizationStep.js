@@ -23,6 +23,13 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     ...formData
   });
 
+  // 🎯 Collapsible sections state
+  const [expandedSections, setExpandedSections] = useState({
+    exporter: false,
+    importer: false,
+    producer: false
+  });
+
   // Agent orchestration removed - was causing excessive AI calls on every field change
 
   // 🚀 AUTO-FILL COMPANY DATA ON MOUNT (so user doesn't have to manually check box)
@@ -41,6 +48,32 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       }));
     }
   }, [workflowData]); // Run when workflowData is available
+
+  // 🎯 AUTO-EXPAND SECTIONS BASED ON CERTIFIER TYPE
+  useEffect(() => {
+    if (authData.certifier_type) {
+      console.log('🎯 Auto-expanding sections for certifier type:', authData.certifier_type);
+
+      // Collapse all first
+      const newExpanded = {
+        exporter: false,
+        importer: false,
+        producer: false
+      };
+
+      // Expand relevant sections based on certifier type
+      if (authData.certifier_type === 'IMPORTER') {
+        newExpanded.importer = true;  // Only show importer section
+      } else if (authData.certifier_type === 'EXPORTER') {
+        newExpanded.exporter = true;  // Only show exporter section
+      } else if (authData.certifier_type === 'PRODUCER') {
+        newExpanded.exporter = true;  // Show exporter section
+        newExpanded.producer = true;  // AND producer section (both needed)
+      }
+
+      setExpandedSections(newExpanded);
+    }
+  }, [authData.certifier_type]); // Run when certifier type changes
 
   // Update parent when authData changes
   useEffect(() => {
@@ -154,6 +187,44 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
   // Get company name from workflow data for certification text
   const companyName = workflowData?.company?.name || 'this company';
+
+  // Toggle section expansion
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Collapsible Section Header Component
+  const CollapsibleSectionHeader = ({ title, description, sectionKey, icon }) => (
+    <div
+      onClick={() => toggleSection(sectionKey)}
+      style={{
+        cursor: 'pointer',
+        padding: '1rem',
+        backgroundColor: expandedSections[sectionKey] ? '#eff6ff' : '#f9fafb',
+        border: '2px solid' + (expandedSections[sectionKey] ? '#3b82f6' : '#e5e7eb'),
+        borderRadius: '8px',
+        marginBottom: expandedSections[sectionKey] ? '1rem' : '0',
+        transition: 'all 0.2s'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h2 className="form-section-title" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {icon} {title}
+          </h2>
+          <p className="form-section-description" style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem' }}>
+            {description}
+          </p>
+        </div>
+        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#6b7280' }}>
+          {expandedSections[sectionKey] ? '▼' : '▶'}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="element-spacing">
@@ -287,11 +358,15 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
       {/* 2. Exporter Information */}
       <div className="form-section">
-        <h2 className="form-section-title">📤 Exporter Details</h2>
-        <p className="form-section-description">
-          Information about the company sending/exporting the goods
-        </p>
+        <CollapsibleSectionHeader
+          title="Exporter Details"
+          description="Information about the company sending/exporting the goods"
+          sectionKey="exporter"
+          icon="📤"
+        />
 
+        {expandedSections.exporter && (
+          <>
         {/* Checkbox to indicate if Exporter is same as your company */}
         <div className="form-group" style={{marginBottom: '1.5rem'}}>
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
@@ -418,14 +493,21 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
             </select>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       {/* 3. Importer Information */}
       <div className="form-section">
-        <h2 className="form-section-title">📥 Importer Details</h2>
-        <p className="form-section-description">
-          Information about your customer (the importing company)
-        </p>
+        <CollapsibleSectionHeader
+          title="Importer Details"
+          description="Information about your customer (the importing company)"
+          sectionKey="importer"
+          icon="📥"
+        />
+
+        {expandedSections.importer && (
+          <>
 
         <div className="form-grid-2">
           <div className="form-group">
@@ -513,15 +595,21 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
             </select>
           </div>
         </div>
+          </>
+        )}
       </div>
 
       {/* 3. Producer Information - NEW SECTION PER CRISTINA'S FEEDBACK */}
       <div className="form-section">
-        <h2 className="form-section-title">🏭 Producer Details</h2>
-        <p className="form-section-description">
-          Information about the company that manufactures/produces the goods
-        </p>
+        <CollapsibleSectionHeader
+          title="Producer Details"
+          description="Information about the company that manufactures/produces the goods"
+          sectionKey="producer"
+          icon="🏭"
+        />
 
+        {expandedSections.producer && (
+          <>
         {/* Checkbox to indicate if Producer is same as Exporter */}
         <div className="form-group" style={{marginBottom: '1.5rem'}}>
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
@@ -634,6 +722,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               </div>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
 
