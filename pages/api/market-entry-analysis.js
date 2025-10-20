@@ -87,9 +87,7 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are a senior Mexico market entry and B2B partnership development expert with 20+ years of experience in North American trade, distribution channel development, and cross-border business strategy. You have deep expertise in Mexico business culture, partnership negotiations, and Latin American market expansion. You are assisting Business Development Specialist, a B2B sales expert with 7 years of business ownership and industrial/manufacturing experience, bilingual (Spanish/English).
-
-===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
+    const aiPrompt = `Provide Mexico market entry analysis for B2B partnership development.
 
 Company Profile:
 - Company: ${businessContext.company.name}
@@ -152,63 +150,61 @@ MARKET ENTRY GOALS:
 - Market Priorities: ${businessContext.market_entry_goals.market_priorities.join(', ') || 'Mexico market expansion'}
 - Competitive Landscape: ${businessContext.market_entry_goals.competitive_landscape || 'To be assessed'}
 
-TASK:
-Provide comprehensive Mexico market entry analysis that Jorge can use for B2B partnership development and execution. Include:
+Provide comprehensive Mexico market entry analysis for B2B partnership development with educational explanations.
 
-1. Mexico Market Opportunity Analysis:
-   - Market size and growth potential for ${businessContext.product.category}
-   - Target customer segments and buying patterns
-   - Distribution channel analysis (direct, distributors, retailers, e-commerce)
-   - Regulatory and compliance requirements specific to Mexico
-   - Import/export considerations given their ${businessContext.trade.current_usmca_status} USMCA status
-
-2. Competitive Landscape Assessment:
-   - Key competitors currently in Mexico market for similar products
-   - Market positioning opportunities and differentiation strategies
-   - Pricing dynamics and expected margins
-   - Barriers to entry and competitive advantages
-   - USMCA advantages vs non-USMCA competitors
-
-3. Entry Strategy Recommendations:
-   - Recommended market entry approach (partnership, direct, hybrid)
-   - Distribution strategy (geographic priorities, channel mix)
-   - Partnership vs direct sales analysis
-   - Investment requirements breakdown
-   - Expected revenue trajectory and timeline
-
-4. Partnership Development Strategy:
-   - Types of partnerships needed (distributors, retailers, strategic alliances)
-   - Ideal partner profiles and selection criteria
-   - Value proposition for potential Mexico partners
-   - Negotiation considerations and deal structures
-   - Cultural business practices for Mexico partnerships
-
-5. Implementation Roadmap:
-   - Phase 1 (0-3 months): Market research, partner identification, initial outreach
-   - Phase 2 (3-6 months): Partnership negotiations, pilot programs, market testing
-   - Phase 3 (6-12 months): Market expansion, distribution growth, revenue scaling
-   - Critical milestones and success metrics for each phase
-
-6. Risk Assessment & Mitigation:
-   - Market entry risks (regulatory, competitive, financial, operational)
-   - Partnership risks (alignment, performance, termination)
-   - Supply chain risks (logistics, customs, USMCA compliance)
-   - Mitigation strategies for each risk category
-
-7. Financial Projections:
-   - Investment requirements (marketing, partnerships, logistics, compliance)
-   - Revenue projections (Year 1, Year 2, Year 3)
-   - Profitability timeline and breakeven analysis
-   - ROI calculation considering $${Number(businessContext.financial_impact.potential_usmca_savings || 0).toLocaleString()} USMCA savings benefit
-
-8. Jorge's B2B Execution Plan:
-   - Partner identification and outreach strategy
-   - Spanish-language communication and relationship building approach
-   - Cultural navigation and business protocol guidance
-   - Negotiation strategy and talking points
-   - Ongoing partnership management and support
-
-Format as JSON with these exact keys: market_opportunity (object with market_size, growth_rate, target_segments, distribution_channels, regulatory_overview), competitive_analysis (object with key_competitors, market_positioning, pricing_dynamics, barriers_to_entry, usmca_advantages), entry_strategy (object with recommended_approach, distribution_strategy, partnership_vs_direct, investment_requirements, revenue_trajectory), partnership_strategy (object with partner_types, ideal_profiles, value_proposition, negotiation_considerations, cultural_practices), implementation_phases (object with phase1, phase2, phase3, critical_milestones arrays), risk_mitigation (array with risk_category, specific_risks, mitigation_strategies), financial_projections (object with investment_breakdown, revenue_projections, profitability_timeline, roi_analysis), jorge_execution_approach (object with partner_outreach, relationship_building, cultural_navigation, negotiation_strategy, ongoing_management arrays).`;
+Return JSON:
+{
+  "market_opportunity": {
+    "market_size": "Size and growth potential for ${businessContext.product.category}",
+    "growth_rate": "Projected growth percentage",
+    "target_segments": ["Customer segments and buying patterns"],
+    "distribution_channels": ["Analysis of direct, distributors, retailers, e-commerce"],
+    "regulatory_overview": "Mexico-specific requirements for ${businessContext.trade.current_usmca_status} USMCA status"
+  },
+  "competitive_analysis": {
+    "key_competitors": ["Current Mexico market competitors"],
+    "market_positioning": "Differentiation opportunities",
+    "pricing_dynamics": "Expected margins and pricing strategies",
+    "barriers_to_entry": ["Entry barriers and competitive advantages"],
+    "usmca_advantages": "Benefits vs non-USMCA competitors"
+  },
+  "entry_strategy": {
+    "recommended_approach": "Partnership/direct/hybrid recommendation",
+    "distribution_strategy": "Geographic priorities and channel mix",
+    "partnership_vs_direct": "Analysis with tradeoffs",
+    "investment_requirements": "Breakdown of needed investment",
+    "revenue_trajectory": "Expected timeline and revenue growth"
+  },
+  "partnership_strategy": {
+    "partner_types": ["Distributors, retailers, strategic alliances needed"],
+    "ideal_profiles": "Partner selection criteria",
+    "value_proposition": "Why Mexico partners should work with them",
+    "negotiation_considerations": "Deal structures and cultural practices",
+    "cultural_practices": "Mexico business protocol guidance"
+  },
+  "implementation_phases": {
+    "phase1": ["0-3 months: Market research, partner identification, outreach"],
+    "phase2": ["3-6 months: Negotiations, pilot programs, testing"],
+    "phase3": ["6-12 months: Expansion, distribution growth, revenue scaling"],
+    "critical_milestones": ["Success metrics for each phase"]
+  },
+  "risk_mitigation": [
+    {"risk_category": "Market/Partnership/Supply Chain", "specific_risks": [], "mitigation_strategies": []}
+  ],
+  "financial_projections": {
+    "investment_breakdown": "Marketing, partnerships, logistics, compliance costs",
+    "revenue_projections": "Year 1, 2, 3 projections",
+    "profitability_timeline": "Breakeven analysis",
+    "roi_analysis": "Include $${Number(businessContext.financial_impact.potential_usmca_savings || 0).toLocaleString()} USMCA savings benefit"
+  },
+  "jorge_execution_approach": {
+    "partner_outreach": ["Identification and outreach strategy"],
+    "relationship_building": ["Spanish-language communication approach"],
+    "cultural_navigation": ["Business protocol guidance"],
+    "negotiation_strategy": ["Talking points and approach"],
+    "ongoing_management": ["Partnership support and management"]
+  }
+}`;
 
     console.log('[MARKET ENTRY] Calling AI with 3-tier fallback architecture...');
 

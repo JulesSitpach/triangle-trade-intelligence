@@ -93,9 +93,7 @@ export default async function handler(req, res) {
     };
 
     // Construct comprehensive AI prompt with full business intelligence
-    const aiPrompt = `You are a senior crisis management and USMCA trade compliance expert with 20+ years of experience in trade policy, customs regulations, and supply chain resilience. You are assisting our Licensed Trade Compliance Expert (#4601913) with 17 years of logistics experience specializing in electronics/telecom industries.
-
-===== COMPLETE BUSINESS INTELLIGENCE CONTEXT =====
+    const aiPrompt = `Provide crisis response analysis for an SMB owner facing trade disruption.
 
 Company Profile:
 - Company: ${businessContext.company.name}
@@ -160,30 +158,31 @@ CRISIS SITUATION:
 - Current Impact: ${businessContext.crisis.current_impact}
 - Immediate Concerns: ${businessContext.crisis.immediate_concerns}
 
-TASK:
-Provide a comprehensive crisis response analysis that Cristina can review and validate. Include:
+Provide comprehensive crisis response analysis with educational explanations for an SMB owner juggling their business.
 
-1. Crisis Severity Assessment (Critical/High/Medium/Low) based on the complete business context
-2. Immediate Impact Analysis considering their trade volume, supply chain concentration, and financial exposure
-3. Specific Risk Factors based on their known vulnerabilities and compliance gaps
-4. Detailed Action Plan with three phases:
-   - Immediate Actions (0-24 hours): Specific steps considering their product type and regulatory requirements
-   - Short-term Actions (24-72 hours): Tactical responses based on their supply chain structure
-   - Long-term Strategy: Preventive measures addressing their vulnerability factors
-
-5. Financial Impact Mitigation: How to minimize costs given their current tariff exposure
-6. Regulatory Compliance Steps: Specific to their regulatory requirements and industry
-7. Supply Chain Diversification Recommendations: Based on current component origins and concentration risk
-
-Format as JSON with these exact keys: crisis_severity, immediate_impact, risk_factors (array), action_plan (object with immediate_actions, short_term_actions, long_term_strategy arrays), financial_mitigation (array), regulatory_steps (array), supply_chain_recommendations (array).`;
+Return JSON:
+{
+  "crisis_severity": "Critical/High/Medium/Low based on complete business context",
+  "immediate_impact": "Analysis considering trade volume, supply chain concentration, financial exposure",
+  "risk_factors": ["Specific risks based on known vulnerabilities and compliance gaps"],
+  "action_plan": {
+    "immediate_actions": ["0-24 hours - specific steps for their product and regulatory requirements"],
+    "short_term_actions": ["24-72 hours - tactical responses for their supply chain structure"],
+    "long_term_strategy": ["Preventive measures addressing vulnerability factors"]
+  },
+  "financial_mitigation": ["How to minimize costs given tariff exposure"],
+  "regulatory_steps": ["Specific to their regulatory requirements and industry"],
+  "supply_chain_recommendations": ["Based on component origins and concentration risk"]
+}`;
 
     console.log('[CRISIS RESPONSE] Calling AI with 3-tier fallback architecture...');
 
     // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    // UPGRADED: Crisis decisions need expert Sonnet 4.5 analysis, not quick Haiku responses
     const aiResult = await executeAIWithFallback({
       prompt: aiPrompt,
-      model: 'anthropic/claude-haiku-4.5',
-      maxTokens: 2500
+      model: 'anthropic/claude-sonnet-4.5', // Both OpenRouter AND Anthropic fallback use Sonnet 4.5
+      maxTokens: 3000 // Increased for detailed strategic crisis analysis
     });
 
     if (!aiResult.success) {

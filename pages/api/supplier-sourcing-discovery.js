@@ -83,28 +83,24 @@ REQUIREMENTS:
 - Payment Terms: ${businessContext.sourcing_requirements.payment_terms || 'Negotiable'}
 - Timeline: ${businessContext.sourcing_requirements.timeline || 'Standard'}
 
-YOUR TASK:
-Find 5-7 Mexico suppliers who can manufacture the EXACT COMPONENTS they currently import from ${businessContext.product.component_origins.filter(c => c.country !== 'United States' && c.country !== 'Mexico').map(c => c.country).join(' and ')}.
+Find 5-7 Mexico suppliers who can manufacture the components they currently import from ${businessContext.product.component_origins.filter(c => c.country !== 'United States' && c.country !== 'Mexico').map(c => c.country).join(' and ')}.
 
-For example:
-- If they import "precision components from Germany", find Mexico precision machining suppliers
-- If they import "electronic components from China", find Mexico electronics manufacturers
-
-For each supplier provide:
-1. name - Realistic Mexico company name
-2. location - "City, State" format (e.g., "Tijuana, Baja California")
-3. capabilities - What they manufacture (match to component needs)
-4. website - Format: https://www.[name].com.mx or .com
-5. company_size - "Small: <50 employees" OR "Medium: 50-250" OR "Large: 250+"
-6. certifications - Array like ["ISO 9001", "ISO 13485", "FDA"]
-7. production_capacity - e.g., "50-100 units/month" or "High volume"
-8. usmca_ready - "High", "Medium", or "Low"
-9. contact_approach - "Direct website contact" OR "CCVIAL network introduction recommended"
-10. match_reason - Why this supplier fits their needs
-11. confidence - Number 0-1
-
-Return ONLY a JSON array, no other text:
-[{"name":"...", "location":"...", ...}, ...]`;
+Return JSON array:
+[
+  {
+    "name": "Mexico company name",
+    "location": "City, State",
+    "capabilities": "What they manufacture (match component needs)",
+    "website": "https://www.[name].com.mx",
+    "company_size": "Small: <50 | Medium: 50-250 | Large: 250+",
+    "certifications": ["ISO 9001", "ISO 13485", "FDA"],
+    "production_capacity": "Units/month or volume level",
+    "usmca_ready": "High/Medium/Low",
+    "contact_approach": "Direct website contact | CCVIAL network introduction",
+    "match_reason": "Why this supplier fits their needs",
+    "confidence": 0.9
+  }
+]`;
 
     let discoveredSuppliers = [];
 
