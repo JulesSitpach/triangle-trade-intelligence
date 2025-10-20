@@ -434,18 +434,24 @@ function MarketResearchStage({ request, subscriberData, serviceDetails, onComple
                     <th style={{ textAlign: 'center', padding: '0.5rem' }}>Origin</th>
                     <th style={{ textAlign: 'center', padding: '0.5rem' }}>Value %</th>
                     <th style={{ textAlign: 'center', padding: '0.5rem' }}>HS Code</th>
-                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>MFN Rate</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Base MFN</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#fef3c7' }}>Section 301</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', fontWeight: '700' }}>Total Rate</th>
                     <th style={{ textAlign: 'right', padding: '0.5rem' }}>USMCA Rate</th>
-                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Savings</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>Net After USMCA</th>
+                    <th style={{ textAlign: 'right', padding: '0.5rem' }}>Actual Savings</th>
                     <th style={{ textAlign: 'center', padding: '0.5rem' }}>AI Confidence</th>
                   </tr>
                 </thead>
                 <tbody>
                   {subscriberData.component_origins.map((comp, idx) => {
                     const hsCode = comp.hs_code || comp.classified_hs_code || '—';
-                    const mfnRate = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                    const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                    const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
+                    const totalRate = comp.total_rate || comp.tariff_rates?.total_rate || baseMFN;
                     const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
-                    const savings = mfnRate - usmcaRate;
+                    const netAfterUSMCA = totalRate - (baseMFN - usmcaRate);
+                    const actualSavings = baseMFN - usmcaRate;
                     const confidence = comp.confidence || null;
 
                     return (
@@ -462,14 +468,44 @@ function MarketResearchStage({ request, subscriberData, serviceDetails, onComple
                         <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace', fontSize: '0.8125rem' }}>
                           {hsCode}
                         </td>
-                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#dc2626' }}>
-                          {mfnRate > 0 ? `${mfnRate.toFixed(1)}%` : '—'}
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                          <span style={{ color: '#374151', fontWeight: '500' }}>
+                            {baseMFN > 0 ? `${baseMFN.toFixed(1)}%` : '—'}
+                          </span>
                         </td>
-                        <td style={{ textAlign: 'right', padding: '0.5rem', color: '#059669' }}>
-                          {usmcaRate >= 0 ? `${usmcaRate.toFixed(1)}%` : '—'}
+                        <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: section301 > 0 ? '#fef3c7' : 'transparent' }}>
+                          {section301 > 0 ? (
+                            <span style={{ color: '#92400e', fontWeight: '700', fontSize: '0.9375rem' }}>
+                              +{section301.toFixed(1)}%
+                            </span>
+                          ) : (
+                            <span style={{ color: '#9ca3af' }}>—</span>
+                          )}
                         </td>
-                        <td style={{ textAlign: 'right', padding: '0.5rem', color: savings > 0 ? '#059669' : '#6b7280', fontWeight: '600' }}>
-                          {savings > 0 ? `${savings.toFixed(1)}%` : '—'}
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                          <span style={{ color: '#dc2626', fontWeight: '700', fontSize: '0.9375rem' }}>
+                            {totalRate > 0 ? `${totalRate.toFixed(1)}%` : '—'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                          <span style={{ color: '#059669' }}>
+                            {usmcaRate >= 0 ? `${usmcaRate.toFixed(1)}%` : '—'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>
+                          <span style={{ color: section301 > 0 ? '#dc2626' : '#059669', fontWeight: '700' }}>
+                            {netAfterUSMCA > 0 ? `${netAfterUSMCA.toFixed(1)}%` : '0%'}
+                          </span>
+                          {section301 > 0 && (
+                            <div style={{ fontSize: '0.6875rem', color: '#92400e', marginTop: '0.125rem' }}>
+                              ⚠️ S301 remains
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                          <span style={{ color: actualSavings > 0 ? '#059669' : '#6b7280', fontWeight: '600' }}>
+                            {actualSavings > 0 ? `${actualSavings.toFixed(1)}%` : '—'}
+                          </span>
                         </td>
                         <td style={{ textAlign: 'center', padding: '0.5rem' }}>
                           {confidence ? (

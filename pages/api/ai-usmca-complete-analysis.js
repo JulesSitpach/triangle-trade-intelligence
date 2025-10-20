@@ -303,6 +303,58 @@ export default protectedApiHandler({
       recommendation_count: analysis.recommendations?.length
     });
 
+    // ========== CRITICAL: VALIDATE AI NUMBERS AGAINST CACHED TARIFF DATA ==========
+    // Prevent AI hallucinations like claiming "77.5% MFN rate" when cache shows 2.9%
+    if (analysis.detailed_analysis?.savings_analysis && componentRates) {
+      const savingsText = analysis.detailed_analysis.savings_analysis;
+
+      // Extract percentage claims from AI text (e.g., "77.5%", "102.5%")
+      const percentageMatches = savingsText.match(/(\d+\.?\d*)%/g) || [];
+      const aiPercentages = percentageMatches.map(p => parseFloat(p.replace('%', '')));
+
+      // Get actual cached rates for comparison
+      const cachedRates = Object.values(componentRates).map(r => ({
+        baseMFN: r.mfn_rate || 0,
+        section301: r.section_301 || 0,
+        totalRate: r.total_rate || r.mfn_rate || 0,
+        usmcaRate: r.usmca_rate || 0
+      }));
+
+      // Check if AI claimed any rates significantly different from cache (>10% deviation)
+      const significantDeviations = aiPercentages.filter(aiRate => {
+        const matchesAnyCache = cachedRates.some(cached =>
+          Math.abs(aiRate - cached.baseMFN) < 1 ||  // Matches base MFN
+          Math.abs(aiRate - cached.section301) < 1 || // Matches Section 301
+          Math.abs(aiRate - cached.totalRate) < 1 ||  // Matches total rate
+          Math.abs(aiRate - cached.usmcaRate) < 1     // Matches USMCA rate
+        );
+
+        return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache
+      });
+
+      if (significantDeviations.length > 0) {
+        console.warn('⚠️ AI VALIDATION WARNING: AI claimed tariff rates not found in cache:', significantDeviations);
+
+        await DevIssue.unexpectedBehavior(
+          'usmca_analysis',
+          `AI claimed tariff rates (${significantDeviations.join('%, ')}%) not matching cached data`,
+          {
+            userId,
+            company: formData.company_name,
+            ai_percentages: aiPercentages,
+            cached_rates: cachedRates,
+            deviations: significantDeviations,
+            savings_analysis_preview: savingsText.substring(0, 300)
+          }
+        );
+
+        // Add validation warning to trust indicators
+        analysis._validation_warning = `AI claimed rates ${significantDeviations.join('%, ')}% not found in tariff cache. Use actual enriched component data instead.`;
+      } else {
+        console.log('✅ AI tariff numbers validated against cache - no significant deviations');
+      }
+    }
+
     // Format response for UI
     const result = {
       success: true,
@@ -574,13 +626,27 @@ async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
   const isUSMCAManufacturing = ['US', 'MX', 'CA'].includes(manufacturingLocation);
   const laborValueAdded = isUSMCAManufacturing ? threshold.labor : 0;
 
-  // Format components with rates (concise)
+  // Format components with rates (concise) - NOW WITH SECTION 301 VALIDATION
   const componentBreakdown = formData.component_origins
     .map((c, i) => {
       const rates = componentRates[c.hs_code] || {};
-      const rateStr = rates.mfn_rate !== undefined
-        ? ` | MFN: ${rates.mfn_rate}% | USMCA: ${rates.usmca_rate || 0}%`
-        : '';
+
+      // CRITICAL FIX: Show TOTAL rate with Section 301 breakdown to prevent AI hallucinations
+      let rateStr = '';
+      if (rates.mfn_rate !== undefined) {
+        const baseMFN = rates.mfn_rate;
+        const section301 = rates.section_301 || 0;
+        const totalRate = rates.total_rate || baseMFN;
+        const usmcaRate = rates.usmca_rate || 0;
+
+        // Show breakdown: Base MFN + Section 301 = Total Rate
+        if (section301 > 0) {
+          rateStr = ` | Base MFN: ${baseMFN}% + Section 301: ${section301}% = Total: ${totalRate}% | USMCA: ${usmcaRate}% | Savings: ${baseMFN}% (Section 301 remains)`;
+        } else {
+          rateStr = ` | MFN: ${baseMFN}% | USMCA: ${usmcaRate}% | Savings: ${baseMFN - usmcaRate}%`;
+        }
+      }
+
       return `${i+1}. ${c.description} - ${c.value_percentage}% from ${c.origin_country}${c.hs_code ? ` (HS: ${c.hs_code})` : ''}${rateStr}`;
     }).join('\n');
 

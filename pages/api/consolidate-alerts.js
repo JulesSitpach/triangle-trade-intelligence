@@ -1,3 +1,4 @@
+
 /**
  * POST /api/consolidate-alerts
  * Intelligent alert consolidation - groups related policy changes
@@ -156,15 +157,108 @@ async function analyzeAlertGroup(group, userProfile) {
       sum + (c.percentage || c.value_percentage || 0), 0
     );
 
-    // Build component context
+    // ========== QUERY USER'S WORKFLOW ANALYSIS FOR RICH PERSONALIZED DATA ==========
+    // Instead of asking AI to make up generic advice, use the detailed analysis already generated
+    let workflowIntelligence = null;
+    if (userProfile.userId) {
+      try {
+        const { data: workflowData, error } = await supabase
+          .from('workflow_completions')
+          .select('workflow_data')
+          .eq('user_id', userProfile.userId)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && workflowData?.workflow_data) {
+          workflowIntelligence = {
+            recommendations: workflowData.workflow_data.recommendations || [],
+            detailed_analysis: workflowData.workflow_data.detailed_analysis || {},
+            usmca_status: workflowData.workflow_data.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
+            regional_content: workflowData.workflow_data.usmca?.north_american_content || 0,
+            threshold_required: workflowData.workflow_data.usmca?.threshold_applied || 0,
+            savings_data: workflowData.workflow_data.savings || {}
+          };
+
+          console.log(`✅ Found workflow intelligence: ${workflowIntelligence.recommendations.length} recommendations, ${Object.keys(workflowIntelligence.detailed_analysis).length} analysis sections`);
+        }
+      } catch (queryError) {
+        console.warn('⚠️ Could not query workflow intelligence:', queryError.message);
+        // Continue without workflow intelligence - will generate from scratch
+      }
+    }
+
+    // CRITICAL FIX: Build component context WITH REAL TARIFF DATA to prevent AI hallucinations
     const componentContext = affectedComponents.map(c => {
-      return `- ${c.component_type || c.description}: ${c.percentage || c.value_percentage}% from ${c.origin_country || c.country} (HS ${c.hs_code || 'unknown'})`;
+      // Extract real tariff data from cached enrichment
+      const baseMFN = c.mfn_rate || c.tariff_rates?.mfn_rate || 0;
+      const section301 = c.section_301 || c.tariff_rates?.section_301 || 0;
+      const totalRate = c.total_rate || c.tariff_rates?.total_rate || baseMFN;
+      const usmcaRate = c.usmca_rate || c.tariff_rates?.usmca_rate || 0;
+
+      // Build detailed tariff breakdown for AI
+      let tariffInfo = '';
+      if (section301 > 0) {
+        tariffInfo = ` | Base MFN: ${baseMFN}% + Section 301: ${section301}% = Total: ${totalRate}% | USMCA: ${usmcaRate}%`;
+      } else if (baseMFN > 0) {
+        tariffInfo = ` | MFN: ${baseMFN}% | USMCA: ${usmcaRate}%`;
+      }
+
+      return `- ${c.component_type || c.description}: ${c.percentage || c.value_percentage}% from ${c.origin_country || c.country} (HS ${c.hs_code || 'unknown'})${tariffInfo}`;
     }).join('\n');
 
     // Build alerts context (what policies are affecting these components)
     const alertsContext = alerts.map(a => {
       return `- ${a.title}: ${a.tariff_adjustment || 'Policy change'} (${a.category})`;
     }).join('\n');
+
+    // ========== BUILD WORKFLOW INTELLIGENCE CONTEXT ==========
+    // Use rich personalized data from user's workflow analysis instead of making up generic advice
+    let workflowContext = '';
+    if (workflowIntelligence) {
+      const { recommendations, detailed_analysis, usmca_status, regional_content, threshold_required, savings_data } = workflowIntelligence;
+
+      // Extract key recommendations (focus on ones relevant to affected components)
+      const relevantRecommendations = recommendations
+        .filter(rec => {
+          const recLower = rec.toLowerCase();
+          // Filter for recommendations about Chinese components, Section 301, supplier alternatives, etc.
+          return recLower.includes('section 301') ||
+                 recLower.includes('chinese') ||
+                 recLower.includes('supplier') ||
+                 recLower.includes('usmca') ||
+                 recLower.includes('mexico') ||
+                 recLower.includes('canada') ||
+                 recLower.includes('north american');
+        })
+        .slice(0, 8); // Max 8 most relevant recommendations
+
+      const recommendationsList = relevantRecommendations.length > 0
+        ? relevantRecommendations.map((rec, idx) => `${idx + 1}. ${rec}`).join('\n')
+        : 'No specific recommendations available';
+
+      // Extract savings analysis with real dollar amounts
+      const savingsAnalysis = detailed_analysis.savings_analysis || 'No savings analysis available';
+
+      workflowContext = `
+
+=== EXISTING WORKFLOW INTELLIGENCE (USE THIS RICH DATA!) ===
+**Current USMCA Status**: ${usmca_status} (${regional_content}% NA content, threshold: ${threshold_required}%)
+
+**Existing Cost Analysis**:
+${savingsAnalysis}
+
+**Existing Strategic Recommendations** (CRITICAL - Use these insights, don't make up generic advice):
+${recommendationsList}
+
+**YOUR TASK**: Synthesize the above existing analysis in the context of these NEW policy changes.
+- Reference specific dollar amounts and supplier locations from the existing analysis
+- Build on the strategic insights already provided
+- Show how the NEW policy changes affect the existing recommendations
+- DO NOT repeat obvious advice like "find suppliers" - user already has detailed supplier recommendations above
+- DO NOT make up generic scenarios - use the specific analysis provided above
+`;
+    }
 
     const prompt = `You are a trade policy analyst providing CONSOLIDATED impact analysis.
 
@@ -178,7 +272,7 @@ Annual Trade Volume: $${userProfile.tradeVolume || userProfile.annual_trade_volu
 ${componentContext}
 
 === RELATED POLICY CHANGES (Multiple alerts consolidated) ===
-${alertsContext}
+${alertsContext}${workflowContext}
 
 === ANALYSIS REQUIRED ===
 
@@ -205,7 +299,7 @@ Write like an experienced customs broker talking to a client over coffee:
 - Avoid jargon, use analogies if helpful
 - Be direct, no corporate speak
 
-Example: "Here's the situation: Section 301 tariffs just doubled the cost of your Chinese steel components. This adds roughly $2M to your annual costs - about 40% of your total product value. The timeline here is important. This takes effect January 1st, which gives you 8-10 weeks to plan your response. Not a fire drill, but you need to move. I'd recommend getting quotes from USMCA suppliers immediately. Yes, the material will cost 15-20% more, but you'll eliminate the $2M tariff hit AND qualify for duty-free USMCA treatment. Net result: you're still significantly ahead. Time to make some calls."
+Example: "Here's the situation: Section 301 tariffs on Chinese steel just jumped 25 percentage points. Based on your $10M annual volume and 40% Chinese steel content, this adds roughly $1M to your annual costs. The timeline here is important. This takes effect January 1st, which gives you 8-10 weeks to plan your response. Not a fire drill, but you need to move. I'd recommend getting quotes from USMCA suppliers immediately. Yes, the material will cost 15-20% more (~$400K premium on $4M steel), but you'll eliminate the $1M tariff hit AND qualify for duty-free USMCA treatment. Net result: you save ~$600K annually. Time to make some calls."
 
 **Real Urgency Level + Timeline**:
 - URGENT: Immediate action required → Timeline: "Days to weeks" → Effective date in <30 days
@@ -217,10 +311,22 @@ CRITICAL: Urgency and timeline must align! Don't say "HIGH urgency" and then "No
 
 **Effective Date**: Specific date when policy takes effect (e.g., "January 1, 2025", "October 31, 2025", "60 days after publication")
 
-**Clear Cost Calculation**:
+**Clear Cost Calculation** (CRITICAL - Avoid Circular Math):
 - Calculate ONCE for all related policies
-- Example: "~$550K annually (25% tariff on $2.2M Chinese components)"
-- NOT: "$500K Section 301 + $300K port fees + $200K transshipment" (that's confusing)
+- CORRECT approach when Annual Trade Volume is known:
+  Example: Annual Trade Volume = $10M
+  → Chinese steel (40% of product) = $10M × 0.40 = $4M
+  → Section 301 tariff (25%) = $4M × 0.25 = $1M annual cost
+  → Show: "~$1M annually (25% Section 301 on $4M Chinese steel component)"
+
+- If Annual Trade Volume is UNKNOWN:
+  → State clearly: "Unable to calculate dollar impact without annual trade volume"
+  → Show percentage impact: "25% tariff on 40% of product = X% total cost increase"
+  → Recommend user provide volume for accurate cost estimate
+
+- ❌ NEVER use circular logic like: "$1.92M tariff on $1.92M steel component"
+  (This is circular - where did $1.92M come from? You need the base annual volume!)
+
 - Include confidence level and WHY (explain the confidence score)
 
 **Mitigation Scenarios** (Side-by-side comparison of options):
@@ -252,7 +358,7 @@ For each scenario include:
 Return ONLY valid JSON:
 {
   "consolidated_title": "China Steel Component Risk (Consolidated)",
-  "broker_summary": "Here's the situation: Section 301 tariffs just doubled the cost of your Chinese steel components. This adds roughly $2M to your annual costs - about 40% of your total product value. The timeline here is important. This takes effect January 1st, which gives you 8-10 weeks to plan your response. Not a fire drill, but you need to move. I'd recommend getting quotes from USMCA suppliers immediately. Yes, the material will cost 15-20% more, but you'll eliminate the $2M tariff hit AND qualify for duty-free USMCA treatment. Net result: you're still significantly ahead. Time to make some calls.",
+  "broker_summary": "Use the example above as a guide. Calculate real costs using: Annual Volume × Component % × Tariff Rate. Show your math clearly.",
   "urgency": "HIGH",
   "timeline": "2-3 months",
   "effective_date": "January 1, 2025",
@@ -266,16 +372,16 @@ Return ONLY valid JSON:
     }
   ],
   "consolidated_impact": {
-    "total_annual_cost": "$1.98M",
-    "confidence": "high",
-    "confidence_explanation": "High confidence because we have exact HS code (7326.90.85), known Section 301 rate (100%), and customer's stated trade volume ($1.92M annually for this component). Calculation: $1.92M × 100% additional tariff = $1.92M new annual cost.",
-    "breakdown": "100% Section 301 tariff on $1.92M Chinese steel components (40% of total product value). This doubles the landed cost.",
-    "stack_explanation": "Section 301 (100%) applies on top of existing MFN rate (0% for this HS code). Total tariff becomes 100%. Port fees are separate operational costs, not included in this calculation."
+    "total_annual_cost": "$XXX,XXX",
+    "confidence": "high/medium/low",
+    "confidence_explanation": "CRITICAL: Use the EXACT tariff rates provided in the component data above. Do NOT hallucinate rates. Explain how you calculated the cost based on the provided rates + annual volume.",
+    "breakdown": "CRITICAL: Calculate using the REAL Section 301 rate from component data (e.g., 25%), NOT a made-up rate. Show: Base MFN + Section 301 = Total Rate.",
+    "stack_explanation": "Explain how tariffs stack (Base MFN + Section 301 = Total), using the ACTUAL rates from the component data above, NOT assumed rates."
   },
   "mitigation_scenarios": [
     {
       "title": "Status Quo (Do Nothing)",
-      "cost_impact": "+$1.98M annually",
+      "cost_impact": "+$XXX,XXX annually (calculate from: Annual Volume × Component % × Tariff Rate)",
       "timeline": "Immediate",
       "benefit": "No transition effort required",
       "tradeoffs": ["Double your component cost", "Lose competitive advantage", "Competitors will move faster"],
@@ -396,6 +502,57 @@ CRITICAL RULES:
     }
 
     console.log(`✅ Consolidated analysis: ${analysis.consolidated_title} (${analysis.urgency})`);
+
+    // ========== CRITICAL: VALIDATE AI NUMBERS AGAINST COMPONENT TARIFF DATA ==========
+    // Prevent AI hallucinations like claiming "100% Section 301" when cache shows 25%
+    if (analysis.consolidated_impact?.breakdown || analysis.broker_summary) {
+      const combinedText = `${analysis.consolidated_impact?.breakdown || ''} ${analysis.broker_summary || ''}`;
+
+      // Extract percentage claims from AI text (e.g., "100%", "25%")
+      const percentageMatches = combinedText.match(/(\d+\.?\d*)%/g) || [];
+      const aiPercentages = percentageMatches.map(p => parseFloat(p.replace('%', '')));
+
+      // Get actual cached rates from affected components
+      const cachedRates = affectedComponents.map(c => ({
+        baseMFN: c.mfn_rate || c.tariff_rates?.mfn_rate || 0,
+        section301: c.section_301 || c.tariff_rates?.section_301 || 0,
+        totalRate: c.total_rate || c.tariff_rates?.total_rate || (c.mfn_rate || 0),
+        component: c.component_type || c.description
+      }));
+
+      // Check if AI claimed any rates significantly different from cache (>10% deviation)
+      const significantDeviations = aiPercentages.filter(aiRate => {
+        const matchesAnyCache = cachedRates.some(cached =>
+          Math.abs(aiRate - cached.baseMFN) < 1 ||  // Matches base MFN
+          Math.abs(aiRate - cached.section301) < 1 || // Matches Section 301
+          Math.abs(aiRate - cached.totalRate) < 1     // Matches total rate
+        );
+
+        return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache
+      });
+
+      if (significantDeviations.length > 0) {
+        console.warn('⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache:', significantDeviations);
+
+        await DevIssue.unexpectedBehavior(
+          'consolidate_alerts_api',
+          `AI claimed tariff rates (${significantDeviations.join('%, ')}%) not matching component cached data`,
+          {
+            company: userProfile.companyName,
+            ai_percentages: aiPercentages,
+            cached_rates: cachedRates,
+            deviations: significantDeviations,
+            broker_summary_preview: analysis.broker_summary?.substring(0, 300),
+            breakdown_preview: analysis.consolidated_impact?.breakdown
+          }
+        );
+
+        // Add validation warning to alert
+        analysis._validation_warning = `AI claimed rates ${significantDeviations.join('%, ')}% not found in component tariff cache. Verify with real cached data before trusting cost estimates.`;
+      } else {
+        console.log('✅ AI tariff numbers validated against component cache - no significant deviations');
+      }
+    }
 
     return {
       id: `consolidated-${group.key}`,

@@ -175,6 +175,7 @@ export default function TradeRiskAlternatives() {
 
       // NO FALLBACKS - Expose missing data as dev issue
       const profile = {
+        userId: user?.id,  // Include userId for workflow intelligence lookup
         companyName: userData.company?.company_name || userData.company?.name,
         businessType: userData.company?.business_type,
         hsCode: userData.product?.hs_code,
@@ -561,46 +562,110 @@ export default function TradeRiskAlternatives() {
                 <table className="component-table">
                   <thead>
                     <tr>
-                      <th>Component</th>
-                      <th>Origin</th>
-                      <th>% of Product</th>
-                      <th>HS Code</th>
-                      <th>MFN Rate</th>
-                      <th>USMCA Rate</th>
-                      <th>Savings</th>
-                      <th>AI Confidence</th>
+                      <th style={{ textAlign: 'left', padding: '0.5rem' }}>Component</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>Origin</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>Value %</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>HS Code</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>Base MFN</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#fef3c7' }}>Section 301</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem', fontWeight: '700' }}>Total Rate</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>USMCA Rate</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>Net After USMCA</th>
+                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>Actual Savings</th>
+                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>AI Confidence</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {userProfile.componentOrigins.map((comp, idx) => (
-                      <tr key={idx} className={comp.ai_confidence && comp.ai_confidence < 80 ? 'low-confidence' : ''}>
-                        <td>{comp.component_type || comp.description || 'Component ' + (idx + 1)}</td>
-                        <td>{comp.origin_country || comp.country}</td>
-                        <td>{comp.percentage || comp.value_percentage}%</td>
-                        <td className="hs-code-cell">
-                          {comp.hs_code || <span className="text-muted">Not classified</span>}
-                        </td>
-                        <td className={comp.mfn_rate ? 'text-danger' : 'text-muted'}>
-                          {comp.mfn_rate !== undefined ? `${comp.mfn_rate.toFixed(1)}%` : 'N/A'}
-                        </td>
-                        <td className={comp.usmca_rate !== undefined ? 'text-success' : 'text-muted'}>
-                          {comp.usmca_rate !== undefined ? `${comp.usmca_rate.toFixed(1)}%` : 'N/A'}
-                        </td>
-                        <td className={comp.savings_percentage > 0 ? 'savings-positive' : 'text-muted'}>
-                          {comp.savings_percentage > 0 ? `${comp.savings_percentage.toFixed(1)}%` : '-'}
-                        </td>
-                        <td>
-                          {comp.ai_confidence ? (
-                            <span className={comp.ai_confidence < 80 ? 'confidence-low' : 'confidence-high'}>
-                              {comp.ai_confidence}%
-                              {comp.ai_confidence < 80 && ' ⚠️'}
+                    {userProfile.componentOrigins.map((comp, idx) => {
+                      const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                      const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
+                      const totalRate = comp.total_rate || comp.tariff_rates?.total_rate || baseMFN;
+                      const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+                      const netAfterUSMCA = totalRate - (baseMFN - usmcaRate);
+                      const actualSavings = baseMFN - usmcaRate;
+
+                      return (
+                        <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                          <td style={{ padding: '0.5rem' }}>
+                            {comp.component_type || comp.description || `Component ${idx + 1}`}
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                            {comp.origin_country || comp.country}
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                            {comp.percentage || comp.value_percentage}%
+                          </td>
+                          <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace' }}>
+                            {comp.hs_code || '—'}
+                          </td>
+
+                          {/* Base MFN Rate */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                            {baseMFN > 0 ? `${baseMFN.toFixed(1)}%` : '—'}
+                          </td>
+
+                          {/* Section 301 Tariff - HIGHLIGHTED */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: section301 > 0 ? '#fef3c7' : 'transparent' }}>
+                            {section301 > 0 ? (
+                              <span style={{ color: '#92400e', fontWeight: '700', fontSize: '0.9375rem' }}>
+                                +{section301.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>—</span>
+                            )}
+                          </td>
+
+                          {/* Total Rate (Base + Section 301) - BOLD */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                            <span style={{ color: '#dc2626', fontWeight: '700', fontSize: '0.9375rem' }}>
+                              {totalRate > 0 ? `${totalRate.toFixed(1)}%` : '—'}
                             </span>
-                          ) : (
-                            <span className="text-muted">N/A</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+
+                          {/* USMCA Rate */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                            <span style={{ color: '#059669' }}>
+                              {usmcaRate.toFixed(1)}%
+                            </span>
+                          </td>
+
+                          {/* Net After USMCA (what you actually pay) - HIGHLIGHTED */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>
+                            <span style={{ color: section301 > 0 ? '#dc2626' : '#059669', fontWeight: '700' }}>
+                              {netAfterUSMCA > 0 ? `${netAfterUSMCA.toFixed(1)}%` : '0%'}
+                            </span>
+                            {section301 > 0 && (
+                              <div style={{ fontSize: '0.6875rem', color: '#92400e', marginTop: '0.125rem' }}>
+                                ⚠️ S301 remains
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Actual Savings (USMCA saves base MFN only) */}
+                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
+                            {actualSavings > 0 ? (
+                              <span style={{ color: '#059669', fontWeight: '600' }}>
+                                {actualSavings.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>—</span>
+                            )}
+                          </td>
+
+                          {/* AI Confidence */}
+                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
+                            {comp.ai_confidence ? (
+                              <span style={{ color: comp.ai_confidence < 80 ? '#dc2626' : '#059669' }}>
+                                {comp.ai_confidence}%
+                                {comp.ai_confidence < 80 && ' ⚠️'}
+                              </span>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>N/A</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
