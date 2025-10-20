@@ -6,6 +6,7 @@ import '../styles/agent-components.css'
 import '../styles/admin-workflows.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
 import { SimpleAuthProvider } from '../lib/contexts/SimpleAuthContext'
+import { ToastProvider } from '../components/Toast'
 import ErrorBoundary from '../components/ErrorBoundary'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
@@ -22,11 +23,13 @@ export default function App({ Component, pageProps }) {
       </Head>
 
       <ErrorBoundary>
-        <SimpleAuthProvider>
-          <AlertProvider>
-            <Component {...pageProps} />
-          </AlertProvider>
-        </SimpleAuthProvider>
+        <ToastProvider>
+          <SimpleAuthProvider>
+            <AlertProvider>
+              <Component {...pageProps} />
+            </AlertProvider>
+          </SimpleAuthProvider>
+        </ToastProvider>
       </ErrorBoundary>
     </>
   )

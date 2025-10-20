@@ -103,7 +103,7 @@ export default function HomePage() {
             <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               About
             </Link>
-            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
               Get Started
             </Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
@@ -144,24 +144,22 @@ export default function HomePage() {
           </div>
           
           <h1 className="hero-main-title">
-            Move The World
+            70% of SMBs Qualify for USMCA<br/>
+            <span className="hero-yellow-highlight">But Don&apos;t Know It</span>
           </h1>
-          <h2 className="hero-sub-title">
-            <span className="hero-yellow-highlight">Small & Medium Business</span><br/>
-            <span>USMCA Compliance & Supply Chain Optimization</span>
-          </h2>
 
-          <p className="hero-description-text">
-            Professional trade services platform delivering comprehensive compliance analysis and supply chain optimization for Small & Medium manufacturers and importers who can&apos;t afford full-time trade compliance teams.
+          <p className="hero-description-text" style={{fontSize: '1.5rem', marginTop: '2rem'}}>
+            Are you paying 6-25% tariffs when you could pay <strong>0%</strong>?<br/>
+            Find out if you qualify in 5 minutes. Get your certificate. Stay protected.
           </p>
           
           <div className="hero-button-group">
             <Link
-              href="/signup"
+              href="/pricing"
               className="hero-primary-button"
-              aria-label="Start free trial - no credit card required"
+              aria-label="View pricing plans and start free trial"
             >
-              Try Free - No Credit Card
+              Start Free Trial
             </Link>
             <Link
               href="/services"
@@ -255,82 +253,118 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="calculator" className="main-content gradient-subtle">
+      {/* How It Works - 3 Simple Steps */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header" style={{textAlign: 'center'}}>
+            <h2 className="section-header-title">Get Your USMCA Certificate in 3 Simple Steps</h2>
+            <p className="section-header-subtitle">
+              Most SMBs already qualify—they just don&apos;t know it. Find out in 5 minutes.
+            </p>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>1️⃣</div>
+              <h3 className="content-card-title">Tell Us About Your Product</h3>
+              <p className="content-card-description">
+                Don&apos;t know your HS code? No problem.<br/>
+                Our AI helps you classify your product correctly.
+              </p>
+            </div>
+
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>2️⃣</div>
+              <h3 className="content-card-title">Check If You Qualify</h3>
+              <p className="content-card-description">
+                See your qualification status instantly.<br/>
+                Get recommendations to qualify if you&apos;re close.
+              </p>
+            </div>
+
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>3️⃣</div>
+              <h3 className="content-card-title">Preview & Download Certificate</h3>
+              <p className="content-card-description">
+                Download official certificate for customs.<br/>
+                Continue with alerts to stay protected.
+              </p>
+            </div>
+          </div>
+
+          <div style={{textAlign: 'center', marginTop: '2rem'}}>
+            <Link href="/pricing" className="btn-primary" style={{fontSize: '1.2rem', padding: '1rem 2rem'}}>
+              Start Free Trial
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Alert Monitoring Section */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app">
+          <div className="section-header" style={{textAlign: 'center'}}>
+            <h2 className="section-header-title">We Watch Trade Policy So You Don&apos;t Have To</h2>
+            <p className="section-header-subtitle">
+              Tariff changes happen fast. Get alerts before they hurt your business.
+            </p>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>🚨</div>
+              <h3 className="content-card-title">Real-Time Tariff Alerts</h3>
+              <p className="content-card-description">
+                Know immediately when tariffs change on your products.
+              </p>
+            </div>
+
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>⚠️</div>
+              <h3 className="content-card-title">Supply Chain Warnings</h3>
+              <p className="content-card-description">
+                Get early warnings about supplier risks and trade disputes.
+              </p>
+            </div>
+
+            <div className="content-card" style={{textAlign: 'center'}}>
+              <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>💡</div>
+              <h3 className="content-card-title">Mexico Alternatives</h3>
+              <p className="content-card-description">
+                Recommendations for Mexico-based alternative suppliers.
+              </p>
+            </div>
+          </div>
+
+          <div style={{textAlign: 'center', marginTop: '2rem'}}>
+            <p style={{fontSize: '1.2rem', marginBottom: '1rem'}}>
+              <strong>Plans starting at $99/month</strong> after 7-day free trial
+            </p>
+            <Link href="/pricing" className="btn-secondary">
+              View Pricing
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section id="calculator" className="main-content">
         <div className="container-app">
           <SimpleSavingsCalculator />
         </div>
       </section>
 
-      {/* Why Small Businesses Need This */}
-      <section className="main-content">
+      {/* Need Help? Simple CTA */}
+      <section className="main-content" style={{backgroundColor: '#fef3c7'}}>
         <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Why Small & Medium Manufacturers Need USMCA Compliance</h2>
-            <p className="section-header-subtitle">
-              You can&apos;t afford a full-time compliance team, but you can&apos;t afford to ignore USMCA benefits either.
+          <div className="content-card" style={{textAlign: 'center', background: 'transparent', border: 'none'}}>
+            <h2 className="section-header-title" style={{color: '#92400e'}}>
+              Don&apos;t Qualify Yet? Need Help?
+            </h2>
+            <p className="section-header-subtitle" style={{color: '#92400e', fontSize: '1.2rem'}}>
+              Mexico-based bilingual expert team helps you restructure supply chains, find alternative suppliers, and achieve USMCA compliance.
             </p>
-          </div>
-
-          <div className="grid-3-cols">
-            <div className="content-card">
-              <div className="content-card-icon">$</div>
-              <h3 className="content-card-title">Losing Money on Tariffs</h3>
-              <p className="content-card-description">
-                Many SMBs pay 6-25% tariffs on imports from China, Mexico, or Canada without realizing they could qualify for 0% tariffs under USMCA.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">?</div>
-              <h3 className="content-card-title">Don&apos;t Know If You Qualify</h3>
-              <p className="content-card-description">
-                USMCA rules are complex. You need 55-75% regional content, but calculating this requires expertise you don&apos;t have in-house.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">⚠</div>
-              <h3 className="content-card-title">Supply Chain at Risk</h3>
-              <p className="content-card-description">
-                Tariff changes, trade disputes, and supplier disruptions can destroy your margins overnight. You need early warning and alternatives.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">C</div>
-              <h3 className="content-card-title">Certificate Confusion</h3>
-              <p className="content-card-description">
-                Need a USMCA certificate but don&apos;t know where to start? Wrong paperwork means customs delays and lost revenue.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">M</div>
-              <h3 className="content-card-title">Want to Enter Mexico Market</h3>
-              <p className="content-card-description">
-                Mexico offers huge opportunities, but finding reliable suppliers or distributors without local connections is nearly impossible.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">!</div>
-              <h3 className="content-card-title">No Emergency Plan</h3>
-              <p className="content-card-description">
-                When customs holds your shipment or tariffs spike, you need expert help immediately—but hiring a consultant takes weeks.
-              </p>
-            </div>
-          </div>
-
-          <div className="content-card">
-            <h3 className="content-card-title">Our Solution: AI Analysis + Expert Team</h3>
-            <p className="content-card-description">
-              Canadian-owned platform with Mexico-based bilingual experts (Jorge & Cristina). We combine AI-powered analysis with 15+ years of trade expertise—at SMB-friendly prices starting at $99/month.
-            </p>
-            <div className="hero-button-group">
-              <Link href="/signup" className="btn-primary">
-                Try Free Analysis
-              </Link>
-              <Link href="/services" className="btn-secondary">
+            <div className="hero-button-group" style={{marginTop: '2rem'}}>
+              <Link href="/services" className="btn-primary">
                 View Expert Services
               </Link>
             </div>
@@ -338,115 +372,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Legal Disclaimer - Visible before pricing and services */}
+      {/* Legal Disclaimer */}
       <section className="main-content">
         <div className="container-app">
           <LegalDisclaimer />
-        </div>
-      </section>
-
-      {/* Pricing Teaser */}
-      <section className="main-content" style={{backgroundColor: '#f0f9ff'}}>
-        <div className="container-app">
-          <div className="content-card" style={{textAlign: 'center'}}>
-            <h2 className="section-header-title">Affordable Subscriptions for SMBs</h2>
-            <p className="section-header-subtitle">
-              Plans starting at $99/month • Unlimited analyses • Real-time trade alerts • Subscriber discounts on expert services
-            </p>
-            <div className="hero-button-group">
-              <Link href="/pricing" className="btn-primary">
-                View All Plans
-              </Link>
-              <Link href="/signup" className="btn-secondary">
-                Try Free Analysis
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Expert Services Teaser */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Not Qualified Yet? We Can Help.</h2>
-            <p className="section-header-subtitle">
-              Mexico-based bilingual expert team (Jorge & Cristina) with 15+ years of trade experience helps you restructure supply chains, find alternative suppliers, and achieve USMCA compliance.
-            </p>
-          </div>
-
-          <div className="grid-3-cols">
-            <div className="content-card">
-              <div className="content-card-icon">H</div>
-              <h3 className="content-card-title">Trade Health Check</h3>
-              <p className="content-card-description">
-                Complete assessment with prioritized action plan. Starting at $99.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">U</div>
-              <h3 className="content-card-title">USMCA Qualification</h3>
-              <p className="content-card-description">
-                Gap analysis and roadmap to achieve compliance. Starting at $175.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">S</div>
-              <h3 className="content-card-title">Supply Chain Services</h3>
-              <p className="content-card-description">
-                Alternative suppliers, Mexico sourcing, crisis response. Starting at $275.
-              </p>
-            </div>
-          </div>
-
-          <div className="content-card" style={{backgroundColor: '#fef3c7', textAlign: 'center'}}>
-            <h3 className="content-card-title" style={{color: '#92400e'}}>💡 Subscribers Save 15-25% on All Services</h3>
-            <p className="content-card-description" style={{color: '#92400e', marginBottom: '1rem'}}>
-              Professional subscribers get 15% off • Premium subscribers get 25% off all expert services
-            </p>
-            <div className="hero-button-group">
-              <Link href="/services" className="btn-primary">
-                View All Services
-              </Link>
-              <Link href="/services/request-form" className="btn-secondary">
-                Request Service
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Industry Insights Section */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Triangle Trade Intelligence Insights</h2>
-            <p className="section-header-subtitle">
-              Professional insights and analysis for strategic supply chain optimization and regulatory compliance management.
-            </p>
-          </div>
-
-          <div className="insights-layout">
-            <div className="content-card">
-              <h3 className="content-card-title">USMCA Optimization: Strategic Opportunities</h3>
-              <p className="content-card-description">
-                Comprehensive analysis of North American trade corridors reveals significant cost reduction opportunities through strategic Mexico routing for small manufacturers and importers. Find out if you qualify in under 5 minutes.
-              </p>
-              <div className="insights-button-group">
-                <Link href="/signup" className="btn-primary">
-                  Try Free Analysis
-                </Link>
-              </div>
-            </div>
-
-            <img
-              src="/image/datos-financieros.jpg"
-              alt="Professional Trade Analysis Dashboard"
-              className="insights-image"
-            />
-          </div>
         </div>
       </section>
 

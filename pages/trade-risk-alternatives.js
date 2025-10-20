@@ -21,6 +21,7 @@ import TRADE_RISK_CONFIG, {
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userTier, setUserTier] = useState('Trial'); // Track subscription tier
 
   // Real policy alerts state
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
@@ -68,6 +69,10 @@ export default function TradeRiskAlternatives() {
 
         if (response.ok) {
           const dashboardData = await response.json();
+
+          // Extract user subscription tier
+          setUserTier(dashboardData.user_profile?.subscription_tier || 'Trial');
+
           const alert = dashboardData.alerts?.find(a => a.id === analysisId);
 
           if (alert) {
@@ -136,7 +141,18 @@ export default function TradeRiskAlternatives() {
   };
 
 
-  const loadLocalStorageData = () => {
+  const loadLocalStorageData = async () => {
+    // Fetch user subscription tier
+    try {
+      const authResponse = await fetch('/api/auth/me', { credentials: 'include' });
+      if (authResponse.ok) {
+        const authData = await authResponse.json();
+        setUserTier(authData.user?.subscription_tier || 'Trial');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user tier:', error);
+    }
+
     // Load user data from completed workflow
     const workflowData = localStorage.getItem('usmca_workflow_data');
     const companyData = localStorage.getItem('usmca_company_data');
@@ -732,6 +748,7 @@ export default function TradeRiskAlternatives() {
                   key={idx}
                   consolidatedAlert={alert}
                   userProfile={userProfile}
+                  userTier={userTier}
                 />
               ))}
             </div>
@@ -785,7 +802,19 @@ export default function TradeRiskAlternatives() {
                 >
                   🎯 Request Expert Consultation
                 </button>
-                <button className="btn-secondary">📋 Download Risk Assessment</button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    if (userTier === 'Trial') {
+                      alert('Risk assessment download is available for paying subscribers. Upgrade to access detailed reports.');
+                      window.location.href = '/pricing';
+                    }
+                  }}
+                  disabled={userTier === 'Trial'}
+                  title={userTier === 'Trial' ? 'Upgrade to download risk assessments' : ''}
+                >
+                  {userTier === 'Trial' ? '🔒 Download Risk Assessment (Upgrade)' : '📋 Download Risk Assessment'}
+                </button>
               </div>
             </div>
           </div>

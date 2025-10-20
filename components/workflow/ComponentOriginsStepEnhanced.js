@@ -554,52 +554,12 @@ export default function ComponentOriginsStepEnhanced({
             )}
           </div>
 
-          {/* Origin Criterion - USMCA Certificate Field #8 */}
-          <div className="form-group">
-            <label className="form-label">
-              Origin Criterion <span style={{ fontSize: '0.8125rem', fontWeight: '400', color: '#6b7280' }}>(Optional - AI will determine this)</span>
-            </label>
-            <select
-              value={formData.origin_criterion || ''}
-              onChange={(e) => updateFormData('origin_criterion', e.target.value)}
-              className={`form-select ${formData.origin_criterion ? 'has-value' : ''}`}
-            >
-              <option value="">Skip - AI will determine...</option>
-              <option value="A">A - Product made entirely in North America (rare)</option>
-              <option value="B">B - Product changed category + meets % threshold (most common)</option>
-              <option value="C">C - Product meets specific processing rules (industry-specific)</option>
-            </select>
-            <div className="form-help" style={{ padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '4px', marginTop: '0.5rem' }}>
-              <strong style={{ color: '#1e40af' }}>💡 Don't worry about this!</strong>
-              <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
-                Our AI will analyze your components and tell you which criterion applies. Most products use <strong>Criterion B</strong> (tariff shift + regional content).
-              </div>
-            </div>
-          </div>
+          {/* REMOVED: origin_criterion and method_of_qualification dropdowns
+              These fields confused users because AI determines them based on USMCA treaty rules.
+              Allowing users to "choose" created false sense of control - AI must apply correct rules
+              regardless of user selection (e.g., automotive products MUST use Net Cost method).
 
-          {/* Method of Qualification - USMCA Certificate Field #10 */}
-          <div className="form-group">
-            <label className="form-label">
-              Method of Qualification <span style={{ fontSize: '0.8125rem', fontWeight: '400', color: '#6b7280' }}>(Optional - AI will calculate)</span>
-            </label>
-            <select
-              value={formData.method_of_qualification || ''}
-              onChange={(e) => updateFormData('method_of_qualification', e.target.value)}
-              className={`form-select ${formData.method_of_qualification ? 'has-value' : ''}`}
-            >
-              <option value="">Skip - AI will calculate...</option>
-              <option value="TV">TV - Based on your selling price (easiest, most common)</option>
-              <option value="NC">NC - Based on production costs (detailed accounting needed)</option>
-              <option value="TS">TS - Product changed enough to qualify (no math needed)</option>
-              <option value="NO">NO - Product qualifies automatically (rare cases)</option>
-            </select>
-            <div className="form-help" style={{ padding: '0.75rem', backgroundColor: '#eff6ff', borderRadius: '4px', marginTop: '0.5rem' }}>
-              <strong style={{ color: '#1e40af' }}>💡 We'll calculate this for you!</strong>
-              <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#1e3a8a' }}>
-                Our AI uses <strong>Transaction Value (TV)</strong> by default - this means we calculate based on your component percentages. No accounting records needed.
-              </div>
-            </div>
-          </div>
+              These values are now determined by AI and shown in results/certificate. */}
         </div>
       </div>
 

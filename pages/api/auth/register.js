@@ -75,16 +75,47 @@ export default async function handler(req, res) {
   try {
     console.log('🔐 Registration attempt:', email);
 
-    // Check if user already exists in user_profiles
-    const { data: existingUser, error: checkError } = await supabaseAdmin
+    // Check if user already exists and handle unconfirmed accounts
+    const { data: existingProfile, error: checkError } = await supabaseAdmin
       .from('user_profiles')
-      .select('email')
+      .select('email, user_id, created_at')
       .eq('email', email)
       .single();
 
-    if (existingUser) {
-      console.log('❌ User already exists:', email);
-      return res.status(409).json({ error: 'User already exists' });
+    if (existingProfile) {
+      // Check if the auth account is confirmed
+      const { data: authUser, error: authCheckError } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
+
+      if (authUser && authUser.user && authUser.user.email_confirmed_at) {
+        // Account exists and is confirmed - block signup
+        console.log('❌ User already exists and is confirmed:', email);
+        return res.status(409).json({ error: 'User already exists' });
+      }
+
+      // Account exists but NOT confirmed - check if it's stale (> 24 hours old)
+      const accountAge = Date.now() - new Date(existingProfile.created_at).getTime();
+      const isStale = accountAge > 24 * 60 * 60 * 1000; // 24 hours
+
+      if (isStale) {
+        console.log('🧹 Cleaning up stale unconfirmed account (>24h old):', email);
+
+        // Delete old unconfirmed account from user_profiles
+        await supabaseAdmin
+          .from('user_profiles')
+          .delete()
+          .eq('user_id', existingProfile.user_id);
+
+        // Delete old unconfirmed auth user
+        await supabaseAdmin.auth.admin.deleteUser(existingProfile.user_id);
+
+        console.log('✅ Stale account deleted, proceeding with new signup');
+      } else {
+        // Account < 24 hours old - tell user to check email
+        console.log('⏰ Recent unconfirmed account exists (<24h old):', email);
+        return res.status(409).json({
+          error: 'Account exists but email not confirmed. Please check your email for the confirmation link. If you didn\'t receive it, try again in 24 hours.'
+        });
+      }
     }
 
     // Step 1: Create user in auth.users via Supabase Auth with email confirmation
@@ -131,6 +162,7 @@ export default async function handler(req, res) {
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('user_profiles')
       .insert({
+        id: userId, // Use auth user ID as profile ID (foreign key to auth.users)
         user_id: userId,
         email: email.toLowerCase(),
         company_name: company_name,

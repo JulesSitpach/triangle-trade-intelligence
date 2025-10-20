@@ -159,6 +159,8 @@ Format as JSON with these exact keys: feasibility_score (1-10), recommended_loca
     console.log('[MANUFACTURING FEASIBILITY] Calling OpenRouter API with comprehensive business context...');
 
     // Call OpenRouter API with full business intelligence
+    // UPGRADED: Manufacturing feasibility affects major capital investment decisions - needs expert Sonnet 4.5
+    // TODO: Implement 3-tier fallback (OpenRouter → Anthropic → Database) like crisis-response-analysis.js
     const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -168,13 +170,13 @@ Format as JSON with these exact keys: feasibility_score (1-10), recommended_loca
         'X-Title': 'Triangle Trade Intelligence - Manufacturing Feasibility Analysis'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4.5',
+        model: 'anthropic/claude-sonnet-4.5', // UPGRADED: Capital investment decisions need expert analysis
         messages: [{
           role: 'user',
           content: aiPrompt
         }],
         temperature: 0.7,
-        max_tokens: 3500
+        max_tokens: 4000 // Increased for comprehensive feasibility analysis
       })
     });
 

@@ -15,7 +15,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!loading && !user) {
       console.log('❌ No valid session, redirecting to login');
-      router.push('/login');
+      router.push('/login?redirect=/dashboard');
     } else if (!loading && user) {
       console.log('✅ Dashboard access granted for:', user.isAdmin ? 'admin' : 'user');
     }

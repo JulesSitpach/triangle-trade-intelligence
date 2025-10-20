@@ -2,13 +2,16 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 
 export default function SubscriptionSuccess() {
   const router = useRouter();
   const { session_id } = router.query;
+  const { refreshUser } = useSimpleAuth();
   const [sessionData, setSessionData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [redirectCountdown, setRedirectCountdown] = useState(3);
 
   useEffect(() => {
     if (session_id) {
@@ -18,6 +21,29 @@ export default function SubscriptionSuccess() {
         .then(data => {
           if (data.success) {
             setSessionData(data.session);
+
+            // 🚨 CRITICAL: Refresh user context to get updated subscription tier
+            // This ensures dashboard shows "Starter" instead of cached "Trial"
+            refreshUser().then(() => {
+              console.log('✅ User context refreshed with new subscription tier');
+            });
+
+            // Countdown timer before redirect
+            const countdownInterval = setInterval(() => {
+              setRedirectCountdown(prev => {
+                if (prev <= 1) {
+                  clearInterval(countdownInterval);
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
+
+            // Auto-redirect to dashboard after 3 seconds
+            // SimpleAuthContext now has fresh data with "Starter" tier
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 3000);
           } else {
             setError(data.error || 'Failed to verify session');
           }
@@ -32,7 +58,7 @@ export default function SubscriptionSuccess() {
     } else {
       setLoading(false);
     }
-  }, [session_id]);
+  }, [session_id, router]);
 
   return (
     <>
@@ -81,9 +107,14 @@ export default function SubscriptionSuccess() {
                   Welcome to Triangle Trade Intelligence. Your subscription is now active.
                 </p>
 
-                <div className="content-card">
-                  <h2 className="content-card-title">What's Next?</h2>
+                <div className="content-card" style={{backgroundColor: '#E3F2FD', border: '2px solid #2196F3'}}>
+                  <h2 className="content-card-title" style={{color: '#1565C0'}}>
+                    🎉 Redirecting to Dashboard in {redirectCountdown} seconds...
+                  </h2>
                   <div>
+                    <p className="text-body">
+                      Your subscription is now active! You'll be automatically redirected to your dashboard where you can:
+                    </p>
                     <p className="text-body">
                       ✓ Access your dashboard to start analyzing USMCA compliance
                     </p>
@@ -94,7 +125,7 @@ export default function SubscriptionSuccess() {
                       ✓ Set up trade alerts for your products
                     </p>
                     <p className="text-body">
-                      ✓ Explore professional services for expert support
+                      ✓ Explore professional services for expert support (with subscriber discounts)
                     </p>
                   </div>
                 </div>
@@ -116,7 +147,7 @@ export default function SubscriptionSuccess() {
                   <Link href="/dashboard" className="hero-primary-button">
                     Go to Dashboard
                   </Link>
-                  <Link href="/usmca-workflow" className="hero-secondary-button">
+                  <Link href="/usmca-workflow" className="hero-primary-button">
                     Start Analysis
                   </Link>
                 </div>

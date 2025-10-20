@@ -4,86 +4,153 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-grid">
+    <footer style={{
+      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+      color: '#fff',
+      padding: '4rem 0 2rem',
+      marginTop: '4rem'
+    }}>
+      <div className="container-app">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '3rem',
+          marginBottom: '3rem'
+        }}>
+          {/* Company Info */}
           <div>
-            <h3 className="footer-title">
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '1rem',
+              color: '#fff'
+            }}>
               Triangle Trade Intelligence
             </h3>
-            <p className="footer-text">
-              Professional USMCA compliance and trade services platform for North American importers and exporters.
+            <p style={{
+              color: '#e0f2fe',
+              lineHeight: '1.6',
+              marginBottom: '1rem'
+            }}>
+              USMCA compliance platform helping North American SMBs save on tariffs and optimize supply chains.
+            </p>
+            <p style={{
+              color: '#e0f2fe',
+              fontSize: '0.9rem'
+            }}>
+              Canadian-owned • Mexico-based experts<br/>
+              Bilingual team (English/Spanish)
             </p>
           </div>
 
+          {/* Platform */}
           <div>
-            <h4 className="footer-subtitle">
+            <h4 style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '1rem',
+              color: '#fff'
+            }}>
               Platform
             </h4>
-            <ul className="footer-list">
-              <li>
-                <Link href="/pricing" className="footer-link">
-                  Pricing
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/signup" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Get Started (Free Trial)
                 </Link>
               </li>
-              <li>
-                <Link href="/services" className="footer-link">
-                  Services
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/pricing" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Pricing Plans
                 </Link>
               </li>
-              <li>
-                <Link href="/dashboard" className="footer-link">
-                  Dashboard
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/services" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Expert Services
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="footer-subtitle">
-              Legal
-            </h4>
-            <ul className="footer-list">
-              <li>
-                <Link href="/terms-of-service" className="footer-link">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy-policy" className="footer-link">
-                  Privacy Policy
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/dashboard" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Dashboard Login
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Resources */}
           <div>
-            <h4 className="footer-subtitle">
-              Contact
+            <h4 style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '1rem',
+              color: '#fff'
+            }}>
+              Resources
             </h4>
-            <ul className="footer-list">
-              <li>
-                <a href="mailto:support@triangleintelligence.com" className="footer-link">
-                  Support & Help
-                </a>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/about" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  About Us
+                </Link>
               </li>
-              <li>
-                <a href="mailto:legal@triangleintelligence.com" className="footer-link">
-                  Legal Inquiries
-                </a>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/mexico-savings-calculator" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Savings Calculator
+                </Link>
               </li>
-              <li>
-                <a href="mailto:privacy@triangleintelligence.com" className="footer-link">
-                  Privacy Concerns
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/secure-supply-chain-mexico" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Supply Chain Security
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support & Legal */}
+          <div>
+            <h4 style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '1rem',
+              color: '#fff'
+            }}>
+              Support & Legal
+            </h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/contact-support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Contact Support
+                </Link>
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <Link href="/contact" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Contact Us
+                </Link>
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <a href="mailto:triangleintel@gmail.com?subject=General%20Inquiry" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Email: triangleintel@gmail.com
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="footer-divider">
-          <p className="footer-copyright">
+        {/* Bottom Bar */}
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.2)',
+          paddingTop: '2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          <p style={{ color: '#e0f2fe', margin: 0 }}>
             © {currentYear} Triangle Trade Intelligence. All rights reserved.
+          </p>
+          <p style={{ color: '#e0f2fe', margin: 0, fontSize: '0.9rem' }}>
+            Not a licensed customs broker. Consulting services only.
           </p>
         </div>
       </div>

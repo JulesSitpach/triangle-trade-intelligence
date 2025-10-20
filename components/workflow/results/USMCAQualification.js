@@ -429,25 +429,90 @@ export default function USMCAQualification({ results }) {
             </tbody>
           </table>
 
-          {/* Summary Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                <Tooltip text="Total value percentage from US, Mexico, or Canada sources">
-                  North American Content
-                </Tooltip>
+          {/* RVC Breakdown - Material + Labor */}
+          <div style={{ marginTop: '1.5rem', padding: '1.5rem', backgroundColor: '#f0f9ff', border: '2px solid #3b82f6', borderRadius: '8px' }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#1e40af', marginBottom: '1rem', textAlign: 'center' }}>
+              📊 Regional Value Content (RVC) Breakdown
+            </h4>
+
+            {/* Material RVC */}
+            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
+                  <Tooltip text="Components from US, Mexico, or Canada that count toward USMCA qualification">
+                    Material Components (USMCA)
+                  </Tooltip>
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>
+                  {(() => {
+                    const materialRVC = results.usmca.component_breakdown
+                      .filter(c => c.is_usmca_member)
+                      .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
+                    return materialRVC.toFixed(1);
+                  })()}%
+                </div>
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{(results.usmca.north_american_content || 0).toFixed(1)}%</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                <Tooltip text="Minimum North American content required for your product category under USMCA treaty rules">
-                  Required Threshold
-                </Tooltip>
+              <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                {results.usmca.component_breakdown.filter(c => c.is_usmca_member).map(c => c.description).join(', ')}
               </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{results.usmca.threshold_applied}%</div>
             </div>
-            <div style={{ textAlign: 'center' }}>
+
+            {/* Labor RVC (if applicable) */}
+            {(() => {
+              const materialRVC = results.usmca.component_breakdown
+                .filter(c => c.is_usmca_member)
+                .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
+              const totalRVC = results.usmca.north_american_content || 0;
+              const laborRVC = totalRVC - materialRVC;
+
+              if (laborRVC > 0.1) {
+                return (
+                  <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
+                        <Tooltip text="Value added through substantial transformation (welding, forming, machining, etc.) performed in USMCA countries">
+                          Labor & Manufacturing Value-Added
+                        </Tooltip>
+                      </div>
+                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
+                        {laborRVC.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                      Manufacturing in {results.manufacturing_location || results.usmca?.manufacturing_location || 'USMCA region'} with substantial transformation
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Total RVC */}
+            <div style={{ padding: '1rem', backgroundColor: qualified ? '#ecfdf5' : '#fef2f2', borderRadius: '6px', border: qualified ? '2px solid #059669' : '2px solid #dc2626' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '1rem', fontWeight: '600', color: qualified ? '#065f46' : '#991b1b' }}>
+                  Total Regional Value Content
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: '700', color: qualified ? '#059669' : '#dc2626' }}>
+                  {(results.usmca.north_american_content || 0).toFixed(1)}%
+                </div>
+              </div>
+              <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: qualified ? '#047857' : '#991b1b', fontWeight: '500' }}>
+                {qualified
+                  ? `✓ Exceeds ${results.usmca.threshold_applied}% threshold - QUALIFIED`
+                  : `✗ Below ${results.usmca.threshold_applied}% threshold - NOT QUALIFIED`}
+              </div>
+            </div>
+
+            {/* Educational Note */}
+            <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#fffbeb', borderRadius: '4px', fontSize: '0.8125rem', color: '#92400e', borderLeft: '3px solid #f59e0b' }}>
+              <strong>💡 Why can RVC exceed 100%?</strong> Under USMCA Net Cost method, material components + labor value-added can sum to more than 100%. This is normal and correct - both material costs AND manufacturing labor count toward regional content.
+            </div>
+          </div>
+
+          {/* Additional Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+            <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
               <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
                 <Tooltip text="Number of components sourced from USMCA countries (US, Mexico, Canada)">
                   Qualifying Components
@@ -456,6 +521,14 @@ export default function USMCAQualification({ results }) {
               <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
                 {results.usmca.component_breakdown.filter(c => c.is_usmca_member).length} of {results.usmca.component_breakdown.length}
               </div>
+            </div>
+            <div style={{ textAlign: 'center', padding: '0.75rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                <Tooltip text="Minimum North American content required for your product category under USMCA treaty rules">
+                  Required Threshold
+                </Tooltip>
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>{results.usmca.threshold_applied}%</div>
             </div>
           </div>
 

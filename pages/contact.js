@@ -175,20 +175,20 @@ export default function Contact() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
                 <div>
                   <h4 className="card-title" style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Email Support</h4>
-                  <a href="mailto:support@triangleintelligence.com" className="nav-link">
-                    support@triangleintelligence.com
+                  <a href="mailto:triangleintel@gmail.com?subject=Support%20Request" className="nav-link">
+                    triangleintel@gmail.com
                   </a>
                 </div>
                 <div>
                   <h4 className="card-title" style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Sales Inquiries</h4>
-                  <a href="mailto:sales@triangleintelligence.com" className="nav-link">
-                    sales@triangleintelligence.com
+                  <a href="mailto:triangleintel@gmail.com?subject=Sales%20Inquiry" className="nav-link">
+                    triangleintel@gmail.com
                   </a>
                 </div>
                 <div>
                   <h4 className="card-title" style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Legal & Privacy</h4>
-                  <a href="mailto:legal@triangleintelligence.com" className="nav-link">
-                    legal@triangleintelligence.com
+                  <a href="mailto:triangleintel@gmail.com?subject=Legal%20Inquiry" className="nav-link">
+                    triangleintel@gmail.com
                   </a>
                 </div>
               </div>

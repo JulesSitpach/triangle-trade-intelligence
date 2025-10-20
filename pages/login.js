@@ -12,10 +12,18 @@ export default function Login() {
 
   const { user, login } = useSimpleAuth();
   const router = useRouter();
+  const { redirect, message } = router.query;
 
   // Note: Removed automatic redirect on page load
   // Server-side authentication handles redirects properly now
   // This prevents infinite redirect loops
+
+  // Show message from query parameter (e.g., from signup flow)
+  useEffect(() => {
+    if (message) {
+      setError(message);
+    }
+  }, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,11 +42,19 @@ export default function Login() {
       if (result.error) {
         setError(result.error);
       } else {
-        // Success - redirect based on user role
+        // Success - redirect based on return URL or user role
         console.log('Login successful, redirecting...');
-        if (result.user && result.user.isAdmin) {
+
+        // Priority 1: Use redirect query parameter if provided
+        if (redirect) {
+          router.push(redirect);
+        }
+        // Priority 2: Admin users go to admin dashboard
+        else if (result.user && result.user.isAdmin) {
           router.push('/admin/broker-dashboard');
-        } else {
+        }
+        // Priority 3: Regular users go to user dashboard
+        else {
           router.push('/dashboard');
         }
       }

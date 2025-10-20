@@ -938,6 +938,8 @@ textarea.form-input:not(:placeholder-shown) {
   top: 100px;
   left: calc(50% - 250px);
   width: 500px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   background-color: white;
   padding: 40px;
   border-radius: 8px;

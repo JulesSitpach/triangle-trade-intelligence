@@ -16,7 +16,7 @@ export default function SubscriptionManagement() {
 
   useEffect(() => {
     if (!user) {
-      router.push('/login');
+      router.push('/login?redirect=/account/subscription');
       return;
     }
 

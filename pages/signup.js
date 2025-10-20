@@ -18,13 +18,19 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signUp, user } = useSimpleAuth();
   const router = useRouter();
+  const { plan } = router.query; // Get selected plan from URL
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to appropriate page
     if (user) {
-      router.push('/dashboard');
+      // If they selected a paid plan, go to pricing to complete subscription
+      if (plan && plan !== 'trial') {
+        router.push('/pricing');
+      } else {
+        router.push('/dashboard');
+      }
     }
-  }, [user]);
+  }, [user, plan]);
 
   const handleChange = (e) => {
     setFormData({
@@ -74,9 +80,17 @@ export default function Signup() {
         // Registration successful with email confirmation
         console.log('Registration successful, check email for confirmation');
         setError(''); // Clear any previous errors
-        // Show success message instead of redirecting
-        alert('Account created successfully! Please check your email to verify your account before signing in.');
-        router.push('/login?message=Please check your email to verify your account');
+
+        // Redirect based on selected plan
+        if (plan && plan !== 'trial') {
+          // For paid plans, redirect to login and then back to pricing
+          alert(`✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nAfter verification, you'll be able to subscribe to the ${plan} plan.`);
+          router.push(`/login?redirect=/pricing&message=Please verify your email to complete subscription`);
+        } else {
+          // For trial, normal flow
+          alert('✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nOnce verified, you can sign in and start your free trial!');
+          router.push('/login?message=Account created successfully. Please sign in.');
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred');
@@ -102,8 +116,18 @@ export default function Signup() {
               <Link href="/">
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-title">Start Your Free Trial</h1>
-              <p className="text-body">Try Triangle Trade Intelligence free - no credit card required</p>
+              <h1 className="section-title">
+                {plan === 'starter' && 'Sign up for Starter Plan'}
+                {plan === 'professional' && 'Sign up for Professional Plan'}
+                {plan === 'premium' && 'Sign up for Premium Plan'}
+                {(!plan || plan === 'trial') && 'Start Your Free Trial'}
+              </h1>
+              <p className="text-body">
+                {plan === 'starter' && 'Create account to subscribe to Starter ($99/month)'}
+                {plan === 'professional' && 'Create account to subscribe to Professional ($299/month)'}
+                {plan === 'premium' && 'Create account to subscribe to Premium ($599/month)'}
+                {(!plan || plan === 'trial') && 'Try Triangle Trade Intelligence free - no credit card required'}
+              </p>
             </div>
 
             {/* Error Message */}
@@ -228,28 +252,79 @@ export default function Signup() {
                 disabled={isLoading}
                 className="btn-primary"
               >
-                {isLoading ? 'Creating Account...' : 'Start Free Trial'}
+                {isLoading ? 'Creating Account...' :
+                  plan === 'starter' ? 'Create Account & Subscribe' :
+                  plan === 'professional' ? 'Create Account & Subscribe' :
+                  plan === 'premium' ? 'Create Account & Subscribe' :
+                  'Start Free Trial'
+                }
               </button>
             </form>
 
-            {/* Trial Benefits Section */}
-            <div className="content-card">
-              <h3 className="card-title">Your Free Trial Includes:</h3>
-              <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
-              <div className="trial-benefit-item">✓ 3 components analyzed</div>
-              <div className="trial-benefit-item">✓ Certificate preview (watermarked)</div>
-              <div className="trial-benefit-item">✓ Access to crisis alerts dashboard</div>
-              <div className="trial-benefit-item">✓ Can purchase services at full price</div>
+            {/* Plan Benefits Section */}
+            {(!plan || plan === 'trial') ? (
+              <div className="content-card">
+                <h3 className="card-title">Your Free Trial Includes:</h3>
+                <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
+                <div className="trial-benefit-item">✓ 3 components analyzed</div>
+                <div className="trial-benefit-item">✓ Certificate preview (watermarked)</div>
+                <div className="trial-benefit-item">✓ Access to crisis alerts dashboard</div>
+                <div className="trial-benefit-item">✓ Can purchase services at full price</div>
 
-              <div className="status-success">
-                <p className="text-body">
-                  <strong>After Trial:</strong> Subscribe for unlimited analyses
-                </p>
-                <p className="text-body">
-                  Plans from $99/month • Cancel anytime
-                </p>
+                <div className="status-success">
+                  <p className="text-body">
+                    <strong>After Trial:</strong> Subscribe for unlimited analyses
+                  </p>
+                  <p className="text-body">
+                    Plans from $99/month • Cancel anytime
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="content-card">
+                <h3 className="card-title">
+                  {plan === 'starter' && 'Starter Plan Includes:'}
+                  {plan === 'professional' && 'Professional Plan Includes:'}
+                  {plan === 'premium' && 'Premium Plan Includes:'}
+                </h3>
+                {plan === 'starter' && (
+                  <>
+                    <div className="trial-benefit-item">✓ 10 USMCA analyses per month</div>
+                    <div className="trial-benefit-item">✓ Basic trade alerts</div>
+                    <div className="trial-benefit-item">✓ Email support</div>
+                    <div className="trial-benefit-item">✓ Certificate generation</div>
+                    <div className="trial-benefit-item">✓ AI HS code suggestions</div>
+                  </>
+                )}
+                {plan === 'professional' && (
+                  <>
+                    <div className="trial-benefit-item">✓ 100 USMCA analyses per month</div>
+                    <div className="trial-benefit-item">✓ Real-time crisis alerts with AI impact scoring</div>
+                    <div className="trial-benefit-item">✓ 15% discount on professional services</div>
+                    <div className="trial-benefit-item">✓ Priority support (48hr response)</div>
+                    <div className="trial-benefit-item">✓ Detailed AI-powered compliance guidance</div>
+                  </>
+                )}
+                {plan === 'premium' && (
+                  <>
+                    <div className="trial-benefit-item">✓ Everything in Professional</div>
+                    <div className="trial-benefit-item">✓ Quarterly strategy calls with our expert team</div>
+                    <div className="trial-benefit-item">✓ 25% discount on professional services</div>
+                    <div className="trial-benefit-item">✓ Dedicated email support</div>
+                    <div className="trial-benefit-item">✓ Custom trade intelligence reports</div>
+                  </>
+                )}
+
+                <div className="status-success">
+                  <p className="text-body">
+                    <strong>After signup:</strong> You'll be taken to Stripe to complete payment
+                  </p>
+                  <p className="text-body">
+                    Cancel anytime • No long-term contracts
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Already have account */}
             <div className="element-spacing">

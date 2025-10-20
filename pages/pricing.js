@@ -11,10 +11,30 @@ export default function Pricing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [billingPeriod, setBillingPeriod] = useState('monthly')
   const [loading, setLoading] = useState(null)
+  const [currentTier, setCurrentTier] = useState(null) // Track user's current subscription
   const router = useRouter()
 
   useEffect(() => {
     setIsClient(true)
+
+    // Check if user is logged in and get their current tier
+    const checkUserTier = async () => {
+      try {
+        const response = await fetch('/api/auth/me', { credentials: 'include' })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.user && data.user.subscription_tier) {
+            // Store in lowercase for comparison (database has "Starter", "Professional", "Premium")
+            setCurrentTier(data.user.subscription_tier.toLowerCase())
+            console.log('Current user tier:', data.user.subscription_tier)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user tier:', error)
+      }
+    }
+
+    checkUserTier()
   }, [])
 
   const toggleMobileMenu = () => {
@@ -25,13 +45,44 @@ export default function Pricing() {
     try {
       setLoading(tier)
 
-      // Call API to create Stripe checkout session
+      // Check if user is logged in first
+      const authCheck = await fetch('/api/auth/me', {
+        credentials: 'include'
+      })
+
+      if (!authCheck.ok) {
+        // User not logged in - redirect to signup with selected plan
+        router.push(`/signup?plan=${tier}`)
+        return
+      }
+
+      // If user already has a subscription (changing plans), redirect to customer portal
+      if (currentTier && currentTier !== 'trial') {
+        // Redirect to Stripe Customer Portal
+        const portalResponse = await fetch('/api/stripe/create-portal-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        })
+
+        if (portalResponse.ok) {
+          const portalData = await portalResponse.json()
+          window.location.href = portalData.url
+          return
+        } else {
+          // Portal session failed (likely no subscription record in database)
+          const errorData = await portalResponse.json()
+          throw new Error(errorData.message || 'Unable to access subscription portal. Please contact support.')
+        }
+      }
+
+      // User is logged in and doesn't have an active subscription - proceed to Stripe checkout
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Important: include auth cookie
+        credentials: 'include',
         body: JSON.stringify({
           tier: tier.toLowerCase(),
           billing_period: billingPeriod
@@ -41,12 +92,6 @@ export default function Pricing() {
       const data = await response.json()
 
       if (!response.ok) {
-        // User-friendly error messages
-        if (response.status === 401) {
-          alert('Please log in to subscribe. Redirecting to login...')
-          router.push('/login?redirect=/pricing')
-          return
-        }
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
@@ -65,13 +110,31 @@ export default function Pricing() {
       }
     } catch (error) {
       console.error('Subscription error:', error)
-      alert(`Subscription error: ${error.message}\n\nIf this persists, please contact support@triangleintelligence.com`)
+      alert(`Subscription error: ${error.message}\n\nIf this persists, please contact triangleintel@gmail.com`)
     } finally {
       setLoading(null)
     }
   }
 
   const plans = [
+    {
+      name: 'Free Trial',
+      tier: 'trial',
+      monthlyPrice: 0,
+      annualPrice: 0,
+      period: '7 days',
+      description: 'Try the platform risk-free for 7 days - no credit card required',
+      features: [
+        '1 USMCA analysis (max 3 components)',
+        'Certificate preview (watermarked)',
+        'View crisis alerts dashboard',
+        'AI HS code suggestions',
+        'No credit card required'
+      ],
+      cta: 'Start Free Trial',
+      popular: false,
+      isTrial: true
+    },
     {
       name: 'Starter',
       tier: 'starter',
@@ -215,7 +278,7 @@ export default function Pricing() {
             <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
-            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+            <Link href="/pricing#pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
@@ -264,9 +327,9 @@ export default function Pricing() {
           
           <div className="hero-button-group">
             <Link
-              href="/signup"
+              href="#pricing"
               className="hero-primary-button"
-              aria-label="Start free trial - no credit card required"
+              aria-label="View pricing plans and start free trial"
             >
               Try Free - No Credit Card
             </Link>
@@ -322,7 +385,7 @@ export default function Pricing() {
             </div>
           </div>
 
-          <div className="grid-3-cols">
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2rem'}}>
             {plans.map((plan, index) => (
               <div key={index} className={`content-card ${plan.popular ? 'popular-plan' : ''}`}>
                 {plan.popular && <div className="popular-badge">Most Popular</div>}
@@ -333,7 +396,7 @@ export default function Pricing() {
                     <strong>${billingPeriod === 'monthly' ? plan.monthlyPrice : plan.annualPrice}</strong>
                     {' '}{plan.period}
                   </p>
-                  {billingPeriod === 'annual' && (
+                  {billingPeriod === 'annual' && !plan.isTrial && (
                     <p className="text-body">
                       ${Math.round(plan.annualPrice / 12)}/month
                     </p>
@@ -349,13 +412,31 @@ export default function Pricing() {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => handleSubscribe(plan.tier)}
-                  disabled={loading === plan.tier}
-                  className="content-card-link btn-primary"
-                >
-                  {loading === plan.tier ? 'Loading...' : plan.cta}
-                </button>
+                {plan.isTrial ? (
+                  <Link
+                    href="/signup?plan=trial"
+                    className="content-card-link btn-primary"
+                  >
+                    {plan.cta}
+                  </Link>
+                ) : currentTier === plan.tier ? (
+                  <button
+                    disabled
+                    className="content-card-link btn-secondary"
+                    style={{cursor: 'not-allowed', opacity: 0.6}}
+                  >
+                    Current Plan
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleSubscribe(plan.tier)}
+                    disabled={loading === plan.tier}
+                    className="content-card-link btn-primary"
+                  >
+                    {loading === plan.tier ? 'Loading...' :
+                      currentTier ? 'Change Plan' : plan.cta}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -640,9 +721,9 @@ export default function Pricing() {
             </p>
             <div className="hero-button-group">
               <Link
-                href="/signup"
+                href="#pricing"
                 className="hero-primary-button"
-                aria-label="Start free trial"
+                aria-label="View pricing plans and subscribe"
               >
                 Get Started
               </Link>

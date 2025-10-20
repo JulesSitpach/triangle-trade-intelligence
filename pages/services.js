@@ -178,7 +178,7 @@ export default function ProfessionalServices() {
             <Link href="/services" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
-            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+            <Link href="/pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
@@ -227,11 +227,11 @@ export default function ProfessionalServices() {
 
           <div className="hero-button-group">
             <Link
-              href="/signup"
+              href="/pricing"
               className="hero-primary-button"
               aria-label="Start free trial - no credit card required"
             >
-              Try Free - No Credit Card
+              Start Free Trial
             </Link>
             <Link
               href="#services"

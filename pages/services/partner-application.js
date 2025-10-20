@@ -585,7 +585,7 @@ export default function PartnerApplication() {
             </div>
 
             <div className="google-workspace">
-              <a href="mailto:partners@triangleintelligence.com" className="google-btn gmail">
+              <a href="mailto:triangleintel@gmail.com?subject=Partnership%20Inquiry" className="google-btn gmail">
                 📧 Contact Partnership Team
               </a>
               <a href="/services/request-form" className="google-btn docs">

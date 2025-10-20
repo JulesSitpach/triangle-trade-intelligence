@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 
-export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile }) {
+export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile, userTier = 'Trial' }) {
   const [showDetails, setShowDetails] = useState(false);
   const [showBrokerSummary, setShowBrokerSummary] = useState(true);
   const [showConfidenceTooltip, setShowConfidenceTooltip] = useState(false);
@@ -330,12 +330,19 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
               className="btn-secondary"
               style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
               onClick={() => {
+                if (userTier === 'Trial') {
+                  alert('Email sharing is available for paying subscribers. Upgrade to share alerts with your team.');
+                  window.location.href = '/pricing';
+                  return;
+                }
                 const subject = encodeURIComponent(`Trade Alert: ${consolidatedAlert.title}`);
                 const body = encodeURIComponent(`${consolidatedAlert.broker_summary}\n\nView full alert: ${window.location.href}`);
                 window.location.href = `mailto:?subject=${subject}&body=${body}`;
               }}
+              disabled={userTier === 'Trial'}
+              title={userTier === 'Trial' ? 'Upgrade to email alerts to your team' : ''}
             >
-              📤 Email to Team
+              {userTier === 'Trial' ? '🔒 Email to Team (Upgrade)' : '📤 Email to Team'}
             </button>
             <button
               className="btn-secondary"
@@ -350,9 +357,18 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
             <button
               className="btn-secondary"
               style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-              onClick={() => window.print()}
+              onClick={() => {
+                if (userTier === 'Trial') {
+                  alert('PDF export is available for paying subscribers. Upgrade to export and share reports.');
+                  window.location.href = '/pricing';
+                  return;
+                }
+                window.print();
+              }}
+              disabled={userTier === 'Trial'}
+              title={userTier === 'Trial' ? 'Upgrade to export PDF reports' : ''}
             >
-              📄 Export PDF
+              {userTier === 'Trial' ? '🔒 Export PDF (Upgrade)' : '📄 Export PDF'}
             </button>
           </div>
         </div>

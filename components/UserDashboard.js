@@ -475,6 +475,12 @@ export default function UserDashboard({ user }) {
   const isTrialExpired = user?.trial_expired === true;
   const subscriptionTier = user?.subscription_tier || 'Trial';
 
+  // Calculate days remaining for active trial
+  const daysRemaining = user?.trial_ends_at && !isTrialExpired
+    ? Math.ceil((new Date(user.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))
+    : null;
+  const isActiveTrial = subscriptionTier === 'Trial' && !isTrialExpired && daysRemaining !== null;
+
   return (
     <TriangleLayout user={user}>
       <Head>
@@ -487,16 +493,46 @@ export default function UserDashboard({ user }) {
           <p className="dashboard-subtitle">Welcome back, {user?.email?.split('@')[0] || 'User'}</p>
         </div>
 
+        {/* ACTIVE TRIAL COUNTDOWN BANNER */}
+        {isActiveTrial && (
+          <div className="form-section" style={{ backgroundColor: '#E3F2FD', border: '2px solid #2196F3', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+            <h2 className="form-section-title" style={{ color: '#1565C0', marginTop: '0' }}>
+              🎉 Free Trial Active - {daysRemaining} Day{daysRemaining !== 1 ? 's' : ''} Remaining
+            </h2>
+            <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
+              {daysRemaining <= 2 ? (
+                <>Your trial ends soon! Upgrade now to keep unlimited access to USMCA analyses, alerts, and certificate downloads.</>
+              ) : (
+                <>You have {daysRemaining} days to explore Triangle Trade Intelligence. Try the USMCA workflow and see your potential tariff savings!</>
+              )}
+            </p>
+            <div className="action-buttons">
+              <Link href="/usmca-workflow" className="btn-primary" style={{ marginRight: '10px' }}>
+                📊 Try USMCA Workflow
+              </Link>
+              <Link href="/pricing" className="btn-secondary">
+                👀 View Plans
+              </Link>
+            </div>
+            <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
+              Trial expires {user?.trial_ends_at && new Date(user.trial_ends_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </p>
+          </div>
+        )}
+
         {/* TRIAL EXPIRED BANNER */}
         {isTrialExpired && (
           <div className="form-section" style={{ backgroundColor: '#FFF3E0', border: '2px solid #FF9800', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-            <h2 className="form-section-title" style={{ color: '#E65100', marginTop: '0' }}>⏰ Your 7-Day Free Trial Has Expired</h2>
+            <h2 className="form-section-title" style={{ color: '#E65100', marginTop: '0' }}>
+              ⏰ Your 7-Day Free Trial Expired
+              {user?.trial_ends_at && ` on ${new Date(user.trial_ends_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
+            </h2>
             <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
               Your trial period has ended. Upgrade now to continue creating USMCA analyses, viewing alerts, and downloading certificates.
             </p>
             <div className="action-buttons">
               <Link href="/pricing" className="btn-primary" style={{ fontSize: '18px', padding: '12px 30px' }}>
-                🚀 Upgrade Now - Plans from $99/month
+                🚀 Upgrade to Starter ($99/month)
               </Link>
             </div>
             <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
@@ -504,6 +540,34 @@ export default function UserDashboard({ user }) {
             </p>
           </div>
         )}
+
+        {/* USAGE TRACKER */}
+        <div className="form-section">
+          <h2 className="form-section-title">Usage</h2>
+            <p className="text-body">
+              <strong>{usageStats.used} of {usageStats.is_unlimited ? 'unlimited' : usageStats.limit}</strong> analyses used this month
+            </p>
+
+            {!usageStats.is_unlimited && (
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${
+                    usageStats.percentage >= 100 ? 'progress-danger' :
+                    usageStats.percentage >= 80 ? 'progress-warning' : 'progress-success'
+                  }`}
+                  style={{ width: `${Math.min(usageStats.percentage || 0, 100)}%` }}
+                />
+              </div>
+            )}
+
+            {usageStats.limit_reached && !usageStats.is_unlimited && (
+              <div className="hero-buttons">
+                <Link href="/account/subscription" className="btn-primary">
+                  Upgrade for More Analyses
+                </Link>
+              </div>
+            )}
+        </div>
 
         {/* MY WORKFLOWS */}
         <div className="form-section">
@@ -551,7 +615,11 @@ export default function UserDashboard({ user }) {
                   🗑️ Clear All
                 </button>
               )}
-              {!isTrialExpired && (
+              {isTrialExpired ? (
+                <Link href="/pricing" className="btn-primary">
+                  🚀 Upgrade to Create Certificates
+                </Link>
+              ) : (
                 <Link
                   href="/usmca-workflow?reset=true"
                   className="btn-primary"
@@ -717,12 +785,6 @@ export default function UserDashboard({ user }) {
             )}
         </div>
 
-        {/* REQUEST EXPERT SERVICE */}
-        <RequestServiceSection
-          user={user}
-          workflows={workflows}
-        />
-
         {/* TRADE ALERTS */}
         <div className="form-section">
           <div className="dashboard-actions">
@@ -730,7 +792,11 @@ export default function UserDashboard({ user }) {
               <h2 className="form-section-title">Trade Alerts</h2>
             </div>
             <div className="dashboard-actions-right">
-              {!isTrialExpired && alerts.length > 0 && (
+              {isTrialExpired ? (
+                <Link href="/pricing" className="btn-primary">
+                  🚀 Upgrade to View Alerts
+                </Link>
+              ) : alerts.length > 0 && (
                 <button
                   onClick={async () => {
                     if (confirm(`Delete ALL alerts?\n\nThis will permanently remove ${alerts.length} alert${alerts.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
@@ -908,33 +974,11 @@ export default function UserDashboard({ user }) {
             )}
         </div>
 
-        {/* USAGE TRACKER */}
-        <div className="form-section">
-          <h2 className="form-section-title">Monthly Usage</h2>
-            <p className="text-body">
-              <strong>{usageStats.used} of {usageStats.is_unlimited ? 'unlimited' : usageStats.limit}</strong> analyses used this month
-            </p>
-
-            {!usageStats.is_unlimited && (
-              <div className="progress-bar">
-                <div
-                  className={`progress-fill ${
-                    usageStats.percentage >= 100 ? 'progress-danger' :
-                    usageStats.percentage >= 80 ? 'progress-warning' : 'progress-success'
-                  }`}
-                  style={{ width: `${Math.min(usageStats.percentage || 0, 100)}%` }}
-                />
-              </div>
-            )}
-
-            {usageStats.limit_reached && !usageStats.is_unlimited && (
-              <div className="hero-buttons">
-                <Link href="/account/subscription" className="btn-primary">
-                  Upgrade for More Analyses
-                </Link>
-              </div>
-            )}
-        </div>
+        {/* REQUEST EXPERT SERVICE */}
+        <RequestServiceSection
+          user={user}
+          workflows={workflows}
+        />
 
       </div>
     </TriangleLayout>

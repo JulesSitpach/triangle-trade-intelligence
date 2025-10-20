@@ -34,9 +34,10 @@ function verifySession(cookieValue) {
       return null;
     }
 
-    // Data is already a string (not an object), verify it directly
+    // Convert data object to string for HMAC verification
+    const dataString = typeof data === 'string' ? data : JSON.stringify(data);
     const expectedSig = crypto.createHmac('sha256', secret)
-      .update(data)
+      .update(dataString)
       .digest('hex');
 
     if (sig !== expectedSig) {
@@ -50,8 +51,8 @@ function verifySession(cookieValue) {
       return null;
     }
 
-    // Parse the data string to get the session object
-    const sessionData = JSON.parse(data);
+    // Parse the data string to get the session object (if it's a string)
+    const sessionData = typeof data === 'string' ? JSON.parse(data) : data;
 
     // Check expiration (7 days)
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -151,6 +152,12 @@ export default async function handler(req, res) {
     const subscriptionTier = profile?.subscription_tier || 'Trial';
     const trialEndsAt = profile?.trial_ends_at;
     const isTrialExpired = subscriptionTier === 'Trial' && trialEndsAt && new Date(trialEndsAt) < new Date();
+
+    // 🚨 CRITICAL: Prevent browser caching of subscription tier data
+    // Without this, tier updates don't appear until manual cache clear
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
 
     return res.status(200).json({
       success: true,

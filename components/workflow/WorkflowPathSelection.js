@@ -14,17 +14,17 @@ export default function WorkflowPathSelection({
   onSelectAlertsSubscription,
   onSelectCertificate 
 }) {
-  // Calculate estimated trade volume for messaging
+  // Display user's actual trade volume input
   const getTradeVolumeDisplay = () => {
-    const volumeMap = {
-      'under_100k': '$75K',
-      '100k_500k': '$300K', 
-      '500k_1m': '$750K',
-      '1m_5m': '$2.5M',
-      '5m_10m': '$7.5M',
-      'over_10m': '$15M+'
-    };
-    return volumeMap[formData.trade_volume] || '$1M';
+    if (!formData.trade_volume) return '$0';
+
+    // Parse user's numeric input and format as currency
+    const numericValue = parseFloat(String(formData.trade_volume).replace(/[^0-9.-]/g, ''));
+
+    if (isNaN(numericValue)) return '$0';
+
+    // Format with commas: 4800000 → $4,800,000
+    return `$${numericValue.toLocaleString()}`;
   };
 
   const tradeVolume = getTradeVolumeDisplay();

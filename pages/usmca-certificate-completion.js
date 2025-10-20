@@ -82,7 +82,7 @@ export default function USMCACertificateCompletion() {
                            initialData.usmca?.north_american_content ||
                            100.0,
           qualification_status: initialData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-          origin_criterion: initialData.usmca?.preference_criterion || 'B',
+          origin_criterion: initialData.usmca?.preference_criterion,
           hs_code: initialData.product?.hs_code || '',
           manufacturing_location: initialData.usmca?.manufacturing_location || '',
           component_breakdown: initialData.components || [],
@@ -129,6 +129,15 @@ export default function USMCACertificateCompletion() {
     };
 
     console.log('Generating professional certificate with data:', preview);
+
+    // CRITICAL DEBUG: Log what company_country value we have
+    console.log('🔍 CERTIFICATE PAGE - Company Country Check:', {
+      has_workflowData: !!workflowData,
+      has_company: !!workflowData?.company,
+      company_country_value: workflowData?.company?.company_country,
+      company_country_type: typeof workflowData?.company?.company_country,
+      full_company_object: workflowData?.company
+    });
 
     try {
       const response = await fetch('/api/trust/complete-certificate', {
@@ -389,6 +398,7 @@ export default function USMCACertificateCompletion() {
           onEmailToImporter={handleEmailToImporter}
           previewData={previewData}
           generatedPDF={generatedPDF}
+          userTier={userTier}
         />
 
           {/* Upgrade Modal for Trial Users */}

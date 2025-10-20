@@ -115,11 +115,8 @@ export default protectedApiHandler({
         },
         // Enable customer to update payment method
         allow_promotion_codes: true,
-        billing_address_collection: 'auto',
-        // Tax calculation
-        automatic_tax: {
-          enabled: true
-        }
+        billing_address_collection: 'auto'
+        // Note: automatic_tax disabled for test mode - enable in production with valid tax settings
       });
 
       return res.status(200).json({

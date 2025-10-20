@@ -2,10 +2,19 @@ import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
 import { stripe } from '../../../lib/stripe/server';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 /**
  * Verify Stripe checkout session and get subscription details
  * GET /api/stripe/verify-session?session_id=xxx
+ *
+ * CRITICAL: This also updates user_profiles.subscription_tier as a fallback
+ * in case webhooks don't fire (common in test mode).
  */
 export default protectedApiHandler({
   GET: async (req, res) => {
@@ -31,6 +40,47 @@ export default protectedApiHandler({
           data: { session_id, userId: req.user.id }
         });
         throw new ApiError('Session not found', 404);
+      }
+
+      // 🚨 CRITICAL FALLBACK: Update user_profiles tier if payment succeeded
+      // This ensures tier updates even when webhooks don't fire (test mode)
+      if (session.payment_status === 'paid' && session.mode === 'subscription') {
+        const tier = session.metadata?.tier;
+        const userId = session.metadata?.user_id || req.user.id;
+
+        if (tier && userId) {
+          // Capitalize tier name (starter → Starter)
+          const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+          const { error: updateError } = await supabase
+            .from('user_profiles')
+            .update({
+              subscription_tier: tierName,
+              status: 'active',
+              trial_ends_at: null,
+              stripe_customer_id: session.customer,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', userId);
+
+          if (updateError) {
+            await logDevIssue({
+              type: 'api_error',
+              severity: 'critical',
+              component: 'verify_session',
+              message: 'CRITICAL: Failed to update subscription tier on success page - user paid but tier not updated',
+              data: {
+                userId,
+                tier: tierName,
+                sessionId: session_id,
+                error: updateError.message
+              }
+            });
+            console.error('Failed to update tier:', updateError);
+          } else {
+            console.log(`✅ Subscription tier updated to ${tierName} for user ${userId} (fallback)`);
+          }
+        }
       }
 
       // Get subscription details if available

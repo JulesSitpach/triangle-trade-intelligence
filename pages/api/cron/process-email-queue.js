@@ -8,7 +8,7 @@
  * Setup in Vercel:
  * 1. Go to Project Settings → Cron Jobs
  * 2. Add: `/api/cron/process-email-queue`
- * 3. Schedule: `*/5 * * * *` (every 5 minutes)
+ * 3. Schedule: every 5 minutes (cron: star-slash-5 star star star star)
  * 4. Add `CRON_SECRET` environment variable
  *
  * Or use external cron (cron-job.org):

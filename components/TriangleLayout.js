@@ -120,6 +120,9 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                       onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     >
                       👤 {user?.user_metadata?.company_name || user?.email?.split('@')[0] || 'User'}
+                      <span className="badge badge-info" style={{marginLeft: '8px'}}>
+                        {user?.subscription_tier || 'Trial'}
+                      </span>
                     </button>
                     {userDropdownOpen && (
                       <div className="admin-dropdown-menu">

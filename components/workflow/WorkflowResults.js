@@ -248,7 +248,7 @@ export default function WorkflowResults({
               ...results.product,
               description: results.product?.description || results.workflow_data?.product_description
             },
-            components: results.component_origins || results.components || [],
+            components: normalizedComponents, // FIX: Use normalized components with section_301 field
             savings: results.savings,
             steps_completed: 4,
             total_steps: 4,

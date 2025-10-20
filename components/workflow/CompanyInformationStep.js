@@ -66,7 +66,7 @@ export default function CompanyInformationStep({
       const stillMissing = [];
       if (!formData.company_name) stillMissing.push('Company Name');
       if (!formData.business_type) stillMissing.push('Business Type');
-      if (!formData.certifier_type) stillMissing.push('Certifier Type');
+      // certifier_type removed - auto-calculated from business_type, not used by AI
       if (!formData.industry_sector) stillMissing.push('Industry Sector');
       if (!formData.company_address) stillMissing.push('Company Address');
       if (!formData.company_country) stillMissing.push('Company Country');
@@ -85,7 +85,7 @@ export default function CompanyInformationStep({
 
   const isNextDisabled = !isClient || !formData.company_name ||
                         !formData.business_type ||
-                        !formData.certifier_type ||
+                        // certifier_type removed - auto-calculated, not needed for validation
                         !formData.industry_sector ||
                         !formData.trade_volume ||
                         !formData.company_address ||
@@ -102,7 +102,7 @@ export default function CompanyInformationStep({
     const missingFields = [];
     if (!formData.company_name) missingFields.push('Company Name');
     if (!formData.business_type) missingFields.push('Business Type');
-    if (!formData.certifier_type) missingFields.push('Certifier Type');
+    // certifier_type removed - auto-calculated from business_type, not used by AI
     if (!formData.industry_sector) missingFields.push('Industry Sector');
     if (!formData.company_address) missingFields.push('Company Address');
     if (!formData.company_country) missingFields.push('Company Country');

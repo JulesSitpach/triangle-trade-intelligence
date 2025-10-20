@@ -73,16 +73,19 @@ export default function CrisisCalculatorResults({
     }
   };
 
-  const getTradeVolumeValue = (volumeSelection) => {
-    const volumeMap = {
-      'under_100k': 75000,
-      '100k_500k': 300000,
-      '500k_1m': 750000,
-      '1m_5m': 2500000,
-      '5m_10m': 7500000,
-      'over_10m': 15000000
-    };
-    return volumeMap[volumeSelection] || 1000000;
+  const getTradeVolumeValue = (volumeInput) => {
+    if (!volumeInput) return 1000000; // Default if missing
+
+    // Parse user's numeric input (user enters "4800000" or "4,800,000")
+    const numericValue = parseFloat(String(volumeInput).replace(/[^0-9.-]/g, ''));
+
+    // If valid number, return it
+    if (!isNaN(numericValue) && numericValue > 0) {
+      return numericValue;
+    }
+
+    // Fallback to $1M if invalid
+    return 1000000;
   };
 
   const saveToAlertsSystem = async (crisisResult, tradeVolume) => {
