@@ -66,14 +66,13 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         // IMPORTER certificate: Only need importer info (you're the buyer)
         newExpanded.importer = true;
       } else if (authData.certifier_type === 'EXPORTER') {
-        // EXPORTER certificate: Need exporter + importer (you're shipping, specify customer)
-        newExpanded.exporter = true;
-        newExpanded.importer = true;  // ✅ NEW: Exporter needs to specify customer
+        // EXPORTER certificate: Only need importer (your customer)
+        // Exporter fields auto-filled from Step 1 company data (no UI needed)
+        newExpanded.importer = true;
       } else if (authData.certifier_type === 'PRODUCER') {
-        // PRODUCER certificate: Need all 3 (who ships, who made it, who receives)
-        newExpanded.exporter = true;   // Who is shipping (could be you or distributor)
-        newExpanded.producer = true;   // Who manufactured (YOU)
-        newExpanded.importer = true;   // ✅ FIXED: Who is receiving (YOUR CUSTOMER)
+        // PRODUCER certificate: Only need importer (your customer)
+        // Exporter + Producer fields auto-filled from Step 1 company data (no UI needed)
+        newExpanded.importer = true;
       }
 
       setExpandedSections(newExpanded);
