@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
-export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF }) {
+export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF, userTier = 'Trial' }) {
   const router = useRouter();
   const previewRef = useRef(null);
   const [authData, setAuthData] = useState({
@@ -140,6 +140,75 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
   return (
     <div className="element-spacing">
+      {/* 0. Certifier Type Selection - CRITICAL FOR USMCA CERTIFICATE */}
+      <div className="form-section">
+        <h2 className="form-section-title">🎯 Who is Completing This Certificate?</h2>
+        <p className="form-section-description">
+          Select your role in this transaction. This determines which fields appear on the USMCA certificate.
+        </p>
+
+        <div className="form-group">
+          <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+            <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', backgroundColor: authData.certifier_type === 'IMPORTER' ? '#eff6ff' : 'transparent'}}>
+              <input
+                type="radio"
+                name="certifier_type"
+                value="IMPORTER"
+                checked={authData.certifier_type === 'IMPORTER'}
+                onChange={(e) => handleFieldChange('certifier_type', e.target.value)}
+                style={{marginTop: '0.25rem'}}
+              />
+              <div>
+                <div style={{fontWeight: '600', marginBottom: '0.25rem'}}>IMPORTER</div>
+                <div style={{fontSize: '0.875rem', color: '#6b7280'}}>
+                  I am the company receiving these goods (the buyer/importing company)
+                </div>
+              </div>
+            </label>
+
+            <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', backgroundColor: authData.certifier_type === 'EXPORTER' ? '#eff6ff' : 'transparent'}}>
+              <input
+                type="radio"
+                name="certifier_type"
+                value="EXPORTER"
+                checked={authData.certifier_type === 'EXPORTER'}
+                onChange={(e) => handleFieldChange('certifier_type', e.target.value)}
+                style={{marginTop: '0.25rem'}}
+              />
+              <div>
+                <div style={{fontWeight: '600', marginBottom: '0.25rem'}}>EXPORTER</div>
+                <div style={{fontSize: '0.875rem', color: '#6b7280'}}>
+                  I am the company sending these goods (the seller/exporting company)
+                </div>
+              </div>
+            </label>
+
+            <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', backgroundColor: authData.certifier_type === 'PRODUCER' ? '#eff6ff' : 'transparent'}}>
+              <input
+                type="radio"
+                name="certifier_type"
+                value="PRODUCER"
+                checked={authData.certifier_type === 'PRODUCER'}
+                onChange={(e) => handleFieldChange('certifier_type', e.target.value)}
+                style={{marginTop: '0.25rem'}}
+              />
+              <div>
+                <div style={{fontWeight: '600', marginBottom: '0.25rem'}}>PRODUCER</div>
+                <div style={{fontSize: '0.875rem', color: '#6b7280'}}>
+                  I am the company that manufactures these goods (the producer/manufacturer)
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {!authData.certifier_type && (
+          <div style={{padding: '1rem', backgroundColor: '#fef3c7', borderRadius: '6px', marginTop: '1rem'}}>
+            <strong>⚠️ Required:</strong> Please select who is completing this certificate before continuing.
+          </div>
+        )}
+      </div>
+
       {/* 1. Authorization Section - NEW DATA COLLECTION */}
       <div className="form-section">
         <h2 className="form-section-title">📝 Certificate Authorization</h2>
@@ -199,7 +268,142 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         </div>
       </div>
 
-      {/* 2. Importer Information - NEW DATA COLLECTION */}
+      {/* 2. Exporter Information */}
+      <div className="form-section">
+        <h2 className="form-section-title">📤 Exporter Details</h2>
+        <p className="form-section-description">
+          Information about the company sending/exporting the goods
+        </p>
+
+        {/* Checkbox to indicate if Exporter is same as your company */}
+        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.exporter_same_as_company || false}
+              onChange={(e) => {
+                handleFieldChange('exporter_same_as_company', e.target.checked);
+                // Auto-populate exporter fields from company data if checked
+                if (e.target.checked) {
+                  handleFieldChange('exporter_name', workflowData?.company?.name || '');
+                  handleFieldChange('exporter_address', workflowData?.company?.company_address || '');
+                  handleFieldChange('exporter_tax_id', workflowData?.company?.tax_id || '');
+                  handleFieldChange('exporter_phone', workflowData?.company?.contact_phone || '');
+                  handleFieldChange('exporter_email', workflowData?.company?.contact_email || '');
+                  handleFieldChange('exporter_country', workflowData?.company?.company_country || '');
+                } else {
+                  // Clear fields if unchecked
+                  handleFieldChange('exporter_name', '');
+                  handleFieldChange('exporter_address', '');
+                  handleFieldChange('exporter_tax_id', '');
+                  handleFieldChange('exporter_phone', '');
+                  handleFieldChange('exporter_email', '');
+                  handleFieldChange('exporter_country', '');
+                }
+              }}
+            />
+            <span className="checkbox-text">
+              Exporter is my company (auto-fill with company information from Step 1)
+            </span>
+          </label>
+        </div>
+
+        <div className="form-grid-2">
+          <div className="form-group">
+            <label className="form-label required">Company Name</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.exporter_name || ''}
+              onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
+              placeholder="Enter exporting company name"
+              required
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Address</label>
+            <textarea
+              className="form-input"
+              value={authData.exporter_address || ''}
+              onChange={(e) => handleFieldChange('exporter_address', e.target.value)}
+              placeholder="Complete address including street, city, state/province, postal code"
+              rows="3"
+              required
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Tax ID/EIN</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.exporter_tax_id || ''}
+              onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)}
+              placeholder="Enter exporter's tax identification number"
+              required
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Contact Person</label>
+            <input
+              type="text"
+              className="form-input"
+              value={authData.exporter_contact_person || ''}
+              onChange={(e) => handleFieldChange('exporter_contact_person', e.target.value)}
+              placeholder="Primary contact at exporting company"
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Phone</label>
+            <input
+              type="tel"
+              className="form-input"
+              value={authData.exporter_phone || ''}
+              onChange={(e) => handleFieldChange('exporter_phone', e.target.value)}
+              placeholder="(555) 123-4567"
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={authData.exporter_email || ''}
+              onChange={(e) => handleFieldChange('exporter_email', e.target.value)}
+              placeholder="contact@exporter.com"
+              disabled={authData.exporter_same_as_company}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Country</label>
+            <select
+              className="form-select"
+              value={authData.exporter_country || ''}
+              onChange={(e) => handleFieldChange('exporter_country', e.target.value)}
+              required
+              disabled={authData.exporter_same_as_company}
+            >
+              <option value="">Select country</option>
+              <option value="United States">United States</option>
+              <option value="Canada">Canada</option>
+              <option value="Mexico">Mexico</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Importer Information */}
       <div className="form-section">
         <h2 className="form-section-title">📥 Importer Details</h2>
         <p className="form-section-description">
@@ -490,14 +694,59 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               </div>
 
               {/* Official USMCA Certificate - Matching PDF Template */}
-              <div style={{
-                border: '3px solid #000',
-                backgroundColor: '#ffffff',
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '11px',
-                maxWidth: '850px',
-                margin: '0 auto'
-              }}>
+              <div style={{position: 'relative'}}>
+                {/* Watermark Overlay for Trial Users */}
+                {userTier === 'Trial' && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
+                    zIndex: 10
+                  }}>
+                    <div style={{
+                      transform: 'rotate(-45deg)',
+                      fontSize: '72px',
+                      fontWeight: 'bold',
+                      color: 'rgba(220, 38, 38, 0.15)',
+                      textAlign: 'center',
+                      userSelect: 'none'
+                    }}>
+                      TRIAL PREVIEW
+                      <div style={{fontSize: '36px', marginTop: '10px'}}>
+                        SUBSCRIBE TO DOWNLOAD
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{
+                  border: '3px solid #000',
+                  backgroundColor: '#ffffff',
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '11px',
+                  maxWidth: '850px',
+                  margin: '0 auto'
+                }}>
+                {/* Trial Banner */}
+                {userTier === 'Trial' && (
+                  <div style={{
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    textAlign: 'center',
+                    padding: '8px',
+                    fontWeight: 'bold',
+                    fontSize: '12px'
+                  }}>
+                    ⚠️ FREE TRIAL PREVIEW - Not valid for customs submissions - Subscribe to download official certificate
+                  </div>
+                )}
+
                 {/* Header */}
                 <div style={{
                   textAlign: 'center',
@@ -740,6 +989,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   USMCA CERTIFICATE V3
                 </div>
               </div>
+              </div>
 
               {/* Platform Disclaimer - Below certificate preview */}
               <div className="alert alert-info" style={{marginTop: '1.5rem', marginBottom: '1.5rem'}}>
@@ -760,18 +1010,39 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   <button
                     className="btn-primary"
                     onClick={() => onDownloadCertificate && onDownloadCertificate()}
-                    disabled={!authData.accuracy_certification || !authData.authority_certification}
+                    disabled={!authData.accuracy_certification || !authData.authority_certification || userTier === 'Trial'}
+                    title={userTier === 'Trial' ? 'Upgrade to download certificates' : ''}
                   >
-                    💾 Download PDF Certificate
+                    {userTier === 'Trial' ? '🔒 Download (Upgrade Required)' : '💾 Download PDF Certificate'}
                   </button>
 
                   <button
                     className="btn-primary"
                     onClick={handleSetUpAlerts}
+                    disabled={userTier === 'Trial'}
+                    title={userTier === 'Trial' ? 'Upgrade to set up trade alerts' : ''}
                   >
-                    🚨 Set Up Trade Alerts
+                    {userTier === 'Trial' ? '🔒 Set Up Trade Alerts (Upgrade Required)' : '🚨 Set Up Trade Alerts'}
                   </button>
                 </div>
+
+                {userTier === 'Trial' && (
+                  <div className="alert alert-warning" style={{marginTop: '1rem'}}>
+                    <div className="alert-content">
+                      <div className="alert-title">🚀 Free Trial - Preview Only</div>
+                      <div className="text-body">
+                        Upgrade to download certificates and access trade alerts. Starting at $99/month.
+                      </div>
+                      <button
+                        className="btn-primary"
+                        style={{marginTop: '0.5rem'}}
+                        onClick={() => router.push('/pricing')}
+                      >
+                        View Pricing Plans
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
