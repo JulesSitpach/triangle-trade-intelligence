@@ -25,6 +25,23 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
   // Agent orchestration removed - was causing excessive AI calls on every field change
 
+  // 🚀 AUTO-FILL COMPANY DATA ON MOUNT (so user doesn't have to manually check box)
+  useEffect(() => {
+    if (workflowData?.company && !authData.exporter_same_as_company) {
+      console.log('📋 Auto-filling company data from workflow:', workflowData.company);
+      setAuthData(prev => ({
+        ...prev,
+        exporter_same_as_company: true,  // Check the box automatically
+        exporter_name: workflowData.company.name || workflowData.company.company_name || '',
+        exporter_address: workflowData.company.company_address || '',
+        exporter_tax_id: workflowData.company.tax_id || '',
+        exporter_phone: workflowData.company.contact_phone || '',
+        exporter_email: workflowData.company.contact_email || '',
+        exporter_country: workflowData.company.company_country || ''
+      }));
+    }
+  }, [workflowData]); // Run when workflowData is available
+
   // Update parent when authData changes
   useEffect(() => {
     Object.keys(authData).forEach(key => {
