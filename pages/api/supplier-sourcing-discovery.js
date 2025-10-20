@@ -118,13 +118,13 @@ Return ONLY a JSON array, no other text:
           'X-Title': 'Triangle Trade Intelligence - Supplier Discovery'
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-haiku-4.5',
+          model: 'anthropic/claude-sonnet-4.5', // UPGRADED: Supplier vetting affects USMCA qualification and product quality
           messages: [{
             role: 'user',
             content: aiPrompt
           }],
           temperature: 0.7,
-          max_tokens: 2000
+          max_tokens: 3000 // Increased for comprehensive supplier analysis
         })
       });
 

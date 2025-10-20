@@ -213,9 +213,10 @@ Format as JSON with these exact keys: market_opportunity (object with market_siz
     console.log('[MARKET ENTRY] Calling AI with 3-tier fallback architecture...');
 
     // 🔄 Call AI with 3-tier fallback (OpenRouter → Anthropic → Graceful fail)
+    // UPGRADED: Mexico market entry decisions worth $50K-500K+ need expert Sonnet 4.5, not quick Haiku
     const aiResult = await executeAIWithFallback({
       prompt: aiPrompt,
-      model: 'anthropic/claude-haiku-4.5',
+      model: 'anthropic/claude-sonnet-4.5', // Upgraded from Haiku - market entry is critical business decision
       maxTokens: 4000
     });
 
