@@ -39,16 +39,9 @@ ${roadmap ? `- Executive Summary: ${roadmap.executive_summary}
 - Expected ROI Timeline: ${roadmap.cost_benefit_projection?.roi_timeline || '3-6 months'}
 - Annual Savings Potential: ${roadmap.cost_benefit_projection?.annual_savings_potential || '$50,000+'}` : 'Roadmap being finalized'}
 
-WRITING GUIDELINES:
-1. Use business language, not technical jargon
-2. Focus on business impact (cost savings, risk reduction) not technical details
-3. Be encouraging and action-oriented
-4. Include specific next steps the client should take
-5. Warm, professional tone (Jorge's specialty)
-6. Keep it concise (3-4 short paragraphs max)
-7. End with clear call-to-action
+Draft warm, action-oriented email focusing on business impact (savings, risk reduction). Keep concise (3-4 paragraphs) with clear next steps.
 
-Return your email in this JSON format:
+Return JSON:
 {
   "subject_line": "Compelling subject line",
   "greeting": "Hi [Contact Name],",
@@ -60,9 +53,7 @@ Return your email in this JSON format:
   ],
   "closing": "Best regards,\\nBusiness Development Specialist\\nMexico Trade Specialist\\nTriangle Trade Intelligence",
   "ps_note": "Optional P.S. with urgency or value reminder"
-}
-
-Write as if you're Jorge personally reaching out to help this client succeed.`;
+}`;
 
     // Call OpenRouter API
     const openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {

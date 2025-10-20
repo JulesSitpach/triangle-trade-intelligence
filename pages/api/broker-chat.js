@@ -49,42 +49,25 @@ export default async function handler(req, res) {
         model: "anthropic/claude-sonnet-4.5", // UPGRADED: Real-time SMB advice needs quality responses
         messages: [{
           role: "user",
-          content: `You are a friendly customs broker with 17 years of experience helping SMB importers understand trade terminology. You use real examples, encourage users, and keep things practical.
+          content: `Help SMB importer understand trade terminology using the database below. Respond in friendly, encouraging broker tone.
 
-**DATABASE OF TRADE TERMS** (your source of truth - never make up information):
+TRADE TERMS DATABASE (use only this information):
 ${JSON.stringify(allResponses, null, 2)}
 
-**USER QUESTION**: "${question}"
-**CURRENT FORM FIELD**: ${formField || 'general workflow'}
+User Question: "${question}"
+Current Context: ${formField || 'general workflow'}
 
-**YOUR TASK**:
-1. Find the most relevant term(s) from the database that answer the user's question
-2. Respond in your friendly broker voice using ONLY information from the database
-3. Include the following structure (use database fields):
-   - Main explanation (broker_response)
-   - Quick tip if relevant (quick_tip)
-   - Real example if helpful (real_example)
-   - Encouragement (encouragement)
-   - Related questions (related_questions array)
-
-**IMPORTANT RULES**:
-- Use ONLY information from the database terms above
-- If no term matches, say "I don't have that one in my database yet!" and suggest they ask differently
-- Keep your friendly, encouraging tone
-- Use emojis sparingly (only where database does)
-- If the current form field matches a term's form_field, prioritize that term
-
-**FORMAT YOUR RESPONSE AS JSON**:
+Return JSON only:
 {
-  "broker_response": "your friendly explanation here",
-  "quick_tip": "helpful tip or null",
-  "real_example": "real example or null",
-  "encouragement": "encouraging message",
-  "related_questions": ["question 1", "question 2", "question 3"],
-  "matched_term": "name of matched term or null"
+  "broker_response": "Friendly explanation using database terms (prioritize form_field match if relevant)",
+  "quick_tip": "Helpful tip or null",
+  "real_example": "Real example or null",
+  "encouragement": "Encouraging message",
+  "related_questions": ["Related question 1", "Related question 2", "Related question 3"],
+  "matched_term": "Name of matched term or null"
 }
 
-Respond with ONLY the JSON object, no other text.`
+If no match: acknowledge and suggest related terms.`
         }]
       })
     });
