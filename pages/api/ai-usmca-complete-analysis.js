@@ -404,12 +404,13 @@ export default protectedApiHandler({
         // Company details for certificate
         company_address: formData.company_address || '',
         address: formData.company_address || '',
+        company_country: formData.company_country || '',  // ✅ CRITICAL FIX: Where company is located
+        country: formData.company_country || '',  // ✅ FIX: Company location, NOT destination
         tax_id: formData.tax_id || '',
         contact_person: formData.contact_person || '',
         contact_email: formData.contact_email || '',
         contact_phone: formData.contact_phone || '',
-        country: formData.destination_country || 'US',
-        exporter_country: formData.destination_country || 'US'
+        certifier_type: formData.certifier_type || 'EXPORTER'  // ✅ Pass certifier type from UI
       },
 
       // Product classification
