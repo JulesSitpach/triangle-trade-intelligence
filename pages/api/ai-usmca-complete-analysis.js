@@ -155,6 +155,34 @@ export default protectedApiHandler({
       });
     }
 
+    // ========== VALIDATE COMPONENT PERCENTAGES DON'T EXCEED 100% ==========
+    const totalPercentage = formData.component_origins.reduce((sum, component) => {
+      return sum + parseFloat(component.value_percentage || 0);
+    }, 0);
+
+    if (totalPercentage > 100) {
+      await DevIssue.validationError('usmca_analysis', 'component_percentage_sum', `Component percentages exceed 100%: ${totalPercentage}%`, {
+        userId,
+        company: formData.company_name,
+        total_percentage: totalPercentage,
+        components: formData.component_origins.map(c => ({
+          description: c.description,
+          percentage: c.value_percentage
+        }))
+      });
+      return res.status(400).json({
+        success: false,
+        error: `Component percentages exceed 100%. Total: ${totalPercentage}%. Please adjust component values so they sum to 100% or less.`,
+        total_percentage: totalPercentage,
+        components: formData.component_origins.map(c => ({
+          description: c.description,
+          percentage: c.value_percentage
+        }))
+      });
+    }
+
+    console.log(`✅ Component percentage validation passed: ${totalPercentage}%`);
+
     // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
     const missingOptionalFields = [];
 
@@ -409,7 +437,7 @@ export default protectedApiHandler({
         component_breakdown: analysis.usmca?.component_breakdown || formData.component_origins,
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-        preference_criterion: analysis.usmca?.qualified ? 'B' : null,
+        preference_criterion: analysis.usmca?.qualified ? analysis.usmca?.preference_criterion : null,
         manufacturing_location: formData.manufacturing_location || '',
         documentation_required: analysis.usmca?.documentation_required || [
           'Manufacturing records',
@@ -418,8 +446,15 @@ export default protectedApiHandler({
         ]
       },
 
-      // Method of qualification for certificate (Transaction Value for RVC calculations)
-      method_of_qualification: 'TV', // Transaction Value method for Regional Value Content
+      // Method of qualification for certificate (from AI based on industry rules)
+      // Convert method name to certificate code: Net Cost -> NC, Transaction Value -> TV
+      method_of_qualification: (() => {
+        const method = analysis.usmca?.method_of_qualification || 'Transaction Value';
+        if (method.includes('Net Cost')) return 'NC';
+        if (method.includes('Transaction Value')) return 'TV';
+        if (method.includes('Yarn Forward')) return 'YF';
+        return 'TV'; // Default to Transaction Value
+      })(),
 
       // Tariff savings (only if qualified for USMCA)
       savings: {
@@ -433,7 +468,7 @@ export default protectedApiHandler({
       // Certificate (if qualified)
       certificate: analysis.usmca?.qualified ? {
         qualified: true,
-        preference_criterion: 'B',
+        preference_criterion: analysis.usmca?.preference_criterion,
         blanket_start: new Date().toISOString().split('T')[0],
         blanket_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       } : null,
@@ -527,14 +562,35 @@ export default protectedApiHandler({
         .insert({
           user_id: userId,
           session_id: `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+
+          // Company information
           company_name: formData.company_name,
           business_type: formData.business_type,  // Business role
           industry_sector: formData.industry_sector,  // Industry classification
-          manufacturing_location: formData.manufacturing_location,
+          company_address: formData.company_address,  // Required for certificates
+          company_country: formData.company_country,  // Where company is located
+          tax_id: formData.tax_id,  // Required for USMCA certificates
+
+          // Contact information (for Jorge/Cristina service delivery)
+          contact_person: formData.contact_person,
+          contact_phone: formData.contact_phone,
+          contact_email: formData.contact_email,
+
+          // Trade flow information
+          supplier_country: formData.supplier_country,  // Used in AI trade flow analysis
+          destination_country: formData.destination_country,  // Export destination
           trade_volume: formData.trade_volume ? parseFloat(formData.trade_volume.replace(/[^0-9.-]+/g, '')) : null,
+
+          // Manufacturing information
+          manufacturing_location: formData.manufacturing_location,
+          substantial_transformation: formData.substantial_transformation || false, // Manufacturing complexity flag
+
+          // Product information
           product_description: formData.product_description,
           hs_code: result.product.hs_code,
           component_origins: normalizedComponents, // CRITICAL: Save NORMALIZED enriched components with tariff intelligence
+
+          // USMCA qualification results
           qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
           regional_content_percentage: result.usmca.north_american_content,
           required_threshold: result.usmca.threshold_applied,
@@ -624,6 +680,7 @@ async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
   // Calculate manufacturing labor (Week 1 Enhancement #3)
   const manufacturingLocation = formData.manufacturing_location;
   const isUSMCAManufacturing = ['US', 'MX', 'CA'].includes(manufacturingLocation);
+  const substantialTransformation = formData.substantial_transformation || false;
   const laborValueAdded = isUSMCAManufacturing ? threshold.labor : 0;
 
   // Format components with rates (concise) - NOW WITH SECTION 301 VALIDATION
@@ -667,39 +724,86 @@ async function buildComprehensiveUSMCAPrompt(formData, componentRates = {}) {
   const destinationUS = formData.destination_country === 'US';
   const section301Applicable = hasChineseComponents && destinationUS;
 
-  // CRITICAL: Calculate USMCA component total BEFORE building prompt
+  // Calculate USMCA component total for reference (AI will verify)
   const usmcaCountries = ['US', 'MX', 'CA'];
   const usmcaComponentTotal = formData.component_origins
     .filter(c => usmcaCountries.includes(c.origin_country))
     .reduce((sum, c) => sum + parseFloat(c.value_percentage || 0), 0);
 
-  const totalNAContent = usmcaComponentTotal + laborValueAdded;
-  const qualified = totalNAContent >= threshold.rvc;
+  const prompt = `You are a USMCA trade compliance expert analyzing qualification for ${formData.product_description}.
 
-  const prompt = `**EXACTLY RIGHT!** 🎯
+Analyze whether this product qualifies for USMCA preferential treatment and provide educational explanations for an SMB owner juggling their business.
 
-User has confirmed manufacturing in ${manufacturingLocation} (USMCA country). Based on industry standards for ${industry}, this manufacturing operation qualifies for ${laborValueAdded}% value-added credit.
-
-USMCA qualification for ${formData.product_description}.
-
-${industry} | Mfg in ${manufacturingLocation} | ${origin}→${destination}
+PRODUCT & BUSINESS CONTEXT:
+- Industry: ${industry} (Threshold: ${threshold.rvc}% RVC per ${threshold.article})
+- Manufacturing: ${manufacturingLocation} (Labor credit: ${laborValueAdded}%)
+- Trade Flow: ${origin}→${destination}${formData.trade_volume ? ` | Annual Volume: $${formData.trade_volume}` : ''}
 
 COMPONENTS:
 ${componentBreakdown}
 
-QUALIFICATION CALCULATION (use these exact values):
-- Threshold: ${threshold.rvc}% RVC (${threshold.article})
-- USMCA components: ${usmcaComponentTotal}%
-- Manufacturing value-added: ${laborValueAdded}%
-- Total NA Content: ${totalNAContent}%
-- Status: ${qualified ? 'QUALIFIED ✓' : 'NOT QUALIFIED ✗'}${section301Applicable ? `
+MANUFACTURING CONTEXT (Explain to client):
+The ${laborValueAdded}% manufacturing value-added represents labor, overhead, and assembly performed in ${manufacturingLocation}.
+USMCA Article ${threshold.article} allows this ${threshold.labor}% labor credit because final assembly occurs in USMCA territory.
 
-SECTION 301 ALERT: Chinese components subject to 25% tariffs` : ''}${deMinimisNote ? `
+Manufacturing Complexity: ${substantialTransformation ? '✓ SUBSTANTIAL TRANSFORMATION - Complex manufacturing confirmed (welding, forming, heat treatment, etc.). This strengthens qualification and reduces audit risk. Advise client to document these processes.' : '⚠️ SIMPLE ASSEMBLY - Standard assembly operations. May face higher audit scrutiny. Recommend documenting value-added activities to strengthen qualification.'}
+
+Regional Content Calculation (Show your work for transparency):
+- USMCA Components: ${usmcaComponentTotal}%
+- Manufacturing Labor Credit: ${laborValueAdded}%
+- Total North American Content: ${totalNAContent}%${section301Applicable ? `
+
+CURRENT POLICY ALERT (2025): Chinese components remain subject to Section 301 tariffs (~25%) even with USMCA qualification. Base MFN duties are eliminated, but Section 301 remains.` : ''}${deMinimisNote ? `
+
 ${deMinimisNote}` : ''}
 
-Your task: Provide strategic insights, recommendations, and detailed analysis based on the ${qualified ? 'QUALIFIED' : 'NOT QUALIFIED'} status above. Focus on practical next steps, documentation requirements, and supply chain optimization opportunities.
+TARIFF SAVINGS ANALYSIS (Show calculations for client education):${formData.trade_volume ? `
+- Annual Trade Volume: $${formData.trade_volume}
+- Calculate per component: Volume × Component % × Tariff Savings Rate
+- Show your work for each component using actual percentages and rates from component data above${section301Applicable ? `
+- For Chinese components: Only base MFN eliminated (Section 301 remains)` : ''}` : `
+- No trade volume provided - explain savings as percentage impact per component`}
 
-Return JSON with north_american_content=${totalNAContent}, qualified=${qualified}: {product: {hs_code, confidence}, usmca: {qualified: ${qualified}, threshold_applied: ${threshold.rvc}, threshold_source: "${threshold.article}", threshold_reasoning: "string", north_american_content: ${totalNAContent}, gap: ${Math.abs(threshold.rvc - totalNAContent)}, rule: "RVC ${threshold.rvc}%", reason: "string", component_breakdown, documentation_required}, savings: {annual_savings, monthly_savings, savings_percentage, mfn_rate, usmca_rate: 0}, recommendations: ["string"], detailed_analysis: {threshold_research: "string", calculation_breakdown: "string", qualification_reasoning: "string", strategic_insights: "string", savings_analysis: "string"}, confidence_score}`;
+PREFERENCE CRITERION: Determine which USMCA criterion applies (A/B/C/D) based on the product's qualification method (${threshold.method}) and whether it has non-USMCA components.
+
+RESPONSE FORMAT (educational and transparent):
+
+{
+  product: {
+    hs_code: "string",
+    confidence: number
+  },
+  usmca: {
+    qualified: boolean,  // YOUR determination based on analysis
+    threshold_applied: ${threshold.rvc},
+    threshold_source: "${threshold.article}",
+    threshold_reasoning: "Explain why this threshold applies",
+    north_american_content: number,  // YOUR calculated total
+    gap: number,  // Difference from threshold
+    rule: "RVC ${threshold.rvc}%",
+    reason: "Your detailed reasoning for qualification decision",
+    component_breakdown: array,
+    documentation_required: ["string"],
+    method_of_qualification: "${threshold.method}",
+    preference_criterion: "A/B/C/D"  // Choose based on your analysis
+  },
+  savings: {
+    annual_savings: number,
+    monthly_savings: number,
+    savings_percentage: number,
+    mfn_rate: number,
+    usmca_rate: 0
+  },
+  recommendations: ["Actionable recommendations"],
+  detailed_analysis: {
+    threshold_research: "Why this specific threshold applies",
+    calculation_breakdown: "Step-by-step calculation with your reasoning",
+    qualification_reasoning: "Why you determined this qualification status",
+    strategic_insights: "Business optimization opportunities",
+    savings_analysis: "Detailed tariff savings breakdown"
+  },
+  confidence_score: number
+}`;
 
   return prompt;
 }

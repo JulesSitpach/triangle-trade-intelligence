@@ -191,7 +191,7 @@ async function analyzeAlertGroup(group, userProfile) {
     // CRITICAL FIX: Build component context WITH REAL TARIFF DATA to prevent AI hallucinations
     const componentContext = affectedComponents.map(c => {
       // Extract real tariff data from cached enrichment
-      const baseMFN = c.mfn_rate || c.tariff_rates?.mfn_rate || 0;
+      const baseMFN = c.mfn_rate || c.base_mfn_rate || c.tariff_rates?.mfn_rate || 0;
       const section301 = c.section_301 || c.tariff_rates?.section_301 || 0;
       const totalRate = c.total_rate || c.tariff_rates?.total_rate || baseMFN;
       const usmcaRate = c.usmca_rate || c.tariff_rates?.usmca_rate || 0;
@@ -260,179 +260,67 @@ ${recommendationsList}
 `;
     }
 
-    const prompt = `You are a trade policy analyst providing CONSOLIDATED impact analysis.
+    const prompt = `You are a trade policy analyst consolidating multiple trade alerts for an SMB owner.
 
-=== USER BUSINESS CONTEXT ===
-Company: ${userProfile.companyName}
-Business Type: ${userProfile.businessType}
+BUSINESS CONTEXT:
+Company: ${userProfile.companyName} (${userProfile.businessType})
 Product: ${userProfile.productDescription}
 Annual Trade Volume: $${userProfile.tradeVolume || userProfile.annual_trade_volume || 'unknown'}
 
-=== AFFECTED COMPONENTS (${totalPercentageAffected}% of product) ===
+AFFECTED COMPONENTS (${totalPercentageAffected}% of product):
 ${componentContext}
 
-=== RELATED POLICY CHANGES (Multiple alerts consolidated) ===
+POLICY CHANGES:
 ${alertsContext}${workflowContext}
 
-=== ANALYSIS REQUIRED ===
+Provide ONE CONSOLIDATED ANALYSIS for an SMB owner juggling their business:
 
-Provide ONE CONSOLIDATED analysis that:
+**Broker Tone**: Write like an experienced customs broker talking to a client over coffee - conversational, direct, no corporate speak. Start with the bad news plainly, explain realistic timelines, give clear recommendation with reasoning, end with specific action to take this week.
 
-1. **Groups related issues** - Don't treat Section 301 + Port Fees + Transshipment as 3 separate crises
-2. **Calibrates urgency** - Not everything is 10/10
-3. **Clarifies cost math** - One total impact, not duplicated amounts
-4. **Skips obvious advice** - No "contact Crisis Navigator" or "find other suppliers" (they already know)
-5. **Extracts specifics** - What's ACTUALLY new and actionable from these policies
-6. **Broker Summary** - Start with conversational, plain-English summary (4-6 sentences, ~150 words max)
+**Calculation Transparency**: Show your math clearly so the client understands and trusts the numbers. Use actual component percentages and tariff rates from the data above. If trade volume unknown, show percentage impact and recommend they provide volume for accurate estimates.
 
-**Consolidated Title**: (Short, clear summary of the grouped issue)
-Example: "China Microcontroller Risk (Consolidated)" not "Section 301 Tariffs on Chinese Imports"
+**POLICY CONTEXT (2025)**: Tariff policies vary by destination market. Use the actual policy data and tariff rates provided in the component context above. Explain how applicable tariffs stack or interact for this specific trade flow.
 
-**Broker Summary** (CRITICAL - This appears at the top):
-Write like an experienced customs broker talking to a client over coffee:
-- Start with the bad news plainly (no sugarcoating)
-- Explain the timeline realistically (urgent vs. emergency vs. strategic planning)
-- Give clear recommendation with reasoning
-- End with specific action to take this week
-- Tone: professional but conversational, like talking to a colleague
-- Length: 4-6 sentences, ~150 words max
-- Avoid jargon, use analogies if helpful
-- Be direct, no corporate speak
-
-Example: "Here's the situation: Section 301 tariffs on Chinese steel just jumped 25 percentage points. Based on your $10M annual volume and 40% Chinese steel content, this adds roughly $1M to your annual costs. The timeline here is important. This takes effect January 1st, which gives you 8-10 weeks to plan your response. Not a fire drill, but you need to move. I'd recommend getting quotes from USMCA suppliers immediately. Yes, the material will cost 15-20% more (~$400K premium on $4M steel), but you'll eliminate the $1M tariff hit AND qualify for duty-free USMCA treatment. Net result: you save ~$600K annually. Time to make some calls."
-
-**Real Urgency Level + Timeline**:
-- URGENT: Immediate action required → Timeline: "Days to weeks" → Effective date in <30 days
-- HIGH: Strategic planning required → Timeline: "2-3 months" → Effective date 30-90 days
-- MEDIUM: Long-term monitoring → Timeline: "6-12 months" → Effective date 3-12 months
-- LOW: Background awareness → Timeline: "Monitor ongoing" → No specific effective date
-
-CRITICAL: Urgency and timeline must align! Don't say "HIGH urgency" and then "Not urgent"
-
-**Effective Date**: Specific date when policy takes effect (e.g., "January 1, 2025", "October 31, 2025", "60 days after publication")
-
-**Clear Cost Calculation** (CRITICAL - Avoid Circular Math):
-- Calculate ONCE for all related policies
-- CORRECT approach when Annual Trade Volume is known:
-  Example: Annual Trade Volume = $10M
-  → Chinese steel (40% of product) = $10M × 0.40 = $4M
-  → Section 301 tariff (25%) = $4M × 0.25 = $1M annual cost
-  → Show: "~$1M annually (25% Section 301 on $4M Chinese steel component)"
-
-- If Annual Trade Volume is UNKNOWN:
-  → State clearly: "Unable to calculate dollar impact without annual trade volume"
-  → Show percentage impact: "25% tariff on 40% of product = X% total cost increase"
-  → Recommend user provide volume for accurate cost estimate
-
-- ❌ NEVER use circular logic like: "$1.92M tariff on $1.92M steel component"
-  (This is circular - where did $1.92M come from? You need the base annual volume!)
-
-- Include confidence level and WHY (explain the confidence score)
-
-**Mitigation Scenarios** (Side-by-side comparison of options):
-Provide 2-4 realistic mitigation strategies with cost comparison:
-- Option 1: Status Quo (do nothing) - costs and consequences
-- Option 2: USMCA Suppliers - costs, timeline, benefits, tradeoffs
-- Option 3: Alternative Countries (Vietnam, India) - costs, timeline, benefits, tradeoffs
-- Option 4: (Optional) Hybrid approach or exemption request
-
-For each scenario include:
-- title: Short name (e.g., "Switch to USMCA Suppliers")
-- cost_impact: Annual cost change (e.g., "+$200K annually" or "-$1.5M savings")
-- timeline: How long to implement (e.g., "3-4 months transition")
-- benefit: Primary advantage (e.g., "Eliminate $2M tariff, qualify for USMCA")
-- tradeoffs: Array of considerations (e.g., ["15-20% higher material cost", "Need quality approval process"])
-- recommended: boolean (mark the best option)
-
-**What You Probably Already Know** (skip this in recommendations):
-- Need to diversify suppliers (duh)
-- Should explore USMCA qualification (obvious)
-- Consider Mexico alternatives (they get it)
-
-**What You Might NOT Know** (focus recommendations here):
-- Specific exemption windows or deadlines
-- Tariff rate combinations (how Section 301 + MFN stack)
-- Specific HS codes affected that you didn't realize
-- Alternative sourcing strategies beyond the obvious
-
-Return ONLY valid JSON:
+Return JSON:
 {
-  "consolidated_title": "China Steel Component Risk (Consolidated)",
-  "broker_summary": "Use the example above as a guide. Calculate real costs using: Annual Volume × Component % × Tariff Rate. Show your math clearly.",
-  "urgency": "HIGH",
-  "timeline": "2-3 months",
-  "effective_date": "January 1, 2025",
-  "urgency_reasoning": "Requires strategic supplier changes and contract renegotiation, not emergency action. Timeline allows proper vetting and transition before Jan 1 effective date.",
-  "affected_components": [
-    {
-      "component": "Steel Housing",
-      "percentage": 40,
-      "origin": "CN",
-      "hs_code": "7326.90.85"
-    }
-  ],
+  "consolidated_title": "Specific, clear summary (e.g., 'China Microcontroller Risk' not 'Section 301 Tariffs')",
+  "broker_summary": "4-6 conversational sentences (~150 words) explaining impact, timeline, recommendation, and immediate action. Show calculations.",
+  "urgency": "URGENT/HIGH/MEDIUM/LOW",
+  "timeline": "Realistic timeframe (e.g., 'Days to weeks', '2-3 months', '6-12 months')",
+  "effective_date": "When policy takes effect (specific date or relative timeline)",
+  "urgency_reasoning": "Why this urgency level? How much time to respond?",
+  "affected_components": [{"component": "name", "percentage": X, "origin": "XX", "hs_code": "xxxx.xx.xx"}],
   "consolidated_impact": {
-    "total_annual_cost": "$XXX,XXX",
+    "total_annual_cost": "Calculate using actual rates from component data",
     "confidence": "high/medium/low",
-    "confidence_explanation": "CRITICAL: Use the EXACT tariff rates provided in the component data above. Do NOT hallucinate rates. Explain how you calculated the cost based on the provided rates + annual volume.",
-    "breakdown": "CRITICAL: Calculate using the REAL Section 301 rate from component data (e.g., 25%), NOT a made-up rate. Show: Base MFN + Section 301 = Total Rate.",
-    "stack_explanation": "Explain how tariffs stack (Base MFN + Section 301 = Total), using the ACTUAL rates from the component data above, NOT assumed rates."
+    "confidence_explanation": "Why this confidence? What rates were used?",
+    "breakdown": "Show how you calculated (Volume × % × Rate)",
+    "stack_explanation": "How do tariffs stack? (Base MFN + Section 301 = Total)"
   },
   "mitigation_scenarios": [
     {
-      "title": "Status Quo (Do Nothing)",
-      "cost_impact": "+$XXX,XXX annually (calculate from: Annual Volume × Component % × Tariff Rate)",
+      "title": "Status Quo",
+      "cost_impact": "Calculate annual cost increase",
       "timeline": "Immediate",
-      "benefit": "No transition effort required",
-      "tradeoffs": ["Double your component cost", "Lose competitive advantage", "Competitors will move faster"],
+      "benefit": "Main advantage",
+      "tradeoffs": ["Array of considerations"],
       "recommended": false
     },
     {
-      "title": "Switch to USMCA Suppliers",
-      "cost_impact": "-$1.6M net savings",
-      "timeline": "3-4 months transition",
-      "benefit": "Eliminate $2M tariff, qualify for USMCA duty-free",
-      "tradeoffs": ["Material costs 15-20% more ($288K-$384K)", "Need supplier qualification", "Potential quality approval delays"],
+      "title": "USMCA Suppliers",
+      "cost_impact": "Net savings after material premium",
+      "timeline": "Implementation time",
+      "benefit": "Eliminate tariff AND qualify for USMCA",
+      "tradeoffs": ["Higher material cost", "Supplier qualification needed"],
       "recommended": true
-    },
-    {
-      "title": "Alternative Countries (India/Vietnam)",
-      "cost_impact": "-$800K savings",
-      "timeline": "2-3 months transition",
-      "benefit": "Lower material costs than USMCA, avoid Section 301",
-      "tradeoffs": ["Still pay regular MFN tariffs", "Longer shipping times", "No USMCA benefits"],
-      "recommended": false
     }
   ],
-  "explanation": "Section 301 tariffs affect 40% of your supply chain (Chinese steel housing). Effective January 1, 2025, adding $1.98M annually to component costs. This is a 100% tariff that doubles the landed cost of these parts.",
-  "what_you_know": [
-    "Need to diversify from China",
-    "Mexico manufacturing could help USMCA qualification"
-  ],
-  "what_you_might_not_know": [
-    "Section 301 (100%) stacks on top of existing MFN rates for HS 7326.90.85",
-    "You have until January 1 to transition - that's 10 weeks, enough time but no room for delays",
-    "Indian suppliers can match China pricing but you'll still pay 6.8% MFN tariff (better than 100%)"
-  ],
-  "specific_action_items": [
-    "Request quotes from 3-4 USMCA steel fabricators by end of this week",
-    "Review HS 7326.90.85 classification - verify this is correct code for your housing",
-    "Calculate exact cost comparison: Mexico supplier premium vs. $2M tariff savings",
-    "Schedule quality approval timeline with engineering team (plan for 4-6 weeks)"
-  ],
-  "related_alerts": ["Section 301 Tariffs on Steel", "China Trade War Escalation"]
-}
-
-CRITICAL RULES:
-- ONE consolidated impact calculation (not 3 separate amounts)
-- Realistic urgency (not everything is URGENT)
-- Skip obvious recommendations
-- Focus on specific, actionable, non-obvious insights
-- Explain how tariffs/fees stack or don't stack
-- ALWAYS include broker_summary at the top (conversational, plain English)
-- ALWAYS include effective_date (when policy takes effect)
-- ALWAYS include confidence_explanation (why this confidence score)
-- ALWAYS include mitigation_scenarios (2-4 options with cost comparison)`;
+  "explanation": "Detailed analysis with calculations shown",
+  "what_you_know": ["Obvious advice to skip"],
+  "what_you_might_not_know": ["Specific, actionable, non-obvious insights - exemption deadlines, tariff stacking specifics, HS code impacts"],
+  "specific_action_items": ["Concrete steps with timelines"],
+  "related_alerts": ["List of grouped policy changes"]
+}`;
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
