@@ -840,112 +840,158 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
   const productContext = typeof businessContext === 'string' ? businessContext : businessContext.product_description;
   const usmcaCountries = ['US', 'MX', 'CA'];
 
-  console.log(`📦 Destination-aware enrichment for ${components.length} components → ${destination_country}`);
+  console.log(`📦 BATCH ENRICHMENT for ${components.length} components → ${destination_country}`);
   console.log(`   Strategy: ${destination_country === 'MX' ? 'Database (free)' : destination_country === 'CA' ? 'AI + 90-day cache' : 'AI + 24-hour cache'}`);
 
-  // Process each component through EnrichmentRouter in parallel
-  const enrichmentPromises = components.map(async (component, index) => {
-    try {
-      const enriched = { ...component };
+  try {
+    // 🚀 NEW: Use batch enrichment (single AI call instead of 3+ parallel calls)
+    const batchEnriched = await enrichmentRouter.enrichComponentsBatch(
+      components.map(comp => ({
+        origin_country: comp.origin_country,
+        description: comp.description || comp.component_type || 'Unknown',
+        value_percentage: comp.value_percentage,
+        hs_code: comp.hs_code || comp.classified_hs_code,
+        component_type: comp.component_type
+      })),
+      destination_country,
+      productContext,
+      {} // context
+    );
 
-      // Case 1: No HS code at all
+    // Merge batch results back with original components
+    const enrichedComponents = components.map((component, index) => {
+      const enrichedData = batchEnriched[index];
+
+      // Check if component has HS code
       if (!component.hs_code && !component.classified_hs_code) {
         console.warn(`⚠️ Component "${component.description}" missing HS code`);
-        DevIssue.missingData('component_enrichment', 'hs_code', {
-          component_description: component.description,
-          origin_country: component.origin_country,
-          value_percentage: component.value_percentage
-        });
-        enriched.hs_code = '';
-        enriched.confidence = 0;
-        enriched.mfn_rate = 0;
-        enriched.usmca_rate = 0;
-        enriched.savings_percent = 0;
-        enriched.rate_source = 'missing';
-        enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
-        return enriched;
-      }
-
-      // Case 2: Has HS code - use EnrichmentRouter
-      const hsCode = component.hs_code || component.classified_hs_code;
-      console.log(`   Component ${index + 1}/${components.length}: Routing HS ${hsCode} from ${component.origin_country} → ${destination_country}`);
-
-      // Call EnrichmentRouter with destination-aware routing
-      const enrichedData = await enrichmentRouter.enrichComponent(
-        {
-          country: component.origin_country,
-          component_type: component.description || component.component_type || 'Unknown',
-          percentage: component.value_percentage
-        },
-        destination_country,
-        productContext,
-        hsCode
-      );
-
-      // Check if enrichment failed
-      if (enrichedData.enrichment_error) {
-        console.error(`   ❌ Enrichment failed for component ${index + 1}: ${enrichedData.error_message}`);
         return {
           ...component,
-          hs_code: hsCode,
+          hs_code: '',
           confidence: 0,
           mfn_rate: 0,
           usmca_rate: 0,
           savings_percent: 0,
-          rate_source: 'enrichment_error',
-          error_message: enrichedData.error_message,
+          rate_source: 'missing',
           is_usmca_member: usmcaCountries.includes(component.origin_country)
         };
       }
 
-      // Success - merge enriched data with original component
-      enriched.classified_hs_code = hsCode;
-      enriched.hs_code = hsCode;
-      enriched.confidence = enrichedData.ai_confidence || component.confidence || 100;
-      enriched.hs_description = enrichedData.hs_description || component.hs_description || component.description;
-      enriched.mfn_rate = enrichedData.mfn_rate || 0;
-      enriched.usmca_rate = enrichedData.usmca_rate || 0;
-      enriched.savings_percent = enrichedData.savings_percentage || 0;
-      enriched.rate_source = enrichedData.data_source || 'enrichment_router';
-      enriched.cache_age_days = enrichedData.cache_age_days;
-      enriched.tariff_policy = enrichedData.tariff_policy;
-      enriched.policy_adjustments = enrichedData.policy_adjustments;
-      enriched.last_updated = enrichedData.last_updated || new Date().toISOString().split('T')[0];
-      enriched.is_usmca_member = usmcaCountries.includes(component.origin_country);
+      const hsCode = component.hs_code || component.classified_hs_code;
 
-      console.log(`   ✅ Component ${index + 1}: Enriched (MFN ${enriched.mfn_rate}%, Source: ${enriched.rate_source})`);
-      return enriched;
-
-    } catch (error) {
-      console.error(`❌ Error enriching component "${component.description}":`, error);
-      logDevIssue({
-        type: 'api_error',
-        severity: 'high',
-        component: 'component_enrichment',
-        message: `Failed to enrich component: ${error.message}`,
-        data: {
-          component_description: component.description,
-          origin_country: component.origin_country,
-          error: error.message,
-          stack: error.stack
-        }
-      });
+      // Merge enriched data
       return {
         ...component,
-        confidence: 0,
-        mfn_rate: 0,
-        usmca_rate: 0,
-        savings_percent: 0,
+        classified_hs_code: hsCode,
+        hs_code: hsCode,
+        confidence: enrichedData.ai_confidence || component.confidence || 100,
+        hs_description: enrichedData.hs_description || component.hs_description || component.description,
+        mfn_rate: enrichedData.mfn_rate || 0,
+        usmca_rate: enrichedData.usmca_rate || 0,
+        savings_percent: enrichedData.savings_percentage || 0,
+        rate_source: enrichedData.data_source || 'batch_enrichment',
+        cache_age_days: enrichedData.cache_age_days,
+        tariff_policy: enrichedData.tariff_policy,
+        policy_adjustments: enrichedData.policy_adjustments,
+        last_updated: enrichedData.last_updated || new Date().toISOString().split('T')[0],
         is_usmca_member: usmcaCountries.includes(component.origin_country)
       };
-    }
-  });
+    });
 
-  // Wait for all enrichments to complete
-  const enrichedComponents = await Promise.all(enrichmentPromises);
+    console.log(`✅ BATCH enrichment complete: ${enrichedComponents.length} components in single AI call`);
+    return enrichedComponents;
 
-  console.log(`✅ Destination-aware enrichment complete: ${enrichedComponents.length} components processed for ${destination_country}`);
-  return enrichedComponents;
+  } catch (error) {
+    console.error(`❌ Batch enrichment failed, falling back to individual:`, error);
+    logDevIssue({
+      type: 'api_error',
+      severity: 'medium',
+      component: 'batch_enrichment',
+      message: `Batch enrichment failed: ${error.message}`,
+      data: { component_count: components.length, error: error.message }
+    });
+
+    // FALLBACK: Process each component individually (old method)
+    const enrichmentPromises = components.map(async (component, index) => {
+      try {
+        const enriched = { ...component };
+
+        if (!component.hs_code && !component.classified_hs_code) {
+          console.warn(`⚠️ Component "${component.description}" missing HS code`);
+          return {
+            ...component,
+            hs_code: '',
+            confidence: 0,
+            mfn_rate: 0,
+            usmca_rate: 0,
+            savings_percent: 0,
+            rate_source: 'missing',
+            is_usmca_member: usmcaCountries.includes(component.origin_country)
+          };
+        }
+
+        const hsCode = component.hs_code || component.classified_hs_code;
+        console.log(`   Component ${index + 1}/${components.length}: Routing HS ${hsCode} from ${component.origin_country} → ${destination_country}`);
+
+        const enrichedData = await enrichmentRouter.enrichComponent(
+          {
+            country: component.origin_country,
+            component_type: component.description || component.component_type || 'Unknown',
+            percentage: component.value_percentage
+          },
+          destination_country,
+          productContext,
+          hsCode
+        );
+
+        if (enrichedData.enrichment_error) {
+          console.error(`   ❌ Enrichment failed for component ${index + 1}: ${enrichedData.error_message}`);
+          return {
+            ...component,
+            hs_code: hsCode,
+            confidence: 0,
+            mfn_rate: 0,
+            usmca_rate: 0,
+            savings_percent: 0,
+            rate_source: 'enrichment_error',
+            is_usmca_member: usmcaCountries.includes(component.origin_country)
+          };
+        }
+
+        return {
+          ...component,
+          classified_hs_code: hsCode,
+          hs_code: hsCode,
+          confidence: enrichedData.ai_confidence || component.confidence || 100,
+          hs_description: enrichedData.hs_description || component.hs_description || component.description,
+          mfn_rate: enrichedData.mfn_rate || 0,
+          usmca_rate: enrichedData.usmca_rate || 0,
+          savings_percent: enrichedData.savings_percentage || 0,
+          rate_source: enrichedData.data_source || 'enrichment_router',
+          cache_age_days: enrichedData.cache_age_days,
+          tariff_policy: enrichedData.tariff_policy,
+          policy_adjustments: enrichedData.policy_adjustments,
+          last_updated: enrichedData.last_updated || new Date().toISOString().split('T')[0],
+          is_usmca_member: usmcaCountries.includes(component.origin_country)
+        };
+
+      } catch (error) {
+        console.error(`❌ Error enriching component "${component.description}":`, error);
+        return {
+          ...component,
+          confidence: 0,
+          mfn_rate: 0,
+          usmca_rate: 0,
+          savings_percent: 0,
+          is_usmca_member: usmcaCountries.includes(component.origin_country)
+        };
+      }
+    });
+
+    const fallbackResults = await Promise.all(enrichmentPromises);
+    console.log(`✅ Fallback enrichment complete: ${fallbackResults.length} components processed individually`);
+    return fallbackResults;
+  }
 }
 
 /**
