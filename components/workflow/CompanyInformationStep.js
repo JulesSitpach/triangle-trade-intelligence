@@ -197,7 +197,7 @@ export default function CompanyInformationStep({
                 </option>
               ))}
             </select>
-            <div className="form-help">Your role in the supply chain - certificate type shown in parentheses</div>
+            <div className="form-help">USMCA certificate type shown first, your business role in parentheses</div>
           </div>
 
           <div className="form-group">

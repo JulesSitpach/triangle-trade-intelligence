@@ -19,7 +19,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Importer',
     label: 'Importer',
-    label_with_cert: 'Importer (Certificate: IMPORTER)',
+    label_with_cert: 'IMPORTER (Importer)',
     label_es: 'Importador',
     description: 'Purchases goods from foreign suppliers',
     description_es: 'Compra productos de proveedores extranjeros',
@@ -28,7 +28,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Exporter',
     label: 'Exporter',
-    label_with_cert: 'Exporter (Certificate: EXPORTER)',
+    label_with_cert: 'EXPORTER (Exporter)',
     label_es: 'Exportador',
     description: 'Sells goods to foreign markets',
     description_es: 'Vende productos a mercados extranjeros',
@@ -37,7 +37,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Manufacturer',
     label: 'Manufacturer',
-    label_with_cert: 'Manufacturer (Certificate: PRODUCER)',
+    label_with_cert: 'PRODUCER (Manufacturer)',
     label_es: 'Fabricante',
     description: 'Produces goods for domestic or international sale',
     description_es: 'Produce bienes para venta nacional o internacional',
@@ -46,7 +46,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Distributor',
     label: 'Distributor',
-    label_with_cert: 'Distributor (Certificate: IMPORTER)',
+    label_with_cert: 'IMPORTER (Distributor)',
     label_es: 'Distribuidor',
     description: 'Distributes products within a region',
     description_es: 'Distribuye productos dentro de una región',
@@ -55,7 +55,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Wholesaler',
     label: 'Wholesaler',
-    label_with_cert: 'Wholesaler (Certificate: IMPORTER)',
+    label_with_cert: 'IMPORTER (Wholesaler)',
     label_es: 'Mayorista',
     description: 'Bulk seller to retailers',
     description_es: 'Vendedor al por mayor a minoristas',
@@ -64,7 +64,7 @@ export const BUSINESS_TYPES = [
   {
     value: 'Retailer',
     label: 'Retailer',
-    label_with_cert: 'Retailer (Certificate: IMPORTER)',
+    label_with_cert: 'IMPORTER (Retailer)',
     label_es: 'Minorista',
     description: 'Sells directly to end consumers',
     description_es: 'Vende directamente a consumidores finales',
