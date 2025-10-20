@@ -199,7 +199,9 @@ export default function CompanyInformationStep({
             </select>
             <div className="form-help">USMCA certificate type shown first, your business role in parentheses</div>
           </div>
+        </div>
 
+        <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label required">Industry Sector</label>
             <select
@@ -218,6 +220,19 @@ export default function CompanyInformationStep({
               )}
             </select>
             <div className="form-help">Primary product category for HS classification</div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label required">Tax ID / EIN</label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.tax_id || ''}
+              onChange={(e) => updateFormData('tax_id', e.target.value)}
+              placeholder="Tax identification number"
+              required
+            />
+            <div className="form-help">Federal tax ID or EIN (required for certificates)</div>
           </div>
         </div>
 
@@ -264,21 +279,6 @@ export default function CompanyInformationStep({
               </optgroup>
             </select>
             <div className="form-help">Country where your company is registered</div>
-          </div>
-        </div>
-
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label className="form-label required">Tax ID / EIN</label>
-            <input
-              type="text"
-              className="form-input"
-              value={formData.tax_id || ''}
-              onChange={(e) => updateFormData('tax_id', e.target.value)}
-              placeholder="Tax identification number"
-              required
-            />
-            <div className="form-help">Federal tax ID or EIN (required for certificates)</div>
           </div>
         </div>
 
