@@ -63,12 +63,17 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
       // Expand relevant sections based on certifier type
       if (authData.certifier_type === 'IMPORTER') {
-        newExpanded.importer = true;  // Only show importer section
+        // IMPORTER certificate: Only need importer info (you're the buyer)
+        newExpanded.importer = true;
       } else if (authData.certifier_type === 'EXPORTER') {
-        newExpanded.exporter = true;  // Only show exporter section
+        // EXPORTER certificate: Need exporter + importer (you're shipping, specify customer)
+        newExpanded.exporter = true;
+        newExpanded.importer = true;  // ✅ NEW: Exporter needs to specify customer
       } else if (authData.certifier_type === 'PRODUCER') {
-        newExpanded.exporter = true;  // Show exporter section
-        newExpanded.producer = true;  // AND producer section (both needed)
+        // PRODUCER certificate: Need all 3 (who ships, who made it, who receives)
+        newExpanded.exporter = true;   // Who is shipping (could be you or distributor)
+        newExpanded.producer = true;   // Who manufactured (YOU)
+        newExpanded.importer = true;   // ✅ FIXED: Who is receiving (YOUR CUSTOMER)
       }
 
       setExpandedSections(newExpanded);
