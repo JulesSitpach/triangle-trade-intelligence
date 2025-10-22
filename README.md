@@ -1,480 +1,241 @@
-# Triangle Trade Intelligence Platform
+# Triangle Intelligence Platform
 
-**AI-Enhanced USMCA Compliance & Mexico Trade Services**
+Global SaaS for international trade compliance automation. Supporting USMCA, EU-UK TCA, CPTPP, and bilateral trade agreements.
 
-Professional trade compliance platform helping North American companies maximize USMCA benefits and build Mexico supply chain relationships through AI-enhanced expert services.
-
-**Positioning**: Canadian-owned platform with Mexico-based operations - North American business standards with Mexico market access and insights.
-
----
-
-## 🎯 Features
-
-### Core Services
-- **USMCA Analysis** - AI-powered qualification assessment with automatic component enrichment
-- **Certificate Generation** - Professional USMCA certificates validated by trade compliance experts
-- **Trade Alerts** - Real-time crisis monitoring and supply chain risk alerts
-- **Mexico Services** - Supplier sourcing, manufacturing feasibility, market entry strategy
-- **Component Enrichment** - Automatic tariff intelligence with HS code classification
-
-### Expert Team
-
-**Founder (Canadian from Ottawa, living in Mexico)**:
-- 15+ years high-tech experience (IBM, Cognos, Mitel, LinkedIn)
-- Video production specialist and platform developer
-- Bilingual: English/French (Quebec market access)
-- **Trust Factor**: Canadian ownership with Mexico market access
-
-**Cristina Escalante** - Trade Compliance Expert
-- Professional Certification #4601913 (**NOT a licensed customs broker**)
-- 17 years logistics experience (Motorola, Arris, Tekmovil)
-- International Commerce degree, HTS codes and INCOTERMS specialist
-- Native Spanish speaker with advanced English
-
-**Jorge Ochoa** - B2B Sales Expert
-- 7+ years as business owner (Art Printing)
-- Consultative selling approach, bilingual (Spanish/English)
-- Mexico supplier relationships and cultural bridge
-
----
-
-## 📌 Current Status (October 2025)
-
-**✅ Production-Ready Clean Codebase**
-- All legacy/experimental code archived
-- Single git repository: `triangle-trade-intelligence`
-- Working on `main` branch only
-- Auto-deploys to Vercel on push
-
-**🔐 Admin Access**
-- Email: triangleintel@gmail.com
-- Password: Admin2025!
-- Dashboards: `/admin/broker-dashboard`, `/admin/jorge-dashboard`, `/admin/analytics`
-
-**🚀 Deployment**
-- Production: https://triangle-trade-intelligence.vercel.app
-- Auto-deploy: Push to `main` branch → Vercel deploys automatically
-- Simple workflow: `git add . && git commit -m "message" && git push`
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 14 (Pages Router), React 18
-- **Database**: Supabase PostgreSQL (34,476+ HS codes)
-- **AI**: OpenRouter API (Claude models)
-- **Payments**: Stripe
-- **Auth**: Cookie-based sessions (HttpOnly cookies)
-- **Styling**: Custom CSS (NO Tailwind, NO inline styles)
-
----
+**Live**: https://triangle-trade-intelligence.vercel.app
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Supabase account
-- Stripe account
-- OpenRouter API key
-
-### Development Server Ports
-- **Port 3000**: Reserved for USER - main development server for direct testing
-- **Port 3001**: Reserved for CLAUDE CODE agents - automated testing/validation
-
 ```bash
-npm run dev        # User development (port 3000)
-npm run dev:3001   # Claude Code agents (port 3001)
-```
-
-### Environment Variables
-
-Copy `.env.example` to `.env.local` and configure:
-
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_key
-
-# OpenRouter API (AI Services)
-OPENROUTER_API_KEY=your_openrouter_api_key
-
-# Stripe Payment Processing
-STRIPE_SECRET_KEY=sk_test_your_secret_key
-STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-
-# Stripe Product IDs
-STRIPE_STARTER_PRICE_ID=price_starter_id
-STRIPE_PROFESSIONAL_PRICE_ID=price_professional_id
-STRIPE_PREMIUM_PRICE_ID=price_premium_id
-
-# JWT Secret for Cookie Auth
-JWT_SECRET=your_jwt_secret_here
-```
-
-### Installation
-
-```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Run development server (USER - port 3000)
-npm run dev
+# 2. Configure environment variables
+cp .env.example .env.local
+# Fill in: OPENROUTER_API_KEY, ANTHROPIC_API_KEY, Supabase keys, Stripe key
 
-# Run development server (CLAUDE CODE - port 3001)
-npm run dev:3001
+# 3. Run development server
+npm run dev:3001          # Port 3001 for Claude Code agents
+
+# 4. Open browser
+open http://localhost:3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for user development
-Open [http://localhost:3001](http://localhost:3001) for Claude Code agent testing
+## 📋 What This Platform Does
 
-### Build for Production
+**Input**: Company info + Product components (descriptions, origins, percentages)
+**Processing**: AI-powered HS code classification + tariff rate lookup
+**Output**: USMCA eligibility assessment + tariff savings calculation
 
-```bash
-npm run build
-npm start
+### Three-Step Workflow
+1. **Company Information** - Business profile and destination market
+2. **Component Details** - Product components with AI classification
+3. **Results** - USMCA qualification status and tariff analysis
+
+### Key Features
+- 🤖 AI-powered HS code classification (OpenRouter + Anthropic fallback)
+- 📊 Real-time tariff rate lookup with policy adjustments
+- 💰 Automatic savings calculation (MFN vs USMCA rates)
+- 🔐 Secure authentication with JWT cookies
+- 📱 Responsive design (mobile, tablet, desktop)
+
+## 🏗️ Architecture
+
+### Tech Stack
+- **Frontend**: Next.js 14 (Pages Router), React 18
+- **Database**: Supabase PostgreSQL
+- **AI**: OpenRouter API (Claude models)
+- **Hosting**: Vercel (auto-deploy on git push)
+- **Auth**: Cookie-based sessions (httpOnly)
+
+### Core Workflow
+```
+User Form Input
+    ↓
+AI Classification (OpenRouter)
+    ↓
+Cache Check (Database)
+    ↓
+Tariff Lookup (4-tier fallback)
+    ↓
+Enrichment Data Saved to DB
+    ↓
+Results Displayed
 ```
 
----
-
-## 💰 Business Model
-
-### Subscription Tiers
-
-**7-Day Free Trial ($0)**
-- 1 USMCA analysis (max 3 components)
-- Certificate preview only (watermarked)
-- View crisis alerts in dashboard
-- No credit card required
-
-**Starter ($99/month)**
-- 10 USMCA analyses per month (10 components each)
-- Basic trade alerts
-- Email support (high/critical alerts only)
-- Full certificate download
-- No service discounts
-
-**Professional ($299/month)** ← Most SMBs land here
-- Unlimited USMCA analyses
-- Real-time crisis alerts
-- **15% discount on all professional services**
-- Priority 48hr support
-- Advanced trade policy analysis
-
-**Premium ($599/month)**
-- Everything in Professional
-- **25% discount on all professional services**
-- Quarterly 1-on-1 strategy calls with Jorge & Cristina
-- Dedicated Slack/email support
-- Custom trade intelligence reports
-
-### Professional Services (Team Collaboration Model)
-
-**All services delivered collaboratively between Jorge and Cristina with different lead/support ratios:**
-
-1. **🏥 Trade Health Check**: $99 (no subscriber discounts)
-   - Team Lead: Jorge & Cristina (Equal 50% each)
-   - Complete assessment with prioritized action plan
-
-2. **📜 USMCA Advantage Sprint**: $175 base / $149 Professional / $131 Premium
-   - Team Lead: Cristina (70% effort) / Jorge (30% support)
-   - USMCA qualification assessment and optimization roadmap
-
-3. **🔧 Supply Chain Optimization**: $275 base / $234 Professional / $206 Premium
-   - Team Lead: Cristina (60% effort) / Jorge (40% support)
-   - Complete supply chain efficiency audit and cost reduction
-
-4. **🚀 Pathfinder Market Entry**: $350 base / $298 Professional / $263 Premium
-   - Team Lead: Jorge (65% effort) / Cristina (35% support)
-   - Mexico market analysis and distribution strategy
-
-5. **🛡️ Supply Chain Resilience**: $450 base / $383 Professional / $338 Premium
-   - Team Lead: Jorge (60% effort) / Cristina (40% support)
-   - Alternative supplier research and USMCA qualification
-
-6. **🆘 Crisis Navigator**: $200/month ongoing retainer
-   - Team Lead: Cristina (60% effort) / Jorge (40% support)
-   - Priority emergency response and regulatory monitoring
-
-**Note:** All pricing reflects consulting and guidance scope. For official customs broker services (legal customs filings) and formal certifications, we partner with licensed customs brokers (separate fees apply).
-
-### 🚨 Legal Service Scope & Disclaimers
-
-**What We Provide:**
-- ✅ Trade compliance consulting and optimization guidance
-- ✅ USMCA qualification assessments and recommendations
-- ✅ Logistics planning and strategic recommendations
-- ✅ Supply chain analysis and process improvement
-- ✅ Market entry strategy and business development support
-
-**What We DO NOT Provide:**
-- ❌ Licensed customs broker services (legal customs filings)
-- ❌ Official USMCA certificate preparation (legal documents)
-- ❌ Formal legal compliance certifications
-- ❌ Official customs declarations
-
-**Partner Network:**
-For official customs broker services (legal customs filings) and formal legal certifications, we partner with licensed customs brokers. Our trade compliance experts provide consulting, guidance and assessments; official legal customs declarations require licensed customs brokers.
-
-**Service Disclaimer:**
-*"Triangle Trade Intelligence provides trade compliance consulting, optimization guidance, and strategic recommendations through experienced trade compliance professionals. We are NOT licensed customs brokers. Official customs declarations, formal legal certifications, and customs filings require partnership with licensed customs brokers. All recommendations are for consulting and guidance purposes and should be validated with licensed customs brokers when official filings are required."*
-
----
-
-## 🗺️ User Journey
-
-**Core Flow:**
-```
-Homepage (/)
-  → Signup (/signup) - 7-day free trial
-  → USMCA Workflow (/usmca-workflow) - Protected (requires subscription)
-  → Results with component enrichment
-  → Two Paths:
-     - Certificate (/usmca-certificate-completion)
-     - Trade Alerts (/trade-risk-alternatives)
-  → Professional Services (/services)
-  → Dashboard (/dashboard)
-```
-
-**Admin Dashboards:**
-- Cristina: `/admin/broker-dashboard` - ALL 6 services visible (leads: Health Check 50%, USMCA Advantage 70%, Supply Chain Opt 60%, Crisis Navigator 60%)
-- Jorge: `/admin/jorge-dashboard` - ALL 6 services visible (leads: Pathfinder 65%, Supply Chain Resilience 60%)
-- Analytics: `/admin/analytics` - Revenue, user analytics, business intelligence
-
-**Key Feature:** Both dashboards show ALL 6 services - the difference is WHO is the primary lead for each service based on skill allocation percentages.
-
----
+### Database Schema
+- `auth.users` - Supabase authentication
+- `user_profiles` - Subscription tier, trial dates
+- `workflow_sessions` - Completed USMCA workflows
+- `tariff_rates_cache` - AI classifications + tariff rates (unified Oct 22, 2025)
 
 ## 📁 Project Structure
 
 ```
-triangle-trade-intelligence/
-├── components/
-│   ├── shared/            # 6 team collaboration service tabs
-│   ├── workflow/          # Workflow components (13 files)
-│   ├── admin/             # Admin components
-│   └── [core components]  # Layout, dashboard, etc.
-│
-├── config/
-│   ├── service-configurations.js  # 6 active services (SINGLE SOURCE OF TRUTH)
-│   ├── team-config.js            # Team member roles and expertise
-│   ├── usmca-thresholds.js       # USMCA qualification rules
-│   ├── business-types.js         # Dynamic business types (16 sectors)
-│   └── workflow-statuses.js      # Centralized status enums
-│
-├── lib/
-│   ├── database/
-│   │   └── supabase.js
-│   ├── utils/
-│   │   ├── error-handler.js
-│   │   └── logger.js
-│   └── services/
-│       └── workflow-service.js
-│
-├── pages/
-│   ├── api/               # API routes (50+ endpoints)
-│   │   ├── auth/         # Cookie-based authentication
-│   │   ├── stripe/       # Stripe payments
-│   │   ├── admin/        # Admin endpoints
-│   │   └── services/     # Service APIs
-│   ├── admin/            # Admin dashboards
-│   └── [core pages]      # User-facing pages
-│
-├── public/               # Static assets
-├── styles/               # CSS files (NO Tailwind)
-│   ├── globals.css
-│   ├── dashboard-user.css
-│   └── admin-workflows.css
-│
-└── database/
-    └── migrations/       # SQL migration files
+pages/
+  ├── index.js                    # Homepage
+  ├── usmca-workflow.js           # Main 3-step workflow
+  ├── pricing.js                  # Subscription plans
+  ├── dashboard.js                # User dashboard
+  └── api/
+      ├── auth/                   # Login/register/logout
+      ├── agents/classification   # HS code classification
+      └── ai-usmca-complete-analysis.js  # Main tariff endpoint
+
+components/workflow/
+  ├── CompanyInformationStep.js
+  ├── ComponentOriginsStepEnhanced.js
+  └── WorkflowResults.js
+
+lib/
+  ├── agents/classification-agent.js
+  ├── ai-helpers.js
+  └── tariff/enrichment-router.js
+
+config/
+  ├── usmca-thresholds.js         # Eligibility rules
+  └── system-config.js             # Global constants
+
+styles/
+  ├── globals.css                 # Main styles
+  └── admin-workflows.css         # Admin-specific styles
 ```
 
----
+## 🔑 Key Concepts
 
-## 🔑 Key Features
+### USMCA Eligibility
+A component qualifies for USMCA benefits if:
+- **Origin country**: One of US, Canada, or Mexico
+- **Destination country**: One of US, Canada, or Mexico
+- **Regional value content**: Meets industry-specific threshold (Textiles 55%, Electronics 65%, Auto 75%)
+- **No tariff escalation**: RVC must not be achieved through tariff evasion
 
-### User-Facing Features
-- **Video Hero Section**: Professional earth loop video on homepage
-- **Interactive Calculator**: Mexico savings calculator with real-time calculations
-- **Protected Workflow**: Subscription-required USMCA analysis
-- **Component Enrichment**: Automatic AI-powered tariff intelligence (NEW October 2025)
-- **Dual Path Results**: Certificate generation OR trade alerts
-- **Real-time Alerts**: Trade risk monitoring with crisis notifications
-- **User Dashboard**: Workflow history with dropdown selector + preview cards
-- **Privacy Controls**: Account settings with data deletion
+### Tariff Rate Cache (4-Tier System)
+1. **Database** (persistent, indexed) - Latest: ~200ms
+2. **In-Memory** (session) - Repeat lookups: <50ms
+3. **OpenRouter API** (primary) - Fresh data: ~2-3 seconds
+4. **Anthropic Direct** (backup) - If OpenRouter down
+5. **Stale Database** (last resort) - Clearly marked as outdated
 
-### Admin Features
-- **Team Collaboration**: Both dashboards see all 6 services with different lead ratios
-- **Service Workflow Modals**: Reusable 3-stage workflow pattern
-- **Component Tables**: 8-column enriched component display with tariff intelligence (NEW)
-- **Admin Intelligence**: Client opportunity prioritization
-- **Floating Team Chat**: Real-time inter-team communication
-- **Business Analytics**: Revenue tracking and user metrics
-- **Toast Notifications**: User feedback system
-- **Error Boundaries**: Graceful error handling
+### AI Classification Flow
+```
+Component description → OpenRouter API → HS code + confidence
+                           ↓
+                    Save to tariff_rates_cache
+                           ↓
+                    Admin reviews (verified = false initially)
+                           ↓
+                    Builds knowledge base over time
+```
 
-### Component Enrichment (NEW - October 2025)
-**Automatic AI-powered enrichment with 2025 policy context:**
-- HS code classification (via OpenRouter API with full business context)
-- 2025 Tariff Policy Integration: China +100%, port fees, bilateral deal impacts
-- Base MFN rate + Policy-adjusted MFN rate (real-time 2025 changes)
-- USMCA rate (preferential 0%)
-- Policy Adjustments Tracking: Section 301 tariffs, port fees, transshipment investigations
-- Savings calculation (Policy-adjusted MFN - USMCA)
-- AI confidence score + policy adjustment flags
-- Visual alerts for low confidence or Mexico opportunities
-- Database comparison (stale Jan 2025 data for reference only)
+## 🚀 Development
 
-**Admin Dashboard Display:**
-- 8-column component tables with complete tariff intelligence + policy tracking
-- Real-time enrichment status indicators
-- Policy adjustment badges (China +100%, Port Fees, etc.)
-- AI-first approach: OpenRouter primary, database comparison secondary
-- Professional validation for low-confidence classifications
-- Verified flag: false (AI-generated, pending human review)
-
----
-
-## 🚢 Deployment
-
-### Vercel (Recommended)
-
-1. Connect GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy
-
-**Environment Variables Checklist:**
-- [ ] Supabase URL and keys
-- [ ] OpenRouter API key
-- [ ] Stripe keys and webhook secret
-- [ ] Stripe product price IDs
-- [ ] JWT_SECRET for cookie auth
-
-### Configure Stripe Webhook
-
-After deployment:
-
-1. Go to Stripe Dashboard → Developers → Webhooks
-2. Add endpoint: `https://your-domain.com/api/stripe/webhook`
-3. Select events:
-   - `checkout.session.completed`
-   - `customer.subscription.created`
-   - `customer.subscription.updated`
-   - `customer.subscription.deleted`
-   - `invoice.payment_succeeded`
-   - `invoice.payment_failed`
-4. Copy webhook signing secret
-5. Add to Vercel: `STRIPE_WEBHOOK_SECRET`
-
----
-
-## 🔧 Development
-
-### Available Scripts
-
+### Commands
 ```bash
-npm run dev              # Start development server (port 3000 - USER)
-npm run dev:3001         # Start development server (port 3001 - CLAUDE CODE)
-npm run build            # Build for production
-npm start                # Start production server
-npm run lint             # Run ESLint
+npm run dev:3001      # Start dev server on port 3001
+npm run build         # Production build
+npm run start         # Run production build locally
+npm run lint          # Manual ESLint
 ```
 
-### Key Implementation Details
+### Key Files for Development
 
-**Authentication:**
-- Cookie-based auth (HttpOnly cookies)
-- SimpleAuthContext for session management
-- No Supabase auth tokens in localStorage
-- JWT_SECRET for session signing
+**Authentication**:
+- `pages/api/auth/login.js` - Cookie-based session
+- `pages/api/auth/me.js` - Returns user with subscription tier
+- `lib/middleware/auth-middleware.js` - Protected route wrapper
 
-**AI Integration:**
-- All AI functionality uses OpenRouter API
-- Claude models for analysis and recommendations with 2025 policy context
-- ~$0.005 per workflow (half a cent)
-- AI-First approach: OpenRouter (2025 policy) → Database comparison (stale Jan 2025 data)
-- Real-time policy adjustments: China +100%, port fees, bilateral deals
-- Verified flag: false (AI-generated, pending human review)
+**Tariff Analysis**:
+- `pages/api/ai-usmca-complete-analysis.js` - Main API (2000+ lines)
+- `lib/ai-helpers.js` - Cache lookup logic
+- `lib/agents/classification-agent.js` - HS code classification
 
-**USMCA Compliance:**
-- Config file for industry thresholds (treaty-defined)
-- AI for context-dependent analysis with current 2025 trade policy
-- Database for user data + historical comparison only (not primary tariff source)
-- No hardcoded business data or stale tariff rates
+**Workflow UI**:
+- `components/workflow/USMCAWorkflowOrchestrator.js` - State management
+- `components/workflow/CompanyInformationStep.js` - Step 1
+- `components/workflow/ComponentOriginsStepEnhanced.js` - Step 2 (AI classification)
+- `components/workflow/WorkflowResults.js` - Results
 
-**Anti-Hardcoding Architecture:**
-- All services in `config/service-configurations.js`
-- All business types in `config/business-types.js`
-- All statuses in `config/workflow-statuses.js`
-- Single source of truth for all business logic
+### Styling
+- ✅ **DO**: Use existing CSS classes from `styles/globals.css`
+- ❌ **DON'T**: Inline styles (`style={{}}`)
+- ❌ **DON'T**: Tailwind CSS
+- ❌ **DON'T**: Create new CSS files without approval
 
----
+### Debugging
+
+**Port already in use?**
+```bash
+taskkill /F /IM node.exe  # Windows
+killall node              # macOS/Linux
+```
+
+**Database connection issues?**
+- Check `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`
+- Verify table names (case-sensitive on Linux/macOS)
+
+**AI API timeout?**
+- Check `OPENROUTER_API_KEY` is valid
+- Verify rate limits haven't been exceeded
+- Check network connectivity
+
+## 📊 Recent Changes (Oct 22, 2025)
+
+### Phase 1 Complete
+- ✅ **P0-1**: Destination country field implemented
+- ✅ **P0-2**: Component data restoration on navigation (fixed data loss bug)
+- ✅ **P0-3**: USMCA eligibility gate added (destination validation)
+- ✅ **P0-4**: Tariff data verified current (not stale)
+- ✅ **P0-5**: Cache consolidation (unified tariff_rates_cache table)
+
+### Commits
+```
+7aa37de - fix: P0-5 Cache table consolidation
+2d2b9c6 - fix: P0 critical fixes - Component data loss + USMCA gate
+```
+
+## 🔮 Roadmap
+
+### Phase 2 (Next - P1 Fixes)
+- Error handling + dev_issues logging
+- Cross-tab workflow synchronization
+- Cost optimization (Haiku vs Sonnet)
+
+### Phase 3 (Q1 2026)
+- EU-UK TCA agreement support
+- CPTPP agreement support
+- Multi-agreement dashboard
+
+### Phase 4 (Q2+ 2026)
+- Bilateral agreement templates (US-Japan, US-India, etc.)
+- Advanced analytics and reporting
+- Partner API
 
 ## 📚 Documentation
 
-### Essential Files
-- `CLAUDE.md` - Complete project documentation (MASTER REFERENCE)
-- `PRE_LAUNCH_CHECKLIST.md` - Launch preparation checklist
-- `DEPLOYMENT_READY_SUMMARY.md` - Deployment summary
-
-### Key Pages
-- Homepage: `/` - Value proposition and calculator
-- Workflow: `/usmca-workflow` - 2-step compliance analysis with component enrichment
-- Certificate: `/usmca-certificate-completion` - Certificate generation
-- Alerts: `/trade-risk-alternatives` - Crisis monitoring
-- Services: `/services` - Professional service marketplace
-- Dashboard: `/dashboard` - User account management
-
----
-
-## 🔐 Security
-
-- Environment variables never committed
-- HttpOnly cookies for authentication
-- JWT_SECRET for session signing
-- Stripe webhooks validated
-- API routes protected with middleware
-- User data encrypted in Supabase
-
----
-
-## 📈 Status
-
-**Current Version:** 1.0.0 (Production Ready)
-**Last Updated:** October 2025
-**Build Status:** ✅ Passing
-**Deployment:** Ready for Vercel
-
-**Recent Updates:**
-- ✅ Component Enrichment Feature (October 2025)
-- ✅ Team Collaboration Services Model (6 active services)
-- ✅ Anti-Hardcoding Architecture (Configuration-driven)
-- ✅ Fixed False "Licensed Customs Broker" Claims (October 2025)
-- ✅ Cookie-Based Authentication (HttpOnly cookies)
-- ✅ Port Assignment Strategy (3000 user, 3001 agents)
-
----
+- **[CLAUDE.md](./CLAUDE.md)** - Developer quick reference (for Claude Code agents)
+- **[Database Schema](./database/schema/)** - Supabase table definitions
+- Source files contain inline documentation
 
 ## 🤝 Contributing
 
-This is a private production repository. For development work, use the development branch.
-
----
+1. Create feature branch: `git checkout -b feature/description`
+2. Implement with tests
+3. Commit: `git commit -m "feat: description"`
+4. Push: `git push origin feature/description`
+5. Create PR for review
 
 ## 📞 Support
 
-**Email:** support@triangletrade.com
-**Admin Access:** triangleintel@gmail.com / Admin2025!
-
----
+- **Production Issues**: Check Vercel logs at https://vercel.com
+- **Database Issues**: Log in to Supabase project (mrwitpgbcaxgnirqtavt)
+- **AI Issues**: Check OpenRouter API status
+- **Code Questions**: Check source file documentation
 
 ## 📄 License
 
-Proprietary - All Rights Reserved
+Proprietary - Triangle Intelligence Platform
 
 ---
 
-**Built with ❤️ for North American trade professionals by a Canadian founder living in Mexico**
+**Latest Update**: October 22, 2025 | **Status**: Production Ready (Phase 1 Complete)
