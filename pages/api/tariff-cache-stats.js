@@ -25,7 +25,7 @@ export default protectedApiHandler({
     try {
       // Build query for overall stats or specific destination
       let query = supabase
-        .from('tariff_cache')
+        .from('tariff_rates_cache')
         .select('*');
 
       if (destination_country) {

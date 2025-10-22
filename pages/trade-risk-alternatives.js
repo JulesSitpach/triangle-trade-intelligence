@@ -11,6 +11,7 @@ import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
 import PersonalizedPolicyAlert from '../components/alerts/PersonalizedPolicyAlert';
 import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAlert';
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
+import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -31,6 +32,9 @@ export default function TradeRiskAlternatives() {
   const [consolidatedAlerts, setConsolidatedAlerts] = useState([]);
   const [isConsolidating, setIsConsolidating] = useState(false);
   const [originalAlertCount, setOriginalAlertCount] = useState(0);
+
+  // PREMIUM CONTENT: USMCA Intelligence from workflow
+  const [workflowIntelligence, setWorkflowIntelligence] = useState(null);
 
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
@@ -60,53 +64,39 @@ export default function TradeRiskAlternatives() {
       const urlParams = new URLSearchParams(window.location.search);
       const analysisId = urlParams.get('analysis_id');
 
-      if (analysisId) {
-        console.log('📊 Loading specific alert:', analysisId);
-        // Load alert from database
-        const response = await fetch('/api/dashboard-data', {
-          credentials: 'include'
+      console.log('🔍 Alert Page Load Context:', {
+        hasAnalysisId: !!analysisId,
+        analysisId: analysisId,
+        fullURL: window.location.href,
+        hasUser: !!user
+      });
+
+      // Load workflow data from database
+      console.log('📊 Loading workflow data from database...');
+      const response = await fetch('/api/dashboard-data', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const dashboardData = await response.json();
+
+        console.log('📦 Dashboard data received:', {
+          alertsCount: dashboardData.alerts?.length || 0,
+          workflowsCount: dashboardData.workflows?.length || 0,
+          tier: dashboardData.user_profile?.subscription_tier
         });
 
-        if (response.ok) {
-          const dashboardData = await response.json();
+        // Extract user subscription tier
+        setUserTier(dashboardData.user_profile?.subscription_tier || 'Trial');
 
-          // Extract user subscription tier
-          setUserTier(dashboardData.user_profile?.subscription_tier || 'Trial');
-
+        // If analysis_id provided, load that specific alert
+        if (analysisId) {
+          console.log('🔍 Looking for specific alert:', analysisId);
           const alert = dashboardData.alerts?.find(a => a.id === analysisId);
 
           if (alert) {
-            console.log('✅ Found alert data from database:', alert);
-
-            // Get supplier country from component origins
+            console.log('✅ Found alert data from database');
             const components = alert.component_origins || [];
-
-            // Check for schema mismatches in database data
-            const hasOriginCountry = components.length > 0 && components[0].origin_country;
-            const hasCountryFallback = components.length > 0 && components[0].country;
-
-            if (components.length > 0 && !hasOriginCountry && hasCountryFallback) {
-              console.warn('⚠️ Database schema mismatch: component has "country" but not "origin_country"', components[0]);
-
-              // Log to admin dashboard (non-blocking)
-              fetch('/api/admin/log-dev-issue', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  issue_type: 'schema_mismatch',
-                  severity: 'medium',
-                  component: 'alerts_database_loader',
-                  message: 'Database component uses "country" field instead of "origin_country"',
-                  context_data: {
-                    alert_id: analysisId,
-                    component_sample: components[0],
-                    expected_field: 'origin_country',
-                    found_field: 'country'
-                  }
-                })
-              }).catch(err => console.error('Failed to log dev issue:', err));
-            }
-
             const primarySupplier = components.length > 0
               ? (components[0].origin_country || components[0].country)
               : 'Not specified';
@@ -119,7 +109,7 @@ export default function TradeRiskAlternatives() {
               tradeVolume: alert.annual_trade_volume || 0,
               supplierCountry: primarySupplier,
               qualificationStatus: alert.qualification_status || 'NEEDS_REVIEW',
-              savings: 0, // Not stored in vulnerability_analyses table
+              savings: 0,
               componentOrigins: components,
               recommendedAlternatives: alert.recommendations?.diversification_strategies || [],
               vulnerabilities: alert.primary_vulnerabilities || []
@@ -130,9 +120,58 @@ export default function TradeRiskAlternatives() {
             return;
           }
         }
+
+        // ✅ NEW: If no analysis_id OR alert not found, load most recent workflow
+        if (dashboardData.workflows?.length > 0) {
+          const mostRecentWorkflow = dashboardData.workflows[0];
+          console.log('✅ Loading most recent workflow from database:', {
+            id: mostRecentWorkflow.id,
+            companyName: mostRecentWorkflow.company_name,
+            hasWorkflowData: !!mostRecentWorkflow.workflow_data
+          });
+
+          // Extract workflow data
+          const workflowData = mostRecentWorkflow.workflow_data || {};
+          const components = mostRecentWorkflow.component_origins || [];
+
+          const profile = {
+            userId: user?.id,
+            companyName: mostRecentWorkflow.company_name,
+            businessType: mostRecentWorkflow.business_type,
+            hsCode: mostRecentWorkflow.hs_code,
+            productDescription: mostRecentWorkflow.product_description,
+            tradeVolume: mostRecentWorkflow.trade_volume,
+            supplierCountry: components[0]?.origin_country || components[0]?.country,
+            qualificationStatus: mostRecentWorkflow.qualification_status,
+            savings: mostRecentWorkflow.estimated_annual_savings || 0,
+            componentOrigins: components
+          };
+
+          // Extract rich workflow intelligence if available
+          if (workflowData.recommendations || workflowData.detailed_analysis) {
+            console.log('✅ Found rich workflow intelligence in database');
+            setWorkflowIntelligence({
+              recommendations: workflowData.recommendations || [],
+              detailed_analysis: workflowData.detailed_analysis || {},
+              compliance_roadmap: workflowData.compliance_roadmap || {},
+              risk_mitigation: workflowData.risk_mitigation || {},
+              confidence_score: workflowData.confidence_score || 0,
+              confidence_factors: workflowData.confidence_factors || {}
+            });
+          }
+
+          setUserProfile(profile);
+          setIsLoading(false);
+          return;
+        } else {
+          console.warn('⚠️ No workflows found in database - falling back to localStorage');
+        }
+      } else {
+        console.error('❌ Dashboard data fetch failed:', response.status, response.statusText);
       }
 
       // Fallback to localStorage (current session)
+      console.log('🔄 Falling back to localStorage data');
       loadLocalStorageData();
     } catch (error) {
       console.error('Error loading trade profile:', error);
@@ -190,6 +229,9 @@ export default function TradeRiskAlternatives() {
         : rawTradeVolume;
 
       // NO FALLBACKS - Expose missing data as dev issue
+      // CRITICAL FIX: Components are saved under usmca.component_breakdown (not top-level "components")
+      const components = userData.usmca?.component_breakdown || userData.components || [];
+
       const profile = {
         userId: user?.id,  // Include userId for workflow intelligence lookup
         companyName: userData.company?.company_name || userData.company?.name,
@@ -197,11 +239,27 @@ export default function TradeRiskAlternatives() {
         hsCode: userData.product?.hs_code,
         productDescription: userData.product?.description,
         tradeVolume: parsedTradeVolume,
-        supplierCountry: userData.components?.[0]?.origin_country,  // Match saved key: "components"
+        supplierCountry: components[0]?.origin_country || components[0]?.country,  // Try both keys
         qualificationStatus: userData.usmca?.qualification_status,
         savings: userData.savings?.annual_savings || 0,
-        componentOrigins: userData.components || []  // Match saved key: "components"
+        componentOrigins: components  // Fixed: use usmca.component_breakdown
       };
+
+      // 🎯 EXTRACT RICH WORKFLOW INTELLIGENCE (Premium content for Professional/Premium tiers)
+      // This is the GOLD that subscribers pay $99-599/month for!
+      if (userData.recommendations || userData.detailed_analysis || userData.compliance_roadmap) {
+        console.log('✅ Found rich workflow intelligence - setting premium content');
+        setWorkflowIntelligence({
+          recommendations: userData.recommendations || [],
+          detailed_analysis: userData.detailed_analysis || {},
+          compliance_roadmap: userData.compliance_roadmap || {},
+          risk_mitigation: userData.risk_mitigation || {},
+          confidence_score: userData.confidence_score || 0,
+          confidence_factors: userData.confidence_factors || {}
+        });
+      } else {
+        console.log('⚠️ No workflow intelligence found in localStorage - user may need to re-run workflow');
+      }
 
       // Log missing data to admin dashboard
       const missingFields = [];
@@ -209,7 +267,7 @@ export default function TradeRiskAlternatives() {
       if (!profile.businessType) missingFields.push('business_type');
       if (!profile.hsCode) missingFields.push('hs_code');
       if (!profile.productDescription) missingFields.push('product_description');
-      if (!profile.supplierCountry && userData.components?.length > 0) missingFields.push('component origin_country');
+      if (!profile.supplierCountry && components.length > 0) missingFields.push('component origin_country');
       if (!profile.qualificationStatus) missingFields.push('qualification_status');
       if (profile.componentOrigins.length === 0) missingFields.push('component_origins array');
 
@@ -368,65 +426,42 @@ export default function TradeRiskAlternatives() {
     setIsLoadingPolicyAlerts(true);
 
     try {
-      console.log('🚨 Fetching real tariff policy alerts from government sources...');
+      console.log('🎯 Generating AI-powered personalized alerts based on user components...');
 
-      const response = await fetch('/api/tariff-policy-alerts', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+      // 🚀 NEW: Generate RELEVANT alerts using AI based on user's actual components
+      // No more hardcoded China/Vietnam alerts for users with US/MX/CA components!
+      const response = await fetch('/api/generate-personalized-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_profile: profile
+        })
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch policy alerts: ${response.status}`);
+        throw new Error(`Failed to generate personalized alerts: ${response.status}`);
       }
 
       const data = await response.json();
 
       if (data.success && data.alerts) {
-        console.log(`✅ Loaded ${data.alerts.length} total policy alerts`);
+        console.log(`✅ Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
 
-        // Extract user's component countries and HS codes for filtering
-        const userCountries = profile.componentOrigins
-          ?.map(c => c.origin_country || c.country)
-          .filter(Boolean) || [];
+        const personalizedAlerts = data.alerts;
 
-        const userHSCodes = profile.componentOrigins
-          ?.map(c => c.hs_code)
-          .filter(Boolean) || [];
-
-        console.log('🔍 User trade profile:', {
-          countries: userCountries,
-          hs_codes: userHSCodes
-        });
-
-        // Filter alerts relevant to user's trade profile
-        const relevantAlerts = data.alerts.filter(alert => {
-          // Check if alert affects user's origin countries
-          const affectsUserCountry = alert.affected_countries?.some(country =>
-            userCountries.includes(country)
-          );
-
-          // Check if alert affects user's HS codes
-          const affectsUserHSCode = alert.affected_hs_codes?.some(hsCode =>
-            userHSCodes.some(userHS => userHS && userHS.startsWith(hsCode.substring(0, 4)))
-          );
-
-          // Always show CRITICAL alerts (priority 1-3) regardless of specifics
-          const isCritical = alert.severity === 'CRITICAL';
-
-          return affectsUserCountry || affectsUserHSCode || isCritical;
-        });
-
-        console.log(`🎯 ${relevantAlerts.length} alerts relevant to your trade profile`);
-        setRealPolicyAlerts(relevantAlerts);
-        setOriginalAlertCount(relevantAlerts.length);
+        setRealPolicyAlerts(personalizedAlerts);
+        setOriginalAlertCount(personalizedAlerts.length);
 
         // Consolidate alerts intelligently (group related issues)
-        if (relevantAlerts.length > 0) {
-          await consolidateAlerts(relevantAlerts, profile);
+        if (personalizedAlerts.length > 0) {
+          await consolidateAlerts(personalizedAlerts, profile);
         }
+      } else {
+        console.log('⚠️ No personalized alerts generated - all AI tiers failed');
+        setRealPolicyAlerts([]);
       }
     } catch (error) {
-      console.error('❌ Error loading real policy alerts:', error);
+      console.error('❌ Error generating personalized alerts:', error);
       setRealPolicyAlerts([]);
     } finally {
       setIsLoadingPolicyAlerts(false);
@@ -537,6 +572,11 @@ export default function TradeRiskAlternatives() {
             </div>
           </div>
         </div>
+
+        {/* 🎯 PREMIUM CONTENT: Rich USMCA Intelligence */}
+        {workflowIntelligence && (
+          <USMCAIntelligenceDisplay workflowIntelligence={workflowIntelligence} />
+        )}
 
         {/* Dynamic User Trade Profile */}
         <div className="form-section">
@@ -796,12 +836,6 @@ export default function TradeRiskAlternatives() {
                 </ol>
               </div>
               <div className="hero-buttons">
-                <button
-                  className="btn-primary"
-                  onClick={() => window.location.href = '/services/request-form'}
-                >
-                  🎯 Request Expert Consultation
-                </button>
                 <button
                   className="btn-secondary"
                   onClick={() => {

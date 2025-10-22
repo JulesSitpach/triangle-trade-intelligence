@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import TriangleLayout from './TriangleLayout';
-import { SERVICE_CONFIGURATIONS, calculateServicePrice } from '../config/service-configurations';
 import { SUBSCRIPTION_TIERS } from '../config/subscription-limits';
 import { logDevIssue, DevIssue } from '../lib/utils/logDevIssue.js';
 
@@ -165,297 +164,6 @@ export default function UserDashboard({ user }) {
     router.push(`/trade-risk-alternatives?analysis_id=${alertId}`);
   };
 
-  // Helper function to scroll to Request Service section
-  const scrollToServiceRequest = (workflowId = null, serviceId = null) => {
-    const section = document.getElementById('request-service-section');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Pre-select workflow and service if provided
-      if (workflowId) {
-        setTimeout(() => {
-          const workflowSelect = document.querySelector('#workflow-selector');
-          if (workflowSelect) {
-            workflowSelect.value = workflowId;
-            workflowSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }, 300);
-      }
-      if (serviceId) {
-        setTimeout(() => {
-          const serviceSelect = document.querySelector('#service-selector');
-          if (serviceSelect) {
-            serviceSelect.value = serviceId;
-            serviceSelect.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }, 500);
-      }
-    }
-  };
-
-  // REQUEST SERVICE SECTION COMPONENT (Subscriber-only fast path)
-  const RequestServiceSection = ({ user, workflows }) => {
-    const [selectedWorkflowId, setSelectedWorkflowId] = useState('');
-    const [selectedService, setSelectedService] = useState('');
-    const [concerns, setConcerns] = useState('');
-    const [isProcessing, setIsProcessing] = useState(false);
-
-    // Get the selected workflow object
-    const selectedWorkflow = workflows.find(w => w.id === selectedWorkflowId);
-
-    // Build services array dynamically from config (FLEXIBLE & DYNAMIC)
-    const services = Object.entries(SERVICE_CONFIGURATIONS).map(([serviceType, config]) => ({
-      id: serviceType,
-      name: `${config.icon} ${config.name}`,
-      basePrice: config.price,
-      recurring: config.isRecurring || false,
-      // Trade Health Check and Crisis Navigator have no discounts
-      noDiscount: serviceType === 'trade-health-check' || serviceType === 'crisis-navigator'
-    }));
-
-    // Use centralized pricing calculation (FLEXIBLE & DYNAMIC)
-    const calculatePrice = (service) => {
-      const tier = user?.subscription_tier || SUBSCRIPTION_TIERS.FREE_TRIAL;
-
-      // Use config helper function for consistent pricing
-      const priceInfo = calculateServicePrice(service.id, tier);
-      return priceInfo ? priceInfo.finalPrice : service.basePrice;
-    };
-
-    // Get discount label for display (DYNAMIC - no hardcoding)
-    const getDiscountLabel = (service) => {
-      const tier = user?.subscription_tier || SUBSCRIPTION_TIERS.FREE_TRIAL;
-
-      if (service.noDiscount) {
-        return '(No subscriber discounts)';
-      }
-
-      // Use config helper to get discount percentage dynamically
-      const priceInfo = calculateServicePrice(service.id, tier);
-      if (priceInfo && priceInfo.discount > 0) {
-        return `(${priceInfo.discountPercentage}% off)`;
-      }
-
-      return '';
-    };
-
-    const handleRequestService = async () => {
-      // Validation
-      if (!selectedWorkflow) {
-        alert('Please select a workflow from your certificates above');
-        return;
-      }
-
-      if (!selectedService) {
-        alert('Please select a service');
-        return;
-      }
-
-      if (!concerns.trim()) {
-        alert('Please describe what you need help with');
-        return;
-      }
-
-      setIsProcessing(true);
-
-      try {
-        console.log('🚀 Creating service request...');
-
-        // Build service request data from selected workflow
-        const workflowData = selectedWorkflow.workflow_data || {};
-        const serviceRequestData = {
-          company_name: selectedWorkflow.company_name || workflowData.company?.name || 'Unknown',
-          product_description: selectedWorkflow.product_description || workflowData.product?.description || '',
-          business_type: workflowData.company?.business_type || '',
-          hs_code: selectedWorkflow.hs_code || '',
-          qualification_status: selectedWorkflow.qualification_status || '',
-          regional_content_percentage: selectedWorkflow.regional_content_percentage || 0,
-          required_threshold: selectedWorkflow.required_threshold || 60,
-          component_origins: selectedWorkflow.component_origins || [],
-          trade_volume: workflowData.company?.trade_volume || '',
-          manufacturing_location: selectedWorkflow.manufacturing_location || '',
-          workflow_id: selectedWorkflow.id,
-          concerns: concerns.trim()
-        };
-
-        // Call Stripe checkout API
-        const response = await fetch('/api/stripe/create-service-checkout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            service_id: selectedService,
-            service_request_data: serviceRequestData
-          })
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to create checkout session');
-        }
-
-        const data = await response.json();
-        console.log('✅ Checkout session created:', data);
-
-        // Redirect to Stripe checkout
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error('No checkout URL returned');
-        }
-
-      } catch (error) {
-        console.error('❌ Service request error:', error);
-        await DevIssue.apiError('user_dashboard', '/api/stripe/create-service-checkout', error, {
-          serviceId: selectedService,
-          workflowId: selectedWorkflowId
-        });
-        alert(`Failed to create service request: ${error.message}`);
-        setIsProcessing(false);
-      }
-    };
-
-    const selectedServiceObj = services.find(s => s.id === selectedService);
-
-    return (
-      <div id="request-service-section" className="form-section">
-        <h2 className="form-section-title">🚀 Request Expert Service</h2>
-        <p className="text-body">
-          Fast-track service requests for subscribers with automatic discount pricing
-        </p>
-
-        {workflows.length === 0 ? (
-          <>
-            <p className="text-body">
-              Complete your first USMCA analysis to unlock expert services with automatic subscriber discounts.
-            </p>
-            <div className="action-buttons">
-              <Link href="/usmca-workflow?reset=true" className="btn-primary">
-                Start USMCA Workflow
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Workflow Selection Dropdown */}
-            <div className="form-group">
-              <label className="form-label">
-                Select Workflow: <span className="text-red">*</span>
-              </label>
-              <select
-                id="workflow-selector"
-                className="form-select"
-                value={selectedWorkflowId}
-                onChange={(e) => setSelectedWorkflowId(e.target.value)}
-              >
-                <option value="">-- Choose a workflow --</option>
-                {workflows.map(w => (
-                  <option key={w.id} value={w.id}>
-                    {w.product_description} - {w.qualification_status} - {new Date(w.completed_at).toLocaleDateString()}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Workflow Preview Card */}
-            {selectedWorkflow && (
-              <div className="form-group">
-                <label className="form-label">Selected Workflow:</label>
-                <div className={`service-request-card ${selectedWorkflow.qualification_status === 'QUALIFIED' ? 'border-left-green' : 'border-left-red'}`}>
-                  <div className="text-bold">{selectedWorkflow.product_description}</div>
-                  <div className="text-body">
-                    Status: <strong className={selectedWorkflow.qualification_status === 'QUALIFIED' ? 'text-green' : 'text-red'}>
-                      {selectedWorkflow.qualification_status === 'QUALIFIED' ? '✓ QUALIFIED' : '✗ NOT QUALIFIED'}
-                    </strong> •
-                    USMCA Content: <strong>{selectedWorkflow.regional_content_percentage}%</strong>
-                  </div>
-                  {selectedWorkflow.hs_code && (
-                    <div className="text-body">HS Code: {selectedWorkflow.hs_code}</div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Service Selection */}
-            <div className="form-group">
-              <label className="form-label">Select Service:</label>
-              <select
-                id="service-selector"
-                className="form-select"
-                value={selectedService}
-                onChange={(e) => setSelectedService(e.target.value)}
-                disabled={!selectedWorkflow}
-              >
-                <option value="">-- Choose a service --</option>
-                {services.map(service => {
-                  const price = calculatePrice(service);
-                  const discountLabel = getDiscountLabel(service);
-                  return (
-                    <option key={service.id} value={service.id}>
-                      {service.name} - ${price}{service.recurring ? '/mo' : ''} {discountLabel}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            {/* Price Display */}
-            {selectedServiceObj && (
-              <div className="form-group">
-                <div className="service-request-card border-left-green">
-                  <div className="text-bold">
-                    Your Price: ${calculatePrice(selectedServiceObj)}
-                    {selectedServiceObj.recurring ? '/month' : ' one-time'}
-                  </div>
-                  {!selectedServiceObj.noDiscount && user?.subscription_tier !== 'Starter' && (
-                    <div className="text-body">
-                      Base price: ${selectedServiceObj.basePrice} •
-                      You save: ${selectedServiceObj.basePrice - calculatePrice(selectedServiceObj)}
-                      with {user?.subscription_tier} subscription
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Concerns/Description */}
-            <div className="form-group">
-              <label className="form-label">
-                What do you need help with? <span className="text-red">*</span>
-              </label>
-              <textarea
-                className="form-textarea"
-                value={concerns}
-                onChange={(e) => setConcerns(e.target.value)}
-                placeholder="Describe your specific concerns or questions about this product/workflow..."
-                rows={4}
-                disabled={!selectedWorkflow || !selectedService}
-              />
-              <p className="text-body">
-                Our team will review your workflow data and address these concerns in the service delivery.
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <div className="action-buttons">
-              <button
-                onClick={handleRequestService}
-                disabled={!selectedWorkflow || !selectedService || !concerns.trim() || isProcessing}
-                className="btn-primary"
-              >
-                {isProcessing ? 'Processing...' : 'Continue to Payment →'}
-              </button>
-            </div>
-
-            <p className="text-body">
-              💡 Your workflow data will be automatically loaded — no need to re-enter company or product details!
-            </p>
-          </>
-        )}
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -709,27 +417,16 @@ export default function UserDashboard({ user }) {
                         </button>
                       )}
 
-                      {/* NOT QUALIFIED: [View Analysis] [Get Help to Qualify] (disabled for expired trials) */}
+                      {/* NOT QUALIFIED: [View Analysis] */}
                       {selectedWorkflow.qualification_status !== 'QUALIFIED' && (
-                        <>
-                          <button
-                            onClick={() => !isTrialExpired && router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
-                            className="btn-primary"
-                            disabled={isTrialExpired}
-                            style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                          >
-                            📊 View Analysis {isTrialExpired && '(Upgrade Required)'}
-                          </button>
-
-                          <button
-                            onClick={() => !isTrialExpired && scrollToServiceRequest(selectedWorkflow.id, 'usmca-advantage')}
-                            className="btn-primary"
-                            disabled={isTrialExpired}
-                            style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                          >
-                            🇲🇽 Get Help to Qualify {isTrialExpired && '(Upgrade Required)'}
-                          </button>
-                        </>
+                        <button
+                          onClick={() => !isTrialExpired && router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
+                          className="btn-primary"
+                          disabled={isTrialExpired}
+                          style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                        >
+                          📊 View Analysis {isTrialExpired && '(Upgrade Required)'}
+                        </button>
                       )}
 
                       {/* Delete Certificate Button */}
@@ -923,23 +620,6 @@ export default function UserDashboard({ user }) {
                       >
                         View Full Alert {isTrialExpired && '(Upgrade Required)'}
                       </button>
-                      <button
-                        onClick={() => {
-                          if (!isTrialExpired) {
-                            // Find the workflow associated with this alert
-                            const relatedWorkflow = workflows.find(w =>
-                              w.product_description === selectedAlert.product_description ||
-                              w.company_name === selectedAlert.company_name
-                            );
-                            scrollToServiceRequest(relatedWorkflow?.id, 'crisis-navigator');
-                          }
-                        }}
-                        className="btn-primary"
-                        disabled={isTrialExpired}
-                        style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                      >
-                        Get Professional Help {isTrialExpired && '(Upgrade Required)'}
-                      </button>
 
                       {/* Delete Alert Button */}
                       <button
@@ -973,12 +653,6 @@ export default function UserDashboard({ user }) {
               </>
             )}
         </div>
-
-        {/* REQUEST EXPERT SERVICE */}
-        <RequestServiceSection
-          user={user}
-          workflows={workflows}
-        />
 
       </div>
     </TriangleLayout>

@@ -94,9 +94,6 @@ export default function HomePage() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Services
-            </Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
@@ -160,13 +157,6 @@ export default function HomePage() {
               aria-label="View pricing plans and start free trial"
             >
               Start Free Trial
-            </Link>
-            <Link
-              href="/services"
-              className="hero-secondary-button"
-              aria-label="View professional services"
-            >
-              View All Services
             </Link>
           </div>
 
@@ -350,25 +340,6 @@ export default function HomePage() {
       <section id="calculator" className="main-content">
         <div className="container-app">
           <SimpleSavingsCalculator />
-        </div>
-      </section>
-
-      {/* Need Help? Simple CTA */}
-      <section className="main-content" style={{backgroundColor: '#fef3c7'}}>
-        <div className="container-app">
-          <div className="content-card" style={{textAlign: 'center', background: 'transparent', border: 'none'}}>
-            <h2 className="section-header-title" style={{color: '#92400e'}}>
-              Don&apos;t Qualify Yet? Need Help?
-            </h2>
-            <p className="section-header-subtitle" style={{color: '#92400e', fontSize: '1.2rem'}}>
-              Mexico-based bilingual expert team helps you restructure supply chains, find alternative suppliers, and achieve USMCA compliance.
-            </p>
-            <div className="hero-button-group" style={{marginTop: '2rem'}}>
-              <Link href="/services" className="btn-primary">
-                View Expert Services
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
 

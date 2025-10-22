@@ -9,10 +9,11 @@ function generateSiteMap() {
   const staticPages = [
     { url: '', priority: '1.0', changefreq: 'daily' }, // Homepage
     { url: '/pricing', priority: '0.9', changefreq: 'weekly' },
-    { url: '/services', priority: '0.9', changefreq: 'weekly' },
+    { url: '/about', priority: '0.8', changefreq: 'weekly' },
     { url: '/usmca-workflow', priority: '0.9', changefreq: 'weekly' },
     { url: '/trade-risk-alternatives', priority: '0.8', changefreq: 'weekly' },
-    { url: '/services/mexico-trade-services', priority: '0.8', changefreq: 'weekly' },
+    { url: '/mexico-savings-calculator', priority: '0.7', changefreq: 'weekly' },
+    { url: '/secure-supply-chain-mexico', priority: '0.7', changefreq: 'weekly' },
     { url: '/terms-of-service', priority: '0.5', changefreq: 'monthly' },
     { url: '/privacy-policy', priority: '0.5', changefreq: 'monthly' },
     { url: '/login', priority: '0.6', changefreq: 'monthly' },

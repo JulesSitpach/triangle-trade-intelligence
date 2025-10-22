@@ -38,7 +38,6 @@ export default function About() {
           </button>
 
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/about" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
@@ -95,13 +94,6 @@ export default function About() {
             >
               Start Free Trial
             </Link>
-            <Link
-              href="/services"
-              className="hero-secondary-button"
-              aria-label="View professional services"
-            >
-              View All Services
-            </Link>
           </div>
 
           {/* Trial Benefits */}
@@ -153,7 +145,7 @@ export default function About() {
               <div className="content-card-icon">B</div>
               <h3 className="content-card-title">SMB Focus</h3>
               <p className="content-card-description">
-                Built specifically for small manufacturers and importers who need Fortune 500 compliance capabilities at affordable prices. Plans start at $99/month with professional services from $99-650 per engagement.
+                Built specifically for small manufacturers and importers who need Fortune 500 compliance capabilities at affordable prices. Plans start at $99/month.
               </p>
             </div>
           </div>
@@ -199,9 +191,6 @@ export default function About() {
               <p className="text-body">✓ Bilingual: Spanish/English (native speaker)</p>
               <p className="text-body">✓ Mexico supplier relationships and sourcing</p>
               <p className="text-body">✓ Cultural bridge for North American companies</p>
-              <p className="content-card-description">
-                <strong>Leads: Pathfinder Market Entry, Supply Chain Resilience</strong>
-              </p>
             </div>
 
             {/* Trade Compliance Expert */}
@@ -217,57 +206,11 @@ export default function About() {
               <p className="text-body">✓ HTS codes and INCOTERMS specialist</p>
               <p className="text-body">✓ License #4601913 (professional certification)</p>
               <p className="text-body">✓ Native Spanish with advanced English</p>
-              <p className="content-card-description">
-                <strong>Leads: USMCA Advantage, Supply Chain Optimization, Crisis Navigator</strong>
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Service Scope and Legal Clarity */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">Our Service Scope</h2>
-            <p className="section-header-subtitle">
-              Clear about what we provide and when licensed professionals are required
-            </p>
-          </div>
-
-          <div className="grid-2-cols">
-            <div className="content-card">
-              <div className="content-card-icon">✓</div>
-              <h3 className="content-card-title">What We Provide</h3>
-              <p className="text-body">✓ Trade process consulting and optimization guidance</p>
-              <p className="text-body">✓ USMCA qualification assessment and recommendations</p>
-              <p className="text-body">✓ Logistics planning and strategic recommendations</p>
-              <p className="text-body">✓ Supply chain analysis and process improvement</p>
-              <p className="text-body">✓ Market entry strategy and business development support</p>
-              <p className="text-body">✓ HS code classification guidance (non-binding recommendations)</p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">✗</div>
-              <h3 className="content-card-title">What We Do Not Provide</h3>
-              <p className="text-body">✗ Licensed customs broker services</p>
-              <p className="text-body">✗ Official USMCA certificate preparation (legal documents)</p>
-              <p className="text-body">✗ Formal legal compliance certifications</p>
-              <p className="text-body">✗ Official customs declarations</p>
-              <p className="text-body">✗ Binding legal or regulatory advice</p>
-              <p className="text-body">✗ Representation before customs authorities</p>
-            </div>
-          </div>
-
-          <div className="content-card">
-            <div className="content-card-icon">P</div>
-            <h3 className="content-card-title">Partner Network for Official Services</h3>
-            <p className="content-card-description">
-              For official customs broker services, USMCA certifications, and legal compliance documents, we partner with licensed professionals. Our services provide expert guidance and assessment to prepare you for these official processes, but official certifications require trade compliance experts.
-            </p>
-          </div>
-        </div>
-      </section>
 
       {/* Competitive Advantages */}
       <section className="main-content gradient-subtle">
@@ -336,22 +279,15 @@ export default function About() {
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">
-              Ready to Work with Our Team?
+              Ready to Get Started?
             </h2>
             <p className="section-header-subtitle">
-              Start with our $99 Trade Health Check or subscribe for AI-powered compliance tools
+              Join North American companies using Triangle for USMCA compliance and tariff optimization
             </p>
             <div className="hero-button-group">
               <Link
-                href="/services/request-form"
-                className="btn-primary"
-                aria-label="Request Trade Health Check"
-              >
-                Request Trade Health Check
-              </Link>
-              <Link
                 href="/pricing"
-                className="btn-secondary"
+                className="btn-primary"
                 aria-label="View subscription plans"
               >
                 View Pricing Plans

@@ -95,6 +95,13 @@ module.exports = {
         source: '/account-settings',
         destination: '/account/settings',
         permanent: true
+      },
+      // ARCHIVED ADMIN ROUTES - Redirect to homepage (consulting services disabled for SMB SaaS launch)
+      // To restore: Remove these redirects and move archived-admin/* back to original locations
+      {
+        source: '/admin/:path*',
+        destination: '/',
+        permanent: false // Non-permanent to easily restore later
       }
     ]
   }

@@ -1065,7 +1065,7 @@ async function lookupBatchTariffRates(components, destination_country = 'US') {
 
     // Query database for cached rate
     const { data: cached, error } = await supabase
-      .from('ai_classifications')
+      .from('tariff_rates_cache')
       .select('*')
       .eq('hs_code', hsCode)
       .eq('origin_country', component.origin_country)
@@ -1434,7 +1434,7 @@ async function saveAIDataToDatabase(classificationResult, component) {
   try {
     // Save to ai_classifications table to build our database over time
     const { data, error } = await supabase
-      .from('ai_classifications')
+      .from('tariff_rates_cache')
       .insert({
         hs_code: classificationResult.hs_code,
         component_description: component.description,
@@ -1502,7 +1502,7 @@ async function saveTariffRatesToDatabase(freshRates, components, destination_cou
       // Save/update each rate using UPSERT (prevents stale duplicate records)
       savePromises.push(
         supabase
-          .from('ai_classifications')
+          .from('tariff_rates_cache')
           .upsert({
             hs_code: hsCode,
             component_description: component.description || 'AI tariff lookup',

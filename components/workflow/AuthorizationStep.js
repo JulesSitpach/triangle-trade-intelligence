@@ -371,12 +371,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
         {expandedSections.exporter && (
           <>
-        {/* Checkbox to indicate if Exporter is same as your company */}
-        <div className="form-group" style={{marginBottom: '1.5rem'}}>
-          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
-            <input
-              type="checkbox"
-              checked={authData.exporter_same_as_company || false}
+            {/* Checkbox to indicate if Exporter is same as your company */}
+            <div className="form-group" style={{marginBottom: '1.5rem'}}>
+              <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                <input
+                  type="checkbox"
+                  checked={authData.exporter_same_as_company || false}
               onChange={(e) => {
                 handleFieldChange('exporter_same_as_company', e.target.checked);
                 // Auto-populate exporter fields from company data if checked
@@ -402,101 +402,101 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               Exporter is my company (auto-fill with company information from Step 1)
             </span>
           </label>
-        </div>
+            </div>
 
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label className="form-label required">Company Name</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.exporter_name || ''}
-              onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
-              placeholder="Enter exporting company name"
-              required
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="form-label required">Company Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.exporter_name || ''}
+                  onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
+                  placeholder="Enter exporting company name"
+                  required
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label required">Address</label>
-            <textarea
-              className="form-input"
-              value={authData.exporter_address || ''}
-              onChange={(e) => handleFieldChange('exporter_address', e.target.value)}
-              placeholder="Complete address including street, city, state/province, postal code"
-              rows="3"
-              required
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label required">Address</label>
+                <textarea
+                  className="form-input"
+                  value={authData.exporter_address || ''}
+                  onChange={(e) => handleFieldChange('exporter_address', e.target.value)}
+                  placeholder="Complete address including street, city, state/province, postal code"
+                  rows="3"
+                  required
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label required">Tax ID/EIN</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.exporter_tax_id || ''}
-              onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)}
-              placeholder="Enter exporter's tax identification number"
-              required
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label required">Tax ID/EIN</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.exporter_tax_id || ''}
+                  onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)}
+                  placeholder="Enter exporter's tax identification number"
+                  required
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Contact Person</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.exporter_contact_person || ''}
-              onChange={(e) => handleFieldChange('exporter_contact_person', e.target.value)}
-              placeholder="Primary contact at exporting company"
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Contact Person</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.exporter_contact_person || ''}
+                  onChange={(e) => handleFieldChange('exporter_contact_person', e.target.value)}
+                  placeholder="Primary contact at exporting company"
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Phone</label>
-            <input
-              type="tel"
-              className="form-input"
-              value={authData.exporter_phone || ''}
-              onChange={(e) => handleFieldChange('exporter_phone', e.target.value)}
-              placeholder="(555) 123-4567"
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Phone</label>
+                <input
+                  type="tel"
+                  className="form-input"
+                  value={authData.exporter_phone || ''}
+                  onChange={(e) => handleFieldChange('exporter_phone', e.target.value)}
+                  placeholder="(555) 123-4567"
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-input"
-              value={authData.exporter_email || ''}
-              onChange={(e) => handleFieldChange('exporter_email', e.target.value)}
-              placeholder="contact@exporter.com"
-              disabled={authData.exporter_same_as_company}
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={authData.exporter_email || ''}
+                  onChange={(e) => handleFieldChange('exporter_email', e.target.value)}
+                  placeholder="contact@exporter.com"
+                  disabled={authData.exporter_same_as_company}
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label required">Country</label>
-            <select
-              className="form-select"
-              value={authData.exporter_country || ''}
-              onChange={(e) => handleFieldChange('exporter_country', e.target.value)}
-              required
-              disabled={authData.exporter_same_as_company}
-            >
-              <option value="">Select country</option>
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="Mexico">Mexico</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </div>
+              <div className="form-group">
+                <label className="form-label required">Country</label>
+                <select
+                  className="form-select"
+                  value={authData.exporter_country || ''}
+                  onChange={(e) => handleFieldChange('exporter_country', e.target.value)}
+                  required
+                  disabled={authData.exporter_same_as_company}
+                >
+                  <option value="">Select country</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Mexico">Mexico</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -512,93 +512,92 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
         {expandedSections.importer && (
           <>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="form-label required">Company Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.importer_name || ''}
+                  onChange={(e) => handleFieldChange('importer_name', e.target.value)}
+                  placeholder="Enter importing company name"
+                  required
+                />
+              </div>
 
-        <div className="form-grid-2">
-          <div className="form-group">
-            <label className="form-label required">Company Name</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.importer_name || ''}
-              onChange={(e) => handleFieldChange('importer_name', e.target.value)}
-              placeholder="Enter importing company name"
-              required
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label required">Address</label>
+                <textarea
+                  className="form-input"
+                  value={authData.importer_address || ''}
+                  onChange={(e) => handleFieldChange('importer_address', e.target.value)}
+                  placeholder="Complete address including street, city, state/province, postal code"
+                  rows="3"
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label required">Address</label>
-            <textarea
-              className="form-input"
-              value={authData.importer_address || ''}
-              onChange={(e) => handleFieldChange('importer_address', e.target.value)}
-              placeholder="Complete address including street, city, state/province, postal code"
-              rows="3"
-              required
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label required">Tax ID/EIN</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.importer_tax_id || ''}
+                  onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)}
+                  placeholder="Enter importer's tax identification number"
+                  required
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label required">Tax ID/EIN</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.importer_tax_id || ''}
-              onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)}
-              placeholder="Enter importer's tax identification number"
-              required
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Contact Person</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={authData.importer_contact_person || ''}
+                  onChange={(e) => handleFieldChange('importer_contact_person', e.target.value)}
+                  placeholder="Primary contact at importing company"
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Contact Person</label>
-            <input
-              type="text"
-              className="form-input"
-              value={authData.importer_contact_person || ''}
-              onChange={(e) => handleFieldChange('importer_contact_person', e.target.value)}
-              placeholder="Primary contact at importing company"
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Phone</label>
+                <input
+                  type="tel"
+                  className="form-input"
+                  value={authData.importer_phone || ''}
+                  onChange={(e) => handleFieldChange('importer_phone', e.target.value)}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Phone</label>
-            <input
-              type="tel"
-              className="form-input"
-              value={authData.importer_phone || ''}
-              onChange={(e) => handleFieldChange('importer_phone', e.target.value)}
-              placeholder="(555) 123-4567"
-            />
-          </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={authData.importer_email || ''}
+                  onChange={(e) => handleFieldChange('importer_email', e.target.value)}
+                  placeholder="contact@importer.com"
+                />
+              </div>
 
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <input
-              type="email"
-              className="form-input"
-              value={authData.importer_email || ''}
-              onChange={(e) => handleFieldChange('importer_email', e.target.value)}
-              placeholder="contact@importer.com"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label required">Country</label>
-            <select
-              className="form-select"
-              value={authData.importer_country || ''}
-              onChange={(e) => handleFieldChange('importer_country', e.target.value)}
-              required
-            >
-              <option value="">Select country</option>
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="Mexico">Mexico</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-        </div>
+              <div className="form-group">
+                <label className="form-label required">Country</label>
+                <select
+                  className="form-select"
+                  value={authData.importer_country || ''}
+                  onChange={(e) => handleFieldChange('importer_country', e.target.value)}
+                  required
+                >
+                  <option value="">Select country</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Mexico">Mexico</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -614,119 +613,119 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
         {expandedSections.producer && (
           <>
-        {/* Checkbox to indicate if Producer is same as Exporter */}
-        <div className="form-group" style={{marginBottom: '1.5rem'}}>
-          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
-            <input
-              type="checkbox"
-              checked={authData.producer_same_as_exporter || false}
-              onChange={(e) => {
-                handleFieldChange('producer_same_as_exporter', e.target.checked);
-                // Clear producer fields if same as exporter
-                if (e.target.checked) {
-                  handleFieldChange('producer_name', '');
-                  handleFieldChange('producer_address', '');
-                  handleFieldChange('producer_tax_id', '');
-                  handleFieldChange('producer_phone', '');
-                  handleFieldChange('producer_email', '');
-                  handleFieldChange('producer_country', '');
-                }
-              }}
-            />
-            <span className="checkbox-text">
-              Producer is the same as Exporter (check this if your company manufactures the goods)
-            </span>
-          </label>
-        </div>
-
-        {/* Only show producer fields if NOT same as exporter */}
-        {!authData.producer_same_as_exporter && (
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label required">Producer Company Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.producer_name || ''}
-                onChange={(e) => handleFieldChange('producer_name', e.target.value)}
-                placeholder="Enter manufacturing company name"
-                required={!authData.producer_same_as_exporter}
-              />
+            {/* Checkbox to indicate if Producer is same as Exporter */}
+            <div className="form-group" style={{marginBottom: '1.5rem'}}>
+              <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+                <input
+                  type="checkbox"
+                  checked={authData.producer_same_as_exporter || false}
+                  onChange={(e) => {
+                    handleFieldChange('producer_same_as_exporter', e.target.checked);
+                    // Clear producer fields if same as exporter
+                    if (e.target.checked) {
+                      handleFieldChange('producer_name', '');
+                      handleFieldChange('producer_address', '');
+                      handleFieldChange('producer_tax_id', '');
+                      handleFieldChange('producer_phone', '');
+                      handleFieldChange('producer_email', '');
+                      handleFieldChange('producer_country', '');
+                    }
+                  }}
+                />
+                <span className="checkbox-text">
+                  Producer is the same as Exporter (check this if your company manufactures the goods)
+                </span>
+              </label>
             </div>
 
-            <div className="form-group">
-              <label className="form-label required">Producer Address</label>
-              <textarea
-                className="form-input"
-                value={authData.producer_address || ''}
-                onChange={(e) => handleFieldChange('producer_address', e.target.value)}
-                placeholder="Complete address including street, city, state/province, postal code"
-                rows="3"
-                required={!authData.producer_same_as_exporter}
-              />
-            </div>
+            {/* Only show producer fields if NOT same as exporter */}
+            {!authData.producer_same_as_exporter && (
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label className="form-label required">Producer Company Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={authData.producer_name || ''}
+                    onChange={(e) => handleFieldChange('producer_name', e.target.value)}
+                    placeholder="Enter manufacturing company name"
+                    required={!authData.producer_same_as_exporter}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label className="form-label required">Producer Tax ID</label>
-              <input
-                type="text"
-                className="form-input"
-                value={authData.producer_tax_id || ''}
-                onChange={(e) => handleFieldChange('producer_tax_id', e.target.value)}
-                placeholder="Enter producer's tax identification number"
-                required={!authData.producer_same_as_exporter}
-              />
-            </div>
+                <div className="form-group">
+                  <label className="form-label required">Producer Address</label>
+                  <textarea
+                    className="form-input"
+                    value={authData.producer_address || ''}
+                    onChange={(e) => handleFieldChange('producer_address', e.target.value)}
+                    placeholder="Complete address including street, city, state/province, postal code"
+                    rows="3"
+                    required={!authData.producer_same_as_exporter}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Producer Phone</label>
-              <input
-                type="tel"
-                className="form-input"
-                value={authData.producer_phone || ''}
-                onChange={(e) => handleFieldChange('producer_phone', e.target.value)}
-                placeholder="(555) 123-4567"
-              />
-            </div>
+                <div className="form-group">
+                  <label className="form-label required">Producer Tax ID</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={authData.producer_tax_id || ''}
+                    onChange={(e) => handleFieldChange('producer_tax_id', e.target.value)}
+                    placeholder="Enter producer's tax identification number"
+                    required={!authData.producer_same_as_exporter}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label className="form-label">Producer Email</label>
-              <input
-                type="email"
-                className="form-input"
-                value={authData.producer_email || ''}
-                onChange={(e) => handleFieldChange('producer_email', e.target.value)}
-                placeholder="contact@producer.com"
-              />
-            </div>
+                <div className="form-group">
+                  <label className="form-label">Producer Phone</label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    value={authData.producer_phone || ''}
+                    onChange={(e) => handleFieldChange('producer_phone', e.target.value)}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
 
-            <div className="form-group">
-              <label className="form-label required">Producer Country</label>
-              <select
-                className="form-select"
-                value={authData.producer_country || ''}
-                onChange={(e) => handleFieldChange('producer_country', e.target.value)}
-                required={!authData.producer_same_as_exporter}
-              >
-                <option value="">Select country</option>
-                <option value="United States">United States</option>
-                <option value="Canada">Canada</option>
-                <option value="Mexico">Mexico</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-        )}
+                <div className="form-group">
+                  <label className="form-label">Producer Email</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={authData.producer_email || ''}
+                    onChange={(e) => handleFieldChange('producer_email', e.target.value)}
+                    placeholder="contact@producer.com"
+                  />
+                </div>
 
-        {authData.producer_same_as_exporter && (
-          <div className="alert alert-info">
-            <div className="alert-content">
-              <div className="text-body">
-                ✓ Producer information will be automatically filled with your company (exporter) details.
+                <div className="form-group">
+                  <label className="form-label required">Producer Country</label>
+                  <select
+                    className="form-select"
+                    value={authData.producer_country || ''}
+                    onChange={(e) => handleFieldChange('producer_country', e.target.value)}
+                    required={!authData.producer_same_as_exporter}
+                  >
+                    <option value="">Select country</option>
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Mexico">Mexico</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+
+            {authData.producer_same_as_exporter && (
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="text-body">
+                    ✓ Producer information will be automatically filled with your company (exporter) details.
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

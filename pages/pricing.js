@@ -162,7 +162,6 @@ export default function Pricing() {
       features: [
         '100 USMCA analyses per month',
         'Real-time crisis alerts with AI impact scoring',
-        '15% discount on professional services',
         'Priority support (48hr response)',
         'Detailed AI-powered compliance guidance'
       ],
@@ -179,69 +178,11 @@ export default function Pricing() {
       features: [
         'Everything in Professional',
         'Quarterly strategy calls with our expert team',
-        '25% discount on professional services',
         'Dedicated email support',
         'Custom trade intelligence reports'
       ],
       cta: 'Subscribe to Premium',
       popular: false
-    }
-  ]
-
-  const addOns = [
-    {
-      name: '🏥 Trade Health Check',
-      serviceId: 'trade-health-check',
-      basePrice: 99,
-      professionalPrice: 99,  // No discount on entry service
-      premiumPrice: 99,       // No discount on entry service
-      description: 'Collaborative assessment by our expert team to identify trade optimization opportunities',
-      recurring: false
-    },
-    {
-      name: '📜 USMCA Advantage Sprint',
-      serviceId: 'usmca-advantage',
-      basePrice: 175,
-      professionalPrice: 149,  // 15% off
-      premiumPrice: 131,       // 25% off
-      description: 'Product audit and USMCA qualification roadmap led by compliance expert with business development support',
-      recurring: false
-    },
-    {
-      name: '🔧 Supply Chain Optimization',
-      serviceId: 'supply-chain-optimization',
-      basePrice: 275,
-      professionalPrice: 234,  // 15% off
-      premiumPrice: 206,       // 25% off
-      description: 'Complete supply chain efficiency audit led by compliance expert with sourcing specialist insights',
-      recurring: false
-    },
-    {
-      name: '🚀 Pathfinder Market Entry',
-      serviceId: 'pathfinder',
-      basePrice: 350,
-      professionalPrice: 298,  // 15% off
-      premiumPrice: 263,       // 25% off
-      description: 'Mexico market entry strategy led by business development specialist with regulatory compliance expertise',
-      recurring: false
-    },
-    {
-      name: '🛡️ Supply Chain Resilience',
-      serviceId: 'supply-chain-resilience',
-      basePrice: 450,
-      professionalPrice: 383,  // 15% off
-      premiumPrice: 338,       // 25% off
-      description: 'Alternative supplier discovery and risk mitigation led by sourcing specialist with compliance verification',
-      recurring: false
-    },
-    {
-      name: '🆘 Crisis Navigator',
-      serviceId: 'crisis-navigator',
-      basePrice: 200,
-      professionalPrice: 200,  // No subscriber discount
-      premiumPrice: 200,       // No subscriber discount
-      description: 'Priority emergency response for urgent trade crises and compliance issues led by compliance expert',
-      recurring: false
     }
   ]
 
@@ -275,7 +216,6 @@ export default function Pricing() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/services" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Services</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/about" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>About</Link>
             <Link href="/pricing#pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
@@ -547,10 +487,6 @@ export default function Pricing() {
                 <p style={{fontSize: '0.85rem'}}>✓ Maintain USMCA qualification to preserve duty-free status</p>
                 <p style={{fontSize: '0.85rem'}}>✓ Timeline: Act within 90 days before enforcement</p>
               </div>
-
-              <Link href="/services" className="btn-primary" style={{fontSize: '0.9rem'}}>
-                Get Expert Help Finding Mexico Suppliers
-              </Link>
             </div>
             <p style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '16px', textAlign: 'center', fontStyle: 'italic'}}>
               Professional & Premium subscribers get real-time alerts with AI analysis
@@ -603,23 +539,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Professional Services Callout */}
-      <section className="main-content">
-        <div className="container-app">
-          <div className="alert alert-info">
-            <div className="alert-content">
-              <div className="alert-title">🤝 Need Expert Help?</div>
-              <div className="text-body">
-                <p><strong>Professional & Premium subscribers save 15-25% on all expert services.</strong> Our Mexico-based expert team provides trade consulting, USMCA optimization, supplier sourcing, and crisis response - pay only when you need help.</p>
-                <Link href="/services" className="btn-primary" style={{marginTop: '12px', display: 'inline-block'}}>
-                  View All Professional Services
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section className="main-content">
         <div className="container-app">
@@ -631,28 +550,28 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">How do I get started?</h3>
               <p className="content-card-description">
-                Subscribe to start using AI tools immediately. Run your first USMCA analysis, get HS code suggestions, generate certificate templates, and receive trade alerts. Professional services charged separately as needed.
+                Sign up for free (no credit card required), run your first USMCA analysis, get AI-powered HS code suggestions, generate certificate templates, and see your potential tariff savings. Upgrade anytime to unlock unlimited analyses and real-time trade alerts.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">What makes your professional services different?</h3>
+              <h3 className="content-card-title">What can I do with Triangle?</h3>
               <p className="content-card-description">
-                Professional services by trade compliance expert (17 years enterprise logistics experience) and Mexico B2B specialist (7+ years SMB operational experience). Team collaboration ensures comprehensive coverage combining compliance expertise with business development skills.
+                Analyze USMCA qualification for your products, get AI-powered HS code suggestions, generate certificate templates, monitor supply chain risks with real-time trade alerts, and calculate potential tariff savings using Mexico-based suppliers.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Why use professional services?</h3>
+              <h3 className="content-card-title">Do I need licensing or certifications?</h3>
               <p className="content-card-description">
-                SMBs can't complete certificates themselves without costly mistakes. Our experts prevent disasters and save months of research.
+                Triangle provides AI-powered analysis and recommendations. For official USMCA certificates and customs filings, you'll need to work with a licensed customs broker - we help you prepare the analysis they need.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">What's included in my subscription vs paid separately?</h3>
+              <h3 className="content-card-title">What's included in my subscription?</h3>
               <p className="content-card-description">
-                <strong>Subscription ($99-599/mo):</strong> AI tools for qualification checks, HS code suggestions, certificate templates, and alerts (10/mo on Starter, 100/mo on Professional, unlimited on Premium). <strong>Professional Services:</strong> Paid separately when you need our expert team to do work for you. Professional tier gets 15% discount, Premium gets 25% discount.
+                <strong>Starter ($99/mo):</strong> 10 USMCA analyses, basic alerts. <strong>Professional ($299/mo):</strong> 100 analyses, real-time crisis alerts, priority support. <strong>Premium ($599/mo):</strong> Unlimited analyses, premium alerts, strategy calls, custom reports.
               </p>
             </div>
           </div>
@@ -726,13 +645,6 @@ export default function Pricing() {
                 aria-label="View pricing plans and subscribe"
               >
                 Get Started
-              </Link>
-              <Link
-                href="/services"
-                className="hero-secondary-button"
-                aria-label="View professional services"
-              >
-                View Services
               </Link>
             </div>
           </div>
