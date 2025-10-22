@@ -873,7 +873,9 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           usmca_rate: 0,
           savings_percent: 0,
           rate_source: 'missing',
-          is_usmca_member: usmcaCountries.includes(component.origin_country)
+          is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                           usmcaCountries.includes(destination_country) &&
+                           usmcaCountries.includes(destination_country)
         };
       }
 
@@ -894,7 +896,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         tariff_policy: enrichedData.tariff_policy,
         policy_adjustments: enrichedData.policy_adjustments,
         last_updated: enrichedData.last_updated || new Date().toISOString().split('T')[0],
-        is_usmca_member: usmcaCountries.includes(component.origin_country)
+        is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                         usmcaCountries.includes(destination_country)
       };
     });
 
@@ -926,7 +929,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
             usmca_rate: 0,
             savings_percent: 0,
             rate_source: 'missing',
-            is_usmca_member: usmcaCountries.includes(component.origin_country)
+            is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                           usmcaCountries.includes(destination_country)
           };
         }
 
@@ -954,7 +958,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
             usmca_rate: 0,
             savings_percent: 0,
             rate_source: 'enrichment_error',
-            is_usmca_member: usmcaCountries.includes(component.origin_country)
+            is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                           usmcaCountries.includes(destination_country)
           };
         }
 
@@ -972,7 +977,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           tariff_policy: enrichedData.tariff_policy,
           policy_adjustments: enrichedData.policy_adjustments,
           last_updated: enrichedData.last_updated || new Date().toISOString().split('T')[0],
-          is_usmca_member: usmcaCountries.includes(component.origin_country)
+          is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                           usmcaCountries.includes(destination_country)
         };
 
       } catch (error) {
@@ -983,7 +989,8 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
           mfn_rate: 0,
           usmca_rate: 0,
           savings_percent: 0,
-          is_usmca_member: usmcaCountries.includes(component.origin_country)
+          is_usmca_member: usmcaCountries.includes(component.origin_country) &&
+                           usmcaCountries.includes(destination_country)
         };
       }
     });

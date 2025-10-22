@@ -24,7 +24,12 @@ export default function ComponentOriginsStepEnhanced({
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL
 }) {
   const [components, setComponents] = useState(() => {
-    // FORCE EMPTY DEFAULTS - ignore any existing data
+    // RESTORATION: Check if formData already has components from previous navigation
+    if (formData.component_origins && formData.component_origins.length > 0) {
+      console.log(`📂 Restoring ${formData.component_origins.length} components from formData`);
+      return formData.component_origins;
+    }
+    // Otherwise initialize with empty template
     return [
       {
         description: '',
@@ -47,6 +52,17 @@ export default function ComponentOriginsStepEnhanced({
   useEffect(() => {
     updateFormData('component_origins', components);
   }, [components, updateFormData]);
+
+  // Restore components when navigating back and formData changes
+  // This handles browser back button and in-app navigation
+  useEffect(() => {
+    if (formData.component_origins &&
+        formData.component_origins.length > 0 &&
+        JSON.stringify(formData.component_origins) !== JSON.stringify(components)) {
+      console.log(`🔄 Syncing components from formData (navigation restore)`);
+      setComponents(formData.component_origins);
+    }
+  }, [formData.component_origins]);
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];
