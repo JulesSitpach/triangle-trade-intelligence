@@ -32,6 +32,9 @@ node_modules/
 
 # testing
 /coverage/
+test-results/
+.nyc_output/
+*.lcov
 
 # IDEs and editors
 .vscode/
@@ -166,7 +169,7 @@ google-service-account.json
 __tests__/
 test/
 test-results/
-tests/
+# tests/ - removed, we want to keep test framework files
 docs/
 supabase/
 
