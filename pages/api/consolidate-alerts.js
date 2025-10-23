@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
     // ✅ FIX: Ensure user_profile has trade_volume from workflow_sessions
     // This prevents "unknown annual volume" in AI analysis
-    if (!user_profile.tradeVolume && !user_profile.annual_trade_volume && user_profile.userId) {
+    if (!user_profile.trade_volume && user_profile.userId) {
       try {
         const { data: workflow, error } = await supabase
           .from('workflow_sessions')
@@ -51,9 +51,9 @@ export default async function handler(req, res) {
         if (!error && workflow?.trade_volume) {
           // ✅ CRITICAL: Parse trade_volume from string to number (handles commas from form)
           const parsedVolume = parseFloat(String(workflow.trade_volume).replace(/[^0-9.-]+/g, ''));
-          user_profile.tradeVolume = !isNaN(parsedVolume) && parsedVolume > 0 ? parsedVolume : null;
+          user_profile.trade_volume = !isNaN(parsedVolume) && parsedVolume > 0 ? parsedVolume : null;
 
-          console.log(`✅ Enriched user_profile with trade_volume: $${user_profile.tradeVolume?.toLocaleString() || 'unknown'}`);
+          console.log(`✅ Enriched user_profile with trade_volume: $${user_profile.trade_volume?.toLocaleString() || 'unknown'}`);
         }
       } catch (enrichmentError) {
         console.warn('⚠️ Could not enrich user_profile with trade_volume:', enrichmentError.message);
@@ -310,7 +310,7 @@ ${recommendationsList}
 BUSINESS CONTEXT:
 Company: ${userProfile.companyName} (${userProfile.businessType})
 Product: ${userProfile.productDescription}
-Annual Trade Volume: $${userProfile.tradeVolume || userProfile.annual_trade_volume || 'unknown'}
+Annual Trade Volume: $${userProfile.trade_volume || 'unknown (not provided in workflow)'}
 
 AFFECTED COMPONENTS (${totalPercentageAffected}% of product):
 ${componentContext}
