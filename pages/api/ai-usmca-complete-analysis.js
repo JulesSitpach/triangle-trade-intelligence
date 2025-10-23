@@ -1569,7 +1569,7 @@ async function saveAIDataToDatabase(classificationResult, component) {
         savings_percentage: classificationResult.savings_percentage || 0,
         policy_adjustments: classificationResult.policy_adjustments ? JSON.stringify(classificationResult.policy_adjustments) : null,
         ai_confidence: classificationResult.confidence || 0.95,  // ✅ CORRECT FIELD NAME
-        cache_source: 'openrouter',  // Source of this tariff data
+        data_source: 'openrouter',  // Source of this tariff data (matches actual DB column)
         expires_at: new Date(Date.now() + getCacheExpiration('US')).toISOString(),  // TTL based on destination
         last_updated: classificationResult.last_updated || new Date().toISOString().split('T')[0],
         created_at: new Date().toISOString()
@@ -1640,7 +1640,7 @@ async function saveTariffRatesToDatabase(freshRates, components, destination_cou
             savings_percentage: rates.savings_percentage || 0,
             policy_adjustments: safePolicyAdjustments,
             ai_confidence: 0.95,  // ✅ CORRECT FIELD NAME
-            cache_source: 'openrouter',  // Source of this tariff data
+            data_source: 'openrouter',  // Source of this tariff data (matches actual DB column)
             expires_at: new Date(Date.now() + getCacheExpiration(destination_country)).toISOString(),  // TTL based on destination
             last_updated: new Date().toISOString().split('T')[0],
             created_at: new Date().toISOString()
