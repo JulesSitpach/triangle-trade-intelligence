@@ -147,7 +147,11 @@ function groupRelatedAlerts(alerts, userProfile) {
         compHSCode.startsWith(alertHS.substring(0, 4))
       );
 
-      return countryMatch || hsCodeMatch; // BUG: This OR causes duplicates if component matches BOTH conditions
+      // ✅ FIX: Use AND logic - component is affected if it matches the country AND is in the alert's scope
+      // If alert doesn't specify HS codes, country match alone is sufficient
+      // If alert specifies HS codes, must match both country and HS code
+      const hasHSCodeFilter = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+      return countryMatch && (hasHSCodeFilter ? hsCodeMatch : true);
     });
 
     // DEDUPLICATION FIX: Remove duplicates when component matched both country AND HS code
