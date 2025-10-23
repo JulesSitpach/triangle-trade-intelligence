@@ -943,7 +943,7 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
     // 🚀 NEW: Use batch enrichment (single AI call instead of 3+ parallel calls)
     const batchEnriched = await enrichmentRouter.enrichComponentsBatch(
       components.map(comp => ({
-        origin_country: comp.origin_country,
+        origin_country: comp.origin_country || comp.country,  // ✅ FIXED: Normalize field name
         description: comp.description || comp.component_type || 'Unknown',
         value_percentage: comp.value_percentage,
         hs_code: comp.hs_code || comp.classified_hs_code,
