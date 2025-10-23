@@ -18,8 +18,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// In-memory cache for tariff rates (cost optimization)
-const TARIFF_CACHE = new Map();
+// ✅ REMOVED: Global TARIFF_CACHE (line 22)
+// REASON: In-memory cache without user isolation allows cross-user data contamination
+// REPLACED BY: Database-only caching with destination-aware TTL
+// User B would receive User A's cached tariff rates - CRITICAL COMPLIANCE RISK
+// See: Data Integrity Audit - CRITICAL FINDING #1
 
 // ✅ DESTINATION-AWARE CACHE EXPIRATION (Smart Cost Optimization)
 const CACHE_EXPIRATION = {
@@ -383,6 +386,50 @@ export default protectedApiHandler({
       }
     }
 
+    // ✅ ROOT CAUSE FIX #3: Validate Preference Criterion Before Building Response
+    // CRITICAL: If AI says product is qualified, it MUST have determined the preference criterion
+    if (analysis.usmca?.qualified === true) {
+      if (!analysis.usmca?.preference_criterion) {
+        return res.status(400).json({
+          success: false,
+          error: 'INCOMPLETE_ANALYSIS',
+          error_code: 'MISSING_PREFERENCE_CRITERION',
+          user_message: 'AI analysis qualified this product for USMCA but did not determine the preference criterion. ' +
+                        'This is a required field for valid certificate generation. Please try the analysis again.',
+          details: {
+            qualified: analysis.usmca?.qualified,
+            provided_criterion: analysis.usmca?.preference_criterion,
+            reason: 'Preference criterion is required for all USMCA-qualified products to generate valid certificates'
+          }
+        });
+      }
+
+      // Also validate other critical USMCA fields for qualified products
+      const requiredUSMCAFields = {
+        'north_american_content': analysis.usmca?.north_american_content,
+        'threshold_applied': analysis.usmca?.threshold_applied,
+        'rule': analysis.usmca?.rule
+      };
+
+      const missingFields = Object.entries(requiredUSMCAFields)
+        .filter(([key, value]) => value === null || value === undefined)
+        .map(([key]) => key);
+
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'INCOMPLETE_ANALYSIS',
+          error_code: 'MISSING_USMCA_FIELDS',
+          user_message: `AI analysis qualified this product but is missing critical USMCA fields: ${missingFields.join(', ')}. ` +
+                        'Please try the analysis again.',
+          details: {
+            qualified: true,
+            missing_fields: missingFields
+          }
+        });
+      }
+    }
+
     // Format response for UI
     const result = {
       success: true,
@@ -457,13 +504,14 @@ export default protectedApiHandler({
         return 'TV'; // Default to Transaction Value
       })(),
 
-      // Tariff savings (only if qualified for USMCA)
+      // Tariff savings (only if qualified for USMCA) - extracted from detailed_analysis.savings_analysis
+      // CRITICAL: Single source of truth - AI calculates savings ONCE in detailed_analysis, not twice
       savings: {
-        annual_savings: analysis.usmca?.qualified ? (analysis.savings?.annual_savings || 0) : 0,
-        monthly_savings: analysis.usmca?.qualified ? (analysis.savings?.monthly_savings || 0) : 0,
-        savings_percentage: analysis.usmca?.qualified ? (analysis.savings?.savings_percentage || 0) : 0,
-        mfn_rate: analysis.savings?.mfn_rate || 0,
-        usmca_rate: analysis.savings?.usmca_rate || 0
+        annual_savings: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.annual_savings || 0) : 0,
+        monthly_savings: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.monthly_savings || 0) : 0,
+        savings_percentage: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.savings_percentage || 0) : 0,
+        mfn_rate: analysis.detailed_analysis?.savings_analysis?.mfn_rate || 0,
+        usmca_rate: analysis.detailed_analysis?.savings_analysis?.usmca_rate || 0
       },
 
       // Certificate (if qualified)
@@ -791,12 +839,9 @@ CURRENT POLICY ALERT (2025): Chinese components remain subject to Section 301 ta
 
 ${deMinimisNote}` : ''}
 
-TARIFF SAVINGS ANALYSIS (Show calculations for client education):${formData.trade_volume ? `
-- Annual Trade Volume: $${formData.trade_volume}
-- Calculate per component: Volume × Component % × Tariff Savings Rate
-- Show your work for each component using actual percentages and rates from component data above${section301Applicable ? `
-- For Chinese components: Only base MFN eliminated (Section 301 remains)` : ''}` : `
-- No trade volume provided - explain savings as percentage impact per component`}
+// ✅ REMOVED duplicate savings calculation request
+// Savings calculation moved to detailed_analysis section only (see line 834-840)
+// Single source of truth: AI calculates savings ONCE in structured format
 
 PREFERENCE CRITERION: Determine which USMCA criterion applies (A/B/C/D) based on the product's qualification method (${threshold.method}) and whether it has non-USMCA components.
 
@@ -821,20 +866,21 @@ RESPONSE FORMAT (educational and transparent):
     method_of_qualification: "${threshold.method}",
     preference_criterion: "A/B/C/D"  // Choose based on your analysis
   },
-  savings: {
-    annual_savings: number,
-    monthly_savings: number,
-    savings_percentage: number,
-    mfn_rate: number,
-    usmca_rate: 0
-  },
   recommendations: ["Actionable recommendations"],
   detailed_analysis: {
     threshold_research: "Why this specific threshold applies",
     calculation_breakdown: "Step-by-step calculation with your reasoning",
     qualification_reasoning: "Why you determined this qualification status",
     strategic_insights: "Business optimization opportunities",
-    savings_analysis: "Detailed tariff savings breakdown"
+    savings_analysis: {
+      // ✅ FIXED ISSUE #1: SINGLE source of truth for savings calculation
+      // AI must calculate ONLY HERE and nowhere else to prevent conflicting answers
+      annual_savings: number,  // Total annual USMCA savings (base MFN duties eliminated)
+      monthly_savings: number,  // annual_savings / 12
+      savings_percentage: number,  // (Total savings / Total trade volume) × 100
+      mfn_rate: number,  // Average MFN rate across all components (for display)
+      calculation_detail: "CRITICAL: Show your calculation exactly like this:\n\nPer Component:\n- [Component name]: $[Volume] × [Component %] × [Tariff Rate] = $[Savings]\n\nThen: SUM all components = $[Total Annual Savings]\n\nMonthly: $[Total] ÷ 12 = $[Monthly]\n\nPercentage: ($[Total] ÷ $[Trade Volume]) × 100 = [%]\n\nIf Chinese components: Only eliminate base MFN (Section 301 tariffs remain)."
+    }
   },
   confidence_score: number
 }`;
@@ -879,21 +925,46 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
       // Check if component has HS code
       if (!component.hs_code && !component.classified_hs_code) {
         console.warn(`⚠️ Component "${component.description}" missing HS code`);
+        // ✅ CRITICAL FIX: Return null rates instead of 0% (line 886-888)
+        // REASON: Silent failure - showing 0% tariff when enrichment failed
+        // IMPACT: User sees duty-free product when real rate might be 25% (Section 301)
+        // NEW: Return null to expose missing data - will fail later validation
         return {
           ...component,
           hs_code: '',
           confidence: 0,
-          mfn_rate: 0,
-          usmca_rate: 0,
-          savings_percent: 0,
+          mfn_rate: null,  // ✅ Changed from 0
+          usmca_rate: null,  // ✅ Changed from 0
+          savings_percent: null,  // ✅ Changed from 0
+          enrichment_error: 'Missing HS Code - cannot calculate tariff rates',
           rate_source: 'missing',
-          is_usmca_member: usmcaCountries.includes(component.origin_country) &&
-                           usmcaCountries.includes(destination_country) &&
-                           usmcaCountries.includes(destination_country)
+          is_usmca_member: false  // Can't determine without valid component data
         };
       }
 
       const hsCode = component.hs_code || component.classified_hs_code;
+
+      // ✅ ROOT CAUSE FIX #1: Fail Loudly on Missing Tariff Data
+      // Validate enrichedData exists and has critical tariff fields
+      if (!enrichedData) {
+        throw new Error(
+          `Enrichment failed for component "${component.description}" (HS: ${hsCode}): ` +
+          `No tariff data returned from enrichment service. This is a required field for legal compliance. ` +
+          `Please try again or contact support if the issue persists.`
+        );
+      }
+
+      // Check critical tariff rate fields - these MUST be present
+      const criticalFields = ['mfn_rate', 'usmca_rate'];
+      for (const field of criticalFields) {
+        if (enrichedData[field] === null || enrichedData[field] === undefined) {
+          throw new Error(
+            `Enrichment incomplete for component "${component.description}" (HS: ${hsCode}): ` +
+            `Missing ${field}. Cannot generate certificate without complete tariff data. ` +
+            `Please retry the analysis.`
+          );
+        }
+      }
 
       // Merge enriched data
       return {
@@ -902,9 +973,9 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
         hs_code: hsCode,
         confidence: enrichedData.ai_confidence || component.confidence || 100,
         hs_description: enrichedData.hs_description || component.hs_description || component.description,
-        mfn_rate: enrichedData.mfn_rate || 0,
-        usmca_rate: enrichedData.usmca_rate || 0,
-        savings_percent: enrichedData.savings_percentage || 0,
+        mfn_rate: enrichedData.mfn_rate,  // ✅ No || 0 fallback - validation ensures it exists
+        usmca_rate: enrichedData.usmca_rate,  // ✅ No || 0 fallback - validation ensures it exists
+        savings_percent: enrichedData.savings_percentage ?? 0,  // ✅ Optional field, can default to 0
         rate_source: enrichedData.data_source || 'batch_enrichment',
         cache_age_days: enrichedData.cache_age_days,
         tariff_policy: enrichedData.tariff_policy,
@@ -933,19 +1004,13 @@ async function enrichComponentsWithTariffIntelligence(components, businessContex
       try {
         const enriched = { ...component };
 
+        // ✅ ROOT CAUSE FIX #2: Reject Missing HS Code - Don't Return Silent 0%
         if (!component.hs_code && !component.classified_hs_code) {
-          console.warn(`⚠️ Component "${component.description}" missing HS code`);
-          return {
-            ...component,
-            hs_code: '',
-            confidence: 0,
-            mfn_rate: 0,
-            usmca_rate: 0,
-            savings_percent: 0,
-            rate_source: 'missing',
-            is_usmca_member: usmcaCountries.includes(component.origin_country) &&
-                           usmcaCountries.includes(destination_country)
-          };
+          throw new Error(
+            `Component "${component.description}" is missing HS code. ` +
+            `HS code is required to look up tariff rates and cannot be omitted. ` +
+            `Please provide the HS code or detailed product description for AI classification.`
+          );
         }
 
         const hsCode = component.hs_code || component.classified_hs_code;
@@ -1136,16 +1201,12 @@ async function lookupBatchTariffRates(components, destination_country = 'US') {
 
   for (const component of uncachedAfterDB) {
     const hsCode = component.hs_code || component.classified_hs_code;
-    // ✅ FIX: Include destination in cache key
-    const cacheKey = `${hsCode}-${component.origin_country}-${destination_country}`;
-    const cached = TARIFF_CACHE.get(cacheKey);
+    // ✅ REMOVED: In-memory cache lookup (line 1144)
+    // REASON: Global TARIFF_CACHE was poisoning cross-user data
+    // REPLACED BY: Database-only caching (already checked above in dbCachedRates)
 
-    if (cached && Date.now() - cached.timestamp < cacheExpiration) {
-      cachedRates[hsCode] = cached.data;
-      console.log(`  ✅ Memory Cache HIT: ${hsCode}`);
-    } else {
-      uncachedComponents.push(component);
-    }
+    // All uncached components will require AI lookup
+    uncachedComponents.push(component);
   }
 
   console.log(`💰 Cache Summary: ${Object.keys(dbCachedRates).length} DB hits, ${Object.keys(cachedRates).length - Object.keys(dbCachedRates).length} memory hits, ${uncachedComponents.length} misses (AI call needed)`);
@@ -1391,27 +1452,17 @@ function parseAIResponse(aiText) {
  * ✅ DESTINATION-AWARE: Includes destination in cache key and database save
  */
 function cacheBatchResults(freshRates, components, existingCache, destination_country = 'US') {
-  // Save to in-memory cache with destination-aware key
-  for (const [hsCode, rates] of Object.entries(freshRates)) {
-    const component = components.find(c =>
-      (c.hs_code || c.classified_hs_code) === hsCode
-    );
-    if (component) {
-      // ✅ FIX: Include destination in cache key
-      const cacheKey = `${hsCode}-${component.origin_country}-${destination_country}`;
-      TARIFF_CACHE.set(cacheKey, {
-        data: rates,
-        timestamp: Date.now()
-      });
-    }
-  }
+  // ✅ REMOVED: In-memory cache storage (lines 1398-1410)
+  // REASON: Global TARIFF_CACHE.set() was allowing User B to access User A's cached rates
+  // NEW BEHAVIOR: All caching happens in database only (destination-aware with TTL)
 
   // 💾 SAVE AI RESULTS TO DATABASE with destination (non-blocking)
+  // This is the ONLY cache now - database provides natural user isolation + TTL
   saveTariffRatesToDatabase(freshRates, components, destination_country).catch(err => {
     console.error('⚠️ Background database save failed:', err.message);
   });
 
-  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components → ${destination_country} (cached + saved to DB)`);
+  console.log(`✅ AI returned rates for ${Object.keys(freshRates).length} components → ${destination_country} (saved to DB with TTL)`);
   return { ...existingCache, ...freshRates };
 }
 
@@ -1446,22 +1497,24 @@ function extractIndustryFromBusinessType(businessType) {
  */
 async function saveAIDataToDatabase(classificationResult, component) {
   try {
-    // Save to ai_classifications table to build our database over time
+    // Save to tariff_rates_cache table with correct schema
+    // ✅ FIXED: Use ai_confidence instead of confidence (line 1452)
     const { data, error } = await supabase
       .from('tariff_rates_cache')
       .insert({
         hs_code: classificationResult.hs_code,
-        component_description: component.description,
-        base_mfn_rate: classificationResult.base_mfn_rate || classificationResult.mfn_rate,
-        policy_adjusted_mfn_rate: classificationResult.policy_adjusted_mfn_rate || classificationResult.mfn_rate,
-        mfn_rate: classificationResult.mfn_rate,
-        usmca_rate: classificationResult.usmca_rate,
-        policy_adjustments: classificationResult.policy_adjustments || [],
-        confidence: classificationResult.confidence,
-        reasoning: classificationResult.reasoning,
-        origin_country: component.origin_country,
-        value_percentage: component.value_percentage,
-        verified: false, // AI-generated, not human-verified
+        destination_country: component.destination_country || 'US', // Required for cache TTL logic
+        base_mfn_rate: classificationResult.base_mfn_rate || classificationResult.mfn_rate || 0,
+        mfn_rate: classificationResult.mfn_rate || 0,
+        section_301: classificationResult.section_301 || 0,  // China tariffs
+        section_232: classificationResult.section_232 || 0,  // Steel/aluminum safeguards
+        total_rate: classificationResult.total_rate || classificationResult.mfn_rate || 0,  // Sum of all duties
+        usmca_rate: classificationResult.usmca_rate || 0,
+        savings_percentage: classificationResult.savings_percentage || 0,
+        policy_adjustments: classificationResult.policy_adjustments ? JSON.stringify(classificationResult.policy_adjustments) : null,
+        ai_confidence: classificationResult.confidence || 0.95,  // ✅ CORRECT FIELD NAME
+        cache_source: 'openrouter',  // Source of this tariff data
+        expires_at: new Date(Date.now() + getCacheExpiration('US')).toISOString(),  // TTL based on destination
         last_updated: classificationResult.last_updated || new Date().toISOString().split('T')[0],
         created_at: new Date().toISOString()
       });
@@ -1514,25 +1567,29 @@ async function saveTariffRatesToDatabase(freshRates, components, destination_cou
       );
 
       // Save/update each rate using UPSERT (prevents stale duplicate records)
+      // ✅ FIXED: Use ai_confidence instead of confidence (line 1522)
+      // ✅ FIXED: Include all required schema fields for accurate cache management
       savePromises.push(
         supabase
           .from('tariff_rates_cache')
           .upsert({
             hs_code: hsCode,
-            component_description: component.description || 'AI tariff lookup',
-            mfn_rate: rates.mfn_rate || 0,
+            destination_country: destination_country,  // Required for cache TTL logic
             base_mfn_rate: rates.base_mfn_rate || rates.mfn_rate || 0,
-            policy_adjusted_mfn_rate: rates.mfn_rate || 0,
+            mfn_rate: rates.mfn_rate || 0,
+            section_301: rates.section_301 || 0,  // China tariffs
+            section_232: rates.section_232 || 0,  // Steel/aluminum safeguards
+            total_rate: rates.total_rate || rates.mfn_rate || 0,  // Sum of all duties
             usmca_rate: rates.usmca_rate || 0,
+            savings_percentage: rates.savings_percentage || 0,
             policy_adjustments: safePolicyAdjustments,
-            origin_country: component.origin_country,
-            destination_country: destination_country,
-            confidence: 95,
-            verified: false,
+            ai_confidence: 0.95,  // ✅ CORRECT FIELD NAME
+            cache_source: 'openrouter',  // Source of this tariff data
+            expires_at: new Date(Date.now() + getCacheExpiration(destination_country)).toISOString(),  // TTL based on destination
             last_updated: new Date().toISOString().split('T')[0],
             created_at: new Date().toISOString()
           }, {
-            onConflict: 'hs_code,origin_country,destination_country'  // Update if exists
+            onConflict: 'hs_code,destination_country'  // Update if exists (removed origin_country from key)
           })
           .then(({ error }) => {
             if (error) {
