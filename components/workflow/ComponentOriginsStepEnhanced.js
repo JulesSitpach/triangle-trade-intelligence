@@ -392,9 +392,14 @@ export default function ComponentOriginsStepEnhanced({
 
   const isValid = () => {
     const total = getTotalPercentage();
-    // HS code is now optional - will be classified during analysis if not provided
+    // HS code is REQUIRED - user must either input it manually or get AI suggestion
+    // This ensures all HS codes are pre-classified before main USMCA analysis API call
     const allFieldsFilled = components.every(c =>
-      c.description && c.origin_country && c.value_percentage > 0
+      c.description &&
+      c.origin_country &&
+      c.value_percentage > 0 &&
+      c.hs_code &&
+      c.hs_code.trim() !== ''
     );
     return total === 100 && allFieldsFilled;
   };
@@ -670,8 +675,11 @@ export default function ComponentOriginsStepEnhanced({
               {/* HS Code Input - Simple Hybrid Approach */}
               <div className="form-group">
                 <label className="form-label">
-                  HS Code (Optional)
+                  HS Code *
                 </label>
+                <div className="form-help">
+                  Required for accurate AI classification (like a tax form needs accurate information)
+                </div>
                 <input
                   type="text"
                   value={component.hs_code}
@@ -683,7 +691,7 @@ export default function ComponentOriginsStepEnhanced({
                   Don't know your HS code? Get AI suggestion below.
                 </div>
 
-                {/* Get AI Suggestion Button - Turns BLUE when fields are filled */}
+                {/* Get AI Suggestion Button - Turns BLUE when all fields are filled (like Continue button) */}
                 <button
                   type="button"
                   onClick={() => getComponentHSSuggestion(index)}
@@ -697,8 +705,8 @@ export default function ComponentOriginsStepEnhanced({
                   className={
                     component.description && component.description.length >= 10 &&
                     component.origin_country && component.value_percentage && !searchingHS[index]
-                      ? 'btn-primary btn-ai-suggestion'  // BLUE when ready
-                      : 'btn-secondary btn-ai-suggestion'  // Gray when not ready
+                      ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
+                      : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
                   }
                 >
                   {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
