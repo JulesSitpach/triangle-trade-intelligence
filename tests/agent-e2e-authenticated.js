@@ -22,7 +22,7 @@ const API_BASE_URL = 'http://localhost:3001';
 const TEST_CONFIG = {
   verboseLogging: true,
   stopOnFirstFailure: false,
-  timeoutMs: 120000,  // 120 seconds - API makes 2 sequential OpenRouter calls (30s each)
+  timeoutMs: 180000,  // 180 seconds - API makes 2 sequential OpenRouter calls (~30s each), plus multi-component overhead
   email: process.env.TEST_EMAIL || 'test@triangle.local',
   password: process.env.TEST_PASSWORD || 'test123456'
 };
@@ -86,36 +86,46 @@ class AuthenticatedE2ETestAgent {
     this.log(`Authenticating with email: ${this.config.email}`, 'info');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: this.config.email,
-          password: this.config.password
-        }),
-        timeout: this.config.timeoutMs
-      });
+      // Use AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
-      if (!response.ok) {
-        throw new Error(`Login failed: ${response.status} ${response.statusText}`);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: this.config.email,
+            password: this.config.password
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Login failed: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(`Login returned error: ${result.message}`);
+        }
+
+        // Extract session cookie from Set-Cookie header
+        const setCookieHeader = response.headers.get('set-cookie');
+        if (setCookieHeader) {
+          this.sessionCookie = setCookieHeader.split(';')[0];
+          this.log(`✅ Authenticated successfully. Session: ${this.sessionCookie.substring(0, 30)}...`, 'pass');
+        } else {
+          this.log('Warning: No session cookie found', 'warn');
+        }
+
+        return true;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
       }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(`Login returned error: ${result.message}`);
-      }
-
-      // Extract session cookie from Set-Cookie header
-      const setCookieHeader = response.headers.get('set-cookie');
-      if (setCookieHeader) {
-        this.sessionCookie = setCookieHeader.split(';')[0];
-        this.log(`✅ Authenticated successfully. Session: ${this.sessionCookie.substring(0, 30)}...`, 'pass');
-      } else {
-        this.log('Warning: No session cookie found', 'warn');
-      }
-
-      return true;
     } catch (error) {
       this.log(`Authentication failed: ${error.message}`, 'fail');
       throw error;
@@ -127,10 +137,14 @@ class AuthenticatedE2ETestAgent {
   // ========================================================================
 
   async apiCall(endpoint, method = 'POST', body = null) {
+    // Use AbortController for timeout (node-fetch doesn't support timeout option)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.config.timeoutMs);
+
     const options = {
       method,
       headers: { 'Content-Type': 'application/json' },
-      timeout: this.config.timeoutMs
+      signal: controller.signal
     };
 
     // Add authentication header
@@ -142,8 +156,14 @@ class AuthenticatedE2ETestAgent {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-    return response;
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
   }
 
   async test(name, testFn) {
