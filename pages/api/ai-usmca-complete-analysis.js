@@ -550,6 +550,20 @@ export default protectedApiHandler({
       manufacturing_location: formData.manufacturing_location
     };
 
+    // ✅ FIX: Include company object for certificate generation
+    result.company = {
+      name: formData.company_name,
+      company_name: formData.company_name,
+      country: formData.company_country,
+      company_country: formData.company_country,
+      address: formData.company_address,
+      company_address: formData.company_address,
+      tax_id: formData.tax_id,
+      contact_person: formData.contact_person,
+      contact_phone: formData.contact_phone,
+      contact_email: formData.contact_email
+    };
+
     logInfo('AI-powered USMCA analysis completed', {
       company: formData.company_name,
       qualified: result.usmca.qualified,
