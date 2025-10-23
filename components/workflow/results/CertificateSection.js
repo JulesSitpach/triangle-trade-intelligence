@@ -19,10 +19,26 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
     setIsGenerating(true);
 
     try {
+      // VALIDATION: Check required fields before generating certificate
+      const requiredCompanyFields = [
+        { field: 'name', value: results.company?.name || results.company?.company_name },
+        { field: 'country', value: results.company?.country || results.company?.company_country }
+      ];
+
+      const missingFields = requiredCompanyFields.filter(f => !f.value);
+
+      if (missingFields.length > 0) {
+        const fieldNames = missingFields.map(f => f.field).join(', ');
+        alert(`❌ Certificate generation failed: Missing required company information (${fieldNames}). Please go back to Step 1 and verify all company details.`);
+        setIsGenerating(false);
+        return;
+      }
+
       // Auto-generate certificate from workflow results
       const certificateData = {
         exporter: {
           name: results.company?.name || results.company?.company_name || '',
+          country: results.company?.country || results.company?.company_country || '',
           address: results.company?.address || results.company?.company_address || '',
           tax_id: results.company?.tax_id || '',
           phone: results.company?.phone || results.company?.contact_phone || '',
