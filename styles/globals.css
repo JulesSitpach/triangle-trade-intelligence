@@ -3130,5 +3130,209 @@ textarea.form-input {
 
 /* ================== END TOAST NOTIFICATION SYSTEM ================== */
 
+/* ================== EXECUTIVE SUMMARY STYLES ================== */
+
+.executive-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.summary-section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--navy-700);
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--blue-300);
+}
+
+.metrics-grid-extended {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.metric-card.extended {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background-color: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--navy-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy-700);
+}
+
+.metric-detail {
+  font-size: 0.8125rem;
+  color: var(--gray-600);
+  margin-top: var(--space-2);
+}
+
+.insight-box {
+  padding: var(--space-4);
+  background-color: var(--amber-50);
+  border-left: 4px solid var(--amber-500);
+  border-radius: var(--radius-md);
+}
+
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.recommendation-card {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--green-50);
+  border: 1px solid var(--green-200);
+  border-radius: var(--radius-md);
+  align-items: flex-start;
+}
+
+.recommendation-number {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--green-600);
+  color: white;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.recommendation-text {
+  flex: 1;
+  color: var(--gray-800);
+  line-height: 1.5;
+}
+
+.financial-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background-color: var(--gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.breakdown-row:last-child {
+  border-bottom: none;
+}
+
+.breakdown-row.highlight-row {
+  background-color: var(--green-50);
+  padding: var(--space-2) var(--space-3);
+  margin: 0 calc(var(--space-4) * -1);
+  padding-left: var(--space-3);
+  padding-right: var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.breakdown-label {
+  font-weight: 600;
+  color: var(--navy-700);
+}
+
+.breakdown-value {
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+.analysis-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.analysis-detail-item {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.analysis-summary-header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4);
+  background-color: var(--gray-50);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--navy-700);
+  user-select: none;
+}
+
+.analysis-summary-header:hover {
+  background-color: var(--gray-100);
+}
+
+.analysis-detail-item[open] .analysis-summary-header {
+  background-color: var(--blue-50);
+  border-bottom: 1px solid var(--blue-200);
+}
+
+.analysis-detail-content {
+  padding: var(--space-4);
+  color: var(--gray-800);
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.text-muted {
+  color: var(--gray-600);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .metrics-grid-extended {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-section-title {
+    font-size: 1rem;
+  }
+}
+
+/* ================== END EXECUTIVE SUMMARY STYLES ================== */
+
 /* ================== BROKER CHATBOT STYLES ================== */
 @import './broker-chatbot.css';

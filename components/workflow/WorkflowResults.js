@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import CompanyProfile from './results/CompanyProfile';
 import ProductClassification from './results/ProductClassification';
 import DataSourceAttribution from './results/DataSourceAttribution';
+import ExecutiveSummary from './results/ExecutiveSummary';
 import USMCAQualification from './results/USMCAQualification';
 import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
@@ -634,6 +635,9 @@ export default function WorkflowResults({
           </div>
         </div>
       </div>
+
+      {/* EXECUTIVE SUMMARY - Rich AI Analysis */}
+      <ExecutiveSummary results={results} />
 
       {/* PRODUCT INFORMATION */}
       <div className="form-section">
