@@ -23,22 +23,34 @@ export default function ComponentOriginsStepEnhanced({
   isLoading,
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL
 }) {
+  // ✅ FIX #3: Ensure all component fields are always defined to prevent React controlled/uncontrolled warning
+  const normalizeComponent = (component) => {
+    return {
+      description: component?.description ?? '',
+      origin_country: component?.origin_country ?? '',
+      value_percentage: component?.value_percentage ?? '',
+      hs_code: component?.hs_code ?? '',
+      hs_suggestions: component?.hs_suggestions ?? [],
+      manufacturing_location: component?.manufacturing_location ?? formData.manufacturing_location ?? '',
+      enrichment_error: component?.enrichment_error ?? null,
+      mfn_rate: component?.mfn_rate ?? null,
+      usmca_rate: component?.usmca_rate ?? null,
+      is_usmca_member: component?.is_usmca_member ?? false
+    };
+  };
+
   const [components, setComponents] = useState(() => {
     // RESTORATION: Check if formData already has components from previous navigation
     if (formData.component_origins && formData.component_origins.length > 0) {
       console.log(`📂 Restoring ${formData.component_origins.length} components from formData`);
-      return formData.component_origins;
+      // ✅ Normalize each component to ensure all fields exist
+      return formData.component_origins.map(normalizeComponent);
     }
     // Otherwise initialize with empty template
     return [
-      {
-        description: '',
-        origin_country: '',
-        value_percentage: '',
-        hs_code: '',
-        hs_suggestions: [],
-        manufacturing_location: formData.manufacturing_location || ''
-      }
+      normalizeComponent({
+        manufacturing_location: formData.manufacturing_location
+      })
     ];
   });
 
@@ -621,7 +633,7 @@ export default function ComponentOriginsStepEnhanced({
                 </label>
                 <input
                   type="text"
-                  value={component.description}
+                  value={component.description || ''}
                   onChange={(e) => {
                     updateComponent(index, 'description', e.target.value);
                   }}
@@ -636,7 +648,7 @@ export default function ComponentOriginsStepEnhanced({
                   Origin Country
                 </label>
                 <select
-                  value={component.origin_country}
+                  value={component.origin_country || ''}
                   onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
                   className={`form-select ${component.origin_country ? 'has-value' : ''}`}
                 >
@@ -682,7 +694,7 @@ export default function ComponentOriginsStepEnhanced({
                 </div>
                 <input
                   type="text"
-                  value={component.hs_code}
+                  value={component.hs_code || ''}
                   onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
                   placeholder="Enter if known (e.g., 8544.42.90)"
                   className="form-input"

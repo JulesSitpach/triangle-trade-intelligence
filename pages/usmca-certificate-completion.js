@@ -148,7 +148,9 @@ export default function USMCACertificateCompletion() {
         body: JSON.stringify({
           action: 'generate_certificate',
           certificateData: {
-            certifier_type: workflowData?.company?.certifier_type || 'EXPORTER',  // NEW: Pass certifier_type from Step 1
+            // ✅ FIX #4: Get certifier_type from authData (Step 4 selection), not from company object
+            // authData.certifier_type is set when user selects IMPORTER/EXPORTER/PRODUCER in AuthorizationStep
+            certifier_type: authData?.certifier_type || 'EXPORTER',
             company_info: {
               exporter_name: workflowData?.company?.company_name || workflowData?.company?.name || '',
               exporter_address: workflowData?.company?.company_address || '',
