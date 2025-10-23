@@ -54,6 +54,8 @@ Company Name: AutoParts USA Inc
 Address: 123 Import Blvd, Detroit, MI 48201
 Company Country: United States
 Tax ID: 38-7654321
+Business Type: Importer
+Industry Sector: Automotive & Transportation
 
 Contact Person: John Smith                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-313-555-1234
@@ -78,7 +80,7 @@ Component 3: Grade 8 steel mounting bolts with lock washers, zinc-plated hardwar
 Certifier Type: ☑️ IMPORTER
 
 Authorized Signatory Name: John Smith
-Authorized Signatory Title: Importer Manager          ← TITLE FIELD REQUIRED (appears only here)
+Authorized Signatory Title: Trade Director               ← FROM DROPDOWN (President, Export Manager, Compliance Officer, Trade Director, Supply Chain Manager, Operations Manager, General Manager, Director of Trade, Customs Manager)
 Signatory Email: john.smith@autopartsusa.com
 Signatory Phone: +1-313-555-1234
 
@@ -108,6 +110,8 @@ Company Name: MexManufacturing Ltd
 Address: 456 Industrial Way, Monterrey, NL, Mexico 64000
 Company Country: Mexico
 Tax ID: RFC-MEX123456
+Business Type: Manufacturer
+Industry Sector: Textiles & Apparel
 
 Contact Person: Maria Garcia                  ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +52-81-555-6789
@@ -132,7 +136,7 @@ Component 3: Foam backing material, closed-cell polyurethane, 25mm thickness, fi
 Certifier Type: ☑️ EXPORTER
 
 Authorized Signatory Name: Maria Garcia
-Authorized Signatory Title: Manufacturer Manager
+Authorized Signatory Title: Export Manager
 Signatory Email: maria@mexmanufacturing.com
 Signatory Phone: +52-81-555-6789
 
@@ -167,7 +171,9 @@ Company Name: CanadaDistribution Inc
 Address: 789 Commerce St, Toronto, ON M5H 2N2
 Company Country: Canada
 Tax ID: BN-987654321RC0001
-Trade Volume: $750,000
+Business Type: Distributor
+Industry Sector: Electronics & Electrical Equipment
+
 Contact Person: David Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-416-555-9012
 Contact Email: david@canadadist.com
@@ -176,6 +182,8 @@ Primary Supplier Country: China
 Destination Market: United States
 Manufacturing Location: Does Not Apply
 ☐ Manufacturing involves substantial transformation (N/A for distributors)
+
+Trade Volume: $750,000
 
 
 
@@ -191,7 +199,7 @@ Component 3: Injection-molded ABS housing, UV-stabilized black resin, EMI shield
 Certifier Type: ☑️ IMPORTER
 
 Authorized Signatory Name: David Chen
-Authorized Signatory Title: Distributor Manager
+Authorized Signatory Title: Supply Chain Manager
 Signatory Email: david@canadadist.com
 Signatory Phone: +1-416-555-9012
 
@@ -221,6 +229,8 @@ Company Name: GlobalWholesale Corp
 Address: 321 Medical Plaza, Houston, TX 77002
 Company Country: United States
 Tax ID: 12-3456789
+Business Type: Importer
+Industry Sector: Medical Devices & Pharmaceuticals
 
 Contact Person: Dr. Sarah Johnson              ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-713-555-3456
@@ -245,7 +255,7 @@ Component 3: Precision polycarbonate housings, optical clarity grade, anti-stati
 Certifier Type: ☑️ IMPORTER
 
 Authorized Signatory Name: Dr. Sarah Johnson
-Authorized Signatory Title: Wholesaler Manager
+Authorized Signatory Title: Operations Manager
 Signatory Email: sarah@globalwholesale.com
 Signatory Phone: +1-713-555-3456
 
@@ -277,6 +287,8 @@ Company Name: Steel Manufacturing Inc
 Address: 1500 Industrial Blvd, Pittsburgh, PA 15213
 Company Country: United States
 Tax ID: 38-2847291
+Business Type: Importer
+Industry Sector: Metals & Metal Products
 
 Contact Person: Maria Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: (412) 555-0198
@@ -286,6 +298,8 @@ Primary Supplier Country: China
 Destination Market: United States
 Manufacturing Location: China
 ☑️ Manufacturing involves substantial transformation
+
+Trade Volume: $1,250,000
 
 Product: Steel housing components for automotive
 
@@ -313,6 +327,8 @@ Company Name: TextileCorp USA
 Address: 2400 Fashion Plaza, New York, NY 10018
 Company Country: United States
 Tax ID: 47-1923847
+Business Type: Manufacturer
+Industry Sector: Textiles & Apparel
 
 Contact Person: James Rodriguez                ← ONLY CONTACT FIELDS (no title)
 Contact Phone: (212) 555-0247
@@ -322,6 +338,8 @@ Primary Supplier Country: Mexico
 Destination Market: United States
 Manufacturing Location: United States
 ☑️ Manufacturing involves substantial transformation
+
+Trade Volume: $850,000
 
 Product: Cotton blend apparel - USMCA qualified
 
