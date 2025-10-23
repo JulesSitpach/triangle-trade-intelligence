@@ -4,25 +4,29 @@
 
 ---
 
-## ⚠️ CRITICAL: API vs UI Form Requirements
+## ⚠️ CRITICAL: Step 1 vs Step 4 Form Separation
 
-**What the API (pages/api/ai-usmca-complete-analysis.js) REQUIRES:**
+**Step 1: USMCA Workflow Form (CompanyInformationStep.js)**
+Contact Information Section has ONLY 3 fields - NO title field exists:
 - `contact_person` ✅ (Contact person name)
 - `contact_phone` ✅ (Contact phone number)
 - `contact_email` ✅ (Contact email address)
-- `contact_title` ❌ **NOT required by API** - this is NOT a field the API validates
+- `contact_title` ❌ **DOES NOT EXIST IN UI**
 
-**What appears in Certificate Authorization Form (Step 4):**
-- `signatory_name` (Who signs the certificate - can be same or different from contact person)
-- `signatory_title` (Role/title of signatory - REQUIRED for certificate signing, NOT for API submission)
+API (pages/api/ai-usmca-complete-analysis.js) validates exactly these 3 fields.
+
+**Step 4: Certificate Authorization Form (AuthorizationStep.js)**
+Authorized Signatory Section has 4 fields including title:
+- `signatory_name` (Who signs the certificate)
+- `signatory_title` (Role/title of signatory - REQUIRED for certificate)
 - `signatory_email`
 - `signatory_phone`
 
 **Key Insight:**
-- Step 1 (USMCA Workflow) has NO title field - API doesn't require it
-- Step 4 (Certificate Generation) HAS a title field - needed for certificate authentication
-- These are TWO DIFFERENT FORMS with DIFFERENT field requirements
-- The contact person from Step 1 can be different from the authorized signatory in Step 4
+- Step 1 has NO title field at all (neither in UI nor required by API)
+- Step 4 HAS a title field (needed for certificate signature authority)
+- These are TWO SEPARATE FORMS at different stages of the workflow
+- The contact person from Step 1 can be the same or different from Step 4's authorized signatory
 
 ---
 
@@ -70,7 +74,7 @@ Status: Trial (7-day countdown)
 Tier: FREE
 ```
 
-### **STEP 1: Company Information Form** (API Form - contact fields only, NO title)
+### **STEP 1: Company Information Form** (API Form - 3 contact fields only)
 ```
 Company Name: AutoParts USA Inc
 Business Type: Importer
@@ -79,11 +83,11 @@ Company Address: 123 Import Blvd, Detroit, MI 48201
 Company Country: United States
 Tax ID: 38-7654321
 
-📍 CONTACT PERSON SECTION (API requires these fields):
+📍 CONTACT INFORMATION SECTION (Only 3 fields - NO title field):
 Contact Person: John Smith
 Contact Phone: +1-313-555-1234
 Contact Email: john.smith@autopartsusa.com
-⚠️ Note: NO Title field here - API doesn't require it
+⚠️ Title field does NOT exist in this form
 
 Trade Volume: $450,000
 ```
@@ -518,7 +522,8 @@ Company Name: AutoParts USA Inc
 Address: 123 Import Blvd, Detroit, MI 48201
 Company Country: United States
 Tax ID: 38-7654321
-Contact Person: John Smith
+
+Contact Person: John Smith                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-313-555-1234
 Contact Email: john.smith@autopartsusa.com
 
@@ -539,7 +544,7 @@ Component 3: Grade 8 steel bolts | USA | 30%
 Certifier Type: ☑️ IMPORTER
 
 Authorized Signatory Name: John Smith
-Authorized Signatory Title: Importer Manager
+Authorized Signatory Title: Importer Manager          ← TITLE FIELD REQUIRED (appears only here in Step 4)
 Signatory Email: john.smith@autopartsusa.com
 Signatory Phone: +1-313-555-1234
 
@@ -562,7 +567,8 @@ Company Name: MexManufacturing Ltd
 Address: 456 Industrial Way, Monterrey, NL, Mexico 64000
 Company Country: Mexico
 Tax ID: RFC-MEX123456
-Contact Person: Maria Garcia
+
+Contact Person: Maria Garcia                  ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +52-81-555-6789
 Contact Email: maria@mexmanufacturing.com
 
@@ -611,7 +617,8 @@ Company Name: CanadaDistribution Inc
 Address: 789 Commerce St, Toronto, ON M5H 2N2
 Company Country: Canada
 Tax ID: BN-987654321RC0001
-Contact Person: David Chen
+
+Contact Person: David Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-416-555-9012
 Contact Email: david@canadadist.com
 
@@ -655,7 +662,8 @@ Company Name: GlobalWholesale Corp
 Address: 321 Medical Plaza, Houston, TX 77002
 Company Country: United States
 Tax ID: 12-3456789
-Contact Person: Dr. Sarah Johnson
+
+Contact Person: Dr. Sarah Johnson              ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-713-555-3456
 Contact Email: sarah@globalwholesale.com
 
