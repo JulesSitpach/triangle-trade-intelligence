@@ -64,6 +64,8 @@ Destination Market: United States
 Manufacturing Location: Mexico
 ☑️ Manufacturing involves substantial transformation
 
+Trade Volume: $450,000
+
 Product: Automotive engine mount assemblies with steel housing and rubber vibration dampeners
 
 Component 1: Cold-rolled steel housing | China | 20%
@@ -115,6 +117,8 @@ Primary Supplier Country: United States
 Destination Market: Canada
 Manufacturing Location: Mexico
 ☑️ Manufacturing involves substantial transformation
+
+Trade Volume: $500,000
 
 Product: Industrial textile products for automotive upholstery and interior trim
 
@@ -173,6 +177,8 @@ Destination Market: United States
 Manufacturing Location: Does Not Apply
 ☐ Manufacturing involves substantial transformation (N/A for distributors)
 
+Trade Volume: $750,000
+
 Product: Electronic components and circuit assemblies for automotive control systems
 
 Component 1: Multi-layer circuit boards | China | 55%
@@ -224,6 +230,8 @@ Primary Supplier Country: Mexico
 Destination Market: United States
 Manufacturing Location: Does Not Apply
 ☐ Manufacturing involves substantial transformation (N/A for wholesalers)
+
+Trade Volume: $1,200,000
 
 Product: Medical device components and surgical instrument assemblies
 
