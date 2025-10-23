@@ -115,10 +115,19 @@ function groupRelatedAlerts(alerts, userProfile) {
         compHSCode.startsWith(alertHS.substring(0, 4))
       );
 
-      return countryMatch || hsCodeMatch;
+      return countryMatch || hsCodeMatch; // BUG: This OR causes duplicates if component matches BOTH conditions
     });
 
-    if (affectedComponents.length > 0) {
+    // DEDUPLICATION FIX: Remove duplicates when component matched both country AND HS code
+    const seenKeys = new Set();
+    const affectedComponents_dedup = affectedComponents.filter(comp => {
+      const key = (comp.hs_code || '') + '|' + (comp.description || '');
+      return !seenKeys.has(key) && !!seenKeys.add(key);
+    });
+
+    if (affectedComponents_dedup.length > 0) {
+      // Use deduplicated components
+      const affectedComponents = affectedComponents_dedup;
       // Group key: country + component types
       const groupKey = affectedUserCountries.join(',') + ':' +
                       affectedComponents.map(c => c.component_type || c.description).join(',');

@@ -168,7 +168,7 @@ export default function USMCAQualification({ results }) {
                 const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
                 const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
                 const savingsPercent = mfnRate - usmcaRate;
-                const hasRates = mfnRate > 0 || usmcaRate >= 0;
+                const hasRates = (component.mfn_rate !== undefined && component.mfn_rate !== null) || (component.usmca_rate !== undefined && component.usmca_rate !== null);
 
                 const isExpanded = expandedComponents[index];
                 const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence || component.hs_description;
