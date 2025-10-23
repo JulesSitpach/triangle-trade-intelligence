@@ -15,7 +15,10 @@ export default function RecommendedActions({ results }) {
   const hasAIRecommendations = !isQualified && results?.recommendations && results.recommendations.length > 0;
 
   // Get trade volume for calculations
-  const tradeVolume = results?.company?.trade_volume || results?.company?.annual_trade_volume || 0;
+  const tradeVolume = results?.company?.trade_volume;
+  if (!tradeVolume) {
+    console.error('❌ [FORM SCHEMA] Missing company.trade_volume in RecommendedActions');
+  }
 
   if (!showRecommendations) return null;
 

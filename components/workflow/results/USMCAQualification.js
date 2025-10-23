@@ -99,7 +99,11 @@ export default function USMCAQualification({ results }) {
     if (!targetComponent) return null;
 
     // Calculate potential savings from trade volume and gap
-    const tradeVolume = results.company?.trade_volume || results.company?.annual_trade_volume || 0;
+    const tradeVolume = results.company?.trade_volume;
+    if (!tradeVolume) {
+      console.error('❌ [FORM SCHEMA] Missing company.trade_volume in USMCAQualification gap analysis (line 102)');
+      return null;
+    }
     const avgTariffRate = results.product?.mfn_rate || 0.025; // Use product's MFN rate or 2.5% average
 
     // If they close the gap, calculate savings on the additional qualifying percentage
@@ -617,19 +621,32 @@ export default function USMCAQualification({ results }) {
                 💰 Component Savings Breakdown
               </h4>
               <div style={{ fontSize: '0.875rem', color: '#047857', marginBottom: '0.75rem' }}>
-                Based on annual trade volume of ${(results.company?.trade_volume || results.company?.annual_trade_volume || 0).toLocaleString()}
+                {(() => {
+                  const tv = results.company?.trade_volume;
+                  if (!tv) {
+                    console.error('❌ [FORM SCHEMA] Missing company.trade_volume in USMCAQualification line 623');
+                    return 'Based on annual trade volume of $0 (ERROR: Missing data)';
+                  }
+                  return `Based on annual trade volume of $${Number(tv).toLocaleString()}`;
+                })()}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {/* ✅ ISSUE #1: Component-level breakdown (NOT a conflicting calculation)
                     This breaks down the AI's total savings to show top contributors.
                     Uses component rates FROM the AI response, not independent calculation.
                     Does NOT affect the total annual_savings shown in TariffSavings. */}
-                {results.usmca.component_breakdown
-                  .map((component, index) => {
-                    const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
-                    const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
-                    const savingsPercent = (mfnRate - usmcaRate) / 100;
-                    const tradeVolume = results.company?.trade_volume || results.company?.annual_trade_volume || 0;
+                {(() => {
+                  const tv = results.company?.trade_volume;
+                  if (!tv) {
+                    console.error('❌ [FORM SCHEMA] Missing company.trade_volume in USMCAQualification component mapping');
+                    return null;
+                  }
+                  return results.usmca.component_breakdown
+                    .map((component, index) => {
+                      const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
+                      const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
+                      const savingsPercent = (mfnRate - usmcaRate) / 100;
+                      const tradeVolume = tv;
                     const componentValue = tradeVolume * (component.value_percentage / 100);
                     const componentSavings = componentValue * savingsPercent;
 
@@ -668,8 +685,8 @@ export default function USMCAQualification({ results }) {
                         ${component.componentSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                       </div>
                     </div>
-                  ))
-                }
+                    ))
+                })()}
               </div>
               <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #d1fae5', fontSize: '0.8125rem', color: '#047857' }}>
                 💡 <strong>Optimization Tip:</strong> Focus on these high-value components for maximum USMCA savings impact

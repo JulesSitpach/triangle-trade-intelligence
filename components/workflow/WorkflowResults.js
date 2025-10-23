@@ -92,7 +92,10 @@ export default function WorkflowResults({
           name: completionResults.company?.name || 'Certificate Holder',
           business_type: completionResults.company?.business_type || 'manufacturing',
           industry_sector: completionResults.company?.industry_sector || 'General Manufacturing',
-          annual_trade_volume: completionResults.company?.annual_trade_volume || 1000000
+          trade_volume: completionResults.company?.trade_volume || (() => {
+            console.error('❌ [FORM SCHEMA] Missing company.trade_volume in WorkflowResults sendCertificateDataToAlerts');
+            return 0;
+          })()
         },
         product: {
           hs_code: completionResults.product?.hs_code || completionResults.classification?.hs_code,
@@ -170,8 +173,13 @@ export default function WorkflowResults({
           company_name: results.company?.name || results.company?.company_name,
           business_type: results.company?.business_type,
           industry_sector: results.company?.industry_sector,
-          trade_volume: results.company?.trade_volume,
-          annual_trade_volume: results.company?.trade_volume,
+          trade_volume: (() => {
+            const tv = results.company?.trade_volume;
+            if (!tv) {
+              console.error('❌ [FORM SCHEMA] Missing company.trade_volume in WorkflowResults handleSaveConsent');
+            }
+            return tv || 0;
+          })(),
           company_country: results.company?.company_country  // FIX: Include country for certificate generation
         },
         product: {

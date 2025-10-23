@@ -98,7 +98,11 @@ export default function ExecutiveSummary({ results }) {
               <span className="breakdown-label">Annual Trade Volume:</span>
               <span className="breakdown-value">
                 ${(() => {
-                  const volume = company?.trade_volume || company?.annual_trade_volume || 0;
+                  const volume = company?.trade_volume;
+                  if (!volume) {
+                    console.error('❌ [FORM SCHEMA] Missing company.trade_volume in ExecutiveSummary');
+                    return '0';
+                  }
                   const num = typeof volume === 'string' ? parseFloat(volume.replace(/[^0-9.-]+/g, '')) : volume;
                   return (isNaN(num) ? 0 : num).toLocaleString();
                 })()}

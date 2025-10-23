@@ -133,8 +133,13 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
         company_name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
         business_type: workflowData?.company?.business_type,
-        trade_volume: workflowData?.company?.trade_volume,
-        annual_trade_volume: workflowData?.company?.trade_volume,
+        trade_volume: (() => {
+          const tv = workflowData?.company?.trade_volume;
+          if (!tv) {
+            console.error('❌ [FORM SCHEMA] Missing company.trade_volume in AuthorizationStep alerts data');
+          }
+          return tv || 0;
+        })(),
         company_country: workflowData?.company?.company_country  // FIX: Include country for certificate generation
       },
       product: {
