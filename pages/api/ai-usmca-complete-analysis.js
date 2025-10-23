@@ -356,7 +356,11 @@ export default protectedApiHandler({
       const validCacheRates = new Set(tariffRatesToValidate.map(r => Math.round(r * 10) / 10));
 
       // Extract ALL percentages from AI text (this will include non-tariff percentages)
-      const percentageMatches = analysis.detailed_analysis.savings_analysis?.match(/(\d+\.?\d*)%/g) || [];
+      // savings_analysis can be an object now, so get the string content from calculation_detail
+      const savingsText = typeof analysis.detailed_analysis.savings_analysis === 'string'
+        ? analysis.detailed_analysis.savings_analysis
+        : analysis.detailed_analysis.savings_analysis?.calculation_detail || '';
+      const percentageMatches = savingsText.match(/(\d+\.?\d*)%/g) || [];
       const allPercentages = percentageMatches.map(p => parseFloat(p.replace('%', '')));
 
       // Filter to ONLY percentages that look like tariff rates (0-100%)
@@ -1146,60 +1150,74 @@ async function lookupBatchTariffRates(components, destination_country = 'US') {
   const cacheExpiration = getCacheExpiration(destination_country);
   console.log(`🗄️ Checking database cache (${destination_country}: ${cacheExpiration / (24 * 60 * 60 * 1000)} days expiration)...`);
 
-  for (const component of components) {
-    const hsCode = component.hs_code || component.classified_hs_code;
+  // ✅ OPTIMIZATION: Batch query instead of loop (single DB roundtrip vs N roundtrips)
+  const hsCodes = components.map(c => c.hs_code || c.classified_hs_code);
+  const { data: allCachedRates, error: batchError } = await supabase
+    .from('tariff_rates_cache')
+    .select('*')
+    .in('hs_code', hsCodes)
+    .eq('destination_country', destination_country)
+    .order('created_at', { ascending: false });
 
-    // Query database for cached rate
-    const { data: cached, error } = await supabase
-      .from('tariff_rates_cache')
-      .select('*')
-      .eq('hs_code', hsCode)
-      .eq('origin_country', component.origin_country)
-      .eq('destination_country', destination_country)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+  if (allCachedRates && !batchError) {
+    // Process batch results and match to components
+    const ratesByHSAndOrigin = {};
+    for (const rate of allCachedRates) {
+      const key = `${rate.hs_code}|${rate.origin_country}`;
+      if (!ratesByHSAndOrigin[key]) {
+        ratesByHSAndOrigin[key] = rate;
+      }
+    }
 
-    if (cached && !error) {
-      // Check if cache is still fresh based on destination
-      const cacheAge = Date.now() - new Date(cached.created_at).getTime();
-      if (cacheAge < cacheExpiration) {
-        // ✅ SAFETY: Normalize policy_adjustments (old data might have objects)
-        const safePolicyAdjustments = (cached.policy_adjustments || []).map(adj =>
-          typeof adj === 'string' ? adj : JSON.stringify(adj)
-        );
+    for (const component of components) {
+      const hsCode = component.hs_code || component.classified_hs_code;
+      const key = `${hsCode}|${component.origin_country}`;
+      const cached = ratesByHSAndOrigin[key];
 
-        // ✅ FIX: Parse Section 301 from policy_adjustments array
-        let section301Rate = 0;
-        for (const adjustment of safePolicyAdjustments) {
-          const match = adjustment.match(/Section 301.*?(\d+(?:\.\d+)?)%/i);
-          if (match) {
-            section301Rate = parseFloat(match[1]);
-            break;
+      if (cached) {
+        // Check if cache is still fresh based on destination
+        const cacheAge = Date.now() - new Date(cached.created_at).getTime();
+        if (cacheAge < cacheExpiration) {
+          // ✅ SAFETY: Normalize policy_adjustments (old data might have objects)
+          const safePolicyAdjustments = (cached.policy_adjustments || []).map(adj =>
+            typeof adj === 'string' ? adj : JSON.stringify(adj)
+          );
+
+          // ✅ FIX: Parse Section 301 from policy_adjustments array
+          let section301Rate = 0;
+          for (const adjustment of safePolicyAdjustments) {
+            const match = adjustment.match(/Section 301.*?(\d+(?:\.\d+)?)%/i);
+            if (match) {
+              section301Rate = parseFloat(match[1]);
+              break;
+            }
           }
+
+          // ✅ FIX: Calculate total_rate from policy_adjusted_mfn_rate or base + section301
+          const totalRate = cached.policy_adjusted_mfn_rate ||
+                           (cached.base_mfn_rate || cached.mfn_rate) + section301Rate;
+
+          dbCachedRates[hsCode] = {
+            mfn_rate: cached.mfn_rate,
+            usmca_rate: cached.usmca_rate,
+            policy_adjustments: safePolicyAdjustments,
+            base_mfn_rate: cached.base_mfn_rate,
+            policy_adjusted_mfn_rate: cached.policy_adjusted_mfn_rate,
+            section_301: section301Rate,  // ✅ FIX: Parse from policy_adjustments
+            total_rate: totalRate  // ✅ FIX: Calculate from policy_adjusted or base+301
+          };
+          console.log(`  ✅ DB Cache HIT: ${hsCode} from ${component.origin_country} → ${destination_country} (${Math.round(cacheAge / (60 * 60 * 1000))}h old)`);
+        } else {
+          console.log(`  ⏰ DB Cache EXPIRED: ${hsCode} (${Math.round(cacheAge / (24 * 60 * 60 * 1000))} days old, limit: ${cacheExpiration / (24 * 60 * 60 * 1000)} days)`);
+          uncachedAfterDB.push(component);
         }
-
-        // ✅ FIX: Calculate total_rate from policy_adjusted_mfn_rate or base + section301
-        const totalRate = cached.policy_adjusted_mfn_rate ||
-                         (cached.base_mfn_rate || cached.mfn_rate) + section301Rate;
-
-        dbCachedRates[hsCode] = {
-          mfn_rate: cached.mfn_rate,
-          usmca_rate: cached.usmca_rate,
-          policy_adjustments: safePolicyAdjustments,
-          base_mfn_rate: cached.base_mfn_rate,
-          policy_adjusted_mfn_rate: cached.policy_adjusted_mfn_rate,
-          section_301: section301Rate,  // ✅ FIX: Parse from policy_adjustments
-          total_rate: totalRate  // ✅ FIX: Calculate from policy_adjusted or base+301
-        };
-        console.log(`  ✅ DB Cache HIT: ${hsCode} from ${component.origin_country} → ${destination_country} (${Math.round(cacheAge / (60 * 60 * 1000))}h old)`);
       } else {
-        console.log(`  ⏰ DB Cache EXPIRED: ${hsCode} (${Math.round(cacheAge / (24 * 60 * 60 * 1000))} days old, limit: ${cacheExpiration / (24 * 60 * 60 * 1000)} days)`);
         uncachedAfterDB.push(component);
       }
-    } else {
-      uncachedAfterDB.push(component);
     }
+  } else {
+    // If batch query fails, process all as uncached
+    uncachedAfterDB.push(...components);
   }
 
   // STEP 1: Check IN-MEMORY cache (session-level, faster than DB)
