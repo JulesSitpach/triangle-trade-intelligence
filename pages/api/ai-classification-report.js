@@ -93,16 +93,46 @@ The report should demonstrate expert knowledge of HS classification rules and pr
     // Generate classification metadata
     const classificationId = `HSC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
 
-    // Extract HS code from response or use default based on product type
-    const defaultHSCode = request.displayTitle?.toLowerCase().includes('electronic') ? '8517.62.00' :
-                         request.displayTitle?.toLowerCase().includes('textile') ? '6109.10.00' :
-                         request.displayTitle?.toLowerCase().includes('food') ? '2009.11.00' :
-                         '8544.42.90'; // Default electronics HS code
+    // ✅ FAIL LOUDLY: Extract HS code from AI response or user input
+    // NO KEYWORD MATCHING, NO HARDCODED DEFAULTS
+    let assignedHSCode = request.hs_code;  // If user provided it explicitly
+
+    // If no user-provided HS code, try to extract from AI response
+    if (!assignedHSCode) {
+      // Look for HS code pattern in AI response (10 digits or similar format)
+      const hsCodePatterns = [
+        /Assigned\s+HS\s+Code[:\s]+(\d{4}\.\d{2}\.\d{2})/i,
+        /HS\s+Code[:\s]+(\d{4}\.\d{2}\.\d{2})/i,
+        /Classification\s+Code[:\s]+(\d{4}\.\d{2}\.\d{2})/i,
+        /^(\d{4}\.\d{2}\.\d{2})$/m  // Standalone HS code
+      ];
+
+      for (const pattern of hsCodePatterns) {
+        const match = reportContent.match(pattern);
+        if (match) {
+          assignedHSCode = match[1];
+          console.log(`✅ Extracted HS Code from AI response: ${assignedHSCode}`);
+          break;
+        }
+      }
+    }
+
+    // ✅ FAIL LOUDLY: If AI couldn't determine HS code, return error
+    if (!assignedHSCode) {
+      console.error('❌ AI failed to determine HS code and user did not provide one');
+      return res.status(400).json({
+        success: false,
+        error: 'HS Code Classification Failed',
+        message: 'The AI could not determine a valid HS code for this product. This product may require manual expert review due to complexity or insufficient product description. Please provide the HS code directly or provide more detailed product specifications.',
+        suggestion: 'Contact a trade compliance expert or provide additional product details (dimensions, materials, manufacturing process, intended use)',
+        request_id: request.id
+      });
+    }
 
     const classificationData = {
       deliverable_type: 'HS Code Classification Report',
       classification_id: classificationId,
-      assigned_hs_code: request.hs_code || defaultHSCode,
+      assigned_hs_code: assignedHSCode,  // ✅ AI-determined or user-provided, never hardcoded
       billable_value: pricing?.price || 200,
       content: reportContent,
       generated_at: new Date().toISOString(),

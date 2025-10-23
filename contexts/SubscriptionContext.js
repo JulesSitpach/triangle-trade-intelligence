@@ -5,23 +5,12 @@ const SubscriptionContext = createContext();
 export const useSubscription = () => {
   const context = useContext(SubscriptionContext);
   if (!context) {
-    // Return sensible defaults when context is not available
-    return {
-      subscription: {
-        plan: 'professional',
-        plan_name: 'Professional Plan',
-        usage_remaining: 'Demo Mode',
-        usage_status: 'active',
-        features_available: ['web_verification', 'confidence_scoring', 'expert_validation']
-      },
-      user: {
-        id: 'demo-user-jorge',
-        email: 'jorge@triangleintel.com',
-        role: 'expert'
-      },
-      loading: false,
-      error: null
-    };
+    // ✅ FAIL LOUDLY: Context must be provided by SubscriptionProvider
+    // No fallback to demo user - authentication is required
+    throw new Error(
+      'SubscriptionContext not found. Make sure your component is wrapped with <SubscriptionProvider>. ' +
+      'This component requires authentication and cannot function without a valid user session.'
+    );
   }
   return context;
 };
@@ -102,20 +91,11 @@ export const SubscriptionProvider = ({ children }) => {
       console.error('Failed to load subscription data:', err);
       setError(err.message);
 
-      // Fallback to minimal working state
-      setSubscription({
-        plan: 'demo',
-        plan_name: 'Demo Mode',
-        usage_remaining: 'Unlimited (Demo)',
-        usage_status: 'demo',
-        features_available: ['basic_classification']
-      });
-
-      setUser({
-        id: 'demo-user',
-        email: 'demo@triangleintel.com',
-        role: 'demo'
-      });
+      // ✅ FAIL LOUDLY: No fallback to demo user
+      // If auth fails, leave subscription/user null and show error to user
+      // Components checking subscription status will see the error and display it
+      setSubscription(null);
+      setUser(null);
 
     } finally {
       setLoading(false);

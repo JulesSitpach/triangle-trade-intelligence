@@ -213,23 +213,9 @@ export function useWorkflowState() {
     loadFromDatabase();
   }, []); // Run once on mount
 
-  // Set form defaults after options are loaded
-  useEffect(() => {
-    if (!defaultsLoaded && !isLoadingOptions) {
-      setFormData(prev => ({
-        ...prev,
-        supplier_country: prev.supplier_country || 'CN',
-        manufacturing_location: prev.manufacturing_location || 'MX',
-        component_origins: (prev.component_origins && prev.component_origins.length > 0)
-          ? prev.component_origins
-          : [
-              { origin_country: 'CN', value_percentage: 60 },
-              { origin_country: 'MX', value_percentage: 40 }
-            ]
-      }));
-      setDefaultsLoaded(true);
-    }
-  }, [defaultsLoaded, isLoadingOptions]);
+  // ✅ REMOVED: Hardcoded CN→MX defaults
+  // Users MUST explicitly select supplier_country, manufacturing_location, and component origins
+  // No more silent assumptions about supply chains
 
   // ✅ REMOVED AUTO-SAVE - Now saves only when user clicks "Next"
   // This eliminates 150+ unnecessary database writes during form filling
@@ -398,30 +384,29 @@ export function useWorkflowState() {
       localStorage.removeItem('usmca_workflow_results');
     }
 
-    // Complete form reset - clear ALL fields for new analysis
+    // ✅ COMPLETE FORM RESET - NO HARDCODED DEFAULTS
+    // Users MUST explicitly enter all supply chain data
     setFormData({
       company_name: '',
-      company_country: '',  // CRITICAL: Reset company country for certificate
+      company_country: '',
       business_type: '',
       industry_sector: '',
-      supplier_country: 'CN',
+      supplier_country: '',  // ✅ No default - user must select
       trade_volume: '',
-      destination_country: 'US',
+      destination_country: '',  // ✅ No default - user must select
       company_address: '',
       tax_id: '',
       contact_person: '',
       contact_email: '',
       contact_phone: '',
       product_description: '',
-      manufacturing_location: 'MX',
+      manufacturing_location: '',  // ✅ No default - user must select
       classified_hs_code: '',
       hs_code_confidence: 0,
       hs_code_description: '',
       classification_method: '',
-      // Reset USMCA Certificate Fields
       origin_criterion: '',
       method_of_qualification: '',
-      // Reset Producer Details
       producer_name: '',
       producer_address: '',
       producer_tax_id: '',
@@ -429,10 +414,7 @@ export function useWorkflowState() {
       producer_email: '',
       producer_country: '',
       producer_same_as_exporter: false,
-      component_origins: [
-        { origin_country: 'CN', value_percentage: 60 },
-        { origin_country: 'MX', value_percentage: 40 }
-      ]
+      component_origins: []  // ✅ No default - user must add components
     });
   }, []);
 
@@ -565,7 +547,7 @@ export function useWorkflowState() {
       components: workflow.component_origins || workflowData.components || []
     };
 
-    // CRITICAL FIX: Also populate formData so step navigation works
+    // ✅ Populate formData from loaded workflow - NO HARDCODED DEFAULTS
     // This ensures when users click back to Step 1 or 2, the form fields are populated
     setFormData(prev => ({
       ...prev,
@@ -579,7 +561,7 @@ export function useWorkflowState() {
       contact_phone: workflowData.company?.contact_phone || workflowData.company?.phone || '',
       contact_email: workflowData.company?.contact_email || workflowData.company?.email || '',
       product_description: workflow.product_description || workflowData.product?.description || '',
-      manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || 'MX',
+      manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || '',  // ✅ No fallback to 'MX'
       classified_hs_code: workflow.hs_code || workflowData.product?.hs_code || '',
       component_origins: workflow.component_origins || workflowData.components || []
     }));

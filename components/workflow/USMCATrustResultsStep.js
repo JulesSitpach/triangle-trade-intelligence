@@ -259,7 +259,10 @@ export default function USMCATrustResultsStep({ certificateData }) {
           </div>
           <div className="status-card">
             <div className="status-label">Origin Criterion</div>
-            <div className="status-value">{certificateData.product_details?.preference_criterion || 'B - Regional Value Content'}</div>
+            {/* ✅ REMOVED: || 'B - Regional Value Content' default (line 262)
+                REASON: FALSE CERTIFICATION if AI didn't determine criterion
+                FIX: Show warning indicator instead */}
+            <div className="status-value">{certificateData.product_details?.preference_criterion || '⚠️ Pending AI Determination'}</div>
           </div>
         </div>
       </div>

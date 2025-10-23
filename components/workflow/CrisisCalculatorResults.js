@@ -39,12 +39,36 @@ export default function CrisisCalculatorResults({
   }, [formData]);
 
   const calculateCrisisImpact = async () => {
-    if (!formData.company_name) return;
+    // ✅ FAIL LOUDLY: Validate all required fields before calculation
+    if (!formData.company_name) {
+      setCrisisData({ error: 'Company name is required' });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.hs_code) {
+      setCrisisData({ error: 'HS Code is required for crisis impact calculation. Please provide your product HS code.' });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.trade_volume) {
+      setCrisisData({ error: 'Annual trade volume is required for accurate crisis impact calculation. Please enter your annual import/export volume.' });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.supplier_country && !formData.origin_country) {
+      setCrisisData({ error: 'Product origin country is required. Please specify where your products are sourced.' });
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // Get trade volume value from selection
+      // ✅ NO HARDCODES: Use actual user data, fail if missing
       const tradeVolume = getTradeVolumeValue(formData.trade_volume);
-      
+      const originCountry = formData.supplier_country || formData.origin_country;
+
       const response = await fetch('/api/crisis-calculator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,8 +76,8 @@ export default function CrisisCalculatorResults({
           action: 'calculate_crisis_penalty',
           data: {
             tradeVolume: tradeVolume,
-            hsCode: formData.hs_code || '8517.62.00.00',
-            originCountry: 'CN',
+            hsCode: formData.hs_code,  // ✅ No fallback - already validated above
+            originCountry: originCountry,  // ✅ Use user's actual origin, not hardcoded CN
             businessType: formData.business_type || 'manufacturing',
             sessionId: `crisis-calc-${formData.company_name}-${Date.now()}`
           }
@@ -74,23 +98,26 @@ export default function CrisisCalculatorResults({
   };
 
   const getTradeVolumeValue = (volumeInput) => {
-    if (!volumeInput) return 1000000; // Default if missing
+    // ✅ FAIL LOUDLY: No hardcoded defaults
+    if (!volumeInput) {
+      throw new Error('Annual trade volume is required');
+    }
 
     // Parse user's numeric input (user enters "4800000" or "4,800,000")
     const numericValue = parseFloat(String(volumeInput).replace(/[^0-9.-]/g, ''));
 
-    // If valid number, return it
-    if (!isNaN(numericValue) && numericValue > 0) {
-      return numericValue;
+    // ✅ Validate parsed value is valid
+    if (isNaN(numericValue) || numericValue <= 0) {
+      throw new Error(`Invalid trade volume: "${volumeInput}". Please enter a positive number.`);
     }
 
-    // Fallback to $1M if invalid
-    return 1000000;
+    return numericValue;
   };
 
   const saveToAlertsSystem = async (crisisResult, tradeVolume) => {
     try {
-      // Prepare user data for alerts dashboard
+      // ✅ NO HARDCODES: Use validated user data
+      // Note: At this point, formData.hs_code is guaranteed to exist (validated in calculateCrisisImpact)
       const userWorkflowData = {
         company: {
           name: formData.company_name,
@@ -98,8 +125,9 @@ export default function CrisisCalculatorResults({
           annual_trade_volume: tradeVolume
         },
         product: {
-          hs_code: formData.hs_code || '8517.62.00.00'
+          hs_code: formData.hs_code  // ✅ No fallback - already validated
         },
+        supplier_country: formData.supplier_country || formData.origin_country,  // ✅ Actual origin
         destination_country: formData.destination_country || 'US',
         workflow_path: 'crisis-calculator',
         crisis_data: crisisResult,
@@ -111,7 +139,9 @@ export default function CrisisCalculatorResults({
       localStorage.setItem('usmca_company_data', JSON.stringify({
         name: formData.company_name,
         business_type: formData.business_type,
-        annual_trade_volume: tradeVolume
+        annual_trade_volume: tradeVolume,
+        hs_code: formData.hs_code,  // ✅ Include actual HS code
+        supplier_country: formData.supplier_country || formData.origin_country  // ✅ Include actual origin
       }));
 
       console.log('Crisis Calculator data saved to alerts system:', userWorkflowData);
@@ -153,6 +183,28 @@ export default function CrisisCalculatorResults({
     setShowSubscriptionFlow(false);
   };
 
+  // ✅ Show validation errors prominently
+  if (crisisData?.error) {
+    return (
+      <div className="card">
+        <div className="alert alert-error">
+          <div className="alert-icon">
+            <div className="status-indicator status-error"></div>
+          </div>
+          <div className="alert-content">
+            <div className="alert-title">Missing Required Information</div>
+            <div className="text-body" style={{marginTop: '0.5rem'}}>
+              {crisisData.error}
+            </div>
+            <div className="small-text" style={{marginTop: '1rem', color: '#666'}}>
+              Please go back and complete all required fields before proceeding.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="card">
@@ -164,13 +216,15 @@ export default function CrisisCalculatorResults({
     );
   }
 
-  // Prepare user profile for subscription flow
+  // ✅ Prepare user profile for subscription flow - NO HARDCODES
+  // Note: At this point, all required fields are guaranteed to exist (validated in calculateCrisisImpact)
   const userProfile = {
     company_name: formData.company_name,
     email: formData.email,
-    annual_trade_volume: getTradeVolumeValue(formData.trade_volume),
+    annual_trade_volume: formData.trade_volume,  // Pass raw value, component should handle parsing
     business_type: formData.business_type,
-    hs_code: formData.hs_code || '8517.62.00.00'
+    hs_code: formData.hs_code,  // ✅ No fallback - already validated
+    supplier_country: formData.supplier_country || formData.origin_country
   };
 
   // Show subscription flow overlay

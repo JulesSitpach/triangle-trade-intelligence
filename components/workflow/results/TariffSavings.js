@@ -12,14 +12,18 @@ export default function TariffSavings({ results }) {
   const components = results.component_origins || results.components || [];
   const tradeVolume = parseFloat(results.company?.trade_volume || 0);
 
-  // Calculate REAL savings: only base MFN rates are eliminated
-  // Section 301 REMAINS even with USMCA qualification
-  let baseMFNSavings = 0;
-  let section301Burden = 0;
-  let totalWithoutUSMCA = 0;
+  // ✅ ISSUE #1 FIX: Use SINGLE authoritative source - AI's detailed_analysis.savings_analysis
+  // The AI calculates savings ONLY in detailed_analysis.savings_analysis
+  // Both results.savings and results.detailed_analysis.savings_analysis come from the SAME source
+  // Use detailed_analysis since it includes calculation_detail (the "show your work")
+  const aiCalculatedSavings = results.detailed_analysis?.savings_analysis?.annual_savings || results.savings?.annual_savings || 0;
+  const aiCalculatedMonthlySavings = results.detailed_analysis?.savings_analysis?.monthly_savings || results.savings?.monthly_savings || 0;
+  const aiSavingsPercentage = results.detailed_analysis?.savings_analysis?.savings_percentage || results.savings?.savings_percentage || 0;
 
-  // Component-level breakdown for detailed display
+  // Component-level breakdown for detailed display (for transparency, not for final savings calculation)
   const componentBreakdown = [];
+  let calculatedBaseMFNSavings = 0;  // For comparison only
+  let calculatedSection301Burden = 0;  // For warnings
 
   components.forEach(c => {
     const componentValue = tradeVolume * (parseFloat(c.percentage || c.value_percentage || 0) / 100);
@@ -27,7 +31,7 @@ export default function TariffSavings({ results }) {
     const section301 = parseFloat(c.section_301 || 0);
     const totalRate = parseFloat(c.total_rate || baseMFN + section301);
 
-    // Store component details for display
+    // Store component details for display (for transparency only)
     componentBreakdown.push({
       description: c.description || c.component_type,
       origin: c.origin_country || c.country,
@@ -40,20 +44,17 @@ export default function TariffSavings({ results }) {
       section301Cost: componentValue * (section301 / 100)
     });
 
-    // Base MFN is eliminated by USMCA
-    baseMFNSavings += componentValue * (baseMFN / 100);
-
-    // Section 301 REMAINS (Chinese goods still pay this)
+    // Calculate ONLY for component-level display (not for final number)
+    calculatedBaseMFNSavings += componentValue * (baseMFN / 100);
     if (section301 > 0) {
-      section301Burden += componentValue * (section301 / 100);
+      calculatedSection301Burden += componentValue * (section301 / 100);
     }
-
-    // Total tariff cost WITHOUT USMCA
-    totalWithoutUSMCA += componentValue * (totalRate / 100);
   });
 
-  const netTariffCost = section301Burden; // With USMCA, only Section 301 remains
-  const savingsPercentage = tradeVolume > 0 ? (baseMFNSavings / tradeVolume) * 100 : 0;
+  // Use AI calculation as the authoritative answer
+  const baseMFNSavings = aiCalculatedSavings;
+  const section301Burden = calculatedSection301Burden;  // Still warn about Section 301
+  const savingsPercentage = aiSavingsPercentage;
 
   return (
     <div className="card-content">
@@ -119,28 +120,28 @@ export default function TariffSavings({ results }) {
         </div>
       )}
 
-      {/* Net Comparison */}
+      {/* Net Comparison - Using AI-calculated values */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '4px' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Without USMCA</div>
           <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937' }}>
-            ${totalWithoutUSMCA.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            ${(baseMFNSavings + section301Burden).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </div>
           <div style={{ fontSize: '0.625rem', color: '#9ca3af' }}>annual tariff cost</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>With USMCA</div>
           <div style={{ fontSize: '1.125rem', fontWeight: '600', color: section301Burden > 0 ? '#dc2626' : '#15803d' }}>
-            ${netTariffCost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+            ${section301Burden.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </div>
           <div style={{ fontSize: '0.625rem', color: '#9ca3af' }}>annual tariff cost</div>
         </div>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Reduction</div>
           <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#15803d' }}>
-            {((baseMFNSavings / totalWithoutUSMCA) * 100).toFixed(1)}%
+            ${baseMFNSavings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
           </div>
-          <div style={{ fontSize: '0.625rem', color: '#9ca3af' }}>tariff reduction</div>
+          <div style={{ fontSize: '0.625rem', color: '#9ca3af' }}>tariff savings (AI-calculated)</div>
         </div>
       </div>
 

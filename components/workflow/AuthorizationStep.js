@@ -1021,7 +1021,10 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                           {previewData.professional_certificate.hs_classification?.code}
                         </td>
                         <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.preference_criterion || 'B'}
+                          {/* ✅ REMOVED: || 'B' default (line 1024)
+                              REASON: FALSE CERTIFICATION if AI didn't determine criterion
+                              FIX: Show blank or warning indicator instead */}
+                          {previewData.professional_certificate.preference_criterion || ''}
                         </td>
                         <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
                           {previewData.professional_certificate.producer_declaration?.is_producer ? 'YES' : 'NO'}

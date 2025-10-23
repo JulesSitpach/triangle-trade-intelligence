@@ -191,7 +191,7 @@ Generated: ${new Date().toLocaleDateString()}
 COMPANY: ${certificate.exporter?.name || results.company?.name || 'TO BE COMPLETED'}
 PRODUCT: ${certificate.product?.description || 'TO BE COMPLETED'}  
 HS CODE: ${certificate.product?.hs_code || results.product?.hs_code || 'TO BE VERIFIED'}
-PREFERENCE CRITERION: ${certificate.preference_criterion || 'B'}
+PREFERENCE CRITERION: ${certificate.preference_criterion || ''}
 
 VALIDITY PERIOD:
 From: ${certificate.blanket_period?.start_date || 'TO BE COMPLETED'}

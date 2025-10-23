@@ -47,7 +47,10 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         product: {
           hs_code: results.product?.hs_code || '',
           description: results.product?.description || results.product?.product_description || '',
-          preference_criterion: certificate.preference_criterion || 'B'
+          // ✅ REMOVED: preference_criterion default || 'B' (line 50)
+          // REASON: Defaulting to 'B' is FALSE CERTIFICATION - violates USMCA Article 5.2
+          // FIX: AI must determine preference criterion, never default
+          preference_criterion: certificate.preference_criterion
         },
         usmca_analysis: {
           qualified: isQualified,
@@ -180,7 +183,10 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
             </div>
             <div className="status-card">
               <div className="status-label">Preference Criterion</div>
-              <div className="status-value">{certificate.preference_criterion || 'B'}</div>
+              {/* ✅ REMOVED: || 'B' default (line 186)
+                  REASON: Shows FALSE data in UI if AI didn't determine criterion
+                  FIX: Display null/undefined indicator instead */}
+              <div className="status-value">{certificate.preference_criterion || '⚠️ Not determined'}</div>
             </div>
             <div className="status-card">
               <div className="status-label">Regional Content</div>

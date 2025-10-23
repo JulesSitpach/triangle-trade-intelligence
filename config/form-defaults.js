@@ -4,72 +4,27 @@
  */
 
 export const getFormDefaults = async () => {
-  try {
-    // Only fetch on client side
-    if (typeof window === 'undefined') {
-      return getFallbackDefaults();
-    }
-    
-    // Fetch dropdown options to determine smart defaults
-    const response = await fetch('/api/simple-dropdown-options');
-    if (response.ok) {
-      const data = await response.json();
-      
-      // Smart supplier country default - most common in tariff data
-      let defaultSupplier = 'CN'; // China is most common trade partner
-      if (data.countries && data.countries.includes('China')) {
-        defaultSupplier = 'CN';
-      } else if (data.countries && data.countries.length > 0) {
-        // Use first available country
-        defaultSupplier = data.countries[0].substring(0, 2).toUpperCase();
-      }
-      
-      // Smart manufacturing location - prefer USMCA countries
-      let defaultManufacturing = 'MX'; // Mexico for USMCA benefits
-      const usmcaCountries = ['Mexico', 'Canada', 'United States'];
-      const availableUSMCA = usmcaCountries.find(country => 
-        data.countries && data.countries.includes(country)
-      );
-      
-      if (availableUSMCA) {
-        defaultManufacturing = availableUSMCA === 'Mexico' ? 'MX' : 
-                              availableUSMCA === 'Canada' ? 'CA' : 'US';
-      }
-      
-      return {
-        supplier_country: defaultSupplier,
-        manufacturing_location: defaultManufacturing,
-        component_origins: [
-          { 
-            origin_country: defaultSupplier, 
-            value_percentage: 60 // Majority from supplier
-          },
-          { 
-            origin_country: defaultManufacturing, 
-            value_percentage: 40 // Processing/assembly in USMCA country
-          }
-        ]
-      };
-    }
-  } catch (error) {
-    console.error('Failed to load form defaults:', error);
-  }
-  
-  // Fallback defaults - still dynamic based on USMCA strategy
-  return getFallbackDefaults();
-};
+  // ✅ NO DEFAULTS: Don't assume supplier country or manufacturing location
+  // Users MUST explicitly select these values - supply chain assumptions destroy data accuracy
+  // Every user has different sourcing strategy; defaulting to CN→MX forces wrong calculations
 
-// Fallback defaults for server-side rendering
-const getFallbackDefaults = () => {
   return {
-    supplier_country: 'CN', // Most common global supplier
-    manufacturing_location: 'MX', // USMCA benefit optimization
-    component_origins: [
-      { origin_country: 'CN', value_percentage: 60 },
-      { origin_country: 'MX', value_percentage: 40 }
-    ]
+    // ✅ REQUIRED FIELDS - User must explicitly select
+    supplier_country: null,  // User must select actual supplier country
+    manufacturing_location: null,  // User must select actual manufacturing location
+    component_origins: [],  // User must specify actual component origins
+
+    // ✅ These fields have no defaults - user entry is required
+    hs_code: null,
+    product_description: '',
+    company_country: null,
+    destination_country: null
   };
 };
+
+// ✅ REMOVED: Fallback defaults function
+// No more CN→MX assumptions for every user
+// Users must explicitly provide their actual supply chain data
 
 export const getDefaultTradeVolume = async (businessType = '') => {
   // Use centralized business type metadata for volume defaults
