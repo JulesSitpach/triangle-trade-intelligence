@@ -43,9 +43,41 @@ export default async function handler(req, res) {
 
     console.log(`📊 Grouped into ${alertGroups.length} consolidated alerts`);
 
+    // ✅ FIX FOR ISSUE #7: Query workflow ONCE before processing groups (not for each group)
+    // This prevents the same "Found workflow intelligence" message from being logged multiple times
+    let sharedWorkflowIntelligence = null;
+    if (user_profile.userId) {
+      try {
+        const { data: workflowData, error } = await supabase
+          .from('workflow_completions')
+          .select('workflow_data')
+          .eq('user_id', user_profile.userId)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && workflowData?.workflow_data) {
+          sharedWorkflowIntelligence = {
+            recommendations: workflowData.workflow_data.recommendations || [],
+            detailed_analysis: workflowData.workflow_data.detailed_analysis || {},
+            usmca_status: workflowData.workflow_data.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
+            regional_content: workflowData.workflow_data.usmca?.north_american_content || 0,
+            threshold_required: workflowData.workflow_data.usmca?.threshold_applied || 0,
+            savings_data: workflowData.workflow_data.savings || {}
+          };
+
+          console.log(`✅ Found workflow intelligence: ${sharedWorkflowIntelligence.recommendations.length} recommendations, ${Object.keys(sharedWorkflowIntelligence.detailed_analysis).length} analysis sections`);
+        }
+      } catch (queryError) {
+        console.warn('⚠️ Could not query workflow intelligence:', queryError.message);
+        // Continue without workflow intelligence - will generate from scratch
+      }
+    }
+
     // Analyze each group with AI for consolidated impact assessment
+    // Pass shared workflow intelligence to avoid querying it multiple times
     const consolidatedAlerts = await Promise.all(
-      alertGroups.map(group => analyzeAlertGroup(group, user_profile))
+      alertGroups.map(group => analyzeAlertGroup(group, user_profile, sharedWorkflowIntelligence))
     );
 
     // Sort by calibrated urgency (not everything is 10/10)
@@ -155,8 +187,9 @@ function groupRelatedAlerts(alerts, userProfile) {
 /**
  * Analyze a group of related alerts with AI
  * Returns ONE consolidated alert with clear cost calculation
+ * ✅ FIXED: Now accepts sharedWorkflowIntelligence parameter to avoid duplicate queries
  */
-async function analyzeAlertGroup(group, userProfile) {
+async function analyzeAlertGroup(group, userProfile, sharedWorkflowIntelligence = null) {
   try {
     const affectedComponents = group.affected_components || [];
     const alerts = group.alerts || [];
@@ -166,36 +199,10 @@ async function analyzeAlertGroup(group, userProfile) {
       sum + (c.percentage || c.value_percentage || 0), 0
     );
 
-    // ========== QUERY USER'S WORKFLOW ANALYSIS FOR RICH PERSONALIZED DATA ==========
-    // Instead of asking AI to make up generic advice, use the detailed analysis already generated
-    let workflowIntelligence = null;
-    if (userProfile.userId) {
-      try {
-        const { data: workflowData, error } = await supabase
-          .from('workflow_completions')
-          .select('workflow_data')
-          .eq('user_id', userProfile.userId)
-          .order('completed_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (!error && workflowData?.workflow_data) {
-          workflowIntelligence = {
-            recommendations: workflowData.workflow_data.recommendations || [],
-            detailed_analysis: workflowData.workflow_data.detailed_analysis || {},
-            usmca_status: workflowData.workflow_data.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-            regional_content: workflowData.workflow_data.usmca?.north_american_content || 0,
-            threshold_required: workflowData.workflow_data.usmca?.threshold_applied || 0,
-            savings_data: workflowData.workflow_data.savings || {}
-          };
-
-          console.log(`✅ Found workflow intelligence: ${workflowIntelligence.recommendations.length} recommendations, ${Object.keys(workflowIntelligence.detailed_analysis).length} analysis sections`);
-        }
-      } catch (queryError) {
-        console.warn('⚠️ Could not query workflow intelligence:', queryError.message);
-        // Continue without workflow intelligence - will generate from scratch
-      }
-    }
+    // ========== USE SHARED WORKFLOW INTELLIGENCE (queried once in main handler) ==========
+    // ✅ FIXED: Instead of querying for each group, use the shared workflow data passed as parameter
+    // This eliminates duplicate "Found workflow intelligence" console messages
+    const workflowIntelligence = sharedWorkflowIntelligence;
 
     // CRITICAL FIX: Build component context WITH REAL TARIFF DATA to prevent AI hallucinations
     const componentContext = affectedComponents.map(c => {
