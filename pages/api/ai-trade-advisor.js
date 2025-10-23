@@ -68,7 +68,10 @@ function buildComponentContext(profile) {
   const usmcaPercentage = usmcaComponents.reduce((sum, c) => sum + (c.percentage || c.value_percentage || 0), 0);
 
   // Calculate financial exposure
-  const tradeVolume = profile.tradeVolume || profile.annual_trade_volume || 0;
+  const tradeVolume = profile.trade_volume || (() => {
+    console.warn('⚠️ [FORM SCHEMA] Missing profile.trade_volume in ai-trade-advisor');
+    return 0;
+  })();
   const totalTariffExposure = components.reduce((sum, c) => {
     const componentValue = tradeVolume * ((c.percentage || c.value_percentage || 0) / 100);
     const tariffCost = componentValue * ((c.mfn_rate || 0) / 100);

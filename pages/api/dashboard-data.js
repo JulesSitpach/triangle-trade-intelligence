@@ -120,7 +120,14 @@ export default protectedApiHandler({
           qualification_status: qualificationResult.status || 'UNKNOWN',
           regional_content_percentage: qualificationResult.regional_content || 0,
           required_threshold: qualificationResult.required_threshold || 60,
-          trade_volume: parseFloat(workflowData.company?.annual_trade_volume || workflowData.company?.trade_volume) || 0,
+          trade_volume: (() => {
+            const tv = parseFloat(workflowData.company?.trade_volume);
+            if (isNaN(tv)) {
+              console.warn('⚠️ [FORM SCHEMA] Invalid/missing company.trade_volume in dashboard-data');
+              return 0;
+            }
+            return tv;
+          })(),
           estimated_annual_savings: row.total_savings || qualificationResult.savings_calculation || 0,
           component_origins: qualificationResult.component_origins || [],
           completed_at: row.completed_at || row.created_at,
@@ -250,7 +257,7 @@ export default protectedApiHandler({
             business_type: contextWorkflow.business_type || 'Not specified',
             hs_code: contextWorkflow.hs_code || 'Multiple',
             product_description: contextWorkflow.product_description || 'Product',
-            annual_trade_volume: contextWorkflow.trade_volume || 0,
+            trade_volume: contextWorkflow.trade_volume || 0,
             qualification_status: contextWorkflow.qualification_status || 'NEEDS_REVIEW',
             component_origins: contextWorkflow.component_origins || [],
 
