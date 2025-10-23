@@ -73,107 +73,19 @@ export const BUSINESS_TYPES = [
 ];
 
 /**
- * Industry Sectors (Product categories for HS classification)
- * Aligned with HS code chapter structure
+ * REMOVED: Industry Sectors hardcoded array
+ *
+ * REASON: Violates AI-first principle "NEVER use hardcoded arrays"
+ * - Database is source of truth for industry sectors
+ * - API queries database directly via /api/simple-dropdown-options
+ * - Config values were out of sync with actual dropdown values
+ * - Example: Config had "Electronics & Electrical Equipment" but DB has "Electronics & Technology"
+ *
+ * ACTION: Industry sectors now come ONLY from the database
+ * - UI Form: Fetches from /api/simple-dropdown-options
+ * - API: Queries from usmca_qualification_rules table
+ * - No hardcoded fallback values
  */
-export const INDUSTRY_SECTORS = [
-  {
-    value: 'Agriculture & Food Products',
-    label: 'Agriculture & Food Products',
-    label_es: 'Agricultura y Productos Alimenticios',
-    hs_chapters: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
-  },
-  {
-    value: 'Textiles & Apparel',
-    label: 'Textiles & Apparel',
-    label_es: 'Textiles y Confección',
-    hs_chapters: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
-  },
-  {
-    value: 'Footwear & Leather',
-    label: 'Footwear & Leather',
-    label_es: 'Calzado y Cuero',
-    hs_chapters: [41, 42, 43, 64]
-  },
-  {
-    value: 'Wood & Paper Products',
-    label: 'Wood & Paper Products',
-    label_es: 'Madera y Papel',
-    hs_chapters: [44, 45, 46, 47, 48, 49]
-  },
-  {
-    value: 'Chemicals & Plastics',
-    label: 'Chemicals & Plastics',
-    label_es: 'Químicos y Plásticos',
-    hs_chapters: [28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
-  },
-  {
-    value: 'Metals & Metal Products',
-    label: 'Metals & Metal Products',
-    label_es: 'Metales y Productos Metálicos',
-    hs_chapters: [72, 73, 74, 75, 76, 78, 79, 80, 81, 82, 83]
-  },
-  {
-    value: 'Machinery & Mechanical Equipment',
-    label: 'Machinery & Mechanical Equipment',
-    label_es: 'Maquinaria y Equipo Mecánico',
-    hs_chapters: [84]
-  },
-  {
-    value: 'Electronics & Electrical Equipment',
-    label: 'Electronics & Electrical Equipment',
-    label_es: 'Electrónica y Equipo Eléctrico',
-    hs_chapters: [85]
-  },
-  {
-    value: 'Automotive & Transportation',
-    label: 'Automotive & Transportation',
-    label_es: 'Automotriz y Transporte',
-    hs_chapters: [86, 87, 88, 89]
-  },
-  {
-    value: 'Medical Devices & Pharmaceuticals',
-    label: 'Medical Devices & Pharmaceuticals',
-    label_es: 'Dispositivos Médicos y Farmacéuticos',
-    hs_chapters: [30, 90]
-  },
-  {
-    value: 'Furniture & Household Goods',
-    label: 'Furniture & Household Goods',
-    label_es: 'Muebles y Artículos del Hogar',
-    hs_chapters: [94, 95, 96]
-  },
-  {
-    value: 'Optical & Precision Instruments',
-    label: 'Optical & Precision Instruments',
-    label_es: 'Instrumentos Ópticos y de Precisión',
-    hs_chapters: [90, 91]
-  },
-  {
-    value: 'Minerals & Stone Products',
-    label: 'Minerals & Stone Products',
-    label_es: 'Minerales y Productos de Piedra',
-    hs_chapters: [25, 26, 27, 68, 69, 70, 71]
-  },
-  {
-    value: 'Arms & Ammunition',
-    label: 'Arms & Ammunition',
-    label_es: 'Armas y Municiones',
-    hs_chapters: [93]
-  },
-  {
-    value: 'Art & Antiques',
-    label: 'Art & Antiques',
-    label_es: 'Arte y Antigüedades',
-    hs_chapters: [97]
-  },
-  {
-    value: 'Other',
-    label: 'Other',
-    label_es: 'Otro',
-    hs_chapters: []
-  }
-];
 
 /**
  * Helper function to get business type label
@@ -185,32 +97,14 @@ export function getBusinessTypeLabel(value, language = 'en') {
 }
 
 /**
- * Helper function to get industry sector label
+ * REMOVED: Helper functions for industry sectors
+ * - getIndustrySectorLabel()
+ * - getHSChaptersForSector()
+ * - findSectorByHSCode()
+ *
+ * These functions referenced INDUSTRY_SECTORS which is now database-driven.
+ * If industry sector label lookups are needed, fetch from the database via the API.
  */
-export function getIndustrySectorLabel(value, language = 'en') {
-  const sector = INDUSTRY_SECTORS.find(s => s.value === value);
-  if (!sector) return value;
-  return language === 'es' ? sector.label_es : sector.label;
-}
-
-/**
- * Helper function to get HS chapters for industry sector
- */
-export function getHSChaptersForSector(sectorValue) {
-  const sector = INDUSTRY_SECTORS.find(s => s.value === sectorValue);
-  return sector?.hs_chapters || [];
-}
-
-/**
- * Helper function to find sector by HS code
- */
-export function findSectorByHSCode(hsCode) {
-  // Extract chapter from HS code (first 2 digits)
-  const chapter = parseInt(hsCode.substring(0, 2), 10);
-
-  const sector = INDUSTRY_SECTORS.find(s => s.hs_chapters.includes(chapter));
-  return sector || INDUSTRY_SECTORS.find(s => s.value === 'Other');
-}
 
 /**
  * USMCA Certifier Types (Official legal options for USMCA Certificate Field 1)
@@ -269,12 +163,8 @@ export function getCertifierTypeLabel(value, language = 'en') {
 
 export default {
   BUSINESS_TYPES,
-  INDUSTRY_SECTORS,
   CERTIFIER_TYPES,
   getBusinessTypeLabel,
-  getIndustrySectorLabel,
-  getHSChaptersForSector,
-  findSectorByHSCode,
   mapBusinessTypeToCertifierType,
   getCertifierTypeLabel
 };
