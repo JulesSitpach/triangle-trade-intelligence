@@ -72,6 +72,13 @@ const DE_MINIMIS = {
   }
 };
 
+// ✅ HELPER: Parse trade_volume from string to number (handles commas from UI form)
+function parseTradeVolume(volumeInput) {
+  if (!volumeInput) return null;
+  const parsed = parseFloat(String(volumeInput).replace(/[^0-9.-]+/g, ''));
+  return !isNaN(parsed) && parsed > 0 ? parsed : null;
+}
+
 export default protectedApiHandler({
   POST: async (req, res) => {
     const startTime = Date.now();
@@ -455,7 +462,7 @@ export default protectedApiHandler({
         company_name: formData.company_name, // Alias for compatibility
         business_type: formData.business_type,  // Business role: Importer/Exporter/etc
         industry_sector: formData.industry_sector,  // Industry classification
-        trade_volume: formData.trade_volume,
+        trade_volume: parseTradeVolume(formData.trade_volume), // ✅ Parse string to number (handles commas)
         supplier_country: formData.supplier_country,
         destination_country: formData.destination_country,
 

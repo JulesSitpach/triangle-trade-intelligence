@@ -96,7 +96,13 @@ export default function ExecutiveSummary({ results }) {
           <div className="financial-breakdown">
             <div className="breakdown-row">
               <span className="breakdown-label">Annual Trade Volume:</span>
-              <span className="breakdown-value">${(company?.trade_volume || company?.annual_trade_volume || 0).toLocaleString()}</span>
+              <span className="breakdown-value">
+                ${(() => {
+                  const volume = company?.trade_volume || company?.annual_trade_volume || 0;
+                  const num = typeof volume === 'string' ? parseFloat(volume.replace(/[^0-9.-]+/g, '')) : volume;
+                  return (isNaN(num) ? 0 : num).toLocaleString();
+                })()}
+              </span>
             </div>
             {savings.annual_savings > 0 && (
               <>
