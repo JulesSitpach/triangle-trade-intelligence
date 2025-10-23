@@ -168,6 +168,43 @@ export default async function handler(req, res) {
         reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
       }));
 
+      // 🚨 CRITICAL FIX: Ensure PRIMARY HS code is always the HIGHEST confidence option
+      // For financial compliance, the most confident classification must be primary
+      let primaryHSCode = aiResult.data.hsCode;
+      let primaryConfidence = Number(aiResult.data.confidence) || 0;
+      let finalAlternativeCodes = [...safeAlternativeCodes];
+
+      // Check if any alternative code has higher confidence than the primary
+      const allCodes = [
+        { code: primaryHSCode, confidence: primaryConfidence, isOriginalPrimary: true },
+        ...finalAlternativeCodes
+      ];
+
+      const sortedByConfidence = allCodes.sort((a, b) => b.confidence - a.confidence);
+      const highestConfidenceCode = sortedByConfidence[0];
+
+      // If highest confidence is NOT the original primary, swap them
+      if (highestConfidenceCode.code !== primaryHSCode) {
+        console.warn(`⚠️ CLASSIFICATION PRIORITY FIX: Highest confidence code (${highestConfidenceCode.code} at ${highestConfidenceCode.confidence}%) was not primary. Swapping with original primary (${primaryHSCode} at ${primaryConfidence}%). This is a critical fix for compliance accuracy.`);
+
+        primaryHSCode = highestConfidenceCode.code;
+        primaryConfidence = highestConfidenceCode.confidence;
+
+        // Rebuild alternatives without the new primary
+        finalAlternativeCodes = sortedByConfidence
+          .filter(item => item.code !== primaryHSCode)
+          .map(item => ({
+            code: item.code,
+            confidence: item.confidence,
+            reason: item.isOriginalPrimary
+              ? `Previously selected as primary (${primaryConfidence}% confidence). However, ${primaryHSCode} has higher confidence (${item.confidence}%).`
+              : item.reason
+          }));
+      }
+
+      // Sort final alternatives by confidence (highest first) for display
+      finalAlternativeCodes.sort((a, b) => b.confidence - a.confidence);
+
       // ✅ SAFETY: Normalize requiredDocumentation (ensure all strings)
       const safeDocumentation = (aiResult.data.requiredDocumentation || []).map(doc =>
         typeof doc === 'string' ? doc : JSON.stringify(doc)
@@ -178,16 +215,16 @@ export default async function handler(req, res) {
 
         // Main classification result (what UI expects)
         classification: {
-          hsCode: aiResult.data.hsCode,
-          description: aiResult.data.description || `HS Code ${aiResult.data.hsCode}`,
-          confidence: `${Math.round(aiResult.data.confidence || 0)}%`,
+          hsCode: primaryHSCode,
+          description: aiResult.data.description || `HS Code ${primaryHSCode}`,
+          confidence: `${Math.round(primaryConfidence)}%`,
           verification_status: aiResult.data.databaseMatch ? 'database_verified' : 'ai_generated',
           usmca_qualification: usmcaQualificationString
         },
 
         // Additional AI insights
         enhanced_features: {
-          alternative_codes: safeAlternativeCodes,
+          alternative_codes: finalAlternativeCodes,
           required_documentation: safeDocumentation,
           reasoning: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || '')
         },
@@ -196,22 +233,24 @@ export default async function handler(req, res) {
         agent_metadata: {
           processing_time_ms: Date.now() - startTime,
           agent_version: 'ai_classification_agent',
-          confidence_threshold_met: (aiResult.data.confidence || 0) >= 75,
-          database_match: aiResult.data.databaseMatch || false
+          confidence_threshold_met: primaryConfidence >= 75,
+          database_match: aiResult.data.databaseMatch || false,
+          classification_priority_adjusted: primaryHSCode !== aiResult.data.hsCode
         },
 
         // Backward compatibility data
         data: {
-          hsCode: aiResult.data.hsCode,
+          hsCode: primaryHSCode,
           description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
-          confidence: Math.round(aiResult.data.confidence || 0),
+          confidence: Math.round(primaryConfidence),
           explanation: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || ''),
           reasoning: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || ''),
-          source: 'AI Classification Agent'
+          source: 'AI Classification Agent',
+          alternativeCodes: finalAlternativeCodes
         }
       };
 
-      console.log(`[AI AGENT] Classification result: ${aiResult.data.hsCode} (${aiResult.data.confidence}% confidence)`);
+      console.log(`[AI AGENT] Classification result: ${primaryHSCode} (${primaryConfidence}% confidence)${primaryHSCode !== aiResult.data.hsCode ? ' [CORRECTED from ' + aiResult.data.hsCode + ']' : ''}`);
 
       // Add subscription context to the response
       const responseWithSubscription = await addSubscriptionContext(req, response, 'classification');
@@ -225,11 +264,11 @@ export default async function handler(req, res) {
         .from('hs_code_classifications')
         .insert({
           component_description: cacheKey,
-          hs_code: aiResult.data.hsCode,
+          hs_code: primaryHSCode,
           hs_description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
-          confidence: Math.round(aiResult.data.confidence || 0),
+          confidence: Math.round(primaryConfidence),
           explanation: safeExplanationForDB,
-          alternative_codes: safeAlternativeCodes,  // ✅ Use normalized array
+          alternative_codes: finalAlternativeCodes,  // ✅ Use corrected sorted alternatives
           source: 'ai_agent',
           verified: false
         });
