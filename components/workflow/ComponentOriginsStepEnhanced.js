@@ -129,7 +129,7 @@ export default function ComponentOriginsStepEnhanced({
             businessType: formData.business_type,
             manufacturingLocation: formData.manufacturing_location,
             exportDestination: formData.export_destination,
-            tradeVolume: formData.annual_trade_volume,
+            tradeVolume: formData.trade_volume,  // ✅ FIXED: Use trade_volume, not annual_trade_volume (matches CompanyInformationStep)
             companyName: formData.company_name,
             primarySupplier: formData.primary_supplier_country,
 
