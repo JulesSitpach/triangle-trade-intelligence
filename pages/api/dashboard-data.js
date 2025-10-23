@@ -94,7 +94,7 @@ export default protectedApiHandler({
           regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
           required_threshold: parseFloat(row.required_threshold) || 60,
           trade_volume: parseFloat(row.trade_volume) || 0,
-          estimated_annual_savings: 0,
+          estimated_annual_savings: parseFloat(row.estimated_annual_savings) || 0,  // ✅ FIXED: Use actual savings
           component_origins: row.component_origins || [],
           completed_at: row.completed_at || row.created_at,
           manufacturing_location: row.manufacturing_location,
@@ -258,6 +258,12 @@ export default protectedApiHandler({
             analyzed_at: alert.created_at,
             alert_type: 'rss_crisis',
             severity_level: alert.severity_level,
+            // ✅ FIXED: Add field name expected by UserDashboard
+            overall_risk_level: alert.severity_level,
+            // ✅ FIXED: Add missing risk_score field
+            risk_score: alert.crisis_score || 0,
+            // ✅ FIXED: Add missing alert_count field
+            alert_count: 1,
 
             // Transform crisis alert into vulnerability analysis format
             primary_vulnerabilities: [
@@ -283,6 +289,11 @@ export default protectedApiHandler({
             ],
 
             recommendations: {
+              // ✅ FIXED: Change field name to match component expectations
+              immediate_actions: alert.recommended_actions
+                ? [alert.recommended_actions]
+                : [],
+              // Keep backwards compatibility
               diversification_strategies: alert.recommended_actions
                 ? [alert.recommended_actions]
                 : []
