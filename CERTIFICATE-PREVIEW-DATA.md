@@ -274,6 +274,9 @@ Importer Company: AutoParts USA Inc
 Address: 123 Import Blvd, Detroit, MI 48201
 Country: United States
 Tax ID: 38-7654321
+Contact Person: John Smith
+Phone: +1-313-555-1234
+Email: john.smith@autopartsusa.com
 
 ✅ Check: I certify that the information provided is true and accurate
 ✅ Check: I am authorized to sign this certificate on behalf of AutoParts USA Inc
@@ -324,6 +327,9 @@ Importer Company: Automotive Textiles Canada Inc
 Address: 1200 Industrial Ave, Toronto, ON M1K 5A8
 Country: Canada
 Tax ID: BN-111222333RC0001
+Contact Person: Patricia Brown
+Phone: +1-416-555-7890
+Email: patricia.brown@autotextiles.ca
 
 ✅ Check: I certify that the information provided is true and accurate
 ✅ Check: I am authorized to sign this certificate on behalf of MexManufacturing Ltd
@@ -369,6 +375,9 @@ Importer Company: CanadaDistribution Inc
 Address: 789 Commerce St, Toronto, ON M5H 2N2
 Country: Canada
 Tax ID: BN-987654321RC0001
+Contact Person: David Chen
+Phone: +1-416-555-9012
+Email: david@canadadist.com
 
 ✅ Check: I certify that the information provided is true and accurate
 ✅ Check: I am authorized to sign this certificate on behalf of CanadaDistribution Inc
@@ -414,6 +423,9 @@ Importer Company: GlobalWholesale Corp
 Address: 321 Medical Plaza, Houston, TX 77002
 Country: United States
 Tax ID: 12-3456789
+Contact Person: Dr. Sarah Johnson
+Phone: +1-713-555-3456
+Email: sarah@globalwholesale.com
 
 ✅ Check: I certify that the information provided is true and accurate
 ✅ Check: I am authorized to sign this certificate on behalf of GlobalWholesale Corp
@@ -431,6 +443,111 @@ Click: Generate & Preview Certificate
 4. **Threshold**: Varies by product category (60-75% typically)
 5. **Watermark**: TRIAL only - shows "DRAFT" or "UNLICENSED"
 6. **Download**: TRIAL blocks it, PAID tiers allow it
+
+---
+
+## 🧪 Business Outcome Test Accounts (Automated Test Suite)
+
+These accounts are used in the automated business outcome testing suite (`tests/business-outcomes.test.js` and `tests/business-value-alerts.test.js`). They validate real user workflows with complete company information.
+
+### **Test 5: Steel Manufacturing Inc** (China-Origin / Section 301 Scenario)
+
+**Purpose**: Validate Section 301 tariff calculation for China-origin goods destined for USA
+
+**STEP 1: Company Information Form - Complete Data:**
+```
+Company Name: Steel Manufacturing Inc
+Business Type: Importer
+Industry Sector: Manufacturing
+Tax ID: 38-2847291
+Company Address: 1500 Industrial Blvd, Pittsburgh, PA 15213
+Company Country: United States
+
+Contact Person: Maria Chen
+Contact Phone: (412) 555-0198
+Contact Email: maria.chen@steelmfg.com
+
+Primary Supplier Country: China
+Destination Market: United States
+Manufacturing Location: China
+Annual Trade Volume: $1,250,000
+
+Product: Steel housing components for automotive
+Component Origin: 100% China-origin
+```
+
+**Test Outcomes Validated**:
+- ✅ Section 301 tariff applies (25% additional duty for China goods)
+- ✅ Total tariff rate calculated correctly (MFN + Section 301)
+- ✅ Annual financial impact shown in dollars ($279,000+ exposure)
+- ✅ USMCA qualification = NOT QUALIFIED (100% non-USMCA content)
+- ✅ Alerts show policy impact with financial consequences
+
+---
+
+### **Test 6: TextileCorp USA** (USMCA-Qualified / Multi-Country BOM)
+
+**Purpose**: Validate USMCA savings calculation and certificate eligibility for qualified content
+
+**STEP 1: Company Information Form - Complete Data:**
+```
+Company Name: TextileCorp USA
+Business Type: Manufacturer
+Industry Sector: Textiles/Apparel
+Tax ID: 47-1923847
+Company Address: 2400 Fashion Plaza, New York, NY 10018
+Company Country: United States
+
+Contact Person: James Rodriguez
+Contact Phone: (212) 555-0247
+Contact Email: james.rodriguez@textilecorp.com
+
+Primary Supplier Country: Mexico
+Destination Market: United States
+Manufacturing Location: United States
+Annual Trade Volume: $850,000
+
+Product: Cotton blend apparel - USMCA qualified
+```
+
+**Component Breakdown** (100% USMCA content):
+```
+1. Cotton fabric | Origin: USA | 45%
+2. Polyester thread | Origin: Mexico | 35%
+3. Foam backing | Origin: Canada | 20%
+```
+
+**Test Outcomes Validated**:
+- ✅ USMCA qualification = QUALIFIED (100% regional content)
+- ✅ Savings calculation accurate: (MFN - USMCA) × $850,000
+- ✅ Trade volume preserved through workflow: $850,000
+- ✅ Certificate generation eligible (USMCA-qualified)
+- ✅ Component breakdown shows accurate origin countries
+- ✅ Regional content percentage calculated: 100%
+
+---
+
+## 📊 Field Mapping: Tests to Certificate
+
+These tests ensure all company information flows correctly through the workflow:
+
+| Field | Required | Step 1 | Step 4 | Certificate | Tests |
+|-------|----------|--------|--------|------------|-------|
+| Company Name | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Business Type | ✅ Yes | ✅ Input | - | - | ✅ Validated |
+| Industry Sector | ✅ Yes | ✅ Input | - | - | ✅ Used for HS classification |
+| Tax ID | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Company Address | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Company Country | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Contact Person | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Contact Phone | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Contact Email | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Trade Volume | ✅ Yes | ✅ Input | - | - | ✅ Persists to alerts |
+| Supplier Country | ✅ Yes | ✅ Input | - | - | ✅ Triggers tariff analysis |
+| Destination Market | ✅ Yes | ✅ Input | - | - | ✅ Determines rates |
+| Manufacturing Location | ✅ Yes | ✅ Input | - | - | ✅ Affects USMCA qualification |
+| Product Description | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
+| Component Origins | ✅ Yes | ✅ Input | - | - | ✅ Used for qualification |
 
 ---
 
