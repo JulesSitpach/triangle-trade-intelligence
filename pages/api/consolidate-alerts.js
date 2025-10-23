@@ -36,6 +36,31 @@ export default async function handler(req, res) {
       });
     }
 
+    // ✅ FIX: Ensure user_profile has trade_volume from workflow_sessions
+    // This prevents "unknown annual volume" in AI analysis
+    if (!user_profile.tradeVolume && !user_profile.annual_trade_volume && user_profile.userId) {
+      try {
+        const { data: workflow, error } = await supabase
+          .from('workflow_sessions')
+          .select('trade_volume')
+          .eq('user_id', user_profile.userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && workflow?.trade_volume) {
+          // ✅ CRITICAL: Parse trade_volume from string to number (handles commas from form)
+          const parsedVolume = parseFloat(String(workflow.trade_volume).replace(/[^0-9.-]+/g, ''));
+          user_profile.tradeVolume = !isNaN(parsedVolume) && parsedVolume > 0 ? parsedVolume : null;
+
+          console.log(`✅ Enriched user_profile with trade_volume: $${user_profile.tradeVolume?.toLocaleString() || 'unknown'}`);
+        }
+      } catch (enrichmentError) {
+        console.warn('⚠️ Could not enrich user_profile with trade_volume:', enrichmentError.message);
+        // Continue without trade_volume - AI will fall back to percentage-based analysis
+      }
+    }
+
     console.log(`🧠 Consolidating ${alerts.length} alerts for ${user_profile.companyName}`);
 
     // Group related alerts by common themes
