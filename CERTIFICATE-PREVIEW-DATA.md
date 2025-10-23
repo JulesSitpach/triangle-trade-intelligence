@@ -172,7 +172,7 @@ Address: 789 Commerce St, Toronto, ON M5H 2N2
 Company Country: Canada
 Tax ID: BN-987654321RC0001
 Business Type: Distributor
-Industry Sector: Electronics & Electrical Equipment
+Industry Sector: Electronics & Technology
 
 Contact Person: David Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-416-555-9012
