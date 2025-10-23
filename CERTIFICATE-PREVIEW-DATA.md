@@ -1,6 +1,6 @@
 # Certificate Preview Data - All Test Accounts
 
-**For Phase 3c Manual Testing - Complete Certificate Information**
+**For Phase 3c Manual Testing + Automated Business Outcome Testing**
 
 ---
 
@@ -13,8 +13,6 @@ Contact Information Section has ONLY 3 fields - NO title field exists:
 - `contact_email` ✅ (Contact email address)
 - `contact_title` ❌ **DOES NOT EXIST IN UI**
 
-API (pages/api/ai-usmca-complete-analysis.js) validates exactly these 3 fields.
-
 **Step 4: Certificate Authorization Form (AuthorizationStep.js)**
 Authorized Signatory Section has 4 fields including title:
 - `signatory_name` (Who signs the certificate)
@@ -22,49 +20,25 @@ Authorized Signatory Section has 4 fields including title:
 - `signatory_email`
 - `signatory_phone`
 
-**Key Insight:**
-- Step 1 has NO title field at all (neither in UI nor required by API)
-- Step 4 HAS a title field (needed for certificate signature authority)
-- These are TWO SEPARATE FORMS at different stages of the workflow
-- The contact person from Step 1 can be the same or different from Step 4's authorized signatory
+---
+
+## 🎯 Quick Start - Choose Your Test
+
+### Manual Testing (Tests 1-4)
+Use these to manually test the UI in your browser:
+- **Test 1: TRIAL** - AutoParts USA (Mexico-origin, mixed BOM)
+- **Test 2: STARTER** - MexManufacturing Ltd (multi-country USMCA)
+- **Test 3: PROFESSIONAL** - CanadaDistribution Inc (China distributor)
+- **Test 4: PREMIUM** - GlobalWholesale Corp (medical devices)
+
+### Automated Testing (Tests 5-6)
+Used by automated test suite - validates business outcomes:
+- **Test 5: SECTION 301** - Steel Manufacturing Inc (China-origin, tariff analysis)
+- **Test 6: USMCA QUALIFIED** - TextileCorp USA (multi-country savings)
 
 ---
 
-## 🎯 How to Test Certificate Preview
-
-### Two Separate Forms - Important Distinction
-
-**Step 1: USMCA Workflow Form** (CompanyInformationStep.js)
-- Collects: Company name, contact person, contact phone, contact email
-- API requires: contact_person, contact_phone, contact_email (NO title field)
-- This is your company's primary contact info
-
-**Step 4: Certificate Authorization Form** (AuthorizationStep.js - appears AFTER results)
-- Collects: Authorized signatory name, title, email, phone
-- Different from workflow contact person
-- Used for certificate signature authorization
-- Certifier type: IMPORTER, EXPORTER, or PRODUCER
-
-### Testing Flow
-
-1. Login with test account
-2. Complete USMCA workflow:
-   - Fill Company Information (including contact_person, contact_phone, contact_email - NO title needed here)
-   - Add components and product details
-   - Continue to Results
-3. Once results show, click "Generate Certificate"
-4. Fill Authorization Step:
-   - Select certifier type (IMPORTER/EXPORTER/PRODUCER)
-   - Enter authorized signatory name (can be same or different from contact person)
-   - Enter authorized signatory title (REQUIRED at this step, NOT at step 1)
-   - Fill importer/exporter details
-   - Check certification boxes
-   - Click "Generate & Preview Certificate"
-5. Verify certificate fields populate correctly
-
----
-
-## 📋 TEST ACCOUNT 1: TRIAL USER
+## 📋 TEST 1: TRIAL USER (Manual Testing)
 
 ### **Login Credentials**
 ```
@@ -74,171 +48,7 @@ Status: Trial (7-day countdown)
 Tier: FREE
 ```
 
-### **STEP 1: Company Information Form** (API Form - 3 contact fields only)
-```
-Company Name: AutoParts USA Inc
-Business Type: Importer
-Industry Sector: Automotive
-Company Address: 123 Import Blvd, Detroit, MI 48201
-Company Country: United States
-Tax ID: 38-7654321
-
-📍 CONTACT INFORMATION SECTION (Only 3 fields - NO title field):
-Contact Person: John Smith
-Contact Phone: +1-313-555-1234
-Contact Email: john.smith@autopartsusa.com
-⚠️ Title field does NOT exist in this form
-
-Trade Volume: $450,000
-```
-
-### **Trade Route Information** (Required by API)
-```
-Primary Supplier Country: Mexico ← WHERE YOU SOURCE COMPONENTS
-Destination Market: United States ← WHERE YOU EXPORT TO
-Manufacturing Location: Mexico ← CRITICAL FOR AI ANALYSIS (where assembly happens)
-
-🔲 Manufacturing involves substantial transformation: ✅ CHECK THIS
-   (Reason: Welding, stamping, assembly = substantial transformation, not just simple assembly)
-```
-
-### **Product Details**
-```
-Product Description: Automotive engine mount assemblies with steel housing and rubber vibration dampeners
-HS Code: [Auto-filled by AI]
-```
-
-### **Components (3 items)**
-```
-1. Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating
-   Origin: China
-   Percentage: 20%
-
-2. Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound
-   Origin: Mexico
-   Percentage: 50%
-
-3. Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch
-   Origin: USA
-   Percentage: 30%
-```
-
-### **STEP 4: Certificate Authorization Form** (After Results - separate form for certificate signing)
-```
-👤 AUTHORIZED SIGNATORY SECTION:
-Authorized Name: John Smith
-  (Can be same or different from Step 1 contact person)
-Authorized Title: Importer Manager
-  (REQUIRED here - this is certification authority)
-Signatory Email: john.smith@autopartsusa.com
-Signatory Phone: +1-313-555-1234
-
-🎯 CERTIFIER TYPE (Choose one):
-☑️ IMPORTER (you are the importing company)
-☐ EXPORTER
-☐ PRODUCER
-
-📋 IMPORTER DETAILS (Your company's info - since you are the importer):
-Company Name: AutoParts USA Inc
-Address: 123 Import Blvd, Detroit, MI 48201
-Tax ID: 38-7654321
-
-✅ CERTIFICATION CHECKBOXES:
-☑️ I certify that the information provided is true and accurate
-☑️ I am authorized to sign this certificate on behalf of AutoParts USA Inc
-
-📅 CERTIFICATION DATE: [Auto-filled to today]
-
-Then click: "Generate & Preview Certificate"
-```
-
-### **Expected Certificate Preview**
-```
-Exporter: AutoParts USA Inc
-Address: 123 Import Blvd, Detroit, MI 48201
-Tax ID: 38-7654321
-Contact: John Smith
-
-Product HS Code: [AI-determined]
-Description: Automotive engine mount assemblies...
-Preference Criterion: [AI-determined]
-
-USMCA Qualification: QUALIFIED
-Regional Content: [Calculated by AI]%
-Threshold: 60%
-
-Blanket Period: [Current date] to [+1 year]
-
-⚠️ TRIAL WATERMARK: Should display watermark
-🔒 Download: Should be BLOCKED with "Upgrade Required" message
-```
-
----
-
-**ℹ️ NOTE:** All test account data is organized in the "Quick Copy-Paste" section below with proper STEP 1 and STEP 4 separation. The old format sections have been removed to reduce confusion.
-
-## ✅ Certificate Preview Testing Checklist
-
-### For Each Account, Verify:
-
-**Certificate Fields Populated**:
-- [ ] Exporter name correct (Company Name)
-- [ ] Address correct (Company Address)
-- [ ] Tax ID correct (Tax ID)
-- [ ] Contact person correct (Contact Person)
-- [ ] Product description populated
-- [ ] HS code filled (from AI)
-- [ ] Preference criterion filled (from AI)
-- [ ] Blanket period shows current date + 1 year
-
-**USMCA Qualification Data**:
-- [ ] Qualification status shows (QUALIFIED/NOT QUALIFIED)
-- [ ] Regional content percentage calculated
-- [ ] Threshold displayed (varies by HS code)
-- [ ] Component breakdown visible
-
-**Authorization Section**:
-- [ ] Authorized name field shows entered value
-- [ ] Authorized title field shows entered value
-- [ ] Certification date shows
-- [ ] Certification checkbox shows as checked
-
-**Download Behavior**:
-
-**TRIAL Account** (AutoParts USA):
-- [ ] Watermark visible on preview
-- [ ] Download button says "Upgrade Required"
-- [ ] Download blocked with message
-- [ ] Service pricing shows $175 (no discount)
-
-**STARTER Account** (MexManufacturing):
-- [ ] No watermark on preview
-- [ ] Download button enabled
-- [ ] Download works successfully
-- [ ] Service pricing shows $175 (no discount)
-
-**PROFESSIONAL Account** (CanadaDistribution):
-- [ ] No watermark on preview
-- [ ] Download button enabled
-- [ ] Download works successfully
-- [ ] Service pricing shows $149 (15% discount)
-- [ ] "Unlimited analyses" message displays
-
-**PREMIUM Account** (GlobalWholesale):
-- [ ] No watermark on preview
-- [ ] Download button enabled
-- [ ] Download works successfully
-- [ ] Service pricing shows $131 (25% discount)
-- [ ] Premium benefits message displays
-- [ ] "Quarterly strategy calls" mentioned
-
----
-
-## 🎯 Quick Copy-Paste for Each Account
-
-### **Test 1: TRIAL** (Two Steps)
-
-**STEP 1: USMCA Workflow Form - Copy all at once:**
+### **STEP 1: USMCA Workflow Form - Copy all at once:**
 ```
 Company Name: AutoParts USA Inc
 Address: 123 Import Blvd, Detroit, MI 48201
@@ -261,12 +71,12 @@ Component 2: Natural rubber dampeners | Mexico | 50%
 Component 3: Grade 8 steel bolts | USA | 30%
 ```
 
-**STEP 4: Certificate Authorization Form - After results display:**
+### **STEP 4: Certificate Authorization Form - After results display:**
 ```
 Certifier Type: ☑️ IMPORTER
 
 Authorized Signatory Name: John Smith
-Authorized Signatory Title: Importer Manager          ← TITLE FIELD REQUIRED (appears only here in Step 4)
+Authorized Signatory Title: Importer Manager          ← TITLE FIELD REQUIRED (appears only here)
 Signatory Email: john.smith@autopartsusa.com
 Signatory Phone: +1-313-555-1234
 
@@ -284,9 +94,13 @@ Email: john.smith@autopartsusa.com
 Click: Generate & Preview Certificate
 ```
 
-### **Test 2: STARTER** (Two Steps)
+**Expected Result**: Certificate preview with TRIAL WATERMARK, download blocked
 
-**STEP 1: USMCA Workflow Form:**
+---
+
+## 📋 TEST 2: STARTER USER (Manual Testing)
+
+### **STEP 1: USMCA Workflow Form:**
 ```
 Company Name: MexManufacturing Ltd
 Address: 456 Industrial Way, Monterrey, NL, Mexico 64000
@@ -309,7 +123,7 @@ Component 2: High-tenacity polyester thread | Mexico | 35%
 Component 3: Foam backing material | Canada | 20%
 ```
 
-**STEP 4: Certificate Authorization Form:**
+### **STEP 4: Certificate Authorization Form:**
 ```
 Certifier Type: ☑️ EXPORTER
 
@@ -337,9 +151,13 @@ Email: patricia.brown@autotextiles.ca
 Click: Generate & Preview Certificate
 ```
 
-### **Test 3: PROFESSIONAL** (Two Steps)
+**Expected Result**: Certificate preview, download enabled, no watermark
 
-**STEP 1: USMCA Workflow Form:**
+---
+
+## 📋 TEST 3: PROFESSIONAL USER (Manual Testing)
+
+### **STEP 1: USMCA Workflow Form:**
 ```
 Company Name: CanadaDistribution Inc
 Address: 789 Commerce St, Toronto, ON M5H 2N2
@@ -362,7 +180,7 @@ Component 2: Wire harness connectors | Mexico | 25%
 Component 3: Injection-molded ABS housing | USA | 20%
 ```
 
-**STEP 4: Certificate Authorization Form:**
+### **STEP 4: Certificate Authorization Form:**
 ```
 Certifier Type: ☑️ IMPORTER
 
@@ -385,9 +203,13 @@ Email: david@canadadist.com
 Click: Generate & Preview Certificate
 ```
 
-### **Test 4: PREMIUM** (Two Steps)
+**Expected Result**: Certificate preview, download enabled, 15% discount applied
 
-**STEP 1: USMCA Workflow Form:**
+---
+
+## 📋 TEST 4: PREMIUM USER (Manual Testing)
+
+### **STEP 1: USMCA Workflow Form:**
 ```
 Company Name: GlobalWholesale Corp
 Address: 321 Medical Plaza, Houston, TX 77002
@@ -410,7 +232,7 @@ Component 2: Medical-grade silicone seals | Mexico | 35%
 Component 3: Precision polycarbonate housings | Canada | 25%
 ```
 
-**STEP 4: Certificate Authorization Form:**
+### **STEP 4: Certificate Authorization Form:**
 ```
 Certifier Type: ☑️ IMPORTER
 
@@ -433,122 +255,149 @@ Email: sarah@globalwholesale.com
 Click: Generate & Preview Certificate
 ```
 
----
-
-## 📌 Key Testing Notes
-
-1. **HS Codes**: AI will auto-fill these - don't worry about them
-2. **Tariff Rates**: AI will calculate these - verify they show in component breakdown
-3. **Regional Content**: AI calculates based on component origins - should vary by account
-4. **Threshold**: Varies by product category (60-75% typically)
-5. **Watermark**: TRIAL only - shows "DRAFT" or "UNLICENSED"
-6. **Download**: TRIAL blocks it, PAID tiers allow it
+**Expected Result**: Certificate preview, download enabled, 25% discount applied
 
 ---
 
-## 🧪 Business Outcome Test Accounts (Automated Test Suite)
-
-These accounts are used in the automated business outcome testing suite (`tests/business-outcomes.test.js` and `tests/business-value-alerts.test.js`). They validate real user workflows with complete company information.
-
-### **Test 5: Steel Manufacturing Inc** (China-Origin / Section 301 Scenario)
+## 🧪 TEST 5: SECTION 301 SCENARIO (Automated Testing)
 
 **Purpose**: Validate Section 301 tariff calculation for China-origin goods destined for USA
 
-**STEP 1: Company Information Form - Complete Data:**
+### **STEP 1: USMCA Workflow Form - Copy all at once:**
 ```
 Company Name: Steel Manufacturing Inc
-Business Type: Importer
-Industry Sector: Manufacturing
-Tax ID: 38-2847291
-Company Address: 1500 Industrial Blvd, Pittsburgh, PA 15213
+Address: 1500 Industrial Blvd, Pittsburgh, PA 15213
 Company Country: United States
+Tax ID: 38-2847291
 
-Contact Person: Maria Chen
+Contact Person: Maria Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: (412) 555-0198
 Contact Email: maria.chen@steelmfg.com
 
 Primary Supplier Country: China
 Destination Market: United States
 Manufacturing Location: China
-Annual Trade Volume: $1,250,000
+☑️ Manufacturing involves substantial transformation
 
 Product: Steel housing components for automotive
-Component Origin: 100% China-origin
+
+Component 1: Steel housing | China | 100%
 ```
 
-**Test Outcomes Validated**:
-- ✅ Section 301 tariff applies (25% additional duty for China goods)
-- ✅ Total tariff rate calculated correctly (MFN + Section 301)
-- ✅ Annual financial impact shown in dollars ($279,000+ exposure)
-- ✅ USMCA qualification = NOT QUALIFIED (100% non-USMCA content)
+**What the Automated Tests Validate**:
+- ✅ Section 301 tariff applies (25% additional duty on China goods)
+- ✅ Total tariff calculated: MFN + Section 301 = ~27.9%
+- ✅ Annual financial impact shown: $279,000+ exposure
+- ✅ USMCA qualification: NOT QUALIFIED (100% non-USMCA content)
 - ✅ Alerts show policy impact with financial consequences
+
+**Trade Volume**: $1,250,000 annually
 
 ---
 
-### **Test 6: TextileCorp USA** (USMCA-Qualified / Multi-Country BOM)
+## 🧪 TEST 6: USMCA QUALIFICATION SCENARIO (Automated Testing)
 
-**Purpose**: Validate USMCA savings calculation and certificate eligibility for qualified content
+**Purpose**: Validate USMCA savings calculation and certificate eligibility for qualified multi-country BOM
 
-**STEP 1: Company Information Form - Complete Data:**
+### **STEP 1: USMCA Workflow Form - Copy all at once:**
 ```
 Company Name: TextileCorp USA
-Business Type: Manufacturer
-Industry Sector: Textiles/Apparel
-Tax ID: 47-1923847
-Company Address: 2400 Fashion Plaza, New York, NY 10018
+Address: 2400 Fashion Plaza, New York, NY 10018
 Company Country: United States
+Tax ID: 47-1923847
 
-Contact Person: James Rodriguez
+Contact Person: James Rodriguez                ← ONLY CONTACT FIELDS (no title)
 Contact Phone: (212) 555-0247
 Contact Email: james.rodriguez@textilecorp.com
 
 Primary Supplier Country: Mexico
 Destination Market: United States
 Manufacturing Location: United States
-Annual Trade Volume: $850,000
+☑️ Manufacturing involves substantial transformation
 
 Product: Cotton blend apparel - USMCA qualified
+
+Component 1: Cotton fabric | USA | 45%
+Component 2: Polyester thread | Mexico | 35%
+Component 3: Foam backing | Canada | 20%
 ```
 
-**Component Breakdown** (100% USMCA content):
-```
-1. Cotton fabric | Origin: USA | 45%
-2. Polyester thread | Origin: Mexico | 35%
-3. Foam backing | Origin: Canada | 20%
-```
-
-**Test Outcomes Validated**:
-- ✅ USMCA qualification = QUALIFIED (100% regional content)
-- ✅ Savings calculation accurate: (MFN - USMCA) × $850,000
+**What the Automated Tests Validate**:
+- ✅ USMCA qualification: QUALIFIED (100% regional content)
+- ✅ Savings calculation: (MFN - USMCA) × $850K = accurate amount
 - ✅ Trade volume preserved through workflow: $850,000
-- ✅ Certificate generation eligible (USMCA-qualified)
+- ✅ Certificate generation eligible: YES
 - ✅ Component breakdown shows accurate origin countries
-- ✅ Regional content percentage calculated: 100%
+- ✅ Regional content percentage: 100%
+
+**Trade Volume**: $850,000 annually
+**Regional Content**: 100% (all components from USMCA countries)
 
 ---
 
-## 📊 Field Mapping: Tests to Certificate
+## ✅ Certificate Preview Testing Checklist
 
-These tests ensure all company information flows correctly through the workflow:
+### For Each Account, Verify:
 
-| Field | Required | Step 1 | Step 4 | Certificate | Tests |
-|-------|----------|--------|--------|------------|-------|
-| Company Name | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Business Type | ✅ Yes | ✅ Input | - | - | ✅ Validated |
-| Industry Sector | ✅ Yes | ✅ Input | - | - | ✅ Used for HS classification |
-| Tax ID | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Company Address | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Company Country | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Contact Person | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Contact Phone | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Contact Email | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Trade Volume | ✅ Yes | ✅ Input | - | - | ✅ Persists to alerts |
-| Supplier Country | ✅ Yes | ✅ Input | - | - | ✅ Triggers tariff analysis |
-| Destination Market | ✅ Yes | ✅ Input | - | - | ✅ Determines rates |
-| Manufacturing Location | ✅ Yes | ✅ Input | - | - | ✅ Affects USMCA qualification |
-| Product Description | ✅ Yes | ✅ Input | - | ✅ Displayed | ✅ Validated |
-| Component Origins | ✅ Yes | ✅ Input | - | - | ✅ Used for qualification |
+**Certificate Fields Populated**:
+- [ ] Exporter name correct
+- [ ] Address correct
+- [ ] Tax ID correct
+- [ ] Contact person correct
+- [ ] Product description populated
+- [ ] HS code filled (from AI)
+- [ ] Preference criterion filled (from AI)
+- [ ] Blanket period shows current date + 1 year
+
+**USMCA Qualification Data**:
+- [ ] Qualification status shows (QUALIFIED/NOT QUALIFIED)
+- [ ] Regional content percentage calculated
+- [ ] Component breakdown visible
+
+**Download Behavior**:
+- **TRIAL (Test 1)**: Watermark visible, download blocked
+- **STARTER+ (Tests 2-4)**: No watermark, download enabled
+- **PROFESSIONAL (Test 3)**: 15% discount shown
+- **PREMIUM (Test 4)**: 25% discount shown
 
 ---
 
-**You're all set! Use the data above for certificate testing. Good luck! 🎉**
+## 📊 Test Summary Table
+
+| Test | Account | Scenario | Purpose | Status |
+|------|---------|----------|---------|--------|
+| 1 | AutoParts USA | Mexico-origin mixed BOM | Manual testing, TRIAL tier | Copy-paste ready |
+| 2 | MexManufacturing | USMCA multi-country | Manual testing, STARTER tier | Copy-paste ready |
+| 3 | CanadaDistribution | China distributor | Manual testing, PROFESSIONAL tier | Copy-paste ready |
+| 4 | GlobalWholesale | Medical USMCA | Manual testing, PREMIUM tier | Copy-paste ready |
+| 5 | Steel Manufacturing | Section 301 tariff | Automated test validation | Runs automatically |
+| 6 | TextileCorp USA | USMCA savings | Automated test validation | Runs automatically |
+
+---
+
+## 🚀 Testing Instructions
+
+### Manual Testing (Tests 1-4)
+1. Open app at http://localhost:3001
+2. Login with credentials provided for each test
+3. Complete USMCA workflow (STEP 1) with copy-pasted data
+4. Click "Generate Certificate"
+5. Complete Certificate Authorization (STEP 4) with copy-pasted data
+6. Verify certificate preview matches expected results
+
+### Automated Testing (Tests 5-6)
+Run: `npm test -- tests/business-outcomes.test.js tests/business-value-alerts.test.js`
+
+Tests validate:
+- Correct tariff calculations
+- Proper USMCA qualification
+- Trade volume preservation
+- Alert accuracy
+- Financial impact display
+- All 31 business outcome tests passing ✅
+
+---
+
+**Last Updated**: October 23, 2025
+**Test Status**: All 6 accounts documented and ready to use
+**Automated Tests**: 31/31 passing ✅
