@@ -31,15 +31,27 @@ describe('Business Outcome Testing Suite', () => {
        */
 
       const userInput = {
-        company_name: 'Steel Co',
-        company_country: 'US',
-        destination_country: 'US',
-        industry_sector: 'Manufacturing',
+        // COMPANY INFORMATION (Complete)
+        company_name: 'Steel Manufacturing Inc',
         business_type: 'Importer',
-        supplier_country: 'CN',
-        manufacturing_location: 'CN',
-        trade_volume: '$1M - $5M',
-        product_description: 'Steel housing components',
+        industry_sector: 'Manufacturing',
+        tax_id: '38-2847291',
+        company_address: '1500 Industrial Blvd, Pittsburgh, PA 15213',
+        company_country: 'United States',
+
+        // CONTACT INFORMATION (Complete - 3 fields per API spec)
+        contact_person: 'Maria Chen',
+        contact_phone: '(412) 555-0198',
+        contact_email: 'maria.chen@steelmfg.com',
+
+        // TRADE INFORMATION (Complete)
+        trade_volume: '1250000', // Annual: $1.25M
+        supplier_country: 'China',
+        destination_country: 'United States',
+        manufacturing_location: 'China',
+
+        // PRODUCT INFORMATION (Complete)
+        product_description: 'Steel housing components for automotive',
         product_hs_code: '7326.90.85',
         component_origins: [
           {
@@ -130,13 +142,27 @@ describe('Business Outcome Testing Suite', () => {
        */
 
       const userInput = {
-        company_name: 'TextileCorp',
-        company_country: 'US',
-        destination_country: 'US',
-        industry_sector: 'Textiles/Apparel',
+        // COMPANY INFORMATION (Complete)
+        company_name: 'TextileCorp USA',
         business_type: 'Manufacturer',
-        trade_volume: '$500K - $1M',
-        product_description: 'Cotton blend apparel',
+        industry_sector: 'Textiles/Apparel',
+        tax_id: '47-1923847',
+        company_address: '2400 Fashion Plaza, New York, NY 10018',
+        company_country: 'United States',
+
+        // CONTACT INFORMATION (Complete - 3 fields per API spec)
+        contact_person: 'James Rodriguez',
+        contact_phone: '(212) 555-0247',
+        contact_email: 'james.rodriguez@textilecorp.com',
+
+        // TRADE INFORMATION (Complete)
+        trade_volume: '850000', // Annual: $850K
+        supplier_country: 'Mexico', // Primary supplier
+        destination_country: 'United States',
+        manufacturing_location: 'United States',
+
+        // PRODUCT INFORMATION (Complete)
+        product_description: 'Cotton blend apparel - USMCA qualified',
         component_origins: [
           {
             description: 'Cotton fabric',
