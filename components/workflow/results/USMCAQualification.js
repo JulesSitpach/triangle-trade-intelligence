@@ -165,10 +165,18 @@ export default function USMCAQualification({ results }) {
             </thead>
             <tbody>
               {results.usmca.component_breakdown.map((component, index) => {
-                const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
+                // ✅ ISSUE #2 FIX: Use base_mfn_rate for display, not total_rate
+                // Total rate = base_mfn + section_301 + section_232
+                // Savings = base_mfn - usmca_rate (only the base duty is eliminated)
+                const baseMfnRate = component.base_mfn_rate || component.mfn_rate || 0;
+                const section301 = component.section_301 || 0;
+                const section232 = component.section_232 || 0;
+                const totalAppliedRate = component.total_rate || baseMfnRate + section301 + section232;
                 const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
-                const savingsPercent = mfnRate - usmcaRate;
-                const hasRates = (component.mfn_rate !== undefined && component.mfn_rate !== null) || (component.usmca_rate !== undefined && component.usmca_rate !== null);
+
+                // Savings calculation: Only base MFN is eliminated, policy tariffs remain
+                const savingsPercent = baseMfnRate - usmcaRate;
+                const hasRates = (baseMfnRate !== undefined && baseMfnRate !== null) || (usmcaRate !== undefined && usmcaRate !== null);
 
                 const isExpanded = expandedComponents[index];
                 const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence || component.hs_description;
@@ -209,42 +217,84 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-                          <span style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
-                            {hasRates ? `${mfnRate.toFixed(1)}%` : '—'}
-                          </span>
-                          {/* EDUCATIONAL: Show policy breakdown proactively */}
-                          {component.policy_adjustments && component.policy_adjustments.length > 0 && (
-                            <div style={{
-                              fontSize: '0.6875rem',
-                              color: '#6b7280',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '0.125rem',
-                              alignItems: 'flex-end'
-                            }}>
-                              {component.policy_adjustments.slice(0, 3).map((adj, idx) => {
-                                // ✅ SAFETY: Ensure adj is always a string (AI/DB might return objects)
-                                const safeAdj = typeof adj === 'string' ? adj : JSON.stringify(adj);
-                                return (
-                                  <span key={idx} style={{
+                          {/* ✅ ISSUE #2 FIX: Show complete tariff breakdown with Section 301 clearly visible */}
+                          {hasRates ? (
+                            <>
+                              <div style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
+                                {baseMfnRate.toFixed(1)}%
+                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{section301.toFixed(1)}%</span>}
+                              </div>
+                              {/* Show breakdown when Section 301 or other policies apply */}
+                              {(section301 > 0 || section232 > 0) && (
+                                <div style={{
+                                  fontSize: '0.6875rem',
+                                  color: '#6b7280',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '0.125rem',
+                                  alignItems: 'flex-end',
+                                  marginTop: '0.25rem'
+                                }}>
+                                  {baseMfnRate > 0 && (
+                                    <span style={{
+                                      whiteSpace: 'nowrap',
+                                      backgroundColor: '#f0fdf4',
+                                      padding: '0.125rem 0.375rem',
+                                      borderRadius: '3px',
+                                      color: '#166534'
+                                    }}>
+                                      Base: {baseMfnRate.toFixed(1)}%
+                                    </span>
+                                  )}
+                                  {section301 > 0 && (
+                                    <span style={{
+                                      whiteSpace: 'nowrap',
+                                      backgroundColor: '#fef2f2',
+                                      padding: '0.125rem 0.375rem',
+                                      borderRadius: '3px',
+                                      color: '#991b1b',
+                                      fontWeight: '500'
+                                    }}>
+                                      Section 301: {section301.toFixed(1)}%
+                                    </span>
+                                  )}
+                                  {section232 > 0 && (
+                                    <span style={{
+                                      whiteSpace: 'nowrap',
+                                      backgroundColor: '#fef2f2',
+                                      padding: '0.125rem 0.375rem',
+                                      borderRadius: '3px',
+                                      color: '#991b1b'
+                                    }}>
+                                      Steel/Aluminum: {section232.toFixed(1)}%
+                                    </span>
+                                  )}
+                                  <span style={{
                                     whiteSpace: 'nowrap',
-                                    backgroundColor: '#fef3c7',
+                                    backgroundColor: '#f3f4f6',
                                     padding: '0.125rem 0.375rem',
                                     borderRadius: '3px',
-                                    color: '#92400e'
+                                    color: '#1f2937',
+                                    fontWeight: '600',
+                                    borderTop: '1px solid #d1d5db',
+                                    marginTop: '0.25rem'
                                   }}>
-                                    {safeAdj}
+                                    Total: {totalAppliedRate.toFixed(1)}%
                                   </span>
-                                );
-                              })}
-                            </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span>—</span>
                           )}
+
                           {/* Data freshness indicator */}
                           {component.rate_source && (
                             <span style={{
                               fontSize: '0.6875rem',
                               color: component.rate_source === 'database_fallback' || component.stale ? '#d97706' : '#059669',
-                              whiteSpace: 'nowrap'
+                              whiteSpace: 'nowrap',
+                              marginTop: '0.25rem'
                             }}>
                               {component.rate_source === 'database_fallback' || component.stale
                                 ? '⚠️ Jan 2025 data'
@@ -254,10 +304,38 @@ export default function USMCAQualification({ results }) {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                          <span>{hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}</span>
+                          {/* ✅ ISSUE #2 FIX: Clarify that Section 301 remains despite USMCA qualification */}
+                          {section301 > 0 && (
+                            <span style={{
+                              fontSize: '0.6875rem',
+                              color: '#991b1b',
+                              fontWeight: '500',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              +{section301.toFixed(1)}% Section 301
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280', whiteSpace: 'nowrap' }}>
-                        {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                          <span style={{ whiteSpace: 'nowrap' }}>
+                            {/* ✅ ISSUE #2 FIX: Show savings clearly - ONLY base MFN is eliminated */}
+                            {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
+                          </span>
+                          {section301 > 0 && (
+                            <span style={{
+                              fontSize: '0.6875rem',
+                              color: '#dc2626',
+                              fontWeight: '400',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              (base only)
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         {component.is_usmca_member ? (
@@ -542,6 +620,10 @@ export default function USMCAQualification({ results }) {
                 Based on annual trade volume of ${(results.company?.trade_volume || results.company?.annual_trade_volume || 0).toLocaleString()}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {/* ✅ ISSUE #1: Component-level breakdown (NOT a conflicting calculation)
+                    This breaks down the AI's total savings to show top contributors.
+                    Uses component rates FROM the AI response, not independent calculation.
+                    Does NOT affect the total annual_savings shown in TariffSavings. */}
                 {results.usmca.component_breakdown
                   .map((component, index) => {
                     const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
@@ -607,7 +689,10 @@ export default function USMCAQualification({ results }) {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem' }}>Preference Criterion</div>
             <div style={{ fontSize: '1rem', fontWeight: '500', color: '#1f2937' }}>
-              {results.origin_criterion || results.certificate?.preference_criterion || 'Criterion B'}
+              {/* ✅ REMOVED: || 'Criterion B' default (line 610)
+                  REASON: Defaulting to 'B' is FALSE CERTIFICATION - violates USMCA Article 5.2
+                  FIX: AI must determine criterion, never default */}
+              {results.origin_criterion || results.certificate?.preference_criterion || '⚠️ Not determined'}
             </div>
           </div>
           <div style={{ textAlign: 'center' }}>

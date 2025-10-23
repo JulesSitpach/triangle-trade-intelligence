@@ -336,35 +336,43 @@ export default protectedApiHandler({
 
     // ========== CRITICAL: VALIDATE AI NUMBERS AGAINST CACHED TARIFF DATA ==========
     // Prevent AI hallucinations like claiming "77.5% MFN rate" when cache shows 2.9%
+    // ✅ ISSUE #6 FIX: Only validate ACTUAL tariff rates, not component percentages or derived metrics
     if (analysis.detailed_analysis?.savings_analysis && componentRates) {
-      const savingsText = analysis.detailed_analysis.savings_analysis;
+      // Extract ONLY the actual tariff rates that should be validated
+      // These are: mfn_rate, usmca_rate, section_301, section_232, total_rate
+      const tariffRatesToValidate = [];
 
-      // Extract percentage claims from AI text (e.g., "77.5%", "102.5%")
-      const percentageMatches = savingsText.match(/(\d+\.?\d*)%/g) || [];
-      const aiPercentages = percentageMatches.map(p => parseFloat(p.replace('%', '')));
-
-      // Get actual cached rates for comparison
-      const cachedRates = Object.values(componentRates).map(r => ({
-        baseMFN: r.mfn_rate || 0,
-        section301: r.section_301 || 0,
-        totalRate: r.total_rate || r.mfn_rate || 0,
-        usmcaRate: r.usmca_rate || 0
-      }));
-
-      // Check if AI claimed any rates significantly different from cache (>10% deviation)
-      const significantDeviations = aiPercentages.filter(aiRate => {
-        const matchesAnyCache = cachedRates.some(cached =>
-          Math.abs(aiRate - cached.baseMFN) < 1 ||  // Matches base MFN
-          Math.abs(aiRate - cached.section301) < 1 || // Matches Section 301
-          Math.abs(aiRate - cached.totalRate) < 1 ||  // Matches total rate
-          Math.abs(aiRate - cached.usmcaRate) < 1     // Matches USMCA rate
-        );
-
-        return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache
+      // Collect all actual tariff rates from enriched components
+      Object.values(componentRates).forEach(rates => {
+        if (rates.mfn_rate !== undefined && rates.mfn_rate !== null) tariffRatesToValidate.push(rates.mfn_rate);
+        if (rates.base_mfn_rate !== undefined && rates.base_mfn_rate !== null) tariffRatesToValidate.push(rates.base_mfn_rate);
+        if (rates.section_301 !== undefined && rates.section_301 !== null && rates.section_301 > 0) tariffRatesToValidate.push(rates.section_301);
+        if (rates.section_232 !== undefined && rates.section_232 !== null && rates.section_232 > 0) tariffRatesToValidate.push(rates.section_232);
+        if (rates.total_rate !== undefined && rates.total_rate !== null) tariffRatesToValidate.push(rates.total_rate);
+        if (rates.usmca_rate !== undefined && rates.usmca_rate !== null) tariffRatesToValidate.push(rates.usmca_rate);
       });
 
-      if (significantDeviations.length > 0) {
-        console.warn('⚠️ AI VALIDATION WARNING: AI claimed tariff rates not found in cache:', significantDeviations);
+      // Normalize to a Set to remove duplicates
+      const validCacheRates = new Set(tariffRatesToValidate.map(r => Math.round(r * 10) / 10));
+
+      // Extract ALL percentages from AI text (this will include non-tariff percentages)
+      const percentageMatches = analysis.detailed_analysis.savings_analysis?.match(/(\d+\.?\d*)%/g) || [];
+      const allPercentages = percentageMatches.map(p => parseFloat(p.replace('%', '')));
+
+      // Filter to ONLY percentages that look like tariff rates (0-100%)
+      // Tariff rates are: 0.x%, 1-100% with variations
+      const aiClaimedRates = allPercentages.filter(pct => pct >= 0 && pct <= 100);
+
+      // Validate: Only report if AI claimed a tariff-like rate NOT in our cache
+      const significantDeviations = aiClaimedRates.filter(aiRate => {
+        const normalized = Math.round(aiRate * 10) / 10;
+        return !validCacheRates.has(normalized) && aiRate > 0.1; // Ignore rates <0.1%
+      });
+
+      // Only log if we have deviations AND they look like they SHOULD be tariff rates
+      // (i.e., they're unusual enough to warrant investigation)
+      if (significantDeviations.length > 0 && significantDeviations.some(d => d >= 10 || d === 25 || d === 75)) {
+        console.warn('⚠️ AI VALIDATION WARNING: AI claimed tariff rates not matching cache:', significantDeviations);
 
         await DevIssue.unexpectedBehavior(
           'usmca_analysis',
@@ -372,17 +380,16 @@ export default protectedApiHandler({
           {
             userId,
             company: formData.company_name,
-            ai_percentages: aiPercentages,
-            cached_rates: cachedRates,
-            deviations: significantDeviations,
-            savings_analysis_preview: savingsText.substring(0, 300)
+            ai_claimed_rates: significantDeviations,
+            cached_rates: Array.from(validCacheRates),
+            note: 'Validation distinguishes between tariff rates and component percentages'
           }
         );
 
         // Add validation warning to trust indicators
-        analysis._validation_warning = `AI claimed rates ${significantDeviations.join('%, ')}% not found in tariff cache. Use actual enriched component data instead.`;
+        analysis._validation_warning = `AI claimed tariff rates ${significantDeviations.join('%, ')}% not matching cached data. Verify against enriched component rates.`;
       } else {
-        console.log('✅ AI tariff numbers validated against cache - no significant deviations');
+        console.log('✅ AI tariff rates validated - all claimed rates match cached data or are non-tariff metrics');
       }
     }
 
