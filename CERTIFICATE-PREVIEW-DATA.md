@@ -68,9 +68,9 @@ Trade Volume: $450,000
 
 Product: Automotive engine mount assemblies with steel housing and rubber vibration dampeners
 
-Component 1: Cold-rolled steel housing | China | 20%
-Component 2: Natural rubber dampeners | Mexico | 50%
-Component 3: Grade 8 steel bolts | USA | 30%
+Component 1: Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating | China | 20%
+Component 2: Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound | Mexico | 50%
+Component 3: Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch | USA | 30%
 ```
 
 ### **STEP 4: Certificate Authorization Form - After results display:**
@@ -122,9 +122,9 @@ Trade Volume: $500,000
 
 Product: Industrial textile products for automotive upholstery and interior trim
 
-Component 1: 100% combed cotton fabric | USA | 45%
-Component 2: High-tenacity polyester thread | Mexico | 35%
-Component 3: Foam backing material | Canada | 20%
+Component 1: 100% combed cotton fabric, pre-shrunk, dyeable, weight 200 gsm, fade-resistant coloring | USA | 45%
+Component 2: High-tenacity polyester thread, UV-resistant, shrink-resistant, color-fast dye lot, 40-weight core spun | Mexico | 35%
+Component 3: Foam backing material, closed-cell polyurethane, 25mm thickness, fire-retardant rating, moisture barrier coating | Canada | 20%
 ```
 
 ### **STEP 4: Certificate Authorization Form:**
@@ -167,7 +167,7 @@ Company Name: CanadaDistribution Inc
 Address: 789 Commerce St, Toronto, ON M5H 2N2
 Company Country: Canada
 Tax ID: BN-987654321RC0001
-
+Trade Volume: $750,000
 Contact Person: David Chen                    ← ONLY CONTACT FIELDS (no title)
 Contact Phone: +1-416-555-9012
 Contact Email: david@canadadist.com
@@ -177,13 +177,13 @@ Destination Market: United States
 Manufacturing Location: Does Not Apply
 ☐ Manufacturing involves substantial transformation (N/A for distributors)
 
-Trade Volume: $750,000
+
 
 Product: Electronic components and circuit assemblies for automotive control systems
 
-Component 1: Multi-layer circuit boards | China | 55%
-Component 2: Wire harness connectors | Mexico | 25%
-Component 3: Injection-molded ABS housing | USA | 20%
+Component 1: Multi-layer circuit boards, 6-layer FR4 PCB, copper-clad, solder mask coating, ENIG finish, RoHS compliant | China | 55%
+Component 2: Wire harness connectors, sealed Deutsch-style connectors, gold-plated terminals, silicone seals, temperature range -40 to +125C | Mexico | 25%
+Component 3: Injection-molded ABS housing, UV-stabilized black resin, EMI shielding, snap-fit assembly, automotive-grade material | USA | 20%
 ```
 
 ### **STEP 4: Certificate Authorization Form:**
@@ -235,9 +235,9 @@ Trade Volume: $1,200,000
 
 Product: Medical device components and surgical instrument assemblies
 
-Component 1: 316L surgical stainless steel | USA | 40%
-Component 2: Medical-grade silicone seals | Mexico | 35%
-Component 3: Precision polycarbonate housings | Canada | 25%
+Component 1: 316L surgical stainless steel, passivated surface, biocompatible grade, precision machined to ±0.05mm tolerance, ISO 5832-1 certified | USA | 40%
+Component 2: Medical-grade silicone seals, platinum-cured elastomer, FDA CFR Title 21 approved, high temperature resistant up to 200C, non-outgassing compound | Mexico | 35%
+Component 3: Precision polycarbonate housings, optical clarity grade, anti-static coating, autoclaved sterilization compatible, dimensional tolerance ±0.1mm | Canada | 25%
 ```
 
 ### **STEP 4: Certificate Authorization Form:**
@@ -289,7 +289,7 @@ Manufacturing Location: China
 
 Product: Steel housing components for automotive
 
-Component 1: Steel housing | China | 100%
+Component 1: Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating, precision tolerance ±1mm | China | 100%
 ```
 
 **What the Automated Tests Validate**:
@@ -325,9 +325,9 @@ Manufacturing Location: United States
 
 Product: Cotton blend apparel - USMCA qualified
 
-Component 1: Cotton fabric | USA | 45%
-Component 2: Polyester thread | Mexico | 35%
-Component 3: Foam backing | Canada | 20%
+Component 1: 100% combed cotton fabric, compact yarn construction, dyeable white goods, weight 165 gsm, pre-shrunk to 2% residual shrinkage, soft hand-feel, enzyme-finished surface | USA | 45%
+Component 2: High-strength polyester thread, UV-resistant core-spun construction, 40/2 Ne count, color-fast guaranteed for 50+ wash cycles, bonded multi-ply, industrial grade suitable for lock-stitch or overlock sewing | Mexico | 35%
+Component 3: Brushed polyester knit backing, 140 gsm weight, air-laid needled construction, washable to 60°C, flame-retardant treatment (CPAI-84 certified), thermal insulating property R-value 0.5, moisture-wicking properties | Canada | 20%
 ```
 
 **What the Automated Tests Validate**:
