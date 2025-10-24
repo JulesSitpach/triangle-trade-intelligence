@@ -263,17 +263,18 @@ export default function CompanyInformationStep({
                 const countryCode = country.code || country.value;
                 const countryName = country.label || country.name;
                 return (
-                  <option key={countryCode} value={countryName}>{countryName}</option>
+                  <option key={`usmca-${countryCode}`} value={countryName}>{countryName}</option>
                 );
               })}
               <optgroup label="Other Countries">
                 {dropdownOptions.countries?.filter(country => {
                   const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
                   return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
-                }).map(country => {
+                }).map((country, index) => {
                   const countryName = typeof country === 'string' ? country : country.name || country.label;
+                  const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
                   return (
-                    <option key={countryName} value={countryName}>{countryName}</option>
+                    <option key={`other-${countryCode}-${index}`} value={countryName}>{countryName}</option>
                   );
                 })}
               </optgroup>
@@ -385,18 +386,18 @@ export default function CompanyInformationStep({
                 const countryCode = country.code || country.value;
                 const countryName = country.label || country.name;
                 return (
-                  <option key={countryCode} value={countryCode}>{countryName}</option>
+                  <option key={`dest-usmca-${countryCode}`} value={countryCode}>{countryName}</option>
                 );
               })}
               <optgroup label="Other Markets">
                 {dropdownOptions.countries?.filter(country => {
                   const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
                   return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
-                }).map(country => {
+                }).map((country, index) => {
                   const countryName = typeof country === 'string' ? country : country.name || country.label;
                   const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
                   return (
-                    <option key={countryCode} value={countryCode}>{countryName}</option>
+                    <option key={`dest-other-${countryCode}-${index}`} value={countryCode}>{countryName}</option>
                   );
                 })}
               </optgroup>

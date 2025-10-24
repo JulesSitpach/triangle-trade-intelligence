@@ -551,11 +551,11 @@ export default function ComponentOriginsStepEnhanced({
             >
               <option value="">Select manufacturing country...</option>
               <option value="DOES_NOT_APPLY">Does Not Apply (Imported/Distributed Only)</option>
-              {dropdownOptions.countries?.map(country => {
+              {dropdownOptions.countries?.map((country, idx) => {
                 const countryCode = typeof country === 'string' ? country : country.value || country.code;
                 const countryName = typeof country === 'string' ? country : country.label || country.name;
                 return (
-                  <option key={countryCode} value={countryCode}>
+                  <option key={`mfg-loc-${countryCode}-${idx}`} value={countryCode}>
                     {countryName}
                   </option>
                 );
@@ -653,11 +653,11 @@ export default function ComponentOriginsStepEnhanced({
                   className={`form-select ${component.origin_country ? 'has-value' : ''}`}
                 >
                   <option value="">Select origin country...</option>
-                  {dropdownOptions.countries?.map(country => {
+                  {dropdownOptions.countries?.map((country, idx) => {
                     const countryCode = typeof country === 'string' ? country : country.value || country.code;
                     const countryName = typeof country === 'string' ? country : country.label || country.name;
                     return (
-                      <option key={countryCode} value={countryCode}>
+                      <option key={`origin-${countryCode}-${idx}`} value={countryCode}>
                         {countryName}
                       </option>
                     );
