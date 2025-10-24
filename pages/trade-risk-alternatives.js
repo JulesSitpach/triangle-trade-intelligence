@@ -8,7 +8,6 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
-import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 
 // Import configuration from centralized config file

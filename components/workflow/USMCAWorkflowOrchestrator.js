@@ -22,6 +22,7 @@ import WorkflowPathSelection from './WorkflowPathSelection';
 import AuthorizationStep from './AuthorizationStep';
 import BrokerChatbot from '../chatbot/BrokerChatbot';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
@@ -225,22 +226,6 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     console.log('✅ Workflow complete - results will display in step 3');
   };
 
-  // Helper function to get numeric trade volume from user input
-  const getTradeVolumeValue = (volumeInput) => {
-    if (!volumeInput) return 1000000; // Default if missing
-
-    // Parse user's numeric input (user enters "4800000" or "4,800,000")
-    const numericValue = parseFloat(String(volumeInput).replace(/[^0-9.-]/g, ''));
-
-    // If valid number, return it
-    if (!isNaN(numericValue) && numericValue > 0) {
-      return numericValue;
-    }
-
-    // Fallback to $1M if invalid
-    return 1000000;
-  };
-
   // Crisis Calculator handlers
   const handleViewAlertsFromCrisisCalc = () => {
     console.log('User navigating to alerts dashboard from crisis calculator');
@@ -254,7 +239,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         tax_id: formData.tax_id,
         contact_phone: formData.contact_phone,
         contact_email: formData.contact_email,
-        annual_trade_volume: getTradeVolumeValue(formData.trade_volume),
+        annual_trade_volume: parseTradeVolume(formData.trade_volume) || 1000000, // ✅ Use centralized utility (fallback to $1M for alerts)
         trade_volume: formData.trade_volume,
         supplier_country: formData.supplier_country || 'CN',
         manufacturing_location: formData.manufacturing_location

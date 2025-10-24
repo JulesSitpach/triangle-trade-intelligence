@@ -10,6 +10,7 @@ import Link from 'next/link';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -357,39 +358,7 @@ export default function ComponentOriginsStepEnhanced({
     updateFormData('usmca_tariff_rate', suggestion.usmcaRate || 0);
     
     // Calculate and save annual savings based on trade volume
-    // Use the same parsing logic as the API to ensure consistency
-    const parseTradeVolume = (volumeText) => {
-      if (typeof volumeText === 'number') {
-        return volumeText;
-      }
-      
-      if (typeof volumeText !== 'string') {
-        return 0;
-      }
-      
-      const input = volumeText.trim();
-      
-      // Map of known range strings to their numeric midpoint values
-      // Based on your API dropdown options - keeping this dynamic and in sync
-      const rangeMap = {
-        'Under $100K': 50000,
-        '$100K - $500K': 300000,
-        '$500K - $1M': 750000,
-        '$1M - $5M': 3000000,
-        '$5M - $25M': 15000000,
-        '$25M - $100M': 62500000,
-        'Over $100M': 500000000
-      };
-      
-      // Check if it's a known range first
-      if (rangeMap[input]) {
-        return rangeMap[input];
-      }
-      
-      // Fallback to parsing for custom values
-      return parseFloat(input.replace(/[$,]/g, '')) || 0;
-    };
-
+    // Use the centralized parseTradeVolume utility for consistency across the app
     const tradeVolume = parseTradeVolume(formData.trade_volume);
     const mfnRate = parseFloat(suggestion.mfnRate || 0);
     const usmcaRate = parseFloat(suggestion.usmcaRate || 0);
