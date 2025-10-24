@@ -144,18 +144,18 @@ export default function TradeRiskAlternatives() {
             componentOrigins: components
           };
 
-          // Extract rich workflow intelligence if available
-          if (workflowData.recommendations || workflowData.detailed_analysis) {
-            console.log('✅ Found rich workflow intelligence in database');
-            setWorkflowIntelligence({
-              recommendations: workflowData.recommendations || [],
-              detailed_analysis: workflowData.detailed_analysis || {},
-              compliance_roadmap: workflowData.compliance_roadmap || {},
-              risk_mitigation: workflowData.risk_mitigation || {},
-              confidence_score: workflowData.confidence_score || 0,
-              confidence_factors: workflowData.confidence_factors || {}
-            });
-          }
+          // ✅ FIXED: Always extract workflow intelligence with correct structure for executive alert API
+          // AI returns: usmca, savings, recommendations, detailed_analysis, confidence_score
+          console.log('✅ Extracting workflow intelligence from database');
+          setWorkflowIntelligence({
+            usmca: workflowData.usmca || {},
+            savings: workflowData.savings || {},
+            component_origins: components,
+            recommendations: workflowData.recommendations || [],
+            detailed_analysis: workflowData.detailed_analysis || {},
+            compliance_roadmap: workflowData.compliance_roadmap || {},
+            confidence_score: workflowData.confidence_score || 0
+          });
 
           setUserProfile(profile);
           setIsLoading(false);
@@ -243,21 +243,18 @@ export default function TradeRiskAlternatives() {
         componentOrigins: components  // Fixed: use usmca.component_breakdown
       };
 
-      // 🎯 EXTRACT RICH WORKFLOW INTELLIGENCE (Premium content for Professional/Premium tiers)
-      // This is the GOLD that subscribers pay $99-599/month for!
-      if (userData.recommendations || userData.detailed_analysis || userData.compliance_roadmap) {
-        console.log('✅ Found rich workflow intelligence - setting premium content');
-        setWorkflowIntelligence({
-          recommendations: userData.recommendations || [],
-          detailed_analysis: userData.detailed_analysis || {},
-          compliance_roadmap: userData.compliance_roadmap || {},
-          risk_mitigation: userData.risk_mitigation || {},
-          confidence_score: userData.confidence_score || 0,
-          confidence_factors: userData.confidence_factors || {}
-        });
-      } else {
-        console.log('⚠️ No workflow intelligence found in localStorage - user may need to re-run workflow');
-      }
+      // 🎯 ALWAYS EXTRACT RICH WORKFLOW INTELLIGENCE
+      // This is the GOLD that subscribers pay $99-599/month for! AI provides: usmca, savings, recommendations, detailed_analysis
+      console.log('✅ Extracting workflow intelligence from localStorage');
+      setWorkflowIntelligence({
+        usmca: userData.usmca || {},
+        savings: userData.savings || {},
+        component_origins: components,
+        recommendations: userData.recommendations || [],
+        detailed_analysis: userData.detailed_analysis || {},
+        compliance_roadmap: userData.compliance_roadmap || {},
+        confidence_score: userData.confidence_score || 0
+      });
 
       // Log missing data to admin dashboard
       const missingFields = [];
