@@ -14,13 +14,13 @@ Copy/paste the test data directly into the form fields. All values are realistic
 | Industry Sector | Electronics | Must be selected from dropdown (see all 14 options below) |
 | Company Address | 42 Industrial Park Drive, San Jose CA 95110 | Full address required |
 | Company Country | United States | Options: US, Canada, Mexico, China, Vietnam, etc. |
-| Destination Market | Mexico | **CRITICAL for USMCA**: Must be US, Canada, or Mexico |
+| Destination Market | United States | **CRITICAL for USMCA**: Must be US, Canada, or Mexico |
 | Contact Person | Sarah Chen | Full name required |
 | Contact Phone | (408) 555-0142 | Format: (XXX) XXX-XXXX or +1-XXX-XXX-XXXX |
 | Contact Email | sarah.chen@acmeelec.com | Valid email format |
 | Tax ID / Business Number | 95-1234567 | EIN format for US: XX-XXXXXXX |
 | Annual Trade Volume | 5,500,000 | In USD. Can include commas, no $ symbol |
-| Supplier Country | Mexico | Where primary components originate |
+| Supplier Country | China | **PRIMARY supplier** - where largest component (Microprocessor, 35%) originates |
 
 ---
 
