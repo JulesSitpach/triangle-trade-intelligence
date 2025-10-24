@@ -69,21 +69,28 @@ export default async function handler(req, res) {
  */
 async function generateExecutiveAlert(userProfile, workflowIntelligence, rawAlerts) {
   try {
-    // Extract key metrics from workflow intelligence
-    const savingsAnalysis = workflowIntelligence.detailed_analysis?.savings_analysis || {};
-    const strategicInsights = workflowIntelligence.detailed_analysis?.strategic_insights || '';
-    const qualificationReasoning = workflowIntelligence.detailed_analysis?.qualification_reasoning || '';
-    const componentBreakdown = workflowIntelligence.detailed_analysis?.component_breakdown || {};
+    // Extract key metrics from workflow intelligence (actual database structure)
+    // workflowIntelligence comes from workflow_data JSONB in database
+    const usmcaData = workflowIntelligence?.usmca || {};
+    const savingsData = workflowIntelligence?.savings || {};
+    const componentBreakdown = usmcaData.component_breakdown || [];
 
-    // Determine most critical components (non-qualifying, high value)
-    const components = userProfile.componentOrigins || [];
-    const nonQualifyingComponents = components.filter(c =>
-      !c.qualifies && (c.percentage || c.value_percentage) > 5
-    ).sort((a, b) => (b.percentage || b.value_percentage) - (a.percentage || a.value_percentage));
+    // Determine most critical components from actual database data
+    const components = userProfile.componentOrigins || componentBreakdown || [];
+
+    // Find non-USMCA components (those with non-USMCA member origins)
+    const nonQualifyingComponents = componentBreakdown.filter(c =>
+      !c.is_usmca_member
+    ).sort((a, b) => (b.value_percentage || 0) - (a.value_percentage || 0));
 
     const mostCriticalComponent = nonQualifyingComponents[0];
-    const potentialSavings = savingsAnalysis.potential_savings || 0;
-    const annualBurden = savingsAnalysis.current_tariff_burden || 0;
+
+    // Use actual database values - NOT hardcoded
+    const potentialSavings = savingsData.annual_savings || 0; // From database
+    const annualBurden = savingsData.annual_savings || 0; // What they could save
+    const thresholdApplied = usmcaData.threshold_applied || null; // From database
+    const currentContent = usmcaData.north_american_content || 0; // From database
+    const isQualified = usmcaData.qualified || false; // From database
 
     // Build component context for AI
     const componentContext = components.map(c => {
@@ -120,37 +127,36 @@ Destination Market: ${userProfile.supplierCountry || 'Multiple'}
 ${componentContext}
 
 === QUALIFICATION STATUS ===
-USMCA Qualified: ${userProfile.qualificationStatus === 'QUALIFIED' ? 'YES' : 'NO'}
-Threshold Required: ${workflowIntelligence.threshold_applied || 65}%
-Current Content: ${workflowIntelligence.north_american_content || 0}%
-Gap: ${(workflowIntelligence.north_american_content || 0) - (workflowIntelligence.threshold_applied || 65)}%
+USMCA Qualified: ${isQualified ? 'YES' : 'NO'}
+Threshold Required: ${thresholdApplied !== null ? thresholdApplied : 'Not determined'}%
+Current Content: ${currentContent}%
+Gap: ${thresholdApplied !== null ? (currentContent - thresholdApplied) : 'Not determined'}%
 
 === FINANCIAL IMPACT ===
-Current Annual Tariff Burden: $${(annualBurden || 0).toLocaleString()}
-Potential Annual Savings (if fixed): $${(potentialSavings || 0).toLocaleString()}
-Payback Period: ${savingsAnalysis.payback_period || 'unknown'}
+Potential Annual Savings: $${potentialSavings.toLocaleString()}
+This is real money from optimizing your supply chain to meet USMCA requirements.
 
 === MOST CRITICAL ISSUE ===
 ${mostCriticalComponent ? `
-The biggest barrier to qualification: ${mostCriticalComponent.component_type || mostCriticalComponent.description}
-- Origin: ${mostCriticalComponent.origin_country || mostCriticalComponent.country}
-- Percentage of Product: ${mostCriticalComponent.percentage || mostCriticalComponent.value_percentage}%
-- Annual Value: $${((userProfile.tradeVolume || 0) * (mostCriticalComponent.percentage || mostCriticalComponent.value_percentage) / 100).toLocaleString()}
-- Tariff Status: Non-qualifying (costing them real money)
+The biggest barrier: ${mostCriticalComponent.description}
+- Origin: ${mostCriticalComponent.origin_country}
+- Percentage of Product: ${mostCriticalComponent.value_percentage}%
+- Annual Value at Risk: $${((userProfile.tradeVolume || 0) * (mostCriticalComponent.value_percentage || 0) / 100).toLocaleString()}
+- Status: Non-USMCA member origin (costing them money in tariffs)
 ` : 'Multiple components need attention'}
 
-=== STRATEGIC ROADMAP FROM ANALYSIS ===
-${strategicInsights}
-
-=== QUALIFICATION REASONING ===
-${qualificationReasoning}
+=== YOUR SITUATION ===
+Company: ${userProfile.companyName}
+Annual Trade Volume: $${(userProfile.tradeVolume || 0).toLocaleString()}
+Industry: ${industries.join(', ')}
+Current USMCA Status: ${isQualified ? 'QUALIFIED - Good news!' : 'NOT QUALIFIED - Opportunity to optimize'}
 
 === POLICY ALERTS AFFECTING THEM ===
 ${alertContext}
 
 === YOUR TASK ===
 Write ONE executive trade alert as if you're calling this company's CEO personally.
-You've found something that could save them $${(potentialSavings || 0).toLocaleString()}/year.
+You've found something that could save them $${potentialSavings.toLocaleString()}/year (based on their actual USMCA analysis).
 You care about getting it right. You understand their business constraints.
 
 **Broker Tone Requirements:**
@@ -180,7 +186,7 @@ Return valid JSON:
     "urgency": "Why this matters NOW (not eventually)"
   },
   "financial_snapshot": {
-    "current_burden": ${annualBurden},
+    "current_burden": ${potentialSavings},
     "potential_savings": ${potentialSavings},
     "payback_period": "Human-readable timeframe",
     "confidence": "HIGH/MEDIUM - why you're confident in this number",
@@ -255,13 +261,20 @@ Return valid JSON:
     });
 
     if (!response.ok) {
-      throw new Error(`OpenRouter failed: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ OpenRouter API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      throw new Error(`OpenRouter failed: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
     const aiResponse = data.choices[0]?.message?.content;
 
     if (!aiResponse) {
+      console.error('❌ Empty AI response:', data);
       throw new Error('Empty response from AI');
     }
 
