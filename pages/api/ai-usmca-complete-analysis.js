@@ -20,7 +20,6 @@ import {
   parseTradeVolume,
   extractIndustryFromBusinessType,
   CACHE_EXPIRATION,
-  INDUSTRY_THRESHOLDS,
   DE_MINIMIS
 } from '../../lib/validation/form-validation.js';
 
