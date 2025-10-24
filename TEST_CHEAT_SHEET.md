@@ -31,7 +31,8 @@ Copy/paste the test data directly into the form fields. All values are realistic
 | Field | Test Value | Notes |
 |-------|-----------|-------|
 | Complete Product Description | Industrial-grade dual-core microprocessor system with metal housing and LCD interface | Detailed description for accurate HS classification |
-| Manufacturing/Assembly Location | Mexico | **REQUIRED FIELD** - For Manufacturers: Enter country (Mexico recommended for USMCA). For Importers/Distributors only: Use "Does Not Apply" |
+| Manufacturing/Assembly Location | **SELECT "Mexico"** from dropdown | **REQUIRED FIELD** - Dropdown with: "Does Not Apply (Imported/Distributed Only)" OR country names. For manufacturers: SELECT "Mexico" or US/Canada. For importers/distributors only: SELECT "Does Not Apply" |
+| Manufacturing involves substantial transformation | ✅ **CHECK** | **Checkbox appears only after selecting Mexico, US, or Canada** (USMCA countries). Check if manufacturing involves significant value-adding (welding, forming, heat treatment). Leave unchecked if simple assembly only |
 
 **Component Origins (BOM):**
 

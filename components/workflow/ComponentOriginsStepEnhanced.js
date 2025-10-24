@@ -566,7 +566,7 @@ export default function ComponentOriginsStepEnhanced({
             </div>
 
             {/* Substantial Transformation Checkbox - Only show for USMCA countries */}
-            {formData.manufacturing_location && ['US', 'MX', 'CA'].includes(formData.manufacturing_location) && (
+            {formData.manufacturing_location && ['US', 'MX', 'CA', 'United States', 'Mexico', 'Canada'].includes(formData.manufacturing_location) && (
               <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
                 <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
                   <input
