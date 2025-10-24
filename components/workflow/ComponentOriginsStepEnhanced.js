@@ -67,6 +67,7 @@ export default function ComponentOriginsStepEnhanced({
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
+  // Only depend on formData.component_origins, not components, to avoid circular dependency
   useEffect(() => {
     if (formData.component_origins &&
         formData.component_origins.length > 0 &&
@@ -74,7 +75,7 @@ export default function ComponentOriginsStepEnhanced({
       console.log(`🔄 Syncing components from formData (navigation restore)`);
       setComponents(formData.component_origins);
     }
-  }, [formData.component_origins, components]);
+  }, [formData.component_origins]);
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];
