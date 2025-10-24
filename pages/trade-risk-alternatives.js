@@ -438,11 +438,24 @@ export default function TradeRiskAlternatives() {
 
       // Step 1: Get personalized policy alerts for context
       console.log('📊 Fetching policy alerts...');
+      // ✅ FIXED: Convert camelCase profile fields to snake_case for API data contract
+      const userProfileForAPI = {
+        companyName: profile.companyName,
+        businessType: profile.businessType,
+        industry_sector: profile.industry_sector,
+        hsCode: profile.hsCode,
+        productDescription: profile.productDescription,
+        trade_volume: profile.tradeVolume,  // ✅ Convert camelCase to snake_case
+        supplier_country: profile.supplierCountry,  // ✅ Convert
+        qualification_status: profile.qualificationStatus,  // ✅ Convert
+        component_origins: profile.componentOrigins  // ✅ Convert
+      };
+
       const alertsResponse = await fetch('/api/generate-personalized-alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_profile: profile
+          user_profile: userProfileForAPI
         })
       });
 
@@ -467,7 +480,7 @@ export default function TradeRiskAlternatives() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_profile: profile,
+          user_profile: userProfileForAPI,  // ✅ Use converted snake_case version
           workflow_intelligence: workflowIntelligence,
           raw_alerts: rawAlerts
         })
