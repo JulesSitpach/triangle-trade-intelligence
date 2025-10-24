@@ -3,6 +3,9 @@
  * Generate RELEVANT policy alerts based on user's actual components
  * No more generic China/Vietnam alerts for users with US/MX/CA components!
  *
+ * DATA CONTRACT: Validates input against UserTradeProfile
+ * Uses canonical field names from data-contracts.ts
+ *
  * Uses AI to monitor:
  * - USMCA policy changes affecting user's specific components
  * - Origin country trade policies (US cotton, MX textiles, CA materials)
@@ -12,6 +15,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import {
+  validateComponentsArray,
+  validateTradeVolume,
+  reportValidationErrors
+} from '../../lib/validation/data-contract-validator.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -26,6 +34,7 @@ export default async function handler(req, res) {
   try {
     const { user_profile } = req.body;
 
+    // === DATA CONTRACT VALIDATION ===
     if (!user_profile) {
       await DevIssue.missingData('generate_alerts_api', 'user_profile', {
         endpoint: '/api/generate-personalized-alerts'
@@ -34,6 +43,24 @@ export default async function handler(req, res) {
         success: false,
         message: 'Missing required field: user_profile'
       });
+    }
+
+    // Validate components array if present
+    const componentsResult = validateComponentsArray(
+      user_profile.component_origins || [],
+      'generate-personalized-alerts request'
+    );
+    if (!componentsResult.valid && user_profile.component_origins?.length > 0) {
+      reportValidationErrors(componentsResult, 'generate-personalized-alerts');
+    }
+
+    // Validate trade_volume
+    const volumeResult = validateTradeVolume(
+      user_profile.trade_volume,
+      'generate-personalized-alerts request'
+    );
+    if (!volumeResult.valid) {
+      reportValidationErrors(volumeResult, 'generate-personalized-alerts');
     }
 
     console.log(`🎯 Generating personalized alerts for ${user_profile.companyName}`);
@@ -93,7 +120,7 @@ async function generateAlertsForComponents(userProfile) {
 Company: ${userProfile.companyName}
 Business Type: ${userProfile.businessType}
 Product: ${userProfile.productDescription}
-Annual Trade Volume: $${userProfile.tradeVolume || 'unknown'}
+Annual Trade Volume: $${userProfile.trade_volume || 'unknown'}
 USMCA Status: ${userProfile.qualificationStatus || 'Unknown'}
 
 Component Sourcing:

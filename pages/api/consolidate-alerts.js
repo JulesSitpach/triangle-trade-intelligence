@@ -4,11 +4,19 @@
  * Intelligent alert consolidation - groups related policy changes
  * Returns consolidated analysis with calibrated urgency and clear cost math
  *
+ * DATA CONTRACT: Validates input against UserTradeProfile and alerts array
+ * Uses canonical field names from data-contracts.ts
+ *
  * Example: 3 alerts about Chinese components → 1 consolidated "China Risk"
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import {
+  validateComponentsArray,
+  validateTradeVolume,
+  reportValidationErrors
+} from '../../lib/validation/data-contract-validator.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,6 +31,7 @@ export default async function handler(req, res) {
   try {
     const { alerts, user_profile } = req.body;
 
+    // === DATA CONTRACT VALIDATION ===
     if (!alerts || !user_profile) {
       await DevIssue.missingData('consolidate_alerts_api', 'alerts or user_profile', {
         endpoint: '/api/consolidate-alerts',
@@ -34,6 +43,24 @@ export default async function handler(req, res) {
         success: false,
         message: 'Missing required fields: alerts and user_profile'
       });
+    }
+
+    // Validate components exist and have proper structure
+    const componentsResult = validateComponentsArray(
+      user_profile.component_origins || [],
+      'consolidate-alerts request'
+    );
+    if (!componentsResult.valid && user_profile.component_origins?.length > 0) {
+      reportValidationErrors(componentsResult, 'consolidate-alerts');
+    }
+
+    // Validate trade_volume if present
+    const volumeResult = validateTradeVolume(
+      user_profile.trade_volume,
+      'consolidate-alerts request'
+    );
+    if (!volumeResult.valid) {
+      reportValidationErrors(volumeResult, 'consolidate-alerts');
     }
 
     // ✅ FIX: Ensure user_profile has trade_volume from workflow_sessions
