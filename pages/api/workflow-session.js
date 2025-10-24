@@ -150,7 +150,17 @@ export default protectedApiHandler({
         state: 'in_progress',
         data: workflowData,
 
-        // NEW: Destination-aware tariff intelligence fields
+        // ✅ FIXED (Oct 24): Extract company/product fields to dedicated columns
+        // Dashboard validation requires these fields to be populated in DB columns, not just JSONB
+        company_name: companyData.company_name || companyData.name || null,
+        business_type: companyData.business_type || null,
+        trade_volume: companyData.trade_volume || workflowData.trade_volume || null,
+        manufacturing_location: companyData.manufacturing_location || null,
+        hs_code: workflowData.product?.hs_code || workflowData.hs_code || null,
+        product_description: workflowData.product?.description || workflowData.product_description || null,
+        component_origins: workflowData.components || workflowData.component_origins || [],
+
+        // Destination-aware tariff intelligence fields
         destination_country: companyData.destination_country || workflowData.destination_country || null,
         trade_flow_type: companyData.trade_flow_type || workflowData.trade_flow_type || null,
         tariff_cache_strategy: companyData.tariff_cache_strategy || workflowData.tariff_cache_strategy || null,
