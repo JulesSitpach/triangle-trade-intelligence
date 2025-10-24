@@ -459,20 +459,23 @@ export default protectedApiHandler({
         hs_code: analysis.product?.hs_code || 'AI-classified',
         description: formData.product_description,
         product_description: formData.product_description,
-        confidence: analysis.product?.confidence || 85,
+        // ✅ FIX: Remove hardcoded || 85 confidence default - use actual AI value
+        confidence: analysis.product?.confidence,
         classification_method: 'ai_analysis',
         manufacturing_location: formData.manufacturing_location || '',
         // Product-level tariff rates (from AI savings analysis)
-        mfn_rate: analysis.savings?.mfn_rate || 0,
-        usmca_rate: analysis.savings?.usmca_rate || 0
+        // ✅ FIX: Remove hardcoded || 0 defaults - use actual AI values
+        mfn_rate: analysis.savings?.mfn_rate,
+        usmca_rate: analysis.savings?.usmca_rate
       },
 
       // USMCA qualification (from AI)
+      // ✅ FIX: Remove hardcoded || false and || 0 defaults - trust AI response
       usmca: {
-        qualified: analysis.usmca?.qualified || false,
-        north_american_content: analysis.usmca?.north_american_content || 0,
-        regional_content: analysis.usmca?.north_american_content || 0, // Alias for certificate
-        threshold_applied: analysis.usmca?.threshold_applied || 0,
+        qualified: analysis.usmca?.qualified,
+        north_american_content: analysis.usmca?.north_american_content,
+        regional_content: analysis.usmca?.north_american_content, // Alias for certificate
+        threshold_applied: analysis.usmca?.threshold_applied,
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
         component_breakdown: analysis.usmca?.component_breakdown || formData.component_origins,
@@ -499,12 +502,13 @@ export default protectedApiHandler({
 
       // Tariff savings (only if qualified for USMCA) - extracted from detailed_analysis.savings_analysis
       // CRITICAL: Single source of truth - AI calculates savings ONCE in detailed_analysis, not twice
+      // ✅ FIX: Remove hardcoded || 0 defaults - trust AI response values
       savings: {
-        annual_savings: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.annual_savings || 0) : 0,
-        monthly_savings: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.monthly_savings || 0) : 0,
-        savings_percentage: analysis.usmca?.qualified ? (analysis.detailed_analysis?.savings_analysis?.savings_percentage || 0) : 0,
-        mfn_rate: analysis.detailed_analysis?.savings_analysis?.mfn_rate || 0,
-        usmca_rate: analysis.detailed_analysis?.savings_analysis?.usmca_rate || 0
+        annual_savings: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.annual_savings : null,
+        monthly_savings: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.monthly_savings : null,
+        savings_percentage: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.savings_percentage : null,
+        mfn_rate: analysis.detailed_analysis?.savings_analysis?.mfn_rate,
+        usmca_rate: analysis.detailed_analysis?.savings_analysis?.usmca_rate
       },
 
       // Certificate (if qualified)
@@ -531,7 +535,8 @@ export default protectedApiHandler({
       trust: {
         ai_powered: true,
         model: 'anthropic/claude-sonnet-4.5',
-        confidence_score: analysis.confidence_score || 85,
+        // ✅ confidence_score defaults to 85 if not provided (reasonable fallback for missing AI metric)
+        confidence_score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
     };
@@ -656,8 +661,9 @@ export default protectedApiHandler({
           qualification_status: result.usmca.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
           regional_content_percentage: result.usmca.north_american_content,
           required_threshold: result.usmca.threshold_applied,
-          threshold_source: analysis.usmca?.threshold_source || null, // AI research citation
-          threshold_reasoning: analysis.usmca?.threshold_reasoning || null, // Why this threshold applies
+          // ✅ FIX: Remove hardcoded || null - use actual AI values directly
+          threshold_source: analysis.usmca?.threshold_source,
+          threshold_reasoning: analysis.usmca?.threshold_reasoning,
           compliance_gaps: result.usmca.qualified ? null : { gap: `${result.usmca.gap}% gap from ${result.usmca.threshold_applied}% threshold` },
           completed_at: new Date().toISOString()
         });
@@ -713,8 +719,9 @@ export default protectedApiHandler({
     };
 
     // Add annual_savings at top level (Issue #1 test expects this)
-    result.annual_savings = result.savings?.annual_savings || 0;
-    result.monthly_savings = result.savings?.monthly_savings || 0;
+    // ✅ FIX: Remove hardcoded || 0 fallback - use actual AI values
+    result.annual_savings = result.savings?.annual_savings;
+    result.monthly_savings = result.savings?.monthly_savings;
 
     // Add enrichment_data wrapper for Issue #2 test
     result.enrichment_data = {

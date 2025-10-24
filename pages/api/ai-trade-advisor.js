@@ -102,7 +102,8 @@ function buildComponentContext(profile) {
     },
     usmca_content: {
       percentage: usmcaPercentage,
-      threshold: profile.requiredThreshold || 65,
+      // ✅ FIX: Remove hardcoded threshold default (65) - use actual value from profile
+      threshold: profile.requiredThreshold,
       qualified: profile.qualificationStatus === 'QUALIFIED'
     },
     quality_concerns: {

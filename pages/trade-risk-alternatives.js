@@ -448,6 +448,12 @@ export default function TradeRiskAlternatives() {
 
       // Step 2: Generate ONE executive summary using all the data
       console.log('✍️ Generating executive summary...');
+      console.log('📊 Request data:', {
+        user_profile_keys: Object.keys(profile || {}),
+        workflow_intelligence_keys: Object.keys(workflowIntelligence || {}),
+        alerts_count: rawAlerts.length
+      });
+
       const executiveResponse = await fetch('/api/executive-trade-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
