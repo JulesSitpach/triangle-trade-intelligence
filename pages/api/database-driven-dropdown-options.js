@@ -137,14 +137,18 @@ async function getBusinessTypes() {
  */
 async function getAllDropdownOptions() {
   try {
-    // Load all options in parallel - for now just business types
+    // Load all options in parallel
     const businessTypes = await getBusinessTypes();
+    const countries = await getCountries();
 
     return {
       business_types: businessTypes,
+      countries: countries,
+      usmca_countries: countries.filter(c => ['US', 'CA', 'MX'].some(code => c.includes(code))),
       summary: {
         business_types_count: businessTypes.length,
-        total_options: businessTypes.length
+        countries_count: countries.length,
+        total_options: businessTypes.length + countries.length
       }
     };
 
@@ -152,4 +156,35 @@ async function getAllDropdownOptions() {
     console.error('Failed to load all dropdown options:', error.message);
     throw error;
   }
+}
+
+/**
+ * Get countries list for dropdowns
+ * Basic list for now - can be expanded from database
+ */
+async function getCountries() {
+  // Return basic countries list
+  // Can be expanded to query database if needed
+  return [
+    'United States',
+    'Canada',
+    'Mexico',
+    'China',
+    'Vietnam',
+    'India',
+    'South Korea',
+    'Japan',
+    'Thailand',
+    'Malaysia',
+    'Singapore',
+    'Indonesia',
+    'Turkey',
+    'Brazil',
+    'Germany',
+    'Italy',
+    'United Kingdom',
+    'Netherlands',
+    'France',
+    'Spain'
+  ];
 }
