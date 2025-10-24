@@ -111,6 +111,18 @@ export default function TradeRiskAlternatives() {
               vulnerabilities: alert.primary_vulnerabilities || []
             };
 
+            // ✅ CRITICAL FIX: Also set workflowIntelligence from alert data (for executive alert API)
+            const workflowData = alert.workflow_data || {};
+            setWorkflowIntelligence({
+              usmca: workflowData.usmca || {},
+              savings: workflowData.savings || {},
+              component_origins: components,
+              recommendations: workflowData.recommendations || [],
+              detailed_analysis: workflowData.detailed_analysis || {},
+              compliance_roadmap: workflowData.compliance_roadmap || {},
+              confidence_score: workflowData.confidence_score || 0
+            });
+
             setUserProfile(profile);
             setIsLoading(false);
             return;
