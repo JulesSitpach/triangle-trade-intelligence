@@ -190,19 +190,22 @@ export default protectedApiHandler({
           .filter(code => code && code !== 'Not classified')
       )];
 
-      // NEW: Get user's destination country from most recent workflow (Phase 3 - Destination-Aware Alerts)
-      const userDestination = allWorkflows.length > 0
-        ? (allWorkflows[0].workflow_data?.company?.destination_country ||
-           allWorkflows[0].workflow_data?.destination_country ||
-           null)
-        : null;
+      // Get ALL destination countries from ALL workflows (user may ship to multiple destinations)
+      const userDestinations = [...new Set(
+        allWorkflows
+          .map(w => w.workflow_data?.company?.destination_country || w.workflow_data?.destination_country)
+          .filter(dest => dest)  // Remove null/undefined
+      )];
 
-      console.log('📍 User Alert Filtering Context:', {
-        userId,
-        userHSCodes: userHSCodes.length,
-        userDestination,
-        workflowCount: allWorkflows.length
-      });
+      // Debug: only log if explicitly requested via query param
+      if (req.query.debug === 'alerts') {
+        console.log('📍 User Alert Filtering Context:', {
+          userId,
+          userHSCodes: userHSCodes.length,
+          userDestinations,
+          workflowCount: allWorkflows.length
+        });
+      }
 
       // Crisis Alerts from RSS Monitoring (real-time government announcements)
       // Match alerts to user's HS codes AND destination country
@@ -225,9 +228,17 @@ export default protectedApiHandler({
             // Continue without alerts rather than failing
           } else {
 
-        // Filter alerts that match user's HS codes AND destination country
+        // Filter alerts that match user's HS codes AND ANY of user's destination countries
+        const normalizeCode = (code) => {
+          if (!code) return null;
+          if (code.includes('Canada') || code === 'CA') return 'CA';
+          if (code.includes('Mexico') || code === 'MX') return 'MX';
+          if (code.includes('United States') || code === 'USA' || code === 'US') return 'US';
+          return code.toUpperCase();
+        };
+
         const relevantAlerts = (matchedAlerts || []).filter(alert => {
-          // 1. Check HS Code Match (existing logic)
+          // 1. Check HS Code Match
           let hsCodeMatch = true;
           if (alert.affected_hs_codes && alert.affected_hs_codes.length > 0) {
             hsCodeMatch = userHSCodes.some(userCode =>
@@ -237,53 +248,35 @@ export default protectedApiHandler({
             );
           }
 
-          // 2. Check Destination Match (NEW - Phase 3)
+          // 2. Check Destination Match (NEW: check against ANY user destination)
           let destinationMatch = true;
           if (alert.affected_destinations && alert.affected_destinations.length > 0) {
-            // Alert has specific destinations - check if user's destination matches
-            if (userDestination) {
-              // Normalize destination codes for comparison
-              const normalizeCode = (code) => {
-                if (!code) return null;
-                if (code.includes('Canada') || code === 'CA') return 'CA';
-                if (code.includes('Mexico') || code === 'MX') return 'MX';
-                if (code.includes('United States') || code === 'USA' || code === 'US') return 'US';
-                return code.toUpperCase();
-              };
-
-              const userDestCode = normalizeCode(userDestination);
-              destinationMatch = alert.affected_destinations.some(dest =>
-                normalizeCode(dest) === userDestCode
+            // Alert has specific destinations - check if ANY of user's destinations match
+            if (userDestinations.length > 0) {
+              // User has destinations - check if alert affects any of them
+              destinationMatch = alert.affected_destinations.some(alertDest =>
+                userDestinations.some(userDest => normalizeCode(userDest) === normalizeCode(alertDest))
               );
             } else {
-              // User has no destination set - show all alerts (don't filter)
+              // User has no destinations set - show all alerts (don't filter by destination)
               destinationMatch = true;
             }
           }
           // If alert has no specific destinations, it affects all destinations (global alert)
 
           // Alert is relevant if BOTH HS code AND destination match
-          const isRelevant = hsCodeMatch && destinationMatch;
-
-          // Debug logging for filtered alerts
-          if (!isRelevant && (matchedAlerts || []).length < 10) {
-            console.log(`🚫 Alert filtered out: "${alert.title}"`, {
-              hsCodeMatch,
-              destinationMatch,
-              userDestination,
-              alertDestinations: alert.affected_destinations
-            });
-          }
-
-          return isRelevant;
+          return hsCodeMatch && destinationMatch;
         });
 
-        console.log(`✅ Alert filtering complete:`, {
-          totalAlerts: (matchedAlerts || []).length,
-          relevantAlerts: relevantAlerts.length,
-          filtered: (matchedAlerts || []).length - relevantAlerts.length,
-          userDestination
-        });
+        // Debug logging: only show if requested
+        if (req.query.debug === 'alerts') {
+          console.log(`✅ Alert filtering complete:`, {
+            totalAlerts: (matchedAlerts || []).length,
+            relevantAlerts: relevantAlerts.length,
+            filtered: (matchedAlerts || []).length - relevantAlerts.length,
+            userDestinations
+          });
+        }
 
         // Transform crisis alerts to match expected structure
         crisisAlerts = relevantAlerts.slice(0, 5).map(alert => {
