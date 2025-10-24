@@ -74,7 +74,7 @@ export default function ComponentOriginsStepEnhanced({
       console.log(`🔄 Syncing components from formData (navigation restore)`);
       setComponents(formData.component_origins);
     }
-  }, [formData.component_origins]);
+  }, [formData.component_origins, components]);
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];

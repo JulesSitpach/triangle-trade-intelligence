@@ -25,11 +25,11 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         { field: 'country', value: results.company?.country || results.company?.company_country }
       ];
 
-      const missingFields = requiredCompanyFields.filter(f => !f.value);
+      const missingFields = requiredCompanyFields.filter(f => !f.value || f.value.trim?.() === '');
 
       if (missingFields.length > 0) {
         const fieldNames = missingFields.map(f => f.field).join(', ');
-        alert(`❌ Certificate generation failed: Missing required company information (${fieldNames}). Please go back to Step 1 and verify all company details.`);
+        alert(`❌ Certificate generation failed: Missing required company information (${fieldNames}). Please go back to Step 1 and verify all company details are filled in completely.`);
         setIsGenerating(false);
         return;
       }
