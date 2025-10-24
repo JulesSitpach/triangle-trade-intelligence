@@ -62,7 +62,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 - Description: 7-inch industrial-grade LCD touchscreen display module with drivers
 - Origin Country: Vietnam
 - Value Percentage: 15
-- HS Code: 9405.10
+- HS Code: 8528.72
 - Manufacturing Location: Mexico
 
 **Component 5 - Wiring & Assembly**
@@ -76,9 +76,9 @@ Copy/paste the test data directly into the form fields. All values are realistic
 
 ---
 
-## ALTERNATIVE TEST SCENARIO (Simpler - 2 Components)
+## ALTERNATIVE TEST SCENARIO (Simpler - 2 Components - Tests NON-QUALIFIED case)
 
-### Use this if you want faster testing
+### Use this if you want faster testing or to test a product that DOES NOT QUALIFY for USMCA
 
 **Step 1: Company Information - Same as above**
 
@@ -99,6 +99,11 @@ Copy/paste the test data directly into the form fields. All values are realistic
 - Manufacturing Location: Mexico
 
 **Total: 100%** ✓
+
+**Expected Result: NOT QUALIFIED**
+- Regional Content: 40% (Mexico) + 17.5% (labor) = 57.5%
+- Electronics threshold: 65% RVC required
+- Status: ❌ FAILS (57.5% < 65%) - Good for testing rejection scenarios
 
 ---
 
