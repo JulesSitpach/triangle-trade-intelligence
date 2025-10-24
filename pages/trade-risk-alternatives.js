@@ -36,6 +36,10 @@ export default function TradeRiskAlternatives() {
   // PREMIUM CONTENT: USMCA Intelligence from workflow
   const [workflowIntelligence, setWorkflowIntelligence] = useState(null);
 
+  // Progress tracking for alert generation
+  const [alertsGenerated, setAlertsGenerated] = useState(false);
+  const [progressSteps, setProgressSteps] = useState([]);
+
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
   const [, setHasSaveDataConsent] = useState(false);
@@ -46,12 +50,6 @@ export default function TradeRiskAlternatives() {
   useEffect(() => {
     loadUserData();
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (userProfile && userProfile.componentOrigins) {
-      loadRealPolicyAlerts(userProfile);
-    }
-  }, [userProfile]);
 
   const loadUserData = async () => {
     if (!user) {
@@ -421,15 +419,22 @@ export default function TradeRiskAlternatives() {
   /**
    * Load REAL tariff policy alerts from database
    * Filters by user's component origins and HS codes for relevance
+   * Now called on-demand with progress tracking
    */
   const loadRealPolicyAlerts = async (profile) => {
     setIsLoadingPolicyAlerts(true);
+    setProgressSteps([]);
 
     try {
-      console.log('🎯 Generating AI-powered personalized alerts based on user components...');
+      // Step 1: Analyze component origins
+      setProgressSteps(prev => [...prev, 'Analyzing component origins...']);
+      console.log('Analyzing component origins for:', profile.companyName);
+      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
 
-      // 🚀 NEW: Generate RELEVANT alerts using AI based on user's actual components
-      // No more hardcoded China/Vietnam alerts for users with US/MX/CA components!
+      // Step 2: Checking trade policies
+      setProgressSteps(prev => [...prev, 'Checking applicable trade policies...']);
+      console.log('Checking trade policies...');
+
       const response = await fetch('/api/generate-personalized-alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -442,27 +447,37 @@ export default function TradeRiskAlternatives() {
         throw new Error(`Failed to generate personalized alerts: ${response.status}`);
       }
 
+      // Step 3: Generating personalized alerts
+      setProgressSteps(prev => [...prev, 'Generating personalized alerts...']);
       const data = await response.json();
 
       if (data.success && data.alerts) {
-        console.log(`✅ Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
+        console.log(`Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
 
         const personalizedAlerts = data.alerts;
 
         setRealPolicyAlerts(personalizedAlerts);
         setOriginalAlertCount(personalizedAlerts.length);
 
-        // Consolidate alerts intelligently (group related issues)
+        // Step 4: Consolidating related alerts
+        setProgressSteps(prev => [...prev, 'Consolidating related alerts...']);
         if (personalizedAlerts.length > 0) {
           await consolidateAlerts(personalizedAlerts, profile);
         }
+
+        setProgressSteps(prev => [...prev, 'Analysis complete']);
+        setAlertsGenerated(true);
       } else {
-        console.log('⚠️ No personalized alerts generated - all AI tiers failed');
+        console.log('No personalized alerts generated');
         setRealPolicyAlerts([]);
+        setProgressSteps(prev => [...prev, 'No alerts found']);
+        setAlertsGenerated(true);
       }
     } catch (error) {
-      console.error('❌ Error generating personalized alerts:', error);
+      console.error('Error generating personalized alerts:', error);
       setRealPolicyAlerts([]);
+      setProgressSteps(prev => [...prev, 'Error generating alerts']);
+      setAlertsGenerated(true);
     } finally {
       setIsLoadingPolicyAlerts(false);
     }
@@ -746,7 +761,7 @@ export default function TradeRiskAlternatives() {
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
         <div className="form-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 className="form-section-title" style={{ margin: 0 }}>🚨 Government Policy Alerts</h2>
+            <h2 className="form-section-title" style={{ margin: 0 }}>Government Policy Alerts</h2>
             {consolidatedAlerts.length > 0 && originalAlertCount > consolidatedAlerts.length && (
               <span style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 500 }}>
                 Consolidated {originalAlertCount} policies → {consolidatedAlerts.length} alert{consolidatedAlerts.length !== 1 ? 's' : ''}
@@ -754,28 +769,59 @@ export default function TradeRiskAlternatives() {
             )}
           </div>
 
-          {(isLoadingPolicyAlerts || isConsolidating) && (
+          {!alertsGenerated && (
             <div className="alert alert-info">
               <div className="alert-content">
-                <div className="alert-title">
-                  {isConsolidating ? '🧠 Consolidating related alerts...' : 'Loading government policy alerts...'}
-                  <span className="spinner-inline"></span>
+                <div className="alert-title">Generate Personalized Risk Analysis</div>
+                <div className="text-body">
+                  Click below to analyze your components for applicable trade policies and tariff risks.
                 </div>
-                {isConsolidating && (
-                  <div className="text-body">
-                    Grouping related policies and calculating consolidated impact...
-                  </div>
-                )}
+                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
+                  <button
+                    onClick={() => loadRealPolicyAlerts(userProfile)}
+                    className="btn-primary"
+                    disabled={isLoadingPolicyAlerts}
+                  >
+                    {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && !isConsolidating && realPolicyAlerts.length === 0 && (
+          {(isLoadingPolicyAlerts || isConsolidating) && (
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">Analyzing your trade profile...</div>
+                <div style={{ marginTop: '0.75rem' }}>
+                  {progressSteps.map((step, idx) => (
+                    <div key={idx} style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '0.5rem' }}>
+                      {idx < progressSteps.length - 1 ? '✓' : '→'} {step}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isLoadingPolicyAlerts && !isConsolidating && alertsGenerated && realPolicyAlerts.length === 0 && (
             <div className="alert alert-success">
               <div className="alert-content">
-                <div className="alert-title">✅ No Critical Policy Changes Affecting Your Trade</div>
+                <div className="alert-title">No Critical Policy Changes Affecting Your Trade</div>
                 <div className="text-body">
-                  Great news! There are currently no government-announced tariff or policy changes that directly impact your component origins or HS codes. We monitor official sources 24/7 and will alert you immediately when relevant changes occur.
+                  Your components are not currently affected by government-announced tariff or policy changes. We monitor official sources continuously and will alert you when relevant changes occur.
+                </div>
+                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
+                  <button
+                    onClick={() => {
+                      setAlertsGenerated(false);
+                      setRealPolicyAlerts([]);
+                      setConsolidatedAlerts([]);
+                    }}
+                    className="btn-secondary"
+                  >
+                    Run Analysis Again
+                  </button>
                 </div>
               </div>
             </div>
@@ -783,6 +829,14 @@ export default function TradeRiskAlternatives() {
 
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
             <div className="element-spacing">
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
+                  TRADE RISK ANALYSIS REPORT
+                </div>
+                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {consolidatedAlerts.length} policy alert{consolidatedAlerts.length !== 1 ? 's' : ''}
+                </div>
+              </div>
               {consolidatedAlerts.map((alert, idx) => (
                 <ConsolidatedPolicyAlert
                   key={idx}
@@ -797,12 +851,12 @@ export default function TradeRiskAlternatives() {
           {/* Fallback: Show individual alerts if consolidation failed */}
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
             <div className="element-spacing">
-              <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
-                <div className="alert-content">
-                  <div className="alert-title">⚠️ Alert Consolidation Unavailable</div>
-                  <div className="text-body">
-                    Showing individual alerts. Smart consolidation temporarily unavailable.
-                  </div>
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
+                  TRADE RISK ANALYSIS REPORT
+                </div>
+                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {realPolicyAlerts.length} policy alert{realPolicyAlerts.length !== 1 ? 's' : ''}
                 </div>
               </div>
               {realPolicyAlerts.map((alert, idx) => (
