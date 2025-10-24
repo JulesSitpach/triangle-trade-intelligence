@@ -592,7 +592,13 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                   tax_id: formData.tax_id,
                   contact_person: formData.contact_person,
                   contact_phone: formData.contact_phone,
-                  contact_email: formData.contact_email
+                  contact_email: formData.contact_email,
+                  business_type: formData.business_type,
+                  industry_sector: formData.industry_sector,
+                  trade_volume: formData.trade_volume,
+                  destination_country: formData.destination_country,
+                  supplier_country: formData.supplier_country,
+                  manufacturing_location: formData.manufacturing_location
                 },
                 product: {
                   hs_code: formData.classified_hs_code,
@@ -721,7 +727,13 @@ NOTE: Complete all fields and obtain proper signatures before submission.
                   tax_id: formData.tax_id,
                   contact_person: formData.contact_person,
                   contact_phone: formData.contact_phone,
-                  contact_email: formData.contact_email
+                  contact_email: formData.contact_email,
+                  business_type: formData.business_type,
+                  industry_sector: formData.industry_sector,
+                  trade_volume: formData.trade_volume,
+                  destination_country: formData.destination_country,
+                  supplier_country: formData.supplier_country,
+                  manufacturing_location: formData.manufacturing_location
                 },
                 product: {
                   hs_code: formData.classified_hs_code,
