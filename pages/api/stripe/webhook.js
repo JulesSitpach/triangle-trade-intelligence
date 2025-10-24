@@ -492,12 +492,23 @@ async function handleSubscriptionCreated(subscription) {
 
 /**
  * Handle customer.subscription.updated event
+ * CRITICAL: Also update user_profiles.subscription_tier when plan changes
  */
 async function handleSubscriptionUpdated(subscription) {
   console.log('Processing customer.subscription.updated:', subscription.id);
 
   try {
-    const { error } = await supabase
+    // === STEP 1: Get user_id from customer metadata ===
+    const customer = await stripe.customers.retrieve(subscription.customer);
+    const userId = customer.metadata?.user_id;
+
+    if (!userId) {
+      console.warn(`⚠️ No user_id in customer metadata for subscription ${subscription.id}`);
+      // Still update subscription table, but can't update user_profiles without userId
+    }
+
+    // === STEP 2: Update subscriptions table with new periods and status ===
+    const { data: updatedSub, error: subError } = await supabase
       .from('subscriptions')
       .update({
         status: subscription.status,
@@ -506,14 +517,61 @@ async function handleSubscriptionUpdated(subscription) {
         cancel_at_period_end: subscription.cancel_at_period_end || false,
         updated_at: new Date().toISOString()
       })
-      .eq('stripe_subscription_id', subscription.id);
+      .eq('stripe_subscription_id', subscription.id)
+      .select('tier_id')
+      .single();
 
-    if (error) {
-      console.error('Error updating subscription:', error);
-    } else {
-      console.log('Subscription updated:', subscription.id);
+    if (subError) {
+      console.error('Error updating subscription:', subError);
+      return;
     }
+
+    console.log('✅ Subscription updated:', subscription.id);
+
+    // === STEP 3: If user_id found, update user_profiles.subscription_tier ===
+    // This handles plan upgrades (e.g., Trial → Professional)
+    if (userId && updatedSub?.tier_id) {
+      const tierName = updatedSub.tier_id.charAt(0).toUpperCase() + updatedSub.tier_id.slice(1);
+
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          subscription_tier: tierName,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (profileError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'high',
+          component: 'stripe_webhook',
+          message: 'Failed to update user_profiles.subscription_tier on plan change',
+          data: {
+            userId,
+            subscriptionId: subscription.id,
+            newTier: tierName,
+            error: profileError.message
+          }
+        });
+        console.error('❌ Failed to update user profile tier:', profileError);
+      } else {
+        console.log(`✅ User profile tier updated to ${tierName} for user ${userId}`);
+      }
+    }
+
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'high',
+      component: 'stripe_webhook',
+      message: 'Error in subscription.updated handler',
+      data: {
+        subscriptionId: subscription.id,
+        error: error.message,
+        stack: error.stack
+      }
+    });
     console.error('Error in subscription.updated handler:', error);
   }
 }
