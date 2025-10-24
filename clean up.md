@@ -42,13 +42,48 @@
 
 **Commits**: `3e7f2a6`
 
-### **⏳ Phase 3: Large File Decomposition (NEXT - Estimated 3-4 hours)**
-- **`pages/api/ai-usmca-complete-analysis.js`** (Main API file - ~1659 lines)
-  - Extract tariff calculation logic → `lib/tariff/tariff-calculator.js`
-  - Extract USMCA qualification → `lib/usmca/qualification-engine.js`
-  - Extract certificate generation → `lib/certificates/certificate-generator.js`
-  - Extract validation logic → `lib/validation/form-validation.js`
-  - Reduce main file to ~250-300 lines orchestration logic
+### **🔄 Phase 3: Large File Decomposition (IN PROGRESS - Step 1 of 4 complete)**
+
+**STEP 1: Utility Functions** ✅ **COMPLETE (Commit 4c3eef2)**
+- Created: `lib/validation/form-validation.js` (194 lines)
+- Extracted functions (pure, no dependencies):
+  - ✅ parseTradeVolume()
+  - ✅ getCacheExpiration()
+  - ✅ extractIndustryFromBusinessType()
+  - ✅ getIndustryThresholds()
+  - ✅ getDeMinimisThreshold()
+- Status: **Build passing ✅ | Tests ready ✅**
+- Main file reduced from 1665 → ~1490 lines
+
+**STEP 2: Tariff Calculation Functions** ⏳ **NEXT (Estimated 1-2 hours)**
+- Target: `lib/tariff/tariff-calculator.js` (~300-350 lines)
+- Functions to extract (interdependent, requires careful handling):
+  - enrichComponentsWithTariffIntelligence() [line 899]
+  - buildDynamicPolicyContext() [line 1092]
+  - lookupBatchTariffRates() [line 1140]
+  - buildBatchTariffPrompt() [line 1271]
+  - tryOpenRouter() [line 1305]
+  - tryAnthropicDirect() [line 1348]
+  - lookupDatabaseRates() [line 1398]
+  - parseAIResponse() [line 1431]
+  - cacheBatchResults() [line 1474]
+  - saveTariffRatesToDatabase() [line 1556]
+- Dependencies: enrichmentRouter (external), supabase (external)
+- Strategy: Extract all together as interdependent module
+
+**STEP 3: USMCA Qualification** ⏳ **PENDING (Estimated 1-2 hours)**
+- Target: `lib/usmca/qualification-engine.js` (~250-300 lines)
+- Functions to extract (depends on Step 2):
+  - buildComprehensiveUSMCAPrompt()
+  - Qualification logic from main handler
+
+**STEP 4: Certificate Generation** ⏳ **PENDING (Estimated 1 hour)**
+- Target: `lib/certificates/certificate-generator.js` (~150-200 lines)
+- Functions to extract (standalone after Steps 2-3):
+  - Certificate generation logic
+  - PDF handling
+
+**Final State**: Main file reduced to ~250-300 lines orchestration logic
 
 ### **⏳ Phase 4: Architecture Simplification (NOT NEEDED - Already Done)**
 - ~~Remove the global cache system~~ **ALREADY DATABASE-ONLY** ✅
