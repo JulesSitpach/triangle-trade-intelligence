@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
@@ -68,6 +69,7 @@ export default function ComponentOriginsStepEnhanced({
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
   // Only depend on formData.component_origins, not components, to avoid circular dependency
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (formData.component_origins &&
         formData.component_origins.length > 0 &&
@@ -563,7 +565,7 @@ export default function ComponentOriginsStepEnhanced({
               })}
             </select>
             <div className="form-help">
-              Where is the final product assembled/manufactured? (Select "Does Not Apply" if you import/distribute only)
+              Where is the final product assembled/manufactured? (Select &quot;Does Not Apply&quot; if you import/distribute only)
             </div>
 
             {/* Substantial Transformation Checkbox - Only show for USMCA countries */}
@@ -601,7 +603,7 @@ export default function ComponentOriginsStepEnhanced({
       <div className="element-spacing">
         <h2 className="form-section-title">Component Breakdown</h2>
         <p className="text-body">
-          Break down your product into its major components. Each component should represent a significant portion of the product's value.
+          Break down your product into its major components. Each component should represent a significant portion of the product&apos;s value.
         </p>
       </div>
 
@@ -701,7 +703,7 @@ export default function ComponentOriginsStepEnhanced({
                   className="form-input"
                 />
                 <div className="form-help">
-                  Don't know your HS code? Get AI suggestion below.
+                  Don&apos;t know your HS code? Get AI suggestion below.
                 </div>
 
                 {/* Get AI Suggestion Button - Turns BLUE when all fields are filled (like Continue button) */}
@@ -954,9 +956,9 @@ export default function ComponentOriginsStepEnhanced({
               <button onClick={() => setShowUpgradeModal(false)} className="btn-secondary">
                 Continue with 3 Components
               </button>
-              <a href="/pricing" className="btn-primary">
+              <Link href="/pricing" className="btn-primary">
                 View Plans & Upgrade
-              </a>
+              </Link>
             </div>
           </div>
         </div>
