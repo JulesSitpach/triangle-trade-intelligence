@@ -133,22 +133,24 @@ async function getBusinessTypes() {
 
 /**
  * Get all dropdown options in one request
- * EFFICIENT BATCH LOADING
+ * EFFICIENT BATCH LOADING - ALL FROM DATABASE
  */
 async function getAllDropdownOptions() {
   try {
     // Load all options in parallel
     const businessTypes = await getBusinessTypes();
-    const countries = await getCountries();
+    const allCountries = await getCountries();
+    const usmcaCountries = await getUSMCACountries();
 
     return {
       business_types: businessTypes,
-      countries: countries,
-      usmca_countries: countries.filter(c => ['US', 'CA', 'MX'].some(code => c.includes(code))),
+      countries: allCountries,
+      usmca_countries: usmcaCountries,
       summary: {
         business_types_count: businessTypes.length,
-        countries_count: countries.length,
-        total_options: businessTypes.length + countries.length
+        countries_count: allCountries.length,
+        usmca_countries_count: usmcaCountries.length,
+        total_options: businessTypes.length + allCountries.length
       }
     };
 
@@ -159,32 +161,85 @@ async function getAllDropdownOptions() {
 }
 
 /**
- * Get countries list for dropdowns
- * Basic list for now - can be expanded from database
+ * Get ALL countries list for dropdowns
+ * QUERIES database - NO hardcoding
  */
 async function getCountries() {
-  // Return basic countries list
-  // Can be expanded to query database if needed
-  return [
-    'United States',
-    'Canada',
-    'Mexico',
-    'China',
-    'Vietnam',
-    'India',
-    'South Korea',
-    'Japan',
-    'Thailand',
-    'Malaysia',
-    'Singapore',
-    'Indonesia',
-    'Turkey',
-    'Brazil',
-    'Germany',
-    'Italy',
-    'United Kingdom',
-    'Netherlands',
-    'France',
-    'Spain'
-  ];
+  try {
+    const { data: countries, error } = await supabase
+      .from('countries')
+      .select('code, name')
+      .order('name');
+
+    if (error) {
+      console.error('Database query error:', error);
+      throw error;
+    }
+
+    if (!countries || countries.length === 0) {
+      console.error('No countries found in countries table');
+      throw new Error('No countries found in countries table');
+    }
+
+    // Return country names for dropdown display
+    const countryNames = countries.map(country => country.name);
+
+    console.log('✓ Countries loaded from countries table', {
+      totalCountries: countryNames.length,
+      samples: countryNames.slice(0, 5)
+    });
+
+    return countryNames;
+
+  } catch (error) {
+    console.error('Failed to load countries from database:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Get USMCA countries list (US, CA, MX only)
+ * QUERIES database for countries with USMCA in trade_agreements
+ */
+async function getUSMCACountries() {
+  try {
+    const { data: countries, error } = await supabase
+      .from('countries')
+      .select('code, name, trade_agreements')
+      .order('name');
+
+    if (error) {
+      console.error('Database query error:', error);
+      throw error;
+    }
+
+    if (!countries || countries.length === 0) {
+      console.error('No countries found in countries table');
+      throw new Error('No countries found in countries table');
+    }
+
+    // Filter for USMCA members (trade_agreements contains 'USMCA')
+    const usmcaMembers = countries
+      .filter(country => {
+        const agreements = country.trade_agreements || [];
+        return Array.isArray(agreements) && agreements.includes('USMCA');
+      })
+      .map(country => ({
+        code: country.code,
+        name: country.name,
+        label: country.name,
+        value: country.code
+      }));
+
+    console.log('✓ USMCA countries loaded from database', {
+      totalUsmcaCountries: usmcaMembers.length,
+      members: usmcaMembers.map(c => c.name)
+    });
+
+    return usmcaMembers;
+
+  } catch (error) {
+    console.error('Failed to load USMCA countries from database:', error.message);
+    throw error;
+  }
 }
