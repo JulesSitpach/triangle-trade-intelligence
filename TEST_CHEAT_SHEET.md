@@ -10,7 +10,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 | Field | Test Value | Notes |
 |-------|-----------|-------|
 | Company Name | Acme Electronics Manufacturing Inc | Min length required |
-| Business Type | Manufacturing | Options: Manufacturing, Importer, Supplier, Trader, Other |
+| Business Type | Manufacturer | Options: Importer, Exporter, Manufacturer, Distributor, Wholesaler, Retailer |
 | Industry Sector | Electronics & Semiconductors | Must be selected from dropdown |
 | Company Address | 42 Industrial Park Drive, San Jose CA 95110 | Full address required |
 | Company Country | United States | Options: US, Canada, Mexico, China, Vietnam, etc. |
@@ -98,7 +98,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 
 ### Step 1 Validation Rules
 ✓ Company Name - Any text, min 2 characters
-✓ Business Type - Must select from dropdown
+✓ Business Type - Must select from: Importer, Exporter, Manufacturer, Distributor, Wholesaler, or Retailer
 ✓ Industry Sector - Must select from dropdown
 ✓ Address - Any valid address format
 ✓ Country - Any country, but destination affects tariff logic
