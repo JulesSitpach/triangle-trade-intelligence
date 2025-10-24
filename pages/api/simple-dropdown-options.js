@@ -13,72 +13,26 @@ export default async function handler(req, res) {
     // Generate business types dynamically from database
     const getBusinessTypes = async () => {
       try {
-        // First try to get business types from USMCA qualification rules
-        const { data: usmcaRules, error: usmcaError } = await supabase
-          .from('usmca_qualification_rules')
-          .select('product_category, regional_content_threshold')
-          .not('product_category', 'is', null)
-          .order('product_category');
-        
-        if (!usmcaError && usmcaRules && usmcaRules.length > 0) {
-          // Create business types from USMCA rules with thresholds and remove duplicates
-          const uniqueRulesMap = new Map();
-          
-          usmcaRules.forEach(rule => {
-            const category = rule.product_category;
-            const threshold = rule.regional_content_threshold;
-            
-            // Keep the rule with higher threshold if duplicates exist
-            if (!uniqueRulesMap.has(category) || uniqueRulesMap.get(category).threshold < threshold) {
-              uniqueRulesMap.set(category, { 
-                category, 
-                threshold,
-                value: category.replace(/[^a-zA-Z0-9]/g, ''),
-                label: category,
-                description: `USMCA threshold: ${threshold}%`
-              });
-            }
-          });
-          
-          const businessTypesFromRules = Array.from(uniqueRulesMap.values()).map(rule => ({
-            value: rule.value,
-            label: rule.label,
-            description: rule.description
-          }));
-          
-          // Add general categories if missing
-          const existingLabels = businessTypesFromRules.map(bt => bt.label);
-          const generalCategories = [
-            { value: 'Manufacturing', label: 'General Manufacturing', description: 'General manufacturing products' },
-            { value: 'Other', label: 'Other', description: 'Other business types' }
-          ].filter(cat => !existingLabels.includes(cat.label));
-          
-          return [...businessTypesFromRules, ...generalCategories];
-        }
-        
-        // Fallback: Try to get from HS codes product categories
-        const { data: hsCategories, error: hsError } = await supabase
-          .from('comtrade_reference')
-          .select('product_category')
-          .not('product_category', 'is', null)
-          .limit(20);
-        
-        if (!hsError && hsCategories && hsCategories.length > 0) {
-          const uniqueCategories = [...new Set(hsCategories.map(item => item.product_category))];
-          return uniqueCategories.slice(0, 10).map(category => ({
-            value: category.replace(/[^a-zA-Z0-9]/g, ''),
-            label: category,
-            description: 'Product category from HS database'
+        // Query industry_thresholds table - this is the authoritative source
+        // It matches what the qualification engine uses in industry-thresholds-service.js
+        const { data: thresholds, error: thresholdError } = await supabase
+          .from('industry_thresholds')
+          .select('display_name, rvc_percentage, usmca_article, is_active')
+          .eq('is_active', true)
+          .order('display_name');
+
+        if (!thresholdError && thresholds && thresholds.length > 0) {
+          // Convert thresholds to dropdown format
+          return thresholds.map(threshold => ({
+            value: threshold.display_name,
+            label: threshold.display_name,
+            description: `USMCA ${threshold.rvc_percentage}% RVC (${threshold.usmca_article})`
           }));
         }
-        
-        // Final fallback: minimal set
-        return [
-          { value: 'Manufacturing', label: 'General Manufacturing', description: 'Professional classification required - database query failed' },
-          { value: 'Electronics', label: 'Electronics', description: 'Professional classification required - database query failed' },
-          { value: 'Other', label: 'Other', description: 'Professional classification required - database query failed' }
-        ];
-        
+
+        // If industry_thresholds is empty, fail loudly
+        throw new Error('No active thresholds found in industry_thresholds table');
+
       } catch (error) {
         console.error('Business types query error:', error);
         throw error;
@@ -389,29 +343,13 @@ export default async function handler(req, res) {
     
   } catch (error) {
     console.error('Database dropdown options error:', error)
-    
-    // Emergency fallback - database unavailable
-    console.warn('Database unavailable - using minimal emergency fallback');
-    
-    res.status(200).json({
-      businessTypes: [
-        { value: 'General', label: 'General Products', description: 'Professional classification required - database unavailable' },
-        { value: 'Electronics', label: 'Electronics', description: 'Professional classification required - database unavailable' },
-        { value: 'Automotive', label: 'Automotive', description: 'Professional classification required - database unavailable' }
-      ],
-      countries: [
-        'China', 'India', 'Vietnam', 'Mexico', 'Canada', 'United States'
-      ],
-      importVolumes: [
-        { value: 'Small', label: 'Small Volume', description: 'Professional assessment required' },
-        { value: 'Medium', label: 'Medium Volume', description: 'Professional assessment required' },
-        { value: 'Large', label: 'Large Volume', description: 'Professional assessment required' }
-      ],
-      optimizationPriorities: [
-        { value: 'professional_consultation', label: 'Professional Consultation Required', description: 'System unavailable - contact trade specialist' }
-      ],
-      systemError: true,
-      message: 'Database connectivity issues - limited options available. Contact customs broker for comprehensive analysis.'
+
+    // Fail loudly - no hardcoded fallback
+    res.status(500).json({
+      error: 'Unable to load dropdown options from database',
+      technical_error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      message: 'Database error - please contact support',
+      systemError: true
     })
   }
 }

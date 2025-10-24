@@ -101,155 +101,64 @@ export default async function handler(req, res) {
 
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    logError('Dropdown options failed', { 
-      error: error.message, 
+    logError('Dropdown options failed', {
+      error: error.message,
       category: req.query.category,
-      responseTime 
+      responseTime
     });
 
+    // Fail loudly - no hardcoded fallback
     return res.status(500).json({
       success: false,
-      error: 'Unable to load dropdown options',
+      error: 'Unable to load dropdown options from database',
       technical_error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       processing_time_ms: responseTime,
       timestamp: new Date().toISOString(),
-      fallback: 'Contact support if this error persists'
+      message: 'Database error - all dropdown options must come from the database'
     });
   }
 }
 
 /**
  * Get business types from database
+ * USES industry_thresholds TABLE (same source as qualification engine)
  * NO HARDCODED BUSINESS TYPE LISTS
  */
 async function getBusinessTypes() {
   try {
-    // Use USMCA qualification rules (same as simple-dropdown-options)
-    const { data: usmcaRules, error: usmcaError } = await serverDatabaseService.client
-      .from('usmca_qualification_rules')
-      .select('product_category, regional_content_threshold')
-      .not('product_category', 'is', null)
-      .order('product_category');
-    
-    if (!usmcaError && usmcaRules && usmcaRules.length > 0) {
-      // Remove duplicates from USMCA rules
-      const uniqueRulesMap = new Map();
-      
-      usmcaRules.forEach(rule => {
-        const category = rule.product_category;
-        const threshold = rule.regional_content_threshold;
-        
-        // Keep the rule with higher threshold if duplicates exist
-        if (!uniqueRulesMap.has(category) || uniqueRulesMap.get(category).threshold < threshold) {
-          uniqueRulesMap.set(category, {
-            category,
-            threshold,
-            label: category,  // Keep original formatting with special characters
-            description: `USMCA threshold: ${threshold}%`
-          });
-        }
-      });
-      
-      const businessTypesFromRules = Array.from(uniqueRulesMap.values()).map(rule => ({
-        value: rule.label,  // Use label as value to preserve formatting like "Machinery & Equipment"
-        label: rule.label,
-        description: rule.description
+    // Query industry_thresholds table - this is the authoritative source
+    // It matches what the qualification engine uses in industry-thresholds-service.js
+    const { data: thresholds, error: thresholdError } = await serverDatabaseService.client
+      .from('industry_thresholds')
+      .select('display_name, rvc_percentage, usmca_article, is_active')
+      .eq('is_active', true)
+      .order('display_name');
+
+    if (!thresholdError && thresholds && thresholds.length > 0) {
+      // Convert thresholds to dropdown format
+      const businessTypes = thresholds.map(threshold => ({
+        value: threshold.display_name,
+        label: threshold.display_name,
+        description: `USMCA ${threshold.rvc_percentage}% RVC (${threshold.usmca_article})`
       }));
-      
-      // Add general categories
-      const existingLabels = businessTypesFromRules.map(bt => bt.label);
-      const generalCategories = [
-        { value: 'Manufacturing', label: 'General Manufacturing', description: 'General manufacturing products' },
-        { value: 'Other', label: 'Other', description: 'Other business types' }
-      ].filter(cat => !existingLabels.includes(cat.label));
-      
-      logInfo('Business types generated from USMCA rules', { 
-        totalCategories: businessTypesFromRules.length + generalCategories.length,
-        businessTypesFound: businessTypesFromRules.length 
+
+      logInfo('Business types loaded from industry_thresholds table', {
+        totalCategories: businessTypes.length
       });
-      
-      return [...businessTypesFromRules, ...generalCategories];
-    }
-    
-    // Fallback: Generate business types from actual database reality
-    const { data: productCategories, error } = await serverDatabaseService.client
-      .from('hs_master_rebuild')
-      .select('chapter, country_source')
-      .not('chapter', 'is', null);
 
-    if (error) throw error;
-
-    // Count products per category
-    const categoryCounts = {};
-    productCategories.forEach(item => {
-      categoryCounts[item.product_category] = (categoryCounts[item.product_category] || 0) + 1;
-    });
-
-    const businessTypes = [];
-    const autoCount = (categoryCounts['Vehicles and Parts'] || 0) + (categoryCounts['Automotive & Transportation'] || 0);
-    if (autoCount >= 10) {
-      businessTypes.push({
-        value: 'Automotive & Transportation',
-        label: 'Automotive & Transportation',
-        description: `Automotive and transportation products (${autoCount} products)`
-      });
+      return businessTypes;
     }
 
-    // Textiles & Apparel (9+ products)
-    if (categoryCounts['Textiles & Apparel'] >= 5) {
-      businessTypes.push({
-        value: 'Textiles & Apparel',
-        label: 'Textiles & Apparel',
-        description: `Textiles, clothing, and apparel products (${categoryCounts['Textiles & Apparel']} products)`
-      });
-    }
-
-    // Agriculture & Food (500+ products across multiple categories)
-    const foodCategories = ['Fish and Crustaceans', 'Meat and Edible Meat Offal', 'Edible Fruit and Nuts', 'Prepared Foodstuffs', 'Beverages and Spirits', 'Live Animals', 'Vegetable Products', 'Dairy Products', 'Live Animals & Animal Products', 'Edible Vegetables', 'Animal or Vegetable Fats', 'Preparations of Vegetables/Fruit'];
-    const totalFood = foodCategories.reduce((sum, cat) => sum + (categoryCounts[cat] || 0), 0);
-    if (totalFood >= 50) {
-      businessTypes.push({
-        value: 'Agriculture & Food',
-        label: 'Agriculture & Food',
-        description: `Agricultural and food products (${totalFood} products)`
-      });
-    }
-
-    // Chemicals & Materials (200+ products across categories)
-    const chemicalCategories = ['Chemicals & Allied Industries', 'Mineral Products', 'Plastics & Rubber', 'Base Metals & Articles', 'Stone & Glass Products'];
-    const totalChemicals = chemicalCategories.reduce((sum, cat) => sum + (categoryCounts[cat] || 0), 0);
-    if (totalChemicals >= 50) {
-      businessTypes.push({
-        value: 'Chemicals & Materials',
-        label: 'Chemicals & Materials',
-        description: `Chemical and material products (${totalChemicals} products)`
-      });
-    }
-
-    // General (always available)
-    businessTypes.push({
-      value: 'General',
-      label: 'General Manufacturing',
-      description: 'General manufacturing and other products'
-    });
-
-    logInfo('Business types generated from database reality', {
-      totalCategories: Object.keys(categoryCounts).length,
-      businessTypesFound: businessTypes.length,
-      removedEnergyEquipment: true
-    });
-
-    return businessTypes;
+    // If industry_thresholds is empty, fail loudly (don't use fallbacks)
+    throw new Error('No active thresholds found in industry_thresholds table');
 
   } catch (error) {
-    logError('Failed to load business types from database reality', { error: error.message });
-    
-    // Emergency fallback - only business types we know work
-    return [
-      { value: 'Electronics & Technology', label: 'Electronics & Technology', description: 'Electronic devices and technology products' },
-      { value: 'Textiles & Apparel', label: 'Textiles & Apparel', description: 'Textiles, clothing, and apparel products' },
-      { value: 'General', label: 'General Manufacturing', description: 'General manufacturing and other products' }
-    ];
+    logError('Failed to load business types from industry_thresholds table', {
+      error: error.message
+    });
+
+    // Return error response instead of hardcoded fallback
+    throw error;
   }
 }
 
