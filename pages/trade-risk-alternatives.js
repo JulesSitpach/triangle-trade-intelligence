@@ -8,8 +8,6 @@ import React, { useState, useEffect } from 'react';
 import TriangleLayout from '../components/TriangleLayout';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
-import PersonalizedPolicyAlert from '../components/alerts/PersonalizedPolicyAlert';
-import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAlert';
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 
@@ -24,21 +22,21 @@ export default function TradeRiskAlternatives() {
   const [isLoading, setIsLoading] = useState(true);
   const [userTier, setUserTier] = useState('Trial'); // Track subscription tier
 
-  // Real policy alerts state
-  const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
-  const [isLoadingPolicyAlerts, setIsLoadingPolicyAlerts] = useState(false);
-
-  // Consolidated alerts state (intelligent alert grouping)
-  const [consolidatedAlerts, setConsolidatedAlerts] = useState([]);
-  const [isConsolidating, setIsConsolidating] = useState(false);
-  const [originalAlertCount, setOriginalAlertCount] = useState(0);
+  // Executive trade alert state
+  const [executiveAlert, setExecutiveAlert] = useState(null);
+  const [isLoadingAlert, setIsLoadingAlert] = useState(false);
+  const [alertsGenerated, setAlertsGenerated] = useState(false);
 
   // PREMIUM CONTENT: USMCA Intelligence from workflow
   const [workflowIntelligence, setWorkflowIntelligence] = useState(null);
 
-  // Progress tracking for alert generation
-  const [alertsGenerated, setAlertsGenerated] = useState(false);
-  const [progressSteps, setProgressSteps] = useState([]);
+  // Email alert preferences
+  const [emailPreferences, setEmailPreferences] = useState({
+    section301_changes: true,
+    usmca_policy_changes: true,
+    new_tariffs: true,
+    frequency: 'IMMEDIATE'
+  });
 
   // Save data consent modal state
   const [showSaveDataConsent, setShowSaveDataConsent] = useState(false);
@@ -420,25 +418,18 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
-   * Load REAL tariff policy alerts from database
-   * Filters by user's component origins and HS codes for relevance
-   * Now called on-demand with progress tracking
+   * Load executive trade alert - ONE cohesive summary
+   * Uses workflow intelligence + personalized alerts
    */
-  const loadRealPolicyAlerts = async (profile) => {
-    setIsLoadingPolicyAlerts(true);
-    setProgressSteps([]);
+  const loadExecutiveAlert = async (profile) => {
+    setIsLoadingAlert(true);
 
     try {
-      // Step 1: Analyze component origins
-      setProgressSteps(prev => [...prev, 'Analyzing component origins...']);
-      console.log('Analyzing component origins for:', profile.companyName);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
+      console.log('🎯 Generating executive trade alert for:', profile.companyName);
 
-      // Step 2: Checking trade policies
-      setProgressSteps(prev => [...prev, 'Checking applicable trade policies...']);
-      console.log('Checking trade policies...');
-
-      const response = await fetch('/api/generate-personalized-alerts', {
+      // Step 1: Get personalized policy alerts for context
+      console.log('📊 Fetching policy alerts...');
+      const alertsResponse = await fetch('/api/generate-personalized-alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -446,81 +437,58 @@ export default function TradeRiskAlternatives() {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate personalized alerts: ${response.status}`);
+      if (!alertsResponse.ok) {
+        throw new Error(`Failed to fetch policy alerts: ${alertsResponse.status}`);
       }
 
-      // Step 3: Generating personalized alerts
-      setProgressSteps(prev => [...prev, 'Generating personalized alerts...']);
-      const data = await response.json();
+      const alertsData = await alertsResponse.json();
+      const rawAlerts = alertsData.alerts || [];
 
-      if (data.success && data.alerts) {
-        console.log(`Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
+      console.log(`📨 Got ${rawAlerts.length} policy alerts for context`);
 
-        const personalizedAlerts = data.alerts;
+      // Step 2: Generate ONE executive summary using all the data
+      console.log('✍️ Generating executive summary...');
+      const executiveResponse = await fetch('/api/executive-trade-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_profile: profile,
+          workflow_intelligence: workflowIntelligence,
+          raw_alerts: rawAlerts
+        })
+      });
 
-        setRealPolicyAlerts(personalizedAlerts);
-        setOriginalAlertCount(personalizedAlerts.length);
+      if (!executiveResponse.ok) {
+        throw new Error(`Failed to generate executive alert: ${executiveResponse.status}`);
+      }
 
-        // Step 4: Consolidating related alerts
-        setProgressSteps(prev => [...prev, 'Consolidating related alerts...']);
-        if (personalizedAlerts.length > 0) {
-          await consolidateAlerts(personalizedAlerts, profile);
-        }
+      const executiveData = await executiveResponse.json();
 
-        setProgressSteps(prev => [...prev, 'Analysis complete']);
+      if (executiveData.success && executiveData.alert) {
+        console.log(`✅ Executive alert generated: ${executiveData.alert.headline}`);
+        setExecutiveAlert(executiveData.alert);
         setAlertsGenerated(true);
+
+        // Save email preference from alert config
+        if (executiveData.alert.email_trigger_config) {
+          const emailConfig = executiveData.alert.email_trigger_config;
+          setEmailPreferences({
+            should_email: emailConfig.should_email,
+            trigger_level: emailConfig.trigger_level,
+            frequency: emailConfig.frequency
+          });
+        }
       } else {
-        console.log('No personalized alerts generated');
-        setRealPolicyAlerts([]);
-        setProgressSteps(prev => [...prev, 'No alerts found']);
+        console.log('⚠️ No executive alert generated');
+        setExecutiveAlert(null);
         setAlertsGenerated(true);
       }
     } catch (error) {
-      console.error('Error generating personalized alerts:', error);
-      setRealPolicyAlerts([]);
-      setProgressSteps(prev => [...prev, 'Error generating alerts']);
+      console.error('❌ Error generating executive alert:', error);
+      setExecutiveAlert(null);
       setAlertsGenerated(true);
     } finally {
-      setIsLoadingPolicyAlerts(false);
-    }
-  };
-
-  /**
-   * Consolidate related alerts into intelligent groups
-   * Example: 3 alerts about Chinese components → 1 consolidated "China Risk"
-   */
-  const consolidateAlerts = async (alerts, profile) => {
-    setIsConsolidating(true);
-
-    try {
-      console.log(`🧠 Consolidating ${alerts.length} alerts...`);
-
-      const response = await fetch('/api/consolidate-alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          alerts: alerts,
-          user_profile: profile
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Consolidation failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.consolidated_alerts) {
-        console.log(`✅ Consolidated ${data.original_count} alerts → ${data.consolidated_count} groups`);
-        setConsolidatedAlerts(data.consolidated_alerts);
-      }
-    } catch (error) {
-      console.error('❌ Alert consolidation failed:', error);
-      // Fallback: show individual alerts if consolidation fails
-      setConsolidatedAlerts([]);
-    } finally {
-      setIsConsolidating(false);
+      setIsLoadingAlert(false);
     }
   };
 
@@ -761,66 +729,53 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
+        {/* Executive Trade Alert Summary - ONE cohesive narrative */}
         <div className="form-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 className="form-section-title" style={{ margin: 0 }}>Government Policy Alerts</h2>
-            {consolidatedAlerts.length > 0 && originalAlertCount > consolidatedAlerts.length && (
-              <span style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 500 }}>
-                Consolidated {originalAlertCount} policies → {consolidatedAlerts.length} alert{consolidatedAlerts.length !== 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
+          <h2 className="form-section-title">Executive Trade Risk Summary</h2>
 
           {!alertsGenerated && (
             <div className="alert alert-info">
               <div className="alert-content">
-                <div className="alert-title">Generate Personalized Risk Analysis</div>
+                <div className="alert-title">Generate Your Trade Risk Analysis</div>
                 <div className="text-body">
-                  Click below to analyze your components for applicable trade policies and tariff risks.
+                  We'll analyze your components, trade policies, tariff exposure, and create ONE strategic recommendation backed by your real data.
                 </div>
                 <div className="hero-buttons" style={{ marginTop: '1rem' }}>
                   <button
-                    onClick={() => loadRealPolicyAlerts(userProfile)}
+                    onClick={() => loadExecutiveAlert(userProfile)}
                     className="btn-primary"
-                    disabled={isLoadingPolicyAlerts}
+                    disabled={isLoadingAlert}
                   >
-                    {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
+                    {isLoadingAlert ? 'Analyzing...' : 'Generate Strategic Analysis'}
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {(isLoadingPolicyAlerts || isConsolidating) && (
+          {isLoadingAlert && (
             <div className="alert alert-info">
               <div className="alert-content">
                 <div className="alert-title">Analyzing your trade profile...</div>
-                <div style={{ marginTop: '0.75rem' }}>
-                  {progressSteps.map((step, idx) => (
-                    <div key={idx} style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '0.5rem' }}>
-                      {idx < progressSteps.length - 1 ? '✓' : '→'} {step}
-                    </div>
-                  ))}
+                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#4b5563' }}>
+                  ⏳ Fetching policy alerts...<br/>
+                  ⏳ Analyzing your components...<br/>
+                  ⏳ Generating strategic recommendations...<br/>
                 </div>
               </div>
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && !isConsolidating && alertsGenerated && realPolicyAlerts.length === 0 && (
+          {!isLoadingAlert && alertsGenerated && !executiveAlert && (
             <div className="alert alert-success">
               <div className="alert-content">
-                <div className="alert-title">No Critical Policy Changes Affecting Your Trade</div>
+                <div className="alert-title">No Immediate Trade Risks Detected</div>
                 <div className="text-body">
-                  Your components are not currently affected by government-announced tariff or policy changes. We monitor official sources continuously and will alert you when relevant changes occur.
+                  Your components are not currently affected by government-announced tariff changes. We monitor official sources continuously and will notify you when relevant policies are announced.
                 </div>
                 <div className="hero-buttons" style={{ marginTop: '1rem' }}>
                   <button
-                    onClick={() => {
-                      setAlertsGenerated(false);
-                      setRealPolicyAlerts([]);
-                      setConsolidatedAlerts([]);
-                    }}
+                    onClick={() => setAlertsGenerated(false)}
                     className="btn-secondary"
                   >
                     Run Analysis Again
@@ -830,45 +785,205 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
+          {!isLoadingAlert && alertsGenerated && executiveAlert && (
             <div className="element-spacing">
-              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
-                  TRADE RISK ANALYSIS REPORT
-                </div>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {consolidatedAlerts.length} policy alert{consolidatedAlerts.length !== 1 ? 's' : ''}
-                </div>
-              </div>
-              {consolidatedAlerts.map((alert, idx) => (
-                <ConsolidatedPolicyAlert
-                  key={idx}
-                  consolidatedAlert={alert}
-                  userProfile={userProfile}
-                  userTier={userTier}
-                />
-              ))}
-            </div>
-          )}
+              {/* Executive Alert Card */}
+              <div style={{ backgroundColor: '#fff', border: '2px solid #dc2626', borderRadius: '0.75rem', padding: '2rem' }}>
 
-          {/* Fallback: Show individual alerts if consolidation failed */}
-          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
-            <div className="element-spacing">
-              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
-                  TRADE RISK ANALYSIS REPORT
+                {/* Headline */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 700, color: '#dc2626' }}>
+                    {executiveAlert.headline}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.9375rem', color: '#6b7280', fontStyle: 'italic' }}>
+                    {executiveAlert.situation_brief}
+                  </p>
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {realPolicyAlerts.length} policy alert{realPolicyAlerts.length !== 1 ? 's' : ''}
-                </div>
+
+                {/* Executive Summary */}
+                {executiveAlert.executive_summary && (
+                  <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb' }}>
+                    <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>
+                      The Situation
+                    </h4>
+                    <div style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: 1.6 }}>
+                      <p style={{ margin: '0 0 0.5rem 0' }}>
+                        <strong>Problem:</strong> {executiveAlert.executive_summary.problem}
+                      </p>
+                      <p style={{ margin: '0 0 0.5rem 0' }}>
+                        <strong>Root Cause:</strong> {executiveAlert.executive_summary.root_cause}
+                      </p>
+                      <p style={{ margin: '0 0 0.5rem 0' }}>
+                        <strong>Annual Impact:</strong> ${executiveAlert.executive_summary.impact?.toLocaleString() || 'TBD'}
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        <strong>Why Now:</strong> {executiveAlert.executive_summary.urgency}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Financial Impact */}
+                {executiveAlert.financial_snapshot && (
+                  <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fef2f2', padding: '1rem', borderRadius: '0.5rem' }}>
+                    <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', fontWeight: 600, color: '#991b1b' }}>
+                      💰 Financial Impact
+                    </h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
+                      <div>
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500 }}>Current Annual Burden</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#dc2626' }}>
+                          ${executiveAlert.financial_snapshot.current_burden?.toLocaleString() || '0'}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500 }}>Potential Annual Savings</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#059669' }}>
+                          ${executiveAlert.financial_snapshot.potential_savings?.toLocaleString() || '0'}
+                        </div>
+                      </div>
+                    </div>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
+                      <strong>Payback Period:</strong> {executiveAlert.financial_snapshot.payback_period}
+                    </p>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#6b7280' }}>
+                      <strong>Confidence:</strong> {executiveAlert.financial_snapshot.confidence}
+                    </p>
+                  </div>
+                )}
+
+                {/* Strategic Roadmap */}
+                {executiveAlert.strategic_roadmap && executiveAlert.strategic_roadmap.length > 0 && (
+                  <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb' }}>
+                    <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>
+                      📋 Strategic Roadmap
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {executiveAlert.strategic_roadmap.map((phase, idx) => (
+                        <div key={idx} style={{ paddingLeft: '1rem', borderLeft: '3px solid #3b82f6', backgroundColor: '#f0f9ff', padding: '1rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                            <div>
+                              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#3b82f6' }}>Phase {phase.phase}</span>
+                              <h5 style={{ margin: '0.25rem 0 0 0', fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>
+                                {phase.title}
+                              </h5>
+                            </div>
+                            <span style={{ fontSize: '0.8125rem', color: '#6b7280', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
+                              {phase.timeline}
+                            </span>
+                          </div>
+                          <p style={{ margin: '0.5rem 0', fontSize: '0.875rem', color: '#6b7280' }}>
+                            {phase.why_matters}
+                          </p>
+                          {phase.actions && phase.actions.length > 0 && (
+                            <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem', fontSize: '0.875rem', color: '#374151' }}>
+                              {phase.actions.map((action, aIdx) => (
+                                <li key={aIdx} style={{ marginBottom: '0.25rem' }}>
+                                  {action}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.8125rem', color: '#059669', fontWeight: 600 }}>
+                            Impact: {phase.impact}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action This Week */}
+                {executiveAlert.action_this_week && executiveAlert.action_this_week.length > 0 && (
+                  <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#fef3c7', padding: '1rem', borderRadius: '0.5rem' }}>
+                    <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', fontWeight: 600, color: '#92400e' }}>
+                      ⚡ Action This Week
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
+                      {executiveAlert.action_this_week.map((action, idx) => (
+                        <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* What Impacts Them */}
+                {executiveAlert.what_impacts_them && executiveAlert.what_impacts_them.length > 0 && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '1rem', fontWeight: 600, color: '#1f2937' }}>
+                      🎯 Policies Affecting You
+                    </h4>
+                    <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
+                      {executiveAlert.what_impacts_them.map((policy, idx) => (
+                        <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                          {policy}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Broker Notes */}
+                {executiveAlert.broker_notes && (
+                  <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb', padding: '1rem', borderRadius: '0.5rem', fontStyle: 'italic', fontSize: '0.9375rem', color: '#6b7280', lineHeight: 1.6 }}>
+                    <strong style={{ color: '#374151' }}>From Your Broker:</strong><br/>
+                    {executiveAlert.broker_notes}
+                  </div>
+                )}
               </div>
-              {realPolicyAlerts.map((alert, idx) => (
-                <PersonalizedPolicyAlert
-                  key={idx}
-                  alert={alert}
-                  userProfile={userProfile}
-                />
-              ))}
+
+              {/* Email Alert Configuration */}
+              {executiveAlert.email_trigger_config && (
+                <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.75rem' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: '#166534' }}>
+                    📧 Email Alert Configuration
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.9375rem', color: '#374151', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={emailPreferences.should_email || false}
+                        onChange={(e) => setEmailPreferences({ ...emailPreferences, should_email: e.target.checked })}
+                        style={{ marginRight: '0.5rem', width: '1rem', height: '1rem', cursor: 'pointer' }}
+                      />
+                      Email me when {executiveAlert.email_trigger_config.trigger_level} policy changes occur
+                    </label>
+                    <select
+                      value={emailPreferences.frequency || 'IMMEDIATE'}
+                      onChange={(e) => setEmailPreferences({ ...emailPreferences, frequency: e.target.value })}
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '0.375rem',
+                        border: '1px solid #d1d5db',
+                        fontSize: '0.875rem',
+                        backgroundColor: '#fff'
+                      }}
+                    >
+                      <option value="IMMEDIATE">Send immediately</option>
+                      <option value="WEEKLY_DIGEST">Weekly digest</option>
+                      <option value="NEVER">Don't email</option>
+                    </select>
+                  </div>
+                  <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.8125rem', color: '#6b7280' }}>
+                    We'll monitor for changes and notify you based on your preferences.
+                  </p>
+                </div>
+              )}
+
+              {/* Run Again */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <button
+                  onClick={() => {
+                    setAlertsGenerated(false);
+                    setExecutiveAlert(null);
+                  }}
+                  className="btn-secondary"
+                >
+                  Run Analysis Again
+                </button>
+              </div>
             </div>
           )}
         </div>
