@@ -455,6 +455,36 @@ export default function USMCAQualification({ results }) {
                               </div>
                             )}
 
+                            {/* STRATEGIC: Supply Chain Alternatives for Policy-Exposed Components */}
+                            {section301 > 0 && (
+                              <div style={{
+                                marginTop: '0.75rem',
+                                padding: '0.75rem',
+                                backgroundColor: '#fef3c7',
+                                borderRadius: '4px',
+                                borderLeft: '3px solid #d97706'
+                              }}>
+                                <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
+                                  💡 Strategic Opportunity: Eliminate Section 301 Exposure
+                                </div>
+                                <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5', marginBottom: '0.5rem' }}>
+                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {section301.toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * section301 / 100 / 12).toFixed(0)}/month</strong>.
+                                </div>
+                                <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5' }}>
+                                  <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component (+2-3% unit cost premium) would:
+                                  <ul style={{ marginTop: '0.25rem', marginBottom: '0.25rem', marginLeft: '1.5rem' }}>
+                                    <li>Eliminate Section 301 exposure entirely</li>
+                                    <li>Increase regional value content (RVC) by ~{component.value_percentage}%</li>
+                                    <li>Implementation timeline: 4-6 weeks for supplier qualification</li>
+                                    <li>Payback period: ~3 months (tariff savings exceed cost premium)</li>
+                                  </ul>
+                                </div>
+                                <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ffffff', borderRadius: '3px', fontSize: '0.75rem', color: '#5f4800', fontStyle: 'italic' }}>
+                                  This analysis assumes current tariff policy. Policy changes can modify payback timeline, which is why policy insulation provides strategic value.
+                                </div>
+                              </div>
+                            )}
+
                             {/* AI Reasoning */}
                             {component.ai_reasoning && (
                               <div style={{ marginBottom: '0.75rem' }}>
