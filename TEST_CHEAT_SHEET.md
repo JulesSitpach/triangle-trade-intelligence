@@ -21,11 +21,19 @@ Copy/paste the test data directly into the form fields. All values are realistic
 | Tax ID / Business Number | 95-1234567 | EIN format for US: XX-XXXXXXX |
 | Annual Trade Volume | 5,500,000 | In USD. Can include commas, no $ symbol |
 | Supplier Country | Mexico | Where primary components originate |
-| Manufacturing Location | Mexico | Where final assembly occurs (or "Does Not Apply") |
 
 ---
 
-## STEP 2: COMPONENT ORIGINS (BOM)
+## STEP 2: PRODUCT & COMPONENT ANALYSIS
+
+**Product Section:**
+
+| Field | Test Value | Notes |
+|-------|-----------|-------|
+| Complete Product Description | Industrial-grade dual-core microprocessor system with metal housing and LCD interface | Detailed description for accurate HS classification |
+| Manufacturing/Assembly Location | Mexico | Required. Options: "Does Not Apply" or any country |
+
+**Component Origins (BOM):**
 
 ### Add these components one at a time - they must sum to 100% or less
 
@@ -101,7 +109,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 ✓ Business Type - Must select from: Importer, Exporter, Manufacturer, Distributor, Wholesaler, or Retailer
 ✓ Industry Sector - Must select from dropdown
 ✓ Address - Any valid address format
-✓ Country - Any country, but destination affects tariff logic
+✓ Company Country - Any country
 ✓ **Destination Country - MUST BE: US, Canada, or Mexico** ← CRITICAL
 ✓ Contact Person - Any name
 ✓ Contact Phone - Any valid phone format
@@ -109,15 +117,16 @@ Copy/paste the test data directly into the form fields. All values are realistic
 ✓ Tax ID - Any format (EIN: XX-XXXXXXX or CA: Business Number, MX: RFC)
 ✓ Trade Volume - Numeric only, can include commas, no currency symbols
 ✓ Supplier Country - Any country
-✓ Manufacturing Location - Any country OR "Does Not Apply"
+✓ All 12 fields required to proceed to Step 2
 
 ### Step 2 Validation Rules
+✓ Complete Product Description - Required for accurate AI classification
+✓ **Manufacturing/Assembly Location - REQUIRED** ← CRITICAL. Options: "Does Not Apply" or any country
 ✓ Component Description - **Minimum 10 characters** ← CRITICAL
-✓ Origin Country - Any country
-✓ Value Percentage - Numeric, **total must be ≤100%** ← CRITICAL
-✓ HS Code - 6-10 digit format (e.g., 8542.31 or 854231)
-✓ Manufacturing Location - Auto-filled from Step 1, can override per component
-✓ All components require at least 1 with an HS code for tariff lookup
+✓ Component Origin Country - Any country
+✓ Component Value Percentage - Numeric, **total must equal 100%** ← CRITICAL
+✓ Component HS Code - 6-10 digit format (e.g., 8542.31 or 854231). Must have at least 1 HS code across all components
+✓ Minimum 1 component required (maximum depends on subscription tier)
 
 ---
 
