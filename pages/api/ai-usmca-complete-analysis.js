@@ -219,6 +219,7 @@ export default protectedApiHandler({
       },
       body: JSON.stringify({
         model: 'anthropic/claude-sonnet-4.5', // Sonnet 4.5 - 72.7% SWE-bench, best for complex USMCA reasoning
+        max_tokens: 3000, // ✅ Prevent truncation of complex USMCA qualification responses
         messages: [{
           role: 'user',
           content: prompt
