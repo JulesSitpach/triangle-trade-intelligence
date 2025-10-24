@@ -8,10 +8,11 @@ import React, { useState } from 'react';
 import { generateUSMCACertificatePDF } from '../../../lib/utils/usmca-certificate-pdf-generator';
 
 export default function CertificateSection({ results, onDownloadCertificate }) {
+  // ✅ FIX: Move useState BEFORE conditional return (React Rules of Hooks)
+  const [isGenerating, setIsGenerating] = useState(false);
 
   if (!results?.certificate) return null;
 
-  const [isGenerating, setIsGenerating] = useState(false);
   const certificate = results.certificate;
   const isQualified = results?.usmca?.qualified || false;
 
