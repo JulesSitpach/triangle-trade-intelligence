@@ -51,7 +51,7 @@ export default async function handler(req, res) {
           severity,
           component,
           message,
-          issue_data: data || {},
+          context_data: data || {},
           user_id,
           certificate_number,
           created_at: new Date().toISOString()
