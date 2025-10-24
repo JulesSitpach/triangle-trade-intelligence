@@ -786,9 +786,55 @@ export default function USMCAQualification({ results }) {
           </div>
         </div>
 
+        {/* EXECUTIVE SUMMARY - Business Advisory */}
         {reason && (
-          <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563' }}>
-            {reason}
+          <div style={{
+            marginTop: '2rem',
+            padding: '1.5rem',
+            backgroundColor: qualified ? '#f0fdf4' : '#fef2f2',
+            border: qualified ? '2px solid #22c55e' : '2px solid #ef4444',
+            borderRadius: '8px',
+            lineHeight: '1.6'
+          }}>
+            <div style={{
+              fontSize: '0.9375rem',
+              color: qualified ? '#15803d' : '#991b1b',
+              fontWeight: '500',
+              marginBottom: '0.75rem'
+            }}>
+              {qualified ? '✓ Qualification Assessment' : '⚠️ Qualification Status'}
+            </div>
+
+            <div style={{
+              fontSize: '0.9375rem',
+              color: '#1f2937',
+              lineHeight: '1.8',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word'
+            }}>
+              {reason}
+            </div>
+
+            {/* Financial Impact Callout (if available from AI response) */}
+            {results.financial_impact?.annual_tariff_savings > 0 && (
+              <div style={{
+                marginTop: '1rem',
+                padding: '0.75rem',
+                backgroundColor: 'rgba(255,255,255,0.6)',
+                borderRadius: '4px',
+                borderLeft: '3px solid #059669'
+              }}>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>ANNUAL TARIFF SAVINGS</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#059669' }}>
+                  ${(results.financial_impact.annual_tariff_savings || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                  {results.financial_impact.monthly_tariff_savings > 0 && (
+                    <>≈ ${(results.financial_impact.monthly_tariff_savings || 0).toLocaleString()}/month</>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
