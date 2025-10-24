@@ -361,11 +361,11 @@ export default function CompanyInformationStep({
               ) : (
                 <>
                   <option value="">Select supplier country</option>
-                  {dropdownOptions.countries?.map(country => {
+                  {dropdownOptions.countries?.map((country, idx) => {
                     const countryName = typeof country === 'string' ? country : country.name || country.label;
                     const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
                     return (
-                      <option key={countryCode} value={countryCode}>{countryName}</option>
+                      <option key={`supplier-${countryCode}-${idx}`} value={countryCode}>{countryName}</option>
                     );
                   })}
                 </>
