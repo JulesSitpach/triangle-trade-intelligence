@@ -12,6 +12,17 @@ import { normalizeComponent, logComponentValidation } from '../../lib/schemas/co
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { enrichmentRouter } from '../../lib/tariff/enrichment-router.js';
+// ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
+import {
+  getCacheExpiration,
+  getIndustryThresholds,
+  getDeMinimisThreshold,
+  parseTradeVolume,
+  extractIndustryFromBusinessType,
+  CACHE_EXPIRATION,
+  INDUSTRY_THRESHOLDS,
+  DE_MINIMIS
+} from '../../lib/validation/form-validation.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,60 +35,13 @@ const supabase = createClient(
 // User B would receive User A's cached tariff rates - CRITICAL COMPLIANCE RISK
 // See: Data Integrity Audit - CRITICAL FINDING #1
 
-// ✅ DESTINATION-AWARE CACHE EXPIRATION (Smart Cost Optimization)
-const CACHE_EXPIRATION = {
-  'US': 24 * 60 * 60 * 1000,      // 24 hours - volatile Section 301 policies
-  'CA': 90 * 24 * 60 * 60 * 1000, // 90 days - stable, predictable
-  'MX': 60 * 24 * 60 * 60 * 1000, // 60 days - relatively stable
-  'default': 24 * 60 * 60 * 1000  // 24 hours fallback
-};
-
-// Helper: Get cache expiration for destination
-function getCacheExpiration(destination) {
-  return CACHE_EXPIRATION[destination?.toUpperCase()] || CACHE_EXPIRATION['default'];
-}
-
-// ========== WEEK 1 ENHANCEMENT CONSTANTS (Performance Optimization) ==========
-
-// Industry-specific thresholds (Week 1 Enhancement #2)
-const INDUSTRY_THRESHOLDS = {
-  'Automotive': { rvc: 75, labor: 22.5, article: 'Annex 4-B Art. 4.5', method: 'Net Cost', lvc_2025: 45 },
-  'Electronics': { rvc: 65, labor: 17.5, article: 'Annex 4-B Art. 4.7', method: 'Transaction Value' },
-  'Textiles/Apparel': { rvc: 55, labor: 27.5, article: 'Annex 4-B Art. 4.3', method: 'Yarn Forward' },
-  'Chemicals': { rvc: 62.5, labor: 12.5, article: 'Article 4.2', method: 'Net Cost' },
-  'Agriculture': { rvc: 60, labor: 17.5, article: 'Annex 4-B Art. 4.4', method: 'Transaction Value' },
-  'default': { rvc: 62.5, labor: 15, article: 'Article 4.2', method: 'Net Cost or Transaction Value' }
-};
-
-// De minimis thresholds (Week 1 Enhancement #4 - October 2025 Accurate)
-const DE_MINIMIS = {
-  'US': {
-    standard: 0,
-    note: '⚠️ USA eliminated de minimis for ALL countries (Aug 2025)'
-  },
-  'CA': {
-    standard: 20,      // CAD $20 from non-USMCA
-    usmca_duty: 150,   // CAD $150 duty-free from US/MX
-    usmca_tax: 40,     // CAD $40 tax-free from US/MX
-    note: origin => (origin === 'US' || origin === 'MX')
-      ? 'USMCA: CAD $150 duty-free, $40 tax-free'
-      : 'CAD $20 - very low threshold'
-  },
-  'MX': {
-    standard: 0,       // Abolished Dec 2024
-    usmca: 117,        // USD $117 from US/CA (VAT >$50)
-    note: origin => (origin === 'US' || origin === 'CA')
-      ? 'USD $117 duty-free under USMCA (VAT applies >$50)'
-      : 'No de minimis - 19% global tax rate (Dec 2024)'
-  }
-};
-
-// ✅ HELPER: Parse trade_volume from string to number (handles commas from UI form)
-function parseTradeVolume(volumeInput) {
-  if (!volumeInput) return null;
-  const parsed = parseFloat(String(volumeInput).replace(/[^0-9.-]+/g, ''));
-  return !isNaN(parsed) && parsed > 0 ? parsed : null;
-}
+// ✅ EXTRACTED (Phase 3, Oct 23, 2025): Constants and utility functions moved to lib/validation/form-validation.js
+// - CACHE_EXPIRATION
+// - getCacheExpiration()
+// - INDUSTRY_THRESHOLDS
+// - DE_MINIMIS
+// - parseTradeVolume()
+// These are now imported from lib/validation/form-validation.js (see imports above)
 
 export default protectedApiHandler({
   POST: async (req, res) => {
@@ -1527,23 +1491,8 @@ function cacheBatchResults(freshRates, components, existingCache, destination_co
  * @param {string} businessType - Business type from form
  * @returns {string} Industry sector
  */
-function extractIndustryFromBusinessType(businessType) {
-  if (!businessType) return 'General Manufacturing';
-
-  const type = businessType.toLowerCase();
-
-  // Map business types to industry sectors
-  if (type.includes('textile') || type.includes('apparel') || type.includes('clothing')) return 'Textiles & Apparel';
-  if (type.includes('automotive') || type.includes('vehicle') || type.includes('transportation')) return 'Automotive & Transportation';
-  if (type.includes('electronic') || type.includes('technology') || type.includes('semiconductor')) return 'Electronics & Technology';
-  if (type.includes('chemical') || type.includes('pharmaceutical') || type.includes('coating') || type.includes('resin')) return 'Chemicals & Materials';
-  if (type.includes('food') || type.includes('agriculture') || type.includes('beverage')) return 'Food & Agriculture';
-  if (type.includes('machinery') || type.includes('equipment') || type.includes('industrial')) return 'Machinery & Equipment';
-  if (type.includes('metal') || type.includes('steel') || type.includes('aluminum')) return 'Metals & Mining';
-  if (type.includes('plastic') || type.includes('polymer')) return 'Plastics & Polymers';
-
-  return 'General Manufacturing';
-}
+// ✅ EXTRACTED (Phase 3, Oct 23, 2025): extractIndustryFromBusinessType() moved to lib/validation/form-validation.js
+// Now imported at the top of this file
 
 /**
  * Save AI-generated classification data to database to BUILD the database

@@ -16,7 +16,7 @@ import {
   validateComponentsArray,
   validateTradeVolume,
   reportValidationErrors
-} from '../../lib/validation/data-contract-validator.js';
+} from '../../lib/validation/data-contract-validator.ts';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
