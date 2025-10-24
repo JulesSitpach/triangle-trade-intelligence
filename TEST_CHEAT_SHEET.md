@@ -11,7 +11,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 |-------|-----------|-------|
 | Company Name | Acme Electronics Manufacturing Inc | Min length required |
 | Business Type | Manufacturer | Options: Importer, Exporter, Manufacturer, Distributor, Wholesaler, Retailer |
-| Industry Sector | Electronics & Technology | Must be selected from dropdown (see all 14 options below) |
+| Industry Sector | Electronics | Must be selected from dropdown (see all 14 options below) |
 | Company Address | 42 Industrial Park Drive, San Jose CA 95110 | Full address required |
 | Company Country | United States | Options: US, Canada, Mexico, China, Vietnam, etc. |
 | Destination Market | Mexico | **CRITICAL for USMCA**: Must be US, Canada, or Mexico |
@@ -106,22 +106,22 @@ Copy/paste the test data directly into the form fields. All values are realistic
 
 **Complete list of industries available in dropdown with their USMCA RVC thresholds:**
 
-| Industry Sector | RVC Threshold | Labor Credit | USMCA Article | Mapping Note |
-|---|---|---|---|---|
-| Agriculture & Food | 60% | 17.5% | Art. 4.4 | Maps to "Agriculture" |
-| Automotive & Transportation | 75% | 22.5% | Art. 4.5 | Maps to "Automotive" |
-| Base Metals & Articles | 62.5% | 12.5% | Art. 4.2 | Maps to "Base Metals" |
-| Chemicals & Materials | 62.5% | 12.5% | Art. 4.2 | Maps to "Chemicals" |
-| Electronics & Technology | 65% | 17.5% | Art. 4.7 | Maps to "Electronics" |
-| Energy Equipment | 62.5% | 12.5% | Art. 4.2 | Maps to "Machinery" |
-| General | 62.5% | 15% | Art. 4.2 | Default fallback |
-| Leather & Leather Goods | 55% | 20% | Art. 4.3 | Maps to "Leather" |
-| Machinery & Equipment | 62.5% | 12.5% | Art. 4.2 | Maps to "Machinery" |
-| Plastics & Rubber | 62.5% | 12.5% | Art. 4.2 | No mapping needed |
-| Precision Instruments | 62.5% | 12.5% | Art. 4.2 | No mapping needed |
-| Textiles & Apparel | 55% | 27.5% | Art. 4.3 | Maps to "Textiles/Apparel" |
-| Transport Equipment | 62.5% | 15% | Art. 4.2 | No mapping needed |
-| Wood & Wood Products | 62.5% | 12.5% | Art. 4.2 | Maps to "Wood Products" |
+| Industry Sector | RVC Threshold | Labor Credit | USMCA Article |
+|---|---|---|---|
+| Agriculture | 60% | 17.5% | Art. 4.4 |
+| Automotive | 75% | 22.5% | Art. 4.5 |
+| Base Metals | 62.5% | 12.5% | Art. 4.2 |
+| Chemicals | 62.5% | 12.5% | Art. 4.2 |
+| Electronics | 65% | 17.5% | Art. 4.7 |
+| Energy Equipment | 62.5% | 12.5% | Art. 4.2 |
+| General | 62.5% | 15% | Art. 4.2 |
+| Leather | 55% | 20% | Art. 4.3 |
+| Machinery | 62.5% | 12.5% | Art. 4.2 |
+| Plastics & Rubber | 62.5% | 12.5% | Art. 4.2 |
+| Precision Instruments | 62.5% | 12.5% | Art. 4.2 |
+| Textiles/Apparel | 55% | 27.5% | Art. 4.3 |
+| Transport Equipment | 62.5% | 15% | Art. 4.2 |
+| Wood Products | 62.5% | 12.5% | Art. 4.2 |
 
 **Testing Tips:**
 - Try each industry to verify the correct threshold is applied
