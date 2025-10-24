@@ -62,7 +62,13 @@ export default function ComponentOriginsStepEnhanced({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Update parent form data when components change
+  // CRITICAL: Only update if components actually changed (not on every render)
+  // This prevents infinite loop with the sync effect below
   useEffect(() => {
+    // Don't update on initial render (components will be [{}])
+    if (components.length === 1 && !components[0].description) {
+      return; // Skip initial empty component
+    }
     updateFormData('component_origins', components);
   }, [components, updateFormData]);
 
