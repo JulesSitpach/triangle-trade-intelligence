@@ -429,12 +429,48 @@ export default function TradeRiskAlternatives() {
   /**
    * Load executive trade alert - ONE cohesive summary
    * Uses workflow intelligence + personalized alerts
+   * OPTIMIZED: Check for saved summary first to avoid $0.02 regeneration
    */
-  const loadExecutiveAlert = async (profile) => {
+  const loadExecutiveAlert = async (profile, workflowSessionId = null) => {
     setIsLoadingAlert(true);
 
     try {
-      console.log('🎯 Generating executive trade alert for:', profile.companyName);
+      console.log('🎯 Loading executive trade alert for:', profile.companyName);
+
+      // === OPTIMIZATION: Check for existing saved summary ===
+      console.log('🔍 Checking for saved summary...');
+      const summaryCheckResponse = await fetch(
+        `/api/retrieve-executive-summary?${workflowSessionId ? `workflow_session_id=${workflowSessionId}` : 'latest=true'}`,
+        { credentials: 'include' }
+      );
+
+      if (summaryCheckResponse.ok) {
+        const summaryData = await summaryCheckResponse.json();
+        if (summaryData.summary) {
+          console.log(`✅ Found saved summary: ${summaryData.summary.id}`);
+          console.log(`💰 Reusing summary instead of regenerating ($0.02 saved)`);
+          setExecutiveAlert(summaryData.summary);
+          setAlertsGenerated(true);
+
+          // Set email preferences if available
+          if (summaryData.summary.email_trigger_config) {
+            const emailConfig = summaryData.summary.email_trigger_config;
+            setEmailPreferences({
+              should_email: emailConfig.should_email,
+              trigger_level: emailConfig.trigger_level,
+              frequency: emailConfig.frequency
+            });
+          }
+
+          setIsLoadingAlert(false);
+          return; // DONE - no need to regenerate
+        }
+      } else if (summaryCheckResponse.status === 410) {
+        console.log('⚠️ Saved summary expired - generating fresh analysis');
+      }
+
+      // === GENERATION: No saved summary, generate new one ===
+      console.log('✍️ Generating new executive summary...');
 
       // Step 1: Get personalized policy alerts for context
       console.log('📊 Fetching policy alerts...');
@@ -469,7 +505,6 @@ export default function TradeRiskAlternatives() {
       console.log(`📨 Got ${rawAlerts.length} policy alerts for context`);
 
       // Step 2: Generate ONE executive summary using all the data
-      console.log('✍️ Generating executive summary...');
       console.log('📊 Request data:', {
         user_profile_keys: Object.keys(profile || {}),
         workflow_intelligence_keys: Object.keys(workflowIntelligence || {}),
@@ -482,7 +517,9 @@ export default function TradeRiskAlternatives() {
         body: JSON.stringify({
           user_profile: userProfileForAPI,  // ✅ Use converted snake_case version
           workflow_intelligence: workflowIntelligence,
-          raw_alerts: rawAlerts
+          raw_alerts: rawAlerts,
+          user_id: user?.id,  // ✅ Pass user_id for database save
+          workflow_session_id: workflowSessionId  // ✅ Pass workflow_session_id
         })
       });
 
@@ -494,6 +531,9 @@ export default function TradeRiskAlternatives() {
 
       if (executiveData.success && executiveData.alert) {
         console.log(`✅ Executive alert generated: ${executiveData.alert.headline}`);
+        if (executiveData.summary_id) {
+          console.log(`💾 Summary saved to database: ${executiveData.summary_id}`);
+        }
         setExecutiveAlert(executiveData.alert);
         setAlertsGenerated(true);
 
@@ -512,7 +552,7 @@ export default function TradeRiskAlternatives() {
         setAlertsGenerated(true);
       }
     } catch (error) {
-      console.error('❌ Error generating executive alert:', error);
+      console.error('❌ Error loading executive alert:', error);
       setExecutiveAlert(null);
       setAlertsGenerated(true);
     } finally {
@@ -770,7 +810,7 @@ export default function TradeRiskAlternatives() {
                 </div>
                 <div className="hero-buttons" style={{ marginTop: '1rem' }}>
                   <button
-                    onClick={() => loadExecutiveAlert(userProfile)}
+                    onClick={() => loadExecutiveAlert(userProfile, userProfile?.workflowSessionId)}
                     className="btn-primary"
                     disabled={isLoadingAlert}
                   >

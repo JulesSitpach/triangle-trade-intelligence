@@ -17,6 +17,12 @@
  */
 
 import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -24,7 +30,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_profile, workflow_intelligence, raw_alerts } = req.body;
+    const { user_profile, workflow_intelligence, raw_alerts, user_id, workflow_session_id } = req.body;
 
     // === VALIDATION ===
     if (!user_profile || !workflow_intelligence || !raw_alerts) {
@@ -45,9 +51,102 @@ export default async function handler(req, res) {
     // Generate the executive summary using AI
     const executiveAlert = await generateExecutiveAlert(user_profile, workflow_intelligence, raw_alerts);
 
+    // === SAVE TO DATABASE ===
+    // Extract data needed for executive_summaries table
+    const usmcaData = workflow_intelligence?.usmca || {};
+    const savingsData = workflow_intelligence?.savings || {};
+    const componentBreakdown = usmcaData.component_breakdown || [];
+
+    // Calculate gap
+    const currentContent = usmcaData.north_american_content || 0;
+    const thresholdApplied = usmcaData.threshold_applied || 65;
+    const gapPercentage = currentContent - thresholdApplied;
+
+    // Extract critical components (non-USMCA)
+    const criticalComponents = componentBreakdown
+      .filter(c => !c.is_usmca_member)
+      .sort((a, b) => (b.value_percentage || 0) - (a.value_percentage || 0))
+      .slice(0, 3);
+
+    // Expires in 90 days (USMCA data becomes stale after that)
+    const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString();
+
+    const summaryData = {
+      user_id,
+      workflow_session_id,
+      company_name: user_profile.companyName || 'Unknown',
+      company_country: user_profile.companyCountry,
+      product_description: user_profile.productDescription,
+      hs_code: user_profile.hsCode,
+      destination_country: user_profile.destinationCountry,
+      annual_trade_volume: parseFloat(user_profile.tradeVolume) || 0,
+
+      // USMCA Analysis
+      usmca_qualified: usmcaData.qualified || false,
+      regional_content_percentage: currentContent,
+      threshold_applied: thresholdApplied,
+      gap_percentage: gapPercentage,
+      qualification_rule: usmcaData.qualification_rule || `RVC ${thresholdApplied}%`,
+
+      // Financial Impact
+      annual_tariff_burden: savingsData.annual_burden || 0,
+      potential_annual_savings: savingsData.annual_savings || 0,
+      savings_percentage: savingsData.savings_percentage || 0,
+      monthly_tariff_burden: (savingsData.annual_burden || 0) / 12,
+      tariff_as_percent_of_volume: ((savingsData.annual_burden || 0) / (parseFloat(user_profile.tradeVolume) || 1)) * 100,
+
+      // Strategic Content
+      headline: executiveAlert.headline,
+      situation_brief: executiveAlert.situation_brief,
+      executive_summary: executiveAlert.executive_summary,
+      financial_snapshot: executiveAlert.financial_snapshot,
+      strategic_roadmap: executiveAlert.strategic_roadmap,
+      action_this_week: executiveAlert.action_this_week || [],
+      recommendations: executiveAlert.what_impacts_them || [],
+
+      // Components
+      component_breakdown: componentBreakdown,
+      critical_components: criticalComponents,
+
+      // AI Metadata
+      ai_confidence: workflow_intelligence?.confidence_score || 0.85,
+      generation_timestamp: new Date().toISOString(),
+      ai_model_used: 'anthropic/claude-sonnet-4.5',
+      ai_cost_cents: 2, // Typical cost for Sonnet response
+
+      expires_at: expiresAt
+    };
+
+    // Save to database
+    let savedSummary = null;
+    try {
+      const { data: inserted, error: dbError } = await supabase
+        .from('executive_summaries')
+        .insert([summaryData])
+        .select('id')
+        .single();
+
+      if (dbError) {
+        console.error('❌ Database save error:', dbError);
+        // Don't fail the API if database save fails - still return the alert
+        await DevIssue.apiError('executive_trade_alert_api', 'database_save', dbError, {
+          company: user_profile.companyName,
+          user_id
+        });
+      } else {
+        savedSummary = inserted;
+        console.log(`✅ Executive summary saved to database: ${inserted.id}`);
+      }
+    } catch (dbError) {
+      console.error('❌ Database error:', dbError.message);
+      // Continue without saving - don't block API response
+    }
+
     return res.status(200).json({
       success: true,
-      alert: executiveAlert
+      alert: executiveAlert,
+      summary_id: savedSummary?.id || null,
+      message: savedSummary ? 'Summary saved to database' : 'Summary generated (database save failed)'
     });
 
   } catch (error) {
