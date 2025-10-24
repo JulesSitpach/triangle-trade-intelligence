@@ -31,7 +31,7 @@ Copy/paste the test data directly into the form fields. All values are realistic
 | Field | Test Value | Notes |
 |-------|-----------|-------|
 | Complete Product Description | Industrial-grade dual-core microprocessor system with metal housing and LCD interface | Detailed description for accurate HS classification |
-| Manufacturing/Assembly Location | Mexico | Required. Options: "Does Not Apply" or any country |
+| Manufacturing/Assembly Location | Mexico | **REQUIRED FIELD** - For Manufacturers: Enter country (Mexico recommended for USMCA). For Importers/Distributors only: Use "Does Not Apply" |
 
 **Component Origins (BOM):**
 
@@ -82,7 +82,14 @@ Copy/paste the test data directly into the form fields. All values are realistic
 
 **Step 1: Company Information - Same as above**
 
-**Step 2: Components**
+**Step 2: Product & Components**
+
+| Field | Test Value |
+|-------|-----------|
+| Complete Product Description | Industrial-grade lithium battery management system with safety electronics and mounting hardware |
+| Manufacturing/Assembly Location | **Mexico** |
+
+**Components:**
 
 **Component 1**
 - Description: Industrial-grade lithium battery management system with safety electronics
@@ -220,23 +227,27 @@ After submission, you should see:
 
 ## TEST DATA WITH VARIATIONS
 
-### Test Case A: China-to-US (High tariff scenario)
-- Company Country: China
-- Destination: United States
-- Main Component: 8517.62 (smartphones) from China
-- Expected: High Section 301 tariffs, NOT qualified unless Mexico manufacturing
+### Test Case A: China-to-US (High tariff scenario - Tests Section 301 tariffs)
+- **Company Country:** China
+- **Destination:** United States
+- **Manufacturing/Assembly Location:** Does Not Apply (Importing/Distributing - no manufacturing)
+- **Main Component:** 8517.62 (smartphones) from China - 100%
+- **Expected:** High Section 301 tariffs, ❌ NOT qualified (no Mexico manufacturing, not eligible for USMCA)
 
-### Test Case B: Mexico-to-US (USMCA scenario)
-- Company Country: Mexico
-- Destination: United States
-- Components: Assembled in Mexico
-- Expected: QUALIFIED with 60%+ regional content, lower tariffs
+### Test Case B: Mexico-to-US (USMCA scenario - Tests QUALIFIED product)
+- **Company Country:** Mexico
+- **Destination:** United States
+- **Manufacturing/Assembly Location:** Mexico
+- **Components:** Mix of Mexican/USMCA origins, 60%+ from Mexico
+- **Expected:** ✅ QUALIFIED with 60%+ regional content, lower tariffs, eligible for certificate
 
-### Test Case C: Multi-sourcing (Complex BOM)
-- Use the 5-component example above
-- Mix of China/Mexico/Vietnam/Korea origins
-- Manufactured in Mexico
-- Expected: Medium tariffs, conditional qualification
+### Test Case C: Multi-sourcing (Complex BOM - Mixed origins, USMCA qualified)
+- **Use:** 5-component example from main test
+- **Company Country:** United States
+- **Destination:** United States
+- **Manufacturing/Assembly Location:** Mexico
+- **Components:** Mix of China/Mexico/Vietnam/Korea origins (35%/50%/15% breakdown)
+- **Expected:** ✅ QUALIFIED (50% Mexico + 17.5% labor = 67.5% > 65% threshold), eligible for certificate
 
 ---
 
