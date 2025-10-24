@@ -1,284 +1,215 @@
-# USMCA Workflow - Test Cheat Sheet
+# USMCA Business Intelligence Platform - Test Cheat Sheet
 
-## How to Use
-Copy/paste the test data directly into the form fields. All values are realistic and pass API validation.
-
----
-
-## STEP 1: COMPANY INFORMATION
-
-| Field | Test Value | Notes |
-|-------|-----------|-------|
-| Company Name | Acme Electronics Manufacturing Inc | Min length required |
-| Business Type | Manufacturer | Options: Importer, Exporter, Manufacturer, Distributor, Wholesaler, Retailer |
-| Industry Sector | Electronics | Must be selected from dropdown (see all 14 options below) |
-| Company Address | 42 Industrial Park Drive, San Jose CA 95110 | Full address required |
-| Company Country | United States | Options: US, Canada, Mexico, China, Vietnam, etc. |
-| Destination Market | United States | **CRITICAL for USMCA**: Must be US, Canada, or Mexico |
-| Contact Person | Sarah Chen | Full name required |
-| Contact Phone | (408) 555-0142 | Format: (XXX) XXX-XXXX or +1-XXX-XXX-XXXX |
-| Contact Email | sarah.chen@acmeelec.com | Valid email format |
-| Tax ID / Business Number | 95-1234567 | EIN format for US: XX-XXXXXXX |
-| Annual Trade Volume | 5,500,000 | In USD. Can include commas, no $ symbol |
-| Supplier Country | China | **PRIMARY supplier** - where largest component (Microprocessor, 35%) originates |
+## Strategic Testing Philosophy
+Test scenarios that deliver REAL business value, not just technical compliance. Each test should validate that users receive actionable strategic advice with concrete financial impact.
 
 ---
 
-## STEP 2: PRODUCT & COMPONENT ANALYSIS
+## CORE BUSINESS VALUE TEST SCENARIOS
 
-**Product Section:**
+### TEST 1: QUALIFIED WITH STRATEGIC VULNERABILITY (Electronics - China PCB Risk)
+**Business Context:** Company qualifies but has Section 301 exposure
+**Expected Intelligence:** Financial impact + supply chain risk analysis + Mexico sourcing recommendation
 
-| Field | Test Value | Notes |
-|-------|-----------|-------|
-| Complete Product Description | Industrial-grade dual-core microprocessor system with metal housing and LCD interface | Detailed description for accurate HS classification |
-| Manufacturing/Assembly Location | **SELECT "Mexico"** from dropdown | **REQUIRED FIELD** - Dropdown with: "Does Not Apply (Imported/Distributed Only)" OR country names. For manufacturers: SELECT "Mexico" or US/Canada. For importers/distributors only: SELECT "Does Not Apply" |
-| Manufacturing involves substantial transformation | ✅ **CHECK** | **Checkbox appears only after selecting Mexico, US, or Canada** (USMCA countries). Check if manufacturing involves significant value-adding (welding, forming, heat treatment). Leave unchecked if simple assembly only |
+| Field | Test Value | Strategic Rationale |
+|-------|-----------|-------------------|
+| Company Name | TechFlow Electronics Corp | Mid-market electronics manufacturer |
+| Business Type | Manufacturer | Creates value through assembly |
+| Industry Sector | Electronics | 65% RVC threshold, high China exposure |
+| Company Address | 1847 Technology Blvd, Austin TX 78759 | US-based company sourcing globally |
+| Destination Market | United States | Domestic market - USMCA benefits apply |
+| Manufacturing/Assembly Location | Mexico | **KEY:** Mexico assembly = USMCA eligibility |
+| Contact Person | Maria Rodriguez | Supply chain decision maker |
+| Contact Email | maria.rodriguez@techflow.com | Professional contact |
+| Annual Trade Volume | 8,500,000 | Significant scale = meaningful savings |
+| Supplier Country | China | Primary risk factor |
 
-**Component Origins (BOM):**
+**Component Mix (Designed for Strategic Analysis):**
+1. **Microprocessor** - China, 35%, 8542.31.00 → Section 301 vulnerability
+2. **Power Supply** - Mexico, 30%, 8504.40.95 → USMCA compliant
+3. **Aluminum Housing** - Mexico, 20%, 7616.99.50 → USMCA compliant  
+4. **Circuit Board** - Vietnam, 10%, 8534.31.00 → Neutral origin
+5. **Assembly Labor** - Mexico, 5%, 8544.42.90 → USMCA benefit
 
-### Add these components one at a time - they must sum to 100% or less
-
-**Component 1 - Microprocessor**
-- Description: ARM-based dual-core microprocessor controller module
-- Origin Country: China
-- Value Percentage: 35
-- HS Code: 8542.31
-- Manufacturing Location: Mexico
-
-**Component 2 - Power Supply Module**
-- Description: 85W switching power supply with UPS backup battery integration
-- Origin Country: Mexico
-- Value Percentage: 25
-- HS Code: 8504.40
-- Manufacturing Location: Mexico
-
-**Component 3 - Aluminum Housing**
-- Description: Precision-machined 6061-T6 aluminum enclosure with mounting hardware
-- Origin Country: Mexico
-- Value Percentage: 20
-- HS Code: 7616.99
-- Manufacturing Location: Mexico
-
-**Component 4 - LCD Display**
-- Description: 7-inch industrial-grade LCD touchscreen display module with drivers
-- Origin Country: Vietnam
-- Value Percentage: 15
-- HS Code: 8528.72
-- Manufacturing Location: Mexico
-
-**Component 5 - Wiring & Assembly**
-- Description: Pre-assembled wiring harness with safety-rated connectors
-- Origin Country: Mexico
-- Value Percentage: 5
-- HS Code: 8544.30
-- Manufacturing Location: Mexico
-
-**Total: 100%** ✓
+**Expected Business Intelligence Output:**
+- ✅ **Qualified at 72.5% RVC** (exceeds 65% threshold)
+- **Monthly savings: $850** vs standard MFN rates
+- **⚠️ Strategic risk:** China microprocessor faces 25% Section 301 tariffs
+- **Recommendation:** Mexico microprocessor sourcing (+3% cost, eliminates tariff risk)
+- **ROI analysis:** 4-month payback on supplier transition
+- **Competitive intelligence:** 68% of sector has similar China exposure
 
 ---
 
-## ALTERNATIVE TEST SCENARIO (Simpler - 2 Components - Tests NON-QUALIFIED case)
+### TEST 2: HIGH-VALUE QUALIFIED SCENARIO (Automotive - Premium Savings)
+**Business Context:** Large automotive manufacturer with optimal USMCA setup
+**Expected Intelligence:** Substantial savings validation + competitive advantage analysis
 
-### Use this if you want faster testing or to test a product that DOES NOT QUALIFY for USMCA
+| Field | Test Value | Strategic Rationale |
+|-------|-----------|-------------------|
+| Company Name | Border Dynamics Manufacturing | Cross-border operations specialist |
+| Business Type | Manufacturer | Value-add manufacturing |
+| Industry Sector | Automotive | 75% RVC threshold - highest standard |
+| Destination Market | United States | Large automotive market |
+| Manufacturing/Assembly Location | Mexico | Optimal USMCA positioning |
+| Annual Trade Volume | 25,000,000 | Enterprise-scale operations |
 
-**Step 1: Company Information - Same as above**
+**Component Mix (Optimized for Maximum USMCA Benefits):**
+1. **Engine Components** - Mexico, 40%, 8408.20.00
+2. **Transmission Parts** - Canada, 25%, 8708.40.75  
+3. **Electronics Module** - US, 15%, 8537.10.90
+4. **Steel Framework** - Mexico, 12%, 7308.90.95
+5. **Assembly & Labor** - Mexico, 8%, 8708.99.80
 
-**Step 2: Product & Components**
-
-| Field | Test Value |
-|-------|-----------|
-| Complete Product Description | Industrial-grade lithium battery management system with safety electronics and mounting hardware |
-| Manufacturing/Assembly Location | **Mexico** |
-
-**Components:**
-
-**Component 1**
-- Description: Industrial-grade lithium battery management system with safety electronics
-- Origin Country: South Korea
-- Value Percentage: 60
-- HS Code: 8507.80
-- Manufacturing Location: Mexico
-
-**Component 2**
-- Description: Stainless steel mounting brackets and fasteners assembly
-- Origin Country: Mexico
-- Value Percentage: 40
-- HS Code: 7326.90
-- Manufacturing Location: Mexico
-
-**Total: 100%** ✓
-
-**Expected Result: NOT QUALIFIED**
-- Regional Content: 40% (Mexico) + 17.5% (labor) = 57.5%
-- Electronics threshold: 65% RVC required
-- Status: ❌ FAILS (57.5% < 65%) - Good for testing rejection scenarios
+**Expected Business Intelligence Output:**
+- ✅ **Highly qualified at 87.5% RVC** (exceeds 75% threshold by 12.5%)
+- **Monthly savings: $3,200** 
+- **Annual savings: $38,400**
+- **Strategic advantage:** 87.5% provides buffer against rule changes
+- **Market position:** Top 15% of qualified automotive manufacturers
+- **Zero tariff risk:** All components from USMCA countries
 
 ---
 
-## ALL 14 INDUSTRY SECTOR OPTIONS
+### TEST 3: MARGINAL QUALIFICATION WITH OPTIMIZATION OPPORTUNITY
+**Business Context:** Company barely qualifies, needs strategic guidance
+**Expected Intelligence:** Optimization recommendations + risk mitigation strategies
 
-**Complete list of industries available in dropdown with their USMCA RVC thresholds:**
+| Field | Test Value | Strategic Rationale |
+|-------|-----------|-------------------|
+| Company Name | Precision Tools Ltd | Mid-market manufacturer |
+| Business Type | Manufacturer | Industrial equipment |
+| Industry Sector | Machinery | 62.5% RVC threshold |
+| Manufacturing/Assembly Location | Mexico | USMCA assembly location |
+| Annual Trade Volume | 3,200,000 | Mid-market scale |
 
-| Industry Sector | RVC Threshold | Labor Credit | USMCA Article |
-|---|---|---|---|
-| Agriculture | 60% | 17.5% | Art. 4.4 |
-| Automotive | 75% | 22.5% | Art. 4.5 |
-| Base Metals | 62.5% | 12.5% | Art. 4.2 |
-| Chemicals | 62.5% | 12.5% | Art. 4.2 |
-| Electronics | 65% | 17.5% | Art. 4.7 |
-| Energy Equipment | 62.5% | 12.5% | Art. 4.2 |
-| General | 62.5% | 15% | Art. 4.2 |
-| Leather | 55% | 20% | Art. 4.3 |
-| Machinery | 62.5% | 12.5% | Art. 4.2 |
-| Plastics & Rubber | 62.5% | 12.5% | Art. 4.2 |
-| Precision Instruments | 62.5% | 12.5% | Art. 4.2 |
-| Textiles/Apparel | 55% | 27.5% | Art. 4.3 |
-| Transport Equipment | 62.5% | 15% | Art. 4.2 |
-| Wood Products | 62.5% | 12.5% | Art. 4.2 |
+**Component Mix (Borderline Qualification):**
+1. **Control System** - Germany, 38%, 8537.10.00 → Major non-USMCA component
+2. **Motor Assembly** - Mexico, 35%, 8501.31.00 → Core USMCA component
+3. **Steel Housing** - Mexico, 15%, 7326.90.95 → USMCA component
+4. **Sensors** - US, 7%, 9032.89.60 → USMCA component
+5. **Assembly Labor** - Mexico, 5%, 8515.80.00 → USMCA benefit
 
-**Testing Tips:**
-- Try each industry to verify the correct threshold is applied
-- Check the AI prompt includes the correct RVC percentage
-- Verify the labor credit matches the threshold for that industry
-- Watch the regional content calculation - it includes the labor credit
-
----
-
-## QUICK REFERENCE: REQUIRED FIELD VALIDATIONS
-
-### Step 1 Validation Rules
-✓ Company Name - Any text, min 2 characters
-✓ Business Type - Must select from: Importer, Exporter, Manufacturer, Distributor, Wholesaler, or Retailer
-✓ Industry Sector - Must select from dropdown
-✓ Address - Any valid address format
-✓ Company Country - Any country
-✓ **Destination Country - MUST BE: US, Canada, or Mexico** ← CRITICAL
-✓ Contact Person - Any name
-✓ Contact Phone - Any valid phone format
-✓ Contact Email - Must be valid email format
-✓ Tax ID - Any format (EIN: XX-XXXXXXX or CA: Business Number, MX: RFC)
-✓ Trade Volume - Numeric only, can include commas, no currency symbols
-✓ Supplier Country - Any country
-✓ All 12 fields required to proceed to Step 2
-
-### Step 2 Validation Rules
-✓ Complete Product Description - Required for accurate AI classification
-✓ **Manufacturing/Assembly Location - REQUIRED** ← CRITICAL. Options: "Does Not Apply" or any country
-✓ Component Description - **Minimum 10 characters** ← CRITICAL
-✓ Component Origin Country - Any country
-✓ Component Value Percentage - Numeric, **total must equal 100%** ← CRITICAL
-✓ Component HS Code - 6-10 digit format (e.g., 8542.31 or 854231). Must have at least 1 HS code across all components
-✓ Minimum 1 component required (maximum depends on subscription tier)
+**Expected Business Intelligence Output:**
+- ✅ **Marginally qualified at 62.5% RVC** (exactly meets threshold)
+- **Monthly savings: $240**
+- **⚠️ Risk:** Zero margin for rule changes or component shifts
+- **Optimization opportunity:** Replace German control system with US/Mexico alternative
+- **Strategic recommendation:** Increase RVC to 75%+ for stability
+- **Implementation:** 6-8 week supplier qualification timeline
 
 ---
 
-## EXPECTED WORKFLOW RESULTS
+### TEST 4: NON-QUALIFIED WITH CLEAR PATHWAY
+**Business Context:** Company doesn't qualify but has obvious optimization path
+**Expected Intelligence:** Gap analysis + specific improvement roadmap
 
-After submission, you should see:
+| Field | Test Value | Strategic Rationale |
+|-------|-----------|-------------------|
+| Company Name | Global Imports Distribution | Import-focused business model |
+| Business Type | Importer | Pure import operation |
+| Industry Sector | Electronics | 65% RVC threshold |
+| Manufacturing/Assembly Location | Does Not Apply | No manufacturing = limited USMCA options |
+| Annual Trade Volume | 12,000,000 | High-volume imports |
 
-**For Mexico Destination (Free Cache):**
-- Tariff data retrieved instantly from database cache
-- No OpenRouter API calls needed
-- Shows cached rates from January 2025 with warning label
+**Component Mix (High Non-USMCA Content):**
+1. **Main Assembly** - China, 60%, 8517.62.00 → Major tariff exposure
+2. **Power Supply** - Vietnam, 25%, 8504.40.60 → Non-USMCA
+3. **Accessories** - Malaysia, 10%, 3926.90.99 → Non-USMCA
+4. **Packaging** - Mexico, 5%, 4819.20.00 → Minor USMCA content
 
-**For US/Canada Destination (Paid Lookup):**
-- OpenRouter API calls to get current 2025 tariff rates
-- Takes 2-5 seconds for analysis
-- Shows real-time Section 301/232 tariffs
-- AI confidence scores for each component
-
-**USMCA Qualification:**
-- Shows regional content percentage
-- Displays qualified/not qualified status
-- Lists components affecting qualification
-- Shows MFN vs USMCA rate comparison
-
-**Certificate Generation:**
-- If QUALIFIED: Shows "Generate Certificate" button
-- If NOT QUALIFIED: Shows alternatives and upgrade options
-
----
-
-## COMMON MISTAKES TO AVOID
-
-❌ Don't use $ or commas in Trade Volume field (e.g., "$5,500,000")
-→ Use: 5500000 or 5,500,000 (commas OK, no currency symbol)
-
-❌ Don't select "Canada" or "US" as company country if you need USMCA benefits
-→ Most USMCA workflows start with non-USMCA suppliers (China, Vietnam, India)
-
-❌ Don't make component descriptions too short
-→ Min 10 characters, preferably full technical specs
-
-❌ Don't exceed 100% on component percentages
-→ If you add Component 5 at 5%, total must be ≤100%
-
-❌ Don't use HS codes that don't match component type
-→ Example: Use 8542.31 (microprocessor) not 8504.40 (power supply) for a CPU
-
-✅ DO use realistic destination countries (US/CA/MX only for USMCA)
-
-✅ DO use manufacturing location = Mexico for USMCA benefits
-(Products partially made in Mexico qualify for treaty benefits)
-
-✅ DO provide detailed component descriptions
-(AI uses this to look up correct HS codes and tariff impacts)
+**Expected Business Intelligence Output:**
+- ❌ **Not qualified: 5% RVC** (needs 65%)
+- **Annual tariff cost: $28,800** (2.4% average rate)
+- **Opportunity:** Partner with Mexico assembly operation
+- **Business model pivot:** Import components, assemble in Mexico
+- **Potential savings:** $24,000 annually with Mexico assembly
+- **Implementation complexity:** Requires operational restructuring
 
 ---
 
-## TEST DATA WITH VARIATIONS
+## BUSINESS INTELLIGENCE VALIDATION CHECKLIST
 
-### Test Case A: China-to-US (High tariff scenario - Tests Section 301 tariffs)
-- **Company Country:** China
-- **Destination:** United States
-- **Manufacturing/Assembly Location:** Does Not Apply (Importing/Distributing - no manufacturing)
-- **Main Component:** 8517.62 (smartphones) from China - 100%
-- **Expected:** High Section 301 tariffs, ❌ NOT qualified (no Mexico manufacturing, not eligible for USMCA)
+For each test scenario, verify the analysis includes:
 
-### Test Case B: Mexico-to-US (USMCA scenario - Tests QUALIFIED product)
-- **Company Country:** Mexico
-- **Destination:** United States
-- **Manufacturing/Assembly Location:** Mexico
-- **Components:** Mix of Mexican/USMCA origins, 60%+ from Mexico
-- **Expected:** ✅ QUALIFIED with 60%+ regional content, lower tariffs, eligible for certificate
+### ✅ Financial Impact Analysis
+- [ ] Specific monthly/annual savings in dollars
+- [ ] Comparison: current costs vs optimized costs
+- [ ] ROI calculations for recommended changes
+- [ ] Payback periods for supplier transitions
 
-### Test Case C: Multi-sourcing (Complex BOM - Mixed origins, USMCA qualified)
-- **Use:** 5-component example from main test
-- **Company Country:** United States
-- **Destination:** United States
-- **Manufacturing/Assembly Location:** Mexico
-- **Components:** Mix of China/Mexico/Vietnam/Korea origins (35%/50%/15% breakdown)
-- **Expected:** ✅ QUALIFIED (50% Mexico + 17.5% labor = 67.5% > 65% threshold), eligible for certificate
+### ✅ Strategic Risk Assessment  
+- [ ] Identification of policy-dependent cost exposures
+- [ ] Section 301/232 tariff vulnerabilities
+- [ ] Supply chain concentration risks
+- [ ] Regulatory change impact scenarios
 
----
+### ✅ Competitive Intelligence
+- [ ] Industry benchmarking (% of companies with similar setups)
+- [ ] First-mover vs late-adopter positioning
+- [ ] Competitive advantages/disadvantages analysis
 
-## DATABASE REFERENCE
+### ✅ Actionable Recommendations
+- [ ] Specific supplier alternatives with cost implications
+- [ ] Implementation timelines (realistic)
+- [ ] Decision frameworks (cost vs risk tradeoffs)
+- [ ] Priority ranking of optimization opportunities
 
-**If you want to manually check results in Supabase:**
-
-Table: `workflow_sessions`
-- Contains company name, destination, all form data
-- Field: `workflow_data` → JSON of complete analysis
-
-Table: `tariff_rates_cache`
-- HS codes stored here with destination-specific rates
-- Filter by: destination_country, expires_at > now()
-
-Table: `workflow_completions`
-- Stores final qualified/not qualified status
-- Shows estimated annual savings
+### ✅ Compliance Confidence
+- [ ] Audit readiness scores
+- [ ] Documentation gap identification
+- [ ] Customs scrutiny probability assessment
+- [ ] Certificate of origin preparation status
 
 ---
 
-## NEXT STEPS AFTER TESTING
+## ONGOING MONITORING VALUE PROPOSITION
 
-1. **Alerts Page**: Click "Generate Alert Analysis" to see trade policy alerts
-2. **Dashboard**: View all submitted workflows and results
-3. **Certificate**: Download USMCA Form D certificate (if qualified)
-4. **Email Alerts**: Enable email notifications for tariff policy changes
+Each test should demonstrate the platform's ongoing value:
+
+### ✅ Policy Monitoring Coverage
+- [ ] Shows specific policy triggers being monitored
+- [ ] Explains alert system for relevant changes
+- [ ] Demonstrates proactive vs reactive compliance
+
+### ✅ Market Intelligence Updates
+- [ ] Industry trend integration
+- [ ] Competitor analysis updates
+- [ ] Supplier market condition monitoring
+
+### ✅ Compliance Automation
+- [ ] Certificate generation readiness
+- [ ] Documentation management
+- [ ] Regulatory filing assistance
 
 ---
 
-**Last Updated:** October 24, 2025
-**Valid for:** USMCA Workflow v1.0
-**API Endpoint:** POST `/api/ai-usmca-complete-analysis`
+## SUCCESS METRICS FOR TESTING
+
+A successful test delivers business value when users feel:
+
+1. **Informed:** "I understand my actual financial exposure and opportunities"
+2. **Confident:** "I know exactly what actions to take and when"
+3. **Protected:** "The platform watches for threats I can't monitor myself"
+4. **Competitive:** "This intelligence gives me advantages over competitors"
+5. **Efficient:** "This saves me from hiring expensive trade consultants"
+
+---
+
+## RAPID TEST EXECUTION
+
+### Quick Value Test (5 minutes):
+Use TEST 1 (Electronics with China PCB risk) - validates core value proposition
+
+### Comprehensive Test (15 minutes):  
+Run all 4 scenarios to validate different user segments and use cases
+
+### Stress Test (30 minutes):
+Test edge cases with complex component mixes and multiple supplier countries
+
+---
+
+**Testing Philosophy:** Every test should make users think "This platform just paid for itself" based on the strategic intelligence provided.
+
+**Last Updated:** October 24, 2025  
+**Focus:** Business Value Delivery & Strategic Intelligence Validation

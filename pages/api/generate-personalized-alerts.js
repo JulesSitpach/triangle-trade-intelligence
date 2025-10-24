@@ -6,7 +6,7 @@
  * to the user's industry, sourcing geography, and product characteristics.
  */
 
-import educationalAlerts from '../../config/educational-alerts.js';
+import { EDUCATIONAL_ALERTS } from '../../config/educational-alerts.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
     // ========== STEP 1: Score each educational alert for relevance ==========
 
-    const scoredAlerts = educationalAlerts.map(alert => {
+    const scoredAlerts = EDUCATIONAL_ALERTS.map(alert => {
       let relevance_score = 0;
       let reason_relevant = [];
 
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       alerts: returnable_alerts,
-      total_available: educationalAlerts.length,
+      total_available: EDUCATIONAL_ALERTS.length,
       matched: returnable_alerts.length,
       user_profile: {
         industry: user_profile.industry_sector,
