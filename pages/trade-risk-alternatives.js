@@ -136,6 +136,7 @@ export default function TradeRiskAlternatives() {
             userId: user?.id,
             companyName: mostRecentWorkflow.company_name,
             businessType: mostRecentWorkflow.business_type,
+            industry_sector: mostRecentWorkflow.industry_sector,
             hsCode: mostRecentWorkflow.hs_code,
             productDescription: mostRecentWorkflow.product_description,
             tradeVolume: mostRecentWorkflow.trade_volume,
@@ -234,6 +235,7 @@ export default function TradeRiskAlternatives() {
         userId: user?.id,  // Include userId for workflow intelligence lookup
         companyName: userData.company?.company_name || userData.company?.name,
         businessType: userData.company?.business_type,
+        industry_sector: userData.company?.industry_sector,
         hsCode: userData.product?.hs_code,
         productDescription: userData.product?.description,
         tradeVolume: parsedTradeVolume,
@@ -263,6 +265,7 @@ export default function TradeRiskAlternatives() {
       const missingFields = [];
       if (!profile.companyName) missingFields.push('company_name');
       if (!profile.businessType) missingFields.push('business_type');
+      if (!profile.industry_sector) missingFields.push('industry_sector');
       if (!profile.hsCode) missingFields.push('hs_code');
       if (!profile.productDescription) missingFields.push('product_description');
       if (!profile.supplierCountry && components.length > 0) missingFields.push('component origin_country');
