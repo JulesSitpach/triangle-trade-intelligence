@@ -341,6 +341,19 @@ async function handleSubscriptionPurchase(session, userId) {
     // Get tier name for display (capitalize first letter)
     const tierName = tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Professional';
 
+    // === CALCULATE LOCK PERIOD (Prevents subscription gaming) ===
+    // Unlimited: 60 days (requires 2-month commitment)
+    // Professional: 30 days (requires 1-month commitment)
+    // Starter: 0 days (cancel anytime)
+    const lockDays = {
+      'unlimited': 60,
+      'professional': 30,
+      'starter': 0
+    }[tier?.toLowerCase()] || 0;
+
+    const lockedUntil = new Date();
+    lockedUntil.setDate(lockedUntil.getDate() + lockDays);
+
     // Update or create subscription record in database
     const { data: existingSubscription } = await supabase
       .from('subscriptions')
@@ -358,6 +371,7 @@ async function handleSubscriptionPurchase(session, userId) {
       status: 'active',
       current_period_start: new Date().toISOString(),
       current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Temporary, will be updated by subscription.created
+      locked_until: lockDays > 0 ? lockedUntil.toISOString() : null, // Set lock period (null = no lock)
       updated_at: new Date().toISOString()
     };
 
@@ -374,7 +388,7 @@ async function handleSubscriptionPurchase(session, userId) {
         .insert([{ ...subscriptionData, created_at: new Date().toISOString() }]);
     }
 
-    console.log('✅ Subscription record updated for user:', userId);
+    console.log(`✅ Subscription record updated for user: ${userId} (locked until ${lockDays > 0 ? lockedUntil.toDateString() : 'never'})`);
 
     // 🚨 CRITICAL FIX: Update user_profiles.subscription_tier to match
     // Without this, users pay but stay on Trial tier!

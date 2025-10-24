@@ -150,7 +150,8 @@ export default function Pricing() {
         'AI HS code suggestions'
       ],
       cta: 'Subscribe to Starter',
-      popular: false
+      popular: false,
+      commitment: null  // No lock
     },
     {
       name: 'Professional',
@@ -166,7 +167,8 @@ export default function Pricing() {
         'Detailed AI-powered compliance guidance'
       ],
       cta: 'Subscribe to Professional',
-      popular: true
+      popular: true,
+      commitment: '30-day commitment'  // 30-day lock
     },
     {
       name: 'Premium',
@@ -182,7 +184,8 @@ export default function Pricing() {
         'Custom trade intelligence reports'
       ],
       cta: 'Subscribe to Premium',
-      popular: false
+      popular: false,
+      commitment: '60-day commitment'  // 60-day lock
     }
   ]
 
@@ -376,6 +379,25 @@ export default function Pricing() {
                     {loading === plan.tier ? 'Loading...' :
                       currentTier ? 'Change Plan' : plan.cta}
                   </button>
+                )}
+
+                {/* Commitment Notice */}
+                {plan.commitment && (
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '0.75rem',
+                    backgroundColor: '#fef3c7',
+                    border: '1px solid #fcd34d',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.875rem',
+                    color: '#78350f',
+                    textAlign: 'center'
+                  }}>
+                    <strong>ℹ️ {plan.commitment}</strong>
+                    <p style={{marginTop: '0.5rem', marginBottom: 0, fontSize: '0.8rem'}}>
+                      Cannot downgrade during lock period. Ensures stable compliance workflow.
+                    </p>
+                  </div>
                 )}
               </div>
             ))}
