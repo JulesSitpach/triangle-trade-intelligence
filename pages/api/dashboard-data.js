@@ -41,13 +41,15 @@ export default protectedApiHandler({
     const userId = req.user.id;
 
     try {
-      // Monthly Usage (drives upgrades)
-      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+      // ✅ FIX: Rolling 30-day usage window (fair for mid-month upgrades)
+      // Count workflows CREATED in last 30 days (not completed, which may be NULL)
+      // Users get 100 analyses per month = ~3.3 per day rolling window
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { count: monthlyUsed } = await supabase
         .from('workflow_sessions')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
-        .gte('completed_at', startOfMonth);
+        .gte('created_at', thirtyDaysAgo);
 
       const { data: profile } = await supabase
         .from('user_profiles')
