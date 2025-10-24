@@ -1,14 +1,17 @@
 /**
  * DATABASE-DRIVEN DROPDOWN OPTIONS API
  * NO HARDCODED LISTS - COMPLETE DATABASE INTEGRATION
- * 
- * Replaces simple-dropdown-options.js with fully database-driven approach
- * Following Holistic Reconstruction Plan Phase 3 requirements
+ *
+ * Queries industry_thresholds table for all industry sector options
+ * Following AI-first principle: database is single source of truth
  */
 
-import { serverDatabaseService } from '../../lib/database/supabase-client.js';
-import { TABLE_CONFIG } from '../../config/system-config.js';
-import { logInfo, logError, logPerformance } from '../../lib/utils/production-logger.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   const startTime = Date.now();
@@ -101,7 +104,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    logError('Dropdown options failed', {
+    console.error('Dropdown options failed:', {
       error: error.message,
       category: req.query.category,
       responseTime
@@ -128,36 +131,38 @@ async function getBusinessTypes() {
   try {
     // Query industry_thresholds table - this is the authoritative source
     // It matches what the qualification engine uses in industry-thresholds-service.js
-    const { data: thresholds, error: thresholdError } = await serverDatabaseService.client
+    const { data: thresholds, error: thresholdError } = await supabase
       .from('industry_thresholds')
       .select('display_name, rvc_percentage, usmca_article, is_active')
       .eq('is_active', true)
       .order('display_name');
 
-    if (!thresholdError && thresholds && thresholds.length > 0) {
-      // Convert thresholds to dropdown format
-      const businessTypes = thresholds.map(threshold => ({
-        value: threshold.display_name,
-        label: threshold.display_name,
-        description: `USMCA ${threshold.rvc_percentage}% RVC (${threshold.usmca_article})`
-      }));
-
-      logInfo('Business types loaded from industry_thresholds table', {
-        totalCategories: businessTypes.length
-      });
-
-      return businessTypes;
+    if (thresholdError) {
+      console.error('Database query error:', thresholdError);
+      throw thresholdError;
     }
 
-    // If industry_thresholds is empty, fail loudly (don't use fallbacks)
-    throw new Error('No active thresholds found in industry_thresholds table');
+    if (!thresholds || thresholds.length === 0) {
+      console.error('No thresholds found in industry_thresholds table');
+      throw new Error('No active thresholds found in industry_thresholds table');
+    }
 
-  } catch (error) {
-    logError('Failed to load business types from industry_thresholds table', {
-      error: error.message
+    // Convert thresholds to dropdown format
+    const businessTypes = thresholds.map(threshold => ({
+      value: threshold.display_name,
+      label: threshold.display_name,
+      description: `USMCA ${threshold.rvc_percentage}% RVC`
+    }));
+
+    console.log('✓ Business types loaded from industry_thresholds table', {
+      totalCategories: businessTypes.length,
+      samples: businessTypes.slice(0, 3)
     });
 
-    // Return error response instead of hardcoded fallback
+    return businessTypes;
+
+  } catch (error) {
+    console.error('Failed to load business types from industry_thresholds table:', error.message);
     throw error;
   }
 }
