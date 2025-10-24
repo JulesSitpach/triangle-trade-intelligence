@@ -7,6 +7,7 @@
 import { expertEndorsementSystem } from '../../../lib/services/expert-endorsement-system.js';
 import { dataProvenanceService } from '../../../lib/services/data-provenance-service.js';
 import { continuousVerificationService } from '../../../lib/services/continuous-verification-service.js';
+import { parseTradeVolume } from '../../../lib/utils/parseTradeVolume.js';
 import { SYSTEM_CONFIG, MESSAGES, TABLE_CONFIG } from '../../../config/system-config.js';
 import { logInfo, logError, logPerformance } from '../../../lib/utils/production-logger.js';
 
@@ -568,7 +569,7 @@ async function getExpertServiceStatus() {
 
 function assessComplexity(classificationData) {
   const confidence = classificationData.confidence || 0.5;
-  const tradeVolume = parseFloat(classificationData.trade_volume) || 0;
+  const tradeVolume = parseTradeVolume(classificationData.trade_volume) || 0;
   const businessType = classificationData.business_type || '';
   
   let complexity = 1;

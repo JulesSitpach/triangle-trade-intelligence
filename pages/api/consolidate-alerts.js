@@ -12,6 +12,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 import {
   validateComponentsArray,
   validateTradeVolume,
@@ -76,9 +77,9 @@ export default async function handler(req, res) {
           .single();
 
         if (!error && workflow?.trade_volume) {
-          // ✅ CRITICAL: Parse trade_volume from string to number (handles commas from form)
-          const parsedVolume = parseFloat(String(workflow.trade_volume).replace(/[^0-9.-]+/g, ''));
-          user_profile.trade_volume = !isNaN(parsedVolume) && parsedVolume > 0 ? parsedVolume : null;
+          // ✅ CRITICAL: Use standardized parseTradeVolume utility (handles all edge cases)
+          const parsedVolume = parseTradeVolume(workflow.trade_volume);
+          user_profile.trade_volume = parsedVolume > 0 ? parsedVolume : null;
 
           console.log(`✅ Enriched user_profile with trade_volume: $${user_profile.trade_volume?.toLocaleString() || 'unknown'}`);
         }

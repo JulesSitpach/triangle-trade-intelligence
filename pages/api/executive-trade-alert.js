@@ -17,6 +17,7 @@
  */
 
 import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
       product_description: user_profile.productDescription,
       hs_code: user_profile.hsCode,
       destination_country: user_profile.destinationCountry,
-      annual_trade_volume: parseFloat(user_profile.tradeVolume) || 0,
+      annual_trade_volume: parseTradeVolume(user_profile.tradeVolume) || 0,
 
       // USMCA Analysis
       usmca_qualified: usmcaData.qualified || false,

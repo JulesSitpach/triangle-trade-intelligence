@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
+import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -47,7 +48,7 @@ export default async function handler(req, res) {
     });
 
     // Calculate actual financial impact
-    const tradeVolume = parseFloat(String(subscriberData.trade_volume || '0').replace(/[^0-9.]/g, ''));
+    const tradeVolume = parseTradeVolume(subscriberData.trade_volume) || 0;
     const currentTariffCost = subscriberData.annual_tariff_cost || 0;
 
     // Get component origins for USMCA analysis

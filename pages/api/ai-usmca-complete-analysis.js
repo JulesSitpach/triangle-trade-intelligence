@@ -646,12 +646,8 @@ export default protectedApiHandler({
           // Trade flow information
           supplier_country: formData.supplier_country,  // Used in AI trade flow analysis
           destination_country: formData.destination_country,  // Export destination
-          // ✅ FIXED: Handle trade_volume as either number (from form) or string (legacy)
-          trade_volume: formData.trade_volume
-            ? (typeof formData.trade_volume === 'number'
-                ? formData.trade_volume
-                : parseFloat(formData.trade_volume.toString().replace(/[^0-9.-]+/g, '')))
-            : null,
+          // ✅ FIXED: Use standardized parseTradeVolume utility (handles all edge cases)
+          trade_volume: parseTradeVolume(formData.trade_volume),
 
           // Manufacturing information
           manufacturing_location: formData.manufacturing_location,
