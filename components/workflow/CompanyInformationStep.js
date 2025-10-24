@@ -332,11 +332,12 @@ export default function CompanyInformationStep({
               <input
                 type="text"
                 className="form-input"
-                value={formData.trade_volume || ''}
+                value={formData.trade_volume ? formData.trade_volume.toLocaleString('en-US') : ''}
                 onChange={(e) => {
-                  // Only allow numbers and commas
-                  const value = e.target.value.replace(/[^0-9,]/g, '');
-                  updateFormData('trade_volume', value);
+                  // ✅ FIXED: Parse as number immediately, remove comma formatting
+                  // Store numeric value in formData, display with commas in UI
+                  const numericValue = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
+                  updateFormData('trade_volume', isNaN(numericValue) ? null : numericValue);
                 }}
                 placeholder="4,800,000"
                 required
