@@ -9,22 +9,24 @@ require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 
 // Test configuration
+// NOTE: Test scripts updated Oct 23, 2025 - removed archived service request tabs
+// USMCA workflow is the active user journey, other tabs were archived
 const COMPONENT_LIST = [
-  'USMCACertificateTab',
-  'HSClassificationTab',
-  'CrisisResponseTab',
-  'SupplierSourcingTab',
-  'ManufacturingFeasibilityTab',
-  'MarketEntryTab'
+  'USMCACertificateTab'
+  // Archived tabs (no longer in active application):
+  // - CrisisResponseTab (archived - use crisis-alerts endpoint instead)
+  // - SupplierSourcingTab (archived - use ai-supplier-discovery instead)
+  // - ManufacturingFeasibilityTab (archived - use ai-manufacturing-discovery instead)
+  // - MarketEntryTab (archived - use ai-market-entry-discovery instead)
 ];
 
 const API_ENDPOINTS = {
-  'USMCACertificateTab': '/api/generate-usmca-certificate',
-  'HSClassificationTab': '/api/validate-hs-classification',
-  'CrisisResponseTab': '/api/crisis-response-analysis',
-  'SupplierSourcingTab': '/api/supplier-sourcing-discovery',
-  'ManufacturingFeasibilityTab': '/api/manufacturing-feasibility-analysis',
-  'MarketEntryTab': '/api/market-entry-analysis'
+  'USMCACertificateTab': '/api/ai-usmca-complete-analysis'
+  // Removed references to archived endpoints:
+  // '/api/crisis-response-analysis' (deleted Oct 23, 2025)
+  // '/api/supplier-sourcing-discovery' (archived - use ai-supplier-discovery)
+  // '/api/manufacturing-feasibility-analysis' (deleted Oct 23, 2025)
+  // '/api/market-entry-analysis' (deleted Oct 23, 2025)
 };
 
 // Main verification function
@@ -289,61 +291,49 @@ const getComponentFolder = (component) => {
 };
 
 const getTestDataForComponent = (component) => {
-  const baseSubscriberData = {
-    company_name: 'Test Manufacturing Corp',
-    product_description: 'electronic components',
-    component_origins: [
-      { country: 'China', percentage: 60, component_type: 'semiconductors' },
-      { country: 'Mexico', percentage: 40, component_type: 'assembly' }
-    ],
-    trade_volume: '500000',
-    manufacturing_location: 'Detroit, Michigan'
-  };
+  // Updated Oct 23, 2025: Only USMCACertificateTab is active
+  // Archived service request tabs removed in Phase 2 cleanup
+
+  if (component !== 'USMCACertificateTab') {
+    throw new Error(`Component ${component} is archived and no longer supported. Only 'USMCACertificateTab' is active.`);
+  }
 
   const testData = {
-    request_id: 'test-' + Date.now(),
-    subscriber_data: baseSubscriberData,
-    service_type: component.toLowerCase().replace('tab', '')
+    company: {
+      company_name: 'Test Manufacturing Corp',
+      country: 'US',
+      business_type: 'Manufacturing',
+      trade_volume: '500000',
+      destination_country: 'US'
+    },
+    product: {
+      description: 'Electronic components assembly',
+      hs_code: '8517.62.00'
+    },
+    component_origins: [
+      {
+        origin_country: 'Mexico',
+        hs_code: '8534.20.00',
+        percentage: 40,
+        value_percentage: 40,
+        mfn_rate: 3.5,
+        usmca_rate: 0,
+        component_type: 'PCB Assembly'
+      },
+      {
+        origin_country: 'US',
+        hs_code: '8534.30.00',
+        percentage: 60,
+        value_percentage: 60,
+        mfn_rate: 2.5,
+        usmca_rate: 0,
+        component_type: 'Components'
+      }
+    ],
+    usmca: {
+      qualified: true
+    }
   };
-
-  // Component-specific test data
-  switch (component) {
-    case 'SupplierSourcingTab':
-      testData.sourcing_requirements = {
-        monthly_volume: '10000',
-        certifications: ['iso_9001'],
-        timeline: 'immediate',
-        payment_terms: '30_days'
-      };
-      break;
-
-    case 'CrisisResponseTab':
-      testData.crisis_details = {
-        crisis_type: 'supply_disruption',
-        impact_level: 'high',
-        affected_products: ['electronic components'],
-        timeline: 'immediate'
-      };
-      break;
-
-    case 'ManufacturingFeasibilityTab':
-      testData.manufacturing_requirements = {
-        product_type: 'electronic components',
-        volume_requirements: '100000',
-        target_timeline: '6_months',
-        quality_standards: ['iso_9001']
-      };
-      break;
-
-    case 'MarketEntryTab':
-      testData.market_goals = {
-        target_market: 'Mexico',
-        product_category: 'electronics',
-        entry_timeline: '12_months',
-        investment_budget: '500000'
-      };
-      break;
-  }
 
   return testData;
 };

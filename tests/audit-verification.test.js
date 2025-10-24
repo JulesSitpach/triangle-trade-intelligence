@@ -4,15 +4,8 @@
  * Run BEFORE manual testing to catch issues early
  */
 
-// Load environment variables
-require('dotenv').config({ path: '.env.local' });
-
+// Load environment variables (handled by jest.setup.js)
 const { createClient } = require('@supabase/supabase-js');
-const {
-  normalizeSubscriberData,
-  validateSubscriberData,
-  normalizeComponent
-} = require('../lib/validation/normalize-subscriber-data');
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -20,14 +13,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Verify environment variables loaded
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ ERROR: Missing Supabase environment variables');
-  console.error('Make sure .env.local file exists with NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
-}
-
 describe('AUDIT FIX VERIFICATION', () => {
+  let normalizeSubscriberData, validateSubscriberData, normalizeComponent;
+
+  // Load ES modules before tests run
+  beforeAll(async () => {
+    const module = await import('../lib/validation/normalize-subscriber-data.js');
+    normalizeSubscriberData = module.normalizeSubscriberData;
+    validateSubscriberData = module.validateSubscriberData;
+    normalizeComponent = module.normalizeComponent;
+  });
 
   // ============================================================================
   // TEST 1: Database Migration Worked

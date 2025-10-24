@@ -1,37 +1,4 @@
-erros in conlole alerts look up:
-hook.js:608 
- Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
-    at input
-    at div
-    at div
-    at div
-    at div
-    at div
-    at ComponentOriginsStepEnhanced (webpack-internal:///./components/workflow/ComponentOriginsStepEnhanced.js:25:11)
-    at div
-    at div
-    at commitMutationEffectsOnFiber (webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:24327:9)
-    at main
-    at div
-    at TriangleLayout (webpack-internal:///./components/TriangleLayout.js:23:11)
-    at commitMutationEffectsOnFiber (webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:24327:9)
-    at AlertProvider (webpack-internal:///./lib/contexts/AlertContext.js:26:11)
-    at SimpleAuthProvider (webpack-internal:///./lib/contexts/SimpleAuthContext.js:24:11)
-    at ToastProvider (webpack-internal:///./components/Toast.js:28:11)
-    at commitMutationEffectsOnFiber (webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:24327:9)
-    at App (webpack-internal:///./pages/_app.js:39:11)
-    at PathnameContextProviderAdapter (webpack-internal:///./node_modules/next/dist/shared/lib/router/adapters.js:81:11)
-    at commitMutationEffectsOnFiber (webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:24327:9)
-    at ReactDevOverlay (webpack-internal:///./node_modules/next/dist/client/components/react-dev-overlay/pages/ReactDevOverlay.js:33:11)
-    at commitMutationEffectsOnFiber (webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:24327:9)
-    at AppContainer (webpack-internal:///./node_modules/next/dist/client/index.js:189:11)
-    at Root (webpack-internal:///./node_modules/next/dist/client/index.js:413:11)
-overrideMethod	@	hook.js:608
-
-
-PS D:\bacjup\triangle-simple> npm run dev
-
-> triangle-intelligence-platform@1.0.0 dev
+ triangle-intelligence-platform@1.0.0 dev
 > next dev -p 3000 -H 0.0.0.0
 
   ▲ Next.js 14.2.33
@@ -40,43 +7,40 @@ PS D:\bacjup\triangle-simple> npm run dev
   - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 14s
+ ✓ Ready in 3.2s
  ○ Compiling / ...
- ✓ Compiled / in 2.2s (378 modules)
- GET / 200 in 3433ms
- ○ Compiling /api/auth/me ...
- ✓ Compiled /api/auth/me in 672ms (151 modules)
+ ✓ Compiled / in 2.5s (378 modules)
+ GET / 200 in 2761ms
+ ✓ Compiled /api/auth/me in 281ms (151 modules)
  ✓ Compiled (156 modules)
-(node:6744) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:4948) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-{"timestamp":"2025-10-23T15:13:36.033Z","level":"INFO","message":"Dropdown options request","category":"all"}
+{"timestamp":"2025-10-23T20:35:29.834Z","level":"INFO","message":"Dropdown options request","category":"all"}
+ GET /api/auth/me?t=1761251729317 200 in 1203ms
+{"timestamp":"2025-10-23T20:35:30.551Z","level":"INFO","message":"Business types generated from USMCA rules","totalCategories":9,"businessTypesFound":7}
+{"timestamp":"2025-10-23T20:35:30.731Z","level":"INFO","message":"Performance: Dropdown options served","duration_ms":898,"category":"all","items":8}
+ GET /api/database-driven-dropdown-options?category=all 200 in 1417ms
  ○ Compiling /login ...
-{"timestamp":"2025-10-23T15:13:37.148Z","level":"INFO","message":"Business types generated from USMCA rules","totalCategories":9,"businessTypesFound":7}
- GET /api/auth/me?t=1761232412467 200 in 4698ms
-{"timestamp":"2025-10-23T15:13:37.240Z","level":"INFO","message":"Performance: Dropdown options served","duration_ms":1208,"category":"all","items":8}
- GET /api/database-driven-dropdown-options?category=all 200 in 4772ms
- ✓ Compiled /login in 5.8s (406 modules)
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\9.pack.gz'
- ✓ Compiled /api/auth/login in 329ms (163 modules)
+ ✓ Compiled /login in 2.2s (382 modules)
+ ✓ Compiled /api/auth/login in 75ms (155 modules)
 🔐 Login attempt: macproductions010@gmail.com
 ✅ Password verified for: macproductions010@gmail.com
 ✅ Login successful: macproductions010@gmail.com Admin: false
- POST /api/auth/login 200 in 1840ms
+ POST /api/auth/login 200 in 1596ms
  ○ Compiling /dashboard ...
- ✓ Compiled /dashboard in 1067ms (632 modules)
- ✓ Compiled /api/dashboard-data in 167ms (178 modules)
+ ✓ Compiled /dashboard in 1357ms (624 modules)
+ ✓ Compiled /api/dashboard-data in 144ms (170 modules)
 📊 Dashboard Usage Check: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
   email: 'macproductions010@gmail.com',
   tier: 'Professional',
   tierLimit: 100
 }
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\9.pack.gz'
 📍 User Alert Filtering Context: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
-  userHSCodes: 12,
+  userHSCodes: 17,
   userDestination: null,
-  workflowCount: 73
+  workflowCount: 122
 }
 ✅ Alert filtering complete: {
   totalAlerts: 12,
@@ -84,339 +48,246 @@ PS D:\bacjup\triangle-simple> npm run dev
   filtered: 7,
   userDestination: null
 }
- GET /api/dashboard-data 200 in 1945ms
+ GET /api/dashboard-data 200 in 2214ms
  ○ Compiling /usmca-workflow ...
- ✓ Compiled /usmca-workflow in 1794ms (781 modules)
-{"timestamp":"2025-10-23T15:13:55.338Z","level":"INFO","message":"Dropdown options request","category":"all"}
- ✓ Compiled /api/trust/trust-metrics in 98ms (220 modules)
- GET /api/trust/trust-metrics 200 in 156ms
-{"timestamp":"2025-10-23T15:13:55.595Z","level":"INFO","message":"Business types generated from USMCA rules","totalCategories":9,"businessTypesFound":7}
-{"timestamp":"2025-10-23T15:13:55.658Z","level":"INFO","message":"Performance: Dropdown options served","duration_ms":320,"category":"all","items":8}
- GET /api/database-driven-dropdown-options?category=all 200 in 345ms
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\9.pack.gz'
- ✓ Compiled /api/workflow-session in 160ms (201 modules)
-{"timestamp":"2025-10-23T15:16:21.380Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"session_1761232580412_esldzctv1","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":366}
- POST /api/workflow-session 200 in 654ms
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\10.pack.gz'
- ✓ Compiled /api/agents/classification in 347ms (201 modules)
-[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating" (User: anonymous)
-💰 Database Cache HIT for "Cold-rolled steel housing with powder-co..." (saved ~13 seconds)
- POST /api/agents/classification 200 in 2410ms
-[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound" (User: anonymous)
-💰 Database Cache HIT for "Natural rubber vibration dampeners, mold..." (saved ~13 seconds)
- POST /api/agents/classification 200 in 210ms
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\11.pack.gz'
-[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch" (User: anonymous)
-💰 Database Cache HIT for "Grade 8 steel mounting bolts with lock w..." (saved ~13 seconds)
- POST /api/agents/classification 200 in 241ms
- ✓ Compiled /api/workflow-session in 52ms (209 modules)
-{"timestamp":"2025-10-23T15:20:36.910Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"session_1761232580412_esldzctv1","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":232}
- POST /api/workflow-session 200 in 297ms
- ✓ Compiled /api/ai-usmca-complete-analysis in 290ms (215 modules)
+ ✓ Compiled /usmca-workflow in 1419ms (773 modules)
+ ✓ Compiled /api/database-driven-dropdown-options in 92ms (213 modules)
+ ✓ Compiled (218 modules)
+{"timestamp":"2025-10-23T20:49:11.157Z","level":"INFO","message":"Dropdown options request","category":"all"}
+ ✓ Compiled /api/trust/trust-metrics in 59ms (220 modules)
+ GET /api/trust/trust-metrics 200 in 68ms
+{"timestamp":"2025-10-23T20:49:11.474Z","level":"INFO","message":"Business types generated from USMCA rules","totalCategories":9,"businessTypesFound":7}
+{"timestamp":"2025-10-23T20:49:11.480Z","level":"INFO","message":"Workflow session retrieved","sessionId":"session_1761232580412_esldzctv1","duration_ms":321}
+ GET /api/workflow-session?sessionId=session_1761232580412_esldzctv1 200 in 537ms
+{"timestamp":"2025-10-23T20:49:11.626Z","level":"INFO","message":"Performance: Dropdown options served","duration_ms":469,"category":"all","items":8}
+ GET /api/database-driven-dropdown-options?category=all 200 in 674ms
+{"timestamp":"2025-10-23T20:57:44.851Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"session_1761232580412_esldzctv1","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":582}
+ POST /api/workflow-session 200 in 602ms
+ ✓ Compiled /api/agents/classification in 218ms (201 modules)
+[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "100% combed cotton fabric, twill weave construction, pre-shrunk and mercerized, 300 thread count, automotive-grade upholstery material" (User: anonymous)
+💰 Database Cache HIT for "100% combed cotton fabric, twill weave c..." (saved ~13 seconds)
+ POST /api/agents/classification 200 in 703ms
+[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "High-tenacity polyester thread, UV-resistant coating, continuous filament spun, industrial-grade stitching for automotive applications" (User: anonymous)
+💰 Database Cache HIT for "High-tenacity polyester thread, UV-resis..." (saved ~13 seconds)
+ POST /api/agents/classification 200 in 254ms
+[SUBSCRIPTION-AWARE AGENT] suggest_hs_code request for: "Foam backing material with pressure-sensitive adhesive, flame-retardant treatment, closed-cell polyurethane construction" (User: anonymous)
+💰 Database Cache HIT for "Foam backing material with pressure-sens..." (saved ~13 seconds)
+ POST /api/agents/classification 200 in 621ms
+ ✓ Compiled /api/workflow-session in 62ms (209 modules)
+{"timestamp":"2025-10-23T21:06:17.148Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"session_1761232580412_esldzctv1","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":375}
+ POST /api/workflow-session 200 in 456ms
+ ○ Compiling /api/ai-usmca-complete-analysis ...
+ ✓ Compiled /api/ai-usmca-complete-analysis in 1862ms (215 modules)
 🤖 ========== AI-POWERED USMCA ANALYSIS: START ==========
 📥 Received request: {
-  company: 'Test USA Exporter Inc 6',
-  business_type: 'Exporter',
-  product: 'Automotive engine mount assemblies with steel housing and rubber vibration dampeners',
+  company: 'MexManufacturing Ltd',
+  business_type: 'Manufacturer',
+  product: 'Industrial textile products for automotive upholstery and interior trim',
   component_count: 3
 }
-✅ Usage check passed: 24/100 (76 remaining)
+✅ Usage check passed: 71/100 (29 remaining)
 ✅ Component percentage validation passed: 100%
 📊 Fetching actual tariff rates for all components...
-🗄️ Checking database cache (US: 1 days expiration)...
-  ⏰ DB Cache EXPIRED: 7326.90.85 (3 days old, limit: 1 days)
-  ⏰ DB Cache EXPIRED: 4016.93.10 (3 days old, limit: 1 days)
-  ⏰ DB Cache EXPIRED: 7308.90.60 (3 days old, limit: 1 days)
-💰 Cache Summary: 0 DB hits, 0 memory hits, 3 misses (AI call needed)
-🎯 TIER 2 (OpenRouter): Making AI call...
-✅ OpenRouter SUCCESS
-💾 Saving 3 AI tariff rates to database (dest: US)...
-✅ AI returned rates for 3 components → US (cached + saved to DB)
-✅ Got tariff rates for 3 components (dest: US)
+🗄️ Checking database cache (CA: 90 days expiration)...
+  ✅ DB Cache HIT: 5209.42.00 from US → CA (72h old)
+  ✅ DB Cache HIT: 5407.10.10 from MX → CA (72h old)
+  ✅ DB Cache HIT: 3926.90.90 from CA → CA (72h old)
+💰 Cache Summary: 3 DB hits, 0 memory hits, 0 misses (AI call needed)
+✅ All rates served from cache - $0 cost
+✅ Got tariff rates for 3 components (dest: CA)
 🎯 ========== SENDING TO OPENROUTER ==========
-Prompt length: 4951 characters
-⚠️ Failed to save 7326.90.85: Could not find the 'confidence' column of 'tariff_rates_cache' in the schema cache
-⚠️ Failed to save 4016.93.10: Could not find the 'confidence' column of 'tariff_rates_cache' in the schema cache
-⚠️ Failed to save 7308.90.60: Could not find the 'confidence' column of 'tariff_rates_cache' in the schema cache
-✅ Successfully saved 3 AI tariff rates to database → US
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\10.pack.gz'
+Prompt length: 5383 characters
 🔮 ========== RAW AI RESPONSE ==========
 ```json
 {
   "product": {
-    "hs_code": "8708.99.81",
-    "description": "Automotive engine mount assemblies (parts and accessories of motor vehicles)",
-    "confidence": 95
+    "hs_code": "6307.90.98",
+    "confidence": 0.92,
+    "classification_notes": "Industrial textile products for automotive upholstery and interior trim fall under HS 6307.90.98 (Other made-up textile articles). The individual components (cotton fabric 5209.42.00, polyester thread 5407.10.10, foam backing 3926.90.90) transform into a finished automotive textile product through substantial manufacturing."
   },
   "usmca": {
     "qualified": true,
-    "threshold_applied": 75,
-    "threshold_source": "Annex 4-B Article 4.5 - Automotive Goods",
-    "threshold_reasoning": "Engine mount assemblies are classified as automotive parts under Chapter 87. Per USMCA Annex 4-B Article 4.5, parts and accessories of vehicles fall under the 75% Regional Value Content (RVC) requirement using the Net Cost method. This is the mandatory threshold for automotive components to qualify for preferential treatment.",
-    "north_american_content": 102.5,
-    "gap": 27.5,
-    "rule": "RVC 75% (Net Cost Method)",
-    "reason": "QUALIFIED - Your engine mounts exceed the 75% threshold with 102.5% North American content. Here's why: (1) Mexican rubber dampeners (50%) are fully USMCA-originating, (2) US mounting bolts (30%) are USMCA-originating, (3) Manufacturing labor credit (22.5%) counts toward RVC under Net Cost method, (4) Chinese steel housing (20%) is non-originating but doesn't prevent qualification. You're 27.5 percentage points above the minimum - a comfortable margin that reduces audit risk.",
+    "threshold_applied": 62.5,
+    "threshold_source": "USMCA Article 4.2 - Textiles and Apparel",
+    "threshold_reasoning": "Automotive upholstery textiles fall under Chapter 63 (Other Made-Up Textile Articles), which is governed by USMCA Article 4.2 requiring 62.5% Regional Value Content (RVC). This is higher than the general 75% Net Cost threshold because textiles have specific rules to protect North American textile manufacturing.",
+    "north_american_content": 115.0,
+    "gap": 52.5,
+    "rule": "RVC 62.5% (Textiles & Apparel)",
+    "reason": "This product STRONGLY QUALIFIES for USMCA preferential treatment. All three components (100%) originate from USMCA countries (US, MX, CA), plus you receive an additional 15% labor credit for Mexican manufacturing operations. Your total North American content of 115% exceeds the 62.5% textile threshold by a comfortable 52.5-point margin, providing excellent audit protection.",
     "component_breakdown": [
       {
-        "component": "Natural rubber vibration dampeners (MX)",
-        "percentage": 50,
-        "origin": "Mexico",
-        "status": "USMCA Originating",
-        "contribution_to_rvc": 50,
-        "rationale": "Manufactured in Mexico from natural rubber with substantial transformation (molding, metal insert integration, heat treatment)"
+        "component": "100% combed cotton fabric (automotive-grade upholstery)",
+        "origin": "US",
+        "percentage": 45,
+        "hs_code": "5209.42.00",
+        "qualifies": true,
+        "notes": "Premium automotive-grade cotton fabric with twill weave, pre-shrunk and mercerized. US origin provides full USMCA qualification."
       },
       {
-        "component": "Grade 8 steel mounting bolts (US)",
-        "percentage": 30,
-        "origin": "United States",
-        "status": "USMCA Originating",
-        "contribution_to_rvc": 30,
-        "rationale": "US-origin components fully qualify as USMCA content"
+        "component": "High-tenacity polyester thread (UV-resistant, industrial-grade)",
+        "origin": "MX",
+        "percentage": 35,
+        "hs_code": "5407.10.10",
+        "qualifies": true,
+        "notes": "Specialized industrial thread for automotive stitching. Mexican origin qualifies fully under USMCA."
       },
       {
-        "component": "Manufacturing labor & overhead (MX)",
-        "percentage": 22.5,
-        "origin": "Mexico",
-        "status": "USMCA Originating",
-        "contribution_to_rvc": 22.5,
-        "rationale": "Assembly, welding, forming, and finishing operations in Mexico count as originating value under Net Cost method (Article 4-B Annex 4)"
-      },
-      {
-        "component": "Cold-rolled steel housing (CN)",
+        "component": "Foam backing with adhesive (flame-retardant polyurethane)",
+        "origin": "CA",
         "percentage": 20,
-        "origin": "China",
-        "status": "Non-Originating",
-        "contribution_to_rvc": 0,
-        "rationale": "Chinese components do not contribute to USMCA RVC calculation"
+        "hs_code": "3926.90.90",
+        "qualifies": true,
+        "notes": "Safety-compliant foam backing from Canada. Full USMCA qualification."
+      },
+      {
+        "component": "Mexican Manufacturing Labor Credit",
+        "origin": "MX",
+        "percentage": 15,
+        "hs_code": "N/A",
+        "qualifies": true,
+        "notes": "USMCA Article 4.2 allows 15% credit for labor, overhead, and assembly performed in Mexico. This is a significant benefit for final assembly operations."
       }
     ],
     "documentation_required": [
-      "USMCA Certificate of Origin (signed declaration)",
-      "Bill of Materials (BOM) with country of origin for each component",
-      "Net Cost calculation worksheet showing RVC methodology",
-      "Purchase invoices for Mexican rubber dampeners and US bolts",
-      "Manufacturing cost records (labor, overhead allocation for 22.5% credit)",
-      "Supplier certifications from Mexican and US vendors",
-      "Process documentation (welding procedures, quality control, substantial transformation evidence)",
-      "Import documentation for Chinese steel housing (to track Section 301 duties)"
+      "USMCA Certificate of Origin (signed declaration covering $850K annual shipments)",
+      "Supplier certifications from US cotton fabric supplier (HS 5209.42.00)",
+      "Supplier certifications from Mexican polyester thread supplier (HS 5407.10.10)",
+      "Supplier certifications from Canadian foam backing supplier (HS 3926.90.90)",
+      "Manufacturing records documenting substantial transformation in Mexico (welding, forming, heat treatment, assembly processes)",
+      "Labor cost documentation supporting 15% manufacturing credit claim",
+      "Bill of Materials (BOM) showing component percentages and origins",
+      "Commercial invoices and packing lists for all cross-border movements",
+      "Product specifications demonstrating automotive-grade compliance"
     ],
-    "method_of_qualification": "Net Cost Method (Required for Automotive)",
-    "preference_criterion": "B",
-    "preference_criterion_explanation": "Criterion B applies because the product uses the Net Cost method AND contains non-originating materials (Chinese steel housing) that have undergone sufficient processing in Mexico to meet the applicable tariff shift rule for HS 8708.99.81"
-  },
-  "savings": {
-    "annual_savings": 3487.5,
-    "monthly_savings": 290.63,
-    "savings_percentage": 0.77,
-    "mfn_rate": "Blended 15.88%",
-    "usmca_rate": 0,
-    "calculation_breakdown": {
-      "chinese_steel_housing": {
-        "annual_value": 90000,
-        "component_percentage": 20,
-        "mfn_rate": 77.5,
-        "section_301_rate": 25,
-        "usmca_base_savings": 69750,
-        "section_301_remains": 22500,
-        "net_savings": 0,
-        "explanation": "CRITICAL: While USMCA eliminates the 77.5% base MFN duty, Section 301 tariffs (~25%) on Chinese steel remain. Your actual duty: 25% (Section 301 only). Without USMCA, you'd pay 102.5% (77.5% + 25%). USMCA saves you the 77.5% base rate = $69,750 annually on this component."
-      },
-      "mexican_rubber_dampeners": {
-        "annual_value": 225000,
-        "component_percentage": 50,
-        "mfn_rate": 2.5,
-        "usmca_rate": 0,
-        "annual_savings": 5625,
-        "explanation": "Without USMCA: $225,000 × 2.5% = $5,625 in duties. With USMCA: $0. Annual savings: $5,625"
-      },
-      "us_mounting_bolts": {
-        "annual_value": 135000,
-        "component_percentage": 30,
-        "mfn_rate": 0,
-        "usmca_rate": 0,
-        "annual_savings": 0,
-        "explanation": "Already duty-free under MFN. No additional USMCA savings."
-      },
-      "total_analysis": {
-        "total_mfn_duties_without_usmca": 98625,
-        "breakdown": "$69,750 (Chinese steel base) + $22,500 (Section 301) + $5,625 (Mexican rubber) = $97,875",
-        "total_duties_with_usmca": 22500,
-        "breakdown_with_usmca": "$22,500 (Section 301 only - cannot be eliminated by USMCA)",
-        "net_annual_savings": 75375,
-        "corrected_annual_savings": 75375,
-        "monthly_savings": 6281.25,
-        "savings_as_percentage_of_trade": 16.75,
-        "effective_duty_rate_without_usmca": 21.92,
-        "effective_duty_rate_with_usmca": 5.0
-      }
-    }
+    "method_of_qualification": "Net Cost Method",
+    "preference_criterion": "A",
+    "criterion_explanation": "Criterion A applies because the goods are 'wholly obtained or produced entirely' in USMCA territory. All components (100%) originate from US, Mexico, or Canada, with no non-USMCA materials. This is the strongest qualification category and simplifies compliance."
   },
   "recommendations": [
-    "✅ IMMEDIATE: File USMCA Certificate of Origin - You're saving $75,375 annually (16.75% of trade value). This is significant money you're leaving on the table without certification.",      
-    "📋 DOCUMENTATION: Establish a compliance file with all required documents listed above. In an audit, you must prove the 102.5% RVC calculation within 30 days.",
-    "🇨🇳 CHINESE COMPONENT STRATEGY: Your 20% Chinese steel housing costs you $22,500/year in Section 301 tariffs that USMCA cannot eliminate. Consider sourcing alternatives: (a) Mexican steel   supplier - would increase USMCA content to 122.5% and eliminate all duties, (b) US steel supplier - same benefit, (c) Canadian supplier - same benefit. Run the numbers: if Mexican/US/CA steel costs less than 25% more than Chinese, you break even.",
-    "🔧 SUBSTANTIAL TRANSFORMATION ADVANTAGE: Your welding, forming, and heat treatment processes are strong evidence of substantial transformation. Document these with photos, process sheets, and quality records - this protects you in audits.",
-    "💰 LABOR CREDIT OPTIMIZATION: You're claiming 22.5% labor credit. Ensure your cost accounting clearly separates and tracks: direct labor, manufacturing overhead, assembly costs. This 22.5% is worth $101,250 in product value - protect it with solid documentation.",
-    "📊 QUARTERLY REVIEW: With $450K annual volume, review your RVC calculation quarterly. If component costs shift and you drop below 75%, you lose ALL savings. Set up alerts if Chinese steel exceeds 25% of product cost.",
-    "🎯 SUPPLIER CERTIFICATIONS: Get annual USMCA origin certifications from your Mexican rubber supplier and US bolt supplier. Without these, you can't prove their content is originating.",    
-    "⚠️ DE MINIMIS ELIMINATED: As of August 2025, the US eliminated de minimis for all countries. This doesn't directly affect your qualified USMCA shipments, but ensure every shipment has propeer certification - no exceptions for small values.",
-    "🔍 AUDIT PREPAREDNESS: With 77.5% tariff differential on steel, CBP may audit. Prepare a 'compliance binder' with: BOM, cost breakdowns, supplier certs, manufacturing process docs, RVC calculations. Update annually.",
-    "💡 STRATEGIC INSIGHT: You're in excellent position. At 102.5% RVC, you could absorb a 27.5% increase in Chinese content and still qualify. This gives you negotiating flexibility with suppliers."
+    "✅ IMMEDIATE ACTION: File USMCA Certificate of Origin to capture $56,525 in annual duty savings. You're leaving money on the table without this documentation.",
+    "📋 COMPLIANCE PRIORITY: Obtain written supplier certifications from all three component suppliers (US, MX, CA) within 30 days. These are your audit defense.",
+    "🏭 DOCUMENT MANUFACTURING: Create detailed process documentation for your Mexican operations showing substantial transformation (welding, forming, heat treatment). This supports both your 15% labor credit and strengthens audit protection.",
+    "💰 CASH FLOW OPTIMIZATION: With $4,710/month in savings, consider reinvesting in inventory or negotiating better payment terms with suppliers.",
+    "🔄 SUPPLY CHAIN RESILIENCE: Your 100% USMCA sourcing insulates you from Section 301 China tariffs and future trade disruptions. Maintain this strategic advantage.",
+    "📊 ANNUAL REVIEW: Schedule quarterly RVC calculations to ensure continued compliance as component costs fluctuate. Your 52.5-point cushion provides room for cost variations.",
+    "🎯 STRATEGIC POSITIONING: Market your '100% North American Made' automotive textiles to OEMs prioritizing supply chain security and USMCA compliance.",
+    "⚠️ RECORDKEEPING: Maintain all USMCA documentation for 5 years (US/Mexico requirement). Set up digital archive system now to avoid scrambling during audits."
   ],
   "detailed_analysis": {
-    "threshold_research": "**Why 75% RVC Applies to Your Engine Mounts:**\n\nUnderstood - you're juggling a lot as a business owner, so let me explain this clearly:\n\nYour engine mounts fall under HS Code 8708.99.81 (motor vehicle parts). The USMCA treaty has special, stricter rules for automotive products in Annex 4-B. Here's why:\n\n1. **Automotive Industry Protection**: The USMCA negotiators wanted to ensure automotive manufacturing stays in North America. They set a 75% threshold (higher than the standard 60-65% for most products) to incentivize companies to source components regionally.\n\n2. **Net Cost Method Required**: For automotive goods, you MUST use the Net Cost method (not Transaction Value method). This is non-negotiable per Article 4-B, Section 4.5.\n\n3. **Your Product Classification**: Engine mounts are specifically listed as automotive parts. Even though they're relatively simple components, they're subject to the full 75% automotive threshold because they're installed in vehicles.\n\n4. **Labor Credit Benefit**: The good news? Your 22.5% manufacturing labor in Mexico counts fully toward the 75%. This is a significant advantage of the Net Cost method for manufacturers like you.\n\nBottom line: 75% is your magic number. You're at 102.5%, so you're in great shape.",
-    "calculation_breakdown": "**Step-by-Step RVC Calculation (Net Cost Method):**\n\nLet me walk you through exactly how I calculated your 102.5% qualification:\n\n**STEP 1: Identify Originating Content**\n- Mexican rubber dampeners: 50% ✓ (Made in USMCA territory)\n- US mounting bolts: 30% ✓ (Made in USMCA territory)\n- Mexican manufacturing labor/overhead: 22.5% ✓ (Performed in USMCA territory)\n- Chinese steel housing: 20% ✗ (Non-originating)\n\n**STEP 2: Calculate Regional Value Content**\nRVC = (Originating Content ÷ Net Cost) × 100\nRVC = (50% + 30% + 22.5%) ÷ 100% × 100\nRVC = 102.5%\n\n**STEP 3: Compare to Threshold**\n102.5% > 75% ✓ QUALIFIED\n\n**Why This Works:**\nUnder Net Cost method, you calculate:\n- Net Cost = Total cost minus excluded costs (sales promotion, royalties, shipping after sale, etc.)\n- Your percentages already represent portions of net cost\n- Originating materials + Originating labor = Total originating value\n- Non-originating materials (Chinese steel) don't count, but don't disqualify you\n\n**The 22.5% Labor Credit Explained:**\nThis represents value added in Mexico through:\n- Direct labor (welding, assembly, finishing)\n- Factory overhead (utilities, supervision, equipment depreciation)\n- Manufacturing profit margin\n\nThis is REAL value you're adding, and USMCA rewards it by counting it toward qualification.\n\n**Margin of Safety:**\nYou're 27.5 percentage points above minimum. This means:\n- Chinese steel could increase from 20% to 47.5% of cost before you'd lose qualification\n- You have significant buffer for cost fluctuations\n- Lower audit risk due to comfortable margin",
-    "qualification_reasoning": "**Why I Determined You QUALIFY:**\n\nAs your compliance advisor, here's my professional assessment:\n\n**✓ QUALIFICATION CONFIRMED** - You meet all three critical tests:\n\n**Test 1: RVC Threshold (PASSED)**\n- Required: 75%\n- Your content: 102.5%\n- Margin: +27.5 percentage points\n- This isn't borderline - you're comfortably qualified\n\n**Test 2: Substantial Transformation (PASSED)**\n- Your manufacturing includes: welding, stamping, forming, powder coating, heat treatment\n- This goes well beyond \"simple assembly\"\n- The product that emerges is fundamentally different from the input materials\n- Strong legal position if audited\n\n**Test 3: Documentation Capability (ASSESSABLE)**\n- You can trace: 50% Mexican rubber (supplier docs), 30% US bolts (supplier docs), 22.5% MX labor (cost accounting), 20% Chinese steel (import records)\n- This traceability is essential for certification\n- Recommendation: Formalize this documentation now\n\n**Risk Assessment: LOW**\n- High RVC margin reduces audit risk\n- Clear substantial transformation\n- Straightforward supply chain (4 components)\n- Manufacturing in single location (Mexico)\n\n**Business Impact:**\nQualification saves you $75,375 annually. The compliance cost (documentation, certification) is minimal compared to savings. This is a clear \"yes\" decision.\n\n**One Caveat:**\nSection 301 tariffs on Chinese steel ($22,500/year) remain. USMCA doesn't eliminate these. Consider this in your sourcing strategy.",
-    "strategic_insights": "**Business Optimization Opportunities:**\n\nYou're doing well, but here are strategic moves to consider:\n\n**1. ELIMINATE CHINESE STEEL ($22,500 annual opportunity)**\n\nCurrent state:\n- Chinese steel: 20% of product cost = ~$90,000/year\n- Section 301 tariff: 25% = $22,500/year in duties\n- These duties are unavoidable under current sourcing\n\nOpportunity:\n- Source from Mexico, US, or Canada instead\n- Break-even analysis: If USMCA steel costs <25% more than Chinese, you save money\n- Example: Mexican steel at $100,000 (vs. $90,000 Chinese) costs $10,000 more but saves $22,500 in tariffs = $12,500 net savings\n- BONUS: Increases your RVC to 122.5%, giving even more audit protection\n\nAction: Request quotes from Mexican steel suppliers this quarter\n\n**2. LABOR CREDIT MAXIMIZATION**\n\nCurrent: 22.5% labor credit\n\nOpportunity:\n- Review your cost accounting methodology\n- Ensure you're capturing ALL allowable costs: direct labor, indirect labor, factory overhead, quality control, engineering support\n- Many manufacturers under-claim labor credit by 5-10%\n- Even a 2% increase in labor credit gives you more cushion\n\nAction: Have your accountant review Net Cost calculation methodology\n\n**3. CERTIFICATION EFFICIENCY**\n\nCurrent: Manual certification process (likely)\n\nOpportunity:\n- With $450K annual volume, you're probably shipping 20-50 times per year\n- Implement a blanket USMCA certificate (valid up to 12 months)\n- Reduces administrative burden from per-shipment to annual certification\n- Train your shipping team to reference blanket certificate on commercial invoices\n\nAction: Create blanket certificate template, update shipping procedures\n\n**4. CUSTOMER COMMUNICATION**\n\nOpportunity:\n- Your US customers benefit from 0% duty on your qualified products\n- This is a competitive advantage - they save money importing from you vs. non-USMCA suppliers\n- Market this: \"USMCA-Qualified Engine Mounts - Duty-Free Import\"\n- Helps justify pricing, win contracts against Asian competitors\n\nAction: Add USMCA qualification to product spec sheets and quotes\n\n**5. SUPPLY CHAIN RESILIENCE**\n\nCurrent risk:\n- 20% dependency on Chinese steel\n- Vulnerable to: Section 301 rate increases, supply disruptions, geopolitical tensions\n\nOpportunity:\n- Dual-source strategy: Qualify both Chinese and Mexican steel suppliers\n- Gives you flexibility to switch based on total landed cost\n- Reduces supply chain risk\n\nAction: Develop relationship with backup USMCA steel supplier\n\n**6. VOLUME GROWTH STRATEGY**\n\nCurrent: $450K annual volume\n\nInsight:\n- Your $75K annual savings = 16.75% cost advantage vs. non-qualified competitors\n- This is HUGE in automotive where margins are tight\n- Use this advantage to: (a) Price more competitively and win market share, (b) Maintain pricing and improve margins, (c) Invest savings in capacity expansion\n\nAction: Develop growth plan leveraging USMCA advantage",
-    "savings_analysis": "**Detailed Tariff Savings Breakdown:**\n\nLet me show you exactly where your $75,375 in annual savings comes from:\n\n**COMPONENT 1: Chinese Steel Housing**\n- Annual value: $450,000 × 20% = $90,000\n- MFN duty rate: 77.5%\n- Section 301 rate: 25%\n- Combined rate without USMCA: 102.5%\n\nWithout USMCA:\n- Base duty: $90,000 × 77.5% = $69,750\n- Section 301: $90,000 × 25% = $22,500\n- Total: $92,250\n\nWith USMCA:\n- Base duty: $0 (eliminated by USMCA)\n- Section 301: $22,500 (CANNOT be eliminated - these are punitive tariffs)\n- Total: $22,500\n\nSavings on this component: $69,750/year\n\n**COMPONENT 2: Mexican Rubber Dampeners**\n- Annual value: $450,000 × 50% = $225,000\n- MFN duty rate: 2.5%\n- USMCA rate: 0%\n\nWithout USMCA: $225,000 × 2.5% = $5,625\nWith USMCA: $0\n\nSavings on this component: $5,625/year\n\n**COMPONENT 3: US Mounting Bolts**\n- Annual value: $450,000 × 30% = $135,000\n- MFN duty rate: 0%\n- Already duty-free\n\nSavings on this component: $0\n\n**TOTAL SAVINGS SUMMARY:**\n- Chinese steel savings: $69,750\n- Mexican rubber savings: $5,625\n- US bolts savings: $0\n- **TOTAL ANNUAL SAVINGS: $75,375**\n- **MONTHLY SAVINGS: $6,281.25**\n- **Savings as % of trade value: 16.75%**\n\n**Effective Duty Rate Comparison:**\n- Without USMCA: 21.92% effective rate\n- With USMCA: 5.0% effective rate (Section 301 only)\n- **Reduction: 16.92 percentage points**\n\n**What This Means for Your Business:**\n- Every $100,000 in sales saves you $16,750 in duties\n- At current volume, you save $6,281/month\n- Over 3 years: $226,125 in savings\n- This is real money that flows to your bottom line\n\n**The Section 301 Reality:**\nI want to be crystal clear: the $22,500 in Section 301 tariffs on Chinese steel is unavoidable under USMCA. These are punitive tariffs specifically targeting Chinese goods, and trade agreements don't eliminate them. Your options:\n1. Accept the $22,500 cost (current state)\n2. Switch to USMCA steel supplier (eliminates this cost entirely)\n3. Hybrid approach (dual source based on total landed cost)\n\nMy recommendation: Get quotes from Mexican steel suppliers. If they're within 25% of Chinese pricing, you'll save money overall."
+    "threshold_research": "**Why 62.5% Applies to Your Automotive Textiles:**\n\nUSMCA Article 4.2 establishes special rules for textiles and apparel (Chapters 50-63) that differ from general manufacturing rules. Here's why:\n\n1. **Textile-Specific Protection**: The agreement created a lower 62.5% threshold (vs. 75% for general goods) to balance competitiveness with protection for North American textile mills.\n\n2. **Chapter 63 Classification**: Your finished automotive upholstery falls under HS 6307.90.98 (Other Made-Up Textile Articles), which is explicitly covered by Article 4.2.\n\n3. **Automotive Exception**: Even though this is automotive upholstery, it's classified as a textile product first, so textile rules govern (not the stricter automotive rules in Article 4.3).\n\n4. **Labor Credit Benefit**: Article 4.2 specifically allows the 15% manufacturing credit for assembly operations, recognizing the labor-intensive nature of textile production.\n\nThis is GOOD NEWS for you—62.5% is much easier to achieve than the 75% general threshold or the complex automotive-specific rules.",
+
+    "calculation_breakdown": "**Step-by-Step RVC Calculation (Net Cost Method):**\n\n**STEP 1: Calculate USMCA Component Value**\n- US Cotton Fabric: 45% ✓ (USMCA-originating)\n- MX Polyester Thread: 35% ✓ (USMCA-originating)\n- CA Foam Backing: 20% ✓ (USMCA-originating)\n- **Subtotal Components: 100%** (all from USMCA countries)\n\n**STEP 2: Add Manufacturing Labor Credit**\n- Mexican assembly operations: +15% (Article 4.2 allowance)\n- **Total North American Content: 115%**\n\n**STEP 3: Compare to Threshold**\n- Your Content: 115%\n- Required Threshold: 62.5%\n- **Margin of Compliance: +52.5 percentage points**\n\n**STEP 4: Qualification Decision**\n✅ **QUALIFIED** - You exceed the requirement by 83% (52.5 ÷ 62.5 = 0.84 or 84% above minimum)\n\n**Why This Matters for Your Business:**\nYour 52.5-point cushion means component costs could increase significantly or sourcing could shift slightly without losing USMCA qualification. This is excellent risk protection.",
+
+    "qualification_reasoning": "**Why I Determined STRONG QUALIFICATION:**\n\n**Primary Factors:**\n\n1. **100% USMCA Sourcing**: Every single component originates from a USMCA country (US, MX, CA). This is the gold standard—no non-originating materials to track or worry about.\n\n2. **Substantial Transformation in Mexico**: Your manufacturing involves complex processes (welding, forming, heat treatment) that clearly transform raw components into a distinct automotive product. This isn't simple assembly—it's value-added manufacturing.\n\n3. **Generous Compliance Margin**: At 115% vs. 62.5% required, you have an 84% buffer above the minimum. Most companies struggle to hit thresholds; you're crushing it.\n\n4. **Criterion A Qualification**: Because all materials are USMCA-originating, you qualify under the strongest criterion (A - wholly obtained). This simplifies paperwork and reduces audit risk.\n\n5. **Documented Manufacturing**: You've confirmed substantial transformation processes, which customs authorities love to see during verification.\n\n**Risk Assessment: VERY LOW**\n- No non-USMCA components to trace\n- Large compliance cushion\n- Clear substantial transformation\n- Well-documented supply chain\n\nThe only compliance work needed is proper documentation—the qualification itself is rock-solid.",
+
+    "strategic_insights": "**Business Optimization Opportunities:**\n\n**1. MARKETING ADVANTAGE ($850K Annual Volume)**\n- Promote '100% North American Made' to automotive OEMs\n- USMCA compliance is increasingly a supplier selection criterion\n- Your complete regional sourcing is rare and valuable\n\n**2. SUPPLY CHAIN RESILIENCE**\n- Zero exposure to China Section 301 tariffs (25%+ on many textiles)\n- Insulated from Asia-Pacific shipping disruptions\n- Shorter lead times (US/MX/CA vs. overseas)\n- Currency risk limited to USD/CAD/MXN (relatively stable)\n\n**3. COST STRUCTURE OPTIMIZATION**\n- $56,525 annual savings = 6.65% of trade volume\n- Reinvestment options: R&D, inventory, marketing, or price competitiveness\n- Monthly $4,710 savings could fund quality improvements or certifications\n\n**4. EXPANSION OPPORTUNITIES**\n- Your Mexican manufacturing platform can serve all USMCA markets duty-free\n- Consider expanding product line using same supply chain\n- 52.5-point cushion allows minor sourcing adjustments without losing qualification\n\n**5. CUSTOMER RELATIONSHIPS**\n- Offer USMCA compliance documentation as value-added service\n- Help customers with their own origin determinations\n- Position as strategic partner, not just supplier\n\n**6. REGULATORY FUTURE-PROOFING**\n- USMCA runs through 2036 with 16-year review cycles\n- Your compliance structure is stable long-term\n- Avoid volatility of MFN rates and trade disputes\n\n**COMPETITIVE MOAT**: Your 100% USMCA sourcing + Mexican manufacturing creates a defensible competitive advantage that's difficult for overseas competitors to replicate.",
+
+    "savings_analysis": {
+      "annual_savings": 56525,
+      "monthly_savings": 4710.42,
+      "savings_percentage": 6.65,
+      "mfn_rate": 6.65,
+      "calculation_detail": "**USMCA Duty Savings Calculation:**\n\n**Per Component Analysis:**\n\n1. **US Cotton Fabric (HS 5209.42.00)**\n   - Component Value: $850,000 × 45% = $382,500\n   - MFN Tariff Rate: 7.9%\n   - MFN Duty: $382,500 × 7.9% = $30,217.50\n   - USMCA Duty: $0 (duty-free)\n   - **Savings: $30,217.50**\n\n2. **Mexican Polyester Thread (HS 5407.10.10)**\n   - Component Value: $850,000 × 35% = $297,500\n   - MFN Tariff Rate: 0%\n   - MFN Duty: $0\n   - USMCA Duty: $0\n   - **Savings: $0** (already duty-free under MFN)\n\n3. **Canadian Foam Backing (HS 3926.90.90)**\n   - Component Value: $850,000 × 20% = $170,000\n   - MFN Tariff Rate: 5.3%\n   - MFN Duty: $170,000 × 5.3% = $9,010\n   - USMCA Duty: $0 (duty-free)\n   - **Savings: $9,010**\n\n4. **Mexican Manufacturing (15% Labor Credit)**\n   - No direct tariff impact (this is value-added, not imported component)\n   - Contributes to RVC qualification but doesn't generate separate duty savings\n\n**TOTAL ANNUAL SAVINGS:**\n$30,217.50 + $0 + $9,010 = **$39,227.50**\n\n**Wait—Recalculation Needed for Trade Flow:**\n\nYour trade flow is **US→CA** (shipping TO Canada), so we need to calculate based on Canadian import duties:\n\n**Revised Calculation (Canadian Import Perspective):**\n\nWhen importing into Canada, the finished product (HS 6307.90.98) faces:\n- **Canadian MFN Rate**: ~6.5-8% (textile products)\n- **USMCA Rate**: 0%\n\nFor $850,000 annual imports to Canada:\n- Estimated MFN Duty: $850,000 × 6.65% (weighted average) = **$56,525**\n- USMCA Duty: $0\n- **Annual Savings: $56,525**\n\n**Monthly Savings:**\n$56,525 ÷ 12 = **$4,710.42/month**\n\n**Savings as Percentage of Trade Volume:**\n($56,525 ÷ $850,000) × 100 = **6.65%**\n\n**Effective MFN Rate (Weighted Average):** 6.65%\n\n**CRITICAL NOTE**: These savings assume proper USMCA Certificate of Origin is filed with Canadian customs. Without certification, your Canadian customers pay the full MFN rate, making your products 6.65% more expensive than USMCA-compliant competitors.\n\n**Source Verification**: Canadian tariff rates verified against Canada Tariff Finder (2025 rates). Textile products under Chapter 63 typically face 6-8% MFN duties when imported into Canada."
+    }
   },
-  "compliance_action_plan": {
-    "immediate_actions": [
-      "Week 1: Complete USMCA Certificate of Origin using template (available at cbp.gov)",
-      "Week 1: Gather supplier certifications from Mexican rubber and US bolt vendors",
-      "Week 2: Document your Net Cost calculation with supporting cost accounting records",
-      "Week 2: Create compliance file with all required documentation",
-      "Week 3: Train shipping team on USMCA certification requirements",
-      "Week 4: Implement blanket certificate system for recurring shipments"
-    ],
-    "ongoing_requirements": [
-      "Quarterly: Review RVC calculation if component costs change",
-      "Annually: Renew blanket USMCA certificate",
-      "Annually: Update supplier certifications",
-      "Monthly: Verify USMCA certificate included on all shipments",
-      "As needed: Update documentation if manufacturing process changes"
-    ],
-    "audit_preparation": [
-      "Maintain 5 years of records (CBP requirement)",
-      "Keep detailed BOM with country of origin for each component",
-      "Preserve cost accounting records supporting 22.5% labor credit",
-      "Document substantial transformation (process sheets, photos, quality records)",
-      "File supplier certifications in accessible format",
-      "Prepare RVC calculation worksheet with clear methodology"
-    ]
-  },
-  "confidence_score": 95,
-  "confidence_explanation": "Very high confidence (95%) based on: (1) Clear 27.5-point margin above 75% threshold, (2) Straightforward 4-component supply chain, (3) Well-documented substantial transformation, (4) Automotive threshold clearly defined in Annex 4-B, (5) Net Cost method properly applied. The 5% uncertainty accounts for potential cost fluctuations that could affect RVC and the need to verify exact manufacturing cost allocation for the 22.5% labor credit."
+  "confidence_score": 0.95,
+  "confidence_explanation": "Very high confidence (95%) based on: (1) All components are USMCA-originating with clear documentation, (2) 52.5-point compliance margin provides substantial buffer, (3) Criterion A qualification is straightforward, (4) Substantial transformation is well-documented, (5) Textile-specific 62.5% threshold is clearly applicable. The 5% uncertainty relates only to potential HS classification nuances if customs views the product differently, but 6307.90.98 is the correct classification for automotive textile assemblies."
 }
 ```
 
 ---
 
-### 🎯 **EXECUTIVE SUMMARY FOR BUSY BUSINESS OWNER**
+## 🎯 **EXECUTIVE SUMMARY FOR SMB OWNER**
 
-**Bottom Line: You QUALIFY for USMCA and should certify immediately.**
+**Good news**: Your automotive upholstery textiles **STRONGLY QUALIFY** for USMCA preferential treatment, saving you **$56,525 annually** (6.65% of your trade volume).
 
-**Your Savings: $75,375/year (16.75% of your trade value)**
+### **Why You Qualify (Simple Version):**
+- ✅ All your components come from US, Mexico, or Canada (100% North American)
+- ✅ Your Mexican manufacturing adds 15% value through labor
+- ✅ Total: 115% North American content vs. 62.5% required
+- ✅ You exceed the threshold by **52.5 percentage points** (huge safety margin)
 
-**What You Need to Do:**
-1. ✅ Sign a USMCA Certificate of Origin (I've listed exactly what docs you need above)
-2. ✅ Give it to your freight forwarder/customs broker for all Mexico→US shipments
-3. ✅ Keep records for 5 years in case of audit
+### **What This Means in Dollars:**
+- **$4,710/month** in eliminated duties
+- **6.65% cost advantage** over non-USMCA competitors
+- **$282,625 saved over 5 years** (assuming stable volume)
 
-**The One Catch:**
-Your Chinese steel still pays 25% Section 301 tariffs ($22,500/year) that USMCA can't eliminate. Consider switching to Mexican/US steel - you'd save this entire amount if the steel costs less than 25% more.
+### **What You Need to Do:**
+1. **File USMCA Certificate of Origin** with your Canadian customers (one-time paperwork)
+2. **Get supplier letters** from your US, Mexican, and Canadian suppliers confirming origin
+3. **Document your Mexican manufacturing processes** (you already do this, just organize it)
+4. **Keep records for 5 years** (digital files are fine)
 
-**Why You Qualify:**
-- You need 75% North American content
-- You have 102.5% (comfortable margin)
-- Mexican rubber (50%) + US bolts (30%) + Mexican labor (22.5%) = 102.5%
+### **Your Competitive Advantage:**
+You're in an enviable position—100% North American sourcing means:
+- No China tariff exposure (competitors using Asian materials face 25%+ tariffs)
+- Stable, predictable costs (USMCA runs through 2036)
+- Marketing edge ("100% North American Made")
+- Supply chain resilience (no ocean shipping delays)
 
-**Risk Level: LOW** - You're well above the threshold with solid documentation capability.
-
-**Questions? Focus on these priorities:**
-1. Get certified this month (don't leave $6,281/month on the table)
-2. Request quotes from Mexican steel suppliers (potential $22,500 additional savings)
-3. Set up quarterly RVC reviews to ensure you stay above 75%
-
-You've got this. The compliance work is straightforward, and the savings are substantial.
+**Bottom line**: You're already doing everything right from a sourcing perspective. Now just capture the $56K+ in annual savings with proper documentation. This is low-hanging fruit. 🍎
 ========== END RAW RESPONSE ==========
 ✅ Results JSON parsed successfully (method: code_block, sanitized)
 ✅ Parsed analysis: {
   qualified: true,
-  threshold: 75,
-  content: 102.5,
-  recommendation_count: 10
+  threshold: 62.5,
+  content: 115,
+  recommendation_count: 8
 }
-⚠️ AI VALIDATION WARNING: AI claimed tariff rates not found in cache: [
-     20,    25, 102.5,
-     25,    50,    30,
-  16.75, 21.92,    25
+⚠️ AI VALIDATION WARNING: AI claimed tariff rates not matching cache: [
+    45,   35,   20,   15,
+     8, 6.65, 6.65, 6.65,
+  6.65,    8
 ]
-⚠️ DEV ISSUE [HIGH]: usmca_analysis - AI claimed tariff rates (20%, 25%, 102.5%, 25%, 50%, 30%, 16.75%, 21.92%, 25%) not matching cached data {
+⚠️ DEV ISSUE [HIGH]: usmca_analysis - AI claimed tariff rates (45%, 35%, 20%, 15%, 8%, 6.65%, 6.65%, 6.65%, 6.65%, 8%) not matching cached data {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
-  company: 'Test USA Exporter Inc 6',
-  ai_percentages: [
-       20,  77.5, 25, 102.5,
-     77.5,    25, 50,   2.5,
-        0,   2.5, 30,     0,
-    16.75, 21.92,  5,    25
+  company: 'MexManufacturing Ltd',
+  ai_claimed_rates: [
+      45,   35,   20,   15,
+       8, 6.65, 6.65, 6.65,
+    6.65,    8
   ],
-  cached_rates: [
-    { baseMFN: 77.5, section301: 0, totalRate: 77.5, usmcaRate: 0 },
-    { baseMFN: 2.5, section301: 0, totalRate: 2.5, usmcaRate: 0 },
-    { baseMFN: 0, section301: 0, totalRate: 0, usmcaRate: 0 }
-  ],
-  deviations: [
-       20,    25, 102.5,
-       25,    50,    30,
-    16.75, 21.92,    25
-  ],
-  savings_analysis_preview: '**Detailed Tariff Savings Breakdown:**\n' +
-    '\n' +
-    'Let me show you exactly where your $75,375 in annual savings comes from:\n' +
-    '\n' +
-    '**COMPONENT 1: Chinese Steel Housing**\n' +
-    '- Annual value: $450,000 × 20% = $90,000\n' +
-    '- MFN duty rate: 77.5%\n' +
-    '- Section 301 rate: 25%\n' +
-    '- Combined rate without USMCA: 102.5%\n' +
-    '\n' +
-    'Without USMCA:\n' +
-    '- Bas'
+  cached_rates: [ 7.9, 0, 5.3 ],
+  note: 'Validation distinguishes between tariff rates and component percentages'
 }
 🔍 Enriching components with tariff intelligence...
-📦 BATCH ENRICHMENT for 3 components → US
-   Strategy: AI + 24-hour cache
+📦 BATCH ENRICHMENT for 3 components → CA
+   Strategy: AI + 90-day cache
 🚀 BATCH ENRICHMENT: Processing 3 components in single AI call...
-{"timestamp":"2025-10-23T15:22:53.203Z","level":"INFO","message":"Cache strategy determined","destination_country":"US","normalized_code":"US","strategy":"ai_24hr"}
+{"timestamp":"2025-10-23T21:07:47.937Z","level":"INFO","message":"Cache strategy determined","destination_country":"CA","normalized_code":"CA","strategy":"ai_90day"}
    ✅ Cache hits: 0, ❌ Needs AI: 3
 🎯 TIER 1: Batch lookup via OpenRouter...
- ○ Compiling /404 ...
- ✓ Compiled /404 in 653ms (740 modules)
- POST /api/admin/log-dev-issue 404 in 2372ms
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\9.pack.gz'
+ ✓ Compiled /404 in 359ms (740 modules)
+ POST /api/admin/log-dev-issue 404 in 422ms
 ✅ OpenRouter batch SUCCESS: 3 components enriched
 ✅ BATCH ENRICHMENT COMPLETE: 3 components processed
 ✅ BATCH enrichment complete: 3 components in single AI call
-✅ Component enrichment complete: { total_components: 3, enriched_count: 3, destination_country: 'US' }
+✅ Component enrichment complete: { total_components: 3, enriched_count: 3, destination_country: 'CA' }
 
 🔍 Component Validation - AI Enrichment Output
 📊 Total Components: 3
 ✅ All 3 components fully enriched
-{"timestamp":"2025-10-23T15:22:57.255Z","level":"INFO","message":"AI-powered USMCA analysis completed","company":"Test USA Exporter Inc 6","qualified":true,"processing_time":135852}
+{"timestamp":"2025-10-23T21:07:54.397Z","level":"INFO","message":"AI-powered USMCA analysis completed","company":"MexManufacturing Ltd","qualified":true,"processing_time":88882}
 ✅ Workflow saved to database for user: 570206c8-b431-4936-81e8-8186ea4065f0
-[USAGE-TRACKING] ✅ Incremented for user 570206c8-b431-4936-81e8-8186ea4065f0: 25/100
-✅ Usage tracked: 25/100
- POST /api/ai-usmca-complete-analysis 200 in 140656ms
+[USAGE-TRACKING] ✅ Incremented for user 570206c8-b431-4936-81e8-8186ea4065f0: 72/100
+✅ Usage tracked: 72/100
+ POST /api/ai-usmca-complete-analysis 200 in 97680ms
  ✓ Compiled /api/workflow-session in 68ms (201 modules)
-{"timestamp":"2025-10-23T15:25:43.439Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"workflow_1761233142245","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":777}
- POST /api/workflow-session 200 in 874ms
- ○ Compiling /usmca-certificate-completion ...
- ✓ Compiled /usmca-certificate-completion in 1002ms (763 modules)
- ✓ Compiled /api/dashboard-data in 92ms (206 modules)
+{"timestamp":"2025-10-23T21:09:50.204Z","level":"INFO","message":"Workflow session saved successfully","sessionId":"workflow_1761253789393","userId":"570206c8-b431-4936-81e8-8186ea4065f0","duration_ms":391}
+ POST /api/workflow-session 200 in 488ms
+ ✓ Compiled /usmca-certificate-completion in 370ms (763 modules)
+ ✓ Compiled /api/dashboard-data in 182ms (206 modules)
 📊 Dashboard Usage Check: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
   email: 'macproductions010@gmail.com',
   tier: 'Professional',
   tierLimit: 100
 }
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\10.pack.gz'
 📍 User Alert Filtering Context: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
-  userHSCodes: 12,
+  userHSCodes: 18,
   userDestination: null,
-  workflowCount: 76
+  workflowCount: 124
 }
 ✅ Alert filtering complete: {
   totalAlerts: 12,
@@ -424,31 +295,35 @@ You've got this. The compliance work is straightforward, and the savings are sub
   filtered: 7,
   userDestination: null
 }
- GET /api/dashboard-data 200 in 1870ms
- ✓ Compiled /api/trust/complete-certificate in 116ms (195 modules)
+ GET /api/dashboard-data 200 in 2190ms
+ ✓ Compiled /404 in 137ms (741 modules)
+ POST /api/admin/log-dev-issue 404 in 195ms
+ POST /api/admin/log-dev-issue 404 in 10ms
+ POST /api/admin/log-dev-issue 404 in 11ms
+ POST /api/admin/log-dev-issue 404 in 9ms
+ ✓ Compiled /api/trust/complete-certificate in 131ms (195 modules)
 🔍 Certificate API - Incoming country data: {
-  exporter_country: 'Canada',
-  importer_country: 'United States',
+  exporter_country: 'Mexico',
+  importer_country: 'Canada',
   full_company_info: {
-    exporter_name: 'Test USA Exporter Inc 6',
-    exporter_address: '"123 Main St, Toronto, ON, M1M 1M1',
-    exporter_country: 'Canada',
-    exporter_tax_id: '38-7654321',
-    exporter_phone: '4165551234',
-    exporter_email: 'john@testexporter.com',
-    importer_name: 'Ford Motor Company',
-    importer_address: 'One American Road\n         Dearborn, MI 48126',
-    importer_country: 'United States',
-    importer_tax_id: '38-0549190',
-    importer_phone: '+1 (313) 322-3000',
-    importer_email: 'supplierquality@ford.com'
+    exporter_name: 'MexManufacturing Ltd',
+    exporter_address: '456 Industrial Way, Monterrey, NL, Mexico 64000',
+    exporter_country: 'Mexico',
+    exporter_tax_id: 'RFC-MEX123456',
+    exporter_phone: '52-81-555-6789',
+    exporter_email: 'maria@mexmanufacturing.com',
+    importer_name: 'Automotive Textiles Canada Inc',
+    importer_address: '1200 Industrial Ave, Toronto, ON M1K 5A8',
+    importer_country: 'Canada',
+    importer_tax_id: 'BN-111222333RC0001',
+    importer_phone: '1-416-555-7890',
+    importer_email: 'patricia.brown@autotextiles.ca'
   }
 }
-✅ Certificate generated: USMCA-1761233719341-DL9PUC
- POST /api/trust/complete-certificate 200 in 1834ms
- ○ Compiling /trade-risk-alternatives ...
- ✓ Compiled /trade-risk-alternatives in 623ms (751 modules)
- ✓ Compiled /api/dashboard-data in 60ms (208 modules)
+✅ Certificate generated: USMCA-1761255183173-WN9VZ0
+ POST /api/trust/complete-certificate 200 in 163ms
+ ✓ Compiled /trade-risk-alternatives in 444ms (751 modules)
+ ✓ Compiled /api/dashboard-data in 57ms (208 modules)
 📊 Dashboard Usage Check: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
   email: 'macproductions010@gmail.com',
@@ -457,9 +332,9 @@ You've got this. The compliance work is straightforward, and the savings are sub
 }
 📍 User Alert Filtering Context: {
   userId: '570206c8-b431-4936-81e8-8186ea4065f0',
-  userHSCodes: 12,
+  userHSCodes: 18,
   userDestination: null,
-  workflowCount: 76
+  workflowCount: 124
 }
 ✅ Alert filtering complete: {
   totalAlerts: 12,
@@ -467,157 +342,118 @@ You've got this. The compliance work is straightforward, and the savings are sub
   filtered: 7,
   userDestination: null
 }
- GET /api/dashboard-data 200 in 1510ms
- ✓ Compiled /api/generate-personalized-alerts in 93ms (210 modules)
-🎯 Generating personalized alerts for Test USA Exporter Inc 6
-📊 User trade profile: CN, MX, US origins | Metals, Plastics/Rubber industries
+ GET /api/dashboard-data 200 in 2003ms
+ ✓ Compiled /api/generate-personalized-alerts in 67ms (207 modules)
+🎯 Generating personalized alerts for MexManufacturing Ltd
+📊 User trade profile: US, MX, CA origins | Textiles, Plastics/Rubber industries
 🎯 TIER 1: Trying OpenRouter...
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\12.pack.gz'
 ✅ OpenRouter SUCCESS
 ✅ Parsed 5 personalized alerts
- POST /api/generate-personalized-alerts 200 in 32856ms
- ✓ Compiled /api/consolidate-alerts in 110ms (209 modules)
-🧠 Consolidating 5 alerts for Test USA Exporter Inc 6
-🔍 User countries: [ 'CN', 'MX', 'US' ]
+ POST /api/generate-personalized-alerts 200 in 32727ms
+ ✓ Compiled /api/consolidate-alerts in 78ms (209 modules)
+🧠 Consolidating 5 alerts for MexManufacturing Ltd
+🔍 User countries: [ 'US', 'MX', 'CA' ]
 🔍 User components: [
-  'Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating',
-  'Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound',
-  'Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch'
+  '100% combed cotton fabric, twill weave construction, pre-shrunk and mercerized, 300 thread count, automotive-grade upholstery material',
+  'High-tenacity polyester thread, UV-resistant coating, continuous filament spun, industrial-grade stitching for automotive applications',
+  'Foam backing material with pressure-sensitive adhesive, flame-retardant treatment, closed-cell polyurethane construction'
 ]
-📊 Grouped into 4 consolidated alerts
+📊 Grouped into 3 consolidated alerts
 ✅ Found workflow intelligence: 0 recommendations, 0 analysis sections
-✅ Found workflow intelligence: 0 recommendations, 0 analysis sections
-✅ Found workflow intelligence: 0 recommendations, 0 analysis sections
-✅ Found workflow intelligence: 0 recommendations, 0 analysis sections
- ✓ Compiled /404 in 220ms (666 modules)
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 286ms
-✅ Consolidated analysis: Mexico Rubber Capacity Expansion - Potential Supply Chain Opportunity (LOW)
-⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [ 50, 50, 15, 102.5, 75, 50 ]
-⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (50%, 50%, 15%, 102.5%, 75%, 50%) not matching component cached data {
-  company: 'Test USA Exporter Inc 6',
-  ai_percentages: [
-     50,   0,    50,
-    2.5,  15, 102.5,
-     75, 2.5,    50
-  ],
+✅ Consolidated analysis: Mexico Automotive Textile Incentives - Bajío Region Opportunity (LOW)
+⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [ 35, 115, 62.5, 35, 35 ]
+⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (35%, 115%, 62.5%, 35%, 35%) not matching component cached data {
+  company: 'MexManufacturing Ltd',
+  ai_percentages: [ 35, 8, 115, 62.5, 35, 35 ],
   cached_rates: [
     {
-      baseMFN: 2.5,
+      baseMFN: 8.4,
       section301: 0,
-      totalRate: 2.5,
-      component: 'Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound'
-    }
-  ],
-  deviations: [ 50, 50, 15, 102.5, 75, 50 ],
-  broker_summary_preview: "Good news for once: Mexico is expanding natural rubber processing capacity specifically for automotive applications. You're already USMCA-qualified at 102.5% (well above the 75% threshold), and your rubber dampeners from Mexico enter duty-free under USMCA versus the 2.5% MFN rate. This expansion cou",
-  breakdown_preview: "Current: 50% of product × $unknown volume × 0% USMCA duty = $0. Alternative if not USMCA-qualified: 50% × volume × 2.5% MFN = cost you're avoiding. Expansion may create 5-15% pricing improvement through competition, but speculative without volume data."
-}
- POST /api/admin/log-dev-issue 404 in 15ms
-✅ Consolidated analysis: USMCA Certification Renewal Due - Protect Your 2.5% Tariff Savings on Mexican Rubber Components (HIGH)
-⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [ 50, 50, 30, 102.5, 75, 50 ]
-⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (50%, 50%, 30%, 102.5%, 75%, 50%) not matching component cached data {
-  company: 'Test USA Exporter Inc 6',
-  ai_percentages: [
-       50, 2.5,  0,
-       50, 2.5, 30,
-    102.5,  75, 50,
-      2.5, 2.5
-  ],
-  cached_rates: [
-    {
-      baseMFN: 2.5,
-      section301: 0,
-      totalRate: 2.5,
-      component: 'Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound'
+      totalRate: 8.4,
+      component: '100% combed cotton fabric, twill weave construction, pre-shrunk and mercerized, 300 thread count, automotive-grade upholstery material'
     },
     {
-      baseMFN: 0,
+      baseMFN: 8,
       section301: 0,
-      totalRate: 0,
-      component: 'Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch'
+      totalRate: 8,
+      component: 'High-tenacity polyester thread, UV-resistant coating, continuous filament spun, industrial-grade stitching for automotive applications'
     }
   ],
-  deviations: [ 50, 50, 30, 102.5, 75, 50 ],
-  broker_summary_preview: "Alright, straight talk: Your USMCA certification is coming up for renewal, and you need to act on this. You're currently sitting pretty at 102.5% North American content (well above the 75% threshold), which means those Mexican rubber dampeners (50% of your product) come in duty-free instead of payin",
-  breakdown_preview: 'Mexican rubber dampeners = 50% of product value. MFN rate = 2.5%, USMCA rate = 0%. Savings per $100K imported = $100K × 50% × 2.5% = $1,250. Your US steel bolts (30%) are domestic so no tariff impact either way.'
+  deviations: [ 35, 115, 62.5, 35, 35 ],
+  broker_summary_preview: "Good news for once. Mexico just expanded manufacturing incentives for automotive textiles in the Bajío region, and you're already sitting pretty with 115% USMCA qualification (way above the 62.5% threshold). Your 35% polyester thread component is already sourced from Mexico, so you're positioned to ",
+  breakdown_preview: "If you provide annual volume: (Annual Volume × 35% polyester component × supplier's cost reduction %) = Your potential savings. Supplier cost reductions from Bajío incentives typically range 3-8% depending on program specifics."
 }
- POST /api/admin/log-dev-issue 404 in 12ms
-✅ Consolidated analysis: Chinese Steel Housing Hit with 25% Section 301 + Anti-Dumping Investigation (URGENT)
-⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [
-   27.9,   25,   30,
-   57.9,   20,   25,
-     50, 27.9,   25,
-  102.5,   75, 27.9
-]
-⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (27.9%, 25%, 30%, 57.9%, 20%, 25%, 50%, 27.9%, 25%, 102.5%, 75%, 27.9%) not matching component cached data {
-  company: 'Test USA Exporter Inc 6',
+ ✓ Compiled /404 in 135ms (666 modules)
+ POST /api/admin/log-dev-issue 404 in 194ms
+✅ Consolidated analysis: Canadian Foam Audit Crackdown - 20% of Your Product Under Scrutiny (MEDIUM)
+⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [ 20, 20, 115, 20 ]
+⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (20%, 20%, 115%, 20%) not matching component cached data {
+  company: 'MexManufacturing Ltd',
   ai_percentages: [
-    27.9, 2.9,   25,    30,
-    57.9,  20,   25,    50,
-    27.9, 2.9,   25, 102.5,
-      75, 2.9, 27.9
+     0,  20, 5.3, 1.06,
+    20, 115,   0,  5.3,
+    20
   ],
   cached_rates: [
     {
-      baseMFN: 2.9,
+      baseMFN: 8.4,
       section301: 0,
-      totalRate: 2.9,
-      component: 'Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating'
-    }
-  ],
-  deviations: [
-     27.9,   25,   30,
-     57.9,   20,   25,
-       50, 27.9,   25,
-    102.5,   75, 27.9
-  ],
-  broker_summary_preview: "Alright, here's the situation: Your cold-rolled steel housings from China (20% of your product) just got hit with Section 301 tariffs jumping to 25%, and there's an anti-dumping investigation underway that could add another 10-50% on top. Right now, you're looking at 27.9% total duty (2.9% MFN + 25%",
-  breakdown_preview: 'Current duty calculation: Component cost × 27.9% total duty rate (2.9% MFN + 25% Section 301). These stack additively. If anti-dumping adds 30% (mid-range estimate), total becomes 57.9%.'
-}
- POST /api/admin/log-dev-issue 404 in 7ms
-✅ Consolidated analysis: USMCA Steel Traceability Enforcement - Chinese Housing Component at Risk (HIGH)
-⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [
-  20, 50,    20,
-  50, 50, 102.5,
-  20, 50,    50
-]
-⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (20%, 50%, 20%, 50%, 50%, 102.5%, 20%, 50%, 50%) not matching component cached data {
-  company: 'Test USA Exporter Inc 6',
-  ai_percentages: [
-    2.9,  20,    0,    50,
-    2.9,  20,  2.5,    50,
-    2.5,  50, 1.25, 102.5,
-     20, 2.9,   50,     0,
-    2.5, 2.5,   50
-  ],
-  cached_rates: [
-    {
-      baseMFN: 2.9,
-      section301: 0,
-      totalRate: 2.9,
-      component: 'Cold-rolled steel housing with powder-coated finish, stamped and welded construction, corrosion-resistant coating'
+      totalRate: 8.4,
+      component: '100% combed cotton fabric, twill weave construction, pre-shrunk and mercerized, 300 thread count, automotive-grade upholstery material'
     },
     {
-      baseMFN: 2.5,
+      baseMFN: 5.3,
       section301: 0,
-      totalRate: 2.5,
-      component: 'Natural rubber vibration dampeners, molded with metal inserts, durometer rating 50-60 Shore A, heat-resistant compound'
-    },
-    {
-      baseMFN: 0,
-      section301: 0,
-      totalRate: 0,
-      component: 'Grade 8 steel mounting bolts with lock washers, zinc-plated hardware, M10x1.5 thread pitch'
+      totalRate: 5.3,
+      component: 'Foam backing material with pressure-sensitive adhesive, flame-retardant treatment, closed-cell polyurethane construction'
     }
   ],
-  deviations: [
-    20, 50,    20,
-    50, 50, 102.5,
-    20, 50,    50
-  ],
-  broker_summary_preview: "Here's the situation: You're currently USMCA-qualified at 102.5% North American content, which is great. But CBP is cracking down on steel traceability under the melted-and-poured rule. Your Chinese cold-rolled steel housing (20% of product value, HS 7326.90.85) is the problem - even though it's onl",
-  breakdown_preview: 'Current state: CN housing pays 2.9% on 20% of value, MX rubber pays 0% on 50% of value (USMCA). If disqualified: CN housing still 2.9% on 20%, but MX rubber jumps to 2.5% on 50%. Net increase = 2.5% × 50% = 1.25% of total product value per shipment. Example: $1M annual volume = $12,500/year ongoing + potential retroactive exposure.'
+  deviations: [ 20, 20, 115, 20 ],
+  broker_summary_preview: "Okay, here's the situation: US Customs is ramping up audits on polyurethane foam imports from Canada, which hits your foam backing material (20% of your product, HS 3926.90.90). Good news is you're already USMCA-qualified at 115% North American content, so you're paying 0% duty on this component. Ba",
+  breakdown_preview: "Current: $0 (USMCA rate: 0%) | Risk scenario if USMCA denied: Unknown annual volume × 20% (foam component) × 5.3% (MFN rate) = potential retroactive assessment. Without annual trade volume, I can't calculate dollar exposure, but it's 1.06% of total product value at risk."
 }
- POST /api/consolidate-alerts 200 in 76141ms
  POST /api/admin/log-dev-issue 404 in 8ms
-<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'D:\bacjup\triangle-simple\.next\cache\webpack\server-development\9.pack.gz'
+✅ Consolidated analysis: USMCA Automotive Textile Compliance Tightening - Documentation & Testing Updates (HIGH)
+⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache: [
+   45,   35, 20,
+  115, 62.5, 45,
+   35,   20
+]
+⚠️ DEV ISSUE [HIGH]: consolidate_alerts_api - AI claimed tariff rates (45%, 35%, 20%, 115%, 62.5%, 45%, 35%, 20%) not matching component cached data {
+  company: 'MexManufacturing Ltd',
+  ai_percentages: [
+     45, 8.4,  35,    8,  20,
+    5.3, 7.5, 115, 62.5, 8.4,
+     45,   8,  35,  5.3,  20,
+    7.5
+  ],
+  cached_rates: [
+    {
+      baseMFN: 8.4,
+      section301: 0,
+      totalRate: 8.4,
+      component: '100% combed cotton fabric, twill weave construction, pre-shrunk and mercerized, 300 thread count, automotive-grade upholstery material'
+    },
+    {
+      baseMFN: 8,
+      section301: 0,
+      totalRate: 8,
+      component: 'High-tenacity polyester thread, UV-resistant coating, continuous filament spun, industrial-grade stitching for automotive applications'
+    },
+    {
+      baseMFN: 5.3,
+      section301: 0,
+      totalRate: 5.3,
+      component: 'Foam backing material with pressure-sensitive adhesive, flame-retardant treatment, closed-cell polyurethane construction'
+    }
+  ],
+  deviations: [
+     45,   35, 20,
+    115, 62.5, 45,
+     35,   20
+  ],
+  broker_summary_preview: "Good news first: you're sitting pretty at 115% North American content—well above the 62.5% threshold—so these USMCA changes won't kill your duty-free status. The bad news? The paperwork just got more complicated. Three simultaneous policy updates are hitting automotive textiles: stricter origin veri",
+  breakdown_preview: 'If USMCA qualification lost: (Annual Volume × 45% × 8.4%) + (Annual Volume × 35% × 8.0%) + (Annual Volume × 20% × 5.3%) = Annual Volume × 7.5%. Example: $1M volume = $75,000 annual tariff exposure. Currently paying $0 under USMCA.'
+}
+ POST /api/consolidate-alerts 200 in 86842ms
+ POST /api/admin/log-dev-issue 404 in 9ms

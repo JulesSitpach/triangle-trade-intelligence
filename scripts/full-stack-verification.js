@@ -16,32 +16,51 @@ const supabase = createClient(
 );
 
 // Feature configuration mapping
+// Updated Oct 23, 2025: Removed archived service request features
+// Only USMCA certificate workflow is active in current application
 const FEATURE_CONFIG = {
-  'SupplierSourcing': {
-    component: 'components/jorge/SupplierSourcingTab.js',
-    api: '/api/supplier-sourcing-discovery',
-    requiredTables: ['service_requests', 'suppliers'],
+  'USMCACertificate': {
+    component: 'pages/usmca-workflow.js',
+    api: '/api/ai-usmca-complete-analysis',
+    requiredTables: ['workflow_sessions', 'workflow_completions', 'tariff_rates_cache'],
     requiredColumns: {
-      'service_requests': ['id', 'service_type', 'company_name', 'service_details', 'status', 'trade_volume'],
-      'suppliers': ['id', 'name', 'company_name', 'location', 'contact_email']
+      'workflow_sessions': ['id', 'user_id', 'company_name', 'product_description', 'hs_code', 'component_origins', 'trade_volume'],
+      'workflow_completions': ['id', 'user_id', 'product_description', 'hs_code', 'total_savings', 'certificate_generated'],
+      'tariff_rates_cache': ['id', 'hs_code', 'destination_country', 'mfn_rate', 'usmca_rate']
     },
     testData: {
-      request_id: 'full-stack-test-' + Date.now(),
-      service_details: {
-        goals: 'Find reliable electronics suppliers for testing',
-        product_description: 'electronic components for testing',
-        volume: '750000',
-        target_regions: ['Mexico', 'Tijuana'],
-        quality_standards: 'ISO 9001',
-        current_challenges: 'Need verified suppliers'
+      company: {
+        company_name: 'Test Manufacturing Inc',
+        country: 'US',
+        business_type: 'Electronics',
+        trade_volume: '1500000',
+        destination_country: 'US'
       },
-      sourcing_requirements: {
-        monthly_volume: '25000',
-        certifications: ['iso_9001'],
-        timeline: 'immediate'
-      }
+      product: {
+        description: 'Electronic components',
+        hs_code: '8517.62.00'
+      },
+      component_origins: [
+        {
+          origin_country: 'Mexico',
+          hs_code: '8534.20.00',
+          percentage: 50,
+          value_percentage: 50
+        },
+        {
+          origin_country: 'US',
+          hs_code: '8534.30.00',
+          percentage: 50,
+          value_percentage: 50
+        }
+      ]
     }
   }
+  // Archived features (removed Oct 23, 2025):
+  // - SupplierSourcing (was at /api/supplier-sourcing-discovery)
+  // - ManufacturingFeasibility (was at /api/manufacturing-feasibility-analysis)
+  // - CrisisResponse (was at /api/crisis-response-analysis)
+  // - MarketEntry (was at /api/market-entry-analysis)
 };
 
 // Main verification function
@@ -321,12 +340,13 @@ const runFullStackVerification = async () => {
   if (!feature) {
     console.log(`
 Full-Stack Alignment Verification
+Updated Oct 23, 2025 - Removed archived service request features
 
 Usage:
-  node scripts/full-stack-verification.js --feature=SupplierSourcing
+  node scripts/full-stack-verification.js --feature=USMCACertificate
 
 Available features:
-  - SupplierSourcing
+  - USMCACertificate (USMCA certificate generation workflow)
 
 This verifies:
 1. Database schema supports the feature
@@ -334,6 +354,12 @@ This verifies:
 3. UI correctly displays API data
 4. Complete user journey works with real data
 5. No mock/template data anywhere in the stack
+
+Archived features removed in Phase 2 cleanup (Oct 23, 2025):
+  - SupplierSourcing (was /api/supplier-sourcing-discovery)
+  - ManufacturingFeasibility (was /api/manufacturing-feasibility-analysis)
+  - CrisisResponse (was /api/crisis-response-analysis)
+  - MarketEntry (was /api/market-entry-analysis)
     `);
     return;
   }
@@ -341,6 +367,7 @@ This verifies:
   if (!FEATURE_CONFIG[feature]) {
     console.error(`❌ Unknown feature: ${feature}`);
     console.log(`Available features: ${Object.keys(FEATURE_CONFIG).join(', ')}`);
+    console.log(`\nNote: Archived features were removed Oct 23, 2025. Only USMCACertificate is active.`);
     process.exit(1);
   }
 
