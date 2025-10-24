@@ -6,6 +6,9 @@
  * 3. Monthly usage stats for tier limits
  * 4. User profile data
  *
+ * DATA CONTRACT: Returns validated WorkflowSessionRow[] and alert data
+ * Uses canonical field names from data-contracts.ts
+ *
  * UPDATED (October 2025): Now loads crisis_alerts from RSS monitoring instead
  * of static vulnerability_analyses. Alerts are matched to user's product HS codes
  * and combined with workflow context for complete business intelligence.
@@ -13,7 +16,13 @@
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
 import { createClient } from '@supabase/supabase-js';
-import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import { DevIssue } from '../../lib/utils/logDevIssue.js';
+import {
+  validateComponentsArray,
+  validateTradeVolume,
+  validateTariffRatesCache,
+  reportValidationErrors
+} from '../../lib/validation/data-contract-validator.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -83,6 +92,21 @@ export default protectedApiHandler({
         // Extract workflow_data if available
         const workflowData = row.workflow_data || {};
 
+        // === DATA CONTRACT VALIDATION ===
+        // Validate trade_volume
+        const volumeResult = validateTradeVolume(row.trade_volume, `workflow_session[${row.id}].trade_volume`);
+        if (!volumeResult.valid) {
+          reportValidationErrors(volumeResult, `dashboard-data: session ${row.id}`);
+        }
+
+        // Validate components if present
+        if (row.component_origins?.length > 0) {
+          const componentsResult = validateComponentsArray(row.component_origins, `workflow_session[${row.id}].components`);
+          if (!componentsResult.valid) {
+            reportValidationErrors(componentsResult, `dashboard-data: session ${row.id}`);
+          }
+        }
+
         return {
           id: row.id,
           source: 'session',
@@ -93,7 +117,7 @@ export default protectedApiHandler({
           qualification_status: row.qualification_status,
           regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
           required_threshold: parseFloat(row.required_threshold) || 60,
-          trade_volume: parseFloat(row.trade_volume) || 0,
+          trade_volume: volumeResult.normalized || 0,  // ✅ Use validated value
           estimated_annual_savings: parseFloat(row.estimated_annual_savings) || 0,  // ✅ FIXED: Use actual savings
           component_origins: row.component_origins || [],
           completed_at: row.completed_at || row.created_at,
@@ -110,24 +134,38 @@ export default protectedApiHandler({
         const workflowData = row.workflow_data || {};
         const qualificationResult = workflowData.qualification_result || {};
 
+        // === DATA CONTRACT VALIDATION ===
+        // Validate trade_volume from workflow
+        const volumeResult = validateTradeVolume(
+          workflowData.company?.trade_volume,
+          `workflow_completion[${row.id}].company.trade_volume`
+        );
+        if (!volumeResult.valid) {
+          reportValidationErrors(volumeResult, `dashboard-data: completion ${row.id}`);
+        }
+
+        // Validate components if present
+        if (qualificationResult.component_origins?.length > 0) {
+          const componentsResult = validateComponentsArray(
+            qualificationResult.component_origins,
+            `workflow_completion[${row.id}].components`
+          );
+          if (!componentsResult.valid) {
+            reportValidationErrors(componentsResult, `dashboard-data: completion ${row.id}`);
+          }
+        }
+
         return {
           id: row.id,
           source: 'completion',
-          company_name: workflowData.company?.name || workflowData.company?.company_name || 'Company',
+          company_name: workflowData.company?.company_name || workflowData.company?.name || 'Company',  // ✅ FIX: use company_name as primary
           business_type: workflowData.company?.business_type || 'Not specified',
           product_description: row.product_description || workflowData.product?.description,
           hs_code: row.hs_code || workflowData.product?.hs_code,
           qualification_status: qualificationResult.status || 'UNKNOWN',
           regional_content_percentage: qualificationResult.regional_content || 0,
           required_threshold: qualificationResult.required_threshold || 60,
-          trade_volume: (() => {
-            const tv = parseFloat(workflowData.company?.trade_volume);
-            if (isNaN(tv)) {
-              console.warn('⚠️ [FORM SCHEMA] Invalid/missing company.trade_volume in dashboard-data');
-              return 0;
-            }
-            return tv;
-          })(),
+          trade_volume: volumeResult.normalized || 0,  // ✅ Use validated value
           estimated_annual_savings: row.total_savings || qualificationResult.savings_calculation || 0,
           component_origins: qualificationResult.component_origins || [],
           completed_at: row.completed_at || row.created_at,
