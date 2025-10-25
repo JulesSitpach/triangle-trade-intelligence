@@ -44,7 +44,19 @@ export default protectedApiHandler({
         return res.status(403).json({ error: 'You do not have permission to delete this workflow' });
       }
 
-      // ✅ Delete the workflow
+      // ✅ Delete associated certificates FIRST (foreign key constraint)
+      const { error: deleteCertsError } = await supabase
+        .from('certificates')
+        .delete()
+        .eq('workflow_id', workflowId)
+        .eq('user_id', userId);
+
+      if (deleteCertsError) {
+        console.warn('Warning deleting certificates:', deleteCertsError.message);
+        // Don't fail - certificates may not exist for this workflow
+      }
+
+      // ✅ Delete the workflow (now safe since certificates are gone)
       const { error: deleteError } = await supabase
         .from('workflow_completions')
         .delete()
@@ -54,9 +66,10 @@ export default protectedApiHandler({
       if (deleteError) {
         await DevIssue.apiError('dashboard', 'delete-workflow', deleteError, {
           workflowId,
-          userId
+          userId,
+          note: 'Foreign key constraint error - certificates may not have been deleted'
         });
-        return res.status(500).json({ error: 'Failed to delete workflow' });
+        return res.status(500).json({ error: 'Failed to delete workflow. Please try again or contact support.' });
       }
 
       console.log(`✅ Deleted workflow ${workflowId} for user ${userId}`);
