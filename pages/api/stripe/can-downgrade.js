@@ -11,7 +11,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { protectedApiHandler } from '../../lib/api/apiHandler';
+import { protectedApiHandler } from '../../../lib/api/apiHandler';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
