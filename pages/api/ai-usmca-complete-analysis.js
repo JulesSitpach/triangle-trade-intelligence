@@ -168,29 +168,6 @@ export default protectedApiHandler({
 
     console.log(`✅ Component percentage validation passed: ${totalPercentage}%`);
 
-    // ========== LOG MISSING OPTIONAL FIELDS (for admin review) ==========
-    const missingOptionalFields = [];
-
-    // manufacturing_location is now REQUIRED (moved to requiredFields above)
-
-    // Check for components missing descriptions
-    const componentsWithoutDesc = formData.component_origins.filter(c => !c.description || c.description.length < 10);
-    if (componentsWithoutDesc.length > 0) {
-      missingOptionalFields.push(`${componentsWithoutDesc.length} components missing detailed descriptions`);
-    }
-
-    if (missingOptionalFields.length > 0) {
-      // Log to admin dashboard (non-blocking)
-      await DevIssue.missingData('usmca_analysis', missingOptionalFields.join(', '), {
-        user_id: userId,
-        company: formData.company_name,
-        workflow_step: 'ai_usmca_analysis',
-        impact: 'AI analysis quality may be reduced due to missing optional context',
-        missing_fields: missingOptionalFields
-      });
-      console.log(`⚠️  Missing optional fields: ${missingOptionalFields.join(', ')} - AI quality may be reduced`);
-    }
-
     // ========== STEP 1: GET ACTUAL TARIFF RATES FIRST ==========
     // Fetch real tariff rates with 2025 policy context BEFORE doing qualification analysis
     console.log('📊 Fetching actual tariff rates for all components...');
@@ -219,7 +196,7 @@ export default protectedApiHandler({
       },
       body: JSON.stringify({
         model: 'anthropic/claude-sonnet-4.5', // Sonnet 4.5 - 72.7% SWE-bench, best for complex USMCA reasoning
-        max_tokens: 3000, // ✅ Prevent truncation of complex USMCA qualification responses
+        max_tokens: 16000, // Increased to 16k for comprehensive business intelligence: tariff analysis, vulnerabilities, strategic alternatives, CBP compliance, strategic roadmap
         messages: [{
           role: 'user',
           content: prompt
@@ -685,25 +662,6 @@ export default protectedApiHandler({
       // Don't fail the request if usage tracking fails
       console.error('⚠️ Usage tracking failed:', usageError);
     }
-
-    // ========== RESPONSE WRAPPER FOR TEST COMPATIBILITY ==========
-    // Issue #1 test expects: result.analysis.detailed_analysis.savings_analysis
-    // Issue #2 test expects: result.enrichment_data.component_origins
-    // Add these wrapper objects for backwards compatibility with tests
-    result.analysis = {
-      detailed_analysis: result.detailed_analysis,
-      initial_summary: undefined  // Issue #1 test checks this doesn't exist
-    };
-
-    // Add annual_savings at top level (Issue #1 test expects this)
-    // ✅ FIX: Remove hardcoded || 0 fallback - use actual AI values
-    result.annual_savings = result.savings?.annual_savings;
-    result.monthly_savings = result.savings?.monthly_savings;
-
-    // Add enrichment_data wrapper for Issue #2 test
-    result.enrichment_data = {
-      component_origins: result.component_origins || []
-    };
 
     return res.status(200).json(result);
 
