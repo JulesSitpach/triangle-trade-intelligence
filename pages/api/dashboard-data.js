@@ -41,15 +41,28 @@ export default protectedApiHandler({
     const userId = req.user.id;
 
     try {
-      // ✅ FIX: Rolling 30-day usage window (fair for mid-month upgrades)
-      // Count workflows CREATED in last 30 days (not completed, which may be NULL)
-      // Users get 100 analyses per month = ~3.3 per day rolling window
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { count: monthlyUsed } = await supabase
-        .from('workflow_sessions')
-        .select('id', { count: 'exact', head: true })
+      // ✅ FIX: Read permanent usage counter from monthly_usage_tracking table
+      // REASON: Counting workflow_sessions records causes counter to reset when records are deleted
+      // monthly_usage_tracking is the source of truth for subscription tier limits
+      // It increments when results are created and never decreases (deleting certificates/alerts doesn't affect it)
+
+      // Calculate current billing period (1st of month to end of month)
+      const now = new Date();
+      const billingPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const billingPeriodStartStr = billingPeriodStart.toISOString().split('T')[0];
+
+      const { data: usageRecord, error: usageError } = await supabase
+        .from('monthly_usage_tracking')
+        .select('analyses_count')
         .eq('user_id', userId)
-        .gte('created_at', thirtyDaysAgo);
+        .eq('billing_period_start', billingPeriodStartStr)
+        .single();
+
+      if (usageError && usageError.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error reading usage tracking:', usageError);
+      }
+
+      const monthlyUsed = usageRecord?.analyses_count || 0;
 
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -61,7 +74,10 @@ export default protectedApiHandler({
         userId,
         email: profile?.email,
         tier: profile?.subscription_tier,
-        tierLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier]
+        tierLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier],
+        source: 'monthly_usage_tracking',
+        billingPeriod: billingPeriodStartStr,
+        permanentCount: monthlyUsed
       });
 
       const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined
