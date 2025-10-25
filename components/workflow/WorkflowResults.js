@@ -11,6 +11,7 @@ import CompanyProfile from './results/CompanyProfile';
 import ProductClassification from './results/ProductClassification';
 import DataSourceAttribution from './results/DataSourceAttribution';
 import ExecutiveSummary from './results/ExecutiveSummary';
+import CollapsibleSection from './results/CollapsibleSection';
 import USMCAQualification from './results/USMCAQualification';
 import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
@@ -645,14 +646,12 @@ export default function WorkflowResults({
         </div>
       </div>
 
-      {/* EXECUTIVE SUMMARY - Rich AI Analysis */}
+      {/* ========== PROGRESSIVE DISCLOSURE: EXECUTIVE SUMMARY AT TOP ========== */}
+
+      {/* 1. EXECUTIVE SUMMARY - Always Visible */}
       <ExecutiveSummary results={results} />
 
-      {/* PRODUCT INFORMATION */}
-      <div className="form-section">
-        <h2 className="form-section-title">Product Classification</h2>
-        <ProductClassification results={results} />
-      </div>
+      {/* 2. COLLAPSIBLE SECTIONS - Details Hidden by Default */}
 
       {/* CERTIFICATE FIELDS PREVIEW */}
       {(results.origin_criterion || results.method_of_qualification || results.producer_name) && (() => {
@@ -801,34 +800,32 @@ export default function WorkflowResults({
         );
       })()}
 
-      {/* COMPLIANCE ANALYSIS */}
-      <div className="form-section">
-        <h2 className="form-section-title">Component & Regional Content Analysis</h2>
+      {/* SECTION 2: Qualification Details */}
+      <CollapsibleSection title="Qualification Details" icon="✓">
         <USMCAQualification results={results} />
-      </div>
+      </CollapsibleSection>
 
-      {/* FINANCIAL IMPACT */}
+      {/* SECTION 3: Component Breakdown */}
+      {/* Hidden inside USMCAQualification - can be accessed via expanding that section */}
+
+      {/* SECTION 4: Tariff Analysis */}
       {results.savings && results.savings.annual_savings > 0 && (
-        <div className="form-section">
-          <h2 className="form-section-title">Financial Impact</h2>
+        <CollapsibleSection title="Tariff Analysis & Savings" icon="💰">
           <TariffSavings results={results} />
-        </div>
+        </CollapsibleSection>
       )}
 
-      {/* PHASE 3: POLICY ALERTS TAILORED TO YOUR PRODUCTS */}
-      <div className="form-section">
-        <PersonalizedAlerts results={results} />
-      </div>
-
-      {/* PHASE 3: STRATEGIC ROADMAP & CBP COMPLIANCE */}
-      <div className="form-section">
+      {/* SECTION 5: Recommended Actions */}
+      <CollapsibleSection title="Recommended Actions" icon="🎯">
         <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
-      </div>
+      </CollapsibleSection>
 
-      {/* DETAILED AI ANALYSIS - Rich insights from Claude */}
+      {/* NOTE: Policy Alerts moved to dedicated /trade-risk-alternatives dashboard */}
+      {/* NOTE: Certificate management moved to dedicated /dashboard */}
+
+      {/* SECTION 6: Detailed USMCA Analysis */}
       {results.detailed_analysis && (
-        <div className="form-section">
-          <h2 className="form-section-title">📊 Detailed USMCA Analysis</h2>
+        <CollapsibleSection title="Detailed USMCA Analysis" icon="📊">
           <p className="form-section-description">
             AI-powered deep dive into your product&apos;s USMCA qualification and strategic opportunities
           </p>
@@ -966,8 +963,62 @@ export default function WorkflowResults({
               View Professional Services
             </button>
           </div>
-        </div>
+        </CollapsibleSection>
       )}
+
+      {/* ========== DEDICATED DASHBOARDS ========== */}
+      <div className="form-section">
+        <h2 className="form-section-title">📊 Explore Related Tools</h2>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem'}}>
+          {/* Trade Alerts Dashboard CTA */}
+          <div style={{
+            padding: '1.5rem',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#f9fafb',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
+          }}>
+            <div style={{fontSize: '1.5rem'}}>🚨</div>
+            <h3 style={{fontSize: '1rem', fontWeight: 600, margin: 0, color: '#111827'}}>Trade Risk Alerts</h3>
+            <p style={{fontSize: '0.875rem', color: '#6b7280', margin: 0}}>
+              Monitor tariff policy changes affecting your products • Set up email notifications • Review Section 301 & 232 impacts
+            </p>
+            <button
+              onClick={() => router.push('/trade-risk-alternatives')}
+              className="btn-primary"
+              style={{marginTop: 'auto', alignSelf: 'flex-start', fontSize: '0.875rem'}}
+            >
+              View Alerts Dashboard →
+            </button>
+          </div>
+
+          {/* Certificate Management CTA */}
+          <div style={{
+            padding: '1.5rem',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            backgroundColor: '#f9fafb',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
+          }}>
+            <div style={{fontSize: '1.5rem'}}>📜</div>
+            <h3 style={{fontSize: '1rem', fontWeight: 600, margin: 0, color: '#111827'}}>Certificate Dashboard</h3>
+            <p style={{fontSize: '0.875rem', color: '#6b7280', margin: 0}}>
+              Manage your certificates • Download certificates • View analysis history • Archive past analyses
+            </p>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="btn-primary"
+              style={{marginTop: 'auto', alignSelf: 'flex-start', fontSize: '0.875rem'}}
+            >
+              Go to Dashboard →
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* NEXT STEPS */}
       <div className="form-section">

@@ -3317,6 +3317,100 @@ textarea.form-input {
   color: var(--gray-600);
 }
 
+/* ================== COLLAPSIBLE SECTION (PROGRESSIVE DISCLOSURE) ================== */
+
+.collapsible-section {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: white;
+  margin-bottom: var(--space-4);
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-4);
+  background-color: var(--gray-50);
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy-700);
+  transition: background-color 0.2s ease;
+  text-align: left;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  background-color: var(--gray-100);
+}
+
+.collapsible-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.collapsible-icon {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.collapsible-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.collapsible-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy-700);
+}
+
+.collapsible-emoji {
+  font-size: 1.25rem;
+  margin-right: var(--space-1);
+}
+
+.collapsible-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--blue-100);
+  color: var(--blue-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.collapsible-content {
+  padding: var(--space-4);
+  border-top: 1px solid var(--gray-200);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .metrics-grid-extended {
@@ -3329,6 +3423,18 @@ textarea.form-input {
 
   .summary-section-title {
     font-size: 1rem;
+  }
+
+  .collapsible-header {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .collapsible-content {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .collapsible-title {
+    font-size: 0.95rem;
   }
 }
 
