@@ -101,6 +101,88 @@ styles/
   └── admin-workflows.css         # Admin-specific styles
 ```
 
+## 🔌 API Endpoints (Fully Documented & Tested)
+
+### Endpoint Status Summary
+
+**✅ PRIMARY**: `/api/ai-usmca-complete-analysis` - **FULLY IMPLEMENTED**
+- Tariff enrichment, component analysis, financial impact, RVC qualification
+- Request: Company info + components with origins
+- Response: USMCA qualification + component tariff breakdown + certificate data
+
+**✅ SECONDARY**: `/api/executive-trade-alert` - **FULLY IMPLEMENTED** (Oct 25, 2025)
+- Financial scenarios (Section 301 escalation, nearshoring ROI)
+- CBP compliance strategy (Form 29 binding ruling, audit prevention)
+- 3-phase strategic roadmap
+- Regulatory calendar and contacts
+
+**✅ TERTIARY**: `/api/generate-personalized-alerts` - **FULLY IMPLEMENTED**
+- Filters static alerts by relevance to user's products
+- Relevance scoring: Industry (+40), Geography (+30), Product (+30), Destination (+20)
+- Returns max 3 most relevant alerts
+
+### Comprehensive Testing Guide
+
+**See**: [`TEST_CHEAT_SHEET.md`](./TEST_CHEAT_SHEET.md) for complete API specifications:
+- **Complete Request/Response Formats** - Actual API specifications with examples
+- **4 Business Value Test Scenarios** - Real-world use cases with expected outputs
+- **Component Specifications** - Real HS codes, tariff rates, financial impacts
+- **Validation Checklist** - All 7 sections of AI response that must be present
+- **Certificate Generation Requirements** - Field validation rules for PDF generation
+
+### Quick API Test Examples
+
+**Test 1: Section 301 Tariff Exposure Detection**
+```bash
+curl -X POST http://localhost:3001/api/ai-usmca-complete-analysis \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_name": "TechFlow Electronics",
+    "company_country": "US",
+    "destination_country": "US",
+    "component_origins": [{
+      "description": "Microprocessor",
+      "hs_code": "8542.31.00",
+      "origin_country": "CN",
+      "value_percentage": 35
+    }],
+    "trade_volume": 8500000
+  }'
+```
+
+**Expected Response Includes:**
+- ✅ Current Section 301 burden: $43,750/year
+- ✅ Mexico nearshoring cost: +$3,500 (1-3 month payback)
+- ✅ RVC impact: increases to 92%
+- ✅ Financial impact section with savings calculations
+- ✅ Supply chain vulnerability assessment
+
+**Test 2: Executive Trade Alert for Policy Impact**
+```bash
+curl -X POST http://localhost:3001/api/executive-trade-alert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_profile": {
+      "industry_sector": "Electronics",
+      "destination_country": "US"
+    },
+    "workflow_intelligence": {
+      "components": [{"hs_code": "8542.31.00", "origin_country": "CN"}],
+      "north_american_content": 72.5,
+      "annual_trade_volume": 8500000
+    }
+  }'
+```
+
+**Expected Response Includes:**
+- ✅ Financial scenarios (if Section 301 increases 20% → +$8,750 burden)
+- ✅ CBP Form 29 binding ruling guidance (90-day processing, 3-year lock-in)
+- ✅ Immediate actions (supplier audit, documentation validation)
+- ✅ Regulatory calendar (USTR cycles, CBP decision milestones)
+- ✅ CBP Contacts: (877) CBP-5511, USMCA@cbp.dhs.gov
+
+---
+
 ## 🔑 Key Concepts
 
 ### USMCA Eligibility
@@ -179,34 +261,53 @@ killall node              # macOS/Linux
 - Verify rate limits haven't been exceeded
 - Check network connectivity
 
-## 📊 Recent Changes (Oct 22, 2025)
+## 📊 Recent Changes
 
-### Phase 1 Complete
+### Phase 1 Complete (Oct 22, 2025)
 - ✅ **P0-1**: Destination country field implemented
 - ✅ **P0-2**: Component data restoration on navigation (fixed data loss bug)
 - ✅ **P0-3**: USMCA eligibility gate added (destination validation)
 - ✅ **P0-4**: Tariff data verified current (not stale)
 - ✅ **P0-5**: Cache consolidation (unified tariff_rates_cache table)
 
+### Phase 2 Complete (Oct 24-25, 2025)
+**Business Intelligence Enhancement**
+- ✅ **Executive Trade Alert API** - Enhanced from basic policy detection to consulting-grade strategic advisory
+  - Financial scenarios: Section 301 escalation (what if increases 20%?), nearshoring ROI, exemption scenarios
+  - CBP compliance strategy: Form 29 binding ruling guidance, immediate actions, risk management
+  - 3-phase strategic roadmap: Supplier Assessment → Trial Shipment → Gradual Migration
+  - Regulatory calendar: USTR cycles, CBP decision milestones, audit risk assessment
+
+- ✅ **Enhanced USMCA AI Prompt** - Transforms compliance checking to strategic business intelligence
+  - Financial impact analysis: Annual/monthly tariff savings, Section 301 exposure in dollars
+  - Supply chain vulnerabilities: Identifies Chinese components, policy risk assessment
+  - Strategic alternatives: Mexico sourcing with cost/benefit analysis and payback period
+
+- ✅ **Personalized Alert Filtering** - Filters static policy alerts by user relevance
+  - Relevance scoring system (Industry +40, Geography +30, Product +30, Destination +20)
+  - Top 3 most relevant alerts instead of all 5 generic policies
+
 ### Commits
 ```
-7aa37de - fix: P0-5 Cache table consolidation
-2d2b9c6 - fix: P0 critical fixes - Component data loss + USMCA gate
+0940b0a - feat: Add business intelligence enhancements to USMCA analysis
+de6c134 - feat: Implement executive-trade-alert and generate-personalized-alerts APIs
+110f6ce - feat: Enhance executive summary display with business advisory formatting
 ```
 
 ## 🔮 Roadmap
 
-### Phase 2 (Next - P1 Fixes)
-- Error handling + dev_issues logging
-- Cross-tab workflow synchronization
-- Cost optimization (Haiku vs Sonnet)
+### Phase 3 (Next - P1 Fixes)
+- Error handling + dev_issues logging (track failures in dev_issues table)
+- Cross-tab workflow synchronization (prevent data conflicts when editing in multiple tabs)
+- Cost optimization (A/B test Haiku vs Sonnet for tariff analysis)
+- API rate limiting (100 req/min per user)
 
-### Phase 3 (Q1 2026)
-- EU-UK TCA agreement support
-- CPTPP agreement support
+### Phase 4 (Q1 2026)
+- EU-UK TCA agreement support (separate codebase)
+- CPTPP agreement support (separate codebase)
 - Multi-agreement dashboard
 
-### Phase 4 (Q2+ 2026)
+### Phase 5 (Q2+ 2026)
 - Bilateral agreement templates (US-Japan, US-India, etc.)
 - Advanced analytics and reporting
 - Partner API
@@ -238,4 +339,4 @@ Proprietary - Triangle Intelligence Platform
 
 ---
 
-**Latest Update**: October 22, 2025 | **Status**: Production Ready (Phase 1 Complete)
+**Latest Update**: October 25, 2025 | **Status**: Production Ready (Phase 1 & 2 Complete - Business Intelligence Enhanced)
