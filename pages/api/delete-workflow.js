@@ -26,13 +26,12 @@ export default protectedApiHandler({
       }
 
       // ✅ Verify user owns this workflow before deletion
-      const { data: workflow, error: fetchError } = await supabase
+      const { data: workflows, error: fetchError } = await supabase
         .from('workflow_completions')
         .select('id, user_id')
-        .eq('id', workflowId)
-        .single();
+        .eq('id', workflowId);
 
-      if (fetchError || !workflow) {
+      if (fetchError || !workflows || workflows.length === 0) {
         await DevIssue.apiError('dashboard', 'delete-workflow', fetchError || new Error('Workflow not found'), {
           workflowId,
           userId
@@ -40,16 +39,17 @@ export default protectedApiHandler({
         return res.status(404).json({ error: 'Workflow not found' });
       }
 
+      const workflow = workflows[0];
       if (workflow.user_id !== userId) {
         return res.status(403).json({ error: 'You do not have permission to delete this workflow' });
       }
 
       // ✅ Delete associated certificates FIRST (foreign key constraint)
+      // Note: The certificates table uses 'workflow_completion_id' not 'workflow_id'
       const { error: deleteCertsError } = await supabase
         .from('certificates')
         .delete()
-        .eq('workflow_id', workflowId)
-        .eq('user_id', userId);
+        .eq('workflow_completion_id', workflowId);
 
       if (deleteCertsError) {
         console.warn('Warning deleting certificates:', deleteCertsError.message);

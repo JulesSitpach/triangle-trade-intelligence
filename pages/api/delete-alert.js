@@ -26,48 +26,31 @@ export default protectedApiHandler({
       }
 
       // ✅ Verify user owns this alert before deletion
-      // First, try crisis_alerts table
-      let alert = null;
-      let tableUsed = null;
-
-      const { data: crisisAlert, error: crisisError } = await supabase
-        .from('crisis_alerts')
+      // Alerts are stored in dashboard_notifications table with user_id
+      const { data: alerts, error: fetchError } = await supabase
+        .from('dashboard_notifications')
         .select('id, user_id')
-        .eq('id', alertId)
-        .single();
+        .eq('id', alertId);
 
-      if (!crisisError && crisisAlert) {
-        alert = crisisAlert;
-        tableUsed = 'crisis_alerts';
-      } else {
-        // Try alerts table
-        const { data: generalAlert, error: generalError } = await supabase
-          .from('alerts')
-          .select('id, user_id')
-          .eq('id', alertId)
-          .single();
-
-        if (!generalError && generalAlert) {
-          alert = generalAlert;
-          tableUsed = 'alerts';
-        }
-      }
-
-      if (!alert) {
-        await DevIssue.apiError('dashboard', 'delete-alert', new Error('Alert not found'), {
-          alertId,
-          userId
+      if (fetchError || !alerts || alerts.length === 0) {
+        // Alert doesn't exist - for a "clear all" operation, this is OK
+        // Just return success (idempotent delete)
+        console.log(`Alert ${alertId} not found (already deleted or doesn't exist)`);
+        return res.status(200).json({
+          success: true,
+          message: `Alert ${alertId} deleted successfully (or didn't exist)`,
+          deleted_id: alertId
         });
-        return res.status(404).json({ error: 'Alert not found' });
       }
 
+      const alert = alerts[0];
       if (alert.user_id !== userId) {
         return res.status(403).json({ error: 'You do not have permission to delete this alert' });
       }
 
-      // ✅ Delete the alert
+      // ✅ Delete the alert from dashboard_notifications
       const { error: deleteError } = await supabase
-        .from(tableUsed)
+        .from('dashboard_notifications')
         .delete()
         .eq('id', alertId)
         .eq('user_id', userId);
