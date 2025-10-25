@@ -67,6 +67,7 @@ export default function ComponentOriginsStepEnhanced({
   // Update parent form data when components change
   // CRITICAL: Prevent infinite loop by tracking when we push to parent
   // ✅ FIX: Use ref to mark when we pushed, skip restoration if we just pushed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Don't update on initial render (components will be [{}])
     if (components.length === 1 && !components[0].description) {
@@ -77,10 +78,15 @@ export default function ComponentOriginsStepEnhanced({
     lastPushedRef.current = JSON.stringify(components);
     updateFormData('component_origins', components);
   }, [components]);
+  // NOTE: updateFormData intentionally excluded from dependencies
+  // - updateFormData is recreated on every render in useWorkflowState
+  // - Including it would cause this effect to run on every render (infinite loop)
+  // - We only need to depend on components changing
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
   // ✅ FIX: Skip restoration if we just pushed the same data (prevents infinite loop)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (formData.component_origins &&
         formData.component_origins.length > 0) {
@@ -98,9 +104,16 @@ export default function ComponentOriginsStepEnhanced({
       }
 
       console.log(`🔄 Syncing components from formData (navigation restore)`);
-      setComponents(formData.component_origins);
+      // ✅ CRITICAL FIX: Normalize components when restoring from formData
+      // Without normalization, fields might be missing, causing first useEffect to think they changed
+      // This triggers an infinite loop: normalize mismatch → push to formData → restore → mismatch again
+      setComponents(formData.component_origins.map(normalizeComponent));
     }
   }, [formData.component_origins]);
+  // NOTE: components intentionally excluded from dependencies
+  // - This effect only needs to re-run when formData.component_origins changes
+  // - The comparison with local components is just a guard clause, not a trigger
+  // - If components changed locally, first effect will push to formData, triggering this
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];
@@ -219,7 +232,7 @@ export default function ComponentOriginsStepEnhanced({
     }
   };
 
-  // Manual HS Code lookup function
+  // Manual HS Code lookup function - uses classification endpoint
   const lookupHSCode = async (index) => {
     const component = components[index];
 
@@ -238,49 +251,66 @@ export default function ComponentOriginsStepEnhanced({
     setSearchingHS({ ...searchingHS, [index]: true });
 
     try {
-      const response = await fetch('/api/lightweight-hs-lookup', {
+      // Use the existing classification endpoint which handles AI + caching
+      const response = await fetch('/api/agents/classification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'suggest_hs_code',
           productDescription: component.description,
-          businessContext: {
-            companyType: formData.business_type // Required field, validated above
+          componentOrigins: [{
+            description: component.description,
+            origin_country: component.origin_country || 'Unknown',  // ✅ Don't assume 'US' - let API validate
+            value_percentage: component.value_percentage || 100
+          }],
+          additionalContext: {
+            overallProduct: formData.product_description,
+            industryContext: formData.business_type,
+            businessType: formData.business_type,
+            manufacturingLocation: formData.manufacturing_location,
+            exportDestination: formData.export_destination,
+            tradeVolume: formData.trade_volume,
+            companyName: formData.company_name,
+            primarySupplier: formData.primary_supplier_country,
+            previouslyClassifiedComponents: components.slice(0, index)
+              .filter(c => c.description && c.hs_code)
+              .map(c => ({
+                description: c.description,
+                origin_country: c.origin_country,
+                value_percentage: c.value_percentage,
+                hs_code: c.hs_code
+              }))
           }
         })
       });
 
       const result = await response.json();
-      
-      if (result.success && result.suggestions && result.suggestions.length > 0) {
-        // Convert lightweight API results to component format
-        const suggestions = result.suggestions.map(item => ({
-          hsCode: item.hsCode,
-          description: item.description,
-          confidence: item.accuracy,
-          confidenceText: `${item.accuracy}% accuracy`,
-          reasoning: item.reasoning,
-          source: item.source
-        }));
-        
+
+      if (result.success && result.data) {
+        // Use classification result to populate suggestions
+        const suggestion = {
+          hsCode: result.data.hsCode,
+          description: result.data.description || component.description,
+          confidence: result.data.confidence || 85,
+          confidenceText: `${Math.round((result.data.confidence || 0.85) * 100)}% accuracy`,
+          reasoning: result.data.explanation || 'AI classification completed',
+          source: 'Classification Agent'
+        };
+
         const newComponents = [...components];
-        newComponents[index].hs_suggestions = suggestions;
-        
-        // Auto-select best match if accuracy is high  
-        if (suggestions.length > 0 && suggestions[0].confidence >= 85) {
-          newComponents[index].hs_code = suggestions[0].hsCode;
-        }
-        
+        newComponents[index].hs_code = suggestion.hsCode;
+        newComponents[index].hs_description = suggestion.description;
+        newComponents[index].hs_suggestions = [suggestion];
+
         setComponents(newComponents);
+        console.log(`✅ Auto-populated HS code ${suggestion.hsCode} for component ${index + 1}`);
       } else {
-        // No suggestions found
-        const newComponents = [...components];
-        newComponents[index].hs_suggestions = [];
-        setComponents(newComponents);
+        console.log(`⚠️ No HS code suggestions found for component ${index + 1}`);
         alert('No HS code suggestions found. Try a more specific product description.');
       }
     } catch (error) {
       console.error('HS code lookup failed:', error);
-      await DevIssue.apiError('component_origins_step', '/api/lightweight-hs-lookup', error, {
+      await DevIssue.apiError('component_origins_step', '/api/agents/classification', error, {
         componentIndex: index,
         productDescription: component.description
       });
