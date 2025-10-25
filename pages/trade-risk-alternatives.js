@@ -9,6 +9,7 @@ import TriangleLayout from '../components/TriangleLayout';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
+import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
