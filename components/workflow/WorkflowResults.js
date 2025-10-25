@@ -15,6 +15,7 @@ import USMCAQualification from './results/USMCAQualification';
 import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
+import PersonalizedAlerts from './results/PersonalizedAlerts';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
@@ -813,6 +814,16 @@ export default function WorkflowResults({
           <TariffSavings results={results} />
         </div>
       )}
+
+      {/* PHASE 3: POLICY ALERTS TAILORED TO YOUR PRODUCTS */}
+      <div className="form-section">
+        <PersonalizedAlerts results={results} />
+      </div>
+
+      {/* PHASE 3: STRATEGIC ROADMAP & CBP COMPLIANCE */}
+      <div className="form-section">
+        <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
+      </div>
 
       {/* DETAILED AI ANALYSIS - Rich insights from Claude */}
       {results.detailed_analysis && (

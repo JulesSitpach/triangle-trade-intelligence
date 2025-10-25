@@ -1,9 +1,10 @@
 /**
  * RecommendedActions - Next steps and recommendations display
- * Shows professional recommendations based on results
+ * Enhanced Phase 3: Now includes Strategic Roadmap, CBP Compliance, and Financial Scenarios
+ * Calls executive-trade-alert API for consulting-grade advisory
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function RecommendedActions({ results }) {
   const isQualified = results?.usmca?.qualified;
@@ -19,6 +20,52 @@ export default function RecommendedActions({ results }) {
   if (!tradeVolume) {
     console.error('❌ [FORM SCHEMA] Missing company.trade_volume in RecommendedActions');
   }
+
+  // Phase 3 Enhancement: Load executive trade alert for strategic roadmap
+  const [executiveAlert, setExecutiveAlert] = useState(null);
+  const [loadingAlert, setLoadingAlert] = useState(false);
+  const [alertError, setAlertError] = useState(null);
+
+  useEffect(() => {
+    // Load executive trade alert with strategic roadmap if qualified
+    if (isQualified && results?.company && !loadingAlert) {
+      loadExecutiveTradeAlert();
+    }
+  }, [isQualified, results]);
+
+  const loadExecutiveTradeAlert = async () => {
+    setLoadingAlert(true);
+    try {
+      const response = await fetch('/api/executive-trade-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          user_profile: {
+            industry_sector: results.company?.industry_sector || 'General Manufacturing',
+            destination_country: results.company?.destination_country || 'US',
+            supplier_country: results.company?.supplier_country
+          },
+          workflow_intelligence: {
+            components: results.usmca?.component_breakdown || [],
+            north_american_content: results.usmca?.north_american_content || 0,
+            annual_trade_volume: tradeVolume ? parseFloat(tradeVolume) : 0
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setExecutiveAlert(data);
+        console.log('✅ Executive trade alert loaded:', data);
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to load executive trade alert:', error);
+      setAlertError(error.message);
+    } finally {
+      setLoadingAlert(false);
+    }
+  };
 
   if (!showRecommendations) return null;
 
@@ -40,6 +87,133 @@ export default function RecommendedActions({ results }) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* PHASE 3: Strategic Roadmap from Executive Trade Alert */}
+      {isQualified && executiveAlert?.strategic_roadmap && (
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">📋 3-Phase Strategic Roadmap</h4>
+            <p className="text-body">Implementation plan to lock in USMCA benefits and eliminate policy risks</p>
+          </div>
+          <div className="element-spacing">
+            {executiveAlert.strategic_roadmap.map((phase, idx) => (
+              <div key={idx} style={{ marginBottom: '1.5rem' }}>
+                <div style={{
+                  backgroundColor: idx === 0 ? '#fef3c7' : idx === 1 ? '#dbeafe' : '#dcfce7',
+                  padding: '1rem',
+                  borderRadius: '4px',
+                  borderLeft: `4px solid ${idx === 0 ? '#d97706' : idx === 1 ? '#0284c7' : '#16a34a'}`
+                }}>
+                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
+                    Phase {idx + 1}: {phase.phase} ({phase.timeline})
+                  </div>
+                  {phase.actions && phase.actions.length > 0 && (
+                    <ul style={{ margin: '0.5rem 0 0 1.5rem', paddingLeft: 0 }}>
+                      {phase.actions.map((action, i) => (
+                        <li key={i} style={{ color: '#374151', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                          {action}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PHASE 3: CBP Compliance Checklist from Executive Trade Alert */}
+      {isQualified && executiveAlert?.cbp_compliance_strategy && (
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">📋 CBP Compliance Checklist</h4>
+            <p className="text-body">Immediate actions to prevent duty assessment and audit risks</p>
+          </div>
+          <div className="element-spacing">
+            {/* Immediate Actions */}
+            {executiveAlert.cbp_compliance_strategy.immediate_actions && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#dc2626', marginBottom: '0.75rem' }}>
+                  ⚡ Immediate Actions (Next 7 Days)
+                </div>
+                {executiveAlert.cbp_compliance_strategy.immediate_actions.map((action, idx) => (
+                  <div key={idx} className="status-card urgent" style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ padding: '1rem' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#7f1d1d', marginBottom: '0.5rem' }}>
+                        {action.action}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#5f2f2f', marginBottom: '0.5rem' }}>
+                        {action.why}
+                      </div>
+                      {action.timeline && (
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                          ⏱️ Timeline: {action.timeline}
+                        </div>
+                      )}
+                      {action.required_docs && action.required_docs.length > 0 && (
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                          📄 Required: {action.required_docs.slice(0, 2).join(', ')}{action.required_docs.length > 2 ? '...' : ''}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Short-term Strategy */}
+            {executiveAlert.cbp_compliance_strategy.short_term_strategy && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0284c7', marginBottom: '0.75rem' }}>
+                  📅 Short-term Strategy (30 Days)
+                </div>
+                {executiveAlert.cbp_compliance_strategy.short_term_strategy.map((strategy, idx) => (
+                  <div key={idx} className="status-card info" style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ padding: '1rem' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#0c4a6e', marginBottom: '0.5rem' }}>
+                        {strategy.action}
+                      </div>
+                      {strategy.requirement && (
+                        <div style={{ fontSize: '0.8rem', color: '#164e63', marginBottom: '0.25rem' }}>
+                          {strategy.requirement}
+                        </div>
+                      )}
+                      {strategy.cost && (
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                          💰 Cost: {strategy.cost}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* CBP Contact Info */}
+            {executiveAlert.cbp_compliance_strategy.contacts && (
+              <div style={{
+                backgroundColor: '#f3f4f6',
+                padding: '1rem',
+                borderRadius: '4px',
+                marginTop: '1rem'
+              }}>
+                <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.75rem' }}>
+                  📞 CBP Contact Information
+                </div>
+                {Object.entries(executiveAlert.cbp_compliance_strategy.contacts).map(([key, contact]) => (
+                  <div key={key} style={{ marginBottom: '0.75rem', fontSize: '0.85rem' }}>
+                    <div style={{ fontWeight: '600', color: '#374151' }}>{contact.office}</div>
+                    <div style={{ color: '#6b7280' }}>
+                      📞 {contact.phone} | 📧 {contact.email}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
