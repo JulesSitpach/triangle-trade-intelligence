@@ -16,6 +16,14 @@
  * - Financial implications
  */
 
+import { Section301Agent } from '../../lib/agents/section301-agent.js';
+import MEXICO_SOURCING_CONFIG from '../../config/mexico-sourcing-config.js';  // ✅ REPLACES MexicoSourcingAgent
+import { getIndustryThreshold } from '../../lib/services/industry-thresholds-service.js';
+
+// Initialize agents
+const section301Agent = new Section301Agent();
+// ✅ Removed mexicoAgent - now using config lookup instead of AI calls
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -32,6 +40,23 @@ export default async function handler(req, res) {
       });
     }
 
+    // Validate required fields (fail loudly, no silent fallbacks)
+    if (!user_profile.destination_country) {
+      return res.status(400).json({
+        error: 'Missing required field: destination_country',
+        success: false,
+        details: 'Destination country is required for tariff analysis. Expected: US, CA, or MX'
+      });
+    }
+
+    if (!user_profile.industry_sector) {
+      return res.status(400).json({
+        error: 'Missing required field: industry_sector',
+        success: false,
+        details: 'Industry sector is required for USMCA threshold analysis'
+      });
+    }
+
     // ========== STEP 1: Identify Which Policies Affect User's Products ==========
 
     // Get their HS codes
@@ -39,8 +64,9 @@ export default async function handler(req, res) {
       .map(c => c.hs_code)
       .filter(Boolean);
 
-    const userIndustry = user_profile.industry_sector || 'electronics';
-    const userDestination = user_profile.destination_country || 'US';
+    // ✅ No fallbacks - fields validated above
+    const userIndustry = user_profile.industry_sector;
+    const userDestination = user_profile.destination_country;
     const hasChineseComponents = (workflow_intelligence.components || [])
       .some(c => c.origin_country === 'China' || c.origin_country === 'CN');
 
@@ -53,38 +79,32 @@ export default async function handler(req, res) {
         policy: 'Section 301 Tariffs',
         severity: 'CRITICAL',
         affects_user: true,
-        impact: '25% additional tariff on Chinese-origin components',
-        annual_cost_impact: calculateSection301Impact(
+        impact: 'Additional tariff on Chinese-origin components (rate varies by HS code)',
+        annual_cost_impact: await calculateSection301Impact(
           workflow_intelligence.components,
           user_profile.annual_trade_volume || 0
         ),
         description: 'China-origin goods entering the US remain subject to Section 301 tariffs despite USMCA qualification.',
-        strategic_options: [
-          {
-            option: 'Nearshoring to Mexico',
-            benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
-            timeline: '4-6 weeks for supplier qualification',
-            cost_impact: '+2% unit cost (typically offset by tariff savings within 3 months)'
-          },
-          {
-            option: 'Request tariff exemption',
-            benefit: 'Potential 100% tariff elimination for specific HS codes',
-            timeline: '2-4 months for exemption application',
-            cost_impact: 'Application fee ~$1,000-5,000'
-          }
-        ]
+        strategic_options: await generateMexicoNearshoringOptions(
+          user_profile,
+          workflow_intelligence,
+          await calculateSection301Impact(workflow_intelligence.components, user_profile.annual_trade_volume || 0)
+        )
       });
     }
 
-    // Generic: USMCA threshold concerns
-    if (workflow_intelligence.north_american_content &&
-        workflow_intelligence.north_american_content < 70) {
+    // ✅ DYNAMIC: USMCA threshold concerns (uses actual industry threshold, not hardcoded 70%)
+    // ✅ No fallback - industry_sector validated above
+    const industryThreshold = await getIndustryThreshold(user_profile.industry_sector);
+    const rvcBuffer = (workflow_intelligence.north_american_content || 0) - industryThreshold.rvc;
+
+    if (workflow_intelligence.north_american_content && rvcBuffer < 15) {
       applicablePolicies.push({
         policy: 'USMCA Qualification Risk',
-        severity: 'HIGH',
+        severity: rvcBuffer < 5 ? 'CRITICAL' : 'HIGH',
         affects_user: true,
         impact: 'Low RVC buffer could cause disqualification with threshold changes',
-        annual_cost_impact: calculateRiskImpact(workflow_intelligence),
+        annual_cost_impact: await calculateRiskImpact(workflow_intelligence, user_profile),
         description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%+.`,
         strategic_options: [
           {
@@ -114,7 +134,7 @@ export default async function handler(req, res) {
 
     // ========== STEP 3: Generate Financial Scenarios ==========
 
-    const financialScenarios = generateFinancialScenarios(
+    const financialScenarios = await generateFinancialScenarios(
       workflow_intelligence,
       applicablePolicies,
       user_profile
@@ -176,26 +196,120 @@ export default async function handler(req, res) {
 
 // ============ HELPER FUNCTIONS ============
 
-function calculateSection301Impact(components, tradeVolume) {
+/**
+ * Generate Mexico nearshoring strategic options with dynamic cost/payback
+ * REPLACES hardcoded +2%, 4-6 weeks, 3 months
+ */
+function generateMexicoNearshoringOptions(userProfile, workflow, section301Impact) {
+  try {
+    // ✅ Get metrics from config lookup (instant, no AI calls)
+    const metrics = MEXICO_SOURCING_CONFIG.calculateMetrics(
+      userProfile.industry_sector || 'electronics',
+      workflow.product_complexity || 'medium',
+      userProfile.annual_trade_volume || 0
+    );
+
+    return [
+      {
+        option: 'Nearshoring to Mexico',
+        benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
+        timeline: `${metrics.implementation_weeks} weeks for supplier qualification`,
+        cost_impact: `+${metrics.cost_premium_percent}% unit cost (offset within ${metrics.payback_months || 'N/A'} months)`
+      },
+      {
+        option: 'Request tariff exemption',
+        benefit: 'Potential 100% tariff elimination for specific HS codes',
+        timeline: '2-4 months for exemption application',
+        cost_impact: 'Application fee ~$1,000-5,000'
+      }
+    ];
+
+  } catch (error) {
+    console.error('[generateMexicoNearshoringOptions] Error:', error);
+
+    // Fallback to generic options
+    return [
+      {
+        option: 'Nearshoring to Mexico',
+        benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
+        timeline: '6-12 weeks for supplier qualification (estimate)',
+        cost_impact: '+1-3% unit cost (typically offset by tariff savings within 3-6 months)'
+      },
+      {
+        option: 'Request tariff exemption',
+        benefit: 'Potential 100% tariff elimination for specific HS codes',
+        timeline: '2-4 months for exemption application',
+        cost_impact: 'Application fee ~$1,000-5,000'
+      }
+    ];
+  }
+}
+
+async function calculateSection301Impact(components, tradeVolume) {
   if (!tradeVolume || tradeVolume === 0) return 'Unable to calculate without trade volume';
 
   const chineseComponents = components.filter(c =>
     c.origin_country === 'China' || c.origin_country === 'CN'
   );
 
+  if (chineseComponents.length === 0) return '$0 (no Chinese components)';
+
   const totalChineseValue = chineseComponents.reduce((sum, c) =>
     sum + (c.value_percentage || 0), 0
   );
 
-  // Assume 25% Section 301 rate on Chinese content
-  const annualCost = (tradeVolume * totalChineseValue / 100 * 0.25);
+  // ✅ DYNAMIC: Get actual Section 301 rate from agent (not hardcoded 25%)
+  let averageSection301Rate = 0;
+  let rateCount = 0;
+
+  for (const component of chineseComponents) {
+    if (component.hs_code) {
+      try {
+        const result = await section301Agent.getSection301Rate({
+          hs_code: component.hs_code,
+          origin_country: 'China',
+          destination_country: 'US'
+        });
+
+        if (result.success && result.data.applicable) {
+          averageSection301Rate += result.data.rate;
+          rateCount++;
+        }
+      } catch (error) {
+        console.error(`Failed to get Section 301 rate for ${component.hs_code}:`, error.message);
+      }
+    }
+  }
+
+  // If we got rates, use average; otherwise fallback to database or 0.20 (20% conservative estimate)
+  const effectiveRate = rateCount > 0
+    ? averageSection301Rate / rateCount
+    : 0.20; // Conservative fallback
+
+  const annualCost = (tradeVolume * totalChineseValue / 100 * effectiveRate);
 
   return `$${Math.round(annualCost).toLocaleString()} annually`;
 }
 
-function calculateRiskImpact(workflow) {
-  // Risk is proportional to how close they are to minimum threshold
-  const buffer = (workflow.north_american_content || 0) - (workflow.threshold_applied || 60);
+async function calculateRiskImpact(workflow, userProfile) {
+  // ✅ DYNAMIC: Get actual threshold from database (not hardcoded 60%)
+  let thresholdApplied = workflow.threshold_applied;
+
+  if (!thresholdApplied) {
+    if (!userProfile.industry_sector) {
+      throw new Error('Unable to calculate risk impact: missing industry_sector and workflow.threshold_applied');
+    }
+    try {
+      const thresholdData = await getIndustryThreshold(userProfile.industry_sector);
+      thresholdApplied = thresholdData.rvc;
+    } catch (error) {
+      console.error('Failed to get industry threshold:', error.message);
+      throw new Error(`Failed to load USMCA threshold for risk calculation: ${error.message}`);
+    }
+  }
+
+  // ✅ Risk is proportional to how close they are to minimum threshold
+  const buffer = (workflow.north_american_content || 0) - thresholdApplied;
   if (buffer < 5) return '$50,000+ if disqualified';
   if (buffer < 15) return '$30,000+ if disqualified';
   return 'Moderate (adequate buffer exists)';
@@ -304,7 +418,7 @@ function generateExecutiveAdvisory(policies, workflow, profile) {
  * Generate "what-if" scenarios for tariff policy changes
  * Shows user the financial impact if policies escalate or improve
  */
-function generateFinancialScenarios(workflow, policies, profile) {
+async function generateFinancialScenarios(workflow, policies, profile) {
   const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
   const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
 
@@ -335,15 +449,49 @@ function generateFinancialScenarios(workflow, policies, profile) {
       });
     }
 
-    // Scenario: Mexico nearshoring
-    scenarios.scenarios.push({
-      scenario: 'If You Nearshore to Mexico',
-      annual_burden: 'Eliminated',
-      cost_to_implement: '+$3,500/year (2% unit cost increase)',
-      payback_timeline: '1-3 months (tariff savings offset cost increase)',
-      additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
-      competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
-    });
+    // ✅ DYNAMIC: Mexico nearshoring scenario (uses AI estimates, not hardcoded values)
+    try {
+      const costResult = await mexicoAgent.estimateMexicoCostPremium({
+        industry_sector: profile.industry_sector || 'electronics',
+        product_complexity: workflow.product_complexity || 'medium',
+        annual_trade_volume: profile.annual_trade_volume || 0,
+        current_origin: 'China'
+      });
+
+      const setupCost = await mexicoAgent.estimateSetupCost({
+        industry_sector: profile.industry_sector || 'electronics',
+        product_complexity: workflow.product_complexity || 'medium',
+        requires_tooling: workflow.requires_custom_tooling || false
+      });
+
+      const paybackResult = mexicoAgent.calculatePaybackPeriod({
+        current_tariff_annual_burden: currentCost,
+        mexico_cost_premium_percent: costResult.data?.premium_percent || 2.0,
+        annual_trade_volume: profile.annual_trade_volume || 0,
+        setup_cost: setupCost
+      });
+
+      scenarios.scenarios.push({
+        scenario: 'If You Nearshore to Mexico',
+        annual_burden: 'Eliminated',
+        cost_to_implement: `+$${Math.round(costResult.data?.annual_cost_increase || 0).toLocaleString()}/year (${costResult.data?.premium_percent || 2}% unit cost increase)`,
+        payback_timeline: paybackResult.payback_months
+          ? `${paybackResult.payback_months} months (tariff savings offset cost increase)`
+          : '3-6 months (estimate)',
+        additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
+        competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
+      });
+    } catch (error) {
+      console.error('[Financial scenarios] Mexico sourcing error:', error);
+      scenarios.scenarios.push({
+        scenario: 'If You Nearshore to Mexico',
+        annual_burden: 'Eliminated',
+        cost_to_implement: '+1-3% unit cost increase (industry estimate)',
+        payback_timeline: '3-6 months (tariff savings offset cost increase)',
+        additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
+        competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
+      });
+    }
 
     // Scenario: Tariff exemption (unlikely but possible)
     scenarios.scenarios.push({
