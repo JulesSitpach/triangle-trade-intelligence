@@ -5,7 +5,7 @@
  * Enhanced with real-time AI agent assistance
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
@@ -25,6 +25,8 @@ export default function ComponentOriginsStepEnhanced({
   isLoading,
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL
 }) {
+  // Track if we just pushed to parent to avoid infinite restore loop
+  const lastPushedRef = useRef(null);
   // ✅ FIX #3: Ensure all component fields are always defined to prevent React controlled/uncontrolled warning
   const normalizeComponent = (component) => {
     return {
@@ -63,24 +65,38 @@ export default function ComponentOriginsStepEnhanced({
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Update parent form data when components change
-  // CRITICAL: Only update if components actually changed (not on every render)
-  // This prevents infinite loop with the sync effect below
+  // CRITICAL: Prevent infinite loop by tracking when we push to parent
+  // ✅ FIX: Use ref to mark when we pushed, skip restoration if we just pushed
   useEffect(() => {
     // Don't update on initial render (components will be [{}])
     if (components.length === 1 && !components[0].description) {
       return; // Skip initial empty component
     }
+
+    // Mark that we just pushed this data
+    lastPushedRef.current = JSON.stringify(components);
     updateFormData('component_origins', components);
-  }, [components, updateFormData]);
+  }, [components]);
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
-  // Only depend on formData.component_origins, not components, to avoid circular dependency
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // ✅ FIX: Skip restoration if we just pushed the same data (prevents infinite loop)
   useEffect(() => {
     if (formData.component_origins &&
-        formData.component_origins.length > 0 &&
-        JSON.stringify(formData.component_origins) !== JSON.stringify(components)) {
+        formData.component_origins.length > 0) {
+
+      const formDataString = JSON.stringify(formData.component_origins);
+
+      // Skip if we just pushed this exact data (prevents loop)
+      if (lastPushedRef.current === formDataString) {
+        return;
+      }
+
+      // Skip if components are already the same
+      if (formDataString === JSON.stringify(components)) {
+        return;
+      }
+
       console.log(`🔄 Syncing components from formData (navigation restore)`);
       setComponents(formData.component_origins);
     }
