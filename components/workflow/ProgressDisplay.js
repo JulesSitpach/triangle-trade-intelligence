@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import './styles/progress-display.css';
+import styles from './styles/progress-display.module.css';
 
 export default function ProgressDisplay({ progress }) {
   const { message, percentage, estimatedTimeRemaining, isComplete } = progress;
@@ -21,51 +21,51 @@ export default function ProgressDisplay({ progress }) {
   };
 
   return (
-    <div className="progress-display-container">
-      <div className="progress-header">
+    <div className={styles['progress-display-container']}>
+      <div className={styles['progress-header']}>
         <h2>Processing USMCA Compliance Analysis</h2>
       </div>
 
       {/* Progress Message */}
-      <div className="progress-message">
-        <p className="progress-text">{message}</p>
+      <div className={styles['progress-message']}>
+        <p className={styles['progress-text']}>{message}</p>
       </div>
 
       {/* Progress Bar */}
-      <div className="progress-bar-container">
-        <div className="progress-bar-track">
+      <div className={styles['progress-bar-container']}>
+        <div className={styles['progress-bar-track']}>
           <div
-            className="progress-bar-fill"
+            className={styles['progress-bar-fill']}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
       </div>
 
       {/* Progress Details */}
-      <div className="progress-details">
-        <div className="progress-percentage">
-          <span className="percentage-value">{percentage}%</span>
+      <div className={styles['progress-details']}>
+        <div className={styles['progress-percentage']}>
+          <span className={styles['percentage-value']}>{percentage}%</span>
         </div>
         {!isComplete && estimatedTimeRemaining > 0 && (
-          <div className="progress-eta">
-            <span className="eta-label">Estimated time:</span>
-            <span className="eta-value">{formatTimeRemaining(estimatedTimeRemaining)}</span>
+          <div className={styles['progress-eta']}>
+            <span className={styles['eta-label']}>Estimated time:</span>
+            <span className={styles['eta-value']}>{formatTimeRemaining(estimatedTimeRemaining)}</span>
           </div>
         )}
         {isComplete && (
-          <div className="progress-complete">
-            <span className="complete-checkmark">✓</span>
-            <span className="complete-text">Complete</span>
+          <div className={styles['progress-complete']}>
+            <span className={styles['complete-checkmark']}>✓</span>
+            <span className={styles['complete-text']}>Complete</span>
           </div>
         )}
       </div>
 
       {/* Animated dots for visual feedback */}
       {!isComplete && (
-        <div className="progress-spinner">
-          <div className="spinner-dot"></div>
-          <div className="spinner-dot"></div>
-          <div className="spinner-dot"></div>
+        <div className={styles['progress-spinner']}>
+          <div className={styles['spinner-dot']}></div>
+          <div className={styles['spinner-dot']}></div>
+          <div className={styles['spinner-dot']}></div>
         </div>
       )}
     </div>
