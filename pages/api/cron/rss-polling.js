@@ -8,6 +8,7 @@
 
 import RSSPollingEngine from '../../../lib/services/rss-polling-engine.js';
 import usitcTariffSync from '../../../lib/services/usitc-tariff-sync.js';
+import tariffChangeDetector from '../../../lib/services/tariff-change-detector.js';
 
 export default async function handler(req, res) {
   // Verify this is a Vercel Cron request OR GitHub Actions
@@ -53,6 +54,30 @@ export default async function handler(req, res) {
       total: rssResult.total
     });
 
+    // 🤖 AI-POWERED TARIFF CHANGE DETECTION
+    // This is the intelligence layer that makes real-time Trump tariff tracking work
+    console.log('🤖 Starting AI-powered tariff change detection...');
+    const startDetect = Date.now();
+    let detectionResult = { changes_detected: 0, users_alerted: 0, errors: [] };
+
+    try {
+      detectionResult = await tariffChangeDetector.detectChangesFromRecentFeeds();
+    } catch (detectError) {
+      console.error('❌ Tariff change detection error:', detectError.message);
+      detectionResult = {
+        changes_detected: 0,
+        users_alerted: 0,
+        error: detectError.message
+      };
+    }
+
+    const detectTime = Date.now() - startDetect;
+    console.log('✅ Tariff Change Detection Completed:', {
+      executionTime: `${detectTime}ms`,
+      changes_detected: detectionResult.changes_detected,
+      users_alerted: detectionResult.users_alerted
+    });
+
     // Sync real-time tariff rates from USITC API
     console.log('🔄 Syncing USITC tariff rates...');
     const syncResult = await usitcTariffSync.syncUSITCTariffRates();
@@ -75,6 +100,12 @@ export default async function handler(req, res) {
         successful_polls: rssResult.successful || 0,
         failed_polls: rssResult.failed || 0,
         duration_ms: rssTime
+      },
+      tariff_change_detection: {
+        changes_detected: detectionResult.changes_detected,
+        users_alerted: detectionResult.users_alerted,
+        errors: detectionResult.errors || [],
+        duration_ms: detectTime
       },
       tariff_sync: {
         codes_updated: syncResult.updated || 0,
