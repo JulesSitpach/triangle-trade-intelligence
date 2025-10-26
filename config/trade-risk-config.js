@@ -4,15 +4,16 @@
  * All values configurable via environment variables
  */
 
-// Environment-driven configuration with fallbacks
+// Environment-driven configuration - NO FALLBACKS (must be set in .env or fetched from AI/database)
 const TRADE_RISK_CONFIG = {
-  // Tariff rates (configurable via env)
+  // Tariff rates (MUST come from AI or database at runtime)
+  // These values should NEVER be used directly - they exist only for type checking
   tariffRates: {
-    section301: parseFloat(process.env.SECTION_301_TARIFF_RATE || '0.25'),
-    defaultTariff: parseFloat(process.env.DEFAULT_TARIFF_RATE || '0.10'),
-    electronics: parseFloat(process.env.ELECTRONICS_TARIFF_RATE || '0.25'),
-    automotive: parseFloat(process.env.AUTOMOTIVE_TARIFF_RATE || '0.275'),
-    textiles: parseFloat(process.env.TEXTILES_TARIFF_RATE || '0.15')
+    section301: parseFloat(process.env.SECTION_301_TARIFF_RATE), // NO FALLBACK - must query AI
+    defaultTariff: parseFloat(process.env.DEFAULT_TARIFF_RATE), // NO FALLBACK - must query AI
+    electronics: parseFloat(process.env.ELECTRONICS_TARIFF_RATE), // NO FALLBACK - must query AI by HS code
+    automotive: parseFloat(process.env.AUTOMOTIVE_TARIFF_RATE), // NO FALLBACK - must query AI by HS code
+    textiles: parseFloat(process.env.TEXTILES_TARIFF_RATE) // NO FALLBACK - must query AI by HS code
   },
 
   // Risk probabilities (configurable)
@@ -23,21 +24,21 @@ const TRADE_RISK_CONFIG = {
     supplyChainDisruption: process.env.SUPPLY_CHAIN_RISK_PROBABILITY || "elevated"
   },
 
-  // Risk reduction strategies effectiveness
+  // Risk reduction strategies effectiveness (NO FALLBACKS - must be set explicitly)
   riskReduction: {
-    alternativeManufacturing: parseFloat(process.env.ALT_MANUFACTURING_REDUCTION || '0.75'),
-    diversifiedNetwork: parseFloat(process.env.DIVERSIFIED_NETWORK_REDUCTION || '0.60'),
-    multiRouteLogistics: parseFloat(process.env.MULTI_ROUTE_REDUCTION || '0.45'),
-    triangleRouting: parseFloat(process.env.TRIANGLE_ROUTING_REDUCTION || '0.50'),
-    complianceOptimization: parseFloat(process.env.COMPLIANCE_OPTIMIZATION_REDUCTION || '0.35')
+    alternativeManufacturing: parseFloat(process.env.ALT_MANUFACTURING_REDUCTION), // NO FALLBACK
+    diversifiedNetwork: parseFloat(process.env.DIVERSIFIED_NETWORK_REDUCTION), // NO FALLBACK
+    multiRouteLogistics: parseFloat(process.env.MULTI_ROUTE_REDUCTION), // NO FALLBACK
+    triangleRouting: parseFloat(process.env.TRIANGLE_ROUTING_REDUCTION), // NO FALLBACK
+    complianceOptimization: parseFloat(process.env.COMPLIANCE_OPTIMIZATION_REDUCTION) // NO FALLBACK
   },
 
-  // Business thresholds
+  // Business thresholds (NO FALLBACKS - must be explicitly configured)
   thresholds: {
-    highVolumeTrader: parseInt(process.env.HIGH_VOLUME_THRESHOLD || '500000'),
-    minimumImpact: parseInt(process.env.MINIMUM_IMPACT_THRESHOLD || '50000'),
-    urgentResponse: parseInt(process.env.URGENT_RESPONSE_THRESHOLD || '100000'),
-    enterpriseClient: parseInt(process.env.ENTERPRISE_CLIENT_THRESHOLD || '1000000')
+    highVolumeTrader: parseInt(process.env.HIGH_VOLUME_THRESHOLD), // NO FALLBACK
+    minimumImpact: parseInt(process.env.MINIMUM_IMPACT_THRESHOLD), // NO FALLBACK
+    urgentResponse: parseInt(process.env.URGENT_RESPONSE_THRESHOLD), // NO FALLBACK
+    enterpriseClient: parseInt(process.env.ENTERPRISE_CLIENT_THRESHOLD) // NO FALLBACK
   },
 
   // Geographic regions (configurable)
@@ -48,38 +49,38 @@ const TRADE_RISK_CONFIG = {
     lowRiskRegion: process.env.LOW_RISK_REGION || 'Mexico'
   },
 
-  // Alert severity levels
+  // Alert severity levels (NO FALLBACKS)
   severityLevels: {
     critical: {
       label: 'CRITICAL',
-      threshold: parseFloat(process.env.CRITICAL_THRESHOLD || '0.20'),
+      threshold: parseFloat(process.env.CRITICAL_THRESHOLD), // NO FALLBACK
       color: 'danger'
     },
     high: {
       label: 'HIGH',
-      threshold: parseFloat(process.env.HIGH_THRESHOLD || '0.15'),
+      threshold: parseFloat(process.env.HIGH_THRESHOLD), // NO FALLBACK
       color: 'warning'
     },
     medium: {
       label: 'MEDIUM',
-      threshold: parseFloat(process.env.MEDIUM_THRESHOLD || '0.10'),
+      threshold: parseFloat(process.env.MEDIUM_THRESHOLD), // NO FALLBACK
       color: 'info'
     },
     low: {
       label: 'LOW',
-      threshold: parseFloat(process.env.LOW_THRESHOLD || '0.05'),
+      threshold: parseFloat(process.env.LOW_THRESHOLD), // NO FALLBACK
       color: 'success'
     }
   },
 
-  // Industry-specific risk multipliers
+  // Industry-specific risk multipliers (NO FALLBACKS)
   industryRiskMultipliers: {
-    electronics: parseFloat(process.env.ELECTRONICS_RISK_MULTIPLIER || '1.5'),
-    automotive: parseFloat(process.env.AUTOMOTIVE_RISK_MULTIPLIER || '1.3'),
-    textiles: parseFloat(process.env.TEXTILES_RISK_MULTIPLIER || '1.2'),
-    machinery: parseFloat(process.env.MACHINERY_RISK_MULTIPLIER || '1.4'),
-    chemicals: parseFloat(process.env.CHEMICALS_RISK_MULTIPLIER || '1.1'),
-    default: parseFloat(process.env.DEFAULT_RISK_MULTIPLIER || '1.0')
+    electronics: parseFloat(process.env.ELECTRONICS_RISK_MULTIPLIER), // NO FALLBACK
+    automotive: parseFloat(process.env.AUTOMOTIVE_RISK_MULTIPLIER), // NO FALLBACK
+    textiles: parseFloat(process.env.TEXTILES_RISK_MULTIPLIER), // NO FALLBACK
+    machinery: parseFloat(process.env.MACHINERY_RISK_MULTIPLIER), // NO FALLBACK
+    chemicals: parseFloat(process.env.CHEMICALS_RISK_MULTIPLIER), // NO FALLBACK
+    default: parseFloat(process.env.DEFAULT_RISK_MULTIPLIER) // NO FALLBACK
   },
 
   // Implementation timelines (configurable)

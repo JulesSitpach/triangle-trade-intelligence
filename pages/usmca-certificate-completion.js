@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TriangleLayout from '../components/TriangleLayout';
 import AuthorizationStep from '../components/workflow/AuthorizationStep';
+import CertificatePreviewAndEdit from '../components/workflow/CertificatePreviewAndEdit';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
 import { generateUSMCACertificatePDF } from '../lib/utils/usmca-certificate-pdf-generator.js';
@@ -21,6 +22,8 @@ export default function USMCACertificateCompletion() {
   const [generatedPDF, setGeneratedPDF] = useState(null);
   const [userTier, setUserTier] = useState('Trial'); // Default to Trial for safety
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [previewReviewComplete, setPreviewReviewComplete] = useState(false); // Track if user reviewed preview
+  const [editedCertificateData, setEditedCertificateData] = useState(null); // Store edited certificate data
   const [certificateData, setCertificateData] = useState({
     company_info: {},
     product_details: {},
@@ -118,6 +121,30 @@ export default function USMCACertificateCompletion() {
       ...prev,
       [section]: { ...prev[section], ...data }
     }));
+  };
+
+  // Handle when user completes certificate preview & edit review
+  const handleCertificateReady = (finalCertificateData) => {
+    console.log('✓ Certificate preview review complete. User made edits:', finalCertificateData.edits);
+
+    // Store the edited certificate data with audit trail
+    setEditedCertificateData(finalCertificateData);
+
+    // Update workflow data with edits
+    const updatedWorkflowData = {
+      ...workflowData,
+      usmca: {
+        ...workflowData.usmca,
+        regional_content: finalCertificateData.regional_content,
+        preference_criterion: finalCertificateData.preference_criterion
+      },
+      components: finalCertificateData.components,
+      certificate_edits: finalCertificateData.edits,
+      certificate_edit_timestamp: new Date().toISOString()
+    };
+
+    setWorkflowData(updatedWorkflowData);
+    setPreviewReviewComplete(true);
   };
 
   const handlePreviewCertificate = async (authData) => {
@@ -361,6 +388,9 @@ export default function USMCACertificateCompletion() {
     );
   }
 
+  // Show preview/edit FIRST, then authorization AFTER review is complete
+  const showPreviewAndEditStep = !previewReviewComplete;
+
   return (
     <TriangleLayout>
       <div className="user-dashboard-page">
@@ -385,23 +415,68 @@ export default function USMCACertificateCompletion() {
 
           <div className="form-section">
             <div className="dashboard-header">
-              <h1 className="dashboard-title">USMCA Certificate Authorization</h1>
-              <p className="text-body">Complete authorization details and generate your certificate</p>
+              <h1 className="dashboard-title">
+                {showPreviewAndEditStep ? '📋 Review Your Certificate' : '✍️ USMCA Certificate Authorization'}
+              </h1>
+              <p className="text-body">
+                {showPreviewAndEditStep
+                  ? 'Review all information and make any necessary edits before downloading'
+                  : 'Complete authorization details and generate your final certificate'
+                }
+              </p>
             </div>
           </div>
 
-          <AuthorizationStep
-          formData={certificateData.authorization || {}}
-          updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
-          workflowData={workflowData}
-          certificateData={certificateData}
-          onPreviewCertificate={handlePreviewCertificate}
-          onDownloadCertificate={handleDownloadCertificate}
-          onEmailToImporter={handleEmailToImporter}
-          previewData={previewData}
-          generatedPDF={generatedPDF}
-          userTier={userTier}
-        />
+          {/* STEP 1: Certificate Preview & Edit (TurboTax-style review) */}
+          {showPreviewAndEditStep && workflowData && (
+            <CertificatePreviewAndEdit
+              results={workflowData}
+              onCertificateReady={handleCertificateReady}
+            />
+          )}
+
+          {/* STEP 2: Authorization & Final Certification (shown after preview review) */}
+          {!showPreviewAndEditStep && (
+            <div>
+              {editedCertificateData?.edits && editedCertificateData.edits.length > 0 && (
+                <div className="element-spacing">
+                  <div className="alert alert-info">
+                    <div className="alert-content">
+                      <div className="alert-title">📝 Changes Applied to Certificate</div>
+                      <div className="text-body">
+                        {editedCertificateData.edits.length} field(s) edited during preview review.
+                        Your final RVC: {editedCertificateData.final_rvc_value}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <AuthorizationStep
+                formData={certificateData.authorization || {}}
+                updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
+                workflowData={workflowData}
+                certificateData={certificateData}
+                onPreviewCertificate={handlePreviewCertificate}
+                onDownloadCertificate={handleDownloadCertificate}
+                onEmailToImporter={handleEmailToImporter}
+                previewData={previewData}
+                generatedPDF={generatedPDF}
+                userTier={userTier}
+              />
+
+              {/* Option to go back to preview if needed */}
+              <div className="element-spacing">
+                <button
+                  onClick={() => setPreviewReviewComplete(false)}
+                  className="btn-secondary"
+                  style={{ width: '100%' }}
+                >
+                  ← Back to Review Certificate
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Upgrade Modal for Trial Users */}
           {showUpgradeModal && (
