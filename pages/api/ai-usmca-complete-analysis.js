@@ -692,15 +692,22 @@ export default protectedApiHandler({
             console.log(`🔄 [TARIFF-ENRICHMENT] Enriched ${enrichedAIComponents.length} AI components with fresh database rates`);
 
             // ✅ NORMALIZE enriched AI components to ensure all required fields exist
-            const normalizedAIComponents = (enrichedAIComponents || []).map(component => ({
-              ...component,
-              // Ensure all required fields are present for frontend transformer
-              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
-              rate_source: component.rate_source || 'ai_analysis',
-              stale: component.stale !== undefined ? component.stale : false,
-              // Ensure data_source is set for tracking provenance
-              data_source: component.data_source || 'ai_analysis'
-            }));
+            const normalizedAIComponents = (enrichedAIComponents || []).map((component, idx) => {
+              // Use original form data to fill in missing hs_code or origin_country
+              const originalComponent = formData.component_origins?.[idx] || {};
+              return {
+                ...component,
+                // ✅ CRITICAL: Ensure hs_code and origin_country from original input
+                hs_code: component.hs_code || originalComponent.hs_code || '',
+                origin_country: component.origin_country || originalComponent.origin_country || '',
+                // Ensure all required fields are present for frontend transformer
+                base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+                rate_source: component.rate_source || 'ai_analysis',
+                stale: component.stale !== undefined ? component.stale : false,
+                // Ensure data_source is set for tracking provenance
+                data_source: component.data_source || 'ai_analysis'
+              };
+            });
 
             console.log(`✅ [COMPONENT-NORMALIZATION] Normalized ${normalizedAIComponents.length} AI components with required fields`);
             return normalizedAIComponents;
@@ -719,27 +726,42 @@ export default protectedApiHandler({
 
           if (hasEnrichedData) {
             console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
-            // ✅ Ensure all enriched components have required fields
-            return (enrichedComponents || []).map(component => ({
-              ...component,
-              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
-              rate_source: component.rate_source || 'ai_enriched',
-              stale: component.stale !== undefined ? component.stale : false
-            }));
+            // ✅ Ensure all enriched components have required fields (including hs_code and origin_country)
+            return (enrichedComponents || []).map((component, idx) => {
+              // Use original form data to fill in missing hs_code or origin_country
+              const originalComponent = formData.component_origins?.[idx] || {};
+              return {
+                ...component,
+                // ✅ CRITICAL: Ensure hs_code and origin_country from original input
+                hs_code: component.hs_code || originalComponent.hs_code || '',
+                origin_country: component.origin_country || originalComponent.origin_country || '',
+                base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+                rate_source: component.rate_source || 'ai_enriched',
+                stale: component.stale !== undefined ? component.stale : false
+              };
+            });
           }
 
           // Option 3: Fallback to API's component_breakdown or raw user input
           console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
           const fallbackComponents = analysis.usmca?.component_breakdown || formData.component_origins || [];
 
-          // ✅ Normalize fallback components to ensure required fields
-          return (fallbackComponents || []).map(component => ({
-            ...component,
-            base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
-            rate_source: component.rate_source || 'user_input',
-            stale: component.stale !== undefined ? component.stale : true,  // Mark as potentially stale
-            data_source: component.data_source || 'user_input'
-          }));
+          // ✅ Normalize fallback components to ensure required fields (including hs_code and origin_country)
+          return (fallbackComponents || []).map((component, idx) => {
+            // Use original form data to fill in missing required fields
+            const originalComponent = formData.component_origins?.[idx] || {};
+            return {
+              ...component,
+              // ✅ CRITICAL: Ensure hs_code and origin_country are always present
+              hs_code: component.hs_code || originalComponent.hs_code || '',
+              origin_country: component.origin_country || originalComponent.origin_country || '',
+              // Ensure all tariff fields
+              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
+              rate_source: component.rate_source || 'user_input',
+              stale: component.stale !== undefined ? component.stale : true,  // Mark as potentially stale
+              data_source: component.data_source || 'user_input'
+            };
+          });
         })();  // ✅ IIFE awaited above
 
     // Format response for UI
