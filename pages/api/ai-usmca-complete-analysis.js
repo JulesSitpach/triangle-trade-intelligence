@@ -11,6 +11,7 @@ import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation, validateAPIResponse } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit } from '../../lib/services/usage-tracking-service.js';
+import { transformAPIToFrontend } from '../../lib/contracts/component-transformer.js';
 
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
@@ -576,8 +577,27 @@ export default protectedApiHandler({
     // The AI analysis populates result.usmca.component_breakdown with tariff rates
     // Frontend looks for result.component_origins and result.components
     // So we must update these to use the ENRICHED data, not the raw user input
-    result.component_origins = result.usmca.component_breakdown;
-    result.components = result.usmca.component_breakdown;
+
+    // ✅ CRITICAL FIX (Oct 26): Transform tariff rates from percentages to decimals
+    // AI returns: mfn_rate: 25 (percentage)
+    // Frontend expects: mfnRate: 0.25 (decimal, multiplied by 100 for display)
+    // Without transformation: 25 × 100 = 2500% ❌
+    // With transformation: 0.25 × 100 = 25% ✅
+    const transformedComponents = result.usmca.component_breakdown.map((component) => {
+      try {
+        return transformAPIToFrontend(component);
+      } catch (err) {
+        logError('Component transformation failed', {
+          component: component?.description || 'Unknown',
+          error: err.message
+        });
+        // Return as-is if transformation fails (non-blocking)
+        return component;
+      }
+    });
+
+    result.component_origins = transformedComponents;
+    result.components = transformedComponents;
 
     result.manufacturing_location = formData.manufacturing_location;
     result.workflow_data = {
