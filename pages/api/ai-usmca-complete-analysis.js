@@ -444,6 +444,20 @@ export default protectedApiHandler({
           // Option 1: AI returned explicit components array
           if (analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0) {
             console.log(`✅ [COMPONENT-BREAKDOWN] Using AI components array (${analysis.components.length} components)`);
+
+            // DEBUG: Check what fields are in the AI components
+            const sampleComponent = analysis.components[0];
+            console.log(`📋 [COMPONENT-BREAKDOWN] Sample component structure:`, {
+              description: sampleComponent.description,
+              hasMfnRate: sampleComponent.mfn_rate !== undefined,
+              mfnRate: sampleComponent.mfn_rate,
+              hasUsmcaRate: sampleComponent.usmca_rate !== undefined,
+              usmcaRate: sampleComponent.usmca_rate,
+              hasSection301: sampleComponent.section_301 !== undefined,
+              section301: sampleComponent.section_301,
+              allKeys: Object.keys(sampleComponent)
+            });
+
             return analysis.components;
           }
 
@@ -558,12 +572,12 @@ export default protectedApiHandler({
     // Use raw components (AI will enrich them internally)
     const normalizedComponents = formData.component_origins.map(c => normalizeComponent(c));
 
-    // Store component origins for results/certificate display
-    result.component_origins = normalizedComponents;
-    result.components = normalizedComponents;
-
-    // Component breakdown will be populated by AI response
-    result.usmca.component_breakdown = normalizedComponents;
+    // ✅ FIX (Oct 26): Use enriched component_breakdown from AI response, NOT raw components
+    // The AI analysis populates result.usmca.component_breakdown with tariff rates
+    // Frontend looks for result.component_origins and result.components
+    // So we must update these to use the ENRICHED data, not the raw user input
+    result.component_origins = result.usmca.component_breakdown;
+    result.components = result.usmca.component_breakdown;
 
     result.manufacturing_location = formData.manufacturing_location;
     result.workflow_data = {

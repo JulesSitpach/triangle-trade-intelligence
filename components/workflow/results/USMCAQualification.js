@@ -188,6 +188,21 @@ export default function USMCAQualification({ results }) {
                 const savingsPercent = baseMfnRate - usmcaRate;
                 const hasRates = (baseMfnRate !== undefined && baseMfnRate !== null) || (usmcaRate !== undefined && usmcaRate !== null);
 
+                // DEBUG: Log what we're receiving from the API
+                if (index === 0) {
+                  console.log(`🔍 [FRONTEND] First component from API:`, {
+                    description: component.description,
+                    rawMfnRate: component.mfn_rate,
+                    rawUsmcaRate: component.usmca_rate,
+                    rawSection301: component.section_301,
+                    baseMfnRate,
+                    usmcaRate,
+                    section301,
+                    hasRates,
+                    allKeys: Object.keys(component)
+                  });
+                }
+
                 const isExpanded = expandedComponents[index];
                 const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence || component.hs_description;
 
