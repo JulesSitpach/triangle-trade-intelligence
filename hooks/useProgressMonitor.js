@@ -7,22 +7,27 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Define progress milestones with time estimates (in milliseconds)
-// Finalizing stage has sub-steps since it takes longest (1.5+ minutes)
+// Spread evenly across full duration (up to 180s) with many granular steps at the end
 const PROGRESS_MILESTONES = [
-  { step: 'validating', label: '🔍 Validating input data...', targetTime: 500, percentage: 5 },
-  { step: 'classifying', label: '🏷️ Classifying product...', targetTime: 3000, percentage: 15 },
-  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 6000, percentage: 25 },
-  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 10000, percentage: 35 },
-  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 14000, percentage: 45 },
-  { step: 'generating', label: '📜 Generating certificate...', targetTime: 18000, percentage: 55 },
+  { step: 'validating', label: '🔍 Validating input data...', targetTime: 1000, percentage: 3 },
+  { step: 'classifying', label: '🏷️ Classifying product...', targetTime: 8000, percentage: 8 },
+  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 18000, percentage: 15 },
+  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 30000, percentage: 23 },
+  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 42000, percentage: 31 },
+  { step: 'generating', label: '📜 Generating certificate...', targetTime: 54000, percentage: 39 },
 
-  // Finalizing stage - broken into detailed sub-steps (remaining 45%)
-  { step: 'finalizing-components', label: '⚙️ Enriching components with tariff data...', targetTime: 22000, percentage: 62 },
-  { step: 'finalizing-validation', label: '✓ Validating regional content calculation...', targetTime: 26000, percentage: 69 },
-  { step: 'finalizing-alerts', label: '🚨 Generating tariff policy alerts...', targetTime: 30000, percentage: 76 },
-  { step: 'finalizing-analysis', label: '📈 Computing strategic opportunities...', targetTime: 34000, percentage: 83 },
-  { step: 'finalizing-certificate', label: '📄 Preparing certificate template...', targetTime: 38000, percentage: 90 },
-  { step: 'finalizing-complete', label: '🔄 Finalizing response...', targetTime: 42000, percentage: 97 }
+  // Finalizing stage - many granular sub-steps so progress doesn't get stuck
+  { step: 'finalizing-components', label: '⚙️ Enriching components with tariff data...', targetTime: 66000, percentage: 45 },
+  { step: 'finalizing-validation', label: '✓ Validating regional content calculation...', targetTime: 78000, percentage: 52 },
+  { step: 'finalizing-alerts', label: '🚨 Generating tariff policy alerts...', targetTime: 90000, percentage: 59 },
+  { step: 'finalizing-analysis', label: '📈 Computing strategic opportunities...', targetTime: 102000, percentage: 66 },
+  { step: 'finalizing-certificate', label: '📄 Preparing certificate template...', targetTime: 114000, percentage: 73 },
+  { step: 'finalizing-formatting', label: '🎨 Formatting final response...', targetTime: 126000, percentage: 80 },
+  { step: 'finalizing-validation2', label: '✓ Validating response integrity...', targetTime: 138000, percentage: 86 },
+  { step: 'finalizing-serializing', label: '📦 Serializing data...', targetTime: 150000, percentage: 91 },
+  { step: 'finalizing-preparing', label: '⏳ Preparing for delivery...', targetTime: 160000, percentage: 95 },
+  { step: 'finalizing-almost', label: '⏳ Almost there...', targetTime: 168000, percentage: 97 },
+  { step: 'finalizing-wrapping', label: '⏳ Wrapping up...', targetTime: 174000, percentage: 99 }
 ];
 
 export function useProgressMonitor() {

@@ -15,7 +15,7 @@ export default function WorkflowLoading({ isVisible }) {
   // Start monitoring when component becomes visible
   useEffect(() => {
     if (isVisible) {
-      startMonitoring(42000); // Estimate 42 seconds for typical USMCA analysis (including long finalizing phase)
+      startMonitoring(180000); // Estimate 180 seconds - progress spreads evenly across full duration to avoid getting stuck at high percentages
     } else {
       reset();
     }
