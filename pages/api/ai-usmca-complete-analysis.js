@@ -162,6 +162,13 @@ export default protectedApiHandler({
 
         const rates = extractComponentRate(comp.description, comp.hs_code, comp.origin_country);
 
+        // DEBUG: Log extraction results
+        if (rates.extracted.mfnFound || rates.extracted.section301Found) {
+          console.log(`✅ Extracted rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
+        } else {
+          console.log(`⚠️ No rates extracted for ${comp.description} - using defaults`);
+        }
+
         const totalRate = rates.mfnRate + rates.section301;
         const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
 
