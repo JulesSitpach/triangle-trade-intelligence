@@ -139,7 +139,7 @@ export default function USMCACertificateCompletion() {
     });
 
     try {
-      const response = await fetch('/api/trust/complete-certificate', {
+      const response = await fetch('/api/generate-certificate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

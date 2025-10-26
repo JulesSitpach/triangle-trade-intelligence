@@ -290,7 +290,7 @@ class E2ETestAgent {
     };
 
     this.log('Generating USMCA certificate with user company data', 'debug');
-    const response = await fetch(`${API_BASE_URL}/api/trust/complete-certificate`, {
+    const response = await fetch(`${API_BASE_URL}/api/generate-certificate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
