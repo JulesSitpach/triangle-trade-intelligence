@@ -123,16 +123,16 @@ export default function USMCACertificateCompletion() {
   };
 
   const handlePreviewCertificate = async (authData) => {
-    console.log('Opening certificate preview for review and editing...');
+    console.log('Generating certificate and opening preview for editing...');
 
-    // Store authorization data for use in preview
+    // Store authorization data for use in certificate generation
     setCertificateData(prev => ({
       ...prev,
       authorization: authData
     }));
 
-    // Show the editable preview step
-    setShowPreview(true);
+    // Generate certificate and show editable preview (pass authData to avoid async state issues)
+    await generateAndDownloadCertificate(authData);
   };
 
   const handlePreviewDownload = async (editedPreviewData) => {
@@ -155,8 +155,8 @@ export default function USMCACertificateCompletion() {
     await generateAndDownloadCertificate();
   };
 
-  const generateAndDownloadCertificate = async () => {
-    const authData = certificateData.authorization || {};
+  const generateAndDownloadCertificate = async (passedAuthData = null) => {
+    const authData = passedAuthData || certificateData.authorization || {};
     const preview = {
       ...certificateData,
       authorization: authData,
@@ -451,13 +451,21 @@ export default function USMCACertificateCompletion() {
             )}
 
             {/* STEP 2: Editable Certificate Preview */}
-            {showPreview && workflowData && (
+            {showPreview && previewData && (
               <EditableCertificatePreview
-                certificateData={certificateData}
-                workflowData={workflowData}
-                onEdit={(editedData) => setPreviewEditedData(editedData)}
-                onDownload={() => handlePreviewDownload(previewEditedData)}
-                onBack={() => setShowPreview(false)}
+                previewData={previewData}
+                userTier={userTier}
+                onSave={async (editedCertificate) => {
+                  // Update preview data with edits
+                  setPreviewData(prev => ({
+                    ...prev,
+                    professional_certificate: editedCertificate
+                  }));
+                  // Proceed to download
+                  setShowPreview(false);
+                  setTimeout(() => handleDownloadCertificate(), 100);
+                }}
+                onCancel={() => setShowPreview(false)}
               />
             )}
           </div>
