@@ -375,47 +375,83 @@ export default protectedApiHandler({
     const aiResult = await aiResponse.json();
     const aiText = aiResult.choices?.[0]?.message?.content;
 
+    if (!aiText) {
+      throw new Error('AI response is empty or missing content field');
+    }
+
     // ⚡ PERFORMANCE: Disabled full AI response logging
 
     // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
     try {
+      // ✅ AGGRESSIVE MARKDOWN STRIPPING (Before all extraction strategies)
+      // Remove markdown code fences and language identifiers
+      let cleanText = aiText
+        .replace(/^```(?:json|javascript)?\s*\n?/gm, '') // Opening fence
+        .replace(/\n?```\s*$/gm, '') // Closing fence
+        .trim();
+
       // Multi-strategy JSON extraction (same as classifyComponentHS and batch lookup)
       let jsonString = null;
       let extractionMethod = '';
 
-      // Strategy 1: Try direct extraction
-      if (aiText.trim().startsWith('{')) {
-        jsonString = aiText;
-        extractionMethod = 'direct';
+      // Strategy 1: Try direct extraction (clean text starts with {)
+      if (cleanText.startsWith('{')) {
+        jsonString = cleanText;
+        extractionMethod = 'direct_clean';
       }
-      // Strategy 2: Extract from markdown code blocks
+      // Strategy 2: Extract from markdown code blocks (if still present after cleaning)
       else {
-        const codeBlockMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        const codeBlockMatch = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
         if (codeBlockMatch) {
           jsonString = codeBlockMatch[1];
           extractionMethod = 'code_block';
         }
         // Strategy 3: Extract JSON object (between first { and last })
         else {
-          const firstBrace = aiText.indexOf('{');
-          const lastBrace = aiText.lastIndexOf('}');
+          const firstBrace = cleanText.indexOf('{');
+          const lastBrace = cleanText.lastIndexOf('}');
           if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-            jsonString = aiText.substring(firstBrace, lastBrace + 1);
+            jsonString = cleanText.substring(firstBrace, lastBrace + 1);
             extractionMethod = 'brace_matching';
           }
         }
       }
 
       if (!jsonString) {
-        throw new Error('No JSON found in AI response');
+        console.error('🚨 [JSON EXTRACTION FAILED]', {
+          original_text_length: aiText.length,
+          original_first_100_chars: aiText.substring(0, 100),
+          clean_text_length: cleanText.length,
+          clean_text_first_100_chars: cleanText.substring(0, 100)
+        });
+        throw new Error('No JSON found in AI response after aggressive cleaning');
       }
 
-      // ✅ OPTIMIZED: Sanitize control characters in single combined regex (60% faster)
-      const sanitizedJSON = jsonString.replace(/[\r\n\t\x00-\x1F\x7F-\x9F]/g, ' ').replace(/\s+/g, ' ');
+      // ✅ OPTIMIZED: Sanitize control characters (remove newlines/tabs while preserving JSON structure)
+      const sanitizedJSON = jsonString
+        .replace(/[\r\n\t\x00-\x1F\x7F-\x9F]/g, ' ')  // Control characters → spaces
+        .replace(/\s+/g, ' ')  // Multiple spaces → single space
+        .trim();
 
-      analysis = JSON.parse(sanitizedJSON.trim());
+      // ✅ FINAL VALIDATION: Ensure it looks like JSON before parsing
+      if (!sanitizedJSON.startsWith('{') || !sanitizedJSON.endsWith('}')) {
+        console.error('🚨 [INVALID JSON STRUCTURE]', {
+          sanitized_first_50_chars: sanitizedJSON.substring(0, 50),
+          sanitized_last_50_chars: sanitizedJSON.substring(sanitizedJSON.length - 50),
+          extraction_method: extractionMethod
+        });
+        throw new Error(`Invalid JSON structure (${extractionMethod}): does not start with { or end with }`);
+      }
+
+      analysis = JSON.parse(sanitizedJSON);
+      console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy`);
     } catch (parseError) {
+      console.error('❌ [JSON PARSE ERROR]', {
+        error: parseError.message,
+        extraction_method: extractionMethod,
+        json_sample: sanitizedJSON?.substring(0, 100)
+      });
       throw new Error(`AI response parsing failed: ${parseError.message}`);
     }
 
@@ -562,7 +598,9 @@ export default protectedApiHandler({
           console.log('⚠️ [COMPONENT-BREAKDOWN] No AI components array, attempting enrichment...');
 
           // Option 2: Enrich user components with rates extracted from AI response
-          const enrichedComponents = enrichComponentsWithTariffRates(formData.component_origins, analysis);
+          // CRITICAL: Pass already-enriched components (with fresh DB rates) instead of original
+          // enrichComponentsWithTariffRates will preserve existing rates and only extract missing ones
+          const enrichedComponents = enrichComponentsWithTariffRates(enrichedComponents, analysis);
           console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${enrichedComponents.length} components`);
           console.log(`📊 [COMPONENT-BREAKDOWN] Checking for data_source==='ai_enriched'...`);
           const hasEnrichedData = enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched');
