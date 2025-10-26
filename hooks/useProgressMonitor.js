@@ -7,14 +7,22 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Define progress milestones with time estimates (in milliseconds)
+// Finalizing stage has sub-steps since it takes longest (1.5+ minutes)
 const PROGRESS_MILESTONES = [
   { step: 'validating', label: '🔍 Validating input data...', targetTime: 500, percentage: 5 },
-  { step: 'classifying', label: '🏷️ Classifying product...', targetTime: 3000, percentage: 20 },
-  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 5000, percentage: 35 },
-  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 8000, percentage: 50 },
-  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 12000, percentage: 70 },
-  { step: 'generating', label: '📜 Generating certificate...', targetTime: 15000, percentage: 85 },
-  { step: 'finalizing', label: '⚙️ Finalizing analysis...', targetTime: 18000, percentage: 95 }
+  { step: 'classifying', label: '🏷️ Classifying product...', targetTime: 3000, percentage: 15 },
+  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 6000, percentage: 25 },
+  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 10000, percentage: 35 },
+  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 14000, percentage: 45 },
+  { step: 'generating', label: '📜 Generating certificate...', targetTime: 18000, percentage: 55 },
+
+  // Finalizing stage - broken into detailed sub-steps (remaining 45%)
+  { step: 'finalizing-components', label: '⚙️ Enriching components with tariff data...', targetTime: 22000, percentage: 62 },
+  { step: 'finalizing-validation', label: '✓ Validating regional content calculation...', targetTime: 26000, percentage: 69 },
+  { step: 'finalizing-alerts', label: '🚨 Generating tariff policy alerts...', targetTime: 30000, percentage: 76 },
+  { step: 'finalizing-analysis', label: '📈 Computing strategic opportunities...', targetTime: 34000, percentage: 83 },
+  { step: 'finalizing-certificate', label: '📄 Preparing certificate template...', targetTime: 38000, percentage: 90 },
+  { step: 'finalizing-complete', label: '🔄 Finalizing response...', targetTime: 42000, percentage: 97 }
 ];
 
 export function useProgressMonitor() {

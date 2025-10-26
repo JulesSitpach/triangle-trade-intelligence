@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useProgressMonitor } from '../../hooks/useProgressMonitor';
 import ProgressDisplay from './ProgressDisplay';
-import './styles/workflow-loading-overlay.css';
+import styles from './styles/workflow-loading-overlay.module.css';
 
 export default function WorkflowLoading({ isVisible }) {
   const { progress, startMonitoring, completeMonitoring, reset } = useProgressMonitor();
@@ -15,7 +15,7 @@ export default function WorkflowLoading({ isVisible }) {
   // Start monitoring when component becomes visible
   useEffect(() => {
     if (isVisible) {
-      startMonitoring(25000); // Estimate 25 seconds for typical USMCA analysis
+      startMonitoring(42000); // Estimate 42 seconds for typical USMCA analysis (including long finalizing phase)
     } else {
       reset();
     }
@@ -24,8 +24,8 @@ export default function WorkflowLoading({ isVisible }) {
   if (!isVisible) return null;
 
   return (
-    <div className="workflow-loading-overlay">
-      <div className="workflow-loading-content">
+    <div className={styles['workflow-loading-overlay']}>
+      <div className={styles['workflow-loading-content']}>
         <ProgressDisplay progress={progress} />
       </div>
     </div>
