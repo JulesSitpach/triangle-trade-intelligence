@@ -1,304 +1,262 @@
 /**
- * TARIFF DATA FRESHNESS WARNING COMPONENT
- * Displays warning if tariff rates are stale or if last update was more than threshold ago
- * Shown on results page to ensure users know if data is current
+ * TARIFF DATA FRESHNESS INDICATOR
+ * ===============================
+ * Shows users when tariff data was last updated
+ * Alerts when data is stale (>24 hours for US/CA, >7 days for MX)
+ * Indicates data source (live API, cached, or offline)
+ *
+ * This component is critical for compliance - users must know
+ * if they're using current rates or cached data from before
+ * Trump tariff changes.
  */
 
-import React, { useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
+import React from 'react';
 
-export default function TariffDataFreshness() {
-  const [freshness, setFreshness] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchFreshnessStatus();
-  }, []);
-
-  const fetchFreshnessStatus = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/tariff-data-freshness');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch freshness status');
-      }
-
-      const data = await response.json();
-      setFreshness(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching tariff data freshness:', err);
-      setError(err.message);
-      setLoading(false);
-    } finally {
-      setLoading(false);
+export default function TariffDataFreshness({ results, destination = 'US' }) {
+  // Extract last update time from results
+  const getDataFreshness = () => {
+    if (!results?.component_origins || results.component_origins.length === 0) {
+      return null;
     }
+
+    // Get the most recent update time from all components
+    const lastUpdates = results.component_origins
+      .map(c => new Date(c.last_updated || c.cached_at))
+      .filter(d => !isNaN(d.getTime()))
+      .sort((a, b) => b - a);
+
+    return lastUpdates[0];
   };
 
-  if (loading) {
+  const getDataSource = () => {
+    if (!results?.component_origins || results.component_origins.length === 0) {
+      return 'unknown';
+    }
+
+    // Check data sources in components
+    const sources = new Set(
+      results.component_origins
+        .map(c => c.data_source || c.cache_source || 'unknown')
+    );
+
+    if (sources.has('USITC DataWeb API') || sources.has('OpenRouter')) {
+      return 'live';
+    }
+    if (sources.has('AI-detected from RSS feeds')) {
+      return 'ai_detected';
+    }
+    return 'cached';
+  };
+
+  const calculateFreshness = () => {
+    const lastUpdate = getDataFreshness();
+    if (!lastUpdate) return null;
+
+    const now = new Date();
+    const ageMs = now - lastUpdate;
+    const ageHours = ageMs / (1000 * 60 * 60);
+    const ageDays = ageHours / 24;
+
+    // Thresholds vary by destination
+    const thresholds = {
+      'US': { warning: 24, critical: 72 },      // US: change every 2 hours, warn after 24h
+      'CA': { warning: 90 * 24, critical: 180 * 24 },  // Canada: slower changes
+      'MX': { warning: 365 * 24, critical: 999 * 24 }  // Mexico: stable rates
+    };
+
+    const threshold = thresholds[destination] || thresholds['US'];
+
+    return {
+      lastUpdate,
+      ageHours,
+      ageDays,
+      status: ageHours > threshold.critical ? 'critical' :
+              ageHours > threshold.warning ? 'warning' : 'fresh',
+      daysAgo: Math.floor(ageDays),
+      hoursAgo: Math.floor(ageHours)
+    };
+  };
+
+  const freshness = calculateFreshness();
+  const source = getDataSource();
+
+  if (!freshness) {
     return (
-      <div className="tariff-freshness-loading">
-        <Clock size={16} />
-        <span>Checking tariff data freshness...</span>
+      <div className="tariff-freshness tariff-freshness-unknown">
+        <span>⚠️ No tariff data available</span>
       </div>
     );
   }
 
-  if (!freshness) {
-    return null;
-  }
+  const statusIcons = {
+    'live': { icon: '🟢', text: 'Live Data' },
+    'ai_detected': { icon: '🤖', text: 'AI-Detected Updates' },
+    'cached': { icon: '🟡', text: 'Cached Data' },
+    'critical': { icon: '🔴', text: 'Stale Data' }
+  };
 
-  const { is_fresh, metadata, last_sync, days_old } = freshness;
-
-  // Calculate hours since last update
-  const hoursSinceSync = last_sync
-    ? Math.floor((Date.now() - new Date(last_sync.sync_timestamp).getTime()) / (1000 * 60 * 60))
-    : null;
-
-  const isStale = is_fresh === false;
-  const isWarning = hoursSinceSync && hoursSinceSync > 12;
+  const statusDisplay = statusIcons[freshness.status] || statusIcons['cached'];
+  const sourceDisplay = statusIcons[source] || { icon: '❓', text: 'Unknown' };
 
   return (
-    <div className={`tariff-freshness-banner ${isStale ? 'stale' : isWarning ? 'warning' : 'fresh'}`}>
+    <div className={`tariff-freshness tariff-freshness-${freshness.status}`}>
       <div className="freshness-content">
-        <div className="freshness-icon">
-          {isStale ? (
-            <AlertTriangle size={20} className="warning-icon" />
-          ) : (
-            <CheckCircle size={20} className="success-icon" />
-          )}
+        <div className="freshness-header">
+          <span className="freshness-icon">{sourceDisplay.icon}</span>
+          <span className="freshness-label">
+            {freshness.status === 'fresh' && `✅ Current rates (${freshness.hoursAgo}h old)`}
+            {freshness.status === 'warning' && `⚠️ Rates from ${freshness.daysAgo} days ago`}
+            {freshness.status === 'critical' && `🚨 STALE: Rates from ${freshness.daysAgo}+ days ago`}
+          </span>
         </div>
 
-        <div className="freshness-text">
-          <div className="freshness-header">
-            {isStale ? (
-              <>
-                <strong>⚠️ Tariff rates may be outdated</strong>
-                <p className="freshness-description">
-                  Data last updated {hoursSinceSync} hours ago. Section 301 rates can change with 30-day notice from USTR.
-                </p>
-              </>
-            ) : isWarning ? (
-              <>
-                <strong>ℹ️ Tariff data is {hoursSinceSync} hours old</strong>
-                <p className="freshness-description">
-                  For critical decisions, verify Section 301 rates at USTR.gov
-                </p>
-              </>
-            ) : (
-              <>
-                <strong>✅ Tariff data current</strong>
-                <p className="freshness-description">
-                  Last updated {hoursSinceSync} hours ago from USITC API
-                </p>
-              </>
-            )}
+        <div className="freshness-details">
+          <span className="detail">
+            {freshness.lastUpdate.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+          <span className="detail-source">
+            {source === 'live' && 'Real-time from USITC'}
+            {source === 'ai_detected' && 'Detected from policy announcements'}
+            {source === 'cached' && 'From database cache'}
+          </span>
+        </div>
+
+        {freshness.status !== 'fresh' && (
+          <div className="freshness-warning">
+            ⚠️ For compliance, verify current rates at{' '}
+            <a href="https://ustr.gov" target="_blank" rel="noopener noreferrer">
+              USTR.gov
+            </a>
+            {destination === 'US' && ', '}<a href="https://usitc.gov" target="_blank" rel="noopener noreferrer">
+              USITC.gov
+            </a>
+            {destination === 'US' && ', '}<a href="https://cbp.gov/trade" target="_blank" rel="noopener noreferrer">
+              CBP Trade
+            </a>
           </div>
+        )}
 
-          <div className="freshness-details">
-            <div className="detail-item">
-              <span className="detail-label">Section 301 Rates:</span>
-              <span className={metadata?.find(m => m.key === 'section_301_rates')?.warning_threshold_minutes < 1440 ? 'urgent' : ''}>
-                Updated {getMetadataAge('section_301_rates', metadata)}
-              </span>
-            </div>
-
-            <div className="detail-item">
-              <span className="detail-label">MFN Rates:</span>
-              <span>Updated {getMetadataAge('mfn_rates', metadata)}</span>
-            </div>
-
-            <div className="detail-item">
-              <span className="detail-label">USMCA Rates:</span>
-              <span>Updated {getMetadataAge('usmca_rates', metadata)}</span>
-            </div>
-          </div>
-
-          {isStale && (
+        {freshness.status === 'critical' && (
+          <div className="freshness-action">
             <button
-              className="btn-refresh-rates"
-              onClick={fetchFreshnessStatus}
-              aria-label="Refresh tariff rates"
+              onClick={() => window.location.reload()}
+              className="btn-recalculate"
             >
-              <RefreshCw size={16} />
-              <span>Check for updates</span>
+              🔄 Recalculate with Fresh Data
             </button>
-          )}
-        </div>
-      </div>
-
-      <div className="freshness-footer">
-        <p className="freshness-notice">
-          💡 <strong>User Responsibility:</strong> Your tariff savings calculations are based on rates as of {new Date(last_sync?.sync_timestamp).toLocaleDateString()}.
-          Trade policy changes frequently. Verify Section 301 rates at <a href="https://ustr.gov" target="_blank" rel="noopener noreferrer">USTR.gov</a> before finalizing contracts.
-        </p>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
-        .tariff-freshness-banner {
-          background-color: #f0f4f8;
-          border-left: 4px solid #2196F3;
-          padding: 16px;
-          margin: 16px 0;
-          border-radius: 4px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        .tariff-freshness {
+          padding: 1rem;
+          border-radius: 8px;
+          margin: 1rem 0;
+          border-left: 4px solid;
+          background-color: #f9fafb;
         }
 
-        .tariff-freshness-banner.fresh {
-          border-left-color: #4CAF50;
-          background-color: #f1f8f4;
+        .tariff-freshness-fresh {
+          border-left-color: #10b981;
+          background-color: #ecfdf5;
         }
 
-        .tariff-freshness-banner.warning {
-          border-left-color: #FF9800;
-          background-color: #fff8f0;
+        .tariff-freshness-warning {
+          border-left-color: #f59e0b;
+          background-color: #fffbeb;
         }
 
-        .tariff-freshness-banner.stale {
-          border-left-color: #f44336;
-          background-color: #fdf1f0;
+        .tariff-freshness-critical {
+          border-left-color: #ef4444;
+          background-color: #fef2f2;
+        }
+
+        .tariff-freshness-unknown {
+          border-left-color: #6b7280;
+          background-color: #f3f4f6;
         }
 
         .freshness-content {
           display: flex;
-          gap: 12px;
-          align-items: flex-start;
-        }
-
-        .freshness-icon {
-          flex-shrink: 0;
-          margin-top: 2px;
-        }
-
-        .warning-icon {
-          color: #f44336;
-        }
-
-        .success-icon {
-          color: #4CAF50;
-        }
-
-        .freshness-text {
-          flex-grow: 1;
+          flex-direction: column;
+          gap: 0.5rem;
         }
 
         .freshness-header {
-          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-weight: 500;
+          font-size: 0.95rem;
         }
 
-        .freshness-header strong {
-          display: block;
-          font-size: 14px;
-          margin-bottom: 4px;
-          color: #1a1a1a;
+        .freshness-icon {
+          font-size: 1.25rem;
         }
 
-        .freshness-description {
-          font-size: 12px;
-          color: #666;
-          margin: 0;
+        .freshness-label {
+          color: #1f2937;
         }
 
         .freshness-details {
-          font-size: 12px;
-          margin: 8px 0;
           display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
+          flex-direction: column;
+          gap: 0.25rem;
+          font-size: 0.875rem;
+          color: #6b7280;
         }
 
-        .detail-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
+        .detail {
+          font-family: 'Courier New', monospace;
         }
 
-        .detail-label {
+        .detail-source {
+          font-style: italic;
+        }
+
+        .freshness-warning {
+          font-size: 0.85rem;
+          color: #92400e;
+          padding-top: 0.5rem;
+          border-top: 1px solid rgba(146, 64, 14, 0.2);
+        }
+
+        .freshness-warning a {
+          color: #b45309;
+          text-decoration: underline;
           font-weight: 500;
-          color: #333;
         }
 
-        .detail-item span:last-child {
-          color: #666;
+        .freshness-warning a:hover {
+          color: #92400e;
         }
 
-        .detail-item span.urgent {
-          color: #f44336;
-          font-weight: 500;
+        .freshness-action {
+          padding-top: 0.75rem;
         }
 
-        .btn-refresh-rates {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          margin-top: 8px;
-          padding: 6px 12px;
-          background-color: #2196F3;
+        .btn-recalculate {
+          background-color: #ef4444;
           color: white;
+          padding: 0.5rem 1rem;
           border: none;
           border-radius: 4px;
-          font-size: 12px;
           cursor: pointer;
+          font-size: 0.875rem;
+          font-weight: 500;
           transition: background-color 0.2s;
         }
 
-        .btn-refresh-rates:hover {
-          background-color: #1976D2;
-        }
-
-        .freshness-footer {
-          margin-top: 12px;
-          padding-top: 12px;
-          border-top: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .freshness-notice {
-          font-size: 11px;
-          color: #666;
-          margin: 0;
-          line-height: 1.4;
-        }
-
-        .freshness-notice a {
-          color: #2196F3;
-          text-decoration: none;
-        }
-
-        .freshness-notice a:hover {
-          text-decoration: underline;
-        }
-
-        .tariff-freshness-loading {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #999;
-          font-size: 12px;
-          padding: 8px;
+        .btn-recalculate:hover {
+          background-color: #dc2626;
         }
       `}</style>
     </div>
   );
-}
-
-/**
- * Helper function to format metadata age
- */
-function getMetadataAge(key, metadata) {
-  if (!metadata) return 'unknown';
-
-  const item = metadata.find(m => m.key === key);
-  if (!item || !item.last_updated_timestamp) return 'unknown';
-
-  const ageMs = Date.now() - new Date(item.last_updated_timestamp).getTime();
-  const ageHours = Math.floor(ageMs / (1000 * 60 * 60));
-  const ageDays = Math.floor(ageHours / 24);
-
-  if (ageDays > 0) return `${ageDays}d ago`;
-  if (ageHours > 0) return `${ageHours}h ago`;
-
-  const ageMinutes = Math.floor(ageMs / (1000 * 60));
-  return `${ageMinutes}m ago`;
 }
