@@ -268,7 +268,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#166534'
                                     }}>
-                                      Base: {(baseMfnRate * 100).toFixed(1)}%
+                                      Base: {baseMfnRate.toFixed(1)}%
                                     </span>
                                   )}
                                   {section301 > 0 && (
@@ -304,7 +304,7 @@ export default function USMCAQualification({ results }) {
                                     borderTop: '1px solid #d1d5db',
                                     marginTop: '0.25rem'
                                   }}>
-                                    Total: {(totalAppliedRate * 100).toFixed(1)}%
+                                    Total: {totalAppliedRate.toFixed(1)}%
                                   </span>
                                 </div>
                               )}
@@ -330,7 +330,7 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                          <span>{hasRates ? `${(usmcaRate * 100).toFixed(1)}%` : '—'}</span>
+                          <span>{hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}</span>
                           {/* ✅ ISSUE #2 FIX: Clarify that Section 301 remains despite USMCA qualification */}
                           {section301 > 0 && (
                             <span style={{
@@ -348,7 +348,7 @@ export default function USMCAQualification({ results }) {
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
                           <span style={{ whiteSpace: 'nowrap' }}>
                             {/* ✅ ISSUE #2 FIX: Show savings clearly - ONLY base MFN is eliminated */}
-                            {hasRates ? `${(savingsPercent * 100).toFixed(1)}%` : '—'}
+                            {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
                           </span>
                           {section301 > 0 && (
                             <span style={{
@@ -735,7 +735,7 @@ export default function USMCAQualification({ results }) {
                           {component.description || 'Component ' + (component.index + 1)}
                         </div>
                         <div style={{ fontSize: '0.8125rem', color: '#047857' }}>
-                          {component.value_percentage}% of product • {(component.savingsPercent * 100).toFixed(1)}% tariff savings
+                          {component.value_percentage}% of product • {component.savingsPercent.toFixed(1)}% tariff savings
                         </div>
                       </div>
                       <div style={{ fontWeight: '600', color: '#065f46', fontSize: '1rem', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
