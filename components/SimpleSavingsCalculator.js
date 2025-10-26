@@ -35,7 +35,13 @@ const getVolumeAmount = (volumeRange) => {
     '$10M+': 15000000,
     'Over $25M': 40000000
   };
-  return volumeMap[volumeRange] || 3500000;
+  // NO FALLBACK - volume must be provided
+  const volume = volumeMap[volumeRange];
+  if (!volume) {
+    console.error(`❌ [HARDCODING] Invalid volume range: ${volumeRange} - must match dropdown values`);
+    return null;
+  }
+  return volume;
 };
 
 export default function SimpleSavingsCalculator() {
@@ -148,27 +154,29 @@ export default function SimpleSavingsCalculator() {
           }
         }
         
-        // Emergency fallback - use basic calculation
-        const baseVolume = getVolumeAmount(importVolume) || 3500000;
-        const estimatedRate = 0.08; // Default 8% savings rate
-        const annualSavings = Math.round(baseVolume * estimatedRate);
+        // CRITICAL: NO EMERGENCY FALLBACK - Cannot calculate without AI
+        const baseVolume = getVolumeAmount(importVolume);
+        if (!baseVolume) {
+          console.error('❌ [HARDCODING] Cannot calculate without valid volume');
+          alert('Unable to calculate savings - please try again or contact support');
+          setIsCalculating(false);
+          return;
+        }
 
-        setEstimatedSavings({
-          annual: annualSavings,
-          monthly: Math.round(annualSavings / 12),
-          percentage: estimatedRate * 100
-        });
+        // If AI fails, show error instead of fake data
+        console.error('❌ [HARDCODING] All AI services failed - cannot calculate savings without real tariff data');
+        alert('Our tariff calculation service is temporarily unavailable. Please try again in a few minutes.');
+        setIsCalculating(false);
+        return;
       }
     } catch (error) {
-      console.error('Calculation error:', error);
-      // Fallback for demo
-      setEstimatedSavings({
-        annual: 125000,
-        monthly: 10400,
-        percentage: 3.5
-      });
+      console.error('❌ [HARDCODING] Calculation error:', error);
+      // NO FAKE DATA - Show error to user
+      alert('An error occurred during calculation. Please try again or contact support.');
+      setEstimatedSavings(null);
+    } finally {
+      setIsCalculating(false);
     }
-    setIsCalculating(false);
   };
 
   const formatCurrency = (amount) => {

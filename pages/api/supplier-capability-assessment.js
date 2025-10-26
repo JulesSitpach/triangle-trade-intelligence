@@ -1,5 +1,5 @@
 // API endpoint for supplier capability assessment submissions
-// Saves assessment responses and notifies Jorge's team
+// Saves assessment responses to database and file storage
 
 import { createClient } from '@supabase/supabase-js';
 

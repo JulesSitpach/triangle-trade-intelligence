@@ -21,6 +21,11 @@ export default function PersonalizedAlerts({ results }) {
   const loadPersonalizedAlerts = async () => {
     setLoadingAlerts(true);
     try {
+      // ✅ Validate destination_country BEFORE API call (fail loudly)
+      if (!results.company?.destination_country) {
+        throw new Error('destination_country is required for personalized alerts. Expected: US, CA, or MX');
+      }
+
       const response = await fetch('/api/generate-personalized-alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -28,7 +33,7 @@ export default function PersonalizedAlerts({ results }) {
         body: JSON.stringify({
           user_profile: {
             industry_sector: results.company?.industry_sector || 'General Manufacturing',
-            destination_country: results.company?.destination_country || 'US',
+            destination_country: results.company.destination_country,  // ✅ No fallback - validated above
             supplier_country: results.company?.supplier_country,
             component_origins: results.usmca?.component_breakdown || []
           }

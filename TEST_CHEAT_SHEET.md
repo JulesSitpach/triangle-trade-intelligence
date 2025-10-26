@@ -56,17 +56,24 @@ Test scenarios that deliver REAL business value by validating:
   company_name: "TechFlow Electronics Corp",
   company_country: "US",                    // CRITICAL: Required for certificate generation
   company_address: "1847 Technology Blvd, Austin TX 78759",
-  company_phone: "(512) 555-0147",
-  company_contact: "Maria Rodriguez",
-  company_email: "maria.rodriguez@techflow.com",
+  tax_id: "12-3456789",                     // TAX ID / EIN (required - passed to API)
+  contact_person: "Maria Rodriguez",
+  contact_phone: "(512) 555-0147",
+  contact_email: "maria.rodriguez@techflow.com",
 
   // DESTINATION & BUSINESS CONTEXT
   destination_country: "US",                // CRITICAL: Must be US, CA, or MX
   supplier_country: "CN",                   // Primary supplier for analysis
   industry_sector: "Electronics",           // Determines RVC threshold (65% for Electronics)
   business_type: "Manufacturer",            // Determines labor credit calculation
-  manufacturing_location: "MX",             // CRITICAL: Must be specific country, not "Does Not Apply"
   trade_volume: 8500000,                    // Annual trade volume in USD
+
+  // PRODUCT DETAILS (Step 2)
+  product_description: "Smartphone assembly with components including microprocessor, power supply, housing, and PCB",
+  manufacturing_location: "MX",             // CRITICAL: Must be specific country (US/CA/MX) for USMCA, or "DOES_NOT_APPLY"
+  substantial_transformation: true,         // CONDITIONAL: Only if manufacturing location is USMCA country
+                                            // Check if manufacturing involves substantial transformation beyond simple assembly
+                                            // (welding, forming, heat treatment, etc.)
 
   // COMPONENT DETAILS (Step 2) - Array format
   component_origins: [

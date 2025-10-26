@@ -118,6 +118,11 @@ export default function CrisisCalculatorResults({
     try {
       // ✅ NO HARDCODES: Use validated user data
       // Note: At this point, formData.hs_code is guaranteed to exist (validated in calculateCrisisImpact)
+      // Also: destination_country was validated in calculateCrisisImpact (though not explicitly checked, it's required in workflow)
+      if (!formData.destination_country) {
+        throw new Error('destination_country is required for alerts system. Expected: US, CA, or MX');
+      }
+
       const userWorkflowData = {
         company: {
           name: formData.company_name,
@@ -128,7 +133,7 @@ export default function CrisisCalculatorResults({
           hs_code: formData.hs_code  // ✅ No fallback - already validated
         },
         supplier_country: formData.supplier_country || formData.origin_country,  // ✅ Actual origin
-        destination_country: formData.destination_country || 'US',
+        destination_country: formData.destination_country,  // ✅ No fallback - validated above
         workflow_path: 'crisis-calculator',
         crisis_data: crisisResult,
         timestamp: new Date().toISOString()

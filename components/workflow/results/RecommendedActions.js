@@ -36,6 +36,11 @@ export default function RecommendedActions({ results }) {
   const loadExecutiveTradeAlert = async () => {
     setLoadingAlert(true);
     try {
+      // ✅ Validate destination_country BEFORE API call (fail loudly)
+      if (!results.company?.destination_country) {
+        throw new Error('destination_country is required for executive trade alert. Expected: US, CA, or MX');
+      }
+
       const response = await fetch('/api/executive-trade-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,7 +48,7 @@ export default function RecommendedActions({ results }) {
         body: JSON.stringify({
           user_profile: {
             industry_sector: results.company?.industry_sector || 'General Manufacturing',
-            destination_country: results.company?.destination_country || 'US',
+            destination_country: results.company.destination_country,  // ✅ No fallback - validated above
             supplier_country: results.company?.supplier_country
           },
           workflow_intelligence: {
