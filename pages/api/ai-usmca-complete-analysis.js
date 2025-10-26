@@ -54,6 +54,80 @@ const supabase = createClient(
 // - parseTradeVolume()
 // These are now imported from lib/validation/form-validation.js (see imports above)
 
+/**
+ * Build detailed qualification summary from pre-calculated financial data
+ * Hybrid approach: AI provides qualification, backend synthesizes detailed narrative
+ * @returns {string} Executive summary for certificate and dashboard
+ */
+function buildDetailedSummary(qualified, rvc, threshold, savings, formData) {
+  if (!qualified) {
+    const gap = Math.max(0, threshold - rvc);
+    return `Your product does not currently qualify for USMCA preferential treatment. ` +
+           `Current RVC is ${rvc}% but the threshold is ${threshold}% (${gap}% short). ` +
+           `To qualify, increase North American content through supplier diversification, ` +
+           `labor-value add in manufacturing, or component redesign.`;
+  }
+
+  // Qualified - build positive summary with financial impact
+  const buffer = Math.round(rvc - threshold);
+  const monthlySavings = savings?.monthly_savings || 0;
+  const yearlySavings = savings?.annual_savings || 0;
+
+  let summary = `✓ Your product qualifies for USMCA preferential treatment. ` +
+                `RVC is ${rvc}% (threshold ${threshold}%, ${buffer}% buffer). `;
+
+  if (yearlySavings > 0) {
+    const monthlyStr = monthlySavings > 0 ? `$${Math.round(monthlySavings)}/month or ` : '';
+    summary += `Annual tariff savings: ${monthlyStr}$${Math.round(yearlySavings)}/year. `;
+  }
+
+  // Add Section 301 warning if applicable
+  if (formData.component_origins?.some(c => c.origin_country === 'CN')) {
+    summary += `⚠️ Chinese-origin components may still be subject to Section 301 tariffs ` +
+               `even with USMCA qualification. Consider Mexico sourcing to eliminate this policy risk.`;
+  }
+
+  return summary;
+}
+
+/**
+ * Build strategic insights for detailed analysis
+ * Synthesized from pre-calculated data
+ */
+function buildStrategicInsights(result, formData) {
+  const insights = [];
+
+  if (result.usmca.qualified) {
+    insights.push(`Qualification unlocks ${result.usmca.preference_criterion || 'B'} USMCA preference.`);
+
+    // Nearshoring insight
+    if (formData.component_origins?.some(c => c.origin_country === 'CN')) {
+      insights.push(
+        'China-origin components expose you to policy risk. ' +
+        'Mexico sourcing at +2-3% cost premium eliminates Section 301 tariffs ' +
+        'and increases RVC buffer. Typical payback: 3-6 months.'
+      );
+    }
+
+    // RVC buffer insight
+    const buffer = Math.round(result.usmca.north_american_content - result.usmca.threshold_applied);
+    if (buffer > 5) {
+      insights.push(`Strong RVC position (${buffer}% buffer). Stable qualification unless supply chain changes.`);
+    } else if (buffer > 0) {
+      insights.push(`Narrow RVC buffer (${buffer}%). Monitor supply chain changes closely.`);
+    }
+  } else {
+    const gap = Math.round(result.usmca.threshold_applied - result.usmca.north_american_content);
+    insights.push(
+      `Qualification gap: ${gap}%. Options: (1) increase Mexico/US sourcing, ` +
+      `(2) add manufacturing value-add in USMCA territory, ` +
+      `(3) redesign product for lower tariff classification.`
+    );
+  }
+
+  return insights.join('\n\n');
+}
+
 export default protectedApiHandler({
   POST: async (req, res) => {
     const startTime = Date.now();
@@ -896,6 +970,29 @@ export default protectedApiHandler({
       business_type: formData.business_type,
       product_description: formData.product_description,
       manufacturing_location: formData.manufacturing_location
+    };
+
+    // ========== HYBRID APPROACH (Oct 26, 2025) ==========
+    // ✅ AI provides: qualification (yes/no), RVC %, preference criterion (fast: 10-15s)
+    // ✅ Backend synthesizes: detailed summary from pre-calculated financial data (no AI call)
+    // Result: Fast response + full analysis, no token truncation
+
+    // Build detailed summary from pre-calculated financial data
+    const detailedReason = buildDetailedSummary(
+      result.usmca.qualified,
+      result.usmca.north_american_content,
+      result.usmca.threshold_applied,
+      result.savings,
+      formData
+    );
+
+    // Enhance AI response with synthesized summary
+    result.usmca.reason = detailedReason;
+    result.detailed_analysis = {
+      threshold_research: `RVC threshold for ${formData.industry_sector}: ${result.usmca.threshold_applied}%`,
+      calculation_breakdown: `Total North American Content: ${result.usmca.north_american_content}% (includes labor credit + component origins)`,
+      qualification_reasoning: detailedReason,
+      strategic_insights: buildStrategicInsights(result, formData)
     };
 
     logInfo('AI-powered USMCA analysis completed', {
