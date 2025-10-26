@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import TriangleLayout from '../components/TriangleLayout';
 import AuthorizationStep from '../components/workflow/AuthorizationStep';
+import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
 import { generateUSMCACertificatePDF } from '../lib/utils/usmca-certificate-pdf-generator.js';
@@ -20,6 +21,8 @@ export default function USMCACertificateCompletion() {
   const [generatedPDF, setGeneratedPDF] = useState(null);
   const [userTier, setUserTier] = useState('Trial'); // Default to Trial for safety
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false); // Track whether to show preview or authorization
+  const [previewEditedData, setPreviewEditedData] = useState(null); // Store edits from preview
   const [certificateData, setCertificateData] = useState({
     company_info: {},
     product_details: {},
@@ -120,6 +123,40 @@ export default function USMCACertificateCompletion() {
   };
 
   const handlePreviewCertificate = async (authData) => {
+    console.log('Opening certificate preview for review and editing...');
+
+    // Store authorization data for use in preview
+    setCertificateData(prev => ({
+      ...prev,
+      authorization: authData
+    }));
+
+    // Show the editable preview step
+    setShowPreview(true);
+  };
+
+  const handlePreviewDownload = async (editedPreviewData) => {
+    // Update workflow data with any edits from preview
+    if (editedPreviewData) {
+      setWorkflowData(prev => ({
+        ...prev,
+        usmca: {
+          ...prev?.usmca,
+          north_american_content: editedPreviewData.rvc,
+          regional_content: editedPreviewData.rvc,
+          preference_criterion: editedPreviewData.preference_criterion
+        },
+        components: editedPreviewData.components
+      }));
+      setPreviewEditedData(editedPreviewData);
+    }
+
+    // Now generate the certificate with potentially updated data
+    await generateAndDownloadCertificate();
+  };
+
+  const generateAndDownloadCertificate = async () => {
+    const authData = certificateData.authorization || {};
     const preview = {
       ...certificateData,
       authorization: authData,
@@ -384,16 +421,21 @@ export default function USMCACertificateCompletion() {
 
           <div className="form-section">
             <div className="dashboard-header">
-              <h1 className="dashboard-title">✍️ USMCA Certificate Authorization</h1>
+              <h1 className="dashboard-title">
+                {showPreview ? '📋 Review Your Certificate' : '✍️ USMCA Certificate Authorization'}
+              </h1>
               <p className="text-body">
-                Complete authorization details and generate your final certificate
+                {showPreview
+                  ? 'Review and edit all certificate details before downloading'
+                  : 'Complete authorization details to proceed with certificate generation'
+                }
               </p>
             </div>
           </div>
 
           <div>
-            {/* Authorization & Certificate Generation */}
-
+            {/* STEP 1: Authorization Form */}
+            {!showPreview && (
               <AuthorizationStep
                 formData={certificateData.authorization || {}}
                 updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
@@ -406,6 +448,18 @@ export default function USMCACertificateCompletion() {
                 generatedPDF={generatedPDF}
                 userTier={userTier}
               />
+            )}
+
+            {/* STEP 2: Editable Certificate Preview */}
+            {showPreview && workflowData && (
+              <EditableCertificatePreview
+                certificateData={certificateData}
+                workflowData={workflowData}
+                onEdit={(editedData) => setPreviewEditedData(editedData)}
+                onDownload={() => handlePreviewDownload(previewEditedData)}
+                onBack={() => setShowPreview(false)}
+              />
+            )}
           </div>
 
           {/* Upgrade Modal for Trial Users */}
