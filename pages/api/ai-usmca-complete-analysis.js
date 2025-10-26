@@ -12,6 +12,7 @@ import { normalizeComponent, logComponentValidation, validateAPIResponse } from 
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit } from '../../lib/services/usage-tracking-service.js';
 import { transformAPIToFrontend } from '../../lib/contracts/component-transformer.js';
+import COMPONENT_DATA_CONTRACT from '../../lib/contracts/COMPONENT_DATA_CONTRACT.js';
 
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
@@ -579,13 +580,44 @@ export default protectedApiHandler({
     // So we must update these to use the ENRICHED data, not the raw user input
 
     // ✅ CRITICAL FIX (Oct 26): Transform tariff rates from percentages to decimals
-    // AI returns: mfn_rate: 25 (percentage)
-    // Frontend expects: mfnRate: 0.25 (decimal, multiplied by 100 for display)
-    // Without transformation: 25 × 100 = 2500% ❌
-    // With transformation: 0.25 × 100 = 25% ✅
+    // result.usmca.component_breakdown from AI contains PERCENTAGES (25 for 25%)
+    // Frontend expects DECIMALS (0.25 for 25%, multiplied by 100 for display)
+    //
+    // Transformation path:
+    // 1. AI format (percentage): mfn_rate: 25
+    // 2. Apply database_to_api divide by 100: mfn_rate: 0.25
+    // 3. Apply api_to_frontend (no change): mfnRate: 0.25
+    // 4. Frontend multiply by 100: 0.25 × 100 = 25% ✅
+
     const transformedComponents = result.usmca.component_breakdown.map((component) => {
       try {
-        return transformAPIToFrontend(component);
+        // Step 1: AI format has percentage values (25, 0, 1.5, etc)
+        // We need to manually apply the database_to_api transformations
+        const apiFormatComponent = {};
+
+        Object.entries(COMPONENT_DATA_CONTRACT.fields).forEach(([dbFieldName, fieldDef]) => {
+          const aiValue = component[dbFieldName];
+
+          if (aiValue === undefined) return;
+
+          try {
+            // Apply database_to_api transformation (AI sends as percentages, convert to decimals)
+            const apiValue = COMPONENT_DATA_CONTRACT.transform(
+              aiValue,
+              'database',  // AI sends percentages like database stores them
+              'api',       // Transform to API format (decimals 0-1)
+              dbFieldName
+            );
+
+            apiFormatComponent[dbFieldName] = apiValue;
+          } catch (err) {
+            // Keep original if transformation fails
+            apiFormatComponent[dbFieldName] = aiValue;
+          }
+        });
+
+        // Step 2: Now transform from API format to frontend format (field renaming + type preservation)
+        return transformAPIToFrontend(apiFormatComponent);
       } catch (err) {
         logError('Component transformation failed', {
           component: component?.description || 'Unknown',
