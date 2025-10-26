@@ -91,65 +91,84 @@ export default protectedApiHandler({
     }
 
     // ✅ CRITICAL HELPER: Enrich components with tariff rates from AI response
-    // Extracts rates from detailed_analysis.savings_analysis and applies to each component
+    // Extracts component-specific rates from detailed_analysis and applies to each component
     function enrichComponentsWithTariffRates(components, aiAnalysis) {
       if (!components || !Array.isArray(components)) return components;
 
-      // Extract per-component tariff data from AI response
       const savingsData = aiAnalysis?.detailed_analysis?.savings_analysis || {};
+      const calcDetail = savingsData.calculation_detail || '';
 
-      // Parse component-level tariff rates if present in calculation_detail
-      let componentRates = {};
-      if (savingsData.calculation_detail && typeof savingsData.calculation_detail === 'string') {
-        // Extract rates for each component from the AI calculation text
-        const mfnMatch = savingsData.calculation_detail.match(/MFN duty rate.*?: ([\d.]+)%/);
-        const section301Match = savingsData.calculation_detail.match(/Section 301 rate.*?: ([\d.]+)%/);
-
-        if (mfnMatch?.[1]) {
-          componentRates.mfn_default = parseFloat(mfnMatch[1]);
-        }
-        if (section301Match?.[1]) {
-          componentRates.section301_default = parseFloat(section301Match[1]);
-        }
-      }
-
-      // Enrich each component with tariff data
-      return components.map((comp, idx) => {
-        // If component already has rates, keep them
-        if (comp.mfn_rate !== undefined && comp.mfn_rate !== null && comp.mfn_rate !== '') {
-          return comp;
-        }
-
-        // Otherwise, apply default rates extracted from AI
+      // Extract component-specific rates from calculation_detail
+      // Format: "1. Component Name...\n - MFN rate: X%\n - Section 301: Y%"
+      function extractComponentRate(componentName, hsCode, originCountry) {
         let mfnRate = 0;
         let usmcaRate = 0;
         let section301 = 0;
 
-        // China-origin components get Section 301
-        if ((comp.origin_country === 'CN' || comp.origin_country === 'China') &&
-            formData.destination_country === 'US') {
-          section301 = componentRates.section301_default || 25;  // Default 25% for Section 301
-          mfnRate = componentRates.mfn_default || 2.4;  // Default MFN if not specified
-        } else if (comp.origin_country === 'MX' || comp.origin_country === 'Mexico' ||
-                   comp.origin_country === 'CA' || comp.origin_country === 'Canada' ||
-                   comp.origin_country === 'US' || comp.origin_country === 'United States') {
-          // USMCA countries typically have 0 MFN for trade agreement products
-          mfnRate = componentRates.mfn_default || 0;
-          usmcaRate = 0;  // Preferential rate
-        } else {
-          // Non-USMCA, non-Section 301
-          mfnRate = componentRates.mfn_default || 0;
+        // Parse all numbered components to build a rate map
+        const componentBlocks = calcDetail.split(/(?=\d+\.\s\*?\*?)/);
+
+        for (const block of componentBlocks) {
+          // Check if this block contains our component
+          const blockContainsComponent = componentName && block.includes(componentName);
+          const blockContainsHSCode = hsCode && block.includes(hsCode);
+
+          if (blockContainsComponent || blockContainsHSCode) {
+            // Extract MFN rate from this block
+            const mfnMatch = block.match(/MFN rate[:\s]+([0-9.]+)%/i);
+            if (mfnMatch?.[1]) {
+              mfnRate = parseFloat(mfnMatch[1]);
+            }
+
+            // Extract USMCA rate from this block
+            const usmcaMatch = block.match(/USMCA rate[:\s]+([0-9.]+)%/i);
+            if (usmcaMatch?.[1]) {
+              usmcaRate = parseFloat(usmcaMatch[1]);
+            }
+
+            // Extract Section 301 from this block
+            const s301Match = block.match(/Section 301[:\s]+([0-9.]+)%/i);
+            if (s301Match?.[1]) {
+              section301 = parseFloat(s301Match[1]);
+            }
+
+            // Found component, stop searching
+            break;
+          }
         }
 
-        const totalRate = mfnRate + section301;
-        const savingsPercent = mfnRate > 0 ? (((mfnRate - usmcaRate) / mfnRate) * 100) : 0;
+        // Fallback: If rates not found, use origin-based defaults
+        if (mfnRate === 0 && originCountry === 'CN') {
+          // China: 2.4% MFN + 25% Section 301
+          mfnRate = 2.4;
+          section301 = 25;
+        } else if (mfnRate === 0 && ['MX', 'Mexico', 'CA', 'Canada', 'US'].includes(originCountry)) {
+          // USMCA countries: 0% MFN
+          mfnRate = 0;
+          usmcaRate = 0;
+        }
+
+        return { mfnRate, usmcaRate, section301 };
+      }
+
+      // Enrich each component
+      return components.map((comp) => {
+        // If component already has rates, keep them
+        if (comp.mfn_rate !== undefined && comp.mfn_rate !== null && comp.mfn_rate !== 0 && comp.mfn_rate !== '') {
+          return comp;
+        }
+
+        const rates = extractComponentRate(comp.description, comp.hs_code, comp.origin_country);
+
+        const totalRate = rates.mfnRate + rates.section301;
+        const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
 
         return {
           ...comp,
-          mfn_rate: mfnRate,
-          base_mfn_rate: mfnRate,
-          usmca_rate: usmcaRate,
-          section_301: section301,
+          mfn_rate: rates.mfnRate,
+          base_mfn_rate: rates.mfnRate,
+          usmca_rate: rates.usmcaRate,
+          section_301: rates.section301,
           section_232: 0,
           total_rate: totalRate,
           savings_percentage: savingsPercent,
