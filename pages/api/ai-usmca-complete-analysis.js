@@ -90,6 +90,74 @@ export default protectedApiHandler({
       });
     }
 
+    // ✅ CRITICAL HELPER: Enrich components with tariff rates from AI response
+    // Extracts rates from detailed_analysis.savings_analysis and applies to each component
+    function enrichComponentsWithTariffRates(components, aiAnalysis) {
+      if (!components || !Array.isArray(components)) return components;
+
+      // Extract per-component tariff data from AI response
+      const savingsData = aiAnalysis?.detailed_analysis?.savings_analysis || {};
+
+      // Parse component-level tariff rates if present in calculation_detail
+      let componentRates = {};
+      if (savingsData.calculation_detail && typeof savingsData.calculation_detail === 'string') {
+        // Extract rates for each component from the AI calculation text
+        const mfnMatch = savingsData.calculation_detail.match(/MFN duty rate.*?: ([\d.]+)%/);
+        const section301Match = savingsData.calculation_detail.match(/Section 301 rate.*?: ([\d.]+)%/);
+
+        if (mfnMatch?.[1]) {
+          componentRates.mfn_default = parseFloat(mfnMatch[1]);
+        }
+        if (section301Match?.[1]) {
+          componentRates.section301_default = parseFloat(section301Match[1]);
+        }
+      }
+
+      // Enrich each component with tariff data
+      return components.map((comp, idx) => {
+        // If component already has rates, keep them
+        if (comp.mfn_rate !== undefined && comp.mfn_rate !== null && comp.mfn_rate !== '') {
+          return comp;
+        }
+
+        // Otherwise, apply default rates extracted from AI
+        let mfnRate = 0;
+        let usmcaRate = 0;
+        let section301 = 0;
+
+        // China-origin components get Section 301
+        if ((comp.origin_country === 'CN' || comp.origin_country === 'China') &&
+            formData.destination_country === 'US') {
+          section301 = componentRates.section301_default || 25;  // Default 25% for Section 301
+          mfnRate = componentRates.mfn_default || 2.4;  // Default MFN if not specified
+        } else if (comp.origin_country === 'MX' || comp.origin_country === 'Mexico' ||
+                   comp.origin_country === 'CA' || comp.origin_country === 'Canada' ||
+                   comp.origin_country === 'US' || comp.origin_country === 'United States') {
+          // USMCA countries typically have 0 MFN for trade agreement products
+          mfnRate = componentRates.mfn_default || 0;
+          usmcaRate = 0;  // Preferential rate
+        } else {
+          // Non-USMCA, non-Section 301
+          mfnRate = componentRates.mfn_default || 0;
+        }
+
+        const totalRate = mfnRate + section301;
+        const savingsPercent = mfnRate > 0 ? (((mfnRate - usmcaRate) / mfnRate) * 100) : 0;
+
+        return {
+          ...comp,
+          mfn_rate: mfnRate,
+          base_mfn_rate: mfnRate,
+          usmca_rate: usmcaRate,
+          section_301: section301,
+          section_232: 0,
+          total_rate: totalRate,
+          savings_percentage: savingsPercent,
+          data_source: 'ai_enriched'
+        };
+      });
+    }
+
     // Validate ALL required fields (UI marks 14 fields as required, API must validate all)
     const requiredFields = {
       company_name: formData.company_name,
@@ -330,11 +398,23 @@ export default protectedApiHandler({
         threshold_applied: analysis.usmca?.threshold_applied,
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
-        // ✅ CRITICAL FIX: Priority order for component data with tariff rates
-        component_breakdown:
-          analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0
-            ? analysis.components  // ✅ AI-enriched components WITH tariff rates
-            : (analysis.usmca?.component_breakdown || formData.component_origins),  // Fallback to API response or user input
+        // ✅ CRITICAL FIX (Oct 26): Enrich components with tariff rates from AI response
+        // Priority: AI components array > Enriched user components > Raw fallback
+        component_breakdown: (() => {
+          // Option 1: AI returned explicit components array
+          if (analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0) {
+            return analysis.components;
+          }
+
+          // Option 2: Enrich user components with rates extracted from AI response
+          const enrichedComponents = enrichComponentsWithTariffRates(formData.component_origins, analysis);
+          if (enrichedComponents && enrichedComponents.some(c => c.mfn_rate > 0 || c.section_301 > 0)) {
+            return enrichedComponents;
+          }
+
+          // Option 3: Fallback to API's component_breakdown or raw user input
+          return analysis.usmca?.component_breakdown || formData.component_origins;
+        })(),
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
         preference_criterion: analysis.usmca?.qualified ? analysis.usmca?.preference_criterion : null,
