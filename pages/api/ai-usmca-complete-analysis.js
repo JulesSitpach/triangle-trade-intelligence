@@ -340,6 +340,16 @@ export default protectedApiHandler({
 
     // ✅ ROOT CAUSE FIX #3: Validate Preference Criterion Before Building Response
     // CRITICAL: If AI says product is qualified, it MUST have determined the preference criterion
+
+    // 🔍 DEBUG: Log what AI returned for USMCA qualification
+    console.log('🔍 [AI RESPONSE] USMCA Qualification Debug:', {
+      qualified: analysis.usmca?.qualified,
+      preference_criterion: analysis.usmca?.preference_criterion,
+      north_american_content: analysis.usmca?.north_american_content,
+      threshold_applied: analysis.usmca?.threshold_applied,
+      all_usmca_keys: Object.keys(analysis.usmca || {})
+    });
+
     if (analysis.usmca?.qualified === true) {
       if (!analysis.usmca?.preference_criterion) {
         return res.status(400).json({
