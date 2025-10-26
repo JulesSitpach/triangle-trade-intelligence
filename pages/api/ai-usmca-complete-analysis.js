@@ -8,7 +8,7 @@
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
-import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
+import { normalizeComponent, logComponentValidation, validateAPIResponse } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit } from '../../lib/services/usage-tracking-service.js';
 
