@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import '../styles/progress-display.css';
+import './styles/progress-display.css';
 
 export default function ProgressDisplay({ progress }) {
   const { message, percentage, estimatedTimeRemaining, isComplete } = progress;
