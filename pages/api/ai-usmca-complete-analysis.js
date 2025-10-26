@@ -251,15 +251,85 @@ export default protectedApiHandler({
       });
     }
 
-    // ========== PERFORMANCE OPTIMIZATION (Oct 26, 2025) ==========
-    // REVERTED: Two sequential AI calls (tariff lookup + USMCA analysis) took ~105 seconds
-    // NEW: Single AI call where Claude determines both qualification AND tariff rates
-    // The AI prompt already instructs: "Determine the ACTUAL Section 301 rate from the USTR tariff list"
-    // Result: ~50% faster (from 105s → ~55s)
-    // See: qualification-engine.js line 118 - AI has full instructions to look up rates
+    // ========== CRITICAL FIX (Oct 26, 2025) ==========
+    // INTEGRATE REAL-TIME TARIFF MONITORING WITH API
+    // The RSS feeds update tariff_rates_cache every 2 hours with fresh rates
+    // We now FETCH those fresh rates from the database BEFORE calling AI
+    // This ensures AI gets CURRENT rates instead of guessing from training data
+    //
+    // Flow:
+    // 1. RSS polling → Database update (fresh tariff rates)
+    // 2. API fetches fresh rates for each component
+    // 3. AI uses real 2025 rates in analysis (not stale training data)
+    // 4. Users get accurate certificate with current tariff impacts
 
-    // Build prompt WITHOUT pre-fetched rates (AI will determine them)
-    const prompt = await buildComprehensiveUSMCAPrompt(formData, {} /* empty rates - let AI look them up */);
+    // ========== FETCH FRESH TARIFF RATES FROM DATABASE ==========
+    async function enrichComponentsWithFreshRates(components, destinationCountry) {
+      const enriched = [];
+
+      for (const component of components) {
+        // Skip if we don't have HS code
+        if (!component.hs_code) {
+          enriched.push(component);
+          continue;
+        }
+
+        try {
+          // Query the RSS-updated tariff_rates_cache for this HS code
+          const { data: rateData, error } = await supabase
+            .from('tariff_rates_cache')
+            .select('mfn_rate, base_mfn_rate, section_301, section_232, usmca_rate, last_updated, data_source')
+            .eq('hs_code', component.hs_code)
+            .eq('destination_country', destinationCountry)
+            .single();
+
+          if (!error && rateData) {
+            // ✅ Found fresh rates in database (updated by RSS polling)
+            enriched.push({
+              ...component,
+              mfn_rate: rateData.mfn_rate || 0,
+              base_mfn_rate: rateData.base_mfn_rate || rateData.mfn_rate || 0,
+              section_301: rateData.section_301 || 0,
+              section_232: rateData.section_232 || 0,
+              usmca_rate: rateData.usmca_rate || 0,
+              tariff_last_updated: rateData.last_updated,
+              data_source: rateData.data_source || 'database_cache'
+            });
+
+            console.log(`✅ [TARIFF-INTEGRATION] Fresh rates loaded for ${component.hs_code}: MFN ${rateData.mfn_rate}%, Section 301 ${rateData.section_301}% (updated ${rateData.last_updated})`);
+          } else {
+            // No rates in database, use empty (AI will estimate)
+            enriched.push(component);
+            console.log(`⚠️ [TARIFF-INTEGRATION] No fresh rates found for ${component.hs_code} - AI will estimate`);
+          }
+        } catch (dbError) {
+          console.error(`❌ [TARIFF-INTEGRATION] Database lookup error for ${component.hs_code}:`, dbError.message);
+          enriched.push(component); // Continue with component as-is
+        }
+      }
+
+      return enriched;
+    }
+
+    // Enrich components with fresh tariff rates from RSS-updated database
+    const enrichedComponents = await enrichComponentsWithFreshRates(
+      formData.component_origins,
+      formData.destination_country
+    );
+
+    // Pass enriched components with real rates to AI prompt
+    const prompt = await buildComprehensiveUSMCAPrompt(
+      { ...formData, component_origins: enrichedComponents },
+      enrichedComponents.reduce((acc, comp) => {
+        acc[comp.hs_code] = {
+          mfn_rate: comp.mfn_rate,
+          section_301: comp.section_301,
+          section_232: comp.section_232,
+          usmca_rate: comp.usmca_rate
+        };
+        return acc;
+      }, {})
+    );
 
     // Call OpenRouter API
     const openrouterStartTime = Date.now();
