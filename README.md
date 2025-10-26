@@ -27,15 +27,18 @@ open http://localhost:3001
 **Processing**: AI-powered HS code classification + tariff rate lookup
 **Output**: USMCA eligibility assessment + tariff savings calculation
 
-### Three-Step Workflow
+### Four-Step Workflow
 1. **Company Information** - Business profile and destination market
 2. **Component Details** - Product components with AI classification
-3. **Results** - USMCA qualification status and tariff analysis
+3. **Results & Alerts** - USMCA qualification status, tariff analysis, policy alerts
+4. **Certificate Preview & Download** - Official USMCA form with editable fields + responsibility confirmation
 
 ### Key Features
 - 🤖 AI-powered HS code classification (OpenRouter + Anthropic fallback)
 - 📊 Real-time tariff rate lookup with policy adjustments
 - 💰 Automatic savings calculation (MFN vs USMCA rates)
+- 📝 **NEW:** Editable official USMCA certificate preview (light blue input boxes)
+- ⚠️ **NEW:** Clear user responsibility messaging with confirmation checkboxes
 - 🔐 Secure authentication with JWT cookies
 - 📱 Responsive design (mobile, tablet, desktop)
 
@@ -74,18 +77,21 @@ Results Displayed
 ```
 pages/
   ├── index.js                    # Homepage
-  ├── usmca-workflow.js           # Main 3-step workflow
+  ├── usmca-workflow.js           # Main 4-step workflow
+  ├── usmca-certificate-completion.js  # Authorization + editable preview
   ├── pricing.js                  # Subscription plans
   ├── dashboard.js                # User dashboard
   └── api/
       ├── auth/                   # Login/register/logout
       ├── agents/classification   # HS code classification
-      └── ai-usmca-complete-analysis.js  # Main tariff endpoint
+      ├── ai-usmca-complete-analysis.js  # Main tariff endpoint
+      └── generate-certificate.js # Certificate generation
 
 components/workflow/
   ├── CompanyInformationStep.js
   ├── ComponentOriginsStepEnhanced.js
-  └── WorkflowResults.js
+  ├── WorkflowResults.js
+  └── EditableCertificatePreview.js  # Official USMCA form preview
 
 lib/
   ├── agents/classification-agent.js
