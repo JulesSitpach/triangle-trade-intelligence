@@ -429,7 +429,9 @@ export default protectedApiHandler({
 
           // Option 2: Enrich user components with rates extracted from AI response
           const enrichedComponents = enrichComponentsWithTariffRates(formData.component_origins, analysis);
-          if (enrichedComponents && enrichedComponents.some(c => c.mfn_rate > 0 || c.section_301 > 0)) {
+          // ✅ FIX: Check if enrichment happened (data_source field), not if rates > 0
+          // Mexico/Canada components have 0% mfn_rate but are still enriched!
+          if (enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched')) {
             return enrichedComponents;
           }
 
