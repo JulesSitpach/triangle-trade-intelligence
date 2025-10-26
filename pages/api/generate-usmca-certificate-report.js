@@ -19,10 +19,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing required data' });
     }
 
-    // Stage 3 contains Cristina's expert inputs (certificate_validation, compliance_risk_assessment, audit_defense_strategy)
-    // Use stage3Data if provided, fallback to stage2Data for backward compatibility
-    const cristinaExpertInputs = stage3Data || stage2Data || {};
-
     // Fetch service request to get subscriber data
     const { data: serviceRequest, error: fetchError } = await supabase
       .from('service_requests')
@@ -212,11 +208,6 @@ ${Array.isArray(subscriberData.vulnerability_factors) && subscriberData.vulnerab
   ? subscriberData.vulnerability_factors.map(v => `- ${v}`).join('\n')
   : '- High China sourcing creates tariff exposure\n- Limited USMCA-compliant supplier options\n- Trade agreement uncertainty'}
 
-CRISTINA'S PROFESSIONAL CERTIFICATE VALIDATION:
-Certificate Accuracy: ${cristinaExpertInputs.certificate_validation}
-Compliance Risk Assessment: ${cristinaExpertInputs.compliance_risk_assessment}
-Audit Defense Strategy: ${cristinaExpertInputs.audit_defense_strategy}
-
 YOUR TASK:
 Write a professional USMCA Certificate Report that demonstrates your 17 years of ${industryContext} logistics expertise. Be SPECIFIC and ACTIONABLE for THIS specific ${subscriberData.business_type || 'business'}.
 
@@ -268,24 +259,7 @@ ${currentStatus === 'QUALIFIED'
 - Certificate ROI: $250 certificate to unlock $${usmcaSavings.toLocaleString()}/year savings = ${Math.round(usmcaSavings / 250)}x ROI
 - Break-even: Certificate pays for itself in ${Math.ceil((250 / usmcaSavings) * 365)} days`}
 
-## 4. TEAM'S PROFESSIONAL ASSESSMENT
-
-CRITICAL: This section contains the team's professional assessment based on combined expertise. Use EXACT words from the validation data verbatim. DO NOT paraphrase or expand.
-
-**USMCA Qualification Assessment:**
-"${cristinaExpertInputs.certificate_validation}"
-
-**Compliance Risk Evaluation:**
-"${cristinaExpertInputs.compliance_risk_assessment}"
-
-**Strategic Implementation Guidance:**
-"${cristinaExpertInputs.audit_defense_strategy}"
-
-Triangle Trade Intelligence Team
-Trade Compliance Expert - Licensed Specialist (17 years Motorola, Arris, Tekmovil)
-Business Development Specialist - Mexico Trade Expert (7 years business ownership, Mexico expertise)
-
-## 5. ACTION PLAN (NEXT 90 DAYS)
+## 4. ACTION PLAN (NEXT 90 DAYS)
 Based on the financial analysis above and the team's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year
 
 TONE: Professional but direct. Use actual numbers from their data. Be specific about which components to shift from China to Mexico. Show the team's combined expertise (17 years enterprise logistics + 7 years SMB operations) through concrete recommendations with dollar amounts and timelines, not generic platitudes.
@@ -365,10 +339,7 @@ Format as a formal business report with clear headers, bullet points for key fin
 
   <div class="content">
     <div class="credentials">
-      <strong>Team:</strong> Business Development Specialist (Mexico Trade Expert) & Trade Compliance Expert (Licensed Specialist)<br>
-      <strong>Cristina's Expertise:</strong> 17 years enterprise logistics (Motorola, Arris, Tekmovil), HTS/INCOTERMS specialist<br>
-      <strong>Jorge's Expertise:</strong> 7-year SMB owner, Mexico trade specialist, bilingual capabilities<br>
-      <strong>Service Type:</strong> Consulting and Guidance (USMCA Optimization Assessment)<br>
+      <strong>Service Type:</strong> USMCA Optimization Assessment<br>
       <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
       <strong>Note:</strong> For official USMCA certificates, we partner with trade compliance experts
     </div>
@@ -430,13 +401,9 @@ Format as a formal business report with clear headers, bullet points for key fin
         completion_data: {
           report_generated: true,
           report_content: reportContent,
-          certificate_validation: cristinaExpertInputs.certificate_validation,
-          compliance_risk_assessment: cristinaExpertInputs.compliance_risk_assessment,
-          audit_defense_strategy: cristinaExpertInputs.audit_defense_strategy,
           email_sent: true,
           email_to: 'triangleintel@gmail.com',
           completed_at: new Date().toISOString(),
-          completed_by: 'Triangle Trade Intelligence Team (Business Development Specialist & Trade Compliance Expert)',
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
           ai_label: aiResult.label,

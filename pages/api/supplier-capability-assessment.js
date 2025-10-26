@@ -63,7 +63,6 @@ export default async function handler(req, res) {
       // Metadata
       submitted_at: assessmentData.submitted_at,
       status: 'submitted',
-      assigned_to: 'Jorge',
       priority: assessmentData.partnership_interest_level === 'very-high' ? 'high' : 'medium'
     };
 
@@ -106,74 +105,6 @@ export default async function handler(req, res) {
           error: 'Failed to save assessment'
         });
       }
-    }
-
-    // Create notification for Jorge's service queue
-    try {
-      const serviceRequest = {
-        id: `SRV_${Date.now()}`,
-        company_name: assessmentData.company_name,
-        service_type: 'Supplier Verification',
-        status: 'Stage 1: Form Completed',
-        priority: supplierAssessment.priority,
-        assigned_to: 'Jorge',
-        client_email: assessmentData.contact_email,
-        timeline: '3-5 business days',
-        intake_form_data: supplierAssessment,
-        intake_form_completed: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        notes: `Supplier capability assessment completed for ${assessmentData.client_company} partnership opportunity. Interest level: ${assessmentData.partnership_interest_level}`
-      };
-
-      // Try to add to service requests
-      try {
-        const { error: serviceError } = await supabase
-          .from('service_requests')
-          .insert([serviceRequest]);
-
-        if (serviceError) {
-          console.log('Service request notification failed:', serviceError);
-        } else {
-          console.log('✅ Service request created for Jorge\'s queue');
-        }
-      } catch (serviceDbError) {
-        console.log('Service notification unavailable:', serviceDbError);
-      }
-    } catch (notificationError) {
-      console.log('Notification creation failed:', notificationError);
-      // Don't fail the whole request for notification issues
-    }
-
-    // Send email notification to Triangle Trade Intelligence team (optional enhancement)
-    try {
-      const emailData = {
-        to: 'jorge@triangleintel.com',
-        subject: `🔔 New Supplier Assessment: ${assessmentData.company_name}`,
-        body: `
-New supplier capability assessment submitted:
-
-Company: ${assessmentData.company_name}
-Contact: ${assessmentData.contact_person} (${assessmentData.contact_email})
-Interest Level: ${assessmentData.partnership_interest_level}
-Client Opportunity: ${assessmentData.client_company}
-
-Production Capacity: ${assessmentData.production_capacity}
-Export Experience: ${assessmentData.export_experience}
-USMCA Compliance: ${assessmentData.usmca_compliance}
-
-Assessment ID: ${assessmentId}
-Priority: ${supplierAssessment.priority}
-
-Please review in Jorge's Service Queue dashboard.
-        `
-      };
-
-      // This would integrate with your email service
-      console.log('📧 Email notification prepared for Jorge\'s team');
-    } catch (emailError) {
-      console.log('Email notification failed:', emailError);
-      // Don't fail the request for email issues
     }
 
     return res.status(200).json({

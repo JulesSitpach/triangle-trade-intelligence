@@ -68,10 +68,19 @@ const testComponentRenders = async (component) => {
     const fs = require('fs');
     const path = require('path');
 
-    const componentPath = path.join(process.cwd(), 'components', getComponentFolder(component), `${component}.js`);
+    // Search for component in standard locations (no team member folder mapping)
+    let componentPath = path.join(process.cwd(), 'components', `${component}.js`);
 
     if (!fs.existsSync(componentPath)) {
-      return { success: false, error: `Component file not found: ${componentPath}` };
+      componentPath = path.join(process.cwd(), 'components', 'workflow', `${component}.js`);
+    }
+
+    if (!fs.existsSync(componentPath)) {
+      componentPath = path.join(process.cwd(), 'components', 'shared', `${component}.js`);
+    }
+
+    if (!fs.existsSync(componentPath)) {
+      return { success: false, error: `Component file not found: ${component}` };
     }
 
     const componentCode = fs.readFileSync(componentPath, 'utf8');
@@ -283,13 +292,6 @@ const testDatabaseWrite = async (component, testData) => {
 };
 
 // Helper functions
-const getComponentFolder = (component) => {
-  if (component.includes('USMCA') || component.includes('HS') || component.includes('Crisis')) {
-    return 'cristina';
-  }
-  return 'jorge';
-};
-
 const getTestDataForComponent = (component) => {
   // Updated Oct 23, 2025: Only USMCACertificateTab is active
   // Archived service request tabs removed in Phase 2 cleanup
