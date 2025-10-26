@@ -321,7 +321,8 @@ export default protectedApiHandler({
       },
 
       // USMCA qualification (from AI)
-      // ✅ FIX: Remove hardcoded || false and || 0 defaults - trust AI response
+      // ✅ FIX (Oct 26): Use AI's components array with tariff rates, NOT raw user input
+      // AI now provides mfn_rate, usmca_rate, section_301 for EACH component (critical for display)
       usmca: {
         qualified: analysis.usmca?.qualified,
         north_american_content: analysis.usmca?.north_american_content,
@@ -329,7 +330,11 @@ export default protectedApiHandler({
         threshold_applied: analysis.usmca?.threshold_applied,
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
-        component_breakdown: analysis.usmca?.component_breakdown || formData.component_origins,
+        // ✅ CRITICAL FIX: Priority order for component data with tariff rates
+        component_breakdown:
+          analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0
+            ? analysis.components  // ✅ AI-enriched components WITH tariff rates
+            : (analysis.usmca?.component_breakdown || formData.component_origins),  // Fallback to API response or user input
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
         preference_criterion: analysis.usmca?.qualified ? analysis.usmca?.preference_criterion : null,
