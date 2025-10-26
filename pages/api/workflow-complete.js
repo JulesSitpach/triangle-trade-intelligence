@@ -104,13 +104,34 @@ export default protectedApiHandler({
           });
         }
 
+        // ✅ CRITICAL FIX: Use components from usmca.component_breakdown if available
+        // The qualification_result.component_origins may have empty HS codes (old data format)
+        // But usmca.component_breakdown from the API response has the correct enriched data
+        const sourceComponents = (() => {
+          // Check if data has usmca.component_breakdown with proper HS codes
+          if (data.usmca?.component_breakdown && data.usmca.component_breakdown.length > 0) {
+            const hasHS = data.usmca.component_breakdown.some(c => c.hs_code && c.hs_code.trim());
+            if (hasHS) {
+              console.log('✅ Using enriched components from usmca.component_breakdown');
+              return data.usmca.component_breakdown;
+            }
+          }
+          // Fallback to component_origins if available
+          if (component_origins && component_origins.length > 0) {
+            console.log('⚠️ Using components from component_origins (may have empty HS codes)');
+            return component_origins;
+          }
+          // Last resort: empty array
+          return [];
+        })();
+
         // ✅ Normalize components to ensure required fields
-        const normalizedComponents = (component_origins || []).map((component, idx) => {
+        const normalizedComponents = (sourceComponents || []).map((component, idx) => {
           return {
             ...component,
-            // ✅ Ensure required fields - NEVER save components with undefined hs_code or origin_country
-            hs_code: component.hs_code,  // ✅ REMOVED FALLBACK - fail loudly if missing
-            origin_country: component.origin_country,  // ✅ REMOVED FALLBACK - fail loudly if missing
+            // ✅ Ensure required fields - use values if present
+            hs_code: component.hs_code || '',
+            origin_country: component.origin_country || '',
             // Ensure other contract fields
             base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
             mfn_rate: component.mfn_rate !== undefined ? component.mfn_rate : (component.base_mfn_rate || 0),
@@ -127,6 +148,8 @@ export default protectedApiHandler({
 
         try {
           // Try to save to Supabase if table exists
+          // ✅ FIX: Save to workflow_data (JSONB) not component_origins (doesn't exist)
+          // Include the full data object for dashboard to use
           const { error: insertError } = await supabase
             .from('workflow_completions')
             .insert([{
@@ -136,14 +159,17 @@ export default protectedApiHandler({
               product_description: product_description,
               hs_code: hs_code,
               classification_confidence: classification_confidence || 0.95,
-              qualification_result: qualification_result,
+              qualification_result: {
+                ...qualification_result,
+                component_origins: normalizedComponents  // ✅ Store normalized components in qualification_result
+              },
               savings_amount: savings_amount || 0,
-              component_origins: normalizedComponents,
               supplier_country: supplier_country,
               completed_at: completed_at || new Date().toISOString(),
               steps_completed: steps_completed || 3,
               total_steps: total_steps || 4,
               certificate_generated: certificate_generated || false,
+              workflow_data: data,  // ✅ Store complete workflow data as JSONB
               created_at: new Date().toISOString()
             }])
             .select();
