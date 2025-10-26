@@ -597,7 +597,19 @@ export default protectedApiHandler({
               allKeys: Object.keys(sampleComponent)
             });
 
-            return analysis.components;
+            // ✅ NORMALIZE AI components to ensure all required fields exist
+            const normalizedAIComponents = (analysis.components || []).map(component => ({
+              ...component,
+              // Ensure all required fields are present for frontend transformer
+              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+              rate_source: component.rate_source || 'ai_analysis',
+              stale: component.stale !== undefined ? component.stale : false,
+              // Ensure data_source is set for tracking provenance
+              data_source: component.data_source || 'ai_analysis'
+            }));
+
+            console.log(`✅ [COMPONENT-NORMALIZATION] Normalized ${normalizedAIComponents.length} AI components with required fields`);
+            return normalizedAIComponents;
           }
 
           console.log('⚠️ [COMPONENT-BREAKDOWN] No AI components array, attempting enrichment...');
@@ -613,12 +625,27 @@ export default protectedApiHandler({
 
           if (hasEnrichedData) {
             console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
-            return enrichedComponents;
+            // ✅ Ensure all enriched components have required fields
+            return (enrichedComponents || []).map(component => ({
+              ...component,
+              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+              rate_source: component.rate_source || 'ai_enriched',
+              stale: component.stale !== undefined ? component.stale : false
+            }));
           }
 
           // Option 3: Fallback to API's component_breakdown or raw user input
           console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
-          return analysis.usmca?.component_breakdown || formData.component_origins;
+          const fallbackComponents = analysis.usmca?.component_breakdown || formData.component_origins || [];
+
+          // ✅ Normalize fallback components to ensure required fields
+          return (fallbackComponents || []).map(component => ({
+            ...component,
+            base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
+            rate_source: component.rate_source || 'user_input',
+            stale: component.stale !== undefined ? component.stale : true,  // Mark as potentially stale
+            data_source: component.data_source || 'user_input'
+          }));
         })(),
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
