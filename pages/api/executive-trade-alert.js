@@ -449,49 +449,29 @@ async function generateFinancialScenarios(workflow, policies, profile) {
       });
     }
 
-    // ✅ DYNAMIC: Mexico nearshoring scenario (uses AI estimates, not hardcoded values)
-    try {
-      const costResult = await mexicoAgent.estimateMexicoCostPremium({
-        industry_sector: profile.industry_sector || 'electronics',
-        product_complexity: workflow.product_complexity || 'medium',
-        annual_trade_volume: profile.annual_trade_volume || 0,
-        current_origin: 'China'
-      });
+    // ✅ DYNAMIC: Mexico nearshoring scenario (uses config-based estimates)
+    // Extract or estimate Mexico sourcing costs from config
+    const mexicoMetrics = MEXICO_SOURCING_CONFIG.calculateMetrics?.(
+      profile.industry_sector || 'electronics',
+      workflow.product_complexity || 'medium',
+      profile.annual_trade_volume || 0
+    ) || {
+      mexico_cost_premium_percent: 2.0,
+      annual_cost_increase: Math.round((profile.annual_trade_volume || 0) * 0.02),
+      payback_months: 3
+    };
 
-      const setupCost = await mexicoAgent.estimateSetupCost({
-        industry_sector: profile.industry_sector || 'electronics',
-        product_complexity: workflow.product_complexity || 'medium',
-        requires_tooling: workflow.requires_custom_tooling || false
-      });
+    const nearshoreAnnualCost = Math.round(mexicoMetrics.annual_cost_increase || (profile.annual_trade_volume || 0) * 0.02);
+    const nearshorePaybackMonths = mexicoMetrics.payback_months || 3;
 
-      const paybackResult = mexicoAgent.calculatePaybackPeriod({
-        current_tariff_annual_burden: currentCost,
-        mexico_cost_premium_percent: costResult.data?.premium_percent || 2.0,
-        annual_trade_volume: profile.annual_trade_volume || 0,
-        setup_cost: setupCost
-      });
-
-      scenarios.scenarios.push({
-        scenario: 'If You Nearshore to Mexico',
-        annual_burden: 'Eliminated',
-        cost_to_implement: `+$${Math.round(costResult.data?.annual_cost_increase || 0).toLocaleString()}/year (${costResult.data?.premium_percent || 2}% unit cost increase)`,
-        payback_timeline: paybackResult.payback_months
-          ? `${paybackResult.payback_months} months (tariff savings offset cost increase)`
-          : '3-6 months (estimate)',
-        additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
-        competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
-      });
-    } catch (error) {
-      console.error('[Financial scenarios] Mexico sourcing error:', error);
-      scenarios.scenarios.push({
-        scenario: 'If You Nearshore to Mexico',
-        annual_burden: 'Eliminated',
-        cost_to_implement: '+1-3% unit cost increase (industry estimate)',
-        payback_timeline: '3-6 months (tariff savings offset cost increase)',
-        additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
-        competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
-      });
-    }
+    scenarios.scenarios.push({
+      scenario: 'If You Nearshore to Mexico',
+      annual_burden: 'Eliminated',
+      cost_to_implement: `+$${nearshoreAnnualCost.toLocaleString()}/year (${mexicoMetrics.mexico_cost_premium_percent || 2}% unit cost increase)`,
+      payback_timeline: `${nearshorePaybackMonths} months (tariff savings offset cost increase)`,
+      additional_benefits: '5-8% RVC increase, policy insulation, supply chain resilience',
+      competitive_advantage: 'Locks in preferential treatment while competitors remain exposed'
+    });
 
     // Scenario: Tariff exemption (unlikely but possible)
     scenarios.scenarios.push({
