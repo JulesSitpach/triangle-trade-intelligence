@@ -181,7 +181,7 @@ export default protectedApiHandler({
           console.log(`⚠️ No rates extracted for ${comp.description} (desc="${comp.description}", hs="${comp.hs_code}", origin="${comp.origin_country}")`);
         }
 
-        const totalRate = rates.mfnRate + rates.section301;
+        const totalRate = rates.mfnRate + rates.section301 + (rates.section232 || 0);
         const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
 
         // ✅ CRITICAL: Preserve all input fields (including rate_source, stale from enrichComponentsWithFreshRates)
