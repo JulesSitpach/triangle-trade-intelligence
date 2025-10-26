@@ -763,22 +763,36 @@ export default protectedApiHandler({
     // 3. Apply api_to_frontend (no change): mfnRate: 0.25
     // 4. Frontend multiply by 100: 0.25 × 100 = 25% ✅
 
-    const transformedComponents = result.usmca.component_breakdown.map((component) => {
+    // ✅ CRITICAL FIX (Oct 26): Use already-normalized componentBreakdown
+    // componentBreakdown (lines 524-598) has all required fields: base_mfn_rate, rate_source, stale
+    // These are REQUIRED by COMPONENT_DATA_CONTRACT and will fail validation if missing
+    // The raw result.usmca.component_breakdown from AI doesn't have these fields
+
+    const transformedComponents = (componentBreakdown || []).map((component) => {
       try {
         // Step 1: AI format has percentage values (25, 0, 1.5, etc)
-        // We need to manually apply the database_to_api transformations
+        // Apply database_to_api transformations to convert percentages to decimals
         const apiFormatComponent = {};
 
         Object.entries(COMPONENT_DATA_CONTRACT.fields).forEach(([dbFieldName, fieldDef]) => {
-          const aiValue = component[dbFieldName];
+          const value = component[dbFieldName];
 
-          if (aiValue === undefined) return;
+          if (value === undefined) {
+            // For optional fields that are undefined, skip them
+            if (!fieldDef.required) return;
+            // For required fields that are missing from componentBreakdown, use fallback
+            if (fieldDef.fallback !== undefined) {
+              apiFormatComponent[dbFieldName] = fieldDef.fallback;
+              return;
+            }
+            return;
+          }
 
           try {
-            // Apply database_to_api transformation (AI sends as percentages, convert to decimals)
+            // Apply database_to_api transformation (percentage to decimal for tariff rates)
             const apiValue = COMPONENT_DATA_CONTRACT.transform(
-              aiValue,
-              'database',  // AI sends percentages like database stores them
+              value,
+              'database',  // AI/componentBreakdown sends percentages like database stores them
               'api',       // Transform to API format (decimals 0-1)
               dbFieldName
             );
@@ -786,7 +800,7 @@ export default protectedApiHandler({
             apiFormatComponent[dbFieldName] = apiValue;
           } catch (err) {
             // Keep original if transformation fails
-            apiFormatComponent[dbFieldName] = aiValue;
+            apiFormatComponent[dbFieldName] = value;
           }
         });
 
