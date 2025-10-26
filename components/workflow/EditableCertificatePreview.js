@@ -193,7 +193,10 @@ export default function EditableCertificatePreview({
     fontSize: '10px',
     fontFamily: 'Arial, sans-serif',
     width: '100%',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word'
   };
 
   const labelStyle = {
@@ -462,12 +465,12 @@ export default function EditableCertificatePreview({
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px' }}>
             <thead>
               <tr style={{ backgroundColor: '#fff' }}>
-                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'left', fontWeight: 'bold', width: '25%', fontSize: '8px' }}>6. DESCRIPTION OF GOOD(S)</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'left', fontWeight: 'bold', width: '40%', fontSize: '8px' }}>6. DESCRIPTION OF GOOD(S)</th>
                 <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%', fontSize: '8px' }}>7. HTS</th>
-                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '18%', fontSize: '8px' }}>8. ORIGIN CRITERION</th>
-                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%', fontSize: '8px' }}>9. PRODUCER (YES/NO)</th>
-                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '16%', fontSize: '8px' }}>10. METHOD OF QUALIFICATION</th>
-                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '17%', fontSize: '8px' }}>11. COUNTRY OF ORIGIN</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%', fontSize: '8px' }}>8. ORIGIN CRITERION</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '8%', fontSize: '8px' }}>9. PRODUCER (YES/NO)</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '15%', fontSize: '8px' }}>10. METHOD OF QUALIFICATION</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '13%', fontSize: '8px' }}>11. COUNTRY OF ORIGIN</th>
               </tr>
             </thead>
             <tbody>
