@@ -1,17 +1,9 @@
 /**
- * Editable Certificate Preview - FULLY EDITABLE
- * Professional USMCA Certificate format with complete editability
+ * Editable Certificate Preview - Official USMCA Form Layout
+ * Matches the official US government USMCA Certificate of Origin template
+ * with light blue input boxes for easy editing and identification
  *
- * KEY PRINCIPLE: Tool-Only Platform
- * - Users make ALL final decisions
- * - AI provides suggestions (clearly labeled)
- * - Users responsible for accuracy
- * - Platform not liable for data
- *
- * All fields editable with clear:
- * - "AI Suggested: X / User Input: Y" labeling
- * - User responsibility disclaimers
- * - Trade attorney consultation recommendations
+ * Layout matches: USMCA-Certificate-Of-Origin-Form-Template-Updated-10-21-2021.pdf
  */
 
 import React, { useState } from 'react';
@@ -23,7 +15,12 @@ export default function EditableCertificatePreview({
   onCancel
 }) {
   const [editedCert, setEditedCert] = useState({
-    // Company Info
+    // Section 1: Certifier Type
+    certifier_type: previewData?.professional_certificate?.certifier?.type || 'EXPORTER',
+    blanket_from: previewData?.professional_certificate?.blanket_period?.start_date || '',
+    blanket_to: previewData?.professional_certificate?.blanket_period?.end_date || '',
+
+    // Section 2: Certifier
     certifier_name: previewData?.professional_certificate?.certifier?.name || '',
     certifier_address: previewData?.professional_certificate?.certifier?.address || '',
     certifier_country: previewData?.professional_certificate?.certifier?.country || '',
@@ -31,6 +28,7 @@ export default function EditableCertificatePreview({
     certifier_email: previewData?.professional_certificate?.certifier?.email || '',
     certifier_tax_id: previewData?.professional_certificate?.certifier?.tax_id || '',
 
+    // Section 3: Exporter
     exporter_name: previewData?.professional_certificate?.exporter?.name || '',
     exporter_address: previewData?.professional_certificate?.exporter?.address || '',
     exporter_country: previewData?.professional_certificate?.exporter?.country || '',
@@ -38,6 +36,15 @@ export default function EditableCertificatePreview({
     exporter_email: previewData?.professional_certificate?.exporter?.email || '',
     exporter_tax_id: previewData?.professional_certificate?.exporter?.tax_id || '',
 
+    // Section 4: Producer
+    producer_name: previewData?.professional_certificate?.producer?.name || '',
+    producer_address: previewData?.professional_certificate?.producer?.address || '',
+    producer_country: previewData?.professional_certificate?.producer?.country || '',
+    producer_phone: previewData?.professional_certificate?.producer?.phone || '',
+    producer_email: previewData?.professional_certificate?.producer?.email || '',
+    producer_tax_id: previewData?.professional_certificate?.producer?.tax_id || '',
+
+    // Section 5: Importer
     importer_name: previewData?.professional_certificate?.importer?.name || '',
     importer_address: previewData?.professional_certificate?.importer?.address || '',
     importer_country: previewData?.professional_certificate?.importer?.country || '',
@@ -45,28 +52,25 @@ export default function EditableCertificatePreview({
     importer_email: previewData?.professional_certificate?.importer?.email || '',
     importer_tax_id: previewData?.professional_certificate?.importer?.tax_id || '',
 
-    // Product Info
+    // Section 6-11: Product Details
     product_description: previewData?.professional_certificate?.product?.description || '',
     hs_code: previewData?.professional_certificate?.hs_classification?.code || '',
-
-    // USMCA Analysis (EDITABLE)
-    rvc_percentage: previewData?.professional_certificate?.regional_value_content || 0,
-    preference_criterion: previewData?.professional_certificate?.preference_criterion || 'B',
+    origin_criterion: previewData?.professional_certificate?.preference_criterion || 'B',
     is_producer: previewData?.professional_certificate?.producer_declaration?.is_producer || false,
     qualification_method: previewData?.professional_certificate?.qualification_method?.method || 'RVC',
     country_of_origin: previewData?.professional_certificate?.country_of_origin || '',
 
-    // Components (EDITABLE)
+    // Components
     components: previewData?.professional_certificate?.components || [],
 
-    // Authorization (EDITABLE)
+    // Section 12: Authorization
     signatory_name: previewData?.professional_certificate?.authorization?.signatory_name || '',
-    signatory_title: previewData?.professional_certificate?.authorization?.signatory_title || 'Authorized Signatory',
-    signatory_email: previewData?.professional_certificate?.authorization?.signatory_email || '',
-    signatory_phone: previewData?.professional_certificate?.authorization?.signatory_phone || '',
+    signatory_title: previewData?.professional_certificate?.authorization?.signatory_title || '',
     signature_date: previewData?.professional_certificate?.authorization?.signature_date ?
       new Date(previewData.professional_certificate.authorization.signature_date).toISOString().split('T')[0] :
       new Date().toISOString().split('T')[0],
+    signatory_phone: previewData?.professional_certificate?.authorization?.signatory_phone || '',
+    signatory_email: previewData?.professional_certificate?.authorization?.signatory_email || '',
 
     // User Acceptance
     user_accepts_responsibility: false,
@@ -97,8 +101,7 @@ export default function EditableCertificatePreview({
           origin_criterion: 'B',
           is_producer: false,
           qualification_method: 'RVC',
-          country_of_origin: '',
-          value_percentage: 0
+          country_of_origin: ''
         }
       ]
     }));
@@ -124,6 +127,7 @@ export default function EditableCertificatePreview({
     const updatedData = {
       ...previewData.professional_certificate,
       certifier: {
+        type: editedCert.certifier_type,
         name: editedCert.certifier_name,
         address: editedCert.certifier_address,
         country: editedCert.certifier_country,
@@ -139,6 +143,14 @@ export default function EditableCertificatePreview({
         email: editedCert.exporter_email,
         tax_id: editedCert.exporter_tax_id
       },
+      producer: {
+        name: editedCert.producer_name,
+        address: editedCert.producer_address,
+        country: editedCert.producer_country,
+        phone: editedCert.producer_phone,
+        email: editedCert.producer_email,
+        tax_id: editedCert.producer_tax_id
+      },
       importer: {
         name: editedCert.importer_name,
         address: editedCert.importer_address,
@@ -153,8 +165,7 @@ export default function EditableCertificatePreview({
       hs_classification: {
         code: editedCert.hs_code
       },
-      regional_value_content: parseFloat(editedCert.rvc_percentage),
-      preference_criterion: editedCert.preference_criterion,
+      preference_criterion: editedCert.origin_criterion,
       producer_declaration: {
         is_producer: editedCert.is_producer
       },
@@ -166,17 +177,30 @@ export default function EditableCertificatePreview({
       authorization: {
         signatory_name: editedCert.signatory_name,
         signatory_title: editedCert.signatory_title,
-        signatory_email: editedCert.signatory_email,
+        signature_date: editedCert.signature_date,
         signatory_phone: editedCert.signatory_phone,
-        signature_date: editedCert.signature_date
+        signatory_email: editedCert.signatory_email
       }
     };
 
     onSave(updatedData);
   };
 
-  const cert = previewData?.professional_certificate;
-  const rvcStatus = parseFloat(editedCert.rvc_percentage) >= 60;
+  const inputStyle = {
+    backgroundColor: '#e8f4f8',
+    border: '1px solid #999',
+    padding: '4px 6px',
+    fontSize: '10px',
+    fontFamily: 'Arial, sans-serif',
+    width: '100%',
+    boxSizing: 'border-box'
+  };
+
+  const labelStyle = {
+    fontSize: '8px',
+    fontWeight: 'bold',
+    color: '#333'
+  };
 
   return (
     <div className="element-spacing">
@@ -193,731 +217,339 @@ export default function EditableCertificatePreview({
         </div>
         <div style={{ fontSize: '12px', color: '#b45309', lineHeight: '1.6' }}>
           <div style={{ marginBottom: '8px' }}>
-            <strong>Triangle Intelligence provides TOOLS ONLY - you are responsible for accuracy:</strong>
+            <strong>You are responsible for the accuracy of every field on this certificate:</strong>
           </div>
           <ul style={{ marginLeft: '20px', marginBottom: '8px' }}>
-            <li>All information on this certificate is YOUR responsibility</li>
-            <li>AI suggestions are just suggestions - YOU make final decisions</li>
-            <li>You must verify accuracy of every field before download</li>
-            <li>You must maintain supporting documentation for CBP audits</li>
-            <li>Consult a trade attorney for legal validation (recommended)</li>
+            <li>Edit any fields that are incorrect</li>
+            <li>AI suggestions are shown for reference - YOU make final decisions</li>
+            <li>Verify all data matches your business records</li>
+            <li>Maintain supporting documentation for CBP audits</li>
+            <li>⚠️ Consult a trade attorney before submitting to customs</li>
             <li>Platform and Triangle Intelligence are NOT liable for certificate accuracy</li>
           </ul>
           <div style={{ fontWeight: 'bold', color: '#dc2626' }}>
-            YOU sign this certificate. YOU certify accuracy. YOU assume legal liability.
+            YOU sign this. YOU certify accuracy. YOU assume legal liability.
           </div>
         </div>
       </div>
 
-      {/* Trial Preview Alert */}
       {userTier === 'Trial' && (
         <div className="alert alert-warning" style={{ marginBottom: '16px' }}>
-          <div className="alert-title">⚠️ TRIAL PREVIEW</div>
-          <div className="text-body">Not valid for customs submissions - Subscribe to download official certificate</div>
+          <div className="alert-title">⚠️ TRIAL PREVIEW - Not valid for customs</div>
         </div>
       )}
 
-      {/* Success Alert */}
-      <div className="alert alert-success" style={{ marginBottom: '16px' }}>
-        <div className="alert-content">
-          <div className="alert-title">✅ USMCA Certificate - EDITABLE PREVIEW</div>
-          <div className="text-body">
-            All fields are editable. Make any corrections needed. AI suggestions shown for reference only.
+      {/* Official USMCA Certificate Form - Exact Layout from US Template */}
+      <div style={{
+        border: '3px solid #000',
+        backgroundColor: '#fff',
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '11px',
+        maxWidth: '900px',
+        margin: '0 auto',
+        pageBreakInside: 'avoid'
+      }}>
+        {/* Header */}
+        <div style={{
+          textAlign: 'center',
+          borderBottom: '2px solid #000',
+          padding: '12px',
+          fontSize: '12px'
+        }}>
+          <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
+            UNITED STATES MEXICO CANADA AGREEMENT (USMCA)
+          </div>
+          <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
+            CERTIFICATION OF ORIGIN
           </div>
         </div>
-      </div>
 
-      {/* Trial Watermark Wrapper */}
-      <div style={{ position: 'relative' }}>
-        {userTier === 'Trial' && (
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            zIndex: 10
-          }}>
-            <div style={{
-              transform: 'rotate(-45deg)',
-              fontSize: '72px',
-              fontWeight: 'bold',
-              color: 'rgba(220, 38, 38, 0.15)',
-              textAlign: 'center',
-              userSelect: 'none'
-            }}>
-              TRIAL PREVIEW
-            </div>
-          </div>
-        )}
-
-        {/* Professional Certificate Document */}
+        {/* Section 1: Certifier Type & Blanket Period */}
         <div style={{
-          border: '3px solid #000',
-          backgroundColor: '#ffffff',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '11px',
-          maxWidth: '850px',
-          margin: '0 auto'
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr auto auto auto auto',
+          borderBottom: '2px solid #000',
+          fontSize: '9px'
         }}>
-          {/* Trial Banner */}
-          {userTier === 'Trial' && (
-            <div style={{
-              backgroundColor: '#dc2626',
-              color: '#ffffff',
-              textAlign: 'center',
-              padding: '8px',
-              fontWeight: 'bold',
-              fontSize: '12px'
-            }}>
-              ⚠️ FREE TRIAL PREVIEW - Not valid for customs submissions
-            </div>
-          )}
-
-          {/* Header */}
-          <div style={{
-            textAlign: 'center',
-            borderBottom: '2px solid #000',
-            padding: '10px',
-            backgroundColor: '#ffffff'
-          }}>
-            <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>
-              UNITED STATES MEXICO CANADA AGREEMENT (USMCA)
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '13px' }}>
-              CERTIFICATION OF ORIGIN
-            </div>
-          </div>
-
-          {/* Section 1: Certifier Type & Blanket Period */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '60% 40%',
-            borderBottom: '1px solid #000'
-          }}>
-            <div style={{ borderRight: '1px solid #000', padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '6px' }}>
-                1. CERTIFIER TYPE (INDICATE "X")
-              </div>
-              <div style={{ display: 'flex', gap: '20px', marginLeft: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input type="checkbox" disabled checked={cert.certifier?.type === 'IMPORTER'} />
-                  IMPORTER
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input type="checkbox" disabled checked={cert.certifier?.type === 'EXPORTER'} />
-                  EXPORTER
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <input type="checkbox" disabled checked={cert.certifier?.type === 'PRODUCER'} />
-                  PRODUCER
-                </label>
-              </div>
-            </div>
-            <div style={{ padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px' }}>
-                BLANKET PERIOD (MM/DD/YYYY)
-              </div>
-              <div style={{ marginLeft: '10px' }}>
-                <div>FROM: {cert.blanket_period?.start_date || 'N/A'}</div>
-                <div>TO: {cert.blanket_period?.end_date || 'N/A'}</div>
-              </div>
+          {/* Certifier Type */}
+          <div style={{ borderRight: '1px solid #000', padding: '8px', minWidth: '180px' }}>
+            <div style={labelStyle}>1. CERTIFIER TYPE (INDICATE "X")</div>
+            <div style={{ marginTop: '4px' }}>
+              <label style={{ display: 'flex', gap: '4px', marginBottom: '3px' }}>
+                <input
+                  type="checkbox"
+                  checked={editedCert.certifier_type === 'IMPORTER'}
+                  onChange={() => handleFieldChange('certifier_type', 'IMPORTER')}
+                />
+                IMPORTER
+              </label>
+              <label style={{ display: 'flex', gap: '4px', marginBottom: '3px' }}>
+                <input
+                  type="checkbox"
+                  checked={editedCert.certifier_type === 'EXPORTER'}
+                  onChange={() => handleFieldChange('certifier_type', 'EXPORTER')}
+                />
+                EXPORTER
+              </label>
+              <label style={{ display: 'flex', gap: '4px' }}>
+                <input
+                  type="checkbox"
+                  checked={editedCert.certifier_type === 'PRODUCER'}
+                  onChange={() => handleFieldChange('certifier_type', 'PRODUCER')}
+                />
+                PRODUCER
+              </label>
             </div>
           </div>
 
-          {/* Sections 2-5: Contact Information - FULLY EDITABLE */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            borderBottom: '1px solid #000'
-          }}>
-            {/* Section 2: Certifier - EDITABLE */}
-            <div style={{ borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px', color: '#0066cc' }}>
-                2. CERTIFIER (EDIT HERE)
-              </div>
-              <div style={{ marginLeft: '4px', fontSize: '9px' }}>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>NAME</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_name}
-                    onChange={(e) => handleFieldChange('certifier_name', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>ADDRESS</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_address}
-                    onChange={(e) => handleFieldChange('certifier_address', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>COUNTRY</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_country}
-                    onChange={(e) => handleFieldChange('certifier_country', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>PHONE</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_phone}
-                    onChange={(e) => handleFieldChange('certifier_phone', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>EMAIL</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_email}
-                    onChange={(e) => handleFieldChange('certifier_email', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div>
-                  <strong>TAX ID</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.certifier_tax_id}
-                    onChange={(e) => handleFieldChange('certifier_tax_id', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-              </div>
-            </div>
+          {/* Blanket Period */}
+          <div style={{ borderRight: '1px solid #000', padding: '8px' }}></div>
+          <div style={{ padding: '8px', minWidth: '140px' }}>
+            <div style={labelStyle}>BLANKET PERIOD<br />(MM/DD/YYYY)</div>
+            <div style={{ marginTop: '2px', fontSize: '8px' }}>FROM:</div>
+            <input
+              type="text"
+              value={editedCert.blanket_from}
+              onChange={(e) => handleFieldChange('blanket_from', e.target.value)}
+              style={{ ...inputStyle, marginBottom: '3px' }}
+            />
+            <div style={{ fontSize: '8px' }}>TO:</div>
+            <input
+              type="text"
+              value={editedCert.blanket_to}
+              onChange={(e) => handleFieldChange('blanket_to', e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+        </div>
 
-            {/* Section 3: Exporter - EDITABLE */}
-            <div style={{ borderBottom: '1px solid #000', padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px', color: '#0066cc' }}>
-                3. EXPORTER (EDIT HERE)
+        {/* Sections 2-5: Certifier, Exporter, Producer, Importer - 2x2 Grid */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          borderBottom: '2px solid #000'
+        }}>
+          {/* Section 2: Certifier */}
+          <div style={{ borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px' }}>
+            <div style={labelStyle}>2. CERTIFIER NAME, ADDRESS, PHONE, AND EMAIL</div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
+            <input type="text" value={editedCert.certifier_name} onChange={(e) => handleFieldChange('certifier_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>ADDRESS</div>
+            <input type="text" value={editedCert.certifier_address} onChange={(e) => handleFieldChange('certifier_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>COUNTRY</div>
+                <input type="text" value={editedCert.certifier_country} onChange={(e) => handleFieldChange('certifier_country', e.target.value)} style={inputStyle} />
               </div>
-              <div style={{ marginLeft: '4px', fontSize: '9px' }}>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>NAME</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_name}
-                    onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>ADDRESS</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_address}
-                    onChange={(e) => handleFieldChange('exporter_address', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>COUNTRY</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_country}
-                    onChange={(e) => handleFieldChange('exporter_country', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>PHONE</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_phone}
-                    onChange={(e) => handleFieldChange('exporter_phone', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>EMAIL</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_email}
-                    onChange={(e) => handleFieldChange('exporter_email', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div>
-                  <strong>TAX ID</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.exporter_tax_id}
-                    onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>PHONE</div>
+                <input type="text" value={editedCert.certifier_phone} onChange={(e) => handleFieldChange('certifier_phone', e.target.value)} style={inputStyle} />
               </div>
             </div>
-
-            {/* Section 4: Producer (Read-only but shown for completeness) */}
-            <div style={{ borderRight: '1px solid #000', padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px' }}>
-                4. PRODUCER
-              </div>
-              <div style={{ marginLeft: '8px', fontSize: '10px' }}>
-                <div><strong>NAME</strong></div>
-                <div>{cert.producer?.same_as_exporter ? 'SAME AS EXPORTER' : cert.producer?.name}</div>
-                <div style={{ marginTop: '4px' }}><strong>ADDRESS</strong></div>
-                <div>{cert.producer?.same_as_exporter ? 'SAME AS EXPORTER' : cert.producer?.address}</div>
-                <div style={{ marginTop: '4px' }}><strong>COUNTRY</strong> {cert.producer?.country || cert.exporter?.country}</div>
-                <div><strong>TAX ID</strong></div>
-                <div>{cert.producer?.tax_id || cert.exporter?.tax_id}</div>
-              </div>
-            </div>
-
-            {/* Section 5: Importer - EDITABLE */}
-            <div style={{ padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px', color: '#0066cc' }}>
-                5. IMPORTER (EDIT HERE)
-              </div>
-              <div style={{ marginLeft: '4px', fontSize: '9px' }}>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>NAME</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_name}
-                    onChange={(e) => handleFieldChange('importer_name', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>ADDRESS</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_address}
-                    onChange={(e) => handleFieldChange('importer_address', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>COUNTRY</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_country}
-                    onChange={(e) => handleFieldChange('importer_country', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>PHONE</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_phone}
-                    onChange={(e) => handleFieldChange('importer_phone', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '4px' }}>
-                  <strong>EMAIL</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_email}
-                    onChange={(e) => handleFieldChange('importer_email', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-                <div>
-                  <strong>TAX ID</strong><br />
-                  <input
-                    type="text"
-                    value={editedCert.importer_tax_id}
-                    onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)}
-                    style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                  />
-                </div>
-              </div>
-            </div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
+            <input type="text" value={editedCert.certifier_email} onChange={(e) => handleFieldChange('certifier_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
+            <input type="text" value={editedCert.certifier_tax_id} onChange={(e) => handleFieldChange('certifier_tax_id', e.target.value)} style={inputStyle} />
           </div>
 
-          {/* Section 6-11: Goods Description Table - FULLY EDITABLE */}
-          <div style={{ borderBottom: '1px solid #000' }}>
-            <div style={{ padding: '8px', backgroundColor: '#e3f2fd', borderBottom: '1px solid #000', fontSize: '10px', fontWeight: 'bold', color: '#0066cc' }}>
-              📦 SECTIONS 6-11: PRODUCT & QUALIFICATION DETAILS (FULLY EDITABLE)
+          {/* Section 3: Exporter */}
+          <div style={{ borderBottom: '1px solid #000', padding: '8px' }}>
+            <div style={labelStyle}>3. EXPORTER NAME, ADDRESS, PHONE, AND EMAIL</div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
+            <input type="text" value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>ADDRESS</div>
+            <input type="text" value={editedCert.exporter_address} onChange={(e) => handleFieldChange('exporter_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>COUNTRY</div>
+                <input type="text" value={editedCert.exporter_country} onChange={(e) => handleFieldChange('exporter_country', e.target.value)} style={inputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>PHONE</div>
+                <input type="text" value={editedCert.exporter_phone} onChange={(e) => handleFieldChange('exporter_phone', e.target.value)} style={inputStyle} />
+              </div>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px' }}>
-              <tbody>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold', width: '30%' }}>
-                    6. DESCRIPTION OF GOOD(S)
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
+            <input type="text" value={editedCert.exporter_email} onChange={(e) => handleFieldChange('exporter_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
+            <input type="text" value={editedCert.exporter_tax_id} onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)} style={inputStyle} />
+          </div>
+
+          {/* Section 4: Producer */}
+          <div style={{ borderRight: '1px solid #000', padding: '8px' }}>
+            <div style={labelStyle}>4. PRODUCER NAME, ADDRESS, PHONE, AND EMAIL</div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
+            <input type="text" value={editedCert.producer_name} onChange={(e) => handleFieldChange('producer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>ADDRESS</div>
+            <input type="text" value={editedCert.producer_address} onChange={(e) => handleFieldChange('producer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>COUNTRY</div>
+                <input type="text" value={editedCert.producer_country} onChange={(e) => handleFieldChange('producer_country', e.target.value)} style={inputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>PHONE</div>
+                <input type="text" value={editedCert.producer_phone} onChange={(e) => handleFieldChange('producer_phone', e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
+            <input type="text" value={editedCert.producer_email} onChange={(e) => handleFieldChange('producer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
+            <input type="text" value={editedCert.producer_tax_id} onChange={(e) => handleFieldChange('producer_tax_id', e.target.value)} style={inputStyle} />
+          </div>
+
+          {/* Section 5: Importer */}
+          <div style={{ padding: '8px' }}>
+            <div style={labelStyle}>5. IMPORTER NAME, ADDRESS, PHONE, AND EMAIL</div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
+            <input type="text" value={editedCert.importer_name} onChange={(e) => handleFieldChange('importer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>ADDRESS</div>
+            <input type="text" value={editedCert.importer_address} onChange={(e) => handleFieldChange('importer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>COUNTRY</div>
+                <input type="text" value={editedCert.importer_country} onChange={(e) => handleFieldChange('importer_country', e.target.value)} style={inputStyle} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '8px' }}>PHONE</div>
+                <input type="text" value={editedCert.importer_phone} onChange={(e) => handleFieldChange('importer_phone', e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+            <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
+            <input type="text" value={editedCert.importer_email} onChange={(e) => handleFieldChange('importer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
+            <input type="text" value={editedCert.importer_tax_id} onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)} style={inputStyle} />
+          </div>
+        </div>
+
+        {/* Sections 6-11: Product Details Table */}
+        <div style={{ borderBottom: '2px solid #000' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#fff' }}>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'left', fontWeight: 'bold', width: '25%', fontSize: '8px' }}>6. DESCRIPTION OF GOOD(S)</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%', fontSize: '8px' }}>7. HTS</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '18%', fontSize: '8px' }}>8. ORIGIN CRITERION</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%', fontSize: '8px' }}>9. PRODUCER (YES/NO)</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '16%', fontSize: '8px' }}>10. METHOD OF QUALIFICATION</th>
+                <th style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '17%', fontSize: '8px' }}>11. COUNTRY OF ORIGIN</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ height: '120px' }}>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px' }} />
+                </td>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                  <input type="text" value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} />
+                </td>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                  <select value={editedCert.origin_criterion} onChange={(e) => handleFieldChange('origin_criterion', e.target.value)} style={{ ...inputStyle, height: '24px' }}>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
+                </td>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'center' }}>
+                  <label style={{ display: 'flex', justifyContent: 'center' }}>
+                    <input type="checkbox" checked={editedCert.is_producer} onChange={(e) => handleFieldChange('is_producer', e.target.checked)} />
+                  </label>
+                </td>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                  <input type="text" value={editedCert.qualification_method} onChange={(e) => handleFieldChange('qualification_method', e.target.value)} style={inputStyle} />
+                </td>
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                  <input type="text" value={editedCert.country_of_origin} onChange={(e) => handleFieldChange('country_of_origin', e.target.value)} style={inputStyle} />
+                </td>
+              </tr>
+              {editedCert.components.map((comp, idx) => (
+                <tr key={idx} style={{ height: '60px' }}>
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                    <input type="text" value={comp.description} onChange={(e) => handleComponentChange(idx, 'description', e.target.value)} style={inputStyle} />
+                    <button onClick={() => handleRemoveComponent(idx)} style={{ marginTop: '3px', padding: '2px 6px', fontSize: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '2px', cursor: 'pointer' }}>Remove</button>
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <input
-                      type="text"
-                      value={editedCert.product_description}
-                      onChange={(e) => handleFieldChange('product_description', e.target.value)}
-                      style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                    />
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                    <input type="text" value={comp.hs_code} onChange={(e) => handleComponentChange(idx, 'hs_code', e.target.value)} style={inputStyle} />
                   </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold' }}>
-                    7. HTS CODE
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <input
-                      type="text"
-                      value={editedCert.hs_code}
-                      onChange={(e) => handleFieldChange('hs_code', e.target.value)}
-                      style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold' }}>
-                    8. ORIGIN CRITERION
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <div style={{ fontSize: '8px', marginBottom: '4px', color: '#666' }}>
-                      AI Suggested: {cert.preference_criterion || 'B'}
-                    </div>
-                    <select
-                      value={editedCert.preference_criterion}
-                      onChange={(e) => handleFieldChange('preference_criterion', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '4px',
-                        fontSize: '9px',
-                        border: '2px solid #0066cc'
-                      }}
-                    >
-                      <option value="A">A - Wholly Obtained</option>
-                      <option value="B">B - Regional Value Content</option>
-                      <option value="C">C - Yarn-Forward Rule</option>
-                      <option value="D">D - Special Rule</option>
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                    <select value={comp.origin_criterion || 'B'} onChange={(e) => handleComponentChange(idx, 'origin_criterion', e.target.value)} style={{ ...inputStyle, height: '24px' }}>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
                     </select>
                   </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold' }}>
-                    9. PRODUCER (YES/NO)
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <input
-                        type="checkbox"
-                        checked={editedCert.is_producer}
-                        onChange={(e) => handleFieldChange('is_producer', e.target.checked)}
-                      />
-                      {editedCert.is_producer ? 'YES' : 'NO'}
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'center' }}>
+                    <label style={{ display: 'flex', justifyContent: 'center' }}>
+                      <input type="checkbox" checked={comp.is_producer || false} onChange={(e) => handleComponentChange(idx, 'is_producer', e.target.checked)} />
                     </label>
                   </td>
-                </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold' }}>
-                    10. METHOD OF QUALIFICATION
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                    <input type="text" value={comp.qualification_method || 'RVC'} onChange={(e) => handleComponentChange(idx, 'qualification_method', e.target.value)} style={inputStyle} />
                   </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <input
-                      type="text"
-                      value={editedCert.qualification_method}
-                      onChange={(e) => handleFieldChange('qualification_method', e.target.value)}
-                      style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                      placeholder="RVC, Net Cost, etc."
-                    />
+                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
+                    <input type="text" value={comp.country_of_origin || ''} onChange={(e) => handleComponentChange(idx, 'country_of_origin', e.target.value)} style={inputStyle} />
                   </td>
                 </tr>
-                <tr>
-                  <td style={{ border: '1px solid #000', padding: '6px', fontWeight: 'bold' }}>
-                    11. COUNTRY OF ORIGIN
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px' }}>
-                    <input
-                      type="text"
-                      value={editedCert.country_of_origin}
-                      onChange={(e) => handleFieldChange('country_of_origin', e.target.value)}
-                      style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                      placeholder="US, CA, MX, etc."
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ padding: '8px', textAlign: 'center', borderTop: '1px solid #000', fontSize: '8px', fontStyle: 'italic' }}>
+            <button onClick={handleAddComponent} style={{ padding: '6px 12px', fontSize: '9px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>+ Add Component Row</button>
+          </div>
+        </div>
+
+        {/* Certification Statement */}
+        <div style={{ borderBottom: '2px solid #000', padding: '10px', fontSize: '9px', lineHeight: '1.4', minHeight: '50px' }}>
+          I CERTIFY THAT THE GOODS DESCRIBED IN THIS DOCUMENT QUALIFY AS ORIGINATING AND THE INFORMATION CONTAINED IN THIS DOCUMENT IS TRUE AND ACCURATE. I ASSUME RESPONSIBILITY FOR PROVING SUCH REPRESENTATIONS AND AGREE TO MAINTAIN AND PRESENT UPON REQUEST OR TO MAKE AVAILABLE DURING A VERIFICATION VISIT, DOCUMENTATION NECESSARY TO SUPPORT THIS CERTIFICATION
+        </div>
+
+        {/* Section 12: Authorization */}
+        <div style={{ borderBottom: '2px solid #000', padding: '8px' }}>
+          <div style={{ fontSize: '9px', fontWeight: 'bold', marginBottom: '8px' }}>
+            THIS CERTIFICATE CONSISTS OF <input type="text" style={{ width: '30px', ...inputStyle }} /> PAGES, INCLUDING ALL ATTACHMENTS.
           </div>
 
-          {/* CRITICAL: RVC Percentage & Qualification Status */}
-          <div style={{ borderBottom: '1px solid #000', padding: '10px', backgroundColor: '#f0f9ff' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px', marginBottom: '12px', color: '#0066cc' }}>
-              📊 CRITICAL: REGIONAL VALUE CONTENT (RVC) - USER INPUT REQUIRED
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '8px' }}>
+            <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
+              <div style={labelStyle}>12a. AUTHORIZED SIGNATURE</div>
+              <div style={{ border: '1px solid #000', minHeight: '40px', marginBottom: '8px', backgroundColor: '#fff' }}></div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div>
-                <div style={{ fontSize: '10px', marginBottom: '4px', color: '#666' }}>
-                  <strong>AI Suggested RVC:</strong> {cert.regional_value_content || 0}%
-                </div>
-                <label style={{ fontWeight: 'bold', fontSize: '10px', display: 'block', marginBottom: '4px' }}>
-                  YOUR RVC % (You verify accuracy):
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={editedCert.rvc_percentage}
-                  onChange={(e) => handleFieldChange('rvc_percentage', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    fontSize: '11px',
-                    border: '2px solid #f59e0b',
-                    borderRadius: '4px',
-                    fontWeight: 'bold'
-                  }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '4px' }}>
-                  QUALIFICATION STATUS:
-                </div>
-                <div style={{
-                  padding: '12px',
-                  backgroundColor: rvcStatus ? '#d1fae5' : '#fee2e2',
-                  border: `3px solid ${rvcStatus ? '#10b981' : '#ef4444'}`,
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  fontWeight: 'bold',
-                  textAlign: 'center'
-                }}>
-                  {rvcStatus ? (
-                    <div>
-                      <div>✅ QUALIFIED</div>
-                      <div style={{ fontSize: '10px', marginTop: '4px' }}>
-                        {editedCert.rvc_percentage}% ≥ 60% threshold
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div>❌ NOT QUALIFIED</div>
-                      <div style={{ fontSize: '10px', marginTop: '4px' }}>
-                        {editedCert.rvc_percentage}% &lt; 60% threshold
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div>
+              <div style={labelStyle}>12b. COMPANY</div>
+              <input type="text" value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
+              <div style={labelStyle}>12c. NAME</div>
+              <input type="text" value={editedCert.signatory_name} onChange={(e) => handleFieldChange('signatory_name', e.target.value)} style={inputStyle} />
+            </div>
+            <div>
+              <div style={labelStyle}>12d. TITLE</div>
+              <input type="text" value={editedCert.signatory_title} onChange={(e) => handleFieldChange('signatory_title', e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
+              <div style={labelStyle}>12e. DATE (MM/DD/YYYY)</div>
+              <input type="date" value={editedCert.signature_date} onChange={(e) => handleFieldChange('signature_date', e.target.value)} style={inputStyle} />
+            </div>
+            <div>
+              <div style={labelStyle}>12f. TELEPHONE NUMBER</div>
+              <input type="text" value={editedCert.signatory_phone} onChange={(e) => handleFieldChange('signatory_phone', e.target.value)} style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <div style={labelStyle}>12g. EMAIL</div>
+              <input type="text" value={editedCert.signatory_email} onChange={(e) => handleFieldChange('signatory_email', e.target.value)} style={inputStyle} />
             </div>
           </div>
+        </div>
 
-          {/* Components Section - FULLY EDITABLE */}
-          <div style={{ borderBottom: '1px solid #000', padding: '10px', backgroundColor: '#fafafa' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px', marginBottom: '12px', color: '#0066cc' }}>
-              📦 COMPONENT ORIGINS - FULLY EDITABLE (You verify each component)
-            </div>
-
-            {editedCert.components.length > 0 ? (
-              <div style={{ marginBottom: '12px', overflow: 'auto' }}>
-                <table style={{ width: '100%', fontSize: '8px', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#e5e7eb' }}>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>Description</th>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>HS Code</th>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>Origin Country</th>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>Criterion</th>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>% of Value</th>
-                      <th style={{ border: '1px solid #000', padding: '4px' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {editedCert.components.map((comp, idx) => (
-                      <tr key={idx}>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}>
-                          <input
-                            type="text"
-                            value={comp.description}
-                            onChange={(e) => handleComponentChange(idx, 'description', e.target.value)}
-                            style={{ width: '100%', fontSize: '8px', padding: '2px', border: '1px solid #0066cc' }}
-                            placeholder="Component"
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}>
-                          <input
-                            type="text"
-                            value={comp.hs_code}
-                            onChange={(e) => handleComponentChange(idx, 'hs_code', e.target.value)}
-                            style={{ width: '100%', fontSize: '8px', padding: '2px', border: '1px solid #0066cc' }}
-                            placeholder="HS code"
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}>
-                          <input
-                            type="text"
-                            value={comp.origin_country}
-                            onChange={(e) => handleComponentChange(idx, 'origin_country', e.target.value)}
-                            style={{ width: '100%', fontSize: '8px', padding: '2px', border: '1px solid #0066cc' }}
-                            placeholder="Country"
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}>
-                          <select
-                            value={comp.origin_criterion || 'B'}
-                            onChange={(e) => handleComponentChange(idx, 'origin_criterion', e.target.value)}
-                            style={{ width: '100%', fontSize: '8px', padding: '2px' }}
-                          >
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                          </select>
-                        </td>
-                        <td style={{ border: '1px solid #000', padding: '4px' }}>
-                          <input
-                            type="number"
-                            value={comp.value_percentage || 0}
-                            onChange={(e) => handleComponentChange(idx, 'value_percentage', parseFloat(e.target.value))}
-                            min="0"
-                            max="100"
-                            step="0.1"
-                            style={{ width: '100%', fontSize: '8px', padding: '2px' }}
-                          />
-                        </td>
-                        <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center' }}>
-                          <button
-                            onClick={() => handleRemoveComponent(idx)}
-                            style={{
-                              padding: '2px 4px',
-                              fontSize: '8px',
-                              backgroundColor: '#ef4444',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '3px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div style={{ padding: '8px', backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '12px', fontSize: '10px' }}>
-                No components added. Click "Add Component" to list components and origins.
-              </div>
-            )}
-
-            <button
-              onClick={handleAddComponent}
-              style={{
-                padding: '8px 12px',
-                fontSize: '10px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              + Add Component
-            </button>
-          </div>
-
-          {/* Certification Statement */}
-          <div style={{ borderBottom: '2px solid #000', padding: '10px', fontSize: '9px', lineHeight: '1.4' }}>
-            I CERTIFY THAT THE GOODS DESCRIBED IN THIS DOCUMENT QUALIFY AS ORIGINATING AND THE INFORMATION CONTAINED IN THIS DOCUMENT IS TRUE
-            AND ACCURATE. I ASSUME RESPONSIBILITY FOR PROVING SUCH REPRESENTATIONS AND AGREE TO MAINTAIN AND PRESENT UPON REQUEST OR TO MAKE
-            AVAILABLE DURING A VERIFICATION VISIT, DOCUMENTATION NECESSARY TO SUPPORT THIS CERTIFICATION
-          </div>
-
-          {/* Section 12: Authorization - FULLY EDITABLE */}
-          <div style={{ padding: '10px', backgroundColor: '#f0f9ff' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '10px', marginBottom: '8px', color: '#0066cc' }}>
-              12. AUTHORIZATION (EDIT YOUR SIGNATURE INFORMATION)
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '10px',
-              fontSize: '10px'
-            }}>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12a. AUTHORIZED SIGNATURE</div>
-                <div style={{ borderBottom: '2px solid #000', minHeight: '40px', marginBottom: '8px' }}></div>
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12b. COMPANY</div>
-                <input
-                  type="text"
-                  value={editedCert.exporter_name}
-                  onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12c. NAME</div>
-                <input
-                  type="text"
-                  value={editedCert.signatory_name}
-                  onChange={(e) => handleFieldChange('signatory_name', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12d. TITLE</div>
-                <input
-                  type="text"
-                  value={editedCert.signatory_title}
-                  onChange={(e) => handleFieldChange('signatory_title', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12e. DATE (MM/DD/YYYY)</div>
-                <input
-                  type="date"
-                  value={editedCert.signature_date}
-                  onChange={(e) => handleFieldChange('signature_date', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12f. TELEPHONE NUMBER</div>
-                <input
-                  type="text"
-                  value={editedCert.signatory_phone}
-                  onChange={(e) => handleFieldChange('signatory_phone', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>12g. EMAIL</div>
-                <input
-                  type="text"
-                  value={editedCert.signatory_email}
-                  onChange={(e) => handleFieldChange('signatory_email', e.target.value)}
-                  style={{ width: '100%', fontSize: '9px', padding: '2px', border: '1px solid #0066cc' }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            textAlign: 'right',
-            padding: '8px',
-            fontSize: '9px',
-            borderTop: '1px solid #000'
-          }}>
-            USMCA CERTIFICATE V3 - FULLY EDITABLE
-          </div>
+        {/* Footer */}
+        <div style={{ textAlign: 'right', padding: '8px', fontSize: '8px', fontWeight: 'bold' }}>
+          USMCA CERTIFICATE V3
         </div>
       </div>
 
-      {/* ⚠️ FINAL DISCLAIMER & USER ACCEPTANCE */}
+      {/* User Responsibility Checkboxes */}
       <div style={{
         backgroundColor: '#fef3c7',
         border: '3px solid #f59e0b',
@@ -927,58 +559,38 @@ export default function EditableCertificatePreview({
         marginBottom: '20px'
       }}>
         <div style={{ fontWeight: 'bold', fontSize: '12px', color: '#92400e', marginBottom: '12px' }}>
-          ⚠️ FINAL REQUIREMENTS BEFORE DOWNLOAD
+          ⚠️ BEFORE YOU DOWNLOAD - FINAL CONFIRMATION REQUIRED
         </div>
 
-        <div style={{ fontSize: '11px', color: '#b45309', lineHeight: '1.8' }}>
-          <div style={{ marginBottom: '12px', fontWeight: 'bold' }}>
-            You are signing this certificate. YOU are responsible for:
+        <label style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={editedCert.user_accepts_responsibility}
+            onChange={(e) => handleFieldChange('user_accepts_responsibility', e.target.checked)}
+            style={{ marginTop: '2px' }}
+          />
+          <div style={{ fontSize: '11px', color: '#b45309' }}>
+            <strong>✓ I accept responsibility for accuracy</strong><br />
+            <span style={{ fontSize: '10px' }}>All information on this certificate is my responsibility. I have verified every field.</span>
           </div>
+        </label>
 
-          <label style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'flex-start' }}>
-            <input
-              type="checkbox"
-              checked={editedCert.user_accepts_responsibility}
-              onChange={(e) => handleFieldChange('user_accepts_responsibility', e.target.checked)}
-              style={{ marginTop: '2px' }}
-            />
-            <div>
-              <strong>✓ I accept responsibility for accuracy</strong><br />
-              <span style={{ fontSize: '10px', color: '#92400e' }}>
-                All information on this certificate is my responsibility. I have verified every field and accept liability for any errors.
-              </span>
-            </div>
-          </label>
-
-          <label style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'flex-start' }}>
-            <input
-              type="checkbox"
-              checked={editedCert.user_confirms_accuracy}
-              onChange={(e) => handleFieldChange('user_confirms_accuracy', e.target.checked)}
-              style={{ marginTop: '2px' }}
-            />
-            <div>
-              <strong>✓ I confirm all information is accurate and complete</strong><br />
-              <span style={{ fontSize: '10px', color: '#92400e' }}>
-                I have reviewed all editable fields and confirmed they match my actual business records.
-              </span>
-            </div>
-          </label>
-
-          <div style={{
-            backgroundColor: 'rgba(255,255,255,0.5)',
-            padding: '8px',
-            borderRadius: '4px',
-            marginTop: '12px',
-            borderLeft: '4px solid #dc2626'
-          }}>
-            <strong>✅ RECOMMENDATION:</strong> Consult with a trade attorney to validate USMCA eligibility and RVC calculations before submitting to customs.
+        <label style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+          <input
+            type="checkbox"
+            checked={editedCert.user_confirms_accuracy}
+            onChange={(e) => handleFieldChange('user_confirms_accuracy', e.target.checked)}
+            style={{ marginTop: '2px' }}
+          />
+          <div style={{ fontSize: '11px', color: '#b45309' }}>
+            <strong>✓ All information matches my business records</strong><br />
+            <span style={{ fontSize: '10px' }}>I confirm this certificate accurately represents my product and origin details.</span>
           </div>
-        </div>
+        </label>
       </div>
 
       {/* Action Buttons */}
-      <div style={{ marginTop: '20px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
         <button
           onClick={onCancel}
           style={{
@@ -992,7 +604,7 @@ export default function EditableCertificatePreview({
             fontWeight: 'bold'
           }}
         >
-          ← Back to Authorization
+          ← Back to Edit Authorization
         </button>
         <button
           onClick={handleSave}
