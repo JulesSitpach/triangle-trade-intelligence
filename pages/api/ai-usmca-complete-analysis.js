@@ -438,6 +438,8 @@ export default protectedApiHandler({
 
     // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
+    let extractionMethod = '';  // ✅ MOVED outside try-catch so catch block can access it
+    let sanitizedJSON = null;   // ✅ MOVED outside try-catch so catch block can access it
     try {
       // ✅ AGGRESSIVE MARKDOWN STRIPPING (Before all extraction strategies)
       // Remove markdown code fences and language identifiers
@@ -448,7 +450,6 @@ export default protectedApiHandler({
 
       // Multi-strategy JSON extraction (same as classifyComponentHS and batch lookup)
       let jsonString = null;
-      let extractionMethod = '';
 
       // Strategy 1: Try direct extraction (clean text starts with {)
       if (cleanText.startsWith('{')) {
@@ -484,7 +485,7 @@ export default protectedApiHandler({
       }
 
       // ✅ OPTIMIZED: Sanitize control characters (remove newlines/tabs while preserving JSON structure)
-      const sanitizedJSON = jsonString
+      sanitizedJSON = jsonString
         .replace(/[\r\n\t\x00-\x1F\x7F-\x9F]/g, ' ')  // Control characters → spaces
         .replace(/\s+/g, ' ')  // Multiple spaces → single space
         .trim();
