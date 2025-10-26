@@ -283,28 +283,44 @@ export default protectedApiHandler({
             .eq('destination_country', destinationCountry)
             .single();
 
-          if (!error && rateData) {
-            // ✅ Found fresh rates in database (updated by RSS polling)
-            enriched.push({
-              ...component,
-              mfn_rate: rateData.mfn_rate || 0,
-              base_mfn_rate: rateData.base_mfn_rate || rateData.mfn_rate || 0,
-              section_301: rateData.section_301 || 0,
-              section_232: rateData.section_232 || 0,
-              usmca_rate: rateData.usmca_rate || 0,
-              tariff_last_updated: rateData.last_updated,
-              data_source: rateData.data_source || 'database_cache'
-            });
+          // 🔧 CONSISTENT CONTRACT: Always return same structure
+          // Use database values if found, otherwise component values, default to 0
+          const standardFields = {
+            mfn_rate: rateData?.mfn_rate !== undefined ? rateData.mfn_rate : (component.mfn_rate || 0),
+            base_mfn_rate: rateData?.base_mfn_rate !== undefined ? rateData.base_mfn_rate : (rateData?.mfn_rate || component.base_mfn_rate || component.mfn_rate || 0),
+            section_301: rateData?.section_301 !== undefined ? rateData.section_301 : (component.section_301 || 0),
+            section_232: rateData?.section_232 !== undefined ? rateData.section_232 : (component.section_232 || 0),
+            usmca_rate: rateData?.usmca_rate !== undefined ? rateData.usmca_rate : (component.usmca_rate || 0),
+            rate_source: rateData ? 'database_cache_current' : 'database_fallback',  // Required field
+            stale: !rateData,  // Required field: Is data missing from fresh cache?
+            data_source: rateData?.data_source || (rateData ? 'database_cache' : 'no_data'),
+            last_updated: rateData?.last_updated || null
+          };
 
-            console.log(`✅ [TARIFF-INTEGRATION] Fresh rates loaded for ${component.hs_code}: MFN ${rateData.mfn_rate}%, Section 301 ${rateData.section_301}% (updated ${rateData.last_updated})`);
+          enriched.push({
+            ...component,
+            ...standardFields
+          });
+
+          if (rateData) {
+            console.log(`✅ [TARIFF-INTEGRATION] Fresh rates loaded for ${component.hs_code}: MFN ${standardFields.mfn_rate}%, Section 301 ${standardFields.section_301}% (rate_source=${standardFields.rate_source})`);
           } else {
-            // No rates in database, use empty (AI will estimate)
-            enriched.push(component);
-            console.log(`⚠️ [TARIFF-INTEGRATION] No fresh rates found for ${component.hs_code} - AI will estimate`);
+            console.log(`⚠️ [TARIFF-INTEGRATION] No fresh rates for ${component.hs_code} - using component values (rate_source=${standardFields.rate_source}, stale=${standardFields.stale})`);
           }
         } catch (dbError) {
           console.error(`❌ [TARIFF-INTEGRATION] Database lookup error for ${component.hs_code}:`, dbError.message);
-          enriched.push(component); // Continue with component as-is
+          // On error: still return consistent structure
+          enriched.push({
+            ...component,
+            mfn_rate: component.mfn_rate || 0,
+            base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
+            section_301: component.section_301 || 0,
+            section_232: component.section_232 || 0,
+            usmca_rate: component.usmca_rate || 0,
+            rate_source: 'database_fallback',
+            stale: true,
+            data_source: 'error'
+          });
         }
       }
 
