@@ -104,23 +104,13 @@ export default protectedApiHandler({
           });
         }
 
-        // ✅ CRITICAL FIX: Validate and normalize components to ensure required fields
-        // Components MUST have hs_code and origin_country (from API enrichment)
+        // ✅ Normalize components to ensure required fields
         const normalizedComponents = (component_origins || []).map((component, idx) => {
-          // Validate required fields from data contract
-          if (!component.hs_code || !component.origin_country) {
-            console.warn(`⚠️ Component ${idx} missing required fields - ensuring they exist:`, {
-              description: component.description,
-              hasHsCode: !!component.hs_code,
-              hasOriginCountry: !!component.origin_country
-            });
-          }
-
           return {
             ...component,
             // ✅ Ensure required fields - NEVER save components with undefined hs_code or origin_country
-            hs_code: component.hs_code || 'UNKNOWN',
-            origin_country: component.origin_country || 'UNKNOWN',
+            hs_code: component.hs_code,  // ✅ REMOVED FALLBACK - fail loudly if missing
+            origin_country: component.origin_country,  // ✅ REMOVED FALLBACK - fail loudly if missing
             // Ensure other contract fields
             base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
             mfn_rate: component.mfn_rate !== undefined ? component.mfn_rate : (component.base_mfn_rate || 0),

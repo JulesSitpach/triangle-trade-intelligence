@@ -746,13 +746,13 @@ export default protectedApiHandler({
           console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
           const fallbackComponents = analysis.usmca?.component_breakdown || formData.component_origins || [];
 
-          // ✅ Normalize fallback components to ensure required fields (including hs_code and origin_country)
+          // ✅ Use original form data to fill in missing required fields
           return (fallbackComponents || []).map((component, idx) => {
             // Use original form data to fill in missing required fields
             const originalComponent = formData.component_origins?.[idx] || {};
             return {
               ...component,
-              // ✅ CRITICAL: Ensure hs_code and origin_country are always present
+              // ✅ CRITICAL: Ensure hs_code and origin_country from original input
               hs_code: component.hs_code || originalComponent.hs_code || '',
               origin_country: component.origin_country || originalComponent.origin_country || '',
               // Ensure all tariff fields
