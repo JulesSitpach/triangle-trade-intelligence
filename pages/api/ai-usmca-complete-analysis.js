@@ -519,6 +519,84 @@ export default protectedApiHandler({
       }
     }
 
+    // ✅ CRITICAL FIX (Oct 26): Calculate component_breakdown separately before building response
+    // Priority: AI components array > Enriched user components > Raw fallback
+    const componentBreakdown = await (async () => {
+          console.log('🔧 [COMPONENT-BREAKDOWN] Starting enrichment logic...');
+
+          // Option 1: AI returned explicit components array
+          if (analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0) {
+            console.log(`✅ [COMPONENT-BREAKDOWN] Using AI components array (${analysis.components.length} components)`);
+
+            // DEBUG: Check what fields are in the AI components
+            const sampleComponent = analysis.components[0];
+            console.log(`📋 [COMPONENT-BREAKDOWN] Sample component structure:`, {
+              description: sampleComponent.description,
+              hasMfnRate: sampleComponent.mfn_rate !== undefined,
+              mfnRate: sampleComponent.mfn_rate,
+              hasUsmcaRate: sampleComponent.usmca_rate !== undefined,
+              usmcaRate: sampleComponent.usmca_rate,
+              hasSection301: sampleComponent.section_301 !== undefined,
+              section301: sampleComponent.section_301,
+              allKeys: Object.keys(sampleComponent)
+            });
+
+            // ✅ CRITICAL FIX (Oct 26): Enrich AI components with fresh database rates
+            // AI components have tariff data, but we need to overlay fresh database rates on top
+            const enrichedAIComponents = await enrichComponentsWithFreshRates(analysis.components, formData.destination_country);
+            console.log(`🔄 [TARIFF-ENRICHMENT] Enriched ${enrichedAIComponents.length} AI components with fresh database rates`);
+
+            // ✅ NORMALIZE enriched AI components to ensure all required fields exist
+            const normalizedAIComponents = (enrichedAIComponents || []).map(component => ({
+              ...component,
+              // Ensure all required fields are present for frontend transformer
+              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+              rate_source: component.rate_source || 'ai_analysis',
+              stale: component.stale !== undefined ? component.stale : false,
+              // Ensure data_source is set for tracking provenance
+              data_source: component.data_source || 'ai_analysis'
+            }));
+
+            console.log(`✅ [COMPONENT-NORMALIZATION] Normalized ${normalizedAIComponents.length} AI components with required fields`);
+            return normalizedAIComponents;
+          }
+
+          console.log('⚠️ [COMPONENT-BREAKDOWN] No AI components array, attempting enrichment...');
+
+          // Option 2: Enrich user components with rates extracted from AI response
+          // CRITICAL: Pass already-enriched components (with fresh DB rates) instead of original
+          // enrichComponentsWithTariffRates will preserve existing rates and only extract missing ones
+          const enrichedComponents = enrichComponentsWithTariffRates(enrichedComponents, analysis);
+          console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${enrichedComponents.length} components`);
+          console.log(`📊 [COMPONENT-BREAKDOWN] Checking for data_source==='ai_enriched'...`);
+          const hasEnrichedData = enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched');
+          console.log(`📊 [COMPONENT-BREAKDOWN] Has enriched data: ${hasEnrichedData}`);
+
+          if (hasEnrichedData) {
+            console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
+            // ✅ Ensure all enriched components have required fields
+            return (enrichedComponents || []).map(component => ({
+              ...component,
+              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+              rate_source: component.rate_source || 'ai_enriched',
+              stale: component.stale !== undefined ? component.stale : false
+            }));
+          }
+
+          // Option 3: Fallback to API's component_breakdown or raw user input
+          console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
+          const fallbackComponents = analysis.usmca?.component_breakdown || formData.component_origins || [];
+
+          // ✅ Normalize fallback components to ensure required fields
+          return (fallbackComponents || []).map(component => ({
+            ...component,
+            base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
+            rate_source: component.rate_source || 'user_input',
+            stale: component.stale !== undefined ? component.stale : true,  // Mark as potentially stale
+            data_source: component.data_source || 'user_input'
+          }));
+        })();  // ✅ IIFE awaited above
+
     // Format response for UI
     const result = {
       success: true,
@@ -575,83 +653,8 @@ export default protectedApiHandler({
         threshold_applied: analysis.usmca?.threshold_applied,
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
-        // ✅ CRITICAL FIX (Oct 26): Enrich components with tariff rates from AI response
-        // Priority: AI components array > Enriched user components > Raw fallback
-        component_breakdown: (() => {
-          console.log('🔧 [COMPONENT-BREAKDOWN] Starting enrichment logic...');
-
-          // Option 1: AI returned explicit components array
-          if (analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0) {
-            console.log(`✅ [COMPONENT-BREAKDOWN] Using AI components array (${analysis.components.length} components)`);
-
-            // DEBUG: Check what fields are in the AI components
-            const sampleComponent = analysis.components[0];
-            console.log(`📋 [COMPONENT-BREAKDOWN] Sample component structure:`, {
-              description: sampleComponent.description,
-              hasMfnRate: sampleComponent.mfn_rate !== undefined,
-              mfnRate: sampleComponent.mfn_rate,
-              hasUsmcaRate: sampleComponent.usmca_rate !== undefined,
-              usmcaRate: sampleComponent.usmca_rate,
-              hasSection301: sampleComponent.section_301 !== undefined,
-              section301: sampleComponent.section_301,
-              allKeys: Object.keys(sampleComponent)
-            });
-
-            // ✅ CRITICAL FIX (Oct 26): Enrich AI components with fresh database rates
-            // AI components have tariff data, but we need to overlay fresh database rates on top
-            const enrichedAIComponents = enrichComponentsWithFreshRates(analysis.components, formData.destination_country);
-            console.log(`🔄 [TARIFF-ENRICHMENT] Enriched ${enrichedAIComponents.length} AI components with fresh database rates`);
-
-            // ✅ NORMALIZE enriched AI components to ensure all required fields exist
-            const normalizedAIComponents = (enrichedAIComponents || []).map(component => ({
-              ...component,
-              // Ensure all required fields are present for frontend transformer
-              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
-              rate_source: component.rate_source || 'ai_analysis',
-              stale: component.stale !== undefined ? component.stale : false,
-              // Ensure data_source is set for tracking provenance
-              data_source: component.data_source || 'ai_analysis'
-            }));
-
-            console.log(`✅ [COMPONENT-NORMALIZATION] Normalized ${normalizedAIComponents.length} AI components with required fields`);
-            return normalizedAIComponents;
-          }
-
-          console.log('⚠️ [COMPONENT-BREAKDOWN] No AI components array, attempting enrichment...');
-
-          // Option 2: Enrich user components with rates extracted from AI response
-          // CRITICAL: Pass already-enriched components (with fresh DB rates) instead of original
-          // enrichComponentsWithTariffRates will preserve existing rates and only extract missing ones
-          const enrichedComponents = enrichComponentsWithTariffRates(enrichedComponents, analysis);
-          console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${enrichedComponents.length} components`);
-          console.log(`📊 [COMPONENT-BREAKDOWN] Checking for data_source==='ai_enriched'...`);
-          const hasEnrichedData = enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched');
-          console.log(`📊 [COMPONENT-BREAKDOWN] Has enriched data: ${hasEnrichedData}`);
-
-          if (hasEnrichedData) {
-            console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
-            // ✅ Ensure all enriched components have required fields
-            return (enrichedComponents || []).map(component => ({
-              ...component,
-              base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
-              rate_source: component.rate_source || 'ai_enriched',
-              stale: component.stale !== undefined ? component.stale : false
-            }));
-          }
-
-          // Option 3: Fallback to API's component_breakdown or raw user input
-          console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
-          const fallbackComponents = analysis.usmca?.component_breakdown || formData.component_origins || [];
-
-          // ✅ Normalize fallback components to ensure required fields
-          return (fallbackComponents || []).map(component => ({
-            ...component,
-            base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
-            rate_source: component.rate_source || 'user_input',
-            stale: component.stale !== undefined ? component.stale : true,  // Mark as potentially stale
-            data_source: component.data_source || 'user_input'
-          }));
-        })(),
+        // ✅ Component breakdown calculated above (awaited)
+        component_breakdown: componentBreakdown,
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
         preference_criterion: analysis.usmca?.qualified ? analysis.usmca?.preference_criterion : null,
