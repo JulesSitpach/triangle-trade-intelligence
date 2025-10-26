@@ -117,20 +117,21 @@ export default protectedApiHandler({
 
           if (!blockHasComponent) continue;
 
-          // Extract MFN rate: look for "MFN rate: X%" or "MFN rate: X% (...)"
-          const mfnMatch = block.match(/MFN rate[:\s]+([0-9.]+)%/i);
+          // Extract MFN rate: look for "MFN rate avoided: X%" or "MFN rate: X%"
+          // Flexible regex to handle "avoided" and other variations
+          const mfnMatch = block.match(/MFN\s+rate\s+(?:avoided)?[^:]*?:\s*([0-9.]+)%/i);
           if (mfnMatch?.[1]) {
             mfnRate = parseFloat(mfnMatch[1]);
           }
 
           // Extract USMCA rate: look for "USMCA rate: X%"
-          const usmcaMatch = block.match(/USMCA rate[:\s]+([0-9.]+)%/i);
+          const usmcaMatch = block.match(/USMCA\s+rate[^:]*?:\s*([0-9.]+)%/i);
           if (usmcaMatch?.[1]) {
             usmcaRate = parseFloat(usmcaMatch[1]);
           }
 
-          // Extract Section 301: look for "Section 301 tariff of X%" or "Section 301: X%"
-          const s301Match = block.match(/Section 301[^:]*?of\s+([0-9.]+)%|Section 301[:\s]+([0-9.]+)%/i);
+          // Extract Section 301: look for "Section 301 of X%", "Section 301: X%", or "tariff of X%"
+          const s301Match = block.match(/Section\s+301[^:]*?(?:of|:)\s*([0-9.]+)%|tariff\s+of\s+([0-9.]+)%/i);
           if (s301Match) {
             section301 = parseFloat(s301Match[1] || s301Match[2]);
           }
@@ -163,10 +164,19 @@ export default protectedApiHandler({
         const rates = extractComponentRate(comp.description, comp.hs_code, comp.origin_country);
 
         // DEBUG: Log extraction results
+        console.log(`🔍 Extracting rates for "${comp.description}" (${comp.hs_code}):`, {
+          mfnFound: rates.extracted.mfnFound,
+          mfnRate: rates.mfnRate,
+          usmcaFound: rates.extracted.usmcaFound,
+          usmcaRate: rates.usmcaRate,
+          section301Found: rates.extracted.section301Found,
+          section301: rates.section301
+        });
+
         if (rates.extracted.mfnFound || rates.extracted.section301Found) {
-          console.log(`✅ Extracted rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
+          console.log(`✅ Successfully extracted rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
         } else {
-          console.log(`⚠️ No rates extracted for ${comp.description} - using defaults`);
+          console.log(`⚠️ No rates extracted for ${comp.description} (desc="${comp.description}", hs="${comp.hs_code}", origin="${comp.origin_country}")`);
         }
 
         const totalRate = rates.mfnRate + rates.section301;
@@ -429,20 +439,30 @@ export default protectedApiHandler({
         // ✅ CRITICAL FIX (Oct 26): Enrich components with tariff rates from AI response
         // Priority: AI components array > Enriched user components > Raw fallback
         component_breakdown: (() => {
+          console.log('🔧 [COMPONENT-BREAKDOWN] Starting enrichment logic...');
+
           // Option 1: AI returned explicit components array
           if (analysis.components && Array.isArray(analysis.components) && analysis.components.length > 0) {
+            console.log(`✅ [COMPONENT-BREAKDOWN] Using AI components array (${analysis.components.length} components)`);
             return analysis.components;
           }
 
+          console.log('⚠️ [COMPONENT-BREAKDOWN] No AI components array, attempting enrichment...');
+
           // Option 2: Enrich user components with rates extracted from AI response
           const enrichedComponents = enrichComponentsWithTariffRates(formData.component_origins, analysis);
-          // ✅ FIX: Check if enrichment happened (data_source field), not if rates > 0
-          // Mexico/Canada components have 0% mfn_rate but are still enriched!
-          if (enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched')) {
+          console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${enrichedComponents.length} components`);
+          console.log(`📊 [COMPONENT-BREAKDOWN] Checking for data_source==='ai_enriched'...`);
+          const hasEnrichedData = enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched');
+          console.log(`📊 [COMPONENT-BREAKDOWN] Has enriched data: ${hasEnrichedData}`);
+
+          if (hasEnrichedData) {
+            console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
             return enrichedComponents;
           }
 
           // Option 3: Fallback to API's component_breakdown or raw user input
+          console.log('⚠️ [COMPONENT-BREAKDOWN] Falling back to raw user input');
           return analysis.usmca?.component_breakdown || formData.component_origins;
         })(),
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
