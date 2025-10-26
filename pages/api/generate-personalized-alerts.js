@@ -20,6 +20,28 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing user_profile', success: false });
     }
 
+    // ✅ TIER-GATING: Personalized alerts are PAID-ONLY feature
+    // Free/Trial users get generic educational alerts only (in static config)
+    // Personalized filtering based on their products is premium feature
+    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
+    const isPaidTier = subscriptionTier && ['Premium', 'Professional', 'Enterprise'].includes(subscriptionTier);
+
+    if (!isPaidTier) {
+      // Return empty alerts for free users - they should not see personalized content
+      // Instead show generic message to upgrade
+      return res.status(403).json({
+        success: false,
+        error: 'UPGRADE_REQUIRED',
+        code: 'PERSONALIZED_ALERTS_REQUIRE_PAID_SUBSCRIPTION',
+        alerts: [],
+        message: 'Personalized alerts are available only with a paid subscription',
+        upgrade_message: 'Upgrade to Professional tier to receive alerts tailored to your specific products, suppliers, and destinations',
+        required_tier: 'Professional',
+        current_tier: subscriptionTier,
+        upgrade_url: '/pricing'
+      });
+    }
+
     // ========== STEP 1: Score each educational alert for relevance ==========
 
     const scoredAlerts = EDUCATIONAL_ALERTS.map(alert => {
