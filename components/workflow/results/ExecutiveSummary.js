@@ -176,9 +176,17 @@ export default function ExecutiveSummary({ results }) {
                   💰 Financial Impact Analysis
                 </summary>
                 <div className="analysis-detail-content">
-                  {typeof detailed_analysis.savings_analysis === 'string'
-                    ? detailed_analysis.savings_analysis
-                    : JSON.stringify(detailed_analysis.savings_analysis)}
+                  {typeof detailed_analysis.savings_analysis === 'string' ? (
+                    detailed_analysis.savings_analysis
+                  ) : (
+                    <>
+                      {detailed_analysis.savings_analysis.calculation_detail && (
+                        <p style={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '0.875rem', lineHeight: '1.6' }}>
+                          {detailed_analysis.savings_analysis.calculation_detail}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               </details>
             )}
