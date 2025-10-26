@@ -12,7 +12,6 @@ import { normalizeComponent, logComponentValidation } from '../../lib/schemas/co
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { enrichmentRouter } from '../../lib/tariff/enrichment-router.js';
-import { SkillsBaseAgent } from '../../lib/agents/skills-base-agent.js';
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
   getCacheExpiration,
@@ -59,12 +58,6 @@ export default protectedApiHandler({
   POST: async (req, res) => {
     const startTime = Date.now();
     const userId = req.user.id;
-    // Initialize Skills-powered agent
-    const skillsAgent = new SkillsBaseAgent({
-      name: 'USMCAAnalysisAgent',
-      enableSkills: true,
-      skillFallback: true  // Falls back to traditional AI if Skill fails
-    });
     const formData = req.body; // Move outside try block for error handler access
 
   try {
@@ -480,45 +473,13 @@ export default protectedApiHandler({
       trade_volume: formData.trade_volume
     };
 
-    // Try Skills-based enrichment (with fallback to traditional function)
-    let enrichedComponents;
-    let enrichmentProvider = 'unknown';
-    try {
-      const skillResult = await skillsAgent.execute(null, {
-        skillId: 'tariff-enrichment-engine',
-        skillInput: {
-          components: formData.component_origins,
-          destination_country: formData.destination_country,
-          cache_lookup_required: true,
-          include_confidence: true
-        }
-      });
-
-      if (skillResult.success && skillResult.data?.enriched_components) {
-        enrichedComponents = skillResult.data.enriched_components;
-        enrichmentProvider = skillResult.metadata?.provider || 'skill';
-        console.log('✅ Tariff enrichment via ' + enrichmentProvider, {
-          components: enrichedComponents.length,
-          cacheHitRate: skillResult.data.cache_hit_rate
-        });
-      } else {
-        throw new Error('Skill returned no data, falling back to traditional enrichment');
-      }
-    } catch (skillError) {
-      console.warn('⚠️ Skill enrichment failed, using traditional function:', skillError.message);
-      enrichmentProvider = 'traditional';
-      enrichedComponents = await enrichComponentsWithTariffIntelligence(
-        formData.component_origins,
-        fullBusinessContext,
-        formData.destination_country
-      );
-    }
-
-    // REPLACED: const enrichedComponents = await enrichComponentsWithTariffIntelligence(
-      // formData.component_origins,
-      // fullBusinessContext,
-      // formData.destination_country  // NEW: Pass destination for routing
-    // );
+    // Enrich components with tariff intelligence (traditional approach)
+    // REVERTED from Skills approach: Proven 3-tier AI system works better for complex reasoning
+    const enrichedComponents = await enrichComponentsWithTariffIntelligence(
+      formData.component_origins,
+      fullBusinessContext,
+      formData.destination_country  // Pass destination for routing
+    );
     console.log('✅ Component enrichment complete:', {
       total_components: enrichedComponents.length,
       enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length,
