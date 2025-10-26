@@ -597,8 +597,13 @@ export default protectedApiHandler({
               allKeys: Object.keys(sampleComponent)
             });
 
-            // ✅ NORMALIZE AI components to ensure all required fields exist
-            const normalizedAIComponents = (analysis.components || []).map(component => ({
+            // ✅ CRITICAL FIX (Oct 26): Enrich AI components with fresh database rates
+            // AI components have tariff data, but we need to overlay fresh database rates on top
+            const enrichedAIComponents = enrichComponentsWithFreshRates(analysis.components, formData.destination_country);
+            console.log(`🔄 [TARIFF-ENRICHMENT] Enriched ${enrichedAIComponents.length} AI components with fresh database rates`);
+
+            // ✅ NORMALIZE enriched AI components to ensure all required fields exist
+            const normalizedAIComponents = (enrichedAIComponents || []).map(component => ({
               ...component,
               // Ensure all required fields are present for frontend transformer
               base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
