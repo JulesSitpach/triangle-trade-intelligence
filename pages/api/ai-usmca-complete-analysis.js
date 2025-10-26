@@ -60,13 +60,7 @@ export default protectedApiHandler({
 
   try {
 
-    console.log('🤖 ========== AI-POWERED USMCA ANALYSIS: START ==========');
-    console.log('📥 Received request:', {
-      company: formData.company_name,
-      business_type: formData.business_type,
-      product: formData.product_description,
-      component_count: formData.component_origins?.length
-    });
+    // ⚡ PERFORMANCE: Disabled verbose startup logging
 
     // ========== STEP 0: CHECK USAGE LIMITS ==========
     // Get user's subscription tier from database
@@ -82,7 +76,6 @@ export default protectedApiHandler({
     const usageStatus = await checkAnalysisLimit(userId, subscriptionTier);
 
     if (!usageStatus.canProceed) {
-      console.log(`❌ Analysis limit reached for user ${userId} (${subscriptionTier}): ${usageStatus.currentCount}/${usageStatus.tierLimit}`);
       return res.status(429).json({
         success: false,
         error: 'Monthly analysis limit reached',
@@ -96,8 +89,6 @@ export default protectedApiHandler({
         upgrade_url: '/pricing'
       });
     }
-
-    console.log(`✅ Usage check passed: ${usageStatus.currentCount}/${usageStatus.tierLimit} (${usageStatus.remaining} remaining)`);
 
     // Validate ALL required fields (UI marks 14 fields as required, API must validate all)
     const requiredFields = {
@@ -126,11 +117,7 @@ export default protectedApiHandler({
     });
 
     if (missingFields.length > 0) {
-      await DevIssue.validationError('usmca_analysis', 'required_fields', `Missing required fields: ${missingFields.join(', ')}`, {
-        userId,
-        missing_fields: missingFields,
-        field_count: missingFields.length
-      });
+      // ⚡ PERFORMANCE: Removed await DevIssue logging (was blocking response)
       return res.status(400).json({
         success: false,
         error: `Missing required fields: ${missingFields.join(', ')}`,
@@ -144,15 +131,7 @@ export default protectedApiHandler({
     }, 0);
 
     if (totalPercentage > 100) {
-      await DevIssue.validationError('usmca_analysis', 'component_percentage_sum', `Component percentages exceed 100%: ${totalPercentage}%`, {
-        userId,
-        company: formData.company_name,
-        total_percentage: totalPercentage,
-        components: formData.component_origins.map(c => ({
-          description: c.description,
-          percentage: c.value_percentage
-        }))
-      });
+      // ⚡ PERFORMANCE: Removed await DevIssue logging (was blocking response)
       return res.status(400).json({
         success: false,
         error: `Component percentages exceed 100%. Total: ${totalPercentage}%. Please adjust component values so they sum to 100% or less.`,
@@ -164,8 +143,6 @@ export default protectedApiHandler({
       });
     }
 
-    console.log(`✅ Component percentage validation passed: ${totalPercentage}%`);
-
     // ========== PERFORMANCE OPTIMIZATION (Oct 26, 2025) ==========
     // REVERTED: Two sequential AI calls (tariff lookup + USMCA analysis) took ~105 seconds
     // NEW: Single AI call where Claude determines both qualification AND tariff rates
@@ -173,13 +150,8 @@ export default protectedApiHandler({
     // Result: ~50% faster (from 105s → ~55s)
     // See: qualification-engine.js line 118 - AI has full instructions to look up rates
 
-    console.log('🚀 OPTIMIZED CODE PATH: Using single AI call (no tariff pre-fetch)');
-
     // Build prompt WITHOUT pre-fetched rates (AI will determine them)
     const prompt = await buildComprehensiveUSMCAPrompt(formData, {} /* empty rates - let AI look them up */);
-
-    console.log('🎯 ========== SENDING TO OPENROUTER ==========');
-    console.log('Prompt length:', prompt.length, 'characters');
 
     // Call OpenRouter API
     const openrouterStartTime = Date.now();
@@ -200,26 +172,16 @@ export default protectedApiHandler({
       })
     });
     const openrouterDuration = Date.now() - openrouterStartTime;
-    console.log(`✅ OpenRouter response received: ${openrouterDuration}ms`);
 
     if (!aiResponse.ok) {
-      const errorMsg = `OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`;
-      await logDevIssue({
-        type: 'api_error',
-        severity: 'critical',
-        component: 'usmca_analysis',
-        message: errorMsg,
-        data: { userId, company: formData.company_name, status: aiResponse.status }
-      });
-      throw new Error(errorMsg);
+      throw new Error(`OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`);
     }
 
+    const aiParsingStart = Date.now();
     const aiResult = await aiResponse.json();
     const aiText = aiResult.choices?.[0]?.message?.content;
 
-    console.log('🔮 ========== RAW AI RESPONSE ==========');
-    console.log(aiText);
-    console.log('========== END RAW RESPONSE ==========');
+    // ⚡ PERFORMANCE: Disabled full AI response logging
 
     // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
@@ -252,15 +214,6 @@ export default protectedApiHandler({
       }
 
       if (!jsonString) {
-        console.error('❌ No JSON found in Results AI response');
-        console.error('AI Response (first 500 chars):', aiText.substring(0, 500));
-        await logDevIssue({
-          type: 'unexpected_behavior',
-          severity: 'critical',
-          component: 'usmca_analysis',
-          message: 'AI response missing JSON structure',
-          data: { userId, company: formData.company_name, response_preview: aiText.substring(0, 500) }
-        });
         throw new Error('No JSON found in AI response');
       }
 
@@ -268,23 +221,9 @@ export default protectedApiHandler({
       const sanitizedJSON = jsonString.replace(/[\r\n\t\x00-\x1F\x7F-\x9F]/g, ' ').replace(/\s+/g, ' ');
 
       analysis = JSON.parse(sanitizedJSON.trim());
-      console.log(`✅ Results JSON parsed successfully (method: ${extractionMethod}, sanitized)`);
     } catch (parseError) {
-      console.error('❌ Failed to parse AI response:', parseError);
-      await DevIssue.apiError('usmca_analysis', 'AI response parsing', parseError, {
-        userId,
-        company: formData.company_name,
-        response_preview: aiText?.substring(0, 500)
-      });
       throw new Error(`AI response parsing failed: ${parseError.message}`);
     }
-
-    console.log('✅ Parsed analysis:', {
-      qualified: analysis.usmca?.qualified,
-      threshold: analysis.usmca?.threshold_applied,
-      content: analysis.usmca?.north_american_content,
-      recommendation_count: analysis.recommendations?.length
-    });
 
     // ✅ SKIPPED: Regex-based validation was causing false positives
     // (extracting component percentages like 35%, 30%, 20% and comparing to tariff rates)
