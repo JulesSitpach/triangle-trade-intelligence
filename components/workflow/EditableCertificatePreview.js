@@ -235,7 +235,16 @@ export default function EditableCertificatePreview({
 
       {userTier === 'Trial' && (
         <div className="alert alert-warning" style={{ marginBottom: '16px' }}>
-          <div className="alert-title">⚠️ TRIAL PREVIEW - Not valid for customs</div>
+          <div className="alert-title">⚠️ FREE TRIAL PREVIEW - WATERMARKED</div>
+          <div className="text-body">
+            This is a <strong>READ-ONLY PREVIEW</strong> for free users. Download and official certificate features require a paid subscription.
+            <br /><br />
+            <strong>Free users can:</strong> View certificate structure, verify accuracy
+            <br />
+            <strong>Paid users can:</strong> Edit & download official certificates (no watermark), receive trade alerts
+            <br />
+            <a href="/pricing" style={{color: '#2563eb', textDecoration: 'underline'}}>Upgrade to Professional ($99/month)</a>
+          </div>
         </div>
       )}
 
@@ -247,8 +256,34 @@ export default function EditableCertificatePreview({
         fontSize: '11px',
         maxWidth: '900px',
         margin: '0 auto',
-        pageBreakInside: 'avoid'
+        pageBreakInside: 'avoid',
+        // Add watermark for free trial users
+        position: 'relative',
+        ...(userTier === 'Trial' && {
+          background: 'repeating-linear-gradient(45deg, #fff, #fff 50px, rgba(239, 68, 68, 0.03) 50px, rgba(239, 68, 68, 0.03) 100px)',
+          border: '3px solid #fee2e2'
+        })
       }}>
+        {/* WATERMARK for free users */}
+        {userTier === 'Trial' && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-45deg)',
+            fontSize: '72px',
+            fontWeight: 'bold',
+            color: 'rgba(239, 68, 68, 0.08)',
+            pointerEvents: 'none',
+            zIndex: 10,
+            width: '200%',
+            textAlign: 'center',
+            fontFamily: 'Arial, sans-serif',
+            letterSpacing: '20px'
+          }}>
+            TRIAL - NOT OFFICIAL
+          </div>
+        )}
         {/* Header */}
         <div style={{
           textAlign: 'center',
@@ -606,22 +641,44 @@ export default function EditableCertificatePreview({
         >
           ← Back to Edit Authorization
         </button>
-        <button
-          onClick={handleSave}
-          disabled={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy}
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            backgroundColor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? '#10b981' : '#cccccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? 'pointer' : 'not-allowed',
-            fontWeight: 'bold'
-          }}
-        >
-          ✓ Download Certificate
-        </button>
+        {userTier === 'Trial' ? (
+          <a
+            href="/pricing"
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              display: 'inline-block'
+            }}
+            title="Upgrade to Professional to download official certificates"
+          >
+            🔒 Upgrade to Download
+          </a>
+        ) : (
+          <button
+            onClick={handleSave}
+            disabled={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy}
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              backgroundColor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? '#10b981' : '#cccccc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? 'pointer' : 'not-allowed',
+              fontWeight: 'bold'
+            }}
+            title={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy ? 'Accept responsibility and confirm accuracy to download' : ''}
+          >
+            ✓ Download Certificate
+          </button>
+        )}
       </div>
     </div>
   );
