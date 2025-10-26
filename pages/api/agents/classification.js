@@ -1,8 +1,7 @@
 // UPGRADED Classification Agent API - Database-backed classification cache
-// Enhanced with EnhancedClassificationAgent for primary HS code suggestions
+// Uses ClassificationAgent for HS code suggestions
 // SUBSCRIPTION-AWARE: Integrates subscription validation and usage tracking
 
-import EnhancedClassificationAgent from '../../../lib/agents/enhanced-classification-agent.js';
 import { ClassificationAgent } from '../../../lib/agents/classification-agent.js';
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
