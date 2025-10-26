@@ -99,56 +99,58 @@ export default protectedApiHandler({
       const calcDetail = savingsData.calculation_detail || '';
 
       // Extract component-specific rates from calculation_detail
-      // Format: "1. Component Name...\n - MFN rate: X%\n - Section 301: Y%"
+      // Format: "1. **Component Name (origin, %)** ... - MFN rate: X% ... - Section 301: Y%"
       function extractComponentRate(componentName, hsCode, originCountry) {
-        let mfnRate = 0;
-        let usmcaRate = 0;
-        let section301 = 0;
+        let mfnRate = undefined;  // undefined = not found (different from 0 = found as 0%)
+        let usmcaRate = undefined;
+        let section301 = undefined;
 
-        // Parse all numbered components to build a rate map
+        // Parse all numbered components (1. 2. 3. etc)
         const componentBlocks = calcDetail.split(/(?=\d+\.\s\*?\*?)/);
 
         for (const block of componentBlocks) {
-          // Check if this block contains our component
-          const blockContainsComponent = componentName && block.includes(componentName);
-          const blockContainsHSCode = hsCode && block.includes(hsCode);
+          // Check if this block contains our component by name, HS code, or origin
+          const blockHasComponent =
+            (componentName && block.includes(componentName)) ||
+            (hsCode && block.includes(hsCode)) ||
+            (originCountry && block.includes(originCountry));
 
-          if (blockContainsComponent || blockContainsHSCode) {
-            // Extract MFN rate from this block
-            const mfnMatch = block.match(/MFN rate[:\s]+([0-9.]+)%/i);
-            if (mfnMatch?.[1]) {
-              mfnRate = parseFloat(mfnMatch[1]);
-            }
+          if (!blockHasComponent) continue;
 
-            // Extract USMCA rate from this block
-            const usmcaMatch = block.match(/USMCA rate[:\s]+([0-9.]+)%/i);
-            if (usmcaMatch?.[1]) {
-              usmcaRate = parseFloat(usmcaMatch[1]);
-            }
-
-            // Extract Section 301 from this block
-            const s301Match = block.match(/Section 301[:\s]+([0-9.]+)%/i);
-            if (s301Match?.[1]) {
-              section301 = parseFloat(s301Match[1]);
-            }
-
-            // Found component, stop searching
-            break;
+          // Extract MFN rate: look for "MFN rate: X%" or "MFN rate: X% (...)"
+          const mfnMatch = block.match(/MFN rate[:\s]+([0-9.]+)%/i);
+          if (mfnMatch?.[1]) {
+            mfnRate = parseFloat(mfnMatch[1]);
           }
+
+          // Extract USMCA rate: look for "USMCA rate: X%"
+          const usmcaMatch = block.match(/USMCA rate[:\s]+([0-9.]+)%/i);
+          if (usmcaMatch?.[1]) {
+            usmcaRate = parseFloat(usmcaMatch[1]);
+          }
+
+          // Extract Section 301: look for "Section 301 tariff of X%" or "Section 301: X%"
+          const s301Match = block.match(/Section 301[^:]*?of\s+([0-9.]+)%|Section 301[:\s]+([0-9.]+)%/i);
+          if (s301Match) {
+            section301 = parseFloat(s301Match[1] || s301Match[2]);
+          }
+
+          // Found component, stop searching
+          break;
         }
 
-        // Fallback: If rates not found, use origin-based defaults
-        if (mfnRate === 0 && originCountry === 'CN') {
-          // China: 2.4% MFN + 25% Section 301
-          mfnRate = 2.4;
-          section301 = 25;
-        } else if (mfnRate === 0 && ['MX', 'Mexico', 'CA', 'Canada', 'US'].includes(originCountry)) {
-          // USMCA countries: 0% MFN
-          mfnRate = 0;
-          usmcaRate = 0;
-        }
-
-        return { mfnRate, usmcaRate, section301 };
+        // NO HARDCODED FALLBACK - Return what we extracted (undefined if not found)
+        // This forces us to see extraction failures instead of hiding them
+        return {
+          mfnRate: mfnRate !== undefined ? mfnRate : 0,  // Only default to 0 if truly not extracted
+          usmcaRate: usmcaRate !== undefined ? usmcaRate : 0,
+          section301: section301 !== undefined ? section301 : 0,
+          extracted: {
+            mfnFound: mfnRate !== undefined,
+            usmcaFound: usmcaRate !== undefined,
+            section301Found: section301 !== undefined
+          }
+        };
       }
 
       // Enrich each component
