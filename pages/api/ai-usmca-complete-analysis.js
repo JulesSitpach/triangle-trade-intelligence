@@ -490,18 +490,38 @@ export default protectedApiHandler({
         .replace(/\s+/g, ' ')  // Multiple spaces → single space
         .trim();
 
+      // ✅ AUTO-CLOSE INCOMPLETE JSON (AI sometimes truncates responses)
+      // Count opening/closing braces and auto-close if needed
+      let repairAttempted = false;
+      if (sanitizedJSON.startsWith('{') && !sanitizedJSON.endsWith('}')) {
+        const openBraces = (sanitizedJSON.match(/{/g) || []).length;
+        const closeBraces = (sanitizedJSON.match(/}/g) || []).length;
+        const missingBraces = openBraces - closeBraces;
+
+        if (missingBraces > 0) {
+          console.warn(`⚠️ [AUTO-REPAIR] Incomplete JSON detected: ${missingBraces} missing closing braces. Attempting repair...`);
+          sanitizedJSON = sanitizedJSON + '}'.repeat(missingBraces);
+          repairAttempted = true;
+        }
+      }
+
       // ✅ FINAL VALIDATION: Ensure it looks like JSON before parsing
       if (!sanitizedJSON.startsWith('{') || !sanitizedJSON.endsWith('}')) {
         console.error('🚨 [INVALID JSON STRUCTURE]', {
           sanitized_first_50_chars: sanitizedJSON.substring(0, 50),
           sanitized_last_50_chars: sanitizedJSON.substring(sanitizedJSON.length - 50),
-          extraction_method: extractionMethod
+          extraction_method: extractionMethod,
+          repair_attempted: repairAttempted
         });
         throw new Error(`Invalid JSON structure (${extractionMethod}): does not start with { or end with }`);
       }
 
       analysis = JSON.parse(sanitizedJSON);
-      console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy`);
+      if (repairAttempted) {
+        console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy (after auto-repair)`);
+      } else {
+        console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy`);
+      }
     } catch (parseError) {
       console.error('❌ [JSON PARSE ERROR]', {
         error: parseError.message,
