@@ -184,16 +184,21 @@ export default protectedApiHandler({
         const totalRate = rates.mfnRate + rates.section301;
         const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
 
+        // ✅ CRITICAL: Preserve all input fields (including rate_source, stale from enrichComponentsWithFreshRates)
+        // Only UPDATE tariff rate fields extracted from AI response
         return {
-          ...comp,
+          ...comp,  // Preserves: rate_source, stale, and all other fields
           mfn_rate: rates.mfnRate,
-          base_mfn_rate: rates.mfnRate,
+          base_mfn_rate: rates.mfnRate,  // Keep base_mfn_rate consistent with mfn_rate
           usmca_rate: rates.usmcaRate,
           section_301: rates.section301,
-          section_232: 0,
+          section_232: comp.section_232 || 0,  // Preserve existing section_232 if present
           total_rate: totalRate,
           savings_percentage: savingsPercent,
-          data_source: 'ai_enriched'
+          data_source: comp.data_source || 'ai_enriched',  // Preserve database source if present
+          // ✅ Ensure rate_source and stale are always present (required by COMPONENT_DATA_CONTRACT)
+          rate_source: comp.rate_source || 'ai_extracted',
+          stale: comp.stale !== undefined ? comp.stale : false
         };
       });
     }
