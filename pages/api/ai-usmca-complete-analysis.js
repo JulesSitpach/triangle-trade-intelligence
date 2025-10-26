@@ -485,8 +485,8 @@ export default protectedApiHandler({
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4.5', // Sonnet 4.5 for reasoning
-        max_tokens: 4000, // ✅ OPTIMIZED: Reduced from 16,000 to 4,000 - AI synthesizes pre-calculated data instead of calculating
+        model: 'anthropic/claude-haiku-4.5-20251001', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
+        max_tokens: 2000, // ✅ OPTIMIZED: Reduced for minimal JSON response (qualification only)
         messages: [{
           role: 'user',
           content: prompt
