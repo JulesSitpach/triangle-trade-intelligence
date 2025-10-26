@@ -171,13 +171,18 @@ export default protectedApiHandler({
     // ========== STEP 1: GET ACTUAL TARIFF RATES FIRST ==========
     // Fetch real tariff rates with 2025 policy context BEFORE doing qualification analysis
     console.log('📊 Fetching actual tariff rates for all components...');
+    const ratesStartTime = Date.now();
     const componentsWithHSCodes = formData.component_origins.filter(c => c.hs_code);
     let componentRates = {};
 
     if (componentsWithHSCodes.length > 0) {
       // ✅ DESTINATION-AWARE: Pass destination for smart cache expiration
       componentRates = await lookupBatchTariffRates(componentsWithHSCodes, formData.destination_country);
-      console.log(`✅ Got tariff rates for ${Object.keys(componentRates).length} components (dest: ${formData.destination_country})`);
+      const ratesDuration = Date.now() - ratesStartTime;
+      console.log(`✅ Got tariff rates for ${Object.keys(componentRates).length} components (${ratesDuration}ms)`, {
+        destination_country: formData.destination_country,
+        duration_ms: ratesDuration
+      });
     }
 
     // ========== STEP 2: BUILD PROMPT WITH ACTUAL RATES ==========
@@ -188,6 +193,7 @@ export default protectedApiHandler({
     console.log('Prompt length:', prompt.length, 'characters');
 
     // Call OpenRouter API
+    const openrouterStartTime = Date.now();
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -204,6 +210,8 @@ export default protectedApiHandler({
         temperature: 0 // Zero temperature for perfect determinism (same input = same output)
       })
     });
+    const openrouterDuration = Date.now() - openrouterStartTime;
+    console.log(`✅ OpenRouter response received: ${openrouterDuration}ms`);
 
     if (!aiResponse.ok) {
       const errorMsg = `OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`;
@@ -475,15 +483,18 @@ export default protectedApiHandler({
 
     // Enrich components with tariff intelligence (traditional approach)
     // REVERTED from Skills approach: Proven 3-tier AI system works better for complex reasoning
+    const enrichmentStartTime = Date.now();
     const enrichedComponents = await enrichComponentsWithTariffIntelligence(
       formData.component_origins,
       fullBusinessContext,
       formData.destination_country  // Pass destination for routing
     );
+    const enrichmentDuration = Date.now() - enrichmentStartTime;
     console.log('✅ Component enrichment complete:', {
       total_components: enrichedComponents.length,
       enriched_count: enrichedComponents.filter(c => c.classified_hs_code).length,
-      destination_country: formData.destination_country
+      destination_country: formData.destination_country,
+      duration_ms: enrichmentDuration
     });
 
     // CRITICAL: Normalize all components to ensure consistent field names
