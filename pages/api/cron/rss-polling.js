@@ -1,11 +1,13 @@
 /**
- * VERCEL CRON JOB - RSS POLLING
+ * VERCEL CRON JOB - RSS POLLING + TARIFF SYNC
  * Called every 2 hours by Vercel Cron (Pro Plan - faster alerts for competitive advantage)
  * Polls USITC, USTR, Federal Register, and Financial Times for tariff policy updates
+ * Also syncs live tariff rates from USITC DataWeb API for October 2025 accuracy
  * Laser-focused keywords: tariff announcements, Section 301/232, USMCA changes, port fees
  */
 
 import RSSPollingEngine from '../../../lib/services/rss-polling-engine.js';
+import usitcTariffSync from '../../../lib/services/usitc-tariff-sync.js';
 
 export default async function handler(req, res) {
   // Verify this is a Vercel Cron request OR GitHub Actions
@@ -32,30 +34,53 @@ export default async function handler(req, res) {
   const startTime = Date.now();
 
   try {
-    console.log('🔄 RSS Polling Cron Job Started:', new Date().toISOString());
+    console.log('🔄 Tariff Update Cron Job Started:', new Date().toISOString());
+
+    const startRss = Date.now();
+    const startSync = Date.now();
 
     // Initialize RSS polling engine
     const rssEngine = new RSSPollingEngine();
 
     // Poll all active feeds
-    const result = await rssEngine.pollAllFeeds();
+    const rssResult = await rssEngine.pollAllFeeds();
+    const rssTime = Date.now() - startRss;
+
+    console.log('✅ RSS Polling Completed:', {
+      executionTime: `${rssTime}ms`,
+      successful: rssResult.successful,
+      failed: rssResult.failed,
+      total: rssResult.total
+    });
+
+    // Sync real-time tariff rates from USITC API
+    console.log('🔄 Syncing USITC tariff rates...');
+    const syncResult = await usitcTariffSync.syncUSITCTariffRates();
+    const syncTime = Date.now() - startSync;
+
+    console.log('✅ USITC Tariff Sync Completed:', {
+      executionTime: `${syncTime}ms`,
+      updated: syncResult.updated,
+      errors: syncResult.errors
+    });
 
     const executionTime = Date.now() - startTime;
 
-    console.log('✅ RSS Polling Cron Job Completed:', {
-      executionTime: `${executionTime}ms`,
-      successful: result.successful,
-      failed: result.failed,
-      total: result.total
-    });
-
     return res.status(200).json({
       success: true,
-      message: 'RSS polling completed successfully',
+      message: 'Tariff updates completed successfully',
       execution_time_ms: executionTime,
-      feeds_polled: result.total || 0,
-      successful_polls: result.successful || 0,
-      failed_polls: result.failed || 0,
+      rss_polling: {
+        feeds_polled: rssResult.total || 0,
+        successful_polls: rssResult.successful || 0,
+        failed_polls: rssResult.failed || 0,
+        duration_ms: rssTime
+      },
+      tariff_sync: {
+        codes_updated: syncResult.updated || 0,
+        errors: syncResult.errors || 0,
+        duration_ms: syncTime
+      },
       timestamp: new Date().toISOString()
     });
 

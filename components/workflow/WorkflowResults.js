@@ -17,6 +17,7 @@ import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import PersonalizedAlerts from './results/PersonalizedAlerts';
+import TariffDataFreshness from './results/TariffDataFreshness';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
@@ -650,6 +651,9 @@ export default function WorkflowResults({
 
       {/* 1. EXECUTIVE SUMMARY - Always Visible */}
       <ExecutiveSummary results={results} />
+
+      {/* TARIFF DATA FRESHNESS WARNING - Displayed before detailed tariff sections */}
+      <TariffDataFreshness />
 
       {/* 2. COLLAPSIBLE SECTIONS - Details Hidden by Default */}
 
