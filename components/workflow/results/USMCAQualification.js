@@ -246,8 +246,8 @@ export default function USMCAQualification({ results }) {
                           {hasRates ? (
                             <>
                               <div style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
-                                {(baseMfnRate * 100).toFixed(1)}%
-                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{(section301 * 100).toFixed(1)}%</span>}
+                                {baseMfnRate.toFixed(1)}%
+                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{section301.toFixed(1)}%</span>}
                               </div>
                               {/* Show breakdown when Section 301 or other policies apply */}
                               {(section301 > 0 || section232 > 0) && (
@@ -280,7 +280,7 @@ export default function USMCAQualification({ results }) {
                                       color: '#991b1b',
                                       fontWeight: '500'
                                     }}>
-                                      Section 301: {(section301 * 100).toFixed(1)}%
+                                      Section 301: {section301.toFixed(1)}%
                                     </span>
                                   )}
                                   {section232 > 0 && (
@@ -291,7 +291,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#991b1b'
                                     }}>
-                                      Steel/Aluminum: {(section232 * 100).toFixed(1)}%
+                                      Steel/Aluminum: {section232.toFixed(1)}%
                                     </span>
                                   )}
                                   <span style={{
@@ -339,7 +339,7 @@ export default function USMCAQualification({ results }) {
                               fontWeight: '500',
                               whiteSpace: 'nowrap'
                             }}>
-                              +{(section301 * 100).toFixed(1)}% Section 301
+                              +{section301.toFixed(1)}% Section 301
                             </span>
                           )}
                         </div>
@@ -495,7 +495,7 @@ export default function USMCAQualification({ results }) {
                                   💡 Strategic Opportunity: Eliminate Section 301 Exposure
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5', marginBottom: '0.5rem' }}>
-                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {(section301 * 100).toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * section301 / 12).toFixed(0)}/month</strong>.
+                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {section301.toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section301 / 100) / 12).toFixed(0)}/month</strong>.
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5' }}>
                                   <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component would:

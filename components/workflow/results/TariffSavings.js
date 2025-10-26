@@ -31,8 +31,8 @@ export default function TariffSavings({ results }) {
     const section301 = parseFloat(c.section_301 || 0);
     const totalRate = parseFloat(c.total_rate || baseMFN + section301);
 
-    // ✅ CRITICAL FIX: Rates are stored as DECIMALS (0.25 = 25%), NOT percentages
-    // Do NOT divide by 100 - multiply directly by decimal rates
+    // ✅ CRITICAL FIX: Rates are stored as PERCENTAGES (55 = 55%, not 0.55)
+    // For calculations: divide by 100 to convert to decimal, e.g., (55 / 100) = 0.55
     // Store component details for display (for transparency only)
     componentBreakdown.push({
       description: c.description || c.component_type,
@@ -42,14 +42,14 @@ export default function TariffSavings({ results }) {
       section301,
       totalRate,
       componentValue,
-      baseMFNSavings: componentValue * baseMFN,  // ✅ No /100 - baseMFN is already decimal (0.05 = 5%)
-      section301Cost: componentValue * section301  // ✅ No /100 - section301 is already decimal (0.25 = 25%)
+      baseMFNSavings: componentValue * (baseMFN / 100),  // ✅ Divide by 100 - baseMFN is percentage (55 = 55%)
+      section301Cost: componentValue * (section301 / 100)  // ✅ Divide by 100 - section301 is percentage (25 = 25%)
     });
 
     // Calculate ONLY for component-level display (not for final number)
-    calculatedBaseMFNSavings += componentValue * baseMFN;  // ✅ Fixed: Use decimal directly
+    calculatedBaseMFNSavings += componentValue * (baseMFN / 100);  // ✅ Fixed: Convert percentage to decimal
     if (section301 > 0) {
-      calculatedSection301Burden += componentValue * section301;  // ✅ Fixed: Use decimal directly
+      calculatedSection301Burden += componentValue * (section301 / 100);  // ✅ Fixed: Convert percentage to decimal
     }
   });
 
