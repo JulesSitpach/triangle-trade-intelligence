@@ -877,7 +877,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'anthropic/claude-sonnet-4.5',
+        model: 'anthropic/claude-haiku-4.5-20251001',  // ✅ Haiku for 10x faster response time
         // ✅ confidence_score defaults to 85 if not provided (reasonable fallback for missing AI metric)
         confidence_score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'

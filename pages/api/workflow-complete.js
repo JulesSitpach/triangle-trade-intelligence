@@ -104,6 +104,37 @@ export default protectedApiHandler({
           });
         }
 
+        // ✅ CRITICAL FIX: Validate and normalize components to ensure required fields
+        // Components MUST have hs_code and origin_country (from API enrichment)
+        const normalizedComponents = (component_origins || []).map((component, idx) => {
+          // Validate required fields from data contract
+          if (!component.hs_code || !component.origin_country) {
+            console.warn(`⚠️ Component ${idx} missing required fields - ensuring they exist:`, {
+              description: component.description,
+              hasHsCode: !!component.hs_code,
+              hasOriginCountry: !!component.origin_country
+            });
+          }
+
+          return {
+            ...component,
+            // ✅ Ensure required fields - NEVER save components with undefined hs_code or origin_country
+            hs_code: component.hs_code || 'UNKNOWN',
+            origin_country: component.origin_country || 'UNKNOWN',
+            // Ensure other contract fields
+            base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
+            mfn_rate: component.mfn_rate !== undefined ? component.mfn_rate : (component.base_mfn_rate || 0),
+            usmca_rate: component.usmca_rate !== undefined ? component.usmca_rate : 0,
+            section_301: component.section_301 !== undefined ? component.section_301 : 0,
+            section_232: component.section_232 !== undefined ? component.section_232 : 0,
+            total_rate: component.total_rate !== undefined ? component.total_rate : 0,
+            savings_percentage: component.savings_percentage !== undefined ? component.savings_percentage : 0,
+            rate_source: component.rate_source || 'workflow_completion',
+            stale: component.stale !== undefined ? component.stale : false,
+            data_source: component.data_source || 'workflow_completion'
+          };
+        });
+
         try {
           // Try to save to Supabase if table exists
           const { error: insertError } = await supabase
@@ -117,7 +148,7 @@ export default protectedApiHandler({
               classification_confidence: classification_confidence || 0.95,
               qualification_result: qualification_result,
               savings_amount: savings_amount || 0,
-              component_origins: component_origins || [],
+              component_origins: normalizedComponents,
               supplier_country: supplier_country,
               completed_at: completed_at || new Date().toISOString(),
               steps_completed: steps_completed || 3,

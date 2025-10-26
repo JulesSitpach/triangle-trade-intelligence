@@ -90,6 +90,38 @@ export default protectedApiHandler({
       return sendSuccess(res, { sessionId, saved: false, reason: 'not_authenticated' }, 'Workflow processed (not saved - no auth)');
     }
 
+    // ✅ CRITICAL FIX: Normalize components to ensure required fields
+    // Components MUST have hs_code and origin_country from API enrichment
+    const normalizeComponents = (components) => {
+      return (components || []).map((component, idx) => {
+        if (!component.hs_code || !component.origin_country) {
+          console.warn(`⚠️ Component ${idx} missing required fields in workflow-session:`, {
+            description: component.description,
+            hasHsCode: !!component.hs_code,
+            hasOriginCountry: !!component.origin_country
+          });
+        }
+
+        return {
+          ...component,
+          // ✅ Ensure required fields - NEVER save components with undefined hs_code or origin_country
+          hs_code: component.hs_code || 'UNKNOWN',
+          origin_country: component.origin_country || 'UNKNOWN',
+          // Ensure other contract fields
+          base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : (component.mfn_rate || 0),
+          mfn_rate: component.mfn_rate !== undefined ? component.mfn_rate : (component.base_mfn_rate || 0),
+          usmca_rate: component.usmca_rate !== undefined ? component.usmca_rate : 0,
+          section_301: component.section_301 !== undefined ? component.section_301 : 0,
+          section_232: component.section_232 !== undefined ? component.section_232 : 0,
+          total_rate: component.total_rate !== undefined ? component.total_rate : 0,
+          savings_percentage: component.savings_percentage !== undefined ? component.savings_percentage : 0,
+          rate_source: component.rate_source || 'workflow_session',
+          stale: component.stale !== undefined ? component.stale : false,
+          data_source: component.data_source || 'workflow_session'
+        };
+      });
+    };
+
     // Determine if this is a complete workflow
     const isCompleteWorkflow = action === 'complete' && workflowData.steps_completed >= 4;
 
@@ -98,6 +130,8 @@ export default protectedApiHandler({
       // Table schema: id, user_id, email, workflow_type, workflow_name, hs_code,
       // completed_at, certificate_generated, status, total_savings, estimated_duty_savings,
       // compliance_cost_savings, workflow_data (JSONB), session_id, completion_time_minutes
+      const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || []);
+
       const workflowRecord = {
         user_id: userId,
         email: req.user?.email || null,
@@ -121,7 +155,7 @@ export default protectedApiHandler({
             trust_score: parseFloat(workflowData.trust?.score) || 95,
             regional_content: parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0,
             required_threshold: workflowData.usmca?.threshold_applied || 60,
-            component_origins: workflowData.components || workflowData.component_origins || [],
+            component_origins: normalizedComponents,
             supplier_country: workflowData.company?.supplier_country
           }
         },
@@ -144,6 +178,9 @@ export default protectedApiHandler({
       // Extract company data from workflow for dedicated columns
       const companyData = workflowData.company || {};
 
+      // ✅ Normalize components for in-progress workflow too
+      const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || []);
+
       const sessionRecord = {
         user_id: userId,
         session_id: sessionId,
@@ -158,7 +195,7 @@ export default protectedApiHandler({
         manufacturing_location: companyData.manufacturing_location || null,
         hs_code: workflowData.product?.hs_code || workflowData.hs_code || null,
         product_description: workflowData.product?.description || workflowData.product_description || null,
-        component_origins: workflowData.components || workflowData.component_origins || [],
+        component_origins: normalizedComponents,
 
         // Destination-aware tariff intelligence fields
         destination_country: companyData.destination_country || workflowData.destination_country || null,
