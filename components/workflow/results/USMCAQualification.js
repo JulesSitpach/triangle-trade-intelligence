@@ -363,11 +363,17 @@ export default function USMCAQualification({ results }) {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        {component.is_usmca_member ? (
-                          <span style={{ color: '#059669', fontWeight: '500' }}>✓ Qualifies</span>
-                        ) : (
-                          <span style={{ color: '#6b7280', fontWeight: '500' }}>✗ Non-USMCA</span>
-                        )}
+                        {(() => {
+                          // ✅ FIXED (Oct 26): Check USMCA member origin country instead of undefined field
+                          const usmcaCountries = ['US', 'MX', 'CA'];
+                          const isUSMCAOrigin = usmcaCountries.includes(component.origin_country?.toUpperCase());
+
+                          return isUSMCAOrigin ? (
+                            <span style={{ color: '#059669', fontWeight: '500' }}>✓ USMCA Origin</span>
+                          ) : (
+                            <span style={{ color: '#6b7280', fontWeight: '500' }}>✗ Non-USMCA Origin</span>
+                          );
+                        })()}
                       </td>
                     </tr>
 
