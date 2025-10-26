@@ -104,7 +104,13 @@ export default function USMCAQualification({ results }) {
       console.error('❌ [FORM SCHEMA] Missing company.trade_volume in USMCAQualification gap analysis (line 102)');
       return null;
     }
-    const avgTariffRate = results.product?.mfn_rate || 0.025; // Use product's MFN rate or 2.5% average
+
+    // CRITICAL FIX: NO FALLBACK for MFN rate - must come from AI/database
+    const avgTariffRate = results.product?.mfn_rate;
+    if (!avgTariffRate) {
+      console.error('❌ [HARDCODING] Missing product.mfn_rate - cannot calculate savings without AI tariff data');
+      return null; // Don't show gap analysis without actual tariff rate
+    }
 
     // If they close the gap, calculate savings on the additional qualifying percentage
     const potentialSavings = tradeVolume > 0 && avgTariffRate > 0
@@ -225,8 +231,8 @@ export default function USMCAQualification({ results }) {
                           {hasRates ? (
                             <>
                               <div style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
-                                {baseMfnRate.toFixed(1)}%
-                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{section301.toFixed(1)}%</span>}
+                                {(baseMfnRate * 100).toFixed(1)}%
+                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{(section301 * 100).toFixed(1)}%</span>}
                               </div>
                               {/* Show breakdown when Section 301 or other policies apply */}
                               {(section301 > 0 || section232 > 0) && (
@@ -247,7 +253,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#166534'
                                     }}>
-                                      Base: {baseMfnRate.toFixed(1)}%
+                                      Base: {(baseMfnRate * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   {section301 > 0 && (
@@ -259,7 +265,7 @@ export default function USMCAQualification({ results }) {
                                       color: '#991b1b',
                                       fontWeight: '500'
                                     }}>
-                                      Section 301: {section301.toFixed(1)}%
+                                      Section 301: {(section301 * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   {section232 > 0 && (
@@ -270,7 +276,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#991b1b'
                                     }}>
-                                      Steel/Aluminum: {section232.toFixed(1)}%
+                                      Steel/Aluminum: {(section232 * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   <span style={{
@@ -283,7 +289,7 @@ export default function USMCAQualification({ results }) {
                                     borderTop: '1px solid #d1d5db',
                                     marginTop: '0.25rem'
                                   }}>
-                                    Total: {totalAppliedRate.toFixed(1)}%
+                                    Total: {(totalAppliedRate * 100).toFixed(1)}%
                                   </span>
                                 </div>
                               )}
@@ -309,7 +315,7 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                          <span>{hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}</span>
+                          <span>{hasRates ? `${(usmcaRate * 100).toFixed(1)}%` : '—'}</span>
                           {/* ✅ ISSUE #2 FIX: Clarify that Section 301 remains despite USMCA qualification */}
                           {section301 > 0 && (
                             <span style={{
@@ -318,7 +324,7 @@ export default function USMCAQualification({ results }) {
                               fontWeight: '500',
                               whiteSpace: 'nowrap'
                             }}>
-                              +{section301.toFixed(1)}% Section 301
+                              +{(section301 * 100).toFixed(1)}% Section 301
                             </span>
                           )}
                         </div>
@@ -327,7 +333,7 @@ export default function USMCAQualification({ results }) {
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
                           <span style={{ whiteSpace: 'nowrap' }}>
                             {/* ✅ ISSUE #2 FIX: Show savings clearly - ONLY base MFN is eliminated */}
-                            {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
+                            {hasRates ? `${(savingsPercent * 100).toFixed(1)}%` : '—'}
                           </span>
                           {section301 > 0 && (
                             <span style={{
@@ -468,19 +474,18 @@ export default function USMCAQualification({ results }) {
                                   💡 Strategic Opportunity: Eliminate Section 301 Exposure
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5', marginBottom: '0.5rem' }}>
-                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {section301.toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * section301 / 100 / 12).toFixed(0)}/month</strong>.
+                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {(section301 * 100).toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * section301 / 12).toFixed(0)}/month</strong>.
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5' }}>
-                                  <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component (+2-3% unit cost premium) would:
+                                  <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component would:
                                   <ul style={{ marginTop: '0.25rem', marginBottom: '0.25rem', marginLeft: '1.5rem' }}>
                                     <li>Eliminate Section 301 exposure entirely</li>
                                     <li>Increase regional value content (RVC) by ~{component.value_percentage}%</li>
-                                    <li>Implementation timeline: 4-6 weeks for supplier qualification</li>
-                                    <li>Payback period: ~3 months (tariff savings exceed cost premium)</li>
+                                    <li>See AI analysis above for industry-specific cost premiums, timelines, and payback calculations</li>
                                   </ul>
                                 </div>
                                 <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ffffff', borderRadius: '3px', fontSize: '0.75rem', color: '#5f4800', fontStyle: 'italic' }}>
-                                  This analysis assumes current tariff policy. Policy changes can modify payback timeline, which is why policy insulation provides strategic value.
+                                  ⚠️ Cost premiums, timelines, and payback periods vary by industry and product complexity. Refer to the AI-generated strategic alternatives section above for calculations specific to your business.
                                 </div>
                               </div>
                             )}
@@ -675,17 +680,18 @@ export default function USMCAQualification({ results }) {
                     .map((component, index) => {
                       const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
                       const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
-                      const savingsPercent = (mfnRate - usmcaRate) / 100;
+                      // ✅ Rates are DECIMAL format (0.25 = 25%), NO /100 needed for calculation
+                      const savingsPercent = mfnRate - usmcaRate;  // Both already decimal
                       const tradeVolume = tv;
-                    const componentValue = tradeVolume * (component.value_percentage / 100);
-                    const componentSavings = componentValue * savingsPercent;
+                      const componentValue = tradeVolume * (component.value_percentage / 100);
+                      const componentSavings = componentValue * savingsPercent;
 
-                    return {
-                      ...component,
-                      index,
-                      componentSavings,
-                      savingsPercent: mfnRate - usmcaRate
-                    };
+                      return {
+                        ...component,
+                        index,
+                        componentSavings,
+                        savingsPercent  // Already in decimal format for display
+                      };
                   })
                   .filter(c => c.componentSavings > 0)
                   .sort((a, b) => b.componentSavings - a.componentSavings)
@@ -708,7 +714,7 @@ export default function USMCAQualification({ results }) {
                           {component.description || 'Component ' + (component.index + 1)}
                         </div>
                         <div style={{ fontSize: '0.8125rem', color: '#047857' }}>
-                          {component.value_percentage}% of product • {component.savingsPercent.toFixed(1)}% tariff savings
+                          {component.value_percentage}% of product • {(component.savingsPercent * 100).toFixed(1)}% tariff savings
                         </div>
                       </div>
                       <div style={{ fontWeight: '600', color: '#065f46', fontSize: '1rem', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
