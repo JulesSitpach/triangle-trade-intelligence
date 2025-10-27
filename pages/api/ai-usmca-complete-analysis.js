@@ -718,11 +718,20 @@ export default protectedApiHandler({
     // So we use the fresh database rates we already retrieved on line 410
     const componentBreakdown = (enrichedComponents || []).map((component, idx) => {
       const originalComponent = formData.component_origins?.[idx] || {};
+      const finalOriginCountry = component.origin_country || originalComponent.origin_country || '';
+
+      // ✅ FIX (Oct 26): Determine if component is from USMCA member country
+      // USMCA members: US, MX (Mexico), CA (Canada)
+      const usmcaCountries = ['US', 'MX', 'CA'];
+      const isUSMCAMember = usmcaCountries.includes(finalOriginCountry.toUpperCase());
+
       return {
         ...component,
         // ✅ CRITICAL: Ensure hs_code and origin_country from original input
         hs_code: component.hs_code || originalComponent.hs_code || '',
-        origin_country: component.origin_country || originalComponent.origin_country || '',
+        origin_country: finalOriginCountry,
+        // ✅ NEW: Flag indicating if component is from USMCA member country (for UI counter)
+        is_usmca_member: isUSMCAMember,
         // Ensure all required fields are present for frontend transformer
         base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
         rate_source: component.rate_source || 'database_cache',
