@@ -313,7 +313,7 @@ export default protectedApiHandler({
     }
 
     // ========== VALIDATE COMPONENT PERCENTAGES DON'T EXCEED 100% ==========
-    const totalPercentage = formData.component_origins.reduce((sum, component) => {
+    const totalPercentage = (formData.component_origins || []).reduce((sum, component) => {
       return sum + parseFloat(component.value_percentage || 0);
     }, 0);
 
@@ -323,7 +323,7 @@ export default protectedApiHandler({
         success: false,
         error: `Component percentages exceed 100%. Total: ${totalPercentage}%. Please adjust component values so they sum to 100% or less.`,
         total_percentage: totalPercentage,
-        components: formData.component_origins.map(c => ({
+        components: (formData.component_origins || []).map(c => ({
           description: c.description,
           percentage: c.value_percentage
         }))
@@ -440,12 +440,12 @@ export default protectedApiHandler({
     const tradeVolume = parseTradeVolume(formData.trade_volume);
 
     // ✅ FIX: Calculate RVC material percentage from USMCA-member components
-    const usmcaMemberValue = enrichedComponents
+    const usmcaMemberValue = (enrichedComponents || [])
       .filter(c => c.is_usmca_member)
       .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
 
     // Calculate component-level financials
-    const componentFinancials = enrichedComponents.map(comp => {
+    const componentFinancials = (enrichedComponents || []).map(comp => {
       const mfn = comp.mfn_rate || 0;
       // ✅ FIX (Oct 27): ALL components in a qualified product get USMCA rates
       // Component origin (CN, US, MX) doesn't matter - if the finished product qualifies,
@@ -506,7 +506,7 @@ export default protectedApiHandler({
     // Pass enriched components with real rates and pre-calculated financials to AI prompt
     const prompt = await buildComprehensiveUSMCAPrompt(
       { ...formData, component_origins: enrichedComponents },
-      enrichedComponents.reduce((acc, comp) => {
+      (enrichedComponents || []).reduce((acc, comp) => {
         acc[comp.hs_code] = {
           mfn_rate: comp.mfn_rate,
           section_301: comp.section_301,
@@ -977,7 +977,7 @@ export default protectedApiHandler({
     // Result: ~9 second savings (from 112s → ~55-60s)
 
     // Use raw components (AI will enrich them internally)
-    const normalizedComponents = formData.component_origins.map(c => normalizeComponent(c));
+    const normalizedComponents = (formData.component_origins || []).map(c => normalizeComponent(c));
 
     // ✅ FIX (Oct 26): Use enriched component_breakdown from AI response, NOT raw components
     // The AI analysis populates result.usmca.component_breakdown with tariff rates
