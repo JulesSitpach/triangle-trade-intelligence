@@ -25,13 +25,33 @@ export default function RecommendedActions({ results }) {
   const [executiveAlert, setExecutiveAlert] = useState(null);
   const [loadingAlert, setLoadingAlert] = useState(false);
   const [alertError, setAlertError] = useState(null);
+  const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
+
+  // Fetch user's subscription tier first
+  useEffect(() => {
+    const fetchUserSubscriptionTier = async () => {
+      try {
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
+        if (response.ok) {
+          const userData = await response.json();
+          setUserSubscriptionTier(userData.subscription_tier || 'trial');
+          console.log('✅ User subscription tier:', userData.subscription_tier);
+        }
+      } catch (error) {
+        console.error('⚠️ Failed to fetch user subscription tier:', error);
+        setUserSubscriptionTier('trial');
+      }
+    };
+
+    fetchUserSubscriptionTier();
+  }, []);
 
   useEffect(() => {
-    // Load executive trade alert with strategic roadmap if qualified
-    if (isQualified && results?.company && !loadingAlert) {
+    // Load executive trade alert with strategic roadmap if qualified and subscription tier is loaded
+    if (isQualified && results?.company && !loadingAlert && userSubscriptionTier) {
       loadExecutiveTradeAlert();
     }
-  }, [isQualified, results]);
+  }, [isQualified, results, userSubscriptionTier]);
 
   const loadExecutiveTradeAlert = async () => {
     setLoadingAlert(true);
@@ -49,7 +69,8 @@ export default function RecommendedActions({ results }) {
           user_profile: {
             industry_sector: results.company?.industry_sector || 'General Manufacturing',
             destination_country: results.company.destination_country,  // ✅ No fallback - validated above
-            supplier_country: results.company?.supplier_country
+            supplier_country: results.company?.supplier_country,
+            subscription_tier: userSubscriptionTier  // ✅ CRITICAL: Pass subscription tier for tier gating
           },
           workflow_intelligence: {
             components: results.usmca?.component_breakdown || [],
@@ -63,6 +84,14 @@ export default function RecommendedActions({ results }) {
         const data = await response.json();
         setExecutiveAlert(data);
         console.log('✅ Executive trade alert loaded:', data);
+      } else if (response.status === 403) {
+        // User doesn't have paid subscription - show graceful message
+        const errorData = await response.json();
+        console.log('⚠️ Executive trade alert requires paid subscription:', errorData.message);
+        setAlertError(errorData.message || 'Real-time crisis alerts require a paid subscription');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load executive trade alert');
       }
     } catch (error) {
       console.error('⚠️ Failed to load executive trade alert:', error);

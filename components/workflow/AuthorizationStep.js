@@ -79,12 +79,16 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     }
   }, [authData.certifier_type]); // Run when certifier type changes
 
-  // Update parent when authData changes
+  // Update parent when authData changes - use ref to avoid infinite loop
+  // Only update on initial mount and when certifications are confirmed
   useEffect(() => {
-    Object.keys(authData).forEach(key => {
-      updateFormData(key, authData[key]);
-    });
-  }, [authData, updateFormData]);
+    if (authData.accuracy_certification && authData.authority_certification) {
+      // Only update parent when both certifications are checked
+      Object.keys(authData).forEach(key => {
+        updateFormData(key, authData[key]);
+      });
+    }
+  }, [authData.accuracy_certification, authData.authority_certification]); // Only track certification checkboxes
 
   // Auto-check certification boxes when certificate is generated
   useEffect(() => {
