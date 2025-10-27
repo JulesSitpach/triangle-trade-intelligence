@@ -478,25 +478,45 @@ export default protectedApiHandler({
 
     // Call OpenRouter API
     const openrouterStartTime = Date.now();
+
+    // ✅ DEBUG: Log what we're sending to OpenRouter
+    console.log('🤖 [OPENROUTER-DEBUG] Request details:', {
+      prompt_length: prompt.length,
+      prompt_first_300_chars: prompt.substring(0, 300),
+      model: 'anthropic/claude-haiku-4.5',
+      max_tokens: 2000,
+      has_api_key: !!process.env.OPENROUTER_API_KEY
+    });
+
+    const requestBody = {
+      model: 'anthropic/claude-haiku-4.5', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
+      max_tokens: 2000, // ✅ OPTIMIZED: Reduced for minimal JSON response (qualification only)
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      temperature: 0 // Zero temperature for determinism
+    };
+
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4.5-20251001', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
-        max_tokens: 2000, // ✅ OPTIMIZED: Reduced for minimal JSON response (qualification only)
-        messages: [{
-          role: 'user',
-          content: prompt
-        }],
-        temperature: 0 // Zero temperature for determinism
-      })
+      body: JSON.stringify(requestBody)
     });
     const openrouterDuration = Date.now() - openrouterStartTime;
 
     if (!aiResponse.ok) {
+      // ✅ LOG: Get error response from OpenRouter
+      const errorText = await aiResponse.text();
+      console.error('❌ [OPENROUTER-ERROR] Full response:', {
+        status: aiResponse.status,
+        statusText: aiResponse.statusText,
+        error_response: errorText.substring(0, 1000),
+        request_was: JSON.stringify(requestBody).substring(0, 500)
+      });
       throw new Error(`OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`);
     }
 
