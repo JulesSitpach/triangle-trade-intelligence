@@ -528,7 +528,12 @@ export default protectedApiHandler({
       throw new Error('AI response is empty or missing content field');
     }
 
-    // ⚡ PERFORMANCE: Disabled full AI response logging
+    // ✅ DEBUG: Log raw AI response to see what's being returned
+    console.log('🤖 [RAW-AI-RESPONSE]', {
+      response_length: aiText.length,
+      first_500_chars: aiText.substring(0, 500),
+      last_200_chars: aiText.substring(Math.max(0, aiText.length - 200))
+    });
 
     // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
