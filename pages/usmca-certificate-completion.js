@@ -194,6 +194,26 @@ export default function USMCACertificateCompletion() {
               exporter_tax_id: workflowData?.company?.tax_id || '',
               exporter_phone: workflowData?.company?.contact_phone || '',
               exporter_email: workflowData?.company?.contact_email || '',
+              // ✅ FIX (Oct 27): Add producer information (Field 4 of USMCA form)
+              // Default to exporter info if "Same as Exporter" is checked or producer fields not provided
+              producer_name: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.company_name || workflowData?.company?.name || '')
+                : (authData.producer_name || ''),
+              producer_address: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.company_address || '')
+                : (authData.producer_address || ''),
+              producer_country: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.company_country || '')
+                : (authData.producer_country || ''),
+              producer_tax_id: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.tax_id || '')
+                : (authData.producer_tax_id || ''),
+              producer_phone: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.contact_phone || '')
+                : (authData.producer_phone || ''),
+              producer_email: authData?.producer_same_as_exporter
+                ? (workflowData?.company?.contact_email || '')
+                : (authData.producer_email || ''),
               importer_name: authData.importer_name || '',
               importer_address: authData.importer_address || '',
               importer_country: authData.importer_country || '',
