@@ -23,8 +23,10 @@ export default async function handler(req, res) {
     // ✅ TIER-GATING: Personalized alerts are PAID-ONLY feature
     // Free/Trial users get generic educational alerts only (in static config)
     // Personalized filtering based on their products is premium feature
-    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
-    const isPaidTier = subscriptionTier && ['Premium', 'Professional', 'Enterprise'].includes(subscriptionTier);
+    // Starter, Professional, and Premium tiers get personalized alerts
+    const subscriptionTier = user_profile?.subscription_tier || 'trial';
+    const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
+    const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
 
     if (!isPaidTier) {
       // Return empty alerts for free users - they should not see personalized content
@@ -34,11 +36,16 @@ export default async function handler(req, res) {
         error: 'UPGRADE_REQUIRED',
         code: 'PERSONALIZED_ALERTS_REQUIRE_PAID_SUBSCRIPTION',
         alerts: [],
-        message: 'Personalized alerts are available only with a paid subscription',
-        upgrade_message: 'Upgrade to Professional tier to receive alerts tailored to your specific products, suppliers, and destinations',
-        required_tier: 'Professional',
+        message: 'Personalized alerts are available only with Starter plan ($99/month) or higher',
+        upgrade_message: 'Upgrade to Starter or above to receive alerts tailored to your specific products, suppliers, and destinations',
+        required_tier: 'Starter',
         current_tier: subscriptionTier,
-        upgrade_url: '/pricing'
+        upgrade_url: '/pricing',
+        pricing_tiers: {
+          'starter': '$99/month - 10 analyses + basic alerts',
+          'professional': '$299/month - 100 analyses + real-time alerts + priority support',
+          'premium': '$599/month - Everything + quarterly strategy calls'
+        }
       });
     }
 
