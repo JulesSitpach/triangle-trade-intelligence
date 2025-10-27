@@ -492,9 +492,7 @@ export default function EditableCertificatePreview({
                   </select>
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'center' }}>
-                  <label style={{ display: 'flex', justifyContent: 'center' }}>
-                    <input type="checkbox" checked={editedCert.is_producer} onChange={(e) => handleFieldChange('is_producer', e.target.checked)} />
-                  </label>
+                  <input type="text" value={editedCert.is_producer ? 'YES' : 'NO'} onChange={(e) => handleFieldChange('is_producer', e.target.value.toUpperCase() === 'YES')} style={{ ...inputStyle, textAlign: 'center', width: '100%' }} placeholder="YES/NO" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <input type="text" value={editedCert.qualification_method} onChange={(e) => handleFieldChange('qualification_method', e.target.value)} style={inputStyle} placeholder="TV/NC/TS/NO" />
