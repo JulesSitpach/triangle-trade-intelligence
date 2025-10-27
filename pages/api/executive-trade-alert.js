@@ -270,19 +270,31 @@ function generateMexicoNearshoringOptions(userProfile, workflow, section301Impac
 }
 
 async function calculateSection301Impact(components, tradeVolume) {
-  if (!tradeVolume || tradeVolume === 0) return 'Unable to calculate without trade volume';
+  if (!tradeVolume || tradeVolume === 0) {
+    return {
+      annualCost: 'Unable to calculate without trade volume',
+      effectiveRate: null,
+      ratePercent: null
+    };
+  }
 
   const chineseComponents = components.filter(c =>
     c.origin_country === 'China' || c.origin_country === 'CN'
   );
 
-  if (chineseComponents.length === 0) return '$0 (no Chinese components)';
+  if (chineseComponents.length === 0) {
+    return {
+      annualCost: '$0 (no Chinese components)',
+      effectiveRate: 0,
+      ratePercent: '0%'
+    };
+  }
 
   const totalChineseValue = chineseComponents.reduce((sum, c) =>
     sum + (c.value_percentage || 0), 0
   );
 
-  // ✅ DYNAMIC: Get actual Section 301 rate from agent (not hardcoded 25%)
+  // ✅ DYNAMIC (Oct 27): Get actual Section 301 rate from agent (not hardcoded 25%)
   let averageSection301Rate = 0;
   let rateCount = 0;
 
@@ -305,14 +317,19 @@ async function calculateSection301Impact(components, tradeVolume) {
     }
   }
 
-  // If we got rates, use average; otherwise fallback to database or 0.20 (20% conservative estimate)
+  // If we got rates, use average; otherwise fallback to 20% conservative estimate
   const effectiveRate = rateCount > 0
     ? averageSection301Rate / rateCount
     : 0.20; // Conservative fallback
 
   const annualCost = (tradeVolume * totalChineseValue / 100 * effectiveRate);
 
-  return `$${Math.round(annualCost).toLocaleString()} annually`;
+  // ✅ FIX: Return both cost AND rate so we don't hardcode percentages later
+  return {
+    annualCost: `$${Math.round(annualCost).toLocaleString()} annually`,
+    effectiveRate: effectiveRate,
+    ratePercent: `${(effectiveRate * 100).toFixed(1)}%`
+  };
 }
 
 async function calculateRiskImpact(workflow, userProfile) {
@@ -380,8 +397,13 @@ function generateExecutiveAdvisory(policies, workflow, profile) {
 
   // Add Section 301 context if applicable
   if (section301Policy) {
-    advisory.problem = `Your Chinese-sourced components remain subject to 25% Section 301 tariffs, creating ongoing policy risk and cost burden of approximately ${section301Policy.annual_cost_impact}.`;
-    advisory.current_burden = section301Policy.annual_cost_impact;
+    // ✅ FIX (Oct 27): Use actual calculated rate instead of hardcoded "25%"
+    const costInfo = section301Policy.annual_cost_impact;
+    const rateDisplay = costInfo?.ratePercent || 'variable';
+    const costDisplay = costInfo?.annualCost || 'unknown';
+
+    advisory.problem = `Your Chinese-sourced components remain subject to ${rateDisplay} Section 301 tariffs, creating ongoing policy risk and cost burden of approximately ${costDisplay}.`;
+    advisory.current_burden = costDisplay;
     advisory.potential_savings = 'Mexico nearshoring could eliminate this burden within 4-6 weeks';
     advisory.why_now = 'Section 301 tariffs can be modified with 30-day notice. Current political environment suggests heightened risk.';
 
@@ -451,21 +473,26 @@ async function generateFinancialScenarios(workflow, policies, profile) {
   };
 
   if (section301Policy) {
-    // Extract current Section 301 cost (already in format "$X annually")
-    const currentCostStr = section301Policy.annual_cost_impact;
+    // ✅ FIX (Oct 27): Extract actual rate from object instead of hardcoding "25%"
+    const costInfo = section301Policy.annual_cost_impact;
+    const currentCostStr = costInfo?.annualCost || 'unknown';
+    const currentRate = costInfo?.ratePercent || '25%'; // Fallback if not calculated
     const currentCost = extractDollarAmount(currentCostStr);
 
     scenarios.scenarios.push({
-      scenario: 'Current State (25% Section 301)',
+      scenario: `Current State (${currentRate} Section 301)`,
       annual_burden: currentCostStr,
-      description: 'Your current tariff exposure with existing 25% Section 301 rate on Chinese components'
+      description: `Your current tariff exposure with existing ${currentRate} Section 301 rate on Chinese components`
     });
 
-    // Scenario: Section 301 increases to 30%
+    // Scenario: Section 301 increases by 20%
     if (currentCost !== null) {
       const increasedCost = Math.round(currentCost * 1.2); // 20% increase
+      const currentRateNum = parseFloat(currentRate) || 25;
+      const futureRateNum = (currentRateNum * 1.2).toFixed(1);
+
       scenarios.scenarios.push({
-        scenario: 'If Section 301 Increases to 30%',
+        scenario: `If Section 301 Increases to ${futureRateNum}%`,
         annual_burden: `$${increasedCost.toLocaleString()}`,
         impact_vs_current: `+$${(increasedCost - currentCost).toLocaleString()}/year additional burden`,
         likelihood: 'Medium (possible with administration change)',
