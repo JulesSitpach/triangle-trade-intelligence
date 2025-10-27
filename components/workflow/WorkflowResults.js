@@ -18,6 +18,7 @@ import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import PersonalizedAlerts from './results/PersonalizedAlerts';
 import TariffDataFreshness from './results/TariffDataFreshness';
+import PolicyTimeline from './PolicyTimeline';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
@@ -676,6 +677,12 @@ export default function WorkflowResults({
           </div>
         </div>
       </div>
+
+      {/* POLICY TIMELINE - Show announced tariff threats affecting user's components */}
+      <PolicyTimeline
+        components={results.component_origins || []}
+        destination={results.destination_country || results.company?.destination_country || 'US'}
+      />
 
       {/* ========== UNIFIED SUMMARY SECTION (NO REPETITION) ========== */}
 
