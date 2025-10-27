@@ -331,6 +331,7 @@ export default protectedApiHandler({
 
     // ✅ CRITICAL HELPER: Enrich components with tariff rates from AI response
     // Extracts component-specific rates from detailed_analysis and applies to each component
+    // ONLY uses AI rates as FALLBACK if database rates are missing
     function enrichComponentsWithTariffRates(components, aiAnalysis) {
       if (!components || !Array.isArray(components)) return components;
 
@@ -395,34 +396,36 @@ export default protectedApiHandler({
 
       // Enrich each component
       return components.map((comp) => {
-        // If component already has rates, keep them
+        // ✅ VALIDATION CHECKPOINT 2: Only use AI rates if database rates are missing
+        // Priority: Keep database rates, only use AI as fallback
         if (comp.mfn_rate !== undefined && comp.mfn_rate !== null && comp.mfn_rate !== 0 && comp.mfn_rate !== '') {
-          return comp;
+          console.log(`✅ [FALLBACK-SKIP] ${comp.description}: Already has database rate ${comp.mfn_rate}%, skipping AI extraction`);
+          return comp;  // Keep database rates - don't extract from AI
         }
 
+        // Only extract from AI if database rate is missing
         const rates = extractComponentRate(comp.description, comp.hs_code, comp.origin_country);
 
         // DEBUG: Log extraction results
-        console.log(`🔍 Extracting rates for "${comp.description}" (${comp.hs_code}):`, {
+        console.log(`🔍 [FALLBACK-EXTRACT] Extracting rates for "${comp.description}" (${comp.hs_code}):`, {
           mfnFound: rates.extracted.mfnFound,
           mfnRate: rates.mfnRate,
-          usmcaFound: rates.extracted.usmcaFound,
-          usmcaRate: rates.usmcaRate,
           section301Found: rates.extracted.section301Found,
-          section301: rates.section301
+          section301: rates.section301,
+          source: comp.rate_source
         });
 
         if (rates.extracted.mfnFound || rates.extracted.section301Found) {
-          console.log(`✅ Successfully extracted rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
+          console.log(`✅ [FALLBACK-SUCCESS] Filled missing rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
         } else {
-          console.log(`⚠️ No rates extracted for ${comp.description} (desc="${comp.description}", hs="${comp.hs_code}", origin="${comp.origin_country}")`);
+          console.log(`⚠️  [FALLBACK-MISS] Could not extract rates for ${comp.description} from AI response`);
         }
 
         const totalRate = rates.mfnRate + rates.section301 + (rates.section232 || 0);
         const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
 
-        // ✅ CRITICAL: Preserve all input fields (including rate_source, stale from enrichComponentsWithFreshRates)
-        // Only UPDATE tariff rate fields extracted from AI response
+        // ✅ CRITICAL: Preserve all input fields (including rate_source, stale)
+        // Only UPDATE tariff rate fields if successfully extracted from AI
         return {
           ...comp,  // Preserves: rate_source, stale, and all other fields
           mfn_rate: rates.mfnRate,
@@ -433,8 +436,8 @@ export default protectedApiHandler({
           total_rate: totalRate,
           savings_percentage: savingsPercent,
           data_source: comp.data_source || 'ai_enriched',  // Preserve database source if present
-          // ✅ Ensure rate_source and stale are always present (required by COMPONENT_DATA_CONTRACT)
-          rate_source: comp.rate_source || 'ai_extracted',
+          // ✅ Ensure rate_source and stale are always present
+          rate_source: comp.rate_source || (rates.extracted.mfnFound ? 'ai_fallback' : 'incomplete'),
           stale: comp.stale !== undefined ? comp.stale : false
         };
       });
@@ -655,6 +658,28 @@ export default protectedApiHandler({
         first_component: enrichedComponents[0]?.description,
         has_mfn_rate: enrichedComponents[0]?.mfn_rate !== undefined,
         rate_sources: enrichedComponents.map(c => c.rate_source).join(', ')
+      });
+    }
+
+    // ========== VALIDATION CHECKPOINT 1: Verify enrichedComponents have rates ==========
+    const missingRates = enrichedComponents.filter(comp =>
+      !comp.mfn_rate || comp.mfn_rate === 0 || comp.mfn_rate === undefined
+    );
+
+    if (missingRates.length > 0) {
+      console.warn(`⚠️  [VALIDATION] ${missingRates.length} components missing tariff rates:`, {
+        missing: missingRates.map(c => ({
+          hs_code: c.hs_code,
+          description: c.description,
+          rate_source: c.rate_source,
+          stale: c.stale
+        }))
+      });
+
+      // Log issue but don't block - pre-calculation will handle 0 rates gracefully
+      await DevIssue.warning('validation_checkpoint', 'Missing tariff rates after enrichment', {
+        count: missingRates.length,
+        components: missingRates.map(c => c.description)
       });
     }
 
@@ -989,13 +1014,44 @@ export default protectedApiHandler({
       };
     });
 
+    // ✅ VALIDATION CHECKPOINT 3: Verify rates are in percentage format before transformation
+    // This prevents 100x calculation errors if rates accidentally get converted early
+    const rateFormatIssues = (componentBreakdown || [])
+      .filter(comp => {
+        // Check if any rate looks like it's already a decimal (0.xx instead of xx)
+        const mfnRate = comp.mfn_rate || 0;
+        const section301 = comp.section_301 || 0;
+
+        // If rate is between 0 and 1, it's likely a decimal (wrong format)
+        if ((mfnRate > 0 && mfnRate < 1) || (section301 > 0 && section301 < 1)) {
+          return true;  // This component has wrong format
+        }
+        return false;
+      })
+      .map(comp => ({
+        description: comp.description,
+        mfn_rate: comp.mfn_rate,
+        section_301: comp.section_301,
+        rate_source: comp.rate_source
+      }));
+
+    if (rateFormatIssues.length > 0) {
+      console.warn(`⚠️  [VALIDATION] ${rateFormatIssues.length} components have unexpected rate format (decimals when percentages expected):`, rateFormatIssues);
+
+      // Log but don't block - transformation will still work
+      await DevIssue.warning('validation_checkpoint', 'Unexpected rate format before transformation', {
+        count: rateFormatIssues.length,
+        components: rateFormatIssues
+      });
+    }
+
     // ✅ CRITICAL: Declare transformedComponents BEFORE using in API response
     // This transforms componentBreakdown from percentage format to decimal format
     // Required because UI calculates: componentValue × (mfnRate - usmcaRate)
     // If rates are percentages (55) instead of decimals (0.55), calculation is 100x too large
     const transformedComponents = (componentBreakdown || []).map((component) => {
       try {
-        // Step 1: AI format has percentage values (25, 0, 1.5, etc)
+        // Step 1: Components are in percentage format (25, 0, 1.5, etc)
         // Apply database_to_api transformations to convert percentages to decimals
         const apiFormatComponent = {};
 
