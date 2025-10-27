@@ -25,9 +25,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing exporter name' });
     }
 
-    if (!certificateData.product_details?.hs_code) {
-      return res.status(400).json({ error: 'Missing HS code' });
-    }
+    // ✅ FIX (Oct 27): HS code is optional at certificate generation
+    // User can fill it in during editable preview, or it can come from enriched components
+    // No validation error if missing - let user populate it during review
 
     // Build professional certificate object
     const professionalCertificate = {
