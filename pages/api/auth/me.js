@@ -133,15 +133,22 @@ export default async function handler(req, res) {
       });
     }
 
+    // ✅ DEBUG: Log the session data to verify what user_id we're querying with
+    console.log('🔐 [AUTH-ME] Session data:', {
+      user_id_from_session: session.userId,
+      user_id_type: typeof session.userId,
+      email_from_session: session.email
+    });
+
     // Fetch user profile from database to get subscription tier and trial expiration
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('subscription_tier, trial_ends_at')
+      .select('id, user_id, subscription_tier, trial_ends_at, email')
       .eq('user_id', session.userId)
       .single();
 
     if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Error fetching user profile:', profileError);
+      console.error('❌ [AUTH-ME] Error fetching user profile:', profileError);
       await DevIssue.apiError('auth_api', '/api/auth/me', profileError, {
         userId: session.userId,
         errorCode: profileError.code
@@ -151,9 +158,13 @@ export default async function handler(req, res) {
     // ✅ DEBUG: Log what we're getting from database
     console.log('📊 [AUTH-ME] Profile lookup for user', session.userId, ':', {
       profile_found: !!profile,
+      profile_id: profile?.id,
+      profile_user_id: profile?.user_id,
+      profile_email: profile?.email,
       subscription_tier: profile?.subscription_tier,
       trial_ends_at: profile?.trial_ends_at,
-      profile_error: profileError?.message
+      profile_error: profileError?.message,
+      profile_error_code: profileError?.code
     });
 
     // Calculate if trial has expired
