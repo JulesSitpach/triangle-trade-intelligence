@@ -63,15 +63,20 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
       }
 
       // Auto-generate certificate from workflow results
+      const exporterData = {
+        name: results.company?.name || results.company?.company_name || '',
+        country: results.company?.country || results.company?.company_country || '',
+        address: results.company?.address || results.company?.company_address || '',
+        tax_id: results.company?.tax_id || '',
+        phone: results.company?.phone || results.company?.contact_phone || '',
+        email: results.company?.email || results.company?.contact_email || ''
+      };
+
       const certificateData = {
-        exporter: {
-          name: results.company?.name || results.company?.company_name || '',
-          country: results.company?.country || results.company?.company_country || '',
-          address: results.company?.address || results.company?.company_address || '',
-          tax_id: results.company?.tax_id || '',
-          phone: results.company?.phone || results.company?.contact_phone || '',
-          email: results.company?.email || results.company?.contact_email || ''
-        },
+        // ✅ FIX: Set certifier explicitly to match exporter for proper PDF generation
+        certifier: exporterData,
+        certifier_type: 'EXPORTER',
+        exporter: exporterData,
         product: {
           hs_code: results.product?.hs_code || '',
           description: results.product?.description || results.product?.product_description || '',
