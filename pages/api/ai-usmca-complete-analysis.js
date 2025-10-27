@@ -662,13 +662,13 @@ export default protectedApiHandler({
     }
 
     // ========== VALIDATION CHECKPOINT 1: Verify enrichedComponents have rates ==========
-    const missingRates = enrichedComponents.filter(comp =>
+    const missingRatesAfterPhase3 = enrichedComponents.filter(comp =>
       !comp.mfn_rate || comp.mfn_rate === 0 || comp.mfn_rate === undefined
     );
 
-    if (missingRates.length > 0) {
-      console.warn(`⚠️  [VALIDATION] ${missingRates.length} components missing tariff rates:`, {
-        missing: missingRates.map(c => ({
+    if (missingRatesAfterPhase3.length > 0) {
+      console.warn(`⚠️  [VALIDATION] ${missingRatesAfterPhase3.length} components still missing tariff rates after Phase 3:`, {
+        missing: missingRatesAfterPhase3.map(c => ({
           hs_code: c.hs_code,
           description: c.description,
           rate_source: c.rate_source,
@@ -676,11 +676,53 @@ export default protectedApiHandler({
         }))
       });
 
-      // Log issue but don't block - pre-calculation will handle 0 rates gracefully
-      await DevIssue.warning('validation_checkpoint', 'Missing tariff rates after enrichment', {
-        count: missingRates.length,
-        components: missingRates.map(c => c.description)
+      // Log issue and determine severity based on destination country
+      const isUSDestination = formData.destination_country === 'US';
+      const isCADestination = formData.destination_country === 'CA';
+      const isMXDestination = formData.destination_country === 'MX';
+
+      await DevIssue.unexpectedBehavior('validation_checkpoint_p0', 'Missing tariff rates after enrichment - P0 ERROR', {
+        count: missingRatesAfterPhase3.length,
+        components: missingRatesAfterPhase3.map(c => c.description),
+        destination: formData.destination_country,
+        severity_level: isMXDestination ? 'warning' : 'error'
       });
+
+      // P0 FIX (Oct 27, 2025): FAIL LOUDLY if critical market data is missing
+      // MX: lenient (database cache is reliable)
+      // US/CA: strict (volatile tariffs, must have fresh data)
+      if ((isUSDestination || isCADestination) && missingRatesAfterPhase3.length > 0) {
+        const missingCodes = missingRatesAfterPhase3.map(c => c.hs_code).join(', ');
+        console.error(`❌ [P0-BLOCKER] Cannot proceed without tariff data for US/CA destination:`, {
+          destination: formData.destination_country,
+          missing_hs_codes: missingCodes,
+          missing_count: missingRatesAfterPhase3.length,
+          action: 'Returning error - user must verify HS codes and try again'
+        });
+
+        return res.status(400).json({
+          success: false,
+          error: 'tariff_data_unavailable',
+          message: `Unable to retrieve current tariff rates for ${missingRatesAfterPhase3.length} component(s). This is required for ${formData.destination_country} destination.`,
+          details: {
+            missing_components: missingRatesAfterPhase3.map(c => ({
+              hs_code: c.hs_code,
+              description: c.description,
+              action: 'Please verify the HS code is correct (10-digit format) and try again'
+            })),
+            destination: formData.destination_country,
+            suggestion: 'If problem persists, check your internet connection and try again in a few minutes.'
+          }
+        });
+      }
+
+      // Mexico destination: warn but continue (database cache is reliable for MX)
+      if (isMXDestination && missingRatesAfterPhase3.length > 0) {
+        console.warn(`⚠️  [P0-WARNING] Mexico destination - continuing with ${missingRatesAfterPhase3.length} components at 0% default rates`, {
+          missing: missingRatesAfterPhase3.map(c => c.description),
+          action: 'Workflow continues - Mexico rates are stable in database'
+        });
+      }
     }
 
     // ========== PRE-CALCULATE FINANCIAL DATA (Oct 26, 2025 Optimization - FIXED Oct 27) ==========
