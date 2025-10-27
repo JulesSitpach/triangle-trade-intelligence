@@ -827,50 +827,12 @@ export default function WorkflowResults({
       {/* NOTE: Policy Alerts moved to dedicated /trade-risk-alternatives dashboard */}
       {/* NOTE: Certificate management moved to dedicated /dashboard */}
 
-      {/* SECTION 6: Detailed USMCA Analysis */}
-      {results.detailed_analysis && (
-        <CollapsibleSection title="Detailed USMCA Analysis" icon="📊">
+      {/* SECTION 6: Strategic Insights & Supply Chain Analysis */}
+      {results.detailed_analysis && (results.detailed_analysis.strategic_insights || results.detailed_analysis.supply_chain_vulnerabilities || results.detailed_analysis.strategic_alternatives) && (
+        <CollapsibleSection title="Strategic Analysis & Alternatives" icon="📊" defaultExpanded={true}>
           <p className="form-section-description">
-            AI-powered deep dive into your product&apos;s USMCA qualification and strategic opportunities
+            AI-powered insights on supply chain optimization and strategic opportunities
           </p>
-
-          {/* Threshold Research */}
-          {results.detailed_analysis.threshold_research && (
-            <div className="service-request-card">
-              <h3 className="content-card-title">🔍 Treaty Rule Analysis</h3>
-              <p className="text-body">
-                {typeof results.detailed_analysis.threshold_research === 'string'
-                  ? results.detailed_analysis.threshold_research
-                  : JSON.stringify(results.detailed_analysis.threshold_research)}
-              </p>
-            </div>
-          )}
-
-          {/* Calculation Breakdown */}
-          {results.detailed_analysis.calculation_breakdown && (
-            <div className="service-request-card">
-              <h3 className="content-card-title">🧮 Regional Content Calculation</h3>
-              <p className="text-body">
-                {typeof results.detailed_analysis.calculation_breakdown === 'string'
-                  ? results.detailed_analysis.calculation_breakdown
-                  : JSON.stringify(results.detailed_analysis.calculation_breakdown)}
-              </p>
-            </div>
-          )}
-
-          {/* Qualification Reasoning */}
-          {results.detailed_analysis.qualification_reasoning && (
-            <div className="service-request-card">
-              <h3 className="content-card-title">
-                {results.usmca?.qualified ? '✅ Qualification Validation' : '❌ Qualification Assessment'}
-              </h3>
-              <p className="text-body">
-                {typeof results.detailed_analysis.qualification_reasoning === 'string'
-                  ? results.detailed_analysis.qualification_reasoning
-                  : JSON.stringify(results.detailed_analysis.qualification_reasoning)}
-              </p>
-            </div>
-          )}
 
           {/* Strategic Insights */}
           {results.detailed_analysis.strategic_insights && (
