@@ -34,16 +34,18 @@ export default async function handler(req, res) {
 
     // ✅ TIER-GATING: Alerts are PAID-ONLY feature
     // Free/Trial users should NOT access real-time crisis alerts
-    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
-    const isPaidTier = subscriptionTier && ['Premium', 'Professional', 'Enterprise'].includes(subscriptionTier);
+    // Starter, Professional, and Premium tiers get alerts (Enterprise is future)
+    const subscriptionTier = user_profile?.subscription_tier || 'trial';
+    const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
+    const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
 
     if (!isPaidTier) {
       return res.status(403).json({
         success: false,
         error: 'UPGRADE_REQUIRED',
         code: 'ALERTS_REQUIRE_PAID_SUBSCRIPTION',
-        message: 'Real-time crisis alerts are available only with a paid subscription',
-        required_tier: 'Professional',
+        message: 'Real-time crisis alerts are available only with Starter plan ($99/month) or higher',
+        required_tier: 'Starter',
         current_tier: subscriptionTier,
         upgrade_url: '/pricing',
         upgrade_benefits: [
@@ -51,7 +53,10 @@ export default async function handler(req, res) {
           'Section 301/232 tariff escalation notifications',
           'USMCA rule change monitoring',
           'Strategic mitigation recommendations',
-          'Full editable certificates (unwatermarked)'
+          'Full editable certificates (unwatermarked)',
+          'Starter: $99/month for 10 analyses + alerts',
+          'Professional: $299/month for 100 analyses + priority support',
+          'Premium: $599/month + quarterly strategy calls'
         ]
       });
     }
