@@ -849,10 +849,12 @@ export default protectedApiHandler({
       product: {
         success: true,
         hs_code: analysis.product?.hs_code || '',
-        description: formData.product_description,
+        description: analysis.product?.description || formData.product_description,
         product_description: formData.product_description,
-        // ✅ FIX: Remove hardcoded || 85 confidence default - use actual AI value
-        confidence: analysis.product?.confidence,
+        hs_description: analysis.product?.hs_description || '',
+        // ✅ FIX: Map both confidence and confidence_score from AI
+        confidence: analysis.product?.confidence || analysis.product?.confidence_score || 0,
+        classification_confidence: analysis.product?.confidence || analysis.product?.confidence_score || 0,
         classification_method: 'ai_analysis',
         manufacturing_location: formData.manufacturing_location || '',
         // Product-level tariff rates (from AI savings analysis)
