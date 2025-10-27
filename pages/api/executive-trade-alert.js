@@ -37,6 +37,8 @@ export default async function handler(req, res) {
     // Starter, Professional, and Premium tiers get alerts (Enterprise is future)
     const subscriptionTier = user_profile?.subscription_tier || 'trial';
     const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
+    // Database stores as 'Premium', 'Starter' (capital letters)
+    // But we normalize to lowercase for comparison with standard tier names
     const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
 
     // ✅ DEBUG: Log tier information to diagnose 403 errors
