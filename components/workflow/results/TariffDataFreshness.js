@@ -13,15 +13,29 @@
 import React from 'react';
 
 export default function TariffDataFreshness({ results, destination = 'US' }) {
+  // ✅ FIX (Oct 26): Look for components in both old and new API response locations
+  const getComponents = () => {
+    // New location after transformAPIToFrontend: results.usmca.component_breakdown
+    if (results?.usmca?.component_breakdown && results.usmca.component_breakdown.length > 0) {
+      return results.usmca.component_breakdown;
+    }
+    // Fallback to old location for backwards compatibility
+    if (results?.component_origins && results.component_origins.length > 0) {
+      return results.component_origins;
+    }
+    return [];
+  };
+
   // Extract last update time from results
   const getDataFreshness = () => {
-    if (!results?.component_origins || results.component_origins.length === 0) {
+    const components = getComponents();
+    if (!components || components.length === 0) {
       return null;
     }
 
     // Get the most recent update time from all components
-    const lastUpdates = results.component_origins
-      .map(c => new Date(c.last_updated || c.cached_at))
+    const lastUpdates = components
+      .map(c => new Date(c.last_updated || c.cached_at || c.lastUpdated))
       .filter(d => !isNaN(d.getTime()))
       .sort((a, b) => b - a);
 
@@ -29,14 +43,15 @@ export default function TariffDataFreshness({ results, destination = 'US' }) {
   };
 
   const getDataSource = () => {
-    if (!results?.component_origins || results.component_origins.length === 0) {
+    const components = getComponents();
+    if (!components || components.length === 0) {
       return 'unknown';
     }
 
-    // Check data sources in components
+    // Check data sources in components (handle both snake_case and camelCase)
     const sources = new Set(
-      results.component_origins
-        .map(c => c.data_source || c.cache_source || 'unknown')
+      components
+        .map(c => c.data_source || c.dataSource || c.cache_source || c.cacheSource || 'unknown')
     );
 
     if (sources.has('USITC DataWeb API') || sources.has('OpenRouter')) {
