@@ -743,16 +743,16 @@ export default protectedApiHandler({
           // Option 2: Enrich user components with rates extracted from AI response
           // CRITICAL: Pass already-enriched components (with fresh DB rates) instead of original
           // enrichComponentsWithTariffRates will preserve existing rates and only extract missing ones
-          const enrichedComponents = enrichComponentsWithTariffRates(enrichedComponents, analysis);
-          console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${enrichedComponents.length} components`);
+          const option2Components = enrichComponentsWithTariffRates(enrichedComponents, analysis);
+          console.log(`📊 [COMPONENT-BREAKDOWN] Enriched ${option2Components.length} components`);
           console.log(`📊 [COMPONENT-BREAKDOWN] Checking for data_source==='ai_enriched'...`);
-          const hasEnrichedData = enrichedComponents && enrichedComponents.some(c => c.data_source === 'ai_enriched');
+          const hasEnrichedData = option2Components && option2Components.some(c => c.data_source === 'ai_enriched');
           console.log(`📊 [COMPONENT-BREAKDOWN] Has enriched data: ${hasEnrichedData}`);
 
           if (hasEnrichedData) {
             console.log('✅ [COMPONENT-BREAKDOWN] Using enriched components');
             // ✅ Ensure all enriched components have required fields (including hs_code and origin_country)
-            return (enrichedComponents || []).map((component, idx) => {
+            return (option2Components || []).map((component, idx) => {
               // Use original form data to fill in missing hs_code or origin_country
               const originalComponent = formData.component_origins?.[idx] || {};
               return {
