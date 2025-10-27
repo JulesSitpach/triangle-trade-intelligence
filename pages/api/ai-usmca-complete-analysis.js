@@ -847,7 +847,7 @@ export default protectedApiHandler({
       // Product classification
       product: {
         success: true,
-        hs_code: analysis.product?.hs_code || 'AI-classified',
+        hs_code: analysis.product?.hs_code || '',
         description: formData.product_description,
         product_description: formData.product_description,
         // ✅ FIX: Remove hardcoded || 85 confidence default - use actual AI value
