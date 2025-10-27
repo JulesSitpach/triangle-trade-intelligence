@@ -347,9 +347,29 @@ export default protectedApiHandler({
       const enriched = [];
 
       for (const component of components) {
-        // Skip if we don't have HS code
+        // ✅ FIX (Oct 26): Always preserve original component fields including origin_country
+        // Even if component doesn't have hs_code yet, we still need to keep all original data
+        // This ensures components retain origin_country through the entire enrichment pipeline
+        const baseComponent = {
+          ...component,
+          // Ensure required fields are always present
+          description: component.description || component.component_type || '',
+          origin_country: component.origin_country || component.country || '',
+          value_percentage: component.value_percentage || component.percentage || 0,
+          // Ensure tariff fields have defaults (will be overwritten if HS code matches in DB)
+          mfn_rate: component.mfn_rate || 0,
+          base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
+          section_301: component.section_301 || 0,
+          section_232: component.section_232 || 0,
+          usmca_rate: component.usmca_rate || 0,
+          rate_source: 'component_input',  // Track data source
+          stale: false,  // User input is always fresh
+          data_source: 'user_input'
+        };
+
+        // Skip database lookup if we don't have HS code
         if (!component.hs_code) {
-          enriched.push(component);
+          enriched.push(baseComponent);
           continue;
         }
 
@@ -377,8 +397,8 @@ export default protectedApiHandler({
           };
 
           enriched.push({
-            ...component,
-            ...standardFields
+            ...baseComponent,  // Keep all original fields
+            ...standardFields  // Overwrite with database rates if available
           });
 
           if (rateData) {
@@ -388,9 +408,9 @@ export default protectedApiHandler({
           }
         } catch (dbError) {
           console.error(`❌ [TARIFF-INTEGRATION] Database lookup error for ${component.hs_code}:`, dbError.message);
-          // On error: still return consistent structure
+          // On error: still return consistent structure with original fields preserved
           enriched.push({
-            ...component,
+            ...baseComponent,
             mfn_rate: component.mfn_rate || 0,
             base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
             section_301: component.section_301 || 0,
