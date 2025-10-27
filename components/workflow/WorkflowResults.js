@@ -34,6 +34,8 @@ export default function WorkflowResults({
   const [userMadeChoice, setUserMadeChoice] = useState(false);
   const [certificateGenerated, setCertificateGenerated] = useState(false);
   const [modalChoice, setModalChoice] = useState('save'); // Default to save
+  const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
+  const [loadingTier, setLoadingTier] = useState(true);
   const modalShownRef = useRef(false);
   const modalClosedTimeRef = useRef(0);
   const isProcessingRef = useRef(false);
@@ -43,6 +45,30 @@ export default function WorkflowResults({
   useEffect(() => {
     console.log('🔄 Modal state changed:', { showSaveConsentModal, userMadeChoice });
   }, [showSaveConsentModal, userMadeChoice]);
+
+  useEffect(() => {
+    // Fetch user's subscription tier for tier-based UI gating
+    const fetchUserSubscriptionTier = async () => {
+      try {
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          const tier = data.user?.subscription_tier || 'trial';
+          setUserSubscriptionTier(tier);
+          console.log('✅ User subscription tier:', tier, '(for results page gating)');
+        } else {
+          setUserSubscriptionTier('trial');
+        }
+      } catch (error) {
+        console.error('⚠️ Failed to fetch user subscription tier:', error);
+        setUserSubscriptionTier('trial');
+      } finally {
+        setLoadingTier(false);
+      }
+    };
+
+    fetchUserSubscriptionTier();
+  }, []);
 
   useEffect(() => {
     // Check if user has already made a save choice
@@ -529,6 +555,10 @@ export default function WorkflowResults({
 
   if (!results) return null;
 
+  // Determine if user is a paid subscriber (Starter, Professional, Premium, Enterprise)
+  const isPaidUser = userSubscriptionTier &&
+    !['trial', 'free'].includes((userSubscriptionTier || '').toLowerCase());
+
   const modalContent = showSaveConsentModal && (
     <div className="consent-modal">
       <h2 className="consent-modal-title">
@@ -659,13 +689,67 @@ export default function WorkflowResults({
         </CollapsibleSection>
       )}
 
-      {/* TARIFF DATA FRESHNESS WARNING - Displayed before detailed tariff sections */}
-      <TariffDataFreshness />
+      {/* ✅ POTENTIAL SAVINGS - Show simple savings for FREE users, hide detailed analysis */}
+      {results.savings && (results.savings.annual_savings || 0) > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">💰 Your Potential Savings</h3>
+          </div>
 
-      {/* 2. COLLAPSIBLE SECTIONS - Details Hidden by Default */}
+          <div className="element-spacing">
+            <div className="status-grid">
+              <div className="status-card success">
+                <div className="status-label">Annual Tariff Savings</div>
+                <div className="status-value success">${(results.savings.annual_savings || 0).toLocaleString()}</div>
+              </div>
+              <div className="status-card success">
+                <div className="status-label">Monthly Savings</div>
+                <div className="status-value success">${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}</div>
+              </div>
+              <div className="status-card success">
+                <div className="status-label">Savings Rate</div>
+                <div className="status-value success">{(results.savings.savings_percentage || 0).toFixed(1)}%</div>
+              </div>
+            </div>
 
-      {/* CERTIFICATE FIELDS PREVIEW */}
-      {(results.origin_criterion || results.method_of_qualification || results.producer_name) && (() => {
+            {/* Upgrade CTA for FREE users */}
+            {!isPaidUser && (
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="alert-title">Unlock Full Financial Analysis</div>
+                  <div className="text-body">
+                    Upgrade to Starter ($99/month) to see detailed breakdown including:
+                    <ul style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                      <li>Component-by-component tariff rates (MFN vs USMCA)</li>
+                      <li>Supply chain vulnerability analysis</li>
+                      <li>Strategic alternatives with ROI calculations</li>
+                      <li>Download and edit official USMCA certificates</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!isPaidUser && (
+              <button
+                onClick={() => router.push('/pricing')}
+                className="btn-primary"
+                style={{ width: '100%' }}
+              >
+                💰 Upgrade to Starter ($99/month) - See Full Analysis
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TARIFF DATA FRESHNESS WARNING - Displayed before detailed tariff sections (PAID only) */}
+      {isPaidUser && <TariffDataFreshness />}
+
+      {/* 2. COLLAPSIBLE SECTIONS - Details Hidden by Default (PAID only) */}
+
+      {/* CERTIFICATE FIELDS PREVIEW - PAID ONLY */}
+      {isPaidUser && (results.origin_criterion || results.method_of_qualification || results.producer_name) && (() => {
         // Validate Origin Criterion against actual analysis
         const validateOriginCriterion = () => {
           if (!results.origin_criterion) return null;
@@ -811,31 +895,35 @@ export default function WorkflowResults({
         );
       })()}
 
-      {/* SECTION 2: Qualification Details */}
-      <CollapsibleSection title="Qualification Details" icon="✓">
-        <USMCAQualification results={results} />
-      </CollapsibleSection>
+      {/* SECTION 2: Qualification Details - PAID ONLY */}
+      {isPaidUser && (
+        <CollapsibleSection title="Qualification Details" icon="✓">
+          <USMCAQualification results={results} />
+        </CollapsibleSection>
+      )}
 
       {/* SECTION 3: Component Breakdown */}
-      {/* Hidden inside USMCAQualification - can be accessed via expanding that section */}
+      {/* Hidden inside USMCAQualification - can be accessed via expanding that section (PAID only) */}
 
-      {/* SECTION 4: Tariff Analysis */}
-      {results.savings && results.savings.annual_savings > 0 && (
+      {/* SECTION 4: Tariff Analysis - PAID ONLY */}
+      {isPaidUser && results.savings && results.savings.annual_savings > 0 && (
         <CollapsibleSection title="Tariff Analysis & Savings" icon="💰">
           <TariffSavings results={results} />
         </CollapsibleSection>
       )}
 
-      {/* SECTION 5: Recommended Actions */}
-      <CollapsibleSection title="Recommended Actions" icon="🎯">
-        <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
-      </CollapsibleSection>
+      {/* SECTION 5: Recommended Actions - PAID ONLY */}
+      {isPaidUser && (
+        <CollapsibleSection title="Recommended Actions" icon="🎯">
+          <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
+        </CollapsibleSection>
+      )}
 
       {/* NOTE: Policy Alerts moved to dedicated /trade-risk-alternatives dashboard */}
       {/* NOTE: Certificate management moved to dedicated /dashboard */}
 
-      {/* SECTION 6: Strategic Insights & Supply Chain Analysis */}
-      {results.detailed_analysis && (results.detailed_analysis.strategic_insights || results.detailed_analysis.supply_chain_vulnerabilities || results.detailed_analysis.strategic_alternatives) && (
+      {/* SECTION 6: Strategic Insights & Supply Chain Analysis - PAID ONLY */}
+      {isPaidUser && results.detailed_analysis && (results.detailed_analysis.strategic_insights || results.detailed_analysis.supply_chain_vulnerabilities || results.detailed_analysis.strategic_alternatives) && (
         <CollapsibleSection title="Strategic Analysis & Alternatives" icon="📊" defaultExpanded={true}>
           <p className="form-section-description">
             AI-powered insights on supply chain optimization and strategic opportunities
