@@ -38,7 +38,18 @@ export default async function handler(req, res) {
       effective_date: new Date().toISOString().split('T')[0],
       expiration_date: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
 
-      // Exporter information
+      // ✅ FIX: Certifier information (Section 1-2 of USMCA form)
+      certifier: {
+        type: certificateData.certifier_type || 'EXPORTER',
+        name: certificateData.authorization?.signatory_name || '',
+        address: certificateData.company_info?.exporter_address || '',
+        country: certificateData.company_info?.exporter_country || '',
+        tax_id: certificateData.company_info?.exporter_tax_id || '',
+        phone: certificateData.company_info?.exporter_phone || '',
+        email: certificateData.company_info?.exporter_email || ''
+      },
+
+      // ✅ FIX: Exporter information (Section 3 of USMCA form)
       exporter: {
         name: certificateData.company_info?.exporter_name || '',
         address: certificateData.company_info?.exporter_address || '',
@@ -48,7 +59,17 @@ export default async function handler(req, res) {
         email: certificateData.company_info?.exporter_email || ''
       },
 
-      // Importer information (optional)
+      // ✅ FIX: Producer information (Section 4 of USMCA form)
+      producer: {
+        name: certificateData.company_info?.producer_name || '',
+        address: certificateData.company_info?.producer_address || '',
+        country: certificateData.company_info?.producer_country || '',
+        tax_id: certificateData.company_info?.producer_tax_id || '',
+        phone: certificateData.company_info?.producer_phone || '',
+        email: certificateData.company_info?.producer_email || ''
+      },
+
+      // ✅ FIX: Importer information (Section 5 of USMCA form)
       importer: certificateData.company_info?.importer_name ? {
         name: certificateData.company_info.importer_name,
         address: certificateData.company_info.importer_address || '',
@@ -58,14 +79,46 @@ export default async function handler(req, res) {
         email: certificateData.company_info.importer_email || ''
       } : null,
 
-      // Product information
+      // ✅ FIX: Product information (Sections 6-7 of USMCA form)
       product: {
-        hs_code: certificateData.product_details?.hs_code || '',
         description: certificateData.product_details?.product_description || certificateData.product_details?.commercial_description || '',
         manufacturing_location: certificateData.product_details?.manufacturing_location || ''
       },
 
-      // USMCA analysis
+      // ✅ FIX: HS Classification (Section 6 field - must match EditableCertificatePreview structure)
+      hs_classification: {
+        code: certificateData.product_details?.hs_code || '',
+        description: certificateData.product_details?.hs_description || ''
+      },
+
+      // ✅ FIX: Producer Declaration (Section 8 of USMCA form)
+      producer_declaration: {
+        is_producer: certificateData.company_info?.is_producer || false
+      },
+
+      // ✅ FIX: Qualification Method (Section 10 of USMCA form)
+      qualification_method: {
+        method: certificateData.supply_chain?.method_of_qualification || 'RVC'
+      },
+
+      // ✅ FIX: Country of Origin (Section 11 of USMCA form)
+      country_of_origin: certificateData.supply_chain?.manufacturing_location || certificateData.product_details?.manufacturing_location || '',
+
+      // ✅ FIX: Preference Criterion (Section 9 of USMCA form)
+      preference_criterion: certificateData.supply_chain?.preference_criterion || 'B',
+
+      // ✅ FIX: Components (Section 12 - auto-populated from analysis)
+      // Must match EditableCertificatePreview expected structure
+      components: (certificateData.supply_chain?.component_origins || []).map((comp, idx) => ({
+        description: comp.description || comp.component_type || '',
+        hs_code: comp.hs_code || '',
+        origin_criterion: comp.is_usmca_member ? 'B' : 'A',
+        is_producer: comp.is_producer || false,
+        qualification_method: certificateData.supply_chain?.method_of_qualification || 'RVC',
+        country_of_origin: comp.origin_country || ''
+      })),
+
+      // USMCA analysis (for backend processing)
       usmca_analysis: {
         qualified: certificateData.supply_chain?.qualified || false,
         regional_value_content: certificateData.supply_chain?.regional_value_content || 0,
