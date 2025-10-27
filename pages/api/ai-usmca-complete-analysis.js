@@ -432,27 +432,41 @@ export default protectedApiHandler({
       formData.destination_country
     );
 
-    // ========== PRE-CALCULATE FINANCIAL DATA (Oct 26, 2025 Optimization) ==========
+    // ========== PRE-CALCULATE FINANCIAL DATA (Oct 26, 2025 Optimization - FIXED Oct 27) ==========
+    // FIXED: Only apply USMCA savings to USMCA-member-origin components
+    // Non-USMCA components (China, Vietnam, etc.) do NOT get USMCA rates or savings
     // Instead of asking AI to calculate, compute all financial metrics here
     // This reduces token usage from 16,000 to 4,000 (~65% faster response)
     const tradeVolume = parseTradeVolume(formData.trade_volume);
 
+    // ✅ FIX: Calculate RVC material percentage from USMCA-member components
+    const usmcaMemberValue = enrichedComponents
+      .filter(c => c.is_usmca_member)
+      .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
+
     // Calculate component-level financials
     const componentFinancials = enrichedComponents.map(comp => {
       const mfn = comp.mfn_rate || 0;
-      const usmca = comp.usmca_rate || 0;
+      // ✅ FIX: Only apply USMCA rate if component is from USMCA-member country (US/CA/MX)
+      // Non-USMCA components (China, Vietnam, etc.) don't get USMCA treatment
+      const usmca = (comp.is_usmca_member) ? (comp.usmca_rate || 0) : 0;
       const section301 = comp.section_301 || 0;
       const totalRate = (mfn + section301 + (comp.section_232 || 0));
 
       const componentValue = (tradeVolume * (comp.value_percentage / 100));
       const mfnCost = componentValue * (mfn / 100);
+      // ✅ Section 301 applies REGARDLESS of USMCA qualification (cannot be eliminated)
       const section301Cost = section301 > 0 ? componentValue * (section301 / 100) : 0;
+      // ✅ FIX: USMCA cost is 0 for non-USMCA components (they can't get preferential rate)
       const usmcaCost = componentValue * (usmca / 100);
-      const savingsPerYear = mfnCost - usmcaCost;
+      // ✅ FIX: Savings only apply when USMCA rate < MFN rate (only for USMCA members)
+      const savingsPerYear = (comp.is_usmca_member && usmca < mfn) ? (mfnCost - usmcaCost) : 0;
 
       return {
         hs_code: comp.hs_code,
         description: comp.description,
+        origin_country: comp.origin_country,
+        is_usmca_member: comp.is_usmca_member,
         annual_mfn_cost: Math.round(mfnCost),
         annual_section301_cost: Math.round(section301Cost),
         annual_usmca_cost: Math.round(usmcaCost),
@@ -462,9 +476,13 @@ export default protectedApiHandler({
 
     // Aggregate financial impact
     const totalAnnualMFNCost = componentFinancials.reduce((sum, c) => sum + c.annual_mfn_cost, 0);
+    // ✅ FIX: Section 301 is separate from USMCA - it's a BURDEN, not reduced by qualification
     const totalSection301Burden = componentFinancials.reduce((sum, c) => sum + c.annual_section301_cost, 0);
     const totalAnnualUSMCACost = componentFinancials.reduce((sum, c) => sum + c.annual_usmca_cost, 0);
-    const totalAnnualSavings = totalAnnualMFNCost - totalAnnualUSMCACost;
+    // ✅ FIX: Total savings only from USMCA-eligible components
+    const totalAnnualSavings = componentFinancials
+      .filter(c => c.is_usmca_member)
+      .reduce((sum, c) => sum + c.annual_savings, 0);
 
     const preCalculatedFinancials = {
       trade_volume: tradeVolume,
@@ -472,12 +490,15 @@ export default protectedApiHandler({
       monthly_tariff_savings: Math.round(totalAnnualSavings / 12),
       savings_percentage: tradeVolume > 0 ? Math.round((totalAnnualSavings / tradeVolume) * 10000) / 100 : 0,
       tariff_cost_without_qualification: Math.round(totalAnnualMFNCost),
+      // ✅ NEW: RVC material component percentage (not just 0%)
+      material_from_usmca_members: usmcaMemberValue,
       section_301_exposure: {
         is_exposed: totalSection301Burden > 0,
         annual_cost_burden: Math.round(totalSection301Burden),
         affected_components: enrichedComponents
           .filter(c => c.section_301 > 0)
-          .map(c => `${c.description} (${c.section_301}%)`)
+          .map(c => `${c.description} (${c.section_301}% - ${c.origin_country})`),
+        note: 'Section 301 costs CANNOT be eliminated by USMCA qualification. Consider sourcing from Mexico/US/CA to reduce exposure.'
       }
     };
 
