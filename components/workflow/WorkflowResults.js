@@ -677,283 +677,241 @@ export default function WorkflowResults({
         </div>
       </div>
 
-      {/* ========== PROGRESSIVE DISCLOSURE: EXECUTIVE SUMMARY AT TOP ========== */}
+      {/* ========== UNIFIED SUMMARY SECTION (NO REPETITION) ========== */}
 
-      {/* 1. EXECUTIVE SUMMARY - Always Visible */}
-      <ExecutiveSummary results={results} />
+      {/* CONSOLIDATED SUMMARY - All Users */}
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">📊 USMCA Analysis Summary</h3>
+        </div>
 
-      {/* ✅ PRODUCT CLASSIFICATION - Display final product HS code prominently */}
-      {results.product && (
-        <CollapsibleSection title="📦 Final Product Classification" defaultOpen={true}>
-          <ProductClassification results={results} />
-        </CollapsibleSection>
-      )}
-
-      {/* ✅ POTENTIAL SAVINGS - Show simple savings for FREE users, hide detailed analysis */}
-      {results.savings && (results.savings.annual_savings || 0) > 0 && (
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">💰 Your Potential Savings</h3>
-          </div>
-
-          <div className="element-spacing">
-            <div className="status-grid">
-              <div className="status-card success">
-                <div className="status-label">Annual Tariff Savings</div>
-                <div className="status-value success">${(results.savings.annual_savings || 0).toLocaleString()}</div>
-              </div>
-              <div className="status-card success">
-                <div className="status-label">Monthly Savings</div>
-                <div className="status-value success">${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}</div>
-              </div>
-              <div className="status-card success">
-                <div className="status-label">Savings Rate</div>
-                <div className="status-value success">{(results.savings.savings_percentage || 0).toFixed(1)}%</div>
+        <div className="element-spacing">
+          {/* Key Metrics Grid */}
+          <div className="status-grid">
+            <div className="status-card">
+              <div className="status-label">Regional Value Content</div>
+              <div className="status-value success">{(results.usmca?.north_american_content || 0).toFixed(1)}%</div>
+              <div className="text-small" style={{marginTop: '0.25rem', color: '#059669'}}>
+                Exceeds {results.usmca?.threshold_applied || 60}% by {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}%
               </div>
             </div>
 
-            {/* Upgrade CTA for FREE users */}
-            {!isPaidUser && (
-              <div className="alert alert-info">
-                <div className="alert-content">
-                  <div className="alert-title">Unlock Full Financial Analysis</div>
-                  <div className="text-body">
-                    Upgrade to Starter ($99/month) to see detailed breakdown including:
-                    <ul style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                      <li>Component-by-component tariff rates (MFN vs USMCA)</li>
-                      <li>Supply chain vulnerability analysis</li>
-                      <li>Strategic alternatives with ROI calculations</li>
-                      <li>Download and edit official USMCA certificates</li>
-                    </ul>
+            {results.savings && (results.savings.annual_savings || 0) > 0 && (
+              <>
+                <div className="status-card">
+                  <div className="status-label">Annual Savings</div>
+                  <div className="status-value success">${(results.savings.annual_savings || 0).toLocaleString()}</div>
+                  <div className="text-small" style={{marginTop: '0.25rem', color: '#059669'}}>
+                    ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/month
                   </div>
                 </div>
-              </div>
+
+                <div className="status-card">
+                  <div className="status-label">Savings Rate</div>
+                  <div className="status-value success">{(results.savings.savings_percentage || 0).toFixed(1)}%</div>
+                  <div className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>
+                    vs standard MFN rates
+                  </div>
+                </div>
+              </>
             )}
 
-            {!isPaidUser && (
-              <button
-                onClick={() => router.push('/pricing')}
-                className="btn-primary"
-                style={{ width: '100%' }}
-              >
-                💰 Upgrade to Starter ($99/month) - See Full Analysis
-              </button>
-            )}
+            <div className="status-card">
+              <div className="status-label">Product Classification</div>
+              <div style={{fontSize: '0.95rem', fontWeight: '600', marginTop: '0.5rem'}}>
+                {results.product?.hs_code}
+              </div>
+              <div className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>
+                {results.product?.description || 'Product'}
+              </div>
+            </div>
+          </div>
+
+          {/* Preference Criterion & Method (PAID ONLY) */}
+          {isPaidUser && (results.origin_criterion || results.method_of_qualification) && (
+            <div style={{
+              backgroundColor: '#f3f4f6',
+              padding: '1rem',
+              borderRadius: '6px',
+              marginTop: '1rem',
+              borderLeft: '4px solid #0284c7'
+            }}>
+              <div style={{fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937'}}>
+                Certificate Details
+              </div>
+              {results.origin_criterion && (
+                <div style={{fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem'}}>
+                  <strong>Origin Criterion:</strong> {results.origin_criterion} - {
+                    results.origin_criterion === 'A' ? 'Wholly Obtained' :
+                    results.origin_criterion === 'B' ? 'Regional Value Content' :
+                    results.origin_criterion === 'C' ? 'Specific Processing' :
+                    results.origin_criterion === 'D' ? 'Specific Manufacturing' :
+                    'Regional Value Content'
+                  }
+                </div>
+              )}
+              {results.method_of_qualification && (
+                <div style={{fontSize: '0.875rem', color: '#374151'}}>
+                  <strong>Qualification Method:</strong> {results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' : results.method_of_qualification}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* FREE USER: Upgrade CTA */}
+          {!isPaidUser && (
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">🔒 Unlock Detailed Analysis</div>
+                <div className="text-body">
+                  Upgrade to <strong>Starter ($99/month)</strong> to see:
+                  <ul style={{ marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem' }}>
+                    <li>Component-by-component tariff breakdown</li>
+                    <li>Section 301 exposure analysis</li>
+                    <li>Supply chain vulnerabilities</li>
+                    <li>Generate and download certificates</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!isPaidUser && (
+            <button
+              onClick={() => router.push('/pricing')}
+              className="btn-primary"
+              style={{ width: '100%' }}
+            >
+              💰 Upgrade to Starter - Unlock Full Analysis
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* PAID ONLY: Component Analysis Table */}
+      {isPaidUser && results.usmca?.component_breakdown && results.usmca.component_breakdown.length > 0 && (
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">📦 Component Analysis</h3>
+          </div>
+
+          <div style={{overflowX: 'auto'}}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '0.875rem'
+            }}>
+              <thead>
+                <tr style={{borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb'}}>
+                  <th style={{padding: '0.75rem', textAlign: 'left', fontWeight: '600', color: '#1f2937'}}>Component</th>
+                  <th style={{padding: '0.75rem', textAlign: 'center', fontWeight: '600', color: '#1f2937'}}>Origin</th>
+                  <th style={{padding: '0.75rem', textAlign: 'center', fontWeight: '600', color: '#1f2937'}}>Value %</th>
+                  <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937'}}>MFN Rate</th>
+                  <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937'}}>USMCA Rate</th>
+                  {results.savings?.annual_savings > 0 && (
+                    <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#059669'}}>Annual Savings</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {results.usmca.component_breakdown.map((comp, idx) => (
+                  <tr key={idx} style={{borderBottom: '1px solid #e5e7eb'}}>
+                    <td style={{padding: '0.75rem', color: '#1f2937'}}>
+                      <strong>{comp.description || comp.hs_code}</strong>
+                    </td>
+                    <td style={{padding: '0.75rem', textAlign: 'center', color: '#6b7280'}}>
+                      {comp.origin_country || comp.country || 'N/A'}
+                    </td>
+                    <td style={{padding: '0.75rem', textAlign: 'center', color: '#6b7280'}}>
+                      {comp.value_percentage || comp.percentage || 0}%
+                    </td>
+                    <td style={{padding: '0.75rem', textAlign: 'right', color: '#6b7280'}}>
+                      {comp.mfn_rate !== undefined ? `${(comp.mfn_rate * 100).toFixed(1)}%` : 'N/A'}
+                    </td>
+                    <td style={{padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '600'}}>
+                      {comp.usmca_rate !== undefined ? `${(comp.usmca_rate * 100).toFixed(1)}%` : '0%'}
+                    </td>
+                    {results.savings?.annual_savings > 0 && (
+                      <td style={{padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '600'}}>
+                        ${(((comp.mfn_rate || 0) - (comp.usmca_rate || 0)) * (comp.value_percentage || 0) * 0.01 * (results.savings.annual_savings || 0)).toLocaleString()}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* TARIFF DATA FRESHNESS WARNING - Displayed before detailed tariff sections (PAID only) */}
-      {isPaidUser && <TariffDataFreshness />}
+      {/* PAID ONLY: Strategic Recommendations (CONSOLIDATED) */}
+      {isPaidUser && (
+        <>
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">🎯 Strategic Recommendations</h3>
+            </div>
 
-      {/* 2. COLLAPSIBLE SECTIONS - Details Hidden by Default (PAID only) */}
-
-      {/* CERTIFICATE FIELDS PREVIEW - PAID ONLY */}
-      {isPaidUser && (results.origin_criterion || results.method_of_qualification || results.producer_name) && (() => {
-        // Validate Origin Criterion against actual analysis
-        const validateOriginCriterion = () => {
-          if (!results.origin_criterion) return null;
-
-          // Determine expected criterion based on qualification results
-          const hasNonUSMCA = results.usmca?.component_breakdown?.some(c => !c.is_usmca_member);
-          const usesRVC = results.usmca?.rule?.toLowerCase().includes('regional value content');
-
-          let expected = null;
-          let reason = '';
-
-          if (!hasNonUSMCA && results.usmca?.qualified) {
-            // All components from USMCA countries
-            expected = 'A';
-            reason = 'All components originate from USMCA countries (Wholly Obtained)';
-          } else if (hasNonUSMCA && usesRVC) {
-            // Has non-USMCA components and uses RVC method
-            expected = 'B';
-            reason = 'Product uses Regional Value Content calculation with tariff shift requirement';
-          }
-
-          if (expected && results.origin_criterion !== expected) {
-            return {
-              mismatch: true,
-              expected,
-              reason,
-              userSelected: results.origin_criterion
-            };
-          }
-
-          return { mismatch: false };
-        };
-
-        // Validate Method of Qualification against actual calculation
-        const validateMethodOfQualification = () => {
-          if (!results.method_of_qualification) return null;
-
-          // Determine expected method based on actual calculation used
-          let expected = null;
-          let reason = '';
-
-          if (results.usmca?.rule?.toLowerCase().includes('regional value content')) {
-            expected = 'TV'; // Transaction Value is most common for RVC
-            reason = 'Analysis used Transaction Value method for Regional Value Content calculation';
-          }
-
-          if (expected && results.method_of_qualification !== expected) {
-            return {
-              mismatch: true,
-              expected,
-              reason,
-              userSelected: results.method_of_qualification
-            };
-          }
-
-          return { mismatch: false };
-        };
-
-        const originValidation = validateOriginCriterion();
-        const methodValidation = validateMethodOfQualification();
-
-        return (
-          <div className="form-section">
-            <h2 className="form-section-title">Certificate Details</h2>
-
-            {results.origin_criterion && (
-              <div style={{marginBottom: '12px'}}>
-                <div className="text-body">
-                  <strong>Origin Criterion:</strong> {results.origin_criterion} - {
-                    results.origin_criterion === 'A' ? 'Wholly Obtained' :
-                    results.origin_criterion === 'B' ? 'Tariff Shift and Regional Value Content' :
-                    results.origin_criterion === 'C' ? 'Specific Processing/Value Requirement' :
-                    results.origin_criterion === 'D' ? 'Specific Manufacturing Process' :
-                    'Regional Value Content'
-                  }
-                </div>
-                {originValidation?.mismatch && (
-                  <div style={{
-                    marginTop: '0.5rem',
-                    padding: '0.75rem',
-                    backgroundColor: '#fef3c7',
-                    borderLeft: '3px solid #f59e0b',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem'
-                  }}>
-                    <strong style={{color: '#92400e'}}>⚠️ Validation Warning:</strong>
-                    <div style={{color: '#92400e', marginTop: '0.25rem'}}>
-                      Based on your component analysis, the recommended Origin Criterion is <strong>{originValidation.expected}</strong>.
-                    </div>
-                    <div style={{color: '#78350f', marginTop: '0.25rem', fontSize: '0.8125rem'}}>
-                      Reason: {originValidation.reason}
+            <div className="element-spacing">
+              {/* Section 301 Exposure Alert */}
+              {results.detailed_analysis?.supply_chain_vulnerabilities && (
+                <div className="alert alert-warning">
+                  <div className="alert-content">
+                    <div className="alert-title">⚠️ Supply Chain Exposure</div>
+                    <div className="text-body">
+                      {results.detailed_analysis.supply_chain_vulnerabilities}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {results.method_of_qualification && (
-              <div style={{marginBottom: '12px'}}>
-                <div className="text-body">
-                  <strong>Qualification Method:</strong> {results.method_of_qualification} - {
-                    results.method_of_qualification === 'TS' ? 'Tariff Shift' :
-                    results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' :
-                    results.method_of_qualification === 'NC' ? 'Net Cost (RVC)' :
-                    results.method_of_qualification === 'NO' ? 'No Requirement' :
-                    'Transaction Value'
-                  }
                 </div>
-                {methodValidation?.mismatch && (
-                  <div style={{
-                    marginTop: '0.5rem',
-                    padding: '0.75rem',
-                    backgroundColor: '#fef3c7',
-                    borderLeft: '3px solid #f59e0b',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem'
-                  }}>
-                    <strong style={{color: '#92400e'}}>⚠️ Validation Warning:</strong>
-                    <div style={{color: '#92400e', marginTop: '0.25rem'}}>
-                      Based on your qualification analysis, the recommended Method is <strong>{methodValidation.expected}</strong>.
-                    </div>
-                    <div style={{color: '#78350f', marginTop: '0.25rem', fontSize: '0.8125rem'}}>
-                      Reason: {methodValidation.reason}
-                    </div>
+              )}
+
+              {/* Strategic Insights */}
+              {results.detailed_analysis?.strategic_insights && (
+                <div style={{
+                  backgroundColor: '#fffbeb',
+                  padding: '1rem',
+                  borderRadius: '6px',
+                  borderLeft: '4px solid #f59e0b'
+                }}>
+                  <div style={{fontSize: '0.95rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem'}}>
+                    💡 Strategic Insights
                   </div>
-                )}
-              </div>
-            )}
-
-            {results.producer_name && results.producer_name !== results.company?.name && (
-              <div className="text-body">
-                <strong>Producer (if different from exporter):</strong><br/>
-                <div style={{marginLeft: '20px', marginTop: '8px'}}>
-                  {results.producer_name}<br/>
-                  {results.producer_address && <>{results.producer_address}<br/></>}
-                  {results.producer_country && <>{results.producer_country}<br/></>}
-                  {results.producer_phone && <>Phone: {results.producer_phone}<br/></>}
-                  {results.producer_email && <>Email: {results.producer_email}</>}
+                  <div style={{fontSize: '0.875rem', color: '#78350f', lineHeight: '1.6'}}>
+                    {typeof results.detailed_analysis.strategic_insights === 'string'
+                      ? results.detailed_analysis.strategic_insights
+                      : JSON.stringify(results.detailed_analysis.strategic_insights)}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Alternatives */}
+              {results.detailed_analysis?.strategic_alternatives && (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  padding: '1rem',
+                  borderRadius: '6px',
+                  borderLeft: '4px solid #16a34a'
+                }}>
+                  <div style={{fontSize: '0.95rem', fontWeight: '600', color: '#166534', marginBottom: '0.5rem'}}>
+                    🌱 Optimization Opportunities
+                  </div>
+                  <div style={{fontSize: '0.875rem', color: '#15803d', lineHeight: '1.6'}}>
+                    {typeof results.detailed_analysis.strategic_alternatives === 'string'
+                      ? results.detailed_analysis.strategic_alternatives
+                      : JSON.stringify(results.detailed_analysis.strategic_alternatives)}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        );
-      })()}
 
-      {/* SECTION 2: Qualification Details - PAID ONLY */}
-      {isPaidUser && (
-        <CollapsibleSection title="Qualification Details" icon="✓">
-          <USMCAQualification results={results} />
-        </CollapsibleSection>
-      )}
-
-      {/* SECTION 3: Component Breakdown */}
-      {/* Hidden inside USMCAQualification - can be accessed via expanding that section (PAID only) */}
-
-      {/* SECTION 4: Tariff Analysis - PAID ONLY */}
-      {isPaidUser && results.savings && results.savings.annual_savings > 0 && (
-        <CollapsibleSection title="Tariff Analysis & Savings" icon="💰">
-          <TariffSavings results={results} />
-        </CollapsibleSection>
-      )}
-
-      {/* SECTION 5: Recommended Actions - PAID ONLY */}
-      {isPaidUser && (
-        <CollapsibleSection title="Recommended Actions" icon="🎯">
+          {/* RECOMMENDED ACTIONS - Show detailed executive guidance (PAID ONLY) */}
           <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
-        </CollapsibleSection>
+        </>
       )}
 
-      {/* NOTE: Policy Alerts moved to dedicated /trade-risk-alternatives dashboard */}
-      {/* NOTE: Certificate management moved to dedicated /dashboard */}
-
-      {/* SECTION 6: Strategic Insights & Supply Chain Analysis - PAID ONLY */}
-      {isPaidUser && results.detailed_analysis && (results.detailed_analysis.strategic_insights || results.detailed_analysis.supply_chain_vulnerabilities || results.detailed_analysis.strategic_alternatives) && (
-        <CollapsibleSection title="Strategic Analysis & Alternatives" icon="📊" defaultExpanded={true}>
-          <p className="form-section-description">
-            AI-powered insights on supply chain optimization and strategic opportunities
-          </p>
-
-          {/* Strategic Insights */}
-          {results.detailed_analysis.strategic_insights && (
-            <div className="service-request-card border-left-amber">
-              <h3 className="content-card-title">💡 Strategic Insights & Next Steps</h3>
-              <p className="text-body">
-                {typeof results.detailed_analysis.strategic_insights === 'string'
-                  ? results.detailed_analysis.strategic_insights
-                  : JSON.stringify(results.detailed_analysis.strategic_insights)}
-              </p>
-            </div>
-          )}
-
-          {/* Savings Analysis */}
-          {results.detailed_analysis.savings_analysis && (
-            <div className="service-request-card border-left-green">
-              <h3 className="content-card-title">💰 Financial Impact Analysis</h3>
-              <p className="text-body">
-                {typeof results.detailed_analysis.savings_analysis === 'string'
-                  ? results.detailed_analysis.savings_analysis
-                  : JSON.stringify(results.detailed_analysis.savings_analysis)}
-              </p>
-            </div>
-          )}
-        </CollapsibleSection>
-      )}
+      {/* TARIFF DATA FRESHNESS WARNING - Displayed before tariff sections (PAID only) */}
+      {isPaidUser && <TariffDataFreshness />}
 
       {/* NOTE: Recommendations moved to CollapsibleSection "Recommended Actions" above */}
 
