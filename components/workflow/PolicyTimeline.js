@@ -26,68 +26,112 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     try {
       setLoading(true);
 
-      // Extract HS codes from components (full 10-digit codes like "8542.31.00")
-      const hsCodesFull = components
-        .map(c => c.hs_code)
-        .filter(Boolean);
-
-      // Extract HS code prefixes (first 4 digits for matching policy records)
-      const hsPrefixes = hsCodesFull.map(code =>
-        code.replace(/\./g, '').substring(0, 4)
-      );
+      // Build component lookup map with all details
+      const componentMap = components
+        .filter(c => c.hs_code)
+        .map(c => ({
+          hs_code: c.hs_code,
+          hs_prefix: c.hs_code.replace(/\./g, '').substring(0, 4),
+          origin_country: c.origin_country || 'Unknown',
+          industry: c.industry || c.product_classification?.industry || 'Unknown',
+          description: c.description || ''
+        }));
 
       console.log('🔍 [POLICYTIMELINE] Starting policy threat check:', {
         components_count: components.length,
-        hs_codes: hsCodesFull,
-        hs_prefixes: hsPrefixes,
+        component_details: componentMap.map(c => ({
+          hs_code: c.hs_code,
+          origin: c.origin_country,
+          industry: c.industry
+        })),
         destination
       });
 
-      if (hsPrefixes.length === 0) {
+      if (componentMap.length === 0) {
         console.log('⚠️  [POLICYTIMELINE] No HS codes found in components - skipping threat check');
         setThreats([]);
         setLoading(false);
         return;
       }
 
-      // Query ALL trump_policy_events and filter client-side for prefix matches
+      // Query ALL trump_policy_events with affected_countries and affected_industries
       const { data: allPolicyEvents, error: eventsError } = await supabase
         .from('trump_policy_events')
         .select(
-          'id, event_date, policy_title, affected_hs_codes, impact_severity, implementation_timeline, implementation_probability'
+          'id, event_date, policy_title, affected_hs_codes, affected_countries, affected_industries, impact_severity, implementation_timeline, implementation_probability'
         )
         .order('event_date', { ascending: false });
 
       if (eventsError) throw eventsError;
 
-      // Filter events that match any of the user's HS code prefixes
+      // Filter events that match origin country AND HS code AND industry
       const matchingEvents = allPolicyEvents?.filter(event => {
         if (!event.affected_hs_codes || event.affected_hs_codes.length === 0) {
           return false;
         }
-        return event.affected_hs_codes.some(eventCode =>
-          hsPrefixes.some(prefix => eventCode.startsWith(prefix))
-        );
+
+        // Check if ANY component matches this policy on all three criteria
+        return componentMap.some(comp => {
+          // 1. Check if component's origin country is in affected_countries
+          const countryMatches = event.affected_countries &&
+            event.affected_countries.some(country =>
+              country.toLowerCase() === comp.origin_country.toLowerCase()
+            );
+
+          // 2. Check if component's HS code matches affected_hs_codes
+          const hsMatches = event.affected_hs_codes.some(eventCode =>
+            eventCode.startsWith(comp.hs_prefix)
+          );
+
+          // 3. Check if component's industry matches affected_industries
+          const industryMatches = !event.affected_industries ||
+            event.affected_industries.length === 0 ||
+            event.affected_industries.some(industry =>
+              industry.toLowerCase() === comp.industry.toLowerCase()
+            );
+
+          return countryMatches && hsMatches && industryMatches;
+        });
       }) || [];
 
       // Query tariff_policy_updates
       const { data: allPolicyUpdates, error: updatesError } = await supabase
         .from('tariff_policy_updates')
         .select(
-          'id, title, affected_hs_codes, status, effective_date, adjustment_percentage, policy_type'
+          'id, title, affected_hs_codes, affected_countries, affected_industries, status, effective_date, adjustment_percentage, policy_type'
         )
         .eq('is_active', true);
 
       if (updatesError) throw updatesError;
 
-      // Filter updates that match any of the user's HS code prefixes
+      // Filter updates that match origin country AND HS code AND industry
       const matchingUpdates = allPolicyUpdates?.filter(update => {
         if (!update.affected_hs_codes || update.affected_hs_codes.length === 0) {
           return false;
         }
-        return update.affected_hs_codes.some(updateCode =>
-          hsPrefixes.some(prefix => updateCode.startsWith(prefix))
-        );
+
+        // Check if ANY component matches this policy on all three criteria
+        return componentMap.some(comp => {
+          // 1. Check if component's origin country is in affected_countries
+          const countryMatches = update.affected_countries &&
+            update.affected_countries.some(country =>
+              country.toLowerCase() === comp.origin_country.toLowerCase()
+            );
+
+          // 2. Check if component's HS code matches affected_hs_codes
+          const hsMatches = update.affected_hs_codes.some(updateCode =>
+            updateCode.startsWith(comp.hs_prefix)
+          );
+
+          // 3. Check if component's industry matches affected_industries
+          const industryMatches = !update.affected_industries ||
+            update.affected_industries.length === 0 ||
+            update.affected_industries.some(industry =>
+              industry.toLowerCase() === comp.industry.toLowerCase()
+            );
+
+          return countryMatches && hsMatches && industryMatches;
+        });
       }) || [];
 
       // Merge and deduplicate threats
