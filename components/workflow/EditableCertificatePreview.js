@@ -6,7 +6,7 @@
  * Layout matches: USMCA-Certificate-Of-Origin-Form-Template-Updated-10-21-2021.pdf
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -26,12 +26,13 @@ export default function EditableCertificatePreview({
     blanket_to: previewData?.professional_certificate?.blanket_period?.end_date || '',
 
     // Section 2: Certifier
-    certifier_name: previewData?.professional_certificate?.certifier?.name || '',
-    certifier_address: previewData?.professional_certificate?.certifier?.address || '',
-    certifier_country: previewData?.professional_certificate?.certifier?.country || '',
-    certifier_phone: previewData?.professional_certificate?.certifier?.phone || '',
-    certifier_email: previewData?.professional_certificate?.certifier?.email || '',
-    certifier_tax_id: previewData?.professional_certificate?.certifier?.tax_id || '',
+    // ✅ FIX: Auto-populate from exporter if certifier_type is EXPORTER
+    certifier_name: previewData?.professional_certificate?.certifier?.name || previewData?.professional_certificate?.exporter?.name || '',
+    certifier_address: previewData?.professional_certificate?.certifier?.address || previewData?.professional_certificate?.exporter?.address || '',
+    certifier_country: previewData?.professional_certificate?.certifier?.country || previewData?.professional_certificate?.exporter?.country || '',
+    certifier_phone: previewData?.professional_certificate?.certifier?.phone || previewData?.professional_certificate?.exporter?.phone || '',
+    certifier_email: previewData?.professional_certificate?.certifier?.email || previewData?.professional_certificate?.exporter?.email || '',
+    certifier_tax_id: previewData?.professional_certificate?.certifier?.tax_id || previewData?.professional_certificate?.exporter?.tax_id || '',
 
     // Section 3: Exporter
     exporter_name: previewData?.professional_certificate?.exporter?.name || '',
@@ -509,7 +510,7 @@ export default function EditableCertificatePreview({
               {/* Components are reference data only, not displayed as separate rows on the main certificate */}
               <tr style={{ height: '120px' }}>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', overflow: 'auto' }}>
-                  <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
+                  <textarea disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%', whiteSpace: 'pre-wrap', overflow: 'auto', resize: 'vertical', fontFamily: 'inherit' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} placeholder="e.g., 8517.62" />
