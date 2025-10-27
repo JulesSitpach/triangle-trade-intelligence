@@ -652,6 +652,13 @@ export default function WorkflowResults({
       {/* 1. EXECUTIVE SUMMARY - Always Visible */}
       <ExecutiveSummary results={results} />
 
+      {/* ✅ PRODUCT CLASSIFICATION - Display final product HS code prominently */}
+      {results.product && (
+        <CollapsibleSection title="📦 Final Product Classification" defaultOpen={true}>
+          <ProductClassification results={results} />
+        </CollapsibleSection>
+      )}
+
       {/* TARIFF DATA FRESHNESS WARNING - Displayed before detailed tariff sections */}
       <TariffDataFreshness />
 
