@@ -15,7 +15,9 @@ export default function EditableCertificatePreview({
   onCancel
 }) {
   // Determine if fields should be disabled based on user tier
-  const isTrialUser = userTier === 'Trial';
+  // Only 'trial' or 'free' tier users have read-only access
+  // Starter, Professional, and Premium users can edit and download
+  const isTrialUser = userTier === 'trial' || isTrialUser || userTier === 'free' || userTier === 'Free';
 
   const [editedCert, setEditedCert] = useState({
     // Section 1: Certifier Type
@@ -257,17 +259,25 @@ export default function EditableCertificatePreview({
         </div>
       </div>
 
-      {userTier === 'Trial' && (
+      {isTrialUser && (
         <div className="alert alert-warning" style={{ marginBottom: '16px' }}>
-          <div className="alert-title">⚠️ FREE TRIAL PREVIEW - WATERMARKED</div>
+          <div className="alert-title">⚠️ FREE TRIAL PREVIEW - READ-ONLY & WATERMARKED</div>
           <div className="text-body">
-            This is a <strong>READ-ONLY PREVIEW</strong> for free users. Download and official certificate features require a paid subscription.
+            This is a <strong>READ-ONLY PREVIEW</strong> for free trial users. Download and editing features require a paid subscription.
             <br /><br />
-            <strong>Free users can:</strong> View certificate structure, verify accuracy
+            <strong>Free Trial users can:</strong> View certificate structure, verify accuracy, preview layout
             <br />
-            <strong>Paid users can:</strong> Edit & download official certificates (no watermark), receive trade alerts
+            <strong>Paid users can:</strong> Edit all fields, download clean certificates (no watermark), manage custom components, receive crisis alerts
+            <br /><br />
+            <strong>Our Plans:</strong>
             <br />
-            <a href="/pricing" style={{color: '#2563eb', textDecoration: 'underline'}}>Upgrade to Professional ($99/month)</a>
+            • <strong>Starter</strong> ($99/month): 10 analyses + certificate generation + basic alerts
+            <br />
+            • <strong>Professional</strong> ($299/month): 100 analyses + real-time alerts + priority support
+            <br />
+            • <strong>Premium</strong> ($599/month): Everything + quarterly strategy calls with our team
+            <br /><br />
+            <a href="/pricing" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</a>
           </div>
         </div>
       )}
@@ -283,13 +293,13 @@ export default function EditableCertificatePreview({
         pageBreakInside: 'avoid',
         // Add watermark for free trial users
         position: 'relative',
-        ...(userTier === 'Trial' && {
+        ...(isTrialUser && {
           background: 'repeating-linear-gradient(45deg, #fff, #fff 50px, rgba(239, 68, 68, 0.03) 50px, rgba(239, 68, 68, 0.03) 100px)',
           border: '3px solid #fee2e2'
         })
       }}>
         {/* WATERMARK for free users */}
-        {userTier === 'Trial' && (
+        {isTrialUser && (
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -635,7 +645,7 @@ export default function EditableCertificatePreview({
         >
           ← Back to Edit Authorization
         </button>
-        {userTier === 'Trial' ? (
+        {isTrialUser ? (
           <a
             href="/pricing"
             style={{

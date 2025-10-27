@@ -226,8 +226,8 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         </div>
 
         <div className="hero-buttons">
-          {/* Determine if user has paid subscription */}
-          {!loadingUserTier && (userSubscriptionTier === 'Trial' || userSubscriptionTier === 'Free') ? (
+          {/* Determine if user has paid subscription (Starter, Professional, or Premium can download) */}
+          {!loadingUserTier && (userSubscriptionTier === 'trial' || userSubscriptionTier === 'free' || userSubscriptionTier === 'Trial') ? (
             <>
               <button
                 onClick={handleGenerateCertificate}
@@ -241,7 +241,7 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
                 className="btn-secondary"
                 style={{ backgroundColor: '#059669', color: 'white' }}
               >
-                💰 Upgrade to Download & Edit
+                💰 Upgrade to Starter ($99/month) to Download & Edit
               </button>
             </>
           ) : (
