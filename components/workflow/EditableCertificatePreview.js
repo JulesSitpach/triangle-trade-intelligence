@@ -14,6 +14,9 @@ export default function EditableCertificatePreview({
   onSave,
   onCancel
 }) {
+  // Determine if fields should be disabled based on user tier
+  const isTrialUser = userTier === 'Trial';
+
   const [editedCert, setEditedCert] = useState({
     // Section 1: Certifier Type
     certifier_type: previewData?.professional_certificate?.certifier?.type || 'EXPORTER',
@@ -78,6 +81,11 @@ export default function EditableCertificatePreview({
   });
 
   const handleFieldChange = (field, value) => {
+    // Prevent editing for Trial users
+    if (isTrialUser && field !== 'user_accepts_responsibility' && field !== 'user_confirms_accuracy') {
+      console.log('⚠️ Trial users cannot edit certificate fields. Please upgrade to Professional.');
+      return;
+    }
     setEditedCert(prev => ({
       ...prev,
       [field]: value
@@ -85,12 +93,21 @@ export default function EditableCertificatePreview({
   };
 
   const handleComponentChange = (index, field, value) => {
+    // Prevent editing for Trial users
+    if (isTrialUser) {
+      console.log('⚠️ Trial users cannot edit certificate fields. Please upgrade to Professional.');
+      return;
+    }
     const updated = [...editedCert.components];
     updated[index] = { ...updated[index], [field]: value };
     setEditedCert(prev => ({ ...prev, components: updated }));
   };
 
   const handleAddComponent = () => {
+    if (isTrialUser) {
+      console.log('⚠️ Trial users cannot add components. Please upgrade to Professional.');
+      return;
+    }
     setEditedCert(prev => ({
       ...prev,
       components: [
@@ -108,6 +125,10 @@ export default function EditableCertificatePreview({
   };
 
   const handleRemoveComponent = (index) => {
+    if (isTrialUser) {
+      console.log('⚠️ Trial users cannot remove components. Please upgrade to Professional.');
+      return;
+    }
     setEditedCert(prev => ({
       ...prev,
       components: prev.components.filter((_, i) => i !== index)
@@ -371,92 +392,92 @@ export default function EditableCertificatePreview({
           <div style={{ borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px' }}>
             <div style={labelStyle}>2. CERTIFIER NAME, ADDRESS, PHONE, AND EMAIL</div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
-            <input type="text" value={editedCert.certifier_name} onChange={(e) => handleFieldChange('certifier_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_name} onChange={(e) => handleFieldChange('certifier_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px', opacity: isTrialUser ? 0.6 : 1, cursor: isTrialUser ? 'not-allowed' : 'text' }} />
             <div style={{ fontSize: '8px' }}>ADDRESS</div>
-            <input type="text" value={editedCert.certifier_address} onChange={(e) => handleFieldChange('certifier_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_address} onChange={(e) => handleFieldChange('certifier_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>COUNTRY</div>
-                <input type="text" value={editedCert.certifier_country} onChange={(e) => handleFieldChange('certifier_country', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_country} onChange={(e) => handleFieldChange('certifier_country', e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>PHONE</div>
-                <input type="text" value={editedCert.certifier_phone} onChange={(e) => handleFieldChange('certifier_phone', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_phone} onChange={(e) => handleFieldChange('certifier_phone', e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
-            <input type="text" value={editedCert.certifier_email} onChange={(e) => handleFieldChange('certifier_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_email} onChange={(e) => handleFieldChange('certifier_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
-            <input type="text" value={editedCert.certifier_tax_id} onChange={(e) => handleFieldChange('certifier_tax_id', e.target.value)} style={inputStyle} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_tax_id} onChange={(e) => handleFieldChange('certifier_tax_id', e.target.value)} style={inputStyle} />
           </div>
 
           {/* Section 3: Exporter */}
           <div style={{ borderBottom: '1px solid #000', padding: '8px' }}>
             <div style={labelStyle}>3. EXPORTER NAME, ADDRESS, PHONE, AND EMAIL</div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
-            <input type="text" value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>ADDRESS</div>
-            <input type="text" value={editedCert.exporter_address} onChange={(e) => handleFieldChange('exporter_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_address} onChange={(e) => handleFieldChange('exporter_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>COUNTRY</div>
-                <input type="text" value={editedCert.exporter_country} onChange={(e) => handleFieldChange('exporter_country', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_country} onChange={(e) => handleFieldChange('exporter_country', e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>PHONE</div>
-                <input type="text" value={editedCert.exporter_phone} onChange={(e) => handleFieldChange('exporter_phone', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_phone} onChange={(e) => handleFieldChange('exporter_phone', e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
-            <input type="text" value={editedCert.exporter_email} onChange={(e) => handleFieldChange('exporter_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_email} onChange={(e) => handleFieldChange('exporter_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
-            <input type="text" value={editedCert.exporter_tax_id} onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)} style={inputStyle} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_tax_id} onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)} style={inputStyle} />
           </div>
 
           {/* Section 4: Producer */}
           <div style={{ borderRight: '1px solid #000', padding: '8px' }}>
             <div style={labelStyle}>4. PRODUCER NAME, ADDRESS, PHONE, AND EMAIL</div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
-            <input type="text" value={editedCert.producer_name} onChange={(e) => handleFieldChange('producer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_name} onChange={(e) => handleFieldChange('producer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>ADDRESS</div>
-            <input type="text" value={editedCert.producer_address} onChange={(e) => handleFieldChange('producer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_address} onChange={(e) => handleFieldChange('producer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>COUNTRY</div>
-                <input type="text" value={editedCert.producer_country} onChange={(e) => handleFieldChange('producer_country', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_country} onChange={(e) => handleFieldChange('producer_country', e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>PHONE</div>
-                <input type="text" value={editedCert.producer_phone} onChange={(e) => handleFieldChange('producer_phone', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_phone} onChange={(e) => handleFieldChange('producer_phone', e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
-            <input type="text" value={editedCert.producer_email} onChange={(e) => handleFieldChange('producer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_email} onChange={(e) => handleFieldChange('producer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
-            <input type="text" value={editedCert.producer_tax_id} onChange={(e) => handleFieldChange('producer_tax_id', e.target.value)} style={inputStyle} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.producer_tax_id} onChange={(e) => handleFieldChange('producer_tax_id', e.target.value)} style={inputStyle} />
           </div>
 
           {/* Section 5: Importer */}
           <div style={{ padding: '8px' }}>
             <div style={labelStyle}>5. IMPORTER NAME, ADDRESS, PHONE, AND EMAIL</div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
-            <input type="text" value={editedCert.importer_name} onChange={(e) => handleFieldChange('importer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_name} onChange={(e) => handleFieldChange('importer_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>ADDRESS</div>
-            <input type="text" value={editedCert.importer_address} onChange={(e) => handleFieldChange('importer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_address} onChange={(e) => handleFieldChange('importer_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>COUNTRY</div>
-                <input type="text" value={editedCert.importer_country} onChange={(e) => handleFieldChange('importer_country', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_country} onChange={(e) => handleFieldChange('importer_country', e.target.value)} style={inputStyle} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '8px' }}>PHONE</div>
-                <input type="text" value={editedCert.importer_phone} onChange={(e) => handleFieldChange('importer_phone', e.target.value)} style={inputStyle} />
+                <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_phone} onChange={(e) => handleFieldChange('importer_phone', e.target.value)} style={inputStyle} />
               </div>
             </div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>EMAIL</div>
-            <input type="text" value={editedCert.importer_email} onChange={(e) => handleFieldChange('importer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_email} onChange={(e) => handleFieldChange('importer_email', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>TAX IDENTIFICATION NUMBER</div>
-            <input type="text" value={editedCert.importer_tax_id} onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)} style={inputStyle} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.importer_tax_id} onChange={(e) => handleFieldChange('importer_tax_id', e.target.value)} style={inputStyle} />
           </div>
         </div>
 
@@ -478,10 +499,10 @@ export default function EditableCertificatePreview({
               {/* Components are reference data only, not displayed as separate rows on the main certificate */}
               <tr style={{ height: '120px' }}>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', overflow: 'auto' }}>
-                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
+                  <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} placeholder="e.g., 8517.62" />
+                  <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} placeholder="e.g., 8517.62" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <select value={editedCert.origin_criterion} onChange={(e) => handleFieldChange('origin_criterion', e.target.value)} style={{ ...inputStyle, height: '24px' }}>
@@ -492,7 +513,7 @@ export default function EditableCertificatePreview({
                   </select>
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'center' }}>
-                  <input type="text" value={editedCert.is_producer ? 'YES' : 'NO'} onChange={(e) => handleFieldChange('is_producer', e.target.value.toUpperCase() === 'YES')} style={{ ...inputStyle, textAlign: 'center', width: '100%' }} placeholder="YES/NO" />
+                  <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.is_producer ? "YES" : "NO"} onChange={(e) => handleFieldChange('is_producer', e.target.value.toUpperCase() === 'YES')} style={{ ...inputStyle, textAlign: 'center', width: '100%' }} placeholder="YES/NO" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <input type="text" value={editedCert.qualification_method} onChange={(e) => handleFieldChange('qualification_method', e.target.value)} style={inputStyle} placeholder="TV/NC/TS/NO" />
@@ -526,27 +547,27 @@ export default function EditableCertificatePreview({
             </div>
             <div>
               <div style={labelStyle}>12b. COMPANY</div>
-              <input type="text" value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={inputStyle} />
+              <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.exporter_name} onChange={(e) => handleFieldChange('exporter_name', e.target.value)} style={inputStyle} />
             </div>
             <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
               <div style={labelStyle}>12c. NAME</div>
-              <input type="text" value={editedCert.signatory_name} onChange={(e) => handleFieldChange('signatory_name', e.target.value)} style={inputStyle} />
+              <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signatory_name} onChange={(e) => handleFieldChange('signatory_name', e.target.value)} style={inputStyle} />
             </div>
             <div>
               <div style={labelStyle}>12d. TITLE</div>
-              <input type="text" value={editedCert.signatory_title} onChange={(e) => handleFieldChange('signatory_title', e.target.value)} style={inputStyle} />
+              <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signatory_title} onChange={(e) => handleFieldChange('signatory_title', e.target.value)} style={inputStyle} />
             </div>
             <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
               <div style={labelStyle}>12e. DATE (MM/DD/YYYY)</div>
-              <input type="date" value={editedCert.signature_date} onChange={(e) => handleFieldChange('signature_date', e.target.value)} style={inputStyle} />
+              <input type="date" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signature_date} onChange={(e) => handleFieldChange('signature_date', e.target.value)} style={inputStyle} />
             </div>
             <div>
               <div style={labelStyle}>12f. TELEPHONE NUMBER</div>
-              <input type="text" value={editedCert.signatory_phone} onChange={(e) => handleFieldChange('signatory_phone', e.target.value)} style={inputStyle} />
+              <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signatory_phone} onChange={(e) => handleFieldChange('signatory_phone', e.target.value)} style={inputStyle} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <div style={labelStyle}>12g. EMAIL</div>
-              <input type="text" value={editedCert.signatory_email} onChange={(e) => handleFieldChange('signatory_email', e.target.value)} style={inputStyle} />
+              <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signatory_email} onChange={(e) => handleFieldChange('signatory_email', e.target.value)} style={inputStyle} />
             </div>
           </div>
         </div>

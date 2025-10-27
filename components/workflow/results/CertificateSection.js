@@ -4,12 +4,37 @@
  * IF NOT QUALIFIED: Show options to get help
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateUSMCACertificatePDF } from '../../../lib/utils/usmca-certificate-pdf-generator';
 
 export default function CertificateSection({ results, onDownloadCertificate }) {
   // ✅ FIX: Move useState BEFORE conditional return (React Rules of Hooks)
   const [isGenerating, setIsGenerating] = useState(false);
+  const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
+  const [loadingUserTier, setLoadingUserTier] = useState(true);
+
+  // Fetch user's subscription tier to determine if certificate editing is allowed
+  useEffect(() => {
+    const fetchUserSubscriptionTier = async () => {
+      try {
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
+        if (response.ok) {
+          const userData = await response.json();
+          setUserSubscriptionTier(userData.subscription_tier || 'Trial');
+          console.log('✅ User subscription tier:', userData.subscription_tier);
+        } else {
+          setUserSubscriptionTier('Trial');
+        }
+      } catch (error) {
+        console.error('⚠️ Failed to fetch user subscription tier:', error);
+        setUserSubscriptionTier('Trial');
+      } finally {
+        setLoadingUserTier(false);
+      }
+    };
+
+    fetchUserSubscriptionTier();
+  }, []);
 
   if (!results?.certificate) return null;
 
@@ -201,19 +226,41 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         </div>
 
         <div className="hero-buttons">
-          <button
-            onClick={handleGenerateCertificate}
-            className="btn-primary"
-          >
-            📄 Generate & Preview Certificate
-          </button>
+          {/* Determine if user has paid subscription */}
+          {!loadingUserTier && (userSubscriptionTier === 'Trial' || userSubscriptionTier === 'Free') ? (
+            <>
+              <button
+                onClick={handleGenerateCertificate}
+                className="btn-primary"
+              >
+                📄 Preview Certificate (Read-Only)
+              </button>
 
-          <button
-            onClick={() => window.location.href = '/services/logistics-support'}
-            className="btn-secondary"
-          >
-            🎯 Request Professional Service
-          </button>
+              <button
+                onClick={() => window.location.href = '/pricing'}
+                className="btn-secondary"
+                style={{ backgroundColor: '#059669', color: 'white' }}
+              >
+                💰 Upgrade to Download & Edit
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleGenerateCertificate}
+                className="btn-primary"
+              >
+                📄 Generate & Edit Certificate
+              </button>
+
+              <button
+                onClick={() => window.location.href = '/services/logistics-support'}
+                className="btn-secondary"
+              >
+                🎯 Request Professional Service
+              </button>
+            </>
+          )}
         </div>
 
         <div className="alert alert-info">
