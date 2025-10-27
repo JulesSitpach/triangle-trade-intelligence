@@ -473,7 +473,7 @@ export default function USMCAQualification({ results }) {
                                       })}
                                     </div>
                                     <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
-                                      {component.rateSource === 'database_fallback' || component.stale
+                                      {component.rate_source === 'database_fallback' || component.stale
                                         ? '⚠️ Data from January 2025 - may not reflect current policy changes'
                                         : '✅ Current October 2025 policy (updated via AI research)'}
                                     </div>
