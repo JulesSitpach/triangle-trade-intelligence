@@ -23,12 +23,14 @@
                     ⏱️  POSTED TO API: /api/ai-usmca-complete-analysis
                                       ↓
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│              STEP 2: ENRICHMENT - ADD TARIFF RATES FROM DATABASE                │
-│            (Line 346-427 in ai-usmca-complete-analysis.js)                      │
+│         STEP 2: HYBRID ENRICHMENT - DATABASE-FIRST + AI FALLBACK               │
+│   PHASE 1 (Lines 429-496): Database lookup for all components                  │
+│   PHASE 2 (Lines 661-681): Validation checkpoint 1 - detect missing rates      │
+│   PHASE 3 (Lines 454-481): AI fallback for components missing database data    │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                       ↓
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│ enrichComponentsWithFreshRates()  → Query tariff_rates_cache for each component  │
+│ PHASE 1: enrichComponentsWithFreshRates() - FAST DATABASE LOOKUP (~100ms)       │
 │                                                                                   │
 │ INPUT: 3 components (no tariff rates yet)                                        │
 │                                                                                   │
@@ -36,14 +38,63 @@
 │  1. Check if HS code exists → "8542.31.00" ✓                                    │
 │  2. Query: SELECT mfn_rate, section_301, section_232 FROM tariff_rates_cache   │
 │     WHERE hs_code='8542.31.00' AND destination_country='US'                     │
-│  3. Get result: {                                                                │
-│       mfn_rate: 2.5,                                                             │
-│       section_301: 25.0,          ← CHINA TARIFF                                │
-│       section_232: 0,                                                            │
-│       usmca_rate: 0                                                              │
-│     }                                                                             │
+│  3. Result scenarios:                                                            │
+│     ✅ FOUND: {mfn_rate: 2.5, section_301: 25, stale: false}                   │
+│     ⚠️  MISS: {mfn_rate: 0, rate_source: 'database_fallback', stale: true}     │
 │                                                                                   │
-│ OUTPUT: enrichedComponents (3 components with rates added) ✅                    │
+│ OUTPUT: enrichedComponents (some with rates, some with 0 rates)                 │
+│                                                                                   │
+│ Expected: 95% of components found in database ✅                                │
+│ Fallback: 5% will have mfn_rate === 0 and need Phase 3 AI lookup               │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ 🛡️ VALIDATION CHECKPOINT 1: Verify enrichedComponents have rates (Lines 661-681)│
+│                                                                                   │
+│ CHECK: Filter components with mfn_rate === 0 or stale === true                 │
+│                                                                                   │
+│ SCENARIOS:                                                                       │
+│ ✅ Fast Path (95%): missingRates.length === 0                                   │
+│    → Skip Phase 3, use database rates                                            │
+│    → Continue to pre-calculation                                                 │
+│                                                                                   │
+│ ⚠️  Slow Path (5%): missingRates.length > 0                                     │
+│    → Log which components are missing                                            │
+│    → Proceed to Phase 3 for AI fallback                                          │
+│                                                                                   │
+│ LOG OUTPUT:                                                                      │
+│   ✅ [PHASE 1] Database enrichment complete: {with_rates: 3, missing_rates: 0}  │
+│   ⏱️  [PHASE 2] Identifying missing rates: 0 components need AI lookup          │
+└──────────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+                   (IF missingRates.length > 0, proceed to Phase 3)
+                                      ↓
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 3: getAIRatesForMissingComponents() - AI FALLBACK (~2000ms, only if needed)│
+│                                                                                   │
+│ INPUT: Only components with mfn_rate === 0 (e.g., 0-5 components out of 3)    │
+│                                                                                   │
+│ PROCESS:                                                                         │
+│  1. Build compact batch prompt with ONLY missing components                      │
+│  2. Call OpenRouter (Tier 1) with 2-tier fallback to Anthropic (Tier 2)        │
+│  3. Extract tariff rates from AI response                                        │
+│  4. Normalize to percentages (match database format)                             │
+│  5. Return results                                                               │
+│                                                                                   │
+│ MERGE BACK:                                                                      │
+│  For each component with mfn_rate === 0:                                         │
+│    enrichedComponents[i] = {                                                     │
+│      ...enrichedComponents[i],                                                   │
+│      ...aiResult,                  ← Overwrite with AI rates                     │
+│      rate_source: 'ai_fallback',  ← Track that AI filled the gap                │
+│      stale: false                 ← Fresh from AI                                │
+│    }                                                                              │
+│                                                                                   │
+│ OUTPUT: enrichedComponents (now ALL have rates, 100% complete)                  │
+│                                                                                   │
+│ LOG OUTPUT (only if Phase 3 runs):                                               │
+│   🤖 [PHASE 3] Calling AI for 1 missing components...                           │
+│   ✅ [MERGE] Filled missing rates for 8542.31.00: MFN 2.5%, Section 301 25%     │
 └──────────────────────────────────────────────────────────────────────────────────┘
                                       ↓
 ┌──────────────────────────────────────────────────────────────────────────────────┐
@@ -396,32 +447,60 @@ OUTPUT: analysis object
 PURPOSE: Get YES/NO + criterion + product classification from AI
 ```
 
-### **Point 5: Component Enrichment FROM AI (Line 750-778)**
+### **Point 5: Component Enrichment FROM AI (Line 332-444)**
 ```
-⚠️ CRITICAL BUG LOCATION!
+🛡️ VALIDATION CHECKPOINT 2: Only use AI rates if database rates are missing
 
 INPUT:  enrichedComponents (already has rates from DB)
         + AI response (may or may not have calculation_detail with rates)
    ↓
-EXTRACT: Try to pull mfn_rate, section_301 from AI's calculation_detail
+VALIDATE: Check if component already has mfn_rate > 0
    ↓
-PROBLEM: If AI calculation_detail is vague, extraction FAILS
+SCENARIOS:
+   ✅ SKIP (if has DB rate): Keep database rate, skip extraction
+      → log: "[FALLBACK-SKIP] Component already has database rate"
+
+   ⚠️  EXTRACT (if missing): Try to pull mfn_rate, section_301 from AI
+      → log: "[FALLBACK-EXTRACT] Extracting rates..."
    ↓
-RESULT: enrichedComponents stays with DB rates ✅ (GOOD - has backup data)
-         OR tries to merge AI rates (RISKY - might override DB data)
+EXTRACTION:
+   ✅ SUCCESS: Extracted mfn_rate, section_301 from AI response
+      → log: "[FALLBACK-SUCCESS] Filled missing rates"
+      → Set rate_source: 'ai_fallback'
+
+   ❌ MISS: Could not extract rates from AI response
+      → log: "[FALLBACK-MISS] Could not extract rates"
+      → Keep existing 0 rates (component remains incomplete)
+   ↓
+RESULT: enrichedComponents with rates ONLY from successful sources
 ```
 
-### **Point 6: Transform to Frontend Format (Line 784-830)**
+### **Point 6: Transform to Frontend Format (Line 1017-1056)**
 ```
-INPUT:  enrichedComponents (percentages: 2.5, 25, 0)
+🛡️ VALIDATION CHECKPOINT 3: Verify rates are percentages before transformation
+
+INPUT:  componentBreakdown (should be percentages: 2.5, 25, 0)
    ↓
-TRANSFORM: Divide by 100 → decimals (0.025, 0.25, 0)
+VALIDATE: Check if rates look like decimals (0.025, 0.25) instead of percentages
+   ↓
+CHECK LOGIC:
+   IF rate > 0 AND rate < 1:
+      → Likely a decimal (WRONG FORMAT - should be 25, not 0.25)
+      → log: "⚠️  [VALIDATION] unexpected rate format"
+      → Log to DevIssue for investigation
+   ↓
+TRANSFORM: If format is correct, divide by 100 → decimals (0.025, 0.25, 0)
    ↓
 OUTPUT: transformedComponents (decimals ready for frontend)
    ↓
-VALIDATION: Both required fields present?
-   ├─ rate_source: "ai_extracted" or "database_cache" ✅
+VALIDATION: Both required fields present after transformation?
+   ├─ rate_source: "ai_extracted", "database_cache", or "ai_fallback" ✅
    └─ stale: true/false ✅
+
+WHY THIS MATTERS:
+   Frontend calculates: tariff_cost = componentValue × mfnRate
+   If mfnRate = 2.5 (wrong):  cost = 1,000,000 × 2.5 = $2,500,000 ❌ 100x too large!
+   If mfnRate = 0.025 (right): cost = 1,000,000 × 0.025 = $25,000 ✅ Correct
 ```
 
 ### **Point 7: Final Response Assembly (Line 833-1030)**
@@ -483,25 +562,273 @@ Total Time: ~2-3 seconds (mostly waiting for OpenRouter)
 
 ---
 
-## 🚨 WHAT CAN BREAK THIS FLOW
+## 🚨 AREAS OF CONCERN & CRITICAL FAILURE POINTS
 
-1. **Database tariff_rates_cache is empty or stale**
-   - Result: enrichedComponents has 0 rates
-   - Fix: RSS feeds should update this every 2 hours
+### **CONCERN 1: Database Cache Dependency (PHASE 1 - Lines 429-496)**
+**Risk Level:** 🔴 **HIGH** - Single point of failure for 95% of requests
 
-2. **AI says "qualified" but no preference_criterion**
-   - Result: Cannot generate certificate (validation error on line 706-720)
-   - Fix: AI prompt ensures criterion is returned
+**Problem:**
+- System expects tariff_rates_cache to have current 2025 rates
+- 95% of requests succeed ONLY if database has data
+- If database is stale or empty, Phase 1 returns components with mfn_rate=0
+- Fallback to Phase 3 AI adds 2+ seconds to response
 
-3. **transformedComponents is empty**
-   - Result: Frontend shows "No tariff data available"
-   - Fix: enrichedComponents must populate before transform
+**Current Status:**
+- ✅ Phase 1 validates database lookup success
+- ✅ Phase 3 AI fallback exists for cache misses
+- ⚠️ RSS feeds update database (need verification: are they running?)
+- ⚠️ No automatic cache refresh if older than 24 hours
 
-4. **company.country is NULL**
-   - Result: Certificate generation fails (required field)
-   - Fix: Form validation on line 281-313 prevents this
+**Action Required:**
+- [ ] Verify RSS polling cron job is running (`pages/api/cron/email-crisis-check.js`)
+- [ ] Check tariff_rates_cache table last_updated timestamps
+- [ ] If cache older than 24 hours → trigger manual update
 
-5. **mfn_rate is percentage (2.5) instead of decimal (0.025)**
-   - Result: Frontend calculates savings 100x too large
-   - Fix: transformAPIToFrontend() divides by 100
+---
+
+### **CONCERN 2: AI Extraction from Vague Responses (STEP 6 - Lines 332-444)**
+**Risk Level:** 🟡 **MEDIUM** - AI response format might change
+
+**Problem:**
+- enrichComponentsWithTariffRates() uses regex to extract rates from AI's calculation_detail
+- If AI changes response format, extraction fails silently
+- Components stay with 0 rates instead of failing loudly
+- Frontend shows incomplete data without warning
+
+**Current Status:**
+- ✅ Validation Checkpoint 2 detects missing rates after extraction
+- ✅ Logs show [FALLBACK-SKIP] vs [FALLBACK-EXTRACT] tracking
+- ⚠️ Regex patterns are fragile (depends on AI wording)
+- ⚠️ No test coverage for extraction accuracy
+
+**Example of Format Dependency:**
+```
+AI must say: "MFN rate: 25%"
+If AI says: "Tariff: 25% (MFN)" → Extraction fails ❌
+If AI says: "Duties before USMCA: 25%" → Extraction fails ❌
+```
+
+**Action Required:**
+- [ ] Test AI extraction with various response formats
+- [ ] Add unit tests for extractComponentRate() function
+- [ ] Consider switching to structured AI responses (JSON only, no text)
+
+---
+
+### **CONCERN 3: Hybrid Enrichment Merge Logic (PHASE 3 - Lines 461-474)**
+**Risk Level:** 🟡 **MEDIUM** - Complex state management
+
+**Problem:**
+- Phase 1 returns components with some rates from DB, some zeros
+- Phase 3 merges AI results back with exact logic: `if (mfnRate === 0) overwrite`
+- If component has mfn_rate: 0.01 (from malformed DB entry), merge won't happen
+- Multiple data sources (DB + AI) create data consistency issues
+
+**Current Status:**
+- ✅ Merge logic is explicit (only overwrites when mfn_rate === 0)
+- ✅ rate_source field tracks which rates come from which source
+- ⚠️ No validation that merged rates are sensible (could be AI hallucinations)
+- ⚠️ No atomic transaction (could fail between phase 1 and phase 3)
+
+**Action Required:**
+- [ ] Add post-merge validation (rates within expected ranges)
+- [ ] Add test case: 1 component from DB + 1 from AI + 1 with 0 rates
+- [ ] Monitor rate_source distribution in production logs
+
+---
+
+### **CONCERN 4: Rate Format Validation (VALIDATION CHECKPOINT 3 - Lines 1017-1046)**
+**Risk Level:** 🟡 **MEDIUM** - Silent 100x calculation errors
+
+**Problem:**
+- If rates accidentally get converted to decimals early (0.025 instead of 2.5)
+- Validation catches the error but transformation still proceeds
+- Frontend receives wrong format, calculates 100x too large
+- 🛡️ **Checkpoint 3 now detects this** but doesn't auto-fix
+
+**Current Status:**
+- ✅ Validation Checkpoint 3 detects format anomalies
+- ✅ Logs warn when rates look like decimals
+- ✅ DevIssue logged for investigation
+- ⚠️ Workflow doesn't BLOCK on format errors (just warns)
+- ⚠️ Frontend has no validation of received rates
+
+**Example:**
+```
+Component arrives at frontend with:
+  mfnRate: 2.5        ← Expected (percentage)
+  mfnRate: 0.025      ← WRONG (decimal)
+
+Frontend does: $1M × 0.025 = $25K ✅ Correct
+Frontend does: $1M × 2.5 = $2.5M ❌ 100x error
+
+Checkpoint 3 would catch: mfnRate is between 0-1, log warning
+But workflow continues anyway
+```
+
+**Action Required:**
+- [ ] Frontend should validate rates are >= 0 (reject values like 2.5 if expecting decimals)
+- [ ] Add unit test: component with wrong rate format should be caught
+- [ ] Consider failing loud instead of just warning
+
+---
+
+### **CONCERN 5: Missing Data After Enrichment (VALIDATION CHECKPOINT 1 - Lines 665-726)**
+**Risk Level:** 🔴 **HIGH** - Data loss prevention with destination-aware strategy
+**Status:** ✅ **FIXED (Oct 27, 2025 - Commit 3116f51)**
+
+**Problem (Original):**
+- Checkpoint 1 detects if components have missing rates AFTER Phase 1
+- But workflow continues even with missing rates
+- Components with mfn_rate=0 proceed to pre-calculation
+- Financial calculations happen with 0 rates (costs all show $0)
+- Users might not realize data is incomplete
+
+**Solution Implemented:**
+Added **destination-aware validation logic** that:
+1. **US/CA destinations (STRICT)**: Return 400 error if any rates missing
+   - Reason: Volatile tariffs change with policy (Section 301, etc.)
+   - Error includes: missing HS codes, recovery instructions, retry guidance
+   - Log: `[P0-BLOCKER] Cannot proceed without tariff data for US/CA destination`
+
+2. **Mexico destination (LENIENT)**: Warn but continue
+   - Reason: Database cache is reliable for Mexico (stable rates)
+   - Log: `[P0-WARNING] Mexico destination - continuing with N components`
+   - Workflow proceeds normally with whatever data available
+
+**Code Changes (Lines 679-725):**
+```javascript
+// Destination-aware error handling
+const isUSDestination = formData.destination_country === 'US';
+const isCADestination = formData.destination_country === 'CA';
+const isMXDestination = formData.destination_country === 'MX';
+
+// STRICT: US/CA markets require current tariff data
+if ((isUSDestination || isCADestination) && missingRatesAfterPhase3.length > 0) {
+  return res.status(400).json({
+    success: false,
+    error: 'tariff_data_unavailable',
+    message: `Unable to retrieve current tariff rates for ${count} component(s).`,
+    details: {
+      missing_components: [{ hs_code, description, action: 'Verify HS code format (10-digit)' }],
+      suggestion: 'Check internet connection and try again in a few minutes.'
+    }
+  });
+}
+
+// LENIENT: Mexico workflow continues (cache is reliable)
+if (isMXDestination && missingRatesAfterPhase3.length > 0) {
+  console.warn(`⚠️ Mexico destination - continuing with ${count} components`);
+}
+```
+
+**Current Status (After Fix):**
+- ✅ Checkpoint 1 detects missing rates
+- ✅ Destination-aware validation (strict vs lenient)
+- ✅ Returns 400 error with actionable recovery steps for US/CA
+- ✅ User-facing error message included
+- ✅ Missing HS codes shown for verification
+- ✅ All scenarios logged to DevIssue dashboard
+
+**Tested Scenarios:**
+```
+Fast Path (95%): missingRates.length === 0 ✅
+  → All rates available, continue normally
+
+Slow Path (5%): missingRates.length > 0 after Phase 3
+  US/CA: Returns 400 error ✅ Prevents silent data loss
+  Mexico: Warns but continues ✅ Allows workflow to proceed
+```
+
+**Impact:**
+- ✅ Eliminates silent data loss on volatile markets (US tariffs)
+- ✅ Clear error messaging for users (not silent 0% fallback)
+- ✅ Mexico operations unaffected (can proceed with cache)
+- ✅ All edge cases logged for monitoring
+
+**Remaining Actions:**
+- [ ] Monitor P0-BLOCKER and P0-WARNING logs in production
+- [ ] Track how often users hit the 400 error (should be <1%)
+- [ ] If >1%: indicates cache needs updating, RSS polling issue
+
+---
+
+### **CONCERN 6: AI Fallback (PHASE 3) Timeout/Failure (Lines 43-204)**
+**Risk Level:** 🟡 **MEDIUM** - API dependency
+
+**Problem:**
+- Phase 3 calls OpenRouter (Tier 1) with 2-second timeout
+- If OpenRouter fails, falls back to Anthropic Direct
+- If both fail, returns empty array and continues
+- No maximum timeout - could hang indefinitely if both APIs down
+
+**Current Status:**
+- ✅ 2-tier fallback exists (OpenRouter → Anthropic)
+- ✅ Error is caught and logged
+- ⚠️ No timeout specified for Anthropic fallback
+- ⚠️ No circuit breaker (could retry immediately after failure)
+- ⚠️ If both APIs unavailable, requests slow down but don't fail clearly
+
+**Action Required:**
+- [ ] Add 5-second timeout for Anthropic fallback
+- [ ] Implement exponential backoff if both fail (don't retry Phase 3 for 60s)
+- [ ] Return explicit error if Phase 3 is needed but both AI endpoints fail
+- [ ] Add monitoring: track Phase 3 success rate (should be >99%)
+
+---
+
+### **CONCERN 7: Rate Source Tracking (Throughout - rate_source field)**
+**Risk Level:** 🟢 **LOW** - Well-tracked but needs monitoring
+
+**Problem:**
+- Components can have different rate_source values: database_cache, ai_fallback, incomplete
+- Frontend needs to understand what each means
+- No documentation visible to users
+
+**Current Status:**
+- ✅ rate_source clearly logged at each step
+- ✅ Validation checkpoints track transitions
+- ✅ DevIssue logs anomalies
+- ⚠️ Frontend doesn't display data provenance
+- ⚠️ Users don't know if rates are fresh or stale
+
+**Action Required:**
+- [ ] Add data freshness badge to component table (e.g., "From database" vs "From AI")
+- [ ] Display staleness warning if stale === true
+- [ ] Document what each rate_source means for users
+
+---
+
+### **CONCERN 8: Form Validation (Before API Call - Lines 281-331)**
+**Risk Level:** 🟢 **LOW** - Well-defended but depends on frontend
+
+**Problem:**
+- API validates required fields, but frontend sends form
+- If frontend validation broken, API catches it
+- Missing company_country would break certificate generation
+
+**Current Status:**
+- ✅ API validates 14 required fields
+- ✅ Clear error messages returned
+- ✅ Frontend should also validate (belt-and-suspenders)
+- ⚠️ Unclear which validation is primary (frontend vs API)
+
+**Action Required:**
+- [ ] Document validation split: frontend (UX) vs API (security)
+- [ ] Add test: submit form without company_country, verify API error
+
+---
+
+## 📊 QUICK RISK MATRIX
+
+| Area | Risk | Impact | Status | Fix Priority |
+|------|------|--------|--------|--------------|
+| Database Cache | 🔴 HIGH | 95% of requests slow | ⚠️ Depends on RSS | P0 |
+| AI Extraction | 🟡 MEDIUM | Data loss if format changes | ⚠️ Detectable | P1 |
+| Merge Logic | 🟡 MEDIUM | Data inconsistency | ✅ Tracked | P2 |
+| Rate Format | 🟡 MEDIUM | 100x calculation errors | ✅ Detected | P1 |
+| Missing Data | 🔴 HIGH | Silent data loss to users | ✅ **FIXED** (Oct 27) | ✅ DONE |
+| AI Timeout | 🟡 MEDIUM | Slow response | ⚠️ No timeout | P1 |
+| Rate Source | 🟢 LOW | Opacity to users | ⚠️ Not visible | P2 |
+| Form Validation | 🟢 LOW | Broken certificates | ✅ Validated | P3 |
 
