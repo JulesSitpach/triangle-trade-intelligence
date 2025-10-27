@@ -684,113 +684,64 @@ export default function WorkflowResults({
         destination={results.destination_country || results.company?.destination_country || 'US'}
       />
 
-      {/* ========== UNIFIED SUMMARY SECTION (NO REPETITION) ========== */}
-
-      {/* CONSOLIDATED SUMMARY - All Users */}
+      {/* CLEAN BUSINESS IMPACT SUMMARY - For All Users */}
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">📊 USMCA Analysis Summary</h3>
+          <h3 className="card-title">💼 Your USMCA Impact</h3>
         </div>
 
         <div className="element-spacing">
-          {/* Key Metrics Grid */}
-          <div className="status-grid">
-            <div className="status-card">
-              <div className="status-label">Regional Value Content</div>
-              <div className="status-value success">{(results.usmca?.north_american_content || 0).toFixed(1)}%</div>
-              <div className="text-small" style={{marginTop: '0.25rem', color: '#059669'}}>
-                Exceeds {results.usmca?.threshold_applied || 60}% by {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}%
-              </div>
-            </div>
+          {/* Plain text explanation of what this means */}
+          <div style={{lineHeight: '1.8', color: '#374151', fontSize: '0.95rem'}}>
+            <p>
+              <strong>Your qualification means:</strong> You meet USMCA requirements and can pay preferential tariff rates instead of standard tariffs.
+            </p>
+
+            <p>
+              <strong>Your Regional Value Content: {(results.usmca?.north_american_content || 0).toFixed(1)}%</strong><br/>
+              Your product is {(results.usmca?.north_american_content || 0).toFixed(1)}% made in the US, Canada, or Mexico. You need at least {results.usmca?.threshold_applied || 60}%, so you have a {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}% safety buffer.
+            </p>
 
             {results.savings && (results.savings.annual_savings || 0) > 0 && (
-              <>
-                <div className="status-card">
-                  <div className="status-label">Annual Savings</div>
-                  <div className="status-value success">${(results.savings.annual_savings || 0).toLocaleString()}</div>
-                  <div className="text-small" style={{marginTop: '0.25rem', color: '#059669'}}>
-                    ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/month
-                  </div>
-                </div>
-
-                <div className="status-card">
-                  <div className="status-label">Savings Rate</div>
-                  <div className="status-value success">{(results.savings.savings_percentage || 0).toFixed(1)}%</div>
-                  <div className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>
-                    vs standard MFN rates
-                  </div>
-                </div>
-              </>
+              <p>
+                <strong>💰 Potential Savings: ${(results.savings.annual_savings || 0).toLocaleString()}/year</strong><br/>
+                That's ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()} per month by using USMCA rates instead of standard tariffs ({(results.savings.savings_percentage || 0).toFixed(1)}% savings).
+              </p>
             )}
 
-            <div className="status-card">
-              <div className="status-label">Product Classification</div>
-              <div style={{fontSize: '0.95rem', fontWeight: '600', marginTop: '0.5rem'}}>
-                {results.product?.hs_code}
-              </div>
-              <div className="text-small" style={{marginTop: '0.25rem', color: '#6b7280'}}>
-                {results.product?.description || 'Product'}
-              </div>
-            </div>
+            <p style={{fontSize: '0.9rem', color: '#6b7280', marginTop: '1rem', fontStyle: 'italic'}}>
+              📋 Product: {results.product?.hs_code} - {results.product?.description || 'Product'}
+            </p>
           </div>
-
-          {/* Preference Criterion & Method (PAID ONLY) */}
-          {isPaidUser && (results.origin_criterion || results.method_of_qualification) && (
-            <div style={{
-              backgroundColor: '#f3f4f6',
-              padding: '1rem',
-              borderRadius: '6px',
-              marginTop: '1rem',
-              borderLeft: '4px solid #0284c7'
-            }}>
-              <div style={{fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#1f2937'}}>
-                Certificate Details
-              </div>
-              {results.origin_criterion && (
-                <div style={{fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem'}}>
-                  <strong>Origin Criterion:</strong> {results.origin_criterion} - {
-                    results.origin_criterion === 'A' ? 'Wholly Obtained' :
-                    results.origin_criterion === 'B' ? 'Regional Value Content' :
-                    results.origin_criterion === 'C' ? 'Specific Processing' :
-                    results.origin_criterion === 'D' ? 'Specific Manufacturing' :
-                    'Regional Value Content'
-                  }
-                </div>
-              )}
-              {results.method_of_qualification && (
-                <div style={{fontSize: '0.875rem', color: '#374151'}}>
-                  <strong>Qualification Method:</strong> {results.method_of_qualification === 'TV' ? 'Transaction Value (RVC)' : results.method_of_qualification}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* FREE USER: Upgrade CTA */}
           {!isPaidUser && (
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <div className="alert-title">🔒 Unlock Detailed Analysis</div>
-                <div className="text-body">
-                  Upgrade to <strong>Starter ($99/month)</strong> to see:
-                  <ul style={{ marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem' }}>
-                    <li>Component-by-component tariff breakdown</li>
-                    <li>Section 301 exposure analysis</li>
-                    <li>Supply chain vulnerabilities</li>
-                    <li>Generate and download certificates</li>
-                  </ul>
+            <>
+              <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
+                <div className="alert alert-info">
+                  <div className="alert-content">
+                    <div className="alert-title">🔒 Unlock Detailed Analysis</div>
+                    <div className="text-body">
+                      Upgrade to <strong>Starter ($99/month)</strong> to see:
+                      <ul style={{ marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem' }}>
+                        <li>Component-by-component breakdown</li>
+                        <li>Supply chain vulnerabilities & Section 301 exposure</li>
+                        <li>Mexico sourcing recommendations with ROI analysis</li>
+                        <li>Generate and download your USMCA certificate</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {!isPaidUser && (
-            <button
-              onClick={() => router.push('/pricing')}
-              className="btn-primary"
-              style={{ width: '100%' }}
-            >
-              💰 Upgrade to Starter - Unlock Full Analysis
-            </button>
+              <button
+                onClick={() => router.push('/pricing')}
+                className="btn-primary"
+                style={{ width: '100%', marginTop: '1rem' }}
+              >
+                💰 Upgrade to Starter - See Full Analysis
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -851,12 +802,34 @@ export default function WorkflowResults({
         </div>
       )}
 
-      {/* PAID ONLY: Strategic Recommendations (CONSOLIDATED) */}
+      {/* PAID ONLY: Executive Summary Button + Strategic Recommendations */}
       {isPaidUser && (
         <>
           <div className="card">
             <div className="card-header">
-              <h3 className="card-title">🎯 Strategic Recommendations</h3>
+              <h3 className="card-title">🎯 Executive Summary</h3>
+            </div>
+
+            <div className="element-spacing">
+              <button
+                onClick={() => {
+                  // TODO: Call AI to generate executive summary
+                  console.log('Generate executive summary for:', results.company?.name);
+                }}
+                className="btn-primary"
+                style={{ width: '100%', marginBottom: '1.5rem' }}
+              >
+                📊 Generate Business Impact Summary
+              </button>
+              <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
+                Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
+              </p>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h3 className="card-title">💡 Strategic Insights</h3>
             </div>
 
             <div className="element-spacing">
