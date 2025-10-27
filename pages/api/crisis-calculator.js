@@ -8,19 +8,78 @@
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
+import { createClient } from '@supabase/supabase-js';
 
-// Section 301 tariff rates by origin country (2024)
-const SECTION_301_RATES = {
-  'CN': 0.25,    // China: 25% additional tariff
-  'China': 0.25,
-  'default': 0    // No additional tariff for other countries
-};
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
-// Section 232 tariff rates (steel/aluminum safeguards)
-const SECTION_232_RATES = {
-  'steel': 0.25,      // Steel products: 25%
-  'aluminum': 0.10    // Aluminum products: 10%
-};
+/**
+ * ✅ AI-FIRST FIX (Oct 27, 2025): Database-driven tariff rates
+ * REMOVED: Hardcoded SECTION_301_RATES and SECTION_232_RATES
+ * REPLACED BY: Dynamic database lookups from tariff_rates_cache
+ *
+ * Fallback: If database doesn't have rate, return null (no silent defaults)
+ * This forces us to see when rates are missing instead of using stale hardcoded values
+ */
+
+/**
+ * Get Section 301 rate from database by origin country and HS code
+ * Returns null if not found (no hardcoded defaults)
+ */
+async function getSection301Rate(originCountry, hsCode) {
+  try {
+    // Section 301 applies to all USMCA members (US, CA, MX) importing from China
+    // Only CN/China origin gets Section 301 tariffs
+    if (!originCountry || (originCountry.toUpperCase() !== 'CN' && originCountry.toLowerCase() !== 'china')) {
+      return 0; // No Section 301 for non-China origin
+    }
+
+    // Query database for China-specific Section 301 rate
+    const { data, error } = await supabase
+      .from('tariff_rates_cache')
+      .select('section_301')
+      .eq('hs_code', hsCode)
+      .limit(1)
+      .single();
+
+    if (error || !data?.section_301) {
+      console.warn(`⚠️ [TARIFF-DB] No Section 301 rate found for ${hsCode} (China origin). Returning null for manual review.`);
+      return null; // Signal missing data - don't use hardcoded default
+    }
+
+    return data.section_301 / 100; // Convert from percentage to decimal
+  } catch (err) {
+    console.error(`❌ [TARIFF-DB-ERROR] Failed to fetch Section 301 rate for ${hsCode}:`, err.message);
+    return null; // Fail loud - don't use hardcoded default
+  }
+}
+
+/**
+ * Get Section 232 rate from database by HS code (steel/aluminum safeguards)
+ * Returns null if not found (no hardcoded defaults)
+ */
+async function getSection232Rate(hsCode) {
+  try {
+    const { data, error } = await supabase
+      .from('tariff_rates_cache')
+      .select('section_232')
+      .eq('hs_code', hsCode)
+      .limit(1)
+      .single();
+
+    if (error || !data?.section_232) {
+      console.warn(`⚠️ [TARIFF-DB] No Section 232 rate found for ${hsCode}. Returning null for manual review.`);
+      return null; // Signal missing data - don't use hardcoded default
+    }
+
+    return data.section_232 / 100; // Convert from percentage to decimal
+  } catch (err) {
+    console.error(`❌ [TARIFF-DB-ERROR] Failed to fetch Section 232 rate for ${hsCode}:`, err.message);
+    return null; // Fail loud - don't use hardcoded default
+  }
+}
 
 // HS code chapters susceptible to tariffs
 const VULNERABLE_CHAPTERS = {
@@ -30,15 +89,28 @@ const VULNERABLE_CHAPTERS = {
   'machinery': ['84'],              // Machinery
 };
 
-function estimateSection301Impact(tradeVolume, hsCode, originCountry) {
-  const section301Rate = SECTION_301_RATES[originCountry] || SECTION_301_RATES.default;
+async function estimateSection301Impact(tradeVolume, hsCode, originCountry) {
+  // ✅ DATABASE-DRIVEN (Oct 27): Fetch rate from database instead of hardcoded constant
+  const section301Rate = await getSection301Rate(originCountry, hsCode);
 
   if (section301Rate === 0) {
     return {
       rate: 0,
       exposure: false,
       annual_burden: 0,
-      explanation: `${originCountry} is not subject to Section 301 tariffs`
+      explanation: `${originCountry} is not subject to Section 301 tariffs`,
+      source: 'business_rule'
+    };
+  }
+
+  if (section301Rate === null) {
+    return {
+      rate: null,
+      exposure: null,
+      annual_burden: null,
+      explanation: `⚠️ Section 301 rate not found in database for ${hsCode}. Please check if this HS code is in the tariff_rates_cache table.`,
+      source: 'missing_data',
+      error: 'NO_TARIFF_DATA'
     };
   }
 
@@ -48,39 +120,51 @@ function estimateSection301Impact(tradeVolume, hsCode, originCountry) {
     rate: section301Rate * 100, // As percentage
     exposure: true,
     annual_burden: annualBurden,
-    explanation: `${originCountry}-origin products subject to ${section301Rate * 100}% Section 301 tariff`
+    explanation: `${originCountry}-origin products subject to ${(section301Rate * 100).toFixed(1)}% Section 301 tariff`,
+    source: 'database_cache'
   };
 }
 
-function estimateSection232Impact(tradeVolume, hsCode) {
+async function estimateSection232Impact(tradeVolume, hsCode) {
   const chapter = hsCode?.substring(0, 2);
 
-  // Check if product is steel or aluminum
-  if (VULNERABLE_CHAPTERS.steel.includes(chapter)) {
-    const burden = tradeVolume * SECTION_232_RATES.steel;
+  // ✅ DATABASE-DRIVEN (Oct 27): Fetch rate from database instead of hardcoded constant
+  const section232Rate = await getSection232Rate(hsCode);
+
+  // Determine if this HS code is subject to Section 232
+  const isSteel = VULNERABLE_CHAPTERS.steel.includes(chapter);
+  const isAluminum = VULNERABLE_CHAPTERS.aluminum.includes(chapter);
+
+  if (!isSteel && !isAluminum) {
     return {
-      rate: SECTION_232_RATES.steel * 100,
-      category: 'steel',
-      annual_burden: burden,
-      exposure: burden > 0
+      rate: 0,
+      category: null,
+      annual_burden: 0,
+      exposure: false,
+      source: 'business_rule'
     };
   }
 
-  if (VULNERABLE_CHAPTERS.aluminum.includes(chapter)) {
-    const burden = tradeVolume * SECTION_232_RATES.aluminum;
+  if (section232Rate === null) {
     return {
-      rate: SECTION_232_RATES.aluminum * 100,
-      category: 'aluminum',
-      annual_burden: burden,
-      exposure: burden > 0
+      rate: null,
+      category: isSteel ? 'steel' : 'aluminum',
+      annual_burden: null,
+      exposure: null,
+      explanation: `⚠️ Section 232 rate not found in database for ${hsCode}. Please check if this HS code is in the tariff_rates_cache table.`,
+      source: 'missing_data',
+      error: 'NO_TARIFF_DATA'
     };
   }
+
+  const burden = tradeVolume * section232Rate;
 
   return {
-    rate: 0,
-    category: null,
-    annual_burden: 0,
-    exposure: false
+    rate: section232Rate * 100,
+    category: isSteel ? 'steel' : 'aluminum',
+    annual_burden: burden,
+    exposure: burden > 0,
+    source: 'database_cache'
   };
 }
 
@@ -121,12 +205,27 @@ export default protectedApiHandler({
         });
       }
 
-      // Calculate tariff impacts
-      const section301Impact = estimateSection301Impact(tradeVolume, hsCode, originCountry);
-      const section232Impact = estimateSection232Impact(tradeVolume, hsCode);
+      // ✅ DATABASE-DRIVEN (Oct 27): Await async tariff rate lookups
+      const section301Impact = await estimateSection301Impact(tradeVolume, hsCode, originCountry);
+      const section232Impact = await estimateSection232Impact(tradeVolume, hsCode);
 
-      // Total annual burden
-      const totalAnnualBurden = section301Impact.annual_burden + section232Impact.annual_burden;
+      // Check if we got valid data from database
+      if (section301Impact.error === 'NO_TARIFF_DATA' && section232Impact.error === 'NO_TARIFF_DATA') {
+        return res.status(400).json({
+          success: false,
+          error: 'MISSING_TARIFF_DATA',
+          message: 'Tariff rates for this HS code not found in database. Please ensure the HS code is in the tariff_rates_cache table.',
+          missing_rates: {
+            section_301: section301Impact.explanation,
+            section_232: section232Impact.explanation
+          }
+        });
+      }
+
+      // Total annual burden - handle null values
+      const totalAnnualBurden =
+        (section301Impact.annual_burden || 0) +
+        (section232Impact.annual_burden || 0);
 
       // Generate mitigation recommendations
       const recommendations = [];
