@@ -792,14 +792,22 @@ export default protectedApiHandler({
       })(),
 
       // Tariff savings (only if qualified for USMCA) - extracted from detailed_analysis.savings_analysis
-      // CRITICAL: Single source of truth - AI calculates savings ONCE in detailed_analysis, not twice
-      // ✅ FIX: Remove hardcoded || 0 defaults - trust AI response values
-      savings: {
-        annual_savings: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.annual_savings : null,
-        monthly_savings: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.monthly_savings : null,
-        savings_percentage: analysis.usmca?.qualified ? analysis.detailed_analysis?.savings_analysis?.savings_percentage : null,
-        mfn_rate: analysis.detailed_analysis?.savings_analysis?.mfn_rate,
-        usmca_rate: analysis.detailed_analysis?.savings_analysis?.usmca_rate
+      // ✅ FIX (Oct 26): Use pre-calculated financial data from component analysis
+      // The simplified prompt doesn't return detailed_analysis.savings_analysis
+      // But we calculated all financial metrics correctly in preCalculatedFinancials (lines 449-462)
+      savings: analysis.usmca?.qualified ? {
+        annual_savings: preCalculatedFinancials.annual_tariff_savings,
+        monthly_savings: preCalculatedFinancials.monthly_tariff_savings,
+        savings_percentage: preCalculatedFinancials.savings_percentage,
+        mfn_rate: preCalculatedFinancials.tariff_cost_without_qualification,
+        usmca_rate: 0,  // Calculated implicitly in the component costs
+        section_301_exposure: preCalculatedFinancials.section_301_exposure
+      } : {
+        annual_savings: 0,
+        monthly_savings: 0,
+        savings_percentage: 0,
+        mfn_rate: 0,
+        usmca_rate: 0
       },
 
       // Certificate (if qualified)
@@ -825,7 +833,7 @@ export default protectedApiHandler({
       // Trust indicators
       trust: {
         ai_powered: true,
-        model: 'anthropic/claude-haiku-4.5-20251001',  // ✅ Haiku for 10x faster response time
+        model: 'anthropic/claude-haiku-4.5',  // ✅ Haiku for 10x faster response time
         // ✅ confidence_score defaults to 85 if not provided (reasonable fallback for missing AI metric)
         confidence_score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85,
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
