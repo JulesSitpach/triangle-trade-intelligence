@@ -47,7 +47,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         exporter_country: workflowData.company.company_country || ''
       }));
     }
-  }, [workflowData]); // Run when workflowData is available
+  }, [workflowData, authData.exporter_same_as_company]); // Run when workflowData or exporter_same_as_company changes
 
   // 🎯 AUTO-EXPAND SECTIONS BASED ON CERTIFIER TYPE
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     Object.keys(authData).forEach(key => {
       updateFormData(key, authData[key]);
     });
-  }, [authData]);
+  }, [authData, updateFormData]);
 
   // Auto-check certification boxes when certificate is generated
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         }));
       }
     }
-  }, [previewData]);
+  }, [previewData, authData.accuracy_certification, authData.authority_certification]);
 
   // Auto-scroll to certificate preview when generated
   useEffect(() => {
