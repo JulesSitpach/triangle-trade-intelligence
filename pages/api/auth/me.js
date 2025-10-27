@@ -148,6 +148,14 @@ export default async function handler(req, res) {
       });
     }
 
+    // ✅ DEBUG: Log what we're getting from database
+    console.log('📊 [AUTH-ME] Profile lookup for user', session.userId, ':', {
+      profile_found: !!profile,
+      subscription_tier: profile?.subscription_tier,
+      trial_ends_at: profile?.trial_ends_at,
+      profile_error: profileError?.message
+    });
+
     // Calculate if trial has expired
     const subscriptionTier = profile?.subscription_tier || 'Trial';
     const trialEndsAt = profile?.trial_ends_at;
