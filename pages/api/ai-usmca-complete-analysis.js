@@ -741,6 +741,58 @@ export default protectedApiHandler({
       };
     });
 
+    // ✅ CRITICAL: Declare transformedComponents BEFORE using in API response
+    // This transforms componentBreakdown from percentage format to decimal format
+    // Required because UI calculates: componentValue × (mfnRate - usmcaRate)
+    // If rates are percentages (55) instead of decimals (0.55), calculation is 100x too large
+    const transformedComponents = (componentBreakdown || []).map((component) => {
+      try {
+        // Step 1: AI format has percentage values (25, 0, 1.5, etc)
+        // Apply database_to_api transformations to convert percentages to decimals
+        const apiFormatComponent = {};
+
+        Object.entries(COMPONENT_DATA_CONTRACT.fields).forEach(([dbFieldName, fieldDef]) => {
+          const value = component[dbFieldName];
+
+          if (value === undefined) {
+            // For optional fields that are undefined, skip them
+            if (!fieldDef.required) return;
+            // For required fields that are missing from componentBreakdown, use fallback
+            if (fieldDef.fallback !== undefined) {
+              apiFormatComponent[dbFieldName] = fieldDef.fallback;
+              return;
+            }
+            return;
+          }
+
+          try {
+            // Apply database_to_api transformation (percentage to decimal for tariff rates)
+            const apiValue = COMPONENT_DATA_CONTRACT.transform(
+              value,
+              'database',  // AI/componentBreakdown sends percentages like database stores them
+              'api',       // Transform to API format (decimals 0-1)
+              dbFieldName
+            );
+
+            apiFormatComponent[dbFieldName] = apiValue;
+          } catch (err) {
+            // Keep original if transformation fails
+            apiFormatComponent[dbFieldName] = value;
+          }
+        });
+
+        // Step 2: Now transform from API format to frontend format (field renaming + type preservation)
+        return transformAPIToFrontend(apiFormatComponent);
+      } catch (err) {
+        logError('Component transformation failed', {
+          component: component?.description || 'Unknown',
+          error: err.message
+        });
+        // Return as-is if transformation fails (non-blocking)
+        return component;
+      }
+    });
+
     // Format response for UI
     const result = {
       success: true,
@@ -918,58 +970,10 @@ export default protectedApiHandler({
     // 3. Apply api_to_frontend (no change): mfnRate: 0.25
     // 4. Frontend multiply by 100: 0.25 × 100 = 25% ✅
 
-    // ✅ CRITICAL FIX (Oct 26): Use already-normalized componentBreakdown
-    // componentBreakdown (lines 524-598) has all required fields: base_mfn_rate, rate_source, stale
-    // These are REQUIRED by COMPONENT_DATA_CONTRACT and will fail validation if missing
+    // ✅ MOVED (Oct 26): transformedComponents is now declared earlier (line 744-794)
+    // This prevents temporal dead zone errors from using it before declaration
+    // It contains all required fields: base_mfn_rate, rate_source, stale
     // The raw result.usmca.component_breakdown from AI doesn't have these fields
-
-    const transformedComponents = (componentBreakdown || []).map((component) => {
-      try {
-        // Step 1: AI format has percentage values (25, 0, 1.5, etc)
-        // Apply database_to_api transformations to convert percentages to decimals
-        const apiFormatComponent = {};
-
-        Object.entries(COMPONENT_DATA_CONTRACT.fields).forEach(([dbFieldName, fieldDef]) => {
-          const value = component[dbFieldName];
-
-          if (value === undefined) {
-            // For optional fields that are undefined, skip them
-            if (!fieldDef.required) return;
-            // For required fields that are missing from componentBreakdown, use fallback
-            if (fieldDef.fallback !== undefined) {
-              apiFormatComponent[dbFieldName] = fieldDef.fallback;
-              return;
-            }
-            return;
-          }
-
-          try {
-            // Apply database_to_api transformation (percentage to decimal for tariff rates)
-            const apiValue = COMPONENT_DATA_CONTRACT.transform(
-              value,
-              'database',  // AI/componentBreakdown sends percentages like database stores them
-              'api',       // Transform to API format (decimals 0-1)
-              dbFieldName
-            );
-
-            apiFormatComponent[dbFieldName] = apiValue;
-          } catch (err) {
-            // Keep original if transformation fails
-            apiFormatComponent[dbFieldName] = value;
-          }
-        });
-
-        // Step 2: Now transform from API format to frontend format (field renaming + type preservation)
-        return transformAPIToFrontend(apiFormatComponent);
-      } catch (err) {
-        logError('Component transformation failed', {
-          component: component?.description || 'Unknown',
-          error: err.message
-        });
-        // Return as-is if transformation fails (non-blocking)
-        return component;
-      }
-    });
 
     result.component_origins = transformedComponents;
     result.components = transformedComponents;
