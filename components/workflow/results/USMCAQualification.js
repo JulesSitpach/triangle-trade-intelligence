@@ -175,14 +175,14 @@ export default function USMCAQualification({ results }) {
             </thead>
             <tbody>
               {results.usmca.component_breakdown.map((component, index) => {
-                // ✅ ISSUE #2 FIX: Use base_mfn_rate for display, not total_rate
-                // Total rate = base_mfn + section_301 + section_232
-                // Savings = base_mfn - usmca_rate (only the base duty is eliminated)
-                const baseMfnRate = component.base_mfn_rate || component.mfn_rate || 0;
-                const section301 = component.section_301 || 0;
-                const section232 = component.section_232 || 0;
-                const totalAppliedRate = component.total_rate || baseMfnRate + section301 + section232;
-                const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
+                // ✅ FIX (Oct 26): API returns camelCase field names from transformAPIToFrontend
+                // base_mfn_rate → baseMfnRate, section_301 → section301, usmca_rate → usmcaRate, etc.
+                // Note: Rates are in decimal format (0-1 range), display multiplies by 100
+                const baseMfnRate = component.baseMfnRate || component.mfnRate || 0;
+                const section301 = component.section301 || 0;
+                const section232 = component.section232 || 0;
+                const totalAppliedRate = component.totalRate || baseMfnRate + section301 + section232;
+                const usmcaRate = component.usmcaRate || component.tariff_rates?.usmcaRate || 0;
 
                 // Savings calculation: Only base MFN is eliminated, policy tariffs remain
                 const savingsPercent = baseMfnRate - usmcaRate;
@@ -190,11 +190,11 @@ export default function USMCAQualification({ results }) {
 
                 // DEBUG: Log what we're receiving from the API
                 if (index === 0) {
-                  console.log(`🔍 [FRONTEND] First component from API:`, {
+                  console.log(`🔍 [FRONTEND] First component from API (camelCase):`, {
                     description: component.description,
-                    rawMfnRate: component.mfn_rate,
-                    rawUsmcaRate: component.usmca_rate,
-                    rawSection301: component.section_301,
+                    rawMfnRate: component.mfnRate,
+                    rawUsmcaRate: component.usmcaRate,
+                    rawSection301: component.section301,
                     baseMfnRate,
                     usmcaRate,
                     section301,
@@ -242,12 +242,12 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
-                          {/* ✅ ISSUE #2 FIX: Show complete tariff breakdown with Section 301 clearly visible */}
+                          {/* ✅ CRITICAL FIX (Oct 26): Rates are in decimal format (0-1), multiply by 100 for display */}
                           {hasRates ? (
                             <>
                               <div style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
-                                {baseMfnRate.toFixed(1)}%
-                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{section301.toFixed(1)}%</span>}
+                                {(baseMfnRate * 100).toFixed(1)}%
+                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{(section301 * 100).toFixed(1)}%</span>}
                               </div>
                               {/* Show breakdown when Section 301 or other policies apply */}
                               {(section301 > 0 || section232 > 0) && (
@@ -268,7 +268,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#166534'
                                     }}>
-                                      Base: {baseMfnRate.toFixed(1)}%
+                                      Base: {(baseMfnRate * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   {section301 > 0 && (
@@ -280,7 +280,7 @@ export default function USMCAQualification({ results }) {
                                       color: '#991b1b',
                                       fontWeight: '500'
                                     }}>
-                                      Section 301: {section301.toFixed(1)}%
+                                      Section 301: {(section301 * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   {section232 > 0 && (
@@ -291,7 +291,7 @@ export default function USMCAQualification({ results }) {
                                       borderRadius: '3px',
                                       color: '#991b1b'
                                     }}>
-                                      Steel/Aluminum: {section232.toFixed(1)}%
+                                      Steel/Aluminum: {(section232 * 100).toFixed(1)}%
                                     </span>
                                   )}
                                   <span style={{
@@ -304,7 +304,7 @@ export default function USMCAQualification({ results }) {
                                     borderTop: '1px solid #d1d5db',
                                     marginTop: '0.25rem'
                                   }}>
-                                    Total: {totalAppliedRate.toFixed(1)}%
+                                    Total: {(totalAppliedRate * 100).toFixed(1)}%
                                   </span>
                                 </div>
                               )}
@@ -330,8 +330,8 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                          <span>{hasRates ? `${usmcaRate.toFixed(1)}%` : '—'}</span>
-                          {/* ✅ ISSUE #2 FIX: Clarify that Section 301 remains despite USMCA qualification */}
+                          <span>{hasRates ? `${(usmcaRate * 100).toFixed(1)}%` : '—'}</span>
+                          {/* ✅ CRITICAL FIX (Oct 26): Rates are decimal format, multiply by 100 for display */}
                           {section301 > 0 && (
                             <span style={{
                               fontSize: '0.6875rem',
@@ -339,7 +339,7 @@ export default function USMCAQualification({ results }) {
                               fontWeight: '500',
                               whiteSpace: 'nowrap'
                             }}>
-                              +{section301.toFixed(1)}% Section 301
+                              +{(section301 * 100).toFixed(1)}% Section 301
                             </span>
                           )}
                         </div>
@@ -347,8 +347,8 @@ export default function USMCAQualification({ results }) {
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
                           <span style={{ whiteSpace: 'nowrap' }}>
-                            {/* ✅ ISSUE #2 FIX: Show savings clearly - ONLY base MFN is eliminated */}
-                            {hasRates ? `${savingsPercent.toFixed(1)}%` : '—'}
+                            {/* ✅ CRITICAL FIX (Oct 26): Savings is decimal format, multiply by 100 for display */}
+                            {hasRates ? `${(savingsPercent * 100).toFixed(1)}%` : '—'}
                           </span>
                           {section301 > 0 && (
                             <span style={{
