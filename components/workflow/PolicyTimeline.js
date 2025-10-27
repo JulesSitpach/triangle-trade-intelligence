@@ -35,7 +35,15 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         code.replace(/\./g, '').substring(0, 4)
       );
 
+      console.log('🔍 [POLICYTIMELINE] Starting policy threat check:', {
+        components_count: components.length,
+        hs_codes: hsCodesFull,
+        hs_prefixes: hsPrefixes,
+        destination
+      });
+
       if (hsPrefixes.length === 0) {
+        console.log('⚠️  [POLICYTIMELINE] No HS codes found in components - skipping threat check');
         setThreats([]);
         setLoading(false);
         return;
@@ -52,6 +60,12 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
       if (eventsError) throw eventsError;
 
+      console.log('📡 [POLICYTIMELINE] trump_policy_events query result:', {
+        records_found: allPolicyEvents?.length || 0,
+        first_record: allPolicyEvents?.[0],
+        error: eventsError
+      });
+
       // Filter events that match any of the user's HS code prefixes
       const matchingEvents = allPolicyEvents?.filter(event => {
         if (!event.affected_hs_codes || event.affected_hs_codes.length === 0) {
@@ -61,6 +75,11 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
           hsPrefixes.some(prefix => eventCode.startsWith(prefix))
         );
       }) || [];
+
+      console.log('🎯 [POLICYTIMELINE] trump_policy_events filtering result:', {
+        matching_events_count: matchingEvents.length,
+        matching_events: matchingEvents
+      });
 
       // Query tariff_policy_updates and filter client-side for prefix matches
       const { data: allPolicyUpdates, error: updatesError } = await supabase
@@ -72,6 +91,12 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
       if (updatesError) throw updatesError;
 
+      console.log('📡 [POLICYTIMELINE] tariff_policy_updates query result:', {
+        records_found: allPolicyUpdates?.length || 0,
+        first_record: allPolicyUpdates?.[0],
+        error: updatesError
+      });
+
       // Filter updates that match any of the user's HS code prefixes
       const matchingUpdates = allPolicyUpdates?.filter(update => {
         if (!update.affected_hs_codes || update.affected_hs_codes.length === 0) {
@@ -81,6 +106,11 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
           hsPrefixes.some(prefix => updateCode.startsWith(prefix))
         );
       }) || [];
+
+      console.log('🎯 [POLICYTIMELINE] tariff_policy_updates filtering result:', {
+        matching_updates_count: matchingUpdates.length,
+        matching_updates: matchingUpdates
+      });
 
       // Merge and deduplicate threats
       const mergedThreats = [];
@@ -122,9 +152,14 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
       // Sort by date (newest first)
       mergedThreats.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+      console.log('✅ [POLICYTIMELINE] Final merged threats:', {
+        total_threats: mergedThreats.length,
+        threats: mergedThreats
+      });
+
       setThreats(mergedThreats);
     } catch (error) {
-      console.error('Error fetching policy threats:', error);
+      console.error('❌ [POLICYTIMELINE] Error fetching policy threats:', error);
       setThreats([]);
     } finally {
       setLoading(false);
@@ -143,6 +178,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
   }
 
   if (threats.length === 0) {
+    console.log('⚠️  [POLICYTIMELINE] No threats found - component will not display');
     return null; // Don't show component if no threats
   }
 
