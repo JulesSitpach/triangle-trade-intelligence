@@ -430,17 +430,6 @@ export default protectedApiHandler({
       const usmcaCost = componentValue * (usmca / 100);
       const savingsPerYear = mfnCost - usmcaCost;
 
-      console.log(`💰 [FINANCIAL-CALC] ${comp.description} (${comp.hs_code}):`, {
-        component_value: Math.round(componentValue),
-        mfn_rate: mfn,
-        usmca_rate: usmca,
-        section_301_rate: section301,
-        mfn_cost: Math.round(mfnCost),
-        section301_cost: Math.round(section301Cost),
-        usmca_cost: Math.round(usmcaCost),
-        savings_per_year: Math.round(savingsPerYear)
-      });
-
       return {
         hs_code: comp.hs_code,
         description: comp.description,
@@ -456,15 +445,6 @@ export default protectedApiHandler({
     const totalSection301Burden = componentFinancials.reduce((sum, c) => sum + c.annual_section301_cost, 0);
     const totalAnnualUSMCACost = componentFinancials.reduce((sum, c) => sum + c.annual_usmca_cost, 0);
     const totalAnnualSavings = totalAnnualMFNCost - totalAnnualUSMCACost;
-
-    console.log(`📊 [FINANCIAL-AGGREGATION]:`, {
-      total_components: componentFinancials.length,
-      total_mfn_cost: totalAnnualMFNCost,
-      total_section301_burden: totalSection301Burden,
-      total_usmca_cost: totalAnnualUSMCACost,
-      total_annual_savings: totalAnnualSavings,
-      monthly_savings: Math.round(totalAnnualSavings / 12)
-    });
 
     const preCalculatedFinancials = {
       trade_volume: tradeVolume,
