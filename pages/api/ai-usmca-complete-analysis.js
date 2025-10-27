@@ -447,9 +447,10 @@ export default protectedApiHandler({
     // Calculate component-level financials
     const componentFinancials = enrichedComponents.map(comp => {
       const mfn = comp.mfn_rate || 0;
-      // ✅ FIX: Only apply USMCA rate if component is from USMCA-member country (US/CA/MX)
-      // Non-USMCA components (China, Vietnam, etc.) don't get USMCA treatment
-      const usmca = (comp.is_usmca_member) ? (comp.usmca_rate || 0) : 0;
+      // ✅ FIX (Oct 27): ALL components in a qualified product get USMCA rates
+      // Component origin (CN, US, MX) doesn't matter - if the finished product qualifies,
+      // all components get preferential tariff treatment
+      const usmca = comp.usmca_rate || 0;
       const section301 = comp.section_301 || 0;
       const totalRate = (mfn + section301 + (comp.section_232 || 0));
 
@@ -457,10 +458,10 @@ export default protectedApiHandler({
       const mfnCost = componentValue * (mfn / 100);
       // ✅ Section 301 applies REGARDLESS of USMCA qualification (cannot be eliminated)
       const section301Cost = section301 > 0 ? componentValue * (section301 / 100) : 0;
-      // ✅ FIX: USMCA cost is 0 for non-USMCA components (they can't get preferential rate)
+      // ✅ FIX (Oct 27): Calculate USMCA cost for all components if qualified
       const usmcaCost = componentValue * (usmca / 100);
-      // ✅ FIX: Savings only apply when USMCA rate < MFN rate (only for USMCA members)
-      const savingsPerYear = (comp.is_usmca_member && usmca < mfn) ? (mfnCost - usmcaCost) : 0;
+      // ✅ FIX (Oct 27): Savings apply whenever USMCA rate < MFN rate (for all components in qualified product)
+      const savingsPerYear = (usmca < mfn) ? (mfnCost - usmcaCost) : 0;
 
       return {
         hs_code: comp.hs_code,
@@ -479,9 +480,9 @@ export default protectedApiHandler({
     // ✅ FIX: Section 301 is separate from USMCA - it's a BURDEN, not reduced by qualification
     const totalSection301Burden = componentFinancials.reduce((sum, c) => sum + c.annual_section301_cost, 0);
     const totalAnnualUSMCACost = componentFinancials.reduce((sum, c) => sum + c.annual_usmca_cost, 0);
-    // ✅ FIX: Total savings only from USMCA-eligible components
+    // ✅ FIX (Oct 27): Total savings from ALL components when product qualifies for USMCA
+    // Don't filter by is_usmca_member - if product qualifies, all components benefit
     const totalAnnualSavings = componentFinancials
-      .filter(c => c.is_usmca_member)
       .reduce((sum, c) => sum + c.annual_savings, 0);
 
     const preCalculatedFinancials = {
