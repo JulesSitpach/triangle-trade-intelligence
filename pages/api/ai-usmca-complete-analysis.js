@@ -432,6 +432,20 @@ export default protectedApiHandler({
       formData.destination_country
     );
 
+    // ✅ DEBUG: Log if components are empty (would cause "No tariff data available")
+    if (!enrichedComponents || enrichedComponents.length === 0) {
+      console.error('🚨 [TARIFF-DATA] enrichedComponents is empty!', {
+        input_components: formData.component_origins?.length || 0,
+        destination: formData.destination_country
+      });
+    } else {
+      console.log('✅ [TARIFF-DATA] enrichedComponents populated:', {
+        count: enrichedComponents.length,
+        first_component: enrichedComponents[0]?.description,
+        has_mfn_rate: enrichedComponents[0]?.mfn_rate !== undefined
+      });
+    }
+
     // ========== PRE-CALCULATE FINANCIAL DATA (Oct 26, 2025 Optimization - FIXED Oct 27) ==========
     // FIXED: Only apply USMCA savings to USMCA-member-origin components
     // Non-USMCA components (China, Vietnam, etc.) do NOT get USMCA rates or savings
@@ -998,6 +1012,19 @@ export default protectedApiHandler({
     // This prevents temporal dead zone errors from using it before declaration
     // It contains all required fields: base_mfn_rate, rate_source, stale
     // The raw result.usmca.component_breakdown from AI doesn't have these fields
+
+    // ✅ DEBUG: Log final components before returning to frontend
+    if (!transformedComponents || transformedComponents.length === 0) {
+      console.error('🚨 [RESPONSE] transformedComponents is empty! Frontend will show "No tariff data available"', {
+        componentBreakdown_count: componentBreakdown?.length || 0,
+        transformedComponents_count: transformedComponents?.length || 0
+      });
+    } else {
+      console.log('✅ [RESPONSE] transformedComponents ready for frontend:', {
+        count: transformedComponents.length,
+        first_component_fields: Object.keys(transformedComponents[0])
+      });
+    }
 
     result.component_origins = transformedComponents;
     result.components = transformedComponents;
