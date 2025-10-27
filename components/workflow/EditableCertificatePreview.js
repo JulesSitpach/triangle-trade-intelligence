@@ -477,8 +477,8 @@ export default function EditableCertificatePreview({
               {/* Only ONE product row per official USMCA certificate form (Field 6-11) */}
               {/* Components are reference data only, not displayed as separate rows on the main certificate */}
               <tr style={{ height: '120px' }}>
-                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
+                <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', overflow: 'auto' }}>
+                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <input type="text" value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} placeholder="e.g., 8517.62" />
