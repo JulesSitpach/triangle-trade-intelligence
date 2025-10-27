@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import html2pdf from 'html2pdf.js';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -210,6 +211,107 @@ export default function EditableCertificatePreview({
     onSave(updatedData);
   };
 
+  const handleDownloadPDF = async () => {
+    // First validate and save
+    if (!editedCert.user_accepts_responsibility) {
+      alert('❌ You must confirm that you accept responsibility for the accuracy of this certificate');
+      return;
+    }
+    if (!editedCert.user_confirms_accuracy) {
+      alert('❌ You must confirm that all information is accurate and complete');
+      return;
+    }
+
+    try {
+      // Get the certificate preview element
+      const certificateElement = document.getElementById('certificate-preview-for-pdf');
+      if (!certificateElement) {
+        alert('❌ Certificate preview not found');
+        return;
+      }
+
+      // ✅ FIX: Use html2pdf to convert the current preview HTML to PDF
+      // This ensures the PDF looks identical to the preview
+      const options = {
+        margin: 10,
+        filename: `USMCA-Certificate-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' }
+      };
+
+      html2pdf()
+        .set(options)
+        .from(certificateElement)
+        .save();
+
+      // Now save the data
+      const updatedData = {
+        ...previewData.professional_certificate,
+        certifier: {
+          type: editedCert.certifier_type,
+          name: editedCert.certifier_name,
+          address: editedCert.certifier_address,
+          country: editedCert.certifier_country,
+          phone: editedCert.certifier_phone,
+          email: editedCert.certifier_email,
+          tax_id: editedCert.certifier_tax_id
+        },
+        exporter: {
+          name: editedCert.exporter_name,
+          address: editedCert.exporter_address,
+          country: editedCert.exporter_country,
+          phone: editedCert.exporter_phone,
+          email: editedCert.exporter_email,
+          tax_id: editedCert.exporter_tax_id
+        },
+        producer: {
+          name: editedCert.producer_name,
+          address: editedCert.producer_address,
+          country: editedCert.producer_country,
+          phone: editedCert.producer_phone,
+          email: editedCert.producer_email,
+          tax_id: editedCert.producer_tax_id
+        },
+        importer: {
+          name: editedCert.importer_name,
+          address: editedCert.importer_address,
+          country: editedCert.importer_country,
+          phone: editedCert.importer_phone,
+          email: editedCert.importer_email,
+          tax_id: editedCert.importer_tax_id
+        },
+        product: {
+          description: editedCert.product_description
+        },
+        hs_classification: {
+          code: editedCert.hs_code
+        },
+        preference_criterion: editedCert.origin_criterion,
+        producer_declaration: {
+          is_producer: editedCert.is_producer
+        },
+        qualification_method: {
+          method: editedCert.qualification_method
+        },
+        country_of_origin: editedCert.country_of_origin,
+        components: editedCert.components,
+        authorization: {
+          signatory_name: editedCert.signatory_name,
+          signatory_title: editedCert.signatory_title,
+          signature_date: editedCert.signature_date,
+          signatory_phone: editedCert.signatory_phone,
+          signatory_email: editedCert.signatory_email
+        }
+      };
+
+      onSave(updatedData);
+    } catch (error) {
+      console.error('❌ PDF download failed:', error);
+      alert('Failed to download PDF. Please try again.');
+    }
+  };
+
   const inputStyle = {
     backgroundColor: '#e8f4f8',
     border: '1px solid #999',
@@ -284,7 +386,7 @@ export default function EditableCertificatePreview({
       )}
 
       {/* Official USMCA Certificate Form - Exact Layout from US Template */}
-      <div style={{
+      <div id="certificate-preview-for-pdf" style={{
         border: '3px solid #000',
         backgroundColor: '#fff',
         fontFamily: 'Arial, sans-serif',
@@ -667,7 +769,7 @@ export default function EditableCertificatePreview({
           </a>
         ) : (
           <button
-            onClick={handleSave}
+            onClick={handleDownloadPDF}
             disabled={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy}
             style={{
               padding: '12px 24px',
