@@ -19,9 +19,11 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
       try {
         const response = await fetch('/api/auth/me', { credentials: 'include' });
         if (response.ok) {
-          const userData = await response.json();
-          setUserSubscriptionTier(userData.subscription_tier || 'Trial');
-          console.log('✅ User subscription tier:', userData.subscription_tier);
+          const data = await response.json();
+          // ✅ FIX: subscription_tier is nested inside 'user' object in response
+          const tier = data.user?.subscription_tier || 'Trial';
+          setUserSubscriptionTier(tier);
+          console.log('✅ User subscription tier:', tier, '(from data.user.subscription_tier)');
         } else {
           setUserSubscriptionTier('Trial');
         }
