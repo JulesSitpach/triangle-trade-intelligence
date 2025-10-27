@@ -1,0 +1,1785 @@
+{
+  "timestamp": "2025-10-27T17:09:31.701Z",
+  "summary": {
+    "totalSnakeCaseFields": 864,
+    "totalCamelCaseFields": 442,
+    "filesScanned": 256,
+    "potentialMismatches": 86
+  },
+  "mismatches": [
+    {
+      "snakeCase": "hs_code",
+      "camelCase": "hsCode",
+      "snakeFiles": [
+        "pages\\api\\agents\\classification.js",
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\database-driven-usmca-compliance.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-certificate.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\research\\weekly-tariff-verification.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "pages\\usmca-certificate-completion.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\EditableCertificatePreview.js",
+        "components\\workflow\\ProductDetailsStep.js",
+        "components\\workflow\\SupplyChainStep.js",
+        "components\\workflow\\USMCATrustResultsStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\classification\\database-driven-hs-classifier.js",
+        "lib\\classification\\enhanced-hs-validator.js",
+        "lib\\core\\simple-usmca-classifier.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\database\\supabase-client.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\ai-confidence-scoring-service.js",
+        "lib\\services\\automated-trade-research.js",
+        "lib\\services\\email-monitoring-service.js",
+        "lib\\services\\expert-endorsement-system.js",
+        "lib\\services\\tariff-change-detector.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\usitc-tariff-sync.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\hts-lookup.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\trade-intelligence\\census-trade-data.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\utils\\hs-code-normalizer.js",
+        "lib\\utils\\smart-fallback.js",
+        "lib\\utils\\trust-score-calculator.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\utils\\usmca-certificate-pdf-generator.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\base-agent.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai\\chatbot-orchestrator.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\expert-endorsement-system.js",
+        "lib\\trade-intelligence\\census-trade-data.js"
+      ],
+      "totalUsage": 257
+    },
+    {
+      "snakeCase": "mfn_rate",
+      "camelCase": "mfnRate",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\research\\live-web-tariff-lookup.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\ProductDetailsStep.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "components\\workflow\\ReviewStep.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\classification\\database-driven-hs-classifier.js",
+        "lib\\classification\\enhanced-hs-validator.js",
+        "lib\\core\\simple-usmca-classifier.js",
+        "lib\\database\\alignment-optimized-client.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\database\\supabase-client.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\scripts\\field-scanner.js",
+        "lib\\services\\automated-trade-research.js",
+        "lib\\services\\professional-referral-system.js",
+        "lib\\services\\usitc-tariff-sync.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\hts-lookup.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\utils\\field-validator.js",
+        "lib\\utils\\hs-code-normalizer.js",
+        "lib\\utils\\rate-normalizer.js",
+        "lib\\utils\\smart-fallback.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\utils\\usitc-hts-api.js",
+        "lib\\utils\\usitc-web-scraper.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js",
+        "lib\\scripts\\field-scanner.js",
+        "lib\\services\\product-context-service.js"
+      ],
+      "totalUsage": 172
+    },
+    {
+      "snakeCase": "company_name",
+      "camelCase": "companyName",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\signup-referral.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\stripe\\webhook.js",
+        "pages\\api\\supplier-capability-assessment.js",
+        "pages\\api\\test-email-alert.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\api\\user\\profile.js",
+        "pages\\api\\user-business-intelligence.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\AlertsSubscriptionFlow.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "components\\workflow\\WorkflowPathSelection.js",
+        "lib\\email\\resend-client.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\email-monitoring-service.js",
+        "lib\\services\\resend-alert-service.js",
+        "lib\\services\\tariff-change-detector.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\stripe\\server.js",
+        "lib\\tariff\\hts-lookup.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\utils\\validation.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\auth\\me.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\crisis-alerts.js",
+        "pages\\signup\\referral.js",
+        "pages\\signup.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\alerts\\PersonalizedPolicyAlert.js",
+        "lib\\auth\\serverAuth.js",
+        "lib\\contexts\\AlertContext.js",
+        "lib\\middleware\\auth-middleware.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-alert-service.js"
+      ],
+      "totalUsage": 156
+    },
+    {
+      "snakeCase": "component_origins",
+      "camelCase": "componentOrigins",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\TariffDataFreshness.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\SupplyChainStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "components\\workflow\\WorkflowResults.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\schemas\\form-data-schema.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\validation\\data-contract-validator.ts",
+        "lib\\validation\\normalize-subscriber-data.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\alerts\\AITradeAdvisor.js",
+        "components\\alerts\\RealTimeMonitoringDashboard.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\classificationApiService.js"
+      ],
+      "totalUsage": 135
+    },
+    {
+      "snakeCase": "origin_country",
+      "camelCase": "originCountry",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-certificate.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\alerts\\RealTimeMonitoringDashboard.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\ReviewStep.js",
+        "components\\workflow\\SupplyChainStep.js",
+        "components\\workflow\\USMCATrustResultsStep.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\schemas\\form-data-schema.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\utils\\trust-score-calculator.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\validation\\data-contract-validator.ts",
+        "lib\\validation\\normalize-subscriber-data.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\services\\crisis-calculator-service.js"
+      ],
+      "totalUsage": 122
+    },
+    {
+      "snakeCase": "usmca_rate",
+      "camelCase": "usmcaRate",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\research\\live-web-tariff-lookup.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\ProductDetailsStep.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "components\\workflow\\ReviewStep.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\classification\\database-driven-hs-classifier.js",
+        "lib\\classification\\enhanced-hs-validator.js",
+        "lib\\core\\simple-usmca-classifier.js",
+        "lib\\database\\alignment-optimized-client.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\database\\supabase-client.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\hts-lookup.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\utils\\field-validator.js",
+        "lib\\utils\\hs-code-normalizer.js",
+        "lib\\utils\\rate-normalizer.js",
+        "lib\\utils\\smart-fallback.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\utils\\usitc-hts-api.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\product-context-service.js"
+      ],
+      "totalUsage": 121
+    },
+    {
+      "snakeCase": "product_description",
+      "camelCase": "productDescription",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\database-driven-usmca-compliance.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\EditableCertificatePreview.js",
+        "components\\workflow\\ProductDetailsStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "components\\workflow\\WorkflowPathSelection.js",
+        "lib\\database\\alignment-optimized-client.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\database\\supabase-client.js",
+        "lib\\services\\ai-confidence-scoring-service.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\email-service.js",
+        "lib\\services\\professional-referral-system.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\usitc-tariff-sync.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\usmca-certificate-pdf-generator.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ],
+      "totalUsage": 103
+    },
+    {
+      "snakeCase": "trade_volume",
+      "camelCase": "tradeVolume",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\user-business-intelligence.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\shared\\DynamicAIReportButton.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\results\\ExecutiveSummary.js",
+        "components\\workflow\\results\\RecommendedActions.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "components\\workflow\\WorkflowPathSelection.js",
+        "components\\workflow\\WorkflowResults.js",
+        "lib\\schemas\\form-data-schema.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\email-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\validation.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ],
+      "totalUsage": 86
+    },
+    {
+      "snakeCase": "value_percentage",
+      "camelCase": "valuePercentage",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "components\\workflow\\ReviewStep.js",
+        "components\\workflow\\SupplyChainStep.js",
+        "components\\workflow\\USMCATrustResultsStep.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\hts-lookup.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\validation\\data-contract-validator.ts",
+        "lib\\validation\\normalize-subscriber-data.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 70
+    },
+    {
+      "snakeCase": "business_type",
+      "camelCase": "businessType",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\crisis-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\email-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\expert-endorsement-system.js",
+        "lib\\services\\resend-alert-service.js"
+      ],
+      "totalUsage": 69
+    },
+    {
+      "snakeCase": "manufacturing_location",
+      "camelCase": "manufacturingLocation",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\usmca-certificate-completion.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "components\\workflow\\ReviewStep.js",
+        "components\\workflow\\SupplyChainStep.js",
+        "components\\workflow\\USMCATrustResultsStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\trust-score-calculator.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\classificationApiService.js"
+      ],
+      "totalUsage": 56
+    },
+    {
+      "snakeCase": "workflow_data",
+      "camelCase": "workflowData",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\WorkflowResults.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\workflow-data-capture-service.js"
+      ],
+      "totalUsage": 50
+    },
+    {
+      "snakeCase": "user_id",
+      "camelCase": "userId",
+      "snakeFiles": [
+        "pages\\api\\auth\\register.js",
+        "pages\\api\\delete-alert.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\email-monitoring-service.js",
+        "lib\\services\\tariff-change-detector.js",
+        "lib\\services\\usage-tracking-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\auth\\me.js",
+        "pages\\api\\consolidate-alerts.js",
+        "lib\\auth\\serverAuth.js",
+        "lib\\middleware\\auth-middleware.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\subscription-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\utils\\emailQueue.js",
+        "lib\\utils\\logDevIssue.js"
+      ],
+      "totalUsage": 46
+    },
+    {
+      "snakeCase": "supplier_country",
+      "camelCase": "supplierCountry",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\utils\\certificate-type-templates.js"
+      ],
+      "camelFiles": [
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\classificationApiService.js"
+      ],
+      "totalUsage": 40
+    },
+    {
+      "snakeCase": "destination_country",
+      "camelCase": "destinationCountry",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\workflow-session.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\schemas\\form-data-schema.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\usmca\\qualification-engine.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "lib\\services\\crisis-alert-service.js"
+      ],
+      "totalUsage": 39
+    },
+    {
+      "snakeCase": "classified_hs_code",
+      "camelCase": "classifiedHsCode",
+      "snakeFiles": [
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\utils\\certificate-type-templates.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 35
+    },
+    {
+      "snakeCase": "qualification_status",
+      "camelCase": "qualificationStatus",
+      "snakeFiles": [
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\email\\resend-client.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\trade-risk-alternatives.js"
+      ],
+      "totalUsage": 34
+    },
+    {
+      "snakeCase": "base_mfn_rate",
+      "camelCase": "baseMfnRate",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\utils\\rate-normalizer.js",
+        "lib\\utils\\usitc-hts-api.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 31
+    },
+    {
+      "snakeCase": "trust_score",
+      "camelCase": "trustScore",
+      "snakeFiles": [
+        "lib\\services\\trust\\trust-common-service.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\trust\\trust-calculation-service.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\utils\\trust-score-calculator.js"
+      ],
+      "totalUsage": 30
+    },
+    {
+      "snakeCase": "certifier_type",
+      "camelCase": "certifierType",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\generate-certificate.js",
+        "pages\\usmca-certificate-completion.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\EditableCertificatePreview.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\utils\\usmca-certificate-pdf-generator.js"
+      ],
+      "camelFiles": [
+        "pages\\test-certificates.js"
+      ],
+      "totalUsage": 28
+    },
+    {
+      "snakeCase": "ai_confidence",
+      "camelCase": "aiConfidence",
+      "snakeFiles": [
+        "pages\\trade-risk-alternatives.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "lib\\agents\\classification-agent.js"
+      ],
+      "totalUsage": 26
+    },
+    {
+      "snakeCase": "total_rate",
+      "camelCase": "totalRate",
+      "snakeFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\types\\data-contracts.ts",
+        "lib\\utils\\rate-normalizer.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 25
+    },
+    {
+      "snakeCase": "expert_validation",
+      "camelCase": "expertValidation",
+      "snakeFiles": [
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\data-provenance-service.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\trust\\trust-calculation-service.js",
+        "lib\\services\\trust\\trust-common-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\utils\\microservices-client.js"
+      ],
+      "totalUsage": 23
+    },
+    {
+      "snakeCase": "annual_savings",
+      "camelCase": "annualSavings",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\results\\ExecutiveSummary.js",
+        "components\\workflow\\results\\RecommendedActions.js",
+        "lib\\services\\expert-endorsement-system.js",
+        "lib\\services\\professional-referral-system.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ],
+      "totalUsage": 22
+    },
+    {
+      "snakeCase": "tariff_rates",
+      "camelCase": "tariffRates",
+      "snakeFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js"
+      ],
+      "camelFiles": [
+        "lib\\database\\supabase-client.js",
+        "lib\\services\\continuous-verification-service.js",
+        "lib\\services\\data-provenance-service.js"
+      ],
+      "totalUsage": 21
+    },
+    {
+      "snakeCase": "full_name",
+      "camelCase": "fullName",
+      "snakeFiles": [
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\request-password-reset.js",
+        "pages\\api\\auth\\signup-referral.js",
+        "pages\\api\\test-email-alert.js",
+        "pages\\api\\user\\profile.js",
+        "lib\\email\\resend-client.js",
+        "lib\\services\\email-monitoring-service.js",
+        "lib\\stripe\\server.js"
+      ],
+      "camelFiles": [
+        "pages\\signup\\referral.js",
+        "pages\\signup.js"
+      ],
+      "totalUsage": 19
+    },
+    {
+      "snakeCase": "annual_trade_volume",
+      "camelCase": "annualTradeVolume",
+      "snakeFiles": [
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\tariff\\hts-lookup.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\resend-alert-service.js"
+      ],
+      "totalUsage": 19
+    },
+    {
+      "snakeCase": "hs_description",
+      "camelCase": "hsDescription",
+      "snakeFiles": [
+        "pages\\api\\agents\\classification.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\ai-helpers.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 18
+    },
+    {
+      "snakeCase": "confidence_score",
+      "camelCase": "confidenceScore",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\research\\weekly-tariff-verification.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\data-provenance-service.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\database-driven-usmca-compliance.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ],
+      "totalUsage": 18
+    },
+    {
+      "snakeCase": "special_rate",
+      "camelCase": "specialRate",
+      "snakeFiles": [
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js",
+        "lib\\tariff\\tariff-calculator.js",
+        "lib\\utils\\usitc-web-scraper.js"
+      ],
+      "camelFiles": [
+        "lib\\agents\\classification-agent.js"
+      ],
+      "totalUsage": 18
+    },
+    {
+      "snakeCase": "supply_chain",
+      "camelCase": "supplyChain",
+      "snakeFiles": [
+        "pages\\api\\generate-certificate.js"
+      ],
+      "camelFiles": [
+        "lib\\contexts\\AlertContext.js"
+      ],
+      "totalUsage": 17
+    },
+    {
+      "snakeCase": "policy_adjustments",
+      "camelCase": "policyAdjustments",
+      "snakeFiles": [
+        "lib\\agents\\tariff-research-agent.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\tariff\\enrichment-router.js",
+        "lib\\tariff\\tariff-calculator.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 17
+    },
+    {
+      "snakeCase": "contact_person",
+      "camelCase": "contactPerson",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\supplier-capability-assessment.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\workflow-service.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\resend-alert-service.js"
+      ],
+      "totalUsage": 15
+    },
+    {
+      "snakeCase": "snake_case",
+      "camelCase": "snakeCase",
+      "snakeFiles": [
+        "lib\\scripts\\field-scanner.js"
+      ],
+      "camelFiles": [
+        "lib\\scripts\\field-scanner.js"
+      ],
+      "totalUsage": 15
+    },
+    {
+      "snakeCase": "financial_impact",
+      "camelCase": "financialImpact",
+      "snakeFiles": [
+        "pages\\api\\generate-personalized-alerts.js",
+        "components\\workflow\\results\\PersonalizedAlerts.js",
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\crisis-alerts.js",
+        "lib\\services\\email-monitoring-service.js"
+      ],
+      "totalUsage": 14
+    },
+    {
+      "snakeCase": "savings_percent",
+      "camelCase": "savingsPercent",
+      "snakeFiles": [
+        "components\\workflow\\results\\RecommendedActions.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\utils\\field-validator.js",
+        "lib\\validation\\data-contract-validator.ts"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\services\\product-context-service.js"
+      ],
+      "totalUsage": 14
+    },
+    {
+      "snakeCase": "is_admin",
+      "camelCase": "isAdmin",
+      "snakeFiles": [
+        "pages\\api\\auth\\login.js",
+        "lib\\middleware\\auth-middleware.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\me.js",
+        "pages\\dashboard.js",
+        "lib\\auth\\serverAuth.js",
+        "lib\\middleware\\auth-middleware.js"
+      ],
+      "totalUsage": 13
+    },
+    {
+      "snakeCase": "hs_codes",
+      "camelCase": "hsCodes",
+      "snakeFiles": [
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\services\\global-trade-alert-service.js"
+      ],
+      "camelFiles": [
+        "lib\\ai\\chatbot-orchestrator.js",
+        "lib\\services\\ai-confidence-scoring-service.js",
+        "lib\\services\\crisis-alert-service.js"
+      ],
+      "totalUsage": 13
+    },
+    {
+      "snakeCase": "relevance_score",
+      "camelCase": "relevanceScore",
+      "snakeFiles": [
+        "pages\\api\\generate-personalized-alerts.js",
+        "components\\alerts\\PersonalizedPolicyAlert.js",
+        "components\\workflow\\results\\PersonalizedAlerts.js"
+      ],
+      "camelFiles": [
+        "lib\\classification\\database-driven-hs-classifier.js"
+      ],
+      "totalUsage": 11
+    },
+    {
+      "snakeCase": "max_tokens",
+      "camelCase": "maxTokens",
+      "snakeFiles": [
+        "lib\\agents\\base-agent.js"
+      ],
+      "camelFiles": [
+        "lib\\agents\\base-agent.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\ai-confidence-scoring-service.js",
+        "lib\\utils\\ai-fallback-chain.js"
+      ],
+      "totalUsage": 11
+    },
+    {
+      "snakeCase": "business_types",
+      "camelCase": "businessTypes",
+      "snakeFiles": [
+        "lib\\services\\workflow-service.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\database-driven-dropdown-options.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "lib\\services\\workflow-service.js"
+      ],
+      "totalUsage": 11
+    },
+    {
+      "snakeCase": "alternative_codes",
+      "camelCase": "alternativeCodes",
+      "snakeFiles": [
+        "pages\\api\\agents\\classification.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js"
+      ],
+      "totalUsage": 10
+    },
+    {
+      "snakeCase": "usmca_countries",
+      "camelCase": "usmcaCountries",
+      "snakeFiles": [
+        "lib\\services\\workflow-service.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\database-driven-dropdown-options.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "lib\\services\\workflow-service.js"
+      ],
+      "totalUsage": 10
+    },
+    {
+      "snakeCase": "data_source",
+      "camelCase": "dataSource",
+      "snakeFiles": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "components\\workflow\\results\\TariffDataFreshness.js",
+        "lib\\tariff\\tariff-calculator.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\TariffDataFreshness.js",
+        "lib\\utils\\response-standardizer.js"
+      ],
+      "totalUsage": 9
+    },
+    {
+      "snakeCase": "affected_countries",
+      "camelCase": "affectedCountries",
+      "snakeFiles": [
+        "pages\\api\\consolidate-alerts.js",
+        "components\\alerts\\PersonalizedPolicyAlert.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\services\\rss-polling-engine.js"
+      ],
+      "camelFiles": [
+        "pages\\api\\test-ai-scoring.js"
+      ],
+      "totalUsage": 9
+    },
+    {
+      "snakeCase": "data_availability",
+      "camelCase": "dataAvailability",
+      "snakeFiles": [
+        "pages\\api\\system-status.js"
+      ],
+      "camelFiles": [
+        "lib\\utils\\test-rich-data-connections.js"
+      ],
+      "totalUsage": 9
+    },
+    {
+      "snakeCase": "producer_country",
+      "camelCase": "producerCountry",
+      "snakeFiles": [
+        "pages\\usmca-certificate-completion.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\EditableCertificatePreview.js",
+        "components\\workflow\\WorkflowResults.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\utils\\certificate-type-templates.js"
+      ],
+      "camelFiles": [
+        "pages\\test-certificates.js"
+      ],
+      "totalUsage": 9
+    },
+    {
+      "snakeCase": "certificate_number",
+      "camelCase": "certificateNumber",
+      "snakeFiles": [
+        "components\\UserDashboard.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js",
+        "lib\\utils\\usmca-certificate-pdf-generator.js"
+      ],
+      "camelFiles": [
+        "lib\\utils\\logDevIssue.js"
+      ],
+      "totalUsage": 9
+    },
+    {
+      "snakeCase": "total_savings",
+      "camelCase": "totalSavings",
+      "snakeFiles": [
+        "pages\\api\\dashboard-data.js",
+        "components\\workflow\\ReviewStep.js",
+        "lib\\services\\crisis-calculator-service.js"
+      ],
+      "camelFiles": [
+        "lib\\services\\crisis-messaging-service.js"
+      ],
+      "totalUsage": 6
+    },
+    {
+      "snakeCase": "ai_reasoning",
+      "camelCase": "aiReasoning",
+      "snakeFiles": [
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "lib\\schemas\\component-schema.js"
+      ],
+      "camelFiles": [
+        "components\\workflow\\results\\USMCAQualification.js"
+      ],
+      "totalUsage": 6
+    }
+  ],
+  "snakeCaseFields": [
+    {
+      "field": "hs_code",
+      "count": 220,
+      "files": [
+        "pages\\api\\agents\\classification.js",
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\database-driven-usmca-compliance.js"
+      ]
+    },
+    {
+      "field": "mfn_rate",
+      "count": 149,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\research\\live-web-tariff-lookup.js",
+        "pages\\api\\workflow-complete.js"
+      ]
+    },
+    {
+      "field": "company_name",
+      "count": 123,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\signup-referral.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js"
+      ]
+    },
+    {
+      "field": "origin_country",
+      "count": 118,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-certificate.js",
+        "pages\\api\\generate-usmca-certificate-report.js"
+      ]
+    },
+    {
+      "field": "component_origins",
+      "count": 116,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\generate-usmca-certificate-report.js"
+      ]
+    },
+    {
+      "field": "usmca_rate",
+      "count": 106,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\research\\live-web-tariff-lookup.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js"
+      ]
+    },
+    {
+      "field": "product_description",
+      "count": 90,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\database-driven-usmca-compliance.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js"
+      ]
+    },
+    {
+      "field": "trade_volume",
+      "count": 77,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\user-business-intelligence.js"
+      ]
+    },
+    {
+      "field": "value_percentage",
+      "count": 67,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\trade-risk-alternatives.js"
+      ]
+    },
+    {
+      "field": "professional_certificate",
+      "count": 64,
+      "files": [
+        "pages\\usmca-certificate-completion.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\EditableCertificatePreview.js"
+      ]
+    },
+    {
+      "field": "manufacturing_location",
+      "count": 55,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\workflow-session.js",
+        "pages\\usmca-certificate-completion.js"
+      ]
+    },
+    {
+      "field": "business_type",
+      "count": 52,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\crisis-alerts.js",
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\workflow-session.js"
+      ]
+    },
+    {
+      "field": "destination_country",
+      "count": 38,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\workflow-session.js",
+        "components\\workflow\\CompanyInformationStep.js"
+      ]
+    },
+    {
+      "field": "industry_sector",
+      "count": 37,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\executive-trade-alert.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\trade-risk-alternatives.js"
+      ]
+    },
+    {
+      "field": "supplier_country",
+      "count": 34,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\generate-personalized-alerts.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\CrisisCalculatorResults.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js"
+      ]
+    },
+    {
+      "field": "classified_hs_code",
+      "count": 34,
+      "files": [
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\services\\workflow-data-connector.js"
+      ]
+    },
+    {
+      "field": "company_country",
+      "count": 32,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\workflow-data-capture-service.js",
+        "lib\\services\\workflow-data-connector.js"
+      ]
+    },
+    {
+      "field": "company_address",
+      "count": 31,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\trust-verified-certificate-service.js"
+      ]
+    },
+    {
+      "field": "base_mfn_rate",
+      "count": 30,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\workflow-complete.js",
+        "pages\\api\\workflow-session.js",
+        "components\\workflow\\results\\TariffSavings.js"
+      ]
+    },
+    {
+      "field": "section_301",
+      "count": 28,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\crisis-alerts.js",
+        "pages\\api\\crisis-calculator.js",
+        "pages\\api\\workflow-complete.js"
+      ]
+    },
+    {
+      "field": "company_info",
+      "count": 28,
+      "files": [
+        "pages\\api\\generate-certificate.js",
+        "components\\workflow\\USMCATrustResultsStep.js"
+      ]
+    },
+    {
+      "field": "trust_verification",
+      "count": 28,
+      "files": [
+        "pages\\usmca-certificate-completion.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\utils\\trust-verified-certificate-formatter.js"
+      ]
+    },
+    {
+      "field": "subscription_tier",
+      "count": 27,
+      "files": [
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\signup-referral.js",
+        "pages\\api\\monitoring\\stats.js",
+        "pages\\api\\stripe\\verify-session.js",
+        "pages\\api\\stripe\\webhook.js"
+      ]
+    },
+    {
+      "field": "qualification_status",
+      "count": 27,
+      "files": [
+        "pages\\api\\dashboard-data.js",
+        "pages\\api\\generate-usmca-certificate-report.js",
+        "pages\\api\\trade-intelligence\\real-time-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\UserDashboard.js"
+      ]
+    },
+    {
+      "field": "contact_email",
+      "count": 26,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\supplier-capability-assessment.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\workflow-data-capture-service.js"
+      ]
+    },
+    {
+      "field": "contact_phone",
+      "count": 25,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\supplier-capability-assessment.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\workflow-data-capture-service.js"
+      ]
+    },
+    {
+      "field": "ai_confidence",
+      "count": 25,
+      "files": [
+        "pages\\trade-risk-alternatives.js",
+        "lib\\ai\\saveAIToGeniusDB.js",
+        "lib\\ai-helpers.js",
+        "lib\\schemas\\component-schema.js",
+        "lib\\tariff\\enrichment-router.js"
+      ]
+    },
+    {
+      "field": "tax_id",
+      "count": 24,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "components\\workflow\\USMCAWorkflowOrchestrator.js",
+        "lib\\services\\certificate-error-recovery-service.js",
+        "lib\\services\\trust-verified-certificate-service.js"
+      ]
+    },
+    {
+      "field": "certifier_type",
+      "count": 24,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\generate-certificate.js",
+        "pages\\usmca-certificate-completion.js",
+        "components\\workflow\\AuthorizationStep.js",
+        "components\\workflow\\EditableCertificatePreview.js"
+      ]
+    },
+    {
+      "field": "detailed_analysis",
+      "count": 22,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\results\\TariffSavings.js",
+        "components\\workflow\\WorkflowResults.js"
+      ]
+    }
+  ],
+  "camelCaseFields": [
+    {
+      "field": "dbService",
+      "count": 55,
+      "files": [
+        "lib\\services\\continuous-verification-service.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\crisis-config-service.js",
+        "lib\\services\\crisis-messaging-service.js",
+        "lib\\services\\data-provenance-service.js"
+      ]
+    },
+    {
+      "field": "hsCode",
+      "count": 37,
+      "files": [
+        "pages\\trade-risk-alternatives.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\base-agent.js",
+        "lib\\agents\\classification-agent.js"
+      ]
+    },
+    {
+      "field": "companyName",
+      "count": 33,
+      "files": [
+        "pages\\api\\auth\\me.js",
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\api\\crisis-alerts.js",
+        "pages\\signup\\referral.js",
+        "pages\\signup.js"
+      ]
+    },
+    {
+      "field": "workflowData",
+      "count": 30,
+      "files": [
+        "lib\\services\\workflow-data-capture-service.js"
+      ]
+    },
+    {
+      "field": "userId",
+      "count": 26,
+      "files": [
+        "pages\\api\\auth\\me.js",
+        "pages\\api\\consolidate-alerts.js",
+        "lib\\auth\\serverAuth.js",
+        "lib\\middleware\\auth-middleware.js",
+        "lib\\services\\crisis-alert-service.js"
+      ]
+    },
+    {
+      "field": "mfnRate",
+      "count": 23,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js"
+      ]
+    },
+    {
+      "field": "trustScore",
+      "count": 22,
+      "files": [
+        "lib\\services\\trust\\trust-calculation-service.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\utils\\trust-score-calculator.js"
+      ]
+    },
+    {
+      "field": "componentOrigins",
+      "count": 19,
+      "files": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\alerts\\AITradeAdvisor.js",
+        "components\\alerts\\RealTimeMonitoringDashboard.js",
+        "lib\\ai-helpers.js"
+      ]
+    },
+    {
+      "field": "statusText",
+      "count": 18,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "pages\\trade-risk-alternatives.js",
+        "components\\alerts\\RealTimeMonitoringDashboard.js",
+        "lib\\agents\\base-agent.js",
+        "lib\\services\\ai-confidence-scoring-service.js"
+      ]
+    },
+    {
+      "field": "crisisLevel",
+      "count": 18,
+      "files": [
+        "pages\\api\\crisis-alerts.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\email-monitoring-service.js"
+      ]
+    },
+    {
+      "field": "businessType",
+      "count": 17,
+      "files": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\expert-endorsement-system.js",
+        "lib\\services\\resend-alert-service.js"
+      ]
+    },
+    {
+      "field": "cacheTtl",
+      "count": 16,
+      "files": [
+        "lib\\classification\\enhanced-hs-validator.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\crisis-config-service.js",
+        "lib\\services\\crisis-messaging-service.js",
+        "lib\\services\\data-provenance-service.js"
+      ]
+    },
+    {
+      "field": "isHealthy",
+      "count": 16,
+      "files": [
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js"
+      ]
+    },
+    {
+      "field": "usmcaRate",
+      "count": 15,
+      "files": [
+        "pages\\api\\ai-usmca-complete-analysis.js",
+        "components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "components\\workflow\\results\\USMCAQualification.js",
+        "lib\\agents\\classification-agent.js",
+        "lib\\ai-helpers.js"
+      ]
+    },
+    {
+      "field": "camelCase",
+      "count": 15,
+      "files": [
+        "lib\\scripts\\field-scanner.js"
+      ]
+    },
+    {
+      "field": "expertValidation",
+      "count": 14,
+      "files": [
+        "lib\\services\\trust\\trust-calculation-service.js",
+        "lib\\services\\trust\\trust-common-service.js",
+        "lib\\services\\trust-verified-certificate-service.js",
+        "lib\\utils\\microservices-client.js"
+      ]
+    },
+    {
+      "field": "productDescription",
+      "count": 13,
+      "files": [
+        "pages\\api\\consolidate-alerts.js",
+        "pages\\trade-risk-alternatives.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-alert-service.js"
+      ]
+    },
+    {
+      "field": "primaryHSCode",
+      "count": 13,
+      "files": [
+        "pages\\api\\crisis-alerts.js",
+        "lib\\services\\crisis-alert-service.js",
+        "lib\\services\\resend-alert-service.js"
+      ]
+    },
+    {
+      "field": "trustMetrics",
+      "count": 13,
+      "files": [
+        "lib\\services\\trust\\trust-calculation-service.js",
+        "lib\\services\\trust\\trust-common-service.js",
+        "lib\\services\\trust\\trust-summary-service.js",
+        "lib\\services\\workflow-service.js",
+        "lib\\utils\\microservices-client.js"
+      ]
+    },
+    {
+      "field": "sessionId",
+      "count": 13,
+      "files": [
+        "lib\\services\\workflow-data-capture-service.js"
+      ]
+    },
+    {
+      "field": "rateLimiter",
+      "count": 13,
+      "files": [
+        "lib\\utils\\web-search.js"
+      ]
+    },
+    {
+      "field": "connectionRetries",
+      "count": 12,
+      "files": [
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js"
+      ]
+    },
+    {
+      "field": "requestCache",
+      "count": 12,
+      "files": [
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\product-context-service.js"
+      ]
+    },
+    {
+      "field": "isAdmin",
+      "count": 11,
+      "files": [
+        "pages\\api\\auth\\login.js",
+        "pages\\api\\auth\\me.js",
+        "pages\\dashboard.js",
+        "lib\\auth\\serverAuth.js",
+        "lib\\middleware\\auth-middleware.js"
+      ]
+    },
+    {
+      "field": "crisisConfig",
+      "count": 11,
+      "files": [
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\crisis-messaging-service.js",
+        "lib\\services\\professional-validation-service.js"
+      ]
+    },
+    {
+      "field": "maxTokens",
+      "count": 10,
+      "files": [
+        "lib\\agents\\base-agent.js",
+        "lib\\ai-helpers.js",
+        "lib\\services\\ai-confidence-scoring-service.js",
+        "lib\\utils\\ai-fallback-chain.js"
+      ]
+    },
+    {
+      "field": "lastHealthCheck",
+      "count": 10,
+      "files": [
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js"
+      ]
+    },
+    {
+      "field": "businessTypes",
+      "count": 9,
+      "files": [
+        "pages\\api\\database-driven-dropdown-options.js",
+        "components\\workflow\\CompanyInformationStep.js",
+        "lib\\services\\workflow-service.js"
+      ]
+    },
+    {
+      "field": "tradeVolume",
+      "count": 9,
+      "files": [
+        "pages\\trade-risk-alternatives.js",
+        "lib\\services\\classificationApiService.js",
+        "lib\\services\\crisis-calculator-service.js",
+        "lib\\services\\expert-endorsement-system.js"
+      ]
+    },
+    {
+      "field": "maxRetries",
+      "count": 9,
+      "files": [
+        "lib\\agents\\base-agent.js",
+        "lib\\database\\enhanced-database-client-cjs.js",
+        "lib\\database\\enhanced-database-client.js"
+      ]
+    }
+  ]
+}
