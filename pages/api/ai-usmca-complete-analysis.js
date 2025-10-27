@@ -552,6 +552,25 @@ export default protectedApiHandler({
             .eq('hts8', normalizedHsCode)
             .single();
 
+          // CRITICAL: Handle null rateData (record not found in database)
+          // This is normal for HS codes not in tariff_intelligence_master
+          // Proceed gracefully to Phase 3 (AI fallback) instead of crashing
+          if (!rateData) {
+            console.log(`⚠️  [TARIFF-LOOKUP] HS code not found: ${normalizedHsCode} (${component.hs_code}) - will use AI fallback`);
+            enriched.push({
+              ...baseComponent,
+              mfn_rate: component.mfn_rate || 0,
+              base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
+              section_301: component.section_301 || 0,
+              section_232: component.section_232 || 0,
+              usmca_rate: component.usmca_rate || 0,
+              rate_source: 'database_lookup_miss',
+              stale: true,  // Missing from database, needs AI enrichment
+              data_source: 'no_data'
+            });
+            continue;  // Skip to next component, let Phase 3 handle this
+          }
+
           // Map USITC columns to our standard format
           // mfn_ave = baseline MFN rate
           // nafta_mexico_ind = qualifies for Mexico USMCA rate
@@ -563,13 +582,13 @@ export default protectedApiHandler({
 
           const getUSMCARate = () => {
             if (destinationCountry === 'MX' && rateData?.nafta_mexico_ind) {
-              return parseFloat(rateData.mexico_ad_val_rate || rateData.mfn_ave || 0);
+              return parseFloat(rateData?.mexico_ad_val_rate || rateData?.mfn_ave || 0);
             }
             if (destinationCountry === 'CA' && rateData?.nafta_canada_ind) {
-              return parseFloat(rateData.usmca_ad_val_rate || rateData.mfn_ave || 0);
+              return parseFloat(rateData?.usmca_ad_val_rate || rateData?.mfn_ave || 0);
             }
             if (destinationCountry === 'US') {
-              return parseFloat(rateData?.usmca_ad_val_rate || rateData.mfn_ave || 0);
+              return parseFloat(rateData?.usmca_ad_val_rate || rateData?.mfn_ave || 0);
             }
             return component.usmca_rate || 0;
           };
