@@ -39,6 +39,15 @@ export default async function handler(req, res) {
     const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
     const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
 
+    // ✅ DEBUG: Log tier information to diagnose 403 errors
+    console.log('📋 [EXECUTIVE-ALERT] Tier Check:', {
+      received_tier: user_profile?.subscription_tier,
+      fallback_applied: !user_profile?.subscription_tier,
+      tier_lowercase: tierLowercase,
+      is_paid: isPaidTier,
+      allowed_tiers: ['starter', 'professional', 'premium', 'enterprise']
+    });
+
     if (!isPaidTier) {
       return res.status(403).json({
         success: false,

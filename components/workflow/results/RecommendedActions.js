@@ -61,6 +61,16 @@ export default function RecommendedActions({ results }) {
         throw new Error('destination_country is required for executive trade alert. Expected: US, CA, or MX');
       }
 
+      // ✅ DEBUG: Log what we're sending to the API
+      console.log('📤 [RECOMMENDED-ACTIONS] Calling executive-trade-alert with:', {
+        industry_sector: results.company?.industry_sector,
+        destination_country: results.company.destination_country,
+        supplier_country: results.company?.supplier_country,
+        subscription_tier: userSubscriptionTier,
+        userSubscriptionTier_type: typeof userSubscriptionTier,
+        userSubscriptionTier_value: userSubscriptionTier
+      });
+
       const response = await fetch('/api/executive-trade-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
