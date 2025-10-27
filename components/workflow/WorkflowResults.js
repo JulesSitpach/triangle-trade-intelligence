@@ -641,6 +641,7 @@ export default function WorkflowResults({
       // Prepare payload for the executive trade alert API
       const payload = {
         user_profile: {
+          subscription_tier: userSubscriptionTier || 'trial',
           industry_sector: results.product_classification?.industry || 'Manufacturing',
           destination_country: results.destination_country || 'US'
         },
