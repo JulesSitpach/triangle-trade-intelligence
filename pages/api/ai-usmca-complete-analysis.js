@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation, validateAPIResponse } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
-import { checkAnalysisLimit } from '../../lib/services/usage-tracking-service.js';
+import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { transformAPIToFrontend } from '../../lib/contracts/component-transformer.js';
 import COMPONENT_DATA_CONTRACT from '../../lib/contracts/COMPONENT_DATA_CONTRACT.js';
 
@@ -1053,6 +1053,13 @@ export default protectedApiHandler({
     //
     // For now: Return response immediately, skip database saves
     // Result: ~90 second performance improvement (102s → 10-15s)
+
+    // ✅ USAGE TRACKING: Increment monthly analysis count (fire-and-forget)
+    // This allows the dashboard counter to update correctly
+    // Fire-and-forget: don't block response while tracking
+    incrementAnalysisCount(userId, subscriptionTier).catch(err => {
+      console.error('[USAGE-TRACKING] Failed to increment count for user', userId, ':', err.message);
+    });
 
     return res.status(200).json(result);
 
