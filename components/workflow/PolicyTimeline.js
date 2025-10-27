@@ -200,29 +200,34 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
                   })}
                 </div>
 
-                {threat.severity && (
-                  <div className="timeline-detail">
-                    <strong>Severity:</strong> {threat.severity}
-                  </div>
-                )}
+                <div className="timeline-details-grid">
+                  {threat.severity && (
+                    <div className="timeline-detail">
+                      <strong>Severity:</strong>
+                      <span className={`severity-badge severity-${threat.severity?.toLowerCase().replace(' ', '-')}`}>
+                        {threat.severity}
+                      </span>
+                    </div>
+                  )}
 
-                {threat.timeline && (
-                  <div className="timeline-detail">
-                    <strong>Timeline:</strong> {threat.timeline}
-                  </div>
-                )}
+                  {threat.timeline && (
+                    <div className="timeline-detail">
+                      <strong>Implementation:</strong> {threat.timeline}
+                    </div>
+                  )}
 
-                {threat.probability && (
-                  <div className="timeline-detail">
-                    <strong>Probability:</strong> {Math.round(threat.probability * 100)}%
-                  </div>
-                )}
+                  {threat.probability && (
+                    <div className="timeline-detail">
+                      <strong>Likelihood:</strong> {Math.round(threat.probability * 100)}%
+                    </div>
+                  )}
 
-                {threat.percentage && (
-                  <div className="timeline-detail">
-                    <strong>Potential Impact:</strong> {threat.percentage}% adjustment
-                  </div>
-                )}
+                  {threat.percentage && (
+                    <div className="timeline-detail">
+                      <strong>Rate Change:</strong> +{threat.percentage}%
+                    </div>
+                  )}
+                </div>
 
                 {threat.type === 'announcement' && (
                   <div className="timeline-alert">
@@ -259,6 +264,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
       <style jsx>{`
         .policy-timeline-card {
           border-left: 4px solid #dc2626;
+          background: #fef2f2;
         }
 
         .timeline-container {
@@ -268,8 +274,13 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
         .timeline-item {
           display: flex;
-          padding: 1rem 0;
+          padding: 1.5rem 0;
           position: relative;
+          border-bottom: 1px solid #fecaca;
+        }
+
+        .timeline-item:last-child {
+          border-bottom: none;
         }
 
         .timeline-marker {
@@ -278,20 +289,21 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
           align-items: center;
           margin-right: 1.5rem;
           position: relative;
-          min-width: 40px;
+          min-width: 50px;
         }
 
         .timeline-dot {
-          width: 40px;
-          height: 40px;
+          width: 50px;
+          height: 50px;
           border-radius: 50%;
           background: white;
           border: 3px solid #dc2626;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.25rem;
+          font-size: 1.5rem;
           flex-shrink: 0;
+          box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
         }
 
         .timeline-line {
@@ -303,34 +315,38 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
         .timeline-content {
           flex: 1;
-          background: #fef2f2;
-          padding: 1rem;
-          border-radius: 6px;
-          border-left: 2px solid #dc2626;
+          background: white;
+          padding: 1.25rem;
+          border-radius: 8px;
+          border-left: 3px solid #dc2626;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .timeline-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
           gap: 1rem;
         }
 
         .timeline-title {
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: 1.05rem;
+          font-weight: 700;
           color: #111827;
           margin: 0;
+          flex: 1;
         }
 
         .badge {
           display: inline-block;
-          padding: 0.25rem 0.75rem;
+          padding: 0.35rem 0.85rem;
           border-radius: 9999px;
           font-size: 0.75rem;
-          font-weight: 600;
+          font-weight: 700;
           white-space: nowrap;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .badge-warning {
@@ -354,25 +370,70 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         }
 
         .timeline-date {
-          font-size: 0.875rem;
-          color: #6b7280;
-          margin-bottom: 0.5rem;
+          font-size: 0.8rem;
+          color: #9ca3af;
+          margin-bottom: 0.75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .timeline-details-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          margin: 1rem 0;
+          padding: 1rem;
+          background: #f9fafb;
+          border-radius: 6px;
         }
 
         .timeline-detail {
-          font-size: 0.875rem;
+          font-size: 0.9rem;
           color: #374151;
-          margin: 0.25rem 0;
+        }
+
+        .timeline-detail strong {
+          display: block;
+          font-size: 0.8rem;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 0.25rem;
+        }
+
+        .severity-badge {
+          display: inline-block;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+
+        .severity-critical {
+          background: #fee2e2;
+          color: #991b1b;
+        }
+
+        .severity-high {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .severity-medium {
+          background: #dbeafe;
+          color: #0c4a6e;
         }
 
         .timeline-alert {
-          margin-top: 0.75rem;
-          padding: 0.75rem;
+          margin-top: 1rem;
+          padding: 0.9rem;
           background: #dbeafe;
-          border-left: 3px solid #0284c7;
-          border-radius: 4px;
-          font-size: 0.875rem;
+          border-left: 4px solid #0284c7;
+          border-radius: 6px;
+          font-size: 0.9rem;
           color: #0c4a6e;
+          line-height: 1.4;
         }
 
         .timeline-alert.warning {
@@ -388,16 +449,18 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         }
 
         .timeline-recommendations {
-          margin-top: 1.5rem;
+          margin-top: 2rem;
           padding-top: 1.5rem;
-          border-top: 1px solid #e5e7eb;
+          border-top: 2px solid #fecaca;
         }
 
         .timeline-recommendations h4 {
           font-size: 0.95rem;
-          font-weight: 600;
+          font-weight: 700;
           color: #111827;
           margin-bottom: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .timeline-recommendations ul {
@@ -407,11 +470,12 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         }
 
         .timeline-recommendations li {
-          font-size: 0.875rem;
+          font-size: 0.9rem;
           color: #374151;
-          padding-left: 1.5rem;
+          padding-left: 1.75rem;
           position: relative;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
+          line-height: 1.5;
         }
 
         .timeline-recommendations li::before {
@@ -419,7 +483,18 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
           position: absolute;
           left: 0;
           color: #dc2626;
-          font-weight: 600;
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 640px) {
+          .timeline-details-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .timeline-header {
+            flex-direction: column;
+          }
         }
       `}</style>
     </div>
