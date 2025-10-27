@@ -797,8 +797,11 @@ export default protectedApiHandler({
         threshold_applied: analysis.usmca?.threshold_applied,
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
-        // ✅ Component breakdown calculated above (awaited)
-        component_breakdown: componentBreakdown,
+        // ✅ FIX (Oct 26): Use transformed components with decimal format (0.55 not 55)
+        // The raw componentBreakdown has percentages, transformedComponents has decimals
+        // UI calculates: componentValue × (mfnRate - usmcaRate)
+        // If mfnRate is 55 instead of 0.55, calculation is 100x too large
+        component_breakdown: transformedComponents,
         qualification_level: analysis.usmca?.qualified ? 'qualified' : 'not_qualified',
         qualification_status: analysis.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
         preference_criterion: analysis.usmca?.qualified ? analysis.usmca?.preference_criterion : null,
