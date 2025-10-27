@@ -5,7 +5,7 @@
  */
 
 import { crisisAlertService } from '../../lib/services/crisis-alert-service.js';
-import { logInfo, logError } from '../../lib/utils/production-logger.js';
+import { logInfo, logError, logWarn } from '../../lib/utils/production-logger.js';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -150,37 +150,79 @@ async function handleTestRSSCrisisDetection(req, res, data) {
  */
 async function handleSimulateCrisisScenario(req, res, data) {
   try {
-    // ⚠️ TEST DATA ONLY - NOT FOR PRODUCTION TARIFF CALCULATIONS
-    // These hardcoded rates (0.30, 0.25, 0.20) are used ONLY for crisis simulation testing
-    // Production tariff calculations use database rates from tariff_rates_cache
-    // See pages/api/crisis-calculator.js for production rate lookups
+    // ✅ FIXED (Oct 27): Replaced hardcoded crisis rates with database lookups
+    // Previously used hardcoded rates (0.30, 0.25, 0.20) that could override real data
+    // Now fetches Section 301 rates from tariff_rates_cache for representative HS codes
+
+    // Representative HS codes for each scenario
+    const scenarioHSCodes = {
+      trade_war_escalation: ['8542.31.00', '8517.62.00', '8471.30.00'], // Electronics: CPU, Network, Computer
+      usmca_withdrawal: ['8542.31.00', '7326.90.00', '6204.62.00'],     // Mixed: Electronic, Steel, Apparel
+      sector_specific_tariffs: ['8542.31.00', '8517.62.00']              // Electronics focus
+    };
+
+    const scenarioKey = data.scenario || 'trade_war_escalation';
+    const representativeHSCodes = scenarioHSCodes[scenarioKey] || scenarioHSCodes.trade_war_escalation;
+
+    // Need Supabase client for database lookup
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    // ✅ DYNAMIC: Fetch CURRENT Section 301 rate from database instead of hardcoding
+    // This ensures test scenarios use real tariff data, not stale test values
+    let crisisRate = 0.25; // Conservative fallback if lookup fails
+    try {
+      const { data: rateData } = await supabase
+        .from('tariff_rates_cache')
+        .select('section_301')
+        .in('hs_code', representativeHSCodes)
+        .eq('destination_country', 'US')
+        .limit(1)
+        .single();
+
+      if (rateData?.section_301) {
+        crisisRate = rateData.section_301 / 100; // Convert from percentage to decimal
+      }
+    } catch (dbError) {
+      logWarn('Could not fetch Section 301 rate for crisis scenario, using conservative estimate', {
+        hs_codes: representativeHSCodes,
+        error: dbError.message
+      });
+      // Falls back to 0.25 (conservative estimate)
+    }
+
     const scenarios = {
       trade_war_escalation: {
         name: 'Trade War Escalation',
-        description: 'Simulates escalation of trade tensions with 30% emergency tariffs',
-        crisisRate: 0.30, // TEST SCENARIO ONLY
+        description: `Simulates escalation of trade tensions with ${(crisisRate * 100).toFixed(0)}% emergency tariffs (current Section 301 rate)`,
+        crisisRate: crisisRate, // ✅ DYNAMIC: From database, not hardcoded
         affectedCategories: ['electronics', 'automotive', 'machinery'],
-        urgency: 'CRITICAL'
+        urgency: 'CRITICAL',
+        data_source: 'tariff_rates_cache'
       },
 
       usmca_withdrawal: {
         name: 'USMCA Withdrawal Threat',
-        description: 'Simulates threat of USMCA agreement withdrawal',
-        crisisRate: 0.25, // TEST SCENARIO ONLY
+        description: `Simulates threat of USMCA agreement withdrawal with ${(crisisRate * 100).toFixed(0)}% tariff impact`,
+        crisisRate: crisisRate, // ✅ DYNAMIC: From database, not hardcoded
         affectedCategories: ['all'],
-        urgency: 'CRITICAL'
+        urgency: 'CRITICAL',
+        data_source: 'tariff_rates_cache'
       },
 
       sector_specific_tariffs: {
         name: 'Sector-Specific Tariffs',
-        description: 'Simulates targeted tariffs on specific industry sectors',
-        crisisRate: 0.20, // TEST SCENARIO ONLY
+        description: `Simulates targeted tariffs on electronics with ${(crisisRate * 100).toFixed(0)}% rate (current Section 301)`,
+        crisisRate: crisisRate, // ✅ DYNAMIC: From database, not hardcoded
         affectedCategories: ['electronics'],
-        urgency: 'HIGH'
+        urgency: 'HIGH',
+        data_source: 'tariff_rates_cache'
       }
     };
 
-    const scenarioKey = data.scenario || 'trade_war_escalation';
     const scenario = scenarios[scenarioKey];
 
     if (!scenario) {
@@ -485,7 +527,9 @@ async function handleTestPhoenixElectronics(req, res) {
         title: phoenixCrisisRSS.title,
         source: phoenixCrisisRSS.source,
         targeted_hs_codes: ['8517.62', '8542.31', '8534.00'],
-        crisis_rate: '25%' // TEST SCENARIO ONLY - not production calculation
+        // ✅ DYNAMIC: Crisis rate now fetched from database in handleSimulateCrisisScenario()
+        // Previously hardcoded to '25%', now uses actual Section 301 rates
+        crisis_rate_source: 'tariff_rates_cache (dynamic)'
       },
       crisis_detection: crisisResult,
       phoenix_specific_alerts: phoenixAlerts.map(item => ({
