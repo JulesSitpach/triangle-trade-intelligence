@@ -150,27 +150,31 @@ async function handleTestRSSCrisisDetection(req, res, data) {
  */
 async function handleSimulateCrisisScenario(req, res, data) {
   try {
+    // ⚠️ TEST DATA ONLY - NOT FOR PRODUCTION TARIFF CALCULATIONS
+    // These hardcoded rates (0.30, 0.25, 0.20) are used ONLY for crisis simulation testing
+    // Production tariff calculations use database rates from tariff_rates_cache
+    // See pages/api/crisis-calculator.js for production rate lookups
     const scenarios = {
       trade_war_escalation: {
         name: 'Trade War Escalation',
         description: 'Simulates escalation of trade tensions with 30% emergency tariffs',
-        crisisRate: 0.30,
+        crisisRate: 0.30, // TEST SCENARIO ONLY
         affectedCategories: ['electronics', 'automotive', 'machinery'],
         urgency: 'CRITICAL'
       },
-      
+
       usmca_withdrawal: {
         name: 'USMCA Withdrawal Threat',
         description: 'Simulates threat of USMCA agreement withdrawal',
-        crisisRate: 0.25,
+        crisisRate: 0.25, // TEST SCENARIO ONLY
         affectedCategories: ['all'],
         urgency: 'CRITICAL'
       },
-      
+
       sector_specific_tariffs: {
         name: 'Sector-Specific Tariffs',
         description: 'Simulates targeted tariffs on specific industry sectors',
-        crisisRate: 0.20,
+        crisisRate: 0.20, // TEST SCENARIO ONLY
         affectedCategories: ['electronics'],
         urgency: 'HIGH'
       }
@@ -481,7 +485,7 @@ async function handleTestPhoenixElectronics(req, res) {
         title: phoenixCrisisRSS.title,
         source: phoenixCrisisRSS.source,
         targeted_hs_codes: ['8517.62', '8542.31', '8534.00'],
-        crisis_rate: '25%'
+        crisis_rate: '25%' // TEST SCENARIO ONLY - not production calculation
       },
       crisis_detection: crisisResult,
       phoenix_specific_alerts: phoenixAlerts.map(item => ({
