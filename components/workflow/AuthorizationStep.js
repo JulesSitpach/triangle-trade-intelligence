@@ -88,7 +88,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         updateFormData(key, authData[key]);
       });
     }
-  }, [authData.accuracy_certification, authData.authority_certification]); // Only track certification checkboxes
+  }, [authData, updateFormData]); // Include all dependencies used in effect
 
   // Auto-check certification boxes when certificate is generated
   useEffect(() => {
