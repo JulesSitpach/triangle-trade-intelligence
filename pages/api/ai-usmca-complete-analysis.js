@@ -541,10 +541,15 @@ export default protectedApiHandler({
 
         try {
           // Query tariff_intelligence_master (12k+ USITC rates) for this HS code
+          // Normalize HS code: remove dots, pad to 8 digits
+          const normalizedHsCode = (component.hs_code || '')
+            .replace(/\./g, '')  // Remove dots (e.g., "8542.31.00" → "854231")
+            .padEnd(8, '0');     // Pad to 8 digits (e.g., "854231" → "85423100")
+
           const { data: rateData, error } = await supabase
             .from('tariff_intelligence_master')
             .select('hts8, mfn_ave, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
-            .eq('hts8', component.hs_code)
+            .eq('hts8', normalizedHsCode)
             .single();
 
           // Map USITC columns to our standard format
