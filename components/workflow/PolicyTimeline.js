@@ -25,45 +25,69 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     try {
       setLoading(true);
 
-      // Extract HS codes from components
-      const hsCodes = components
+      // Extract HS codes from components (full 10-digit codes like "8542.31.00")
+      const hsCodesFull = components
         .map(c => c.hs_code)
         .filter(Boolean);
 
-      if (hsCodes.length === 0) {
+      // Extract HS code prefixes (first 4 digits for matching policy records)
+      const hsPrefixes = hsCodesFull.map(code =>
+        code.replace(/\./g, '').substring(0, 4)
+      );
+
+      if (hsPrefixes.length === 0) {
         setThreats([]);
         setLoading(false);
         return;
       }
 
-      // Query trump_policy_events for announced threats
-      const { data: policyEvents, error: eventsError } = await supabase
+      // Query ALL trump_policy_events and filter client-side for prefix matches
+      // (Database array overlap doesn't support partial string matching)
+      const { data: allPolicyEvents, error: eventsError } = await supabase
         .from('trump_policy_events')
         .select(
           'id, event_date, policy_title, affected_hs_codes, impact_severity, implementation_timeline, implementation_probability'
         )
-        .overlaps('affected_hs_codes', hsCodes)
         .order('event_date', { ascending: false });
 
       if (eventsError) throw eventsError;
 
-      // Query tariff_policy_updates for implementation status
-      const { data: policyUpdates, error: updatesError } = await supabase
+      // Filter events that match any of the user's HS code prefixes
+      const matchingEvents = allPolicyEvents?.filter(event => {
+        if (!event.affected_hs_codes || event.affected_hs_codes.length === 0) {
+          return false;
+        }
+        return event.affected_hs_codes.some(eventCode =>
+          hsPrefixes.some(prefix => eventCode.startsWith(prefix))
+        );
+      }) || [];
+
+      // Query tariff_policy_updates and filter client-side for prefix matches
+      const { data: allPolicyUpdates, error: updatesError } = await supabase
         .from('tariff_policy_updates')
         .select(
           'id, title, affected_hs_codes, status, effective_date, adjustment_percentage, policy_type'
         )
-        .overlaps('affected_hs_codes', hsCodes)
         .eq('is_active', true);
 
       if (updatesError) throw updatesError;
+
+      // Filter updates that match any of the user's HS code prefixes
+      const matchingUpdates = allPolicyUpdates?.filter(update => {
+        if (!update.affected_hs_codes || update.affected_hs_codes.length === 0) {
+          return false;
+        }
+        return update.affected_hs_codes.some(updateCode =>
+          hsPrefixes.some(prefix => updateCode.startsWith(prefix))
+        );
+      }) || [];
 
       // Merge and deduplicate threats
       const mergedThreats = [];
       const seenTitles = new Set();
 
       // Add events first (announcements)
-      policyEvents?.forEach(event => {
+      matchingEvents?.forEach(event => {
         if (!seenTitles.has(event.policy_title)) {
           mergedThreats.push({
             id: event.id,
@@ -80,7 +104,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
       });
 
       // Add updates (confirmation/implementation)
-      policyUpdates?.forEach(update => {
+      matchingUpdates?.forEach(update => {
         if (!seenTitles.has(update.title)) {
           mergedThreats.push({
             id: update.id,
