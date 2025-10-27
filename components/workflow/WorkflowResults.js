@@ -37,6 +37,9 @@ export default function WorkflowResults({
   const [modalChoice, setModalChoice] = useState('save'); // Default to save
   const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
   const [loadingTier, setLoadingTier] = useState(true);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [executiveSummary, setExecutiveSummary] = useState(null);
+  const [showSummary, setShowSummary] = useState(false);
   const modalShownRef = useRef(false);
   const modalClosedTimeRef = useRef(0);
   const isProcessingRef = useRef(false);
@@ -630,6 +633,52 @@ export default function WorkflowResults({
     </div>
   );
 
+  const generateExecutiveSummary = async () => {
+    try {
+      setLoadingSummary(true);
+      console.log('🎯 Generating Executive Summary for:', results.company?.name);
+
+      // Prepare payload for the executive trade alert API
+      const payload = {
+        user_profile: {
+          industry_sector: results.product_classification?.industry || 'Manufacturing',
+          destination_country: results.destination_country || 'US'
+        },
+        workflow_intelligence: {
+          components: results.component_origins || results.components || [],
+          north_american_content: results.usmca?.north_american_content || 0,
+          annual_trade_volume: results.trade_volume || 0,
+          usmca_qualified: results.usmca?.qualified || false,
+          preference_criterion: results.usmca?.preference_criterion || null
+        }
+      };
+
+      console.log('📊 Executive Summary payload:', payload);
+
+      // Call the executive trade alert API
+      const response = await fetch('/api/executive-trade-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('✅ Executive Summary generated:', data);
+
+      setExecutiveSummary(data);
+      setShowSummary(true);
+    } catch (error) {
+      console.error('❌ Failed to generate Executive Summary:', error);
+      alert('Failed to generate summary. Please try again.');
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
   return (
     <div className="dashboard-container workflow-results-container">
       {/* PORTAL MODAL - RENDERED OUTSIDE THIS COMPONENT */}
@@ -812,18 +861,92 @@ export default function WorkflowResults({
 
             <div className="element-spacing">
               <button
-                onClick={() => {
-                  // TODO: Call AI to generate executive summary
-                  console.log('Generate executive summary for:', results.company?.name);
-                }}
+                onClick={() => generateExecutiveSummary()}
                 className="btn-primary"
                 style={{ width: '100%', marginBottom: '1.5rem' }}
+                disabled={loadingSummary}
               >
-                📊 Generate Business Impact Summary
+                {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary'}
               </button>
               <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
                 Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
               </p>
+
+              {/* Executive Summary Display Section */}
+              {showSummary && executiveSummary && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1.5rem',
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  borderRadius: '8px'
+                }}>
+                  <h4 style={{fontSize: '1rem', fontWeight: 600, margin: '0 0 1rem 0', color: '#166534'}}>
+                    📊 Your Personalized Business Impact Analysis
+                  </h4>
+
+                  {/* Headline */}
+                  {executiveSummary.headline && (
+                    <p style={{fontSize: '0.95rem', fontWeight: 500, color: '#166534', marginBottom: '1rem'}}>
+                      {executiveSummary.headline}
+                    </p>
+                  )}
+
+                  {/* Financial Impact Section */}
+                  {executiveSummary.financial_impact && (
+                    <div style={{marginBottom: '1rem'}}>
+                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
+                        💰 Financial Impact
+                      </h5>
+                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
+                        {executiveSummary.financial_impact}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Strategic Recommendation */}
+                  {executiveSummary.strategic_recommendation && (
+                    <div style={{marginBottom: '1rem'}}>
+                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
+                        🎯 Strategic Recommendation
+                      </h5>
+                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
+                        {executiveSummary.strategic_recommendation}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Immediate Actions */}
+                  {executiveSummary.immediate_actions && (
+                    <div style={{marginBottom: '1rem'}}>
+                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
+                        ⚡ Immediate Actions
+                      </h5>
+                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
+                        {executiveSummary.immediate_actions}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Close button */}
+                  <button
+                    onClick={() => setShowSummary(false)}
+                    style={{
+                      marginTop: '1rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#86efac',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      color: '#166534',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✕ Close Summary
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -894,60 +1017,6 @@ export default function WorkflowResults({
       {isPaidUser && <TariffDataFreshness />}
 
       {/* NOTE: Recommendations moved to CollapsibleSection "Recommended Actions" above */}
-
-      {/* ========== DEDICATED DASHBOARDS ========== */}
-      <div className="form-section">
-        <h2 className="form-section-title">📊 Explore Related Tools</h2>
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem'}}>
-          {/* Trade Alerts Dashboard CTA */}
-          <div style={{
-            padding: '1.5rem',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            backgroundColor: '#f9fafb',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem'
-          }}>
-            <div style={{fontSize: '1.5rem'}}>🚨</div>
-            <h3 style={{fontSize: '1rem', fontWeight: 600, margin: 0, color: '#111827'}}>Trade Risk Alerts</h3>
-            <p style={{fontSize: '0.875rem', color: '#6b7280', margin: 0}}>
-              Monitor tariff policy changes affecting your products • Set up email notifications • Review Section 301 & 232 impacts
-            </p>
-            <button
-              onClick={() => router.push('/trade-risk-alternatives')}
-              className="btn-primary"
-              style={{marginTop: 'auto', alignSelf: 'flex-start', fontSize: '0.875rem'}}
-            >
-              View Alerts Dashboard →
-            </button>
-          </div>
-
-          {/* Certificate Management CTA */}
-          <div style={{
-            padding: '1.5rem',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            backgroundColor: '#f9fafb',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem'
-          }}>
-            <div style={{fontSize: '1.5rem'}}>📜</div>
-            <h3 style={{fontSize: '1rem', fontWeight: 600, margin: 0, color: '#111827'}}>Certificate Dashboard</h3>
-            <p style={{fontSize: '0.875rem', color: '#6b7280', margin: 0}}>
-              Manage your certificates • Download certificates • View analysis history • Archive past analyses
-            </p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="btn-primary"
-              style={{marginTop: 'auto', alignSelf: 'flex-start', fontSize: '0.875rem'}}
-            >
-              Go to Dashboard →
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* NEXT STEPS */}
       <div className="form-section">
@@ -1034,23 +1103,7 @@ export default function WorkflowResults({
               </button>
             )}
 
-            {/* Button 3: Request Professional Service */}
-            <button
-              onClick={() => {
-                const savedChoice = localStorage.getItem('save_data_consent');
-                if (!savedChoice) {
-                  // Open modal directly
-                  setShowSaveConsentModal(true);
-                  return;
-                }
-                router.push('/services/logistics-support');
-              }}
-              className="btn-primary"
-            >
-              🎯 Request Professional Service
-            </button>
-
-            {/* Button 4: Set Up Alerts */}
+            {/* Button 3: Set Up Alerts */}
             <button
               onClick={() => {
                 const savedChoice = localStorage.getItem('save_data_consent');
