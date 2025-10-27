@@ -647,13 +647,14 @@ export default protectedApiHandler({
 
     console.log('✅ [PHASE 1] Database enrichment complete:', {
       count: enrichedComponents.length,
-      with_rates: enrichedComponents.filter(c => c.mfn_rate > 0).length,
-      missing_rates: enrichedComponents.filter(c => c.mfn_rate === 0 || c.stale).length
+      with_rates: enrichedComponents.filter(c => c.stale === false).length,
+      missing_rates: enrichedComponents.filter(c => c.stale === true).length
     });
 
     // Phase 2: Identify components missing tariff rates (cache misses)
+    // CRITICAL: Only check stale flag, NOT mfn_rate === 0 (zero is valid data from AI)
     const missingRates = enrichedComponents.filter(comp =>
-      comp.hs_code && (comp.mfn_rate === 0 || comp.mfn_rate === undefined || comp.stale === true)
+      comp.hs_code && comp.stale === true
     );
 
     console.log(`⏱️  [PHASE 2] Identifying missing rates: ${missingRates.length} components need AI lookup`);
@@ -708,8 +709,11 @@ export default protectedApiHandler({
     }
 
     // ========== VALIDATION CHECKPOINT 1: Verify enrichedComponents have rates ==========
+    // CRITICAL FIX: Only check stale flag, NOT mfn_rate === 0
+    // Zero percent tariffs are VALID data from AI, not missing data
+    // Missing data is indicated by stale === true or rate_source === 'no_data'
     const missingRatesAfterPhase3 = enrichedComponents.filter(comp =>
-      !comp.mfn_rate || comp.mfn_rate === 0 || comp.mfn_rate === undefined
+      comp.stale === true || comp.data_source === 'no_data'
     );
 
     if (missingRatesAfterPhase3.length > 0) {
