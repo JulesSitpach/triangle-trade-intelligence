@@ -367,21 +367,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
       {/* 2. Exporter Information */}
       <div className="form-section">
-        <CollapsibleSectionHeader
-          title="Exporter Details"
-          description="Information about the company sending/exporting the goods"
-          sectionKey="exporter"
-          icon="📤"
-        />
-
-        {expandedSections.exporter && (
-          <>
-            {/* Checkbox to indicate if Exporter is same as your company */}
-            <div className="form-group" style={{marginBottom: '1.5rem'}}>
-              <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
-                <input
-                  type="checkbox"
-                  checked={authData.exporter_same_as_company || false}
+        {/* Checkbox OUTSIDE the collapsed section - always visible */}
+        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.exporter_same_as_company || false}
               onChange={(e) => {
                 handleFieldChange('exporter_same_as_company', e.target.checked);
                 // Auto-populate exporter fields from company data if checked
@@ -407,7 +398,17 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               Exporter is my company (auto-fill with company information from Step 1)
             </span>
           </label>
-            </div>
+        </div>
+
+        <CollapsibleSectionHeader
+          title="Exporter Details"
+          description="Information about the company sending/exporting the goods"
+          sectionKey="exporter"
+          icon="📤"
+        />
+
+        {expandedSections.exporter && (
+          <>
 
             <div className="form-grid-2">
               <div className="form-group">
@@ -508,6 +509,32 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
       {/* 3. Importer Information */}
       <div className="form-section">
+        {/* Checkbox OUTSIDE the collapsed section - always visible */}
+        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.importer_not_yet_available || false}
+              onChange={(e) => {
+                handleFieldChange('importer_not_yet_available', e.target.checked);
+                // Clear importer fields if not yet available
+                if (e.target.checked) {
+                  handleFieldChange('importer_name', '');
+                  handleFieldChange('importer_address', '');
+                  handleFieldChange('importer_tax_id', '');
+                  handleFieldChange('importer_contact_person', '');
+                  handleFieldChange('importer_phone', '');
+                  handleFieldChange('importer_email', '');
+                  handleFieldChange('importer_country', '');
+                }
+              }}
+            />
+            <span className="checkbox-text">
+              Importer information not yet available (can be added later)
+            </span>
+          </label>
+        </div>
+
         <CollapsibleSectionHeader
           title="Importer Details"
           description="Information about your customer (the importing company)"
@@ -607,8 +634,33 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         )}
       </div>
 
-      {/* 3. Producer Information - NEW SECTION PER CRISTINA'S FEEDBACK */}
+      {/* 4. Producer Information - NEW SECTION PER CRISTINA'S FEEDBACK */}
       <div className="form-section">
+        {/* Checkbox OUTSIDE the collapsed section - always visible */}
+        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+          <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
+            <input
+              type="checkbox"
+              checked={authData.producer_same_as_exporter || false}
+              onChange={(e) => {
+                handleFieldChange('producer_same_as_exporter', e.target.checked);
+                // Clear producer fields if same as exporter
+                if (e.target.checked) {
+                  handleFieldChange('producer_name', '');
+                  handleFieldChange('producer_address', '');
+                  handleFieldChange('producer_tax_id', '');
+                  handleFieldChange('producer_phone', '');
+                  handleFieldChange('producer_email', '');
+                  handleFieldChange('producer_country', '');
+                }
+              }}
+            />
+            <span className="checkbox-text">
+              Producer is the same as Exporter (check this if your company manufactures the goods)
+            </span>
+          </label>
+        </div>
+
         <CollapsibleSectionHeader
           title="Producer Details"
           description="Information about the company that manufactures/produces the goods"
@@ -618,31 +670,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
         {expandedSections.producer && (
           <>
-            {/* Checkbox to indicate if Producer is same as Exporter */}
-            <div className="form-group" style={{marginBottom: '1.5rem'}}>
-              <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
-                <input
-                  type="checkbox"
-                  checked={authData.producer_same_as_exporter || false}
-                  onChange={(e) => {
-                    handleFieldChange('producer_same_as_exporter', e.target.checked);
-                    // Clear producer fields if same as exporter
-                    if (e.target.checked) {
-                      handleFieldChange('producer_name', '');
-                      handleFieldChange('producer_address', '');
-                      handleFieldChange('producer_tax_id', '');
-                      handleFieldChange('producer_phone', '');
-                      handleFieldChange('producer_email', '');
-                      handleFieldChange('producer_country', '');
-                    }
-                  }}
-                />
-                <span className="checkbox-text">
-                  Producer is the same as Exporter (check this if your company manufactures the goods)
-                </span>
-              </label>
-            </div>
-
             {/* Only show producer fields if NOT same as exporter */}
             {!authData.producer_same_as_exporter && (
               <div className="form-grid-2">
@@ -735,7 +762,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         )}
       </div>
 
-      {/* 4. Digital Signature & Certification */}
+      {/* 5. Digital Signature & Certification */}
       <div className="form-section">
         <h2 className="form-section-title">✍️ Digital Signature</h2>
         <p className="form-section-description">
