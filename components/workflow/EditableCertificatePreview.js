@@ -474,12 +474,14 @@ export default function EditableCertificatePreview({
               </tr>
             </thead>
             <tbody>
+              {/* Only ONE product row per official USMCA certificate form (Field 6-11) */}
+              {/* Components are reference data only, not displayed as separate rows on the main certificate */}
               <tr style={{ height: '120px' }}>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px' }} />
+                  <input type="text" value={editedCert.product_description} onChange={(e) => handleFieldChange('product_description', e.target.value)} style={{ ...inputStyle, minHeight: '100px', width: '100%' }} placeholder="Product description (e.g., Smartphone assembly with components including PCB, housing, etc.)" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} />
+                  <input type="text" value={editedCert.hs_code} onChange={(e) => handleFieldChange('hs_code', e.target.value)} style={inputStyle} placeholder="e.g., 8517.62" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
                   <select value={editedCert.origin_criterion} onChange={(e) => handleFieldChange('origin_criterion', e.target.value)} style={{ ...inputStyle, height: '24px' }}>
@@ -495,46 +497,16 @@ export default function EditableCertificatePreview({
                   </label>
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.qualification_method} onChange={(e) => handleFieldChange('qualification_method', e.target.value)} style={inputStyle} />
+                  <input type="text" value={editedCert.qualification_method} onChange={(e) => handleFieldChange('qualification_method', e.target.value)} style={inputStyle} placeholder="TV/NC/TS/NO" />
                 </td>
                 <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                  <input type="text" value={editedCert.country_of_origin} onChange={(e) => handleFieldChange('country_of_origin', e.target.value)} style={inputStyle} />
+                  <input type="text" value={editedCert.country_of_origin} onChange={(e) => handleFieldChange('country_of_origin', e.target.value)} style={inputStyle} placeholder="e.g., MX" />
                 </td>
               </tr>
-              {editedCert.components.map((comp, idx) => (
-                <tr key={idx} style={{ height: '60px' }}>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                    <input type="text" value={comp.description} onChange={(e) => handleComponentChange(idx, 'description', e.target.value)} style={inputStyle} />
-                    <button onClick={() => handleRemoveComponent(idx)} style={{ marginTop: '3px', padding: '2px 6px', fontSize: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '2px', cursor: 'pointer' }}>Remove</button>
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                    <input type="text" value={comp.hs_code} onChange={(e) => handleComponentChange(idx, 'hs_code', e.target.value)} style={inputStyle} />
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                    <select value={comp.origin_criterion || 'B'} onChange={(e) => handleComponentChange(idx, 'origin_criterion', e.target.value)} style={{ ...inputStyle, height: '24px' }}>
-                      <option value="A">A</option>
-                      <option value="B">B</option>
-                      <option value="C">C</option>
-                      <option value="D">D</option>
-                    </select>
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top', textAlign: 'center' }}>
-                    <label style={{ display: 'flex', justifyContent: 'center' }}>
-                      <input type="checkbox" checked={comp.is_producer || false} onChange={(e) => handleComponentChange(idx, 'is_producer', e.target.checked)} />
-                    </label>
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                    <input type="text" value={comp.qualification_method || 'RVC'} onChange={(e) => handleComponentChange(idx, 'qualification_method', e.target.value)} style={inputStyle} />
-                  </td>
-                  <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'top' }}>
-                    <input type="text" value={comp.country_of_origin || ''} onChange={(e) => handleComponentChange(idx, 'country_of_origin', e.target.value)} style={inputStyle} />
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </table>
-          <div style={{ padding: '8px', textAlign: 'center', borderTop: '1px solid #000', fontSize: '8px', fontStyle: 'italic' }}>
-            <button onClick={handleAddComponent} style={{ padding: '6px 12px', fontSize: '9px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>+ Add Component Row</button>
+          <div style={{ padding: '8px', fontSize: '8px', fontStyle: 'italic', color: '#666', borderTop: '1px solid #000' }}>
+            💡 NOTE: Only ONE product description and HS code per USMCA certificate form (per official US government template). Components are reference/backing data for compliance verification.
           </div>
         </div>
 
