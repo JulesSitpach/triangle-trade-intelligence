@@ -94,23 +94,23 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         });
       }) || [];
 
-      // Query tariff_policy_updates
+      // Query tariff_policy_updates (no affected_industries column in this table)
       const { data: allPolicyUpdates, error: updatesError } = await supabase
         .from('tariff_policy_updates')
         .select(
-          'id, title, affected_hs_codes, affected_countries, affected_industries, status, effective_date, adjustment_percentage, policy_type'
+          'id, title, affected_hs_codes, affected_countries, status, effective_date, adjustment_percentage, policy_type'
         )
         .eq('is_active', true);
 
       if (updatesError) throw updatesError;
 
-      // Filter updates that match origin country AND HS code AND industry
+      // Filter updates that match origin country AND HS code
       const matchingUpdates = allPolicyUpdates?.filter(update => {
         if (!update.affected_hs_codes || update.affected_hs_codes.length === 0) {
           return false;
         }
 
-        // Check if ANY component matches this policy on all three criteria
+        // Check if ANY component matches this policy on both criteria
         return componentMap.some(comp => {
           // 1. Check if component's origin country is in affected_countries
           const countryMatches = update.affected_countries &&
@@ -123,14 +123,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
             updateCode.startsWith(comp.hs_prefix)
           );
 
-          // 3. Check if component's industry matches affected_industries
-          const industryMatches = !update.affected_industries ||
-            update.affected_industries.length === 0 ||
-            update.affected_industries.some(industry =>
-              industry.toLowerCase() === comp.industry.toLowerCase()
-            );
-
-          return countryMatches && hsMatches && industryMatches;
+          return countryMatches && hsMatches;
         });
       }) || [];
 
