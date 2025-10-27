@@ -204,7 +204,7 @@ export default function USMCAQualification({ results }) {
                 }
 
                 const isExpanded = expandedComponents[index];
-                const hasDetails = component.ai_reasoning || component.alternative_codes || component.confidence || component.hs_description;
+                const hasDetails = component.aiReasoning || component.alternativeCodes || component.confidence || component.hsDescription;
 
                 return (
                   <React.Fragment key={index}>
@@ -232,13 +232,13 @@ export default function USMCAQualification({ results }) {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontFamily: 'monospace', fontSize: '0.8125rem', wordWrap: 'break-word' }}>
-                        {component.hs_code || component.classified_hs_code || '—'}
+                        {component.hsCode || component.classifiedHsCode || '—'}
                       </td>
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {component.origin_country}
+                        {component.originCountry || '—'}
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        {component.value_percentage}%
+                        {component.valuePercentage}%
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
@@ -364,9 +364,9 @@ export default function USMCAQualification({ results }) {
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                         {(() => {
-                          // ✅ FIXED (Oct 26): Check USMCA member origin country instead of undefined field
+                          // ✅ FIXED (Oct 26): Use camelCase field name (originCountry) from transformAPIToFrontend
                           const usmcaCountries = ['US', 'MX', 'CA'];
-                          const isUSMCAOrigin = usmcaCountries.includes(component.origin_country?.toUpperCase());
+                          const isUSMCAOrigin = usmcaCountries.includes(component.originCountry?.toUpperCase());
 
                           return isUSMCAOrigin ? (
                             <span style={{ color: '#059669', fontWeight: '500' }}>✓ USMCA Origin</span>
@@ -405,7 +405,7 @@ export default function USMCAQualification({ results }) {
                             )}
 
                             {/* HS Code Description */}
-                            {component.hs_description && (
+                            {component.hsDescription && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>HS Code Description:</strong>
                                 <div style={{
@@ -416,13 +416,13 @@ export default function USMCAQualification({ results }) {
                                   borderLeft: '3px solid #10b981',
                                   color: '#4b5563'
                                 }}>
-                                  {component.hs_description}
+                                  {component.hsDescription}
                                 </div>
                               </div>
                             )}
 
                             {/* Tariff Rate Information */}
-                            {(component.mfn_rate || component.usmca_rate !== undefined) && (
+                            {(component.mfnRate || component.usmcaRate !== undefined) && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>Tariff Rate Details:</strong>
                                 <div style={{
@@ -436,20 +436,20 @@ export default function USMCAQualification({ results }) {
                                 }}>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>MFN Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{(component.mfn_rate || 0).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{((component.mfnRate || 0) * 100).toFixed(1)}%</div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(component.usmca_rate || 0).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.usmcaRate || 0) * 100).toFixed(1)}%</div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Savings</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.mfn_rate || 0) - (component.usmca_rate || 0)).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(((component.mfnRate || 0) - (component.usmcaRate || 0)) * 100).toFixed(1)}%</div>
                                   </div>
                                 </div>
 
                                 {/* EDUCATIONAL: Policy Breakdown Explanation */}
-                                {component.policy_adjustments && component.policy_adjustments.length > 0 && (
+                                {component.policyAdjustments && component.policyAdjustments.length > 0 && (
                                   <div style={{
                                     marginTop: '0.75rem',
                                     padding: '0.75rem',
@@ -458,10 +458,10 @@ export default function USMCAQualification({ results }) {
                                     borderLeft: '3px solid #f59e0b'
                                   }}>
                                     <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
-                                      📊 How We Calculate {(component.mfn_rate || 0).toFixed(1)}% Total Rate:
+                                      📊 How We Calculate {((component.mfnRate || 0) * 100).toFixed(1)}% Total Rate:
                                     </div>
                                     <div style={{ fontSize: '0.8125rem', color: '#78350f', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                      {component.policy_adjustments.map((adj, idx) => {
+                                      {component.policyAdjustments.map((adj, idx) => {
                                         // ✅ SAFETY: Ensure adj is always a string (AI/DB might return objects)
                                         const safeAdj = typeof adj === 'string' ? adj : JSON.stringify(adj);
                                         return (
@@ -473,7 +473,7 @@ export default function USMCAQualification({ results }) {
                                       })}
                                     </div>
                                     <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#92400e', fontStyle: 'italic' }}>
-                                      {component.rate_source === 'database_fallback' || component.stale
+                                      {component.rateSource === 'database_fallback' || component.stale
                                         ? '⚠️ Data from January 2025 - may not reflect current policy changes'
                                         : '✅ Current October 2025 policy (updated via AI research)'}
                                     </div>
@@ -495,13 +495,13 @@ export default function USMCAQualification({ results }) {
                                   💡 Strategic Opportunity: Eliminate Section 301 Exposure
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5', marginBottom: '0.5rem' }}>
-                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {section301.toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section301 / 100) / 12).toFixed(0)}/month</strong>.
+                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.originCountry} is subject to {(section301 * 100).toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.valuePercentage / 100 * (results.company?.trade_volume || 0) * (section301) / 12).toFixed(0)}/month</strong>.
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5' }}>
                                   <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component would:
                                   <ul style={{ marginTop: '0.25rem', marginBottom: '0.25rem', marginLeft: '1.5rem' }}>
                                     <li>Eliminate Section 301 exposure entirely</li>
-                                    <li>Increase regional value content (RVC) by ~{component.value_percentage}%</li>
+                                    <li>Increase regional value content (RVC) by ~{component.valuePercentage}%</li>
                                     <li>See AI analysis above for industry-specific cost premiums, timelines, and payback calculations</li>
                                   </ul>
                                 </div>
@@ -512,7 +512,7 @@ export default function USMCAQualification({ results }) {
                             )}
 
                             {/* AI Reasoning */}
-                            {component.ai_reasoning && (
+                            {component.aiReasoning && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>AI Classification Reasoning:</strong>
                                 <div style={{
@@ -524,17 +524,17 @@ export default function USMCAQualification({ results }) {
                                   color: '#4b5563',
                                   fontStyle: 'italic'
                                 }}>
-                                  {component.ai_reasoning}
+                                  {component.aiReasoning}
                                 </div>
                               </div>
                             )}
 
                             {/* Alternative HS Codes */}
-                            {component.alternative_codes && component.alternative_codes.length > 0 && (
+                            {component.alternativeCodes && component.alternativeCodes.length > 0 && (
                               <div>
                                 <strong style={{ color: '#374151' }}>Alternative HS Codes:</strong>
                                 <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                  {component.alternative_codes.map((alt, altIndex) => (
+                                  {component.alternativeCodes.map((alt, altIndex) => (
                                     <div
                                       key={altIndex}
                                       style={{
