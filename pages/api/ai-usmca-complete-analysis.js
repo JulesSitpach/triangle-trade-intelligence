@@ -752,6 +752,18 @@ export default protectedApiHandler({
       formData.destination_country
     );
 
+    // DEBUG: Log enrichedComponents to see if database rates are present
+    console.log('📦 [ENRICHMENT-DEBUG] After database lookup:',
+      enrichedComponents.map(c => ({
+        description: c.description,
+        hs_code: c.hs_code,
+        mfn_rate: c.mfn_rate,
+        section_301: c.section_301,
+        rate_source: c.rate_source,
+        stale: c.stale
+      }))
+    );
+
     // Phase 1: Database enrichment complete
 
     // Phase 2: Identify components missing tariff rates (cache misses)
@@ -1555,6 +1567,17 @@ export default protectedApiHandler({
     incrementAnalysisCount(userId, subscriptionTier).catch(err => {
       console.error('[USAGE-TRACKING] Failed to increment count for user', userId, ':', err.message);
     });
+
+    // DEBUG: Log what's being returned in component_origins
+    console.log('📊 [RESPONSE-DEBUG] Tariff rates in API response:',
+      (result.component_origins || []).map(c => ({
+        description: c.description,
+        mfn_rate: c.mfn_rate,
+        section_301: c.section_301,
+        usmca_rate: c.usmca_rate,
+        total_rate: c.total_rate
+      }))
+    );
 
     return res.status(200).json(result);
 
