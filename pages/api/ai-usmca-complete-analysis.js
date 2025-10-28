@@ -545,11 +545,31 @@ export default protectedApiHandler({
             .replace(/\./g, '')  // Remove dots (e.g., "8542.31.00" → "854231")
             .padEnd(8, '0');     // Pad to 8 digits (e.g., "854231" → "85423100")
 
-          const { data: rateData, error } = await supabase
+          // Try exact match first
+          const { data: exactMatch } = await supabase
             .from('tariff_intelligence_master')
-            .select('hts8, mfn_ave, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
+            .select('hts8, brief_description, mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
             .eq('hts8', normalizedHsCode)
             .single();
+
+          let rateData = exactMatch;
+
+          // If exact match fails, try 6-digit prefix match (more lenient)
+          if (!rateData) {
+            const sixDigitPrefix = normalizedHsCode.substring(0, 6);
+            console.log(`⚠️  [TARIFF-LOOKUP] Exact match failed for ${normalizedHsCode}, trying 6-digit prefix: ${sixDigitPrefix}`);
+
+            const { data: prefixMatches } = await supabase
+              .from('tariff_intelligence_master')
+              .select('hts8, brief_description, mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
+              .ilike('hts8', `${sixDigitPrefix}%`)
+              .limit(1);
+
+            if (prefixMatches && prefixMatches.length > 0) {
+              rateData = prefixMatches[0];
+              console.log(`✅ [TARIFF-LOOKUP] Found prefix match: ${rateData.hts8} for input ${component.hs_code}`);
+            }
+          }
 
           // CRITICAL: Handle null rateData (record not found in database)
           // This is normal for HS codes not in tariff_intelligence_master
@@ -558,11 +578,11 @@ export default protectedApiHandler({
             console.log(`⚠️  [TARIFF-LOOKUP] HS code not found: ${normalizedHsCode} (${component.hs_code}) - will use AI fallback`);
             enriched.push({
               ...baseComponent,
-              mfn_rate: component.mfn_rate || 0,
-              base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
-              section_301: component.section_301 || 0,
-              section_232: component.section_232 || 0,
-              usmca_rate: component.usmca_rate || 0,
+              mfn_rate: 0,
+              base_mfn_rate: 0,
+              section_301: 0,
+              section_232: 0,
+              usmca_rate: 0,
               rate_source: 'database_lookup_miss',
               stale: true,  // Missing from database, needs AI enrichment
               data_source: 'no_data'
@@ -571,23 +591,27 @@ export default protectedApiHandler({
           }
 
           // Map USITC columns to our standard format
-          // mfn_ave = baseline MFN rate
+          // Database columns: mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate
           // nafta_mexico_ind = qualifies for Mexico USMCA rate
           // nafta_canada_ind = qualifies for Canada USMCA rate
           const getMFNRate = () => {
-            if (rateData?.mfn_ave) return parseFloat(rateData.mfn_ave);
+            const rate = parseFloat(rateData?.mfn_ad_val_rate);
+            if (!isNaN(rate)) return rate * 100;  // Convert decimal to percentage (0.025 → 2.5)
             return component.mfn_rate || 0;
           };
 
           const getUSMCARate = () => {
-            if (destinationCountry === 'MX' && rateData?.nafta_mexico_ind) {
-              return parseFloat(rateData?.mexico_ad_val_rate || rateData?.mfn_ave || 0);
+            if (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') {
+              const rate = parseFloat(rateData?.mexico_ad_val_rate);
+              return !isNaN(rate) ? rate * 100 : (getMFNRate());
             }
-            if (destinationCountry === 'CA' && rateData?.nafta_canada_ind) {
-              return parseFloat(rateData?.usmca_ad_val_rate || rateData?.mfn_ave || 0);
+            if (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') {
+              const rate = parseFloat(rateData?.usmca_ad_val_rate);
+              return !isNaN(rate) ? rate * 100 : (getMFNRate());
             }
             if (destinationCountry === 'US') {
-              return parseFloat(rateData?.usmca_ad_val_rate || rateData?.mfn_ave || 0);
+              const rate = parseFloat(rateData?.usmca_ad_val_rate);
+              return !isNaN(rate) ? rate * 100 : (getMFNRate());
             }
             return component.usmca_rate || 0;
           };
@@ -598,8 +622,8 @@ export default protectedApiHandler({
           const standardFields = {
             mfn_rate: mfnRate,
             base_mfn_rate: mfnRate,
-            section_301: component.section_301 || 0,  // Not in USITC data
-            section_232: component.section_232 || 0,  // Not in USITC data
+            section_301: component.section_301 || 0,  // Not in USITC data - AI will fill if needed
+            section_232: component.section_232 || 0,  // Not in USITC data - AI will fill if needed
             usmca_rate: usmcaRate,
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // USITC data is current
