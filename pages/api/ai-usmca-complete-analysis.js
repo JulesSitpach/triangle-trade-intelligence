@@ -776,53 +776,9 @@ export default protectedApiHandler({
 
     // Phase 1: Database enrichment complete
 
-    // Phase 2: Identify components missing tariff rates (cache misses)
-    // CRITICAL: Only check stale flag, NOT mfn_rate === 0 (zero is valid data from AI)
-    const missingRates = enrichedComponents.filter(comp =>
-      comp.hs_code && comp.stale === true
-    );
-
-    // Phase 2: Identifying missing rates for AI lookup
-
-    // Phase 3: If any missing, single AI call for just those components
-    if (missingRates.length > 0) {
-      try {
-        // Phase 3: Calling AI for missing components
-
-        const aiEnrichedRates = await getAIRatesForMissingComponents(
-          missingRates,
-          formData.destination_country,
-          formData.product_description
-        );
-
-        // Merge AI results back into enrichedComponents
-        enrichedComponents = enrichedComponents.map(comp => {
-          const aiMatch = aiEnrichedRates.find(air => air.hs_code === comp.hs_code);
-          // ✅ FIX: Merge AI data for ANY component marked as needing AI enrichment, not just when mfn_rate === 0
-          if (aiMatch && (comp.rate_source === 'database_lookup_miss' || comp.stale === true)) {
-            // DEBUG: Merging AI enrichment for component
-            return {
-              ...comp,
-              mfn_rate: aiMatch.mfn_rate,
-              base_mfn_rate: aiMatch.base_mfn_rate,
-              section_301: aiMatch.section_301,
-              section_232: aiMatch.section_232,
-              usmca_rate: aiMatch.usmca_rate,  // ✅ CRITICAL: Explicitly include usmca_rate
-              total_rate: aiMatch.total_rate,
-              rate_source: 'ai_fallback',
-              stale: false,
-              data_source: 'ai_enrichment'
-            };
-          }
-          return comp;
-        });
-
-        // Phase 3: AI enrichment complete
-      } catch (aiError) {
-        console.warn(`⚠️  [PHASE 3] AI fallback failed, continuing with database rates:`, aiError.message);
-        // Continue with database rates - don't block workflow
-      }
-    }
+    // ✅ DATABASE-FIRST ONLY: No AI enrichment fallback
+    // If database doesn't have a rate, component stays at 0 (unknown/missing)
+    // This prevents stale/incorrect AI data from overwriting database values
 
     // DEBUG: Final enrichment state validation
     if (!enrichedComponents || enrichedComponents.length === 0) {
