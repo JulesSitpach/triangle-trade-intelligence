@@ -136,14 +136,16 @@ export default function USMCAQualification({ results }) {
         <div className="element-spacing">
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', tableLayout: 'fixed' }}>
             <colgroup>
-              <col style={{ width: '25%' }} />
-              <col style={{ width: '12%' }} />
+              <col style={{ width: '22%' }} />
+              <col style={{ width: '9%' }} />
+              <col style={{ width: '7%' }} />
+              <col style={{ width: '7%' }} />
               <col style={{ width: '8%' }} />
               <col style={{ width: '8%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '12%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '15%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '7%' }} />
             </colgroup>
             <thead>
               <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
@@ -156,8 +158,18 @@ export default function USMCAQualification({ results }) {
                 <th style={{ textAlign: 'left', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Origin</th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Value %</th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
-                  <Tooltip text="Most Favored Nation rate - standard import duty without trade agreement benefits. May include Section 301, IEEPA, or other policy adjustments">
+                  <Tooltip text="Most Favored Nation rate - standard import duty without trade agreement benefits">
                     MFN Rate
+                  </Tooltip>
+                </th>
+                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Additional tariffs (Section 301 on China goods, Section 232 on steel/aluminum)">
+                    Add'l Tariffs
+                  </Tooltip>
+                </th>
+                <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
+                  <Tooltip text="Total duty rate including all policy adjustments (MFN + Section 301 + Section 232)">
+                    Total Rate
                   </Tooltip>
                 </th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
@@ -166,8 +178,8 @@ export default function USMCAQualification({ results }) {
                   </Tooltip>
                 </th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
-                  <Tooltip text="Tariff savings if you qualify for USMCA (MFN Rate - USMCA Rate)">
-                    Savings
+                  <Tooltip text="Annual tariff savings per component (Trade Volume × Value % × (MFN - USMCA Rate))">
+                    Ann'l Savings
                   </Tooltip>
                 </th>
                 <th style={{ textAlign: 'center', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>Status</th>
@@ -337,6 +349,36 @@ export default function USMCAQualification({ results }) {
                           )}
                         </div>
                       </td>
+                      {/* ✅ NEW COL: Additional Tariffs (Section 301 + Section 232) */}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                        {section301 > 0 || section232 > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                            <span style={{ fontWeight: '600', color: '#991b1b' }}>
+                              {((section301 + section232) * 100).toFixed(1)}%
+                            </span>
+                            {section301 > 0 && (
+                              <span style={{ fontSize: '0.6875rem', color: '#dc2626' }}>
+                                S.301: {(section301 * 100).toFixed(1)}%
+                              </span>
+                            )}
+                            {section232 > 0 && (
+                              <span style={{ fontSize: '0.6875rem', color: '#dc2626' }}>
+                                S.232: {(section232 * 100).toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: '#9ca3af' }}>—</span>
+                        )}
+                      </td>
+                      {/* ✅ NEW COL: Total Rate (MFN + Additional) */}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937', whiteSpace: 'nowrap' }}>
+                        {totalAppliedRate !== null ? (
+                          <span>{(totalAppliedRate * 100).toFixed(1)}%</span>
+                        ) : (
+                          <span style={{ color: '#9ca3af' }}>N/A</span>
+                        )}
+                      </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: usmcaRate !== null ? '#059669' : '#9ca3af', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
                           <span>{usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A'}</span>
@@ -389,7 +431,7 @@ export default function USMCAQualification({ results }) {
                     {/* Expandable Details Row */}
                     {isExpanded && hasDetails && (
                       <tr>
-                        <td colSpan="8" style={{ padding: '1rem', backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                        <td colSpan="10" style={{ padding: '1rem', backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                           <div style={{ fontSize: '0.875rem' }}>
                             {/* AI Confidence */}
                             {component.confidence && (

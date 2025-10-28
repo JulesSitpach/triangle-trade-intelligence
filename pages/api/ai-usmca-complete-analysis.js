@@ -618,16 +618,34 @@ export default protectedApiHandler({
             const rateTypeCode = rateData?.mfn_rate_type_code;
             const textRate = rateData?.mfn_text_rate;
 
-            // Handle "Free" and NULL rates (rate_type_code "0" = Free)
+            // ✅ CRITICAL FIX: Check origin_country to determine which rate to use
+            // China-origin goods: Use column_2_ad_val_rate (non-WTO tariff rate)
+            // WTO countries: Use mfn_ad_val_rate (Most Favored Nation rate)
+            const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
+
+            // ✅ Handle "Free" rates (rate_type_code "0" = Free/duty-free for WTO)
+            // BUT: China is not WTO member, so even "Free" items are subject to column_2 rate!
             if (!rateTypeCode || rateTypeCode === '0' || textRate === 'Free') {
-              return 0;  // Base MFN is Free (0%); Section 301 will be added separately
+              // For China-origin, use column_2 even if WTO rate is Free
+              if (isChineseOrigin) {
+                const column2Rate = parseFloat(rateData?.column_2_ad_val_rate);
+                if (!isNaN(column2Rate) && column2Rate > 0) {
+                  return column2Rate;  // Return decimal format (0-1), no multiplication
+                }
+              }
+              // For WTO countries, Free = 0%
+              return 0;
             }
 
             // Ad valorem rate (percentage) - return base rate WITHOUT Section 301
             // Section 301 is extracted separately in getSection301Rate()
             // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
             if (rateTypeCode === 'A') {
-              const baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate) || 0;
+              // ✅ Use column_2 for China-origin, mfn for WTO countries
+              const baseMfnRate = isChineseOrigin
+                ? (parseFloat(rateData?.column_2_ad_val_rate) || 0)
+                : (parseFloat(rateData?.mfn_ad_val_rate) || 0);
+
               if (!isNaN(baseMfnRate) && baseMfnRate > 0) {
                 return baseMfnRate;  // Return decimal format (0-1), no multiplication
               }
@@ -644,15 +662,28 @@ export default protectedApiHandler({
           };
 
           const getSection301Rate = () => {
-            // Section 301 is extracted independently of base rate type
-            // It's a policy tariff that applies on top of any base rate (Free, Ad valorem, Specific, etc.)
-            // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
-            const section301Value = parseFloat(rateData?.column_2_ad_val_rate);
+            // ✅ CRITICAL FIX: Section 301 is NOT column_2_ad_val_rate!
+            // column_2_ad_val_rate = Base USITC tariff for non-WTO countries (China) - 35% for semiconductors
+            // Section 301 = Trump policy tariff ON TOP of base rate - varies by USTR list (7.5%-100%)
+            // These are TWO SEPARATE concepts!
 
-            if (!isNaN(section301Value) && section301Value > 0) {
-              return section301Value;  // Return decimal format (0-1), no multiplication
+            // Section 301 is not stored in tariff_intelligence_master (it changes frequently)
+            // AI will look it up based on HS code and USTR list assignment
+            // For now, return 0 - AI fallback will provide current Section 301 rate
+            // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
+
+            // Check if origin is China AND destination is US
+            const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
+            const isUSDestination = destinationCountry === 'US';
+
+            if (isChineseOrigin && isUSDestination) {
+              // Section 301 applies - should be looked up from AI
+              // Return 0 here, let AI provide current policy rate
+              return component.section_301 || 0;
             }
-            return component.section_301 || 0;
+
+            // Section 301 doesn't apply to non-China origins or non-US destinations
+            return 0;
           };
 
           const getUSMCARate = () => {
@@ -700,22 +731,35 @@ export default protectedApiHandler({
           // Calculate base_mfn_rate (without policy tariffs like Section 301)
           // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
           let baseMfnRate = 0;
-          const rateTypeCode = rateData?.mfn_rate_type_code;
-          if (rateTypeCode === 'A') {
-            baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
+          const rateTypeCodeForBase = rateData?.mfn_rate_type_code;
+          const isChineseOriginForBase = component.origin_country === 'CN' || component.origin_country === 'China';
+          const textRateForBase = rateData?.mfn_text_rate;
+
+          // ✅ Handle Free rates for China-origin
+          if (!rateTypeCodeForBase || rateTypeCodeForBase === '0' || textRateForBase === 'Free') {
+            if (isChineseOriginForBase) {
+              baseMfnRate = parseFloat(rateData?.column_2_ad_val_rate || 0);
+            } else {
+              baseMfnRate = 0;  // Free for WTO countries
+            }
+          } else if (rateTypeCodeForBase === 'A') {
+            // ✅ Use column_2 for China-origin, mfn for WTO countries
+            baseMfnRate = isChineseOriginForBase
+              ? parseFloat(rateData?.column_2_ad_val_rate || 0)
+              : parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
           }
           // For other rate types (S, C, O), base rate is 0 (handled by AI)
 
           const standardFields = {
             mfn_rate: mfnRate,
-            base_mfn_rate: baseMfnRate,  // Base rate without policy tariffs
-            section_301: section301Rate,  // Section 301 policy tariff from database column_2_ad_val_rate
+            base_mfn_rate: baseMfnRate,  // Base rate without policy tariffs (uses column_2 for China, mfn for WTO)
+            section_301: section301Rate,  // Section 301 policy tariff (0 from DB, AI provides current rate if applicable)
             section_232: component.section_232 || 0,  // Not in USITC data - AI will fill if needed
             usmca_rate: usmcaRate,
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // USITC data is current
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
-            rate_type: rateTypeCode,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
+            rate_type: rateTypeCodeForBase,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
           };
 
