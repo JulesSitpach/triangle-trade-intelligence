@@ -615,37 +615,22 @@ export default protectedApiHandler({
           // Rate type codes: "A" = ad valorem, "S" = specific, "C" = compound, NULL = free
 
           const getMFNRate = () => {
+            // MFN rate is ALWAYS from mfn_ad_val_rate, regardless of origin
+            // Section 301 is a SEPARATE policy tariff applied on top of MFN
+            // Example: Semiconductors are 0% MFN (Free) + 60% Section 301 = 60% total for China origin
             const rateTypeCode = rateData?.mfn_rate_type_code;
             const textRate = rateData?.mfn_text_rate;
 
-            // ✅ CRITICAL FIX: Check origin_country to determine which rate to use
-            // China-origin goods: Use column_2_ad_val_rate (non-WTO tariff rate)
-            // WTO countries: Use mfn_ad_val_rate (Most Favored Nation rate)
-            const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
-
-            // ✅ Handle "Free" rates (rate_type_code "0" = Free/duty-free for WTO)
-            // BUT: China is not WTO member, so even "Free" items are subject to column_2 rate!
+            // Handle "Free" rates (rate_type_code "0" = Free/duty-free)
             if (!rateTypeCode || rateTypeCode === '0' || textRate === 'Free') {
-              // For China-origin, use column_2 even if WTO rate is Free
-              if (isChineseOrigin) {
-                const column2Rate = parseFloat(rateData?.column_2_ad_val_rate);
-                if (!isNaN(column2Rate) && column2Rate > 0) {
-                  return column2Rate;  // Return decimal format (0-1), no multiplication
-                }
-              }
-              // For WTO countries, Free = 0%
-              return 0;
+              return 0;  // Base MFN is Free (0%); Section 301 will be added separately
             }
 
             // Ad valorem rate (percentage) - return base rate WITHOUT Section 301
             // Section 301 is extracted separately in getSection301Rate()
             // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
             if (rateTypeCode === 'A') {
-              // ✅ Use column_2 for China-origin, mfn for WTO countries
-              const baseMfnRate = isChineseOrigin
-                ? (parseFloat(rateData?.column_2_ad_val_rate) || 0)
-                : (parseFloat(rateData?.mfn_ad_val_rate) || 0);
-
+              const baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate) || 0;
               if (!isNaN(baseMfnRate) && baseMfnRate > 0) {
                 return baseMfnRate;  // Return decimal format (0-1), no multiplication
               }
@@ -729,24 +714,18 @@ export default protectedApiHandler({
           const section301Rate = getSection301Rate();
 
           // Calculate base_mfn_rate (without policy tariffs like Section 301)
+          // MFN rate is ALWAYS from mfn_ad_val_rate regardless of origin country
           // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
           let baseMfnRate = 0;
           const rateTypeCodeForBase = rateData?.mfn_rate_type_code;
-          const isChineseOriginForBase = component.origin_country === 'CN' || component.origin_country === 'China';
           const textRateForBase = rateData?.mfn_text_rate;
 
-          // ✅ Handle Free rates for China-origin
+          // Handle Free rates
           if (!rateTypeCodeForBase || rateTypeCodeForBase === '0' || textRateForBase === 'Free') {
-            if (isChineseOriginForBase) {
-              baseMfnRate = parseFloat(rateData?.column_2_ad_val_rate || 0);
-            } else {
-              baseMfnRate = 0;  // Free for WTO countries
-            }
+            baseMfnRate = 0;  // Base MFN is Free (0%)
           } else if (rateTypeCodeForBase === 'A') {
-            // ✅ Use column_2 for China-origin, mfn for WTO countries
-            baseMfnRate = isChineseOriginForBase
-              ? parseFloat(rateData?.column_2_ad_val_rate || 0)
-              : parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
+            // Ad valorem: use mfn_ad_val_rate
+            baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
           }
           // For other rate types (S, C, O), base rate is 0 (handled by AI)
 
