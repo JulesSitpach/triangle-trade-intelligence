@@ -615,10 +615,8 @@ export default protectedApiHandler({
           // Rate type codes: "A" = ad valorem, "S" = specific, "C" = compound, NULL = free
 
           const getMFNRate = () => {
-            // MFN rate is ALWAYS from mfn_ad_val_rate, regardless of origin
+            // MFN rate is ALWAYS from mfn_ad_val_rate
             // Section 301 is a SEPARATE policy tariff applied on top of MFN
-            // Example: Semiconductors are 0% MFN (Free) + 60% Section 301 = 60% total for China origin
-            const rateTypeCode = rateData?.mfn_rate_type_code;
             const textRate = rateData?.mfn_text_rate;
             const mfnAdValRate = rateData?.mfn_ad_val_rate;
 
@@ -627,48 +625,21 @@ export default protectedApiHandler({
               console.log('\n═══════════════════════════════════════════════════════════════');
               console.log('🔍 [DATABASE ENRICHMENT] getMFNRate() - Raw database values:');
               console.log(`   HS Code: ${component.hs_code}`);
-              console.log(`   mfn_rate_type_code: "${rateTypeCode}"`);
               console.log(`   mfn_text_rate: "${textRate}"`);
               console.log(`   mfn_ad_val_rate: "${mfnAdValRate}" (parsed: ${parseFloat(mfnAdValRate)})`);
               component._debugLogged = true;
             }
 
-            // Handle "Free" rates (rate_type_code "0" = Free/duty-free)
-            if (!rateTypeCode || rateTypeCode === '0' || textRate === 'Free') {
-              return 0;  // Base MFN is Free (0%); Section 301 will be added separately
-            }
-
-            // Ad valorem rate (percentage) - return base rate WITHOUT Section 301
-            // Section 301 is extracted separately in getSection301Rate()
-            // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
-            if (rateTypeCode === 'A') {
-              const baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate) || 0;
-              if (!isNaN(baseMfnRate) && baseMfnRate > 0) {
-                console.log(`✅ [getMFNRate] Returning: ${baseMfnRate}`);
-                return baseMfnRate;  // Return decimal format (0-1), no multiplication
-              }
-              console.log(`⚠️  [getMFNRate] Ad valorem rate is 0 or invalid`);
+            // Simple logic: If Free, return 0. Otherwise use ad valorem rate.
+            if (textRate === 'Free') {
               return 0;
             }
 
-            // Specific or compound rates - return 0 for now (AI will handle these)
-            // TODO: Handle specific rates like "30.9 cents/kg" and compound rates
-            if (rateTypeCode === 'S' || rateTypeCode === 'C' || rateTypeCode === 'O') {
-              console.log(`⚠️  [getMFNRate] Returning 0 for ${rateTypeCode} rate type`);
-              return 0;  // Mark for AI enrichment
+            const rate = parseFloat(mfnAdValRate);
+            if (!isNaN(rate)) {
+              return rate;
             }
-
-            // ✅ FALLBACK: For any other rate type code that has an ad valorem rate, use it
-            // This handles cases like rate_type_code="7" which have valid mfn_ad_val_rate values
-            if (mfnAdValRate) {
-              const fallbackRate = parseFloat(mfnAdValRate);
-              if (!isNaN(fallbackRate) && fallbackRate > 0) {
-                console.log(`✅ [getMFNRate] Fallback: Using ad valorem rate ${fallbackRate} for unhandled rate type '${rateTypeCode}'`);
-                return fallbackRate;
-              }
-            }
-
-            return component.mfn_rate || 0;
+            return 0;
           };
 
           const getSection301Rate = () => {
@@ -690,9 +661,6 @@ export default protectedApiHandler({
           };
 
           const getUSMCARate = () => {
-            const destinationCode = destinationCountry === 'MX' ? 'mexico' :
-                                   destinationCountry === 'CA' ? 'usmca' : 'usmca';
-
             // Check if product qualifies for USMCA/NAFTA rate
             const qualifies = (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') ||
                              (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') ||
@@ -702,28 +670,21 @@ export default protectedApiHandler({
               return getMFNRate();  // Not eligible, use MFN rate
             }
 
-            // Determine which rate column to use
-            let rateTypeCode, rateValue;
+            // Determine which rate column to use based on destination
+            let rateValue;
             if (destinationCountry === 'MX') {
-              rateTypeCode = rateData?.mexico_rate_type_code;
               rateValue = rateData?.mexico_ad_val_rate;
             } else {
-              rateTypeCode = rateData?.usmca_rate_type_code;
               rateValue = rateData?.usmca_ad_val_rate;
             }
 
-            // Handle rate types for USMCA
-            if (!rateTypeCode || rateData?.mfn_text_rate === 'Free') {
-              return 0;  // Free under USMCA
+            // If Free, return 0. Otherwise return ad valorem rate.
+            if (rateData?.mfn_text_rate === 'Free') {
+              return 0;
             }
 
-            if (rateTypeCode === 'A') {
-              const rate = parseFloat(rateValue);
-              return !isNaN(rate) ? rate : getMFNRate();  // Return decimal format (0-1), no multiplication
-            }
-
-            // Specific or compound rates - return MFN as fallback
-            return getMFNRate();
+            const rate = parseFloat(rateValue);
+            return !isNaN(rate) ? rate : getMFNRate();
           };
 
           // 🔧 CONSISTENT CONTRACT: Always return same structure

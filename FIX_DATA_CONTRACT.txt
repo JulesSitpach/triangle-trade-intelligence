@@ -1,0 +1,15 @@
+FIELDS TO FIX (camelCase → snake_case):
+
+Line 79:  mfnRate → mfn_rate
+Line 129: usmcaRate → usmca_rate  
+Line 179: section301 → section_301
+Line 228: section232 → section_232
+Line 325: savingsPercentage → savings_percentage
+Line 374: originCountry → origin_country
+Line 406: valuePercentage → value_percentage
+Line 442: hsCode → hs_code
+Line 536: baseMfnRate → base_mfn_rate
+Line 662: dataSource → data_source
+Line 276: totalRate → total_rate (already fixed)
+
+All 10 fields need to be changed from camelCase to snake_case.

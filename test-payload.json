@@ -1,0 +1,12 @@
+{
+  "company_name": "TestCorp",
+  "company_country": "US",
+  "destination_country": "US",
+  "component_origins": [{
+    "description": "Microprocessor",
+    "hs_code": "8542.31.00",
+    "origin_country": "CN",
+    "value_percentage": 35
+  }],
+  "trade_volume": 8500000
+}
