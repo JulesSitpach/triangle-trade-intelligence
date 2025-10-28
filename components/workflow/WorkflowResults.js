@@ -657,11 +657,11 @@ export default function WorkflowResults({
       // Validate all required fields for executive summary
       if (!userSubscriptionTier) throw new Error('subscription_tier missing - failed to load user tier');
       if (!results.company?.industry_sector) throw new Error('industry_sector required for executive summary');
-      if (!results.destination_country) throw new Error('destination_country required for executive summary');
+      if (!results.company?.destination_country) throw new Error('destination_country required for executive summary');
       const components = results.component_origins || results.components;
       if (!components || components.length === 0) throw new Error('components required for executive summary');
       if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) throw new Error('north_american_content required for executive summary');
-      if (!results.trade_volume && results.trade_volume !== 0) throw new Error('annual_trade_volume required for executive summary');
+      if (!results.company?.trade_volume && results.company?.trade_volume !== 0) throw new Error('annual_trade_volume required for executive summary');
       if (results.usmca?.qualified === undefined || results.usmca?.qualified === null) throw new Error('usmca_qualified status required for executive summary');
 
       // Prepare payload for the executive trade alert API
@@ -669,12 +669,12 @@ export default function WorkflowResults({
         user_profile: {
           subscription_tier: userSubscriptionTier,
           industry_sector: results.company.industry_sector,
-          destination_country: results.destination_country
+          destination_country: results.company.destination_country
         },
         workflow_intelligence: {
           components: components,
           north_american_content: results.usmca.north_american_content,
-          annual_trade_volume: results.trade_volume,
+          annual_trade_volume: results.company.trade_volume,
           usmca_qualified: results.usmca.qualified,
           preference_criterion: results.usmca?.preference_criterion || null
         }
