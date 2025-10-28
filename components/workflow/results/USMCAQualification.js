@@ -178,27 +178,35 @@ export default function USMCAQualification({ results }) {
                 // ✅ API returns snake_case field names (database canonical format)
                 // All fields use underscore: mfn_rate, base_mfn_rate, section_301, usmca_rate, etc.
                 // Note: Rates are in decimal format (0-1 range), display multiplies by 100
-                const baseMfnRate = component.base_mfn_rate || component.mfn_rate || 0;
-                const section301 = component.section_301 || 0;
-                const section232 = component.section_232 || 0;
-                const totalAppliedRate = component.total_rate || baseMfnRate + section301 + section232;
-                const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
+                // ✅ DEFENSIVE APPROACH: Handle missing data gracefully
+                // If any rate is missing, show 'N/A' instead of silent 0 - helps identify pipeline breaks
+                const baseMfnRate = component.base_mfn_rate ?? component.mfn_rate ?? null;
+                const section301 = component.section_301 ?? null;
+                const section232 = component.section_232 ?? null;
+                const usmcaRate = component.usmca_rate ?? component.tariff_rates?.usmca_rate ?? null;
+
+                const totalAppliedRate = component.total_rate ?? (baseMfnRate !== null && section301 !== null && section232 !== null ? baseMfnRate + section301 + section232 : null);
 
                 // Savings calculation: Only base MFN is eliminated, policy tariffs remain
-                const savingsPercent = baseMfnRate - usmcaRate;
-                const hasRates = (baseMfnRate !== undefined && baseMfnRate !== null) || (usmcaRate !== undefined && usmcaRate !== null);
+                const savingsPercent = (baseMfnRate !== null && usmcaRate !== null) ? (baseMfnRate - usmcaRate) : null;
+                const hasCompleteRates = baseMfnRate !== null && usmcaRate !== null;
 
-                // DEBUG: Log what we're receiving from the API
+                // DEBUG: Log what we're receiving from the API - especially missing fields
                 if (index === 0) {
-                  console.log(`🔍 [FRONTEND] First component from API (snake_case):`, {
+                  console.log(`🔍 [FRONTEND] First component from API (defensive parsing):`, {
                     description: component.description,
                     rawMfnRate: component.mfn_rate,
                     rawUsmcaRate: component.usmca_rate,
                     rawSection301: component.section_301,
-                    baseMfnRate,
-                    usmcaRate,
-                    section301,
-                    hasRates,
+                    parsedBaseMfnRate: baseMfnRate,
+                    parsedUsmcaRate: usmcaRate,
+                    parsedSection301: section301,
+                    hasCompleteRates,
+                    missingFields: {
+                      mfn_rate: component.mfn_rate === undefined || component.mfn_rate === null,
+                      usmca_rate: component.usmca_rate === undefined || component.usmca_rate === null,
+                      section_301: component.section_301 === undefined || component.section_301 === null
+                    },
                     allKeys: Object.keys(component)
                   });
                 }
@@ -209,8 +217,8 @@ export default function USMCAQualification({ results }) {
                 return (
                   <React.Fragment key={index}>
                     <tr style={{ borderBottom: '1px solid #e5e7eb', cursor: hasDetails ? 'pointer' : 'default' }}>
-                      <td style={{ padding: '0.75rem', color: '#1f2937', wordWrap: 'break-word', overflow: 'hidden' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <td style={{ padding: '0.75rem', color: '#1f2937', wordWrap: 'break-word', overflow: 'visible', whiteSpace: 'normal' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
                           {hasDetails && (
                             <button
                               onClick={() => toggleComponentDetails(index)}
@@ -221,14 +229,15 @@ export default function USMCAQualification({ results }) {
                                 fontSize: '1rem',
                                 padding: '0',
                                 lineHeight: '1',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                marginTop: '0.125rem'
                               }}
                               title={isExpanded ? 'Hide details' : 'Show AI analysis details'}
                             >
                               {isExpanded ? '▼' : '▶'}
                             </button>
                           )}
-                          <span style={{ wordWrap: 'break-word', overflow: 'hidden' }}>{component.description || ('Component ' + (index + 1))}</span>
+                          <span style={{ wordWrap: 'break-word', whiteSpace: 'normal', overflow: 'visible' }}>{component.description || ('Component ' + (index + 1))}</span>
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontFamily: 'monospace', fontSize: '0.8125rem', wordWrap: 'break-word' }}>
@@ -240,14 +249,14 @@ export default function USMCAQualification({ results }) {
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
                         {component.value_percentage}%
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: baseMfnRate !== null ? '#1f2937' : '#9ca3af' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
                           {/* ✅ CRITICAL FIX (Oct 26): Rates are in decimal format (0-1), multiply by 100 for display */}
-                          {hasRates ? (
+                          {baseMfnRate !== null ? (
                             <>
                               <div style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
                                 {(baseMfnRate * 100).toFixed(1)}%
-                                {section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{(section301 * 100).toFixed(1)}%</span>}
+                                {section301 !== null && section301 > 0 && <span style={{ fontSize: '0.75rem', color: '#dc2626', marginLeft: '0.25rem' }}>+{(section301 * 100).toFixed(1)}%</span>}
                               </div>
                               {/* Show breakdown when Section 301 or other policies apply */}
                               {(section301 > 0 || section232 > 0) && (
@@ -310,7 +319,7 @@ export default function USMCAQualification({ results }) {
                               )}
                             </>
                           ) : (
-                            <span>—</span>
+                            <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>N/A</span>
                           )}
 
                           {/* Data freshness indicator */}
@@ -328,9 +337,9 @@ export default function USMCAQualification({ results }) {
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: usmcaRate !== null ? '#059669' : '#9ca3af', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                          <span>{hasRates ? `${(usmcaRate * 100).toFixed(1)}%` : '—'}</span>
+                          <span>{usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A'}</span>
                           {/* ✅ CRITICAL FIX (Oct 26): Rates are decimal format, multiply by 100 for display */}
                           {section301 > 0 && (
                             <span style={{

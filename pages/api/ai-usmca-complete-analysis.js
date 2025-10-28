@@ -59,38 +59,37 @@ async function getAIRatesForMissingComponents(missingComponents, destinationCoun
     .map((comp, i) => `${i + 1}. HS Code: ${comp.hs_code}, Origin: ${comp.origin_country}, Description: ${comp.description}`)
     .join('\n');
 
-  const prompt = `You are a tariff expert. Provide COMPLETE tariff rates for ${destinationCountry} destination for these ${missingComponents.length} components:
+  const prompt = `You are a tariff expert with access to current 2025 US tariff schedules. Research and provide ACCURATE tariff rates for ${destinationCountry} destination for these components:
 
 ${componentsList}
 
 Product Context: ${productDescription}
 
-CRITICAL TARIFF POLICIES (2025):
-- Section 301 Tariffs: Apply additional duties to Chinese-origin goods entering USA (25% typical, varies by HS code). Does NOT apply to Mexico or Canada origin.
-- Section 232 Tariffs: Apply to steel/aluminum components (HS codes 72xx-73xx).
-- USMCA Rates: Only apply if product qualifies (Mexico, Canada origin with regional content).
+Your task:
+1. Look up the CURRENT (2025) MFN tariff rate for each HS code in the US Harmonized Tariff Schedule
+2. Apply Section 301 duties if: Origin = China AND Destination = US (research the actual rate for this HS code)
+3. Apply Section 232 duties if component is steel/aluminum (research the actual rate)
+4. Calculate USMCA preferential rate if applicable to Mexico/Canada origin
+5. Return REAL rates from actual 2025 tariff schedules - not estimates or defaults
 
-RULES:
-✓ APPLY Section 301 when: Origin = "CN" AND Destination = "US"
-✗ DO NOT APPLY when: Origin is Mexico, Canada, or US
-✗ DO NOT APPLY when: Destination is not US
+CRITICAL: Do not return zeros unless the actual tariff IS zero (e.g., ITA-covered electronics).
 
-For EACH component, return VALID JSON array with COMPLETE tariff breakdown:
+Return VALID JSON array with rates AS PERCENTAGES:
 [
   {
     "hs_code": "...",
-    "mfn_rate": 0.0,
-    "base_mfn_rate": 0.0,
-    "section_301": 0.0,
-    "section_232": 0.0,
-    "total_rate": 0.0,
-    "usmca_rate": 0.0,
+    "mfn_rate": <actual MFN rate from 2025 US tariff schedule>,
+    "base_mfn_rate": <same as mfn_rate>,
+    "section_301": <0 if not applicable, else actual Section 301 rate>,
+    "section_232": <0 if not applicable, else actual Section 232 rate>,
+    "total_rate": <sum of all applicable duties>,
+    "usmca_rate": <actual preferential rate if qualified>,
     "description": "...",
     "confidence": "high|medium|low"
   }
 ]
 
-Return ONLY valid JSON array. No other text.`;
+Return ONLY valid JSON array. No explanations.`;
 
   try {
     // TIER 1: Try OpenRouter
@@ -673,11 +672,22 @@ export default protectedApiHandler({
         // Merge AI results back into enrichedComponents
         enrichedComponents = enrichedComponents.map(comp => {
           const aiMatch = aiEnrichedRates.find(air => air.hs_code === comp.hs_code);
-          if (aiMatch && comp.mfn_rate === 0) {
-            console.log(`✅ [MERGE] Filled missing rates for ${comp.hs_code}: MFN ${aiMatch.mfn_rate}%, Section 301 ${aiMatch.section_301}%`);
+          // ✅ FIX: Merge AI data for ANY component marked as needing AI enrichment, not just when mfn_rate === 0
+          if (aiMatch && (comp.rate_source === 'database_lookup_miss' || comp.stale === true)) {
+            console.log(`✅ [MERGE] AI enrichment for ${comp.hs_code}:`, {
+              ai_mfn_rate: aiMatch.mfn_rate,
+              ai_usmca_rate: aiMatch.usmca_rate,
+              ai_section_301: aiMatch.section_301,
+              previous_source: comp.rate_source
+            });
             return {
               ...comp,
-              ...aiMatch,  // Overwrite with AI rates
+              mfn_rate: aiMatch.mfn_rate,
+              base_mfn_rate: aiMatch.base_mfn_rate,
+              section_301: aiMatch.section_301,
+              section_232: aiMatch.section_232,
+              usmca_rate: aiMatch.usmca_rate,  // ✅ CRITICAL: Explicitly include usmca_rate
+              total_rate: aiMatch.total_rate,
               rate_source: 'ai_fallback',
               stale: false,
               data_source: 'ai_enrichment'
