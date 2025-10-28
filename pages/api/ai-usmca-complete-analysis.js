@@ -66,56 +66,54 @@ async function getAIRatesForMissingComponents(missingComponents, destinationCoun
     .map((comp, i) => `${i + 1}. HS Code: ${comp.hs_code}, Origin: ${comp.origin_country}, Description: ${comp.description}`)
     .join('\n');
 
-  const prompt = `You are a rigorous tariff expert validating 2025 US tariff rates. Your job is NOT to accept zeros passively - QUESTION and VERIFY every zero rate in the database.
+  const prompt = `Your role: Research tariff rates for components MISSING from our database. Database is the source of truth.
 
-Components requiring tariff analysis for ${destinationCountry} destination:
+Components requiring tariff research for ${destinationCountry} destination:
 ${componentsList}
 
 Product Context: ${productDescription}
 
-CRITICAL VALIDATION RULES (2025):
-1. IF database shows 0% MFN rate: INVESTIGATE WHY
-   - Is it ITA (Information Technology Agreement)? Provide evidence.
-   - Is it a legitimate zero-duty item? Research and confirm.
-   - Or is the database incomplete? Research the actual rate.
+YOUR JOB (Simple & Clear):
+═══════════════════════════════════════════════════════════════════════════════
+1. Research each component's current 2025 tariff rates from official sources
+2. Include all applicable duties that stack (MFN + Section 301 + Section 232 + IEEPA)
+3. Explain your research process so we can validate it
+4. Confidence score reflects research quality
 
-2. ALWAYS include Section 301/tariff escalations if applicable:
-   - China origin → US destination: Research current Section 301 tariff rate (as of 2025)
-   - Include any IEEPA reciprocal tariffs that may stack on top
-   - Research if additional stacking applies for this HS code
+WHAT TO RESEARCH:
+─────────────────────────────────────────────────────────────────────────────
+- Base MFN rate: Official US tariff schedule (2025)
+- Section 301: If China origin → US destination, research current rate for this HS code
+- Section 232: If steel/aluminum, research current safeguard rate
+- IEEPA reciprocal: If applicable to this HS code
+- USMCA rate: If Mexico/Canada origin, research preferential rate
 
-3. ALWAYS include Section 232 where applicable:
-   - Steel/aluminum components: Research current 2025 rates for these protected categories
-   - Verify if USMCA exemptions apply
+HOW TO CALCULATE TOTAL RATE:
+─────────────────────────────────────────────────────────────────────────────
+total_rate = base_mfn_rate + section_301 + section_232 + ieepa_reciprocal
 
-4. USMCA rates: Research Mexico/Canada preferential rates
-   - If rules of origin unclear, note "qualification pending verification"
+Example (Microprocessor 8542.31.00 from China to US):
+- Base MFN: 0% (ITA duty-free)
+- Section 301: 50% (current Chinese semiconductor policy)
+- IEEPA reciprocal: 10% (additional policy)
+- Total: 60% (user pays this when importing)
 
-Your analysis process:
-- For EVERY component, explain why the rate is correct (not just return it)
-- If a rate is 0%, state explicitly: "Confirmed ITA duty-free item" or "Research shows actual rate is X%"
-- Flag any data quality issues you find
-- Provide confidence level: high/medium/low based on research clarity
-
-Return VALID JSON array with rates AS PERCENTAGES:
+RETURN JSON ARRAY (rates as decimals, e.g., 0.60 for 60%):
 [
   {
     "hs_code": "...",
-    "mfn_rate": <verified 2025 MFN rate from US tariff schedule>,
-    "base_mfn_rate": <same as mfn_rate>,
-    "section_301": <China origin to US? Verify and include 50% + 10% reciprocal>,
-    "section_232": <steel/aluminum? Research 2025 rate>,
-    "total_rate": <sum of ALL applicable duties>,
-    "usmca_rate": <preferential rate if applicable>,
+    "mfn_rate": 0.0,
+    "base_mfn_rate": 0.0,
+    "section_301": <China to US? Current policy rate or 0>,
+    "section_232": <Steel/aluminum? Current rate or 0>,
+    "usmca_rate": <preferential rate or same as mfn>,
     "description": "...",
-    "justification": "<explain why this rate is correct, especially if zero>",
-    "confidence": "high|medium|low",
-    "data_quality_flag": "<any issues found>"
+    "justification": "<your research summary>",
+    "confidence": "high|medium|low"
   }
 ]
 
-CRITICAL: Never return zeros without explicit justification. If you cannot verify a 0% rate is correct, research and provide the actual rate. This is for USMCA certificates - accuracy is legally required.
-
+CRITICAL: This is for USMCA compliance certificates. Accuracy is legally required.
 Return ONLY valid JSON array. No explanations.`;
 
   try {
@@ -570,7 +568,7 @@ export default protectedApiHandler({
           // Try exact match first
           const { data: exactMatch } = await supabase
             .from('tariff_intelligence_master')
-            .select('hts8, brief_description, mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
+            .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
             .eq('hts8', normalizedHsCode)
             .single();
 
@@ -583,7 +581,7 @@ export default protectedApiHandler({
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
-              .select('hts8, brief_description, mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate, nafta_mexico_ind, nafta_canada_ind')
+              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
               .ilike('hts8', `${sixDigitPrefix}%`)
               .limit(1);
 
@@ -613,43 +611,111 @@ export default protectedApiHandler({
           }
 
           // Map USITC columns to our standard format
-          // Database columns: mfn_ad_val_rate, usmca_ad_val_rate, mexico_ad_val_rate
-          // nafta_mexico_ind = qualifies for Mexico USMCA rate
-          // nafta_canada_ind = qualifies for Canada USMCA rate
+          // Handle multiple rate types: Ad valorem (%), Specific (per unit), Compound (% + per unit), Free
+          // Rate type codes: "A" = ad valorem, "S" = specific, "C" = compound, NULL = free
+
           const getMFNRate = () => {
-            const rate = parseFloat(rateData?.mfn_ad_val_rate);
-            if (!isNaN(rate)) return rate * 100;  // Convert decimal to percentage (0.025 → 2.5)
+            const rateTypeCode = rateData?.mfn_rate_type_code;
+            const textRate = rateData?.mfn_text_rate;
+
+            // Handle "Free" and NULL rates (rate_type_code "0" = Free)
+            if (!rateTypeCode || rateTypeCode === '0' || textRate === 'Free') {
+              return 0;  // Base MFN is Free (0%); Section 301 will be added separately
+            }
+
+            // Ad valorem rate (percentage) - return base rate WITHOUT Section 301
+            // Section 301 is extracted separately in getSection301Rate()
+            // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
+            if (rateTypeCode === 'A') {
+              const baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate) || 0;
+              if (!isNaN(baseMfnRate) && baseMfnRate > 0) {
+                return baseMfnRate;  // Return decimal format (0-1), no multiplication
+              }
+              return 0;
+            }
+
+            // Specific or compound rates - return 0 for now (AI will handle these)
+            // TODO: Handle specific rates like "30.9 cents/kg" and compound rates
+            if (rateTypeCode === 'S' || rateTypeCode === 'C' || rateTypeCode === 'O') {
+              return 0;  // Mark for AI enrichment
+            }
+
             return component.mfn_rate || 0;
           };
 
+          const getSection301Rate = () => {
+            // Section 301 is extracted independently of base rate type
+            // It's a policy tariff that applies on top of any base rate (Free, Ad valorem, Specific, etc.)
+            // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
+            const section301Value = parseFloat(rateData?.column_2_ad_val_rate);
+
+            if (!isNaN(section301Value) && section301Value > 0) {
+              return section301Value;  // Return decimal format (0-1), no multiplication
+            }
+            return component.section_301 || 0;
+          };
+
           const getUSMCARate = () => {
-            if (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') {
-              const rate = parseFloat(rateData?.mexico_ad_val_rate);
-              return !isNaN(rate) ? rate * 100 : (getMFNRate());
+            const destinationCode = destinationCountry === 'MX' ? 'mexico' :
+                                   destinationCountry === 'CA' ? 'usmca' : 'usmca';
+
+            // Check if product qualifies for USMCA/NAFTA rate
+            const qualifies = (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') ||
+                             (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') ||
+                             (destinationCountry === 'US');
+
+            if (!qualifies) {
+              return getMFNRate();  // Not eligible, use MFN rate
             }
-            if (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') {
-              const rate = parseFloat(rateData?.usmca_ad_val_rate);
-              return !isNaN(rate) ? rate * 100 : (getMFNRate());
+
+            // Determine which rate column to use
+            let rateTypeCode, rateValue;
+            if (destinationCountry === 'MX') {
+              rateTypeCode = rateData?.mexico_rate_type_code;
+              rateValue = rateData?.mexico_ad_val_rate;
+            } else {
+              rateTypeCode = rateData?.usmca_rate_type_code;
+              rateValue = rateData?.usmca_ad_val_rate;
             }
-            if (destinationCountry === 'US') {
-              const rate = parseFloat(rateData?.usmca_ad_val_rate);
-              return !isNaN(rate) ? rate * 100 : (getMFNRate());
+
+            // Handle rate types for USMCA
+            if (!rateTypeCode || rateData?.mfn_text_rate === 'Free') {
+              return 0;  // Free under USMCA
             }
-            return component.usmca_rate || 0;
+
+            if (rateTypeCode === 'A') {
+              const rate = parseFloat(rateValue);
+              return !isNaN(rate) ? rate : getMFNRate();  // Return decimal format (0-1), no multiplication
+            }
+
+            // Specific or compound rates - return MFN as fallback
+            return getMFNRate();
           };
 
           // 🔧 CONSISTENT CONTRACT: Always return same structure
           const mfnRate = getMFNRate();
           const usmcaRate = getUSMCARate();
+          const section301Rate = getSection301Rate();
+
+          // Calculate base_mfn_rate (without policy tariffs like Section 301)
+          // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
+          let baseMfnRate = 0;
+          const rateTypeCode = rateData?.mfn_rate_type_code;
+          if (rateTypeCode === 'A') {
+            baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
+          }
+          // For other rate types (S, C, O), base rate is 0 (handled by AI)
+
           const standardFields = {
             mfn_rate: mfnRate,
-            base_mfn_rate: mfnRate,
-            section_301: component.section_301 || 0,  // Not in USITC data - AI will fill if needed
+            base_mfn_rate: baseMfnRate,  // Base rate without policy tariffs
+            section_301: section301Rate,  // Section 301 policy tariff from database column_2_ad_val_rate
             section_232: component.section_232 || 0,  // Not in USITC data - AI will fill if needed
             usmca_rate: usmcaRate,
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // USITC data is current
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
+            rate_type: rateTypeCode,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
           };
 
@@ -1151,7 +1217,7 @@ export default protectedApiHandler({
       console.warn(`⚠️  [VALIDATION] ${rateFormatIssues.length} components have unexpected rate format (decimals when percentages expected):`, rateFormatIssues);
 
       // Log but don't block - transformation will still work
-      await DevIssue.warning('validation_checkpoint', 'Unexpected rate format before transformation', {
+      await DevIssue.unexpectedBehavior('validation_checkpoint', 'Unexpected rate format before transformation', {
         count: rateFormatIssues.length,
         components: rateFormatIssues
       });
@@ -1182,13 +1248,40 @@ export default protectedApiHandler({
           }
 
           try {
-            // Apply database_to_api transformation (percentage to decimal for tariff rates)
-            const apiValue = COMPONENT_DATA_CONTRACT.transform(
-              value,
-              'database',  // AI/componentBreakdown sends percentages like database stores them
-              'api',       // Transform to API format (decimals 0-1)
-              dbFieldName
-            );
+            // CRITICAL FIX (Oct 28): Check if value is already in decimal format (API format)
+            // enrichedComponents from database lookup are already decimal (0.35 = 35%)
+            // Do NOT apply database_to_api transformation if already decimal
+            let apiValue = value;
+
+            // Detect if this is a tariff rate field (should be 0-1 range)
+            const isTariffRateField = ['mfn_rate', 'base_mfn_rate', 'section_301', 'section_232', 'usmca_rate', 'total_rate'].includes(dbFieldName);
+
+            if (isTariffRateField) {
+              // Check if value is already in decimal format (0-1 range)
+              const numValue = parseFloat(value);
+              if (!isNaN(numValue) && numValue >= 0 && numValue <= 1) {
+                // Already in decimal format - NO transformation needed
+                apiValue = numValue;
+              } else if (!isNaN(numValue) && numValue > 1) {
+                // In percentage format (25) - apply database_to_api transformation
+                apiValue = COMPONENT_DATA_CONTRACT.transform(
+                  value,
+                  'database',  // Percentage format from database/AI
+                  'api',       // Transform to API format (decimals 0-1)
+                  dbFieldName
+                );
+              } else {
+                apiValue = 0;  // Invalid or zero
+              }
+            } else {
+              // Non-tariff fields: Apply normal transformation
+              apiValue = COMPONENT_DATA_CONTRACT.transform(
+                value,
+                'database',
+                'api',
+                dbFieldName
+              );
+            }
 
             apiFormatComponent[dbFieldName] = apiValue;
           } catch (err) {
