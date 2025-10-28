@@ -292,10 +292,10 @@ export default function USMCAQualification({ results }) {
                         )}
                       </td>
 
-                      {/* Column 8: Annual Savings */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: savingsPercent > 0 ? '#059669' : '#6b7280' }}>
+                      {/* Column 8: Annual Savings (in dollars from API) */}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: component.annual_savings > 0 ? '#059669' : '#6b7280' }}>
                         <span style={{ whiteSpace: 'nowrap' }}>
-                          {hasCompleteRates ? `${(savingsPercent * 100).toFixed(1)}%` : '—'}
+                          {component.annual_savings !== undefined && component.annual_savings !== null ? `$${component.annual_savings.toLocaleString()}` : '—'}
                         </span>
                       </td>
                     </tr>
