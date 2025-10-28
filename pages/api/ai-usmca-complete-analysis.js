@@ -879,11 +879,13 @@ export default protectedApiHandler({
       const totalRate = (mfn + section301 + (comp.section_232 || 0));
 
       const componentValue = (tradeVolume * (comp.value_percentage / 100));
-      const mfnCost = componentValue * (mfn / 100);
+      // ✅ FIX (Oct 28): Rates are already in decimal format (0.026 = 2.6%), NOT percentage format
+      // Do NOT divide by 100 again
+      const mfnCost = componentValue * mfn;
       // ✅ Section 301 applies REGARDLESS of USMCA qualification (cannot be eliminated)
-      const section301Cost = section301 > 0 ? componentValue * (section301 / 100) : 0;
+      const section301Cost = section301 > 0 ? componentValue * section301 : 0;
       // ✅ FIX (Oct 27): Calculate USMCA cost for all components if qualified
-      const usmcaCost = componentValue * (usmca / 100);
+      const usmcaCost = componentValue * usmca;
       // ✅ FIX (Oct 27): Savings apply whenever USMCA rate < MFN rate (for all components in qualified product)
       const savingsPerYear = (usmca < mfn) ? (mfnCost - usmcaCost) : 0;
 
