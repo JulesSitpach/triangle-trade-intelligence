@@ -232,11 +232,12 @@ export default function EditableCertificatePreview({
       // ✅ FIX: Use html2pdf to convert the current preview HTML to PDF
       // This ensures the PDF looks identical to the preview
       const options = {
-        margin: 10,
+        margin: [5, 5, 5, 5], // top, left, bottom, right in mm
         filename: `USMCA-Certificate-${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' }
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Allow page breaks
       };
 
       // Dynamically import html2pdf (browser-only library)
@@ -394,7 +395,8 @@ export default function EditableCertificatePreview({
         fontSize: '11px',
         maxWidth: '900px',
         margin: '0 auto',
-        pageBreakInside: 'avoid',
+        // Allow page breaks for long certificates
+        // pageBreakInside: 'avoid', // Removed to allow multi-page PDFs
         // Add watermark for free trial users
         position: 'relative',
         ...(isTrialUser && {
