@@ -1,8 +1,15 @@
 /**
- * AI-POWERED USMCA COMPLETE ANALYSIS
- * Pure AI approach - no local calculations, no config files
- * AI handles: threshold determination, calculation, qualification, recommendations
- * Flexible for changing trade policies
+ * HYBRID TARIFF ANALYSIS - DATABASE-FIRST + AI FALLBACK
+ *
+ * Architecture (Oct 28, 2025):
+ *   Phase 1: Query tariff_intelligence_master (12K+ USITC 2025 HTS codes)
+ *   Phase 2: Missing rates? Call AI for fallback (OpenRouter → Anthropic)
+ *   Phase 3: AI determines USMCA qualification + preference criterion
+ *
+ * Benefits:
+ *   - 95%+ requests get tariff rates from database (100-200ms, free)
+ *   - <5% requests need AI fallback (2-3 seconds, ~$0.02)
+ *   - Current 2025 tariff policy data from USITC official schedule
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
