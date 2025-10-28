@@ -191,12 +191,12 @@ export default async function handler(req, res) {
 
         // Rebuild alternatives without the new primary
         finalAlternativeCodes = sortedByConfidence
-          .filter(item => item.code !== primaryHSCode)
+          .filter(item => item.code !== primary_hs_code)
           .map(item => ({
             code: item.code,
             confidence: item.confidence,
             reason: item.isOriginalPrimary
-              ? `Previously selected as primary (${primaryConfidence}% confidence). However, ${primaryHSCode} has higher confidence (${item.confidence}%).`
+              ? `Previously selected as primary (${primaryConfidence}% confidence). However, ${primary_hs_code} has higher confidence (${item.confidence}%).`
               : item.reason
           }));
       }
@@ -214,8 +214,8 @@ export default async function handler(req, res) {
 
         // Main classification result (what UI expects)
         classification: {
-          hsCode: primaryHSCode,
-          description: aiResult.data.description || `HS Code ${primaryHSCode}`,
+          hsCode: primary_hs_code,
+          description: aiResult.data.description || `HS Code ${primary_hs_code}`,
           confidence: `${Math.round(primaryConfidence)}%`,
           verification_status: aiResult.data.databaseMatch ? 'database_verified' : 'ai_generated',
           usmca_qualification: usmcaQualificationString
@@ -263,7 +263,7 @@ export default async function handler(req, res) {
         .from('hs_code_classifications')
         .insert({
           component_description: cacheKey,
-          hs_code: primaryHSCode,
+          hs_code: primary_hs_code,
           hs_description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
           confidence: Math.round(primaryConfidence),
           explanation: safeExplanationForDB,
