@@ -713,7 +713,6 @@ export default protectedApiHandler({
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // All rates now from database - no AI enrichment needed
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
-            rate_type: rateTypeCodeForBase,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
           };
 
