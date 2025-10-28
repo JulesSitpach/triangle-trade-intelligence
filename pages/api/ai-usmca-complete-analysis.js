@@ -72,12 +72,13 @@ CRITICAL VALIDATION RULES (2025):
    - Is it a legitimate zero-duty item? Research and confirm.
    - Or is the database incomplete? Research the actual rate.
 
-2. ALWAYS include Section 301/tariff escalations:
-   - China origin → US destination: Apply 50% Section 301 (doubled Jan 2025) + 10% reciprocal tariffs
+2. ALWAYS include Section 301/tariff escalations if applicable:
+   - China origin → US destination: Research current Section 301 tariff rate (as of 2025)
+   - Include any IEEPA reciprocal tariffs that may stack on top
    - Research if additional stacking applies for this HS code
 
 3. ALWAYS include Section 232 where applicable:
-   - Steel/aluminum components: Research current 2025 rates (typically 50%)
+   - Steel/aluminum components: Research current 2025 rates for these protected categories
    - Verify if USMCA exemptions apply
 
 4. USMCA rates: Research Mexico/Canada preferential rates
