@@ -47,7 +47,7 @@ export default function TradeRiskAlternatives() {
 
   useEffect(() => {
     loadUserData();
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // Run only once on component mount
 
   const loadUserData = async () => {
     if (!user) {
