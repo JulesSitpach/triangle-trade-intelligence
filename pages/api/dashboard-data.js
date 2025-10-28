@@ -46,23 +46,22 @@ export default protectedApiHandler({
       // monthly_usage_tracking is the source of truth for subscription tier limits
       // It increments when results are created and never decreases (deleting certificates/alerts doesn't affect it)
 
-      // Calculate current billing period (1st of month to end of month)
+      // Calculate current billing period (month_year format: "2025-10")
       const now = new Date();
-      const billingPeriodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const billingPeriodStartStr = billingPeriodStart.toISOString().split('T')[0];
+      const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
       const { data: usageRecord, error: usageError } = await supabase
         .from('monthly_usage_tracking')
-        .select('analyses_count')
+        .select('analysis_count')
         .eq('user_id', userId)
-        .eq('billing_period_start', billingPeriodStartStr)
+        .eq('month_year', month_year)
         .single();
 
       if (usageError && usageError.code !== 'PGRST116') { // PGRST116 = no rows found
         console.error('Error reading usage tracking:', usageError);
       }
 
-      const monthlyUsed = usageRecord?.analyses_count || 0;
+      const monthlyUsed = usageRecord?.analysis_count || 0;
 
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -76,7 +75,7 @@ export default protectedApiHandler({
         tier: profile?.subscription_tier,
         tierLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier],
         source: 'monthly_usage_tracking',
-        billingPeriod: billingPeriodStartStr,
+        billingPeriod: month_year,
         permanentCount: monthlyUsed
       });
 
