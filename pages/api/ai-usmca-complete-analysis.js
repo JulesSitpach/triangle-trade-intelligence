@@ -692,21 +692,17 @@ export default protectedApiHandler({
           const usmcaRate = getUSMCARate();
           const section301Rate = getSection301Rate();
 
-          // Calculate base_mfn_rate (without policy tariffs like Section 301)
-          // MFN rate is ALWAYS from mfn_ad_val_rate regardless of origin country
-          // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
+          // Calculate base_mfn_rate (same as mfnRate - this is the base rate before Section 301)
+          // Use same simple logic: If Free, return 0. Otherwise use ad valorem rate.
           let baseMfnRate = 0;
-          const rateTypeCodeForBase = rateData?.mfn_rate_type_code;
           const textRateForBase = rateData?.mfn_text_rate;
+          const mfnAdValRateForBase = rateData?.mfn_ad_val_rate;
 
-          // Handle Free rates
-          if (!rateTypeCodeForBase || rateTypeCodeForBase === '0' || textRateForBase === 'Free') {
-            baseMfnRate = 0;  // Base MFN is Free (0%)
-          } else if (rateTypeCodeForBase === 'A') {
-            // Ad valorem: use mfn_ad_val_rate
-            baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate || 0);  // Return decimal format, no multiplication
+          if (textRateForBase === 'Free') {
+            baseMfnRate = 0;
+          } else {
+            baseMfnRate = parseFloat(mfnAdValRateForBase) || 0;
           }
-          // For other rate types (S, C, O), base rate is 0 (handled by AI)
 
           const standardFields = {
             mfn_rate: mfnRate,
