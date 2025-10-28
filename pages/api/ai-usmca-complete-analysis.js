@@ -58,6 +58,7 @@ const supabase = createClient(
  */
 async function getAIRatesForMissingComponents(missingComponents, destinationCountry, productDescription) {
   if (!missingComponents || missingComponents.length === 0) {
+    console.log('✅ [HYBRID] No missing components, skipping AI call');
     return [];
   }
 
@@ -153,15 +154,17 @@ Return ONLY valid JSON array. No explanations.`;
     const jsonMatch = content.match(/\[[\s\S]*\]/);
     const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
-    // Normalize rates to percentages (API returns decimals, we store percentages)
+    // ✅ Keep rates in DECIMAL format (0-1 range, not percentages)
+    // Financial calculations expect decimals: 0.026 means 2.6%
+    // DO NOT multiply by 100 - AI returns decimals, we use decimals throughout
     const normalizedResults = results.map(result => ({
       hs_code: result.hs_code,
-      mfn_rate: (parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0) * 100,
-      base_mfn_rate: (parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0) * 100,
-      section_301: (parseFloat(result.section_301) || 0) * 100,
-      section_232: (parseFloat(result.section_232) || 0) * 100,
-      usmca_rate: (parseFloat(result.usmca_rate) || 0) * 100,
-      total_rate: (parseFloat(result.total_rate) || 0) * 100,
+      mfn_rate: parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0,
+      base_mfn_rate: parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0,
+      section_301: parseFloat(result.section_301) || 0,
+      section_232: parseFloat(result.section_232) || 0,
+      usmca_rate: parseFloat(result.usmca_rate) || 0,
+      total_rate: parseFloat(result.total_rate) || 0,
       // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
       justification: result.justification || 'No justification provided',
       confidence: result.confidence || 'low',
@@ -209,15 +212,16 @@ Return ONLY valid JSON array. No explanations.`;
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
-      // Normalize rates (matching OpenRouter normalization)
+      // ✅ Keep rates in DECIMAL format (0-1 range, not percentages)
+      // Financial calculations expect decimals: 0.026 means 2.6%
       const normalizedResults = results.map(result => ({
         hs_code: result.hs_code,
-        mfn_rate: (parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0) * 100,
-        base_mfn_rate: (parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0) * 100,
-        section_301: (parseFloat(result.section_301) || 0) * 100,
-        section_232: (parseFloat(result.section_232) || 0) * 100,
-        usmca_rate: (parseFloat(result.usmca_rate) || 0) * 100,
-        total_rate: (parseFloat(result.total_rate) || 0) * 100,
+        mfn_rate: parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0,
+        base_mfn_rate: parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0,
+        section_301: parseFloat(result.section_301) || 0,
+        section_232: parseFloat(result.section_232) || 0,
+        usmca_rate: parseFloat(result.usmca_rate) || 0,
+        total_rate: parseFloat(result.total_rate) || 0,
         // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
         justification: result.justification || 'No justification provided',
         confidence: result.confidence || 'low',
@@ -776,9 +780,45 @@ export default protectedApiHandler({
 
     // Phase 1: Database enrichment complete
 
-    // ✅ DATABASE-FIRST ONLY: No AI enrichment fallback
-    // If database doesn't have a rate, component stays at 0 (unknown/missing)
-    // This prevents stale/incorrect AI data from overwriting database values
+    // Phase 2: AI FALLBACK for missing components (HYBRID approach)
+    // ✅ DATABASE-FIRST: Only call AI if component is missing from database
+    // Don't overwrite database rates with AI - only fill gaps
+    const missingFromDatabase = enrichedComponents.filter(c =>
+      c.stale === true || c.rate_source === 'no_data' || c.mfn_rate === 0
+    );
+
+    if (missingFromDatabase.length > 0) {
+      console.log(`⏳ [HYBRID] ${missingFromDatabase.length} components missing from database, calling AI for 2025 rates...`);
+
+      try {
+        const aiRates = await getAIRatesForMissingComponents(
+          missingFromDatabase,
+          formData.destination_country,
+          formData.product_description
+        );
+
+        // Merge AI results back into enrichedComponents - ONLY for missing ones
+        enrichedComponents = enrichedComponents.map(comp => {
+          const aiResult = aiRates.find(air => air.hs_code === comp.hs_code);
+          if (aiResult && (comp.stale === true || comp.rate_source === 'no_data')) {
+            console.log(`✅ [HYBRID] AI found rates for ${comp.hs_code}: MFN=${aiResult.mfn_rate}, Section 301=${aiResult.section_301}`);
+            return {
+              ...comp,
+              mfn_rate: aiResult.mfn_rate,
+              base_mfn_rate: aiResult.mfn_rate,
+              section_301: aiResult.section_301,
+              section_232: aiResult.section_232,
+              usmca_rate: aiResult.usmca_rate,
+              rate_source: 'ai_research_2025',
+              stale: false
+            };
+          }
+          return comp;
+        });
+      } catch (aiError) {
+        console.error(`⚠️  [HYBRID] AI enrichment failed, continuing with database rates:`, aiError.message);
+      }
+    }
 
     // DEBUG: Final enrichment state validation
     if (!enrichedComponents || enrichedComponents.length === 0) {
