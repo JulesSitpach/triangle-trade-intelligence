@@ -729,6 +729,13 @@ export default protectedApiHandler({
           }
           // For other rate types (S, C, O), base rate is 0 (handled by AI)
 
+          // ✅ CRITICAL: Mark as stale if Section 301 needs AI enrichment
+          // Section 301 is policy tariff (changes frequently), not in USITC database
+          // For China → US, we MUST call AI to get current Section 301 rate
+          const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
+          const needsSection301Enrichment = isChineseOrigin && destinationCountry === 'US' && section301Rate === 0;
+          const shouldMarkStale = needsSection301Enrichment;
+
           const standardFields = {
             mfn_rate: mfnRate,
             base_mfn_rate: baseMfnRate,  // Base rate without policy tariffs (uses column_2 for China, mfn for WTO)
@@ -736,7 +743,7 @@ export default protectedApiHandler({
             section_232: component.section_232 || 0,  // Not in USITC data - AI will fill if needed
             usmca_rate: usmcaRate,
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
-            stale: false,  // USITC data is current
+            stale: shouldMarkStale,  // ✅ Mark stale if Section 301 needs AI enrichment
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
             rate_type: rateTypeCodeForBase,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
