@@ -568,7 +568,7 @@ export default protectedApiHandler({
           // Try exact match first
           const { data: exactMatch } = await supabase
             .from('tariff_intelligence_master')
-            .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
+            .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
             .eq('hts8', normalizedHsCode)
             .single();
 
@@ -581,7 +581,7 @@ export default protectedApiHandler({
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
-              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
+              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
               .ilike('hts8', `${sixDigitPrefix}%`)
               .limit(1);
 
@@ -647,24 +647,17 @@ export default protectedApiHandler({
           };
 
           const getSection301Rate = () => {
-            // ✅ CRITICAL FIX: Section 301 is NOT column_2_ad_val_rate!
-            // column_2_ad_val_rate = Base USITC tariff for non-WTO countries (China) - 35% for semiconductors
-            // Section 301 = Trump policy tariff ON TOP of base rate - varies by USTR list (7.5%-100%)
-            // These are TWO SEPARATE concepts!
-
-            // Section 301 is not stored in tariff_intelligence_master (it changes frequently)
-            // AI will look it up based on HS code and USTR list assignment
-            // For now, return 0 - AI fallback will provide current Section 301 rate
+            // Section 301 is stored in tariff_intelligence_master (updated daily with policy changes)
             // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
 
             // Check if origin is China AND destination is US
             const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
             const isUSDestination = destinationCountry === 'US';
 
-            if (isChineseOrigin && isUSDestination) {
-              // Section 301 applies - should be looked up from AI
-              // Return 0 here, let AI provide current policy rate
-              return component.section_301 || 0;
+            if (isChineseOrigin && isUSDestination && rateData) {
+              // Read Section 301 from database (e.g., 0.60 for semiconductors)
+              const section301FromDB = parseFloat(rateData?.section_301) || 0;
+              return section301FromDB;  // Return decimal format (0-1)
             }
 
             // Section 301 doesn't apply to non-China origins or non-US destinations
@@ -729,21 +722,14 @@ export default protectedApiHandler({
           }
           // For other rate types (S, C, O), base rate is 0 (handled by AI)
 
-          // ✅ CRITICAL: Mark as stale if Section 301 needs AI enrichment
-          // Section 301 is policy tariff (changes frequently), not in USITC database
-          // For China → US, we MUST call AI to get current Section 301 rate
-          const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
-          const needsSection301Enrichment = isChineseOrigin && destinationCountry === 'US' && section301Rate === 0;
-          const shouldMarkStale = needsSection301Enrichment;
-
           const standardFields = {
             mfn_rate: mfnRate,
-            base_mfn_rate: baseMfnRate,  // Base rate without policy tariffs (uses column_2 for China, mfn for WTO)
-            section_301: section301Rate,  // Section 301 policy tariff (0 from DB, AI provides current rate if applicable)
-            section_232: component.section_232 || 0,  // Not in USITC data - AI will fill if needed
+            base_mfn_rate: baseMfnRate,
+            section_301: section301Rate,  // Read from database tariff_intelligence_master
+            section_232: parseFloat(rateData?.section_232) || 0,  // Read from database
             usmca_rate: usmcaRate,
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
-            stale: shouldMarkStale,  // ✅ Mark stale if Section 301 needs AI enrichment
+            stale: false,  // All rates now from database - no AI enrichment needed
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
             rate_type: rateTypeCodeForBase,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
