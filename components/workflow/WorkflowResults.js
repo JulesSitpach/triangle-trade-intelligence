@@ -822,60 +822,9 @@ export default function WorkflowResults({
         </div>
       </div>
 
-      {/* PAID ONLY: Component Analysis Table */}
-      {isPaidUser && results.usmca?.component_breakdown && results.usmca.component_breakdown.length > 0 && (
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">📦 Component Analysis</h3>
-          </div>
-
-          <div style={{overflowX: 'auto'}}>
-            <table style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: '0.875rem'
-            }}>
-              <thead>
-                <tr style={{borderBottom: '2px solid #e5e7eb', backgroundColor: '#f9fafb'}}>
-                  <th style={{padding: '0.75rem', textAlign: 'left', fontWeight: '600', color: '#1f2937'}}>Component</th>
-                  <th style={{padding: '0.75rem', textAlign: 'center', fontWeight: '600', color: '#1f2937'}}>Origin</th>
-                  <th style={{padding: '0.75rem', textAlign: 'center', fontWeight: '600', color: '#1f2937'}}>Value %</th>
-                  <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937'}}>MFN Rate</th>
-                  <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937'}}>USMCA Rate</th>
-                  {results.savings?.annual_savings > 0 && (
-                    <th style={{padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#059669'}}>Annual Savings</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {results.usmca.component_breakdown.map((comp, idx) => (
-                  <tr key={idx} style={{borderBottom: '1px solid #e5e7eb'}}>
-                    <td style={{padding: '0.75rem', color: '#1f2937'}}>
-                      <strong>{comp.description || comp.hs_code}</strong>
-                    </td>
-                    <td style={{padding: '0.75rem', textAlign: 'center', color: '#6b7280'}}>
-                      {comp.origin_country || comp.country || 'N/A'}
-                    </td>
-                    <td style={{padding: '0.75rem', textAlign: 'center', color: '#6b7280'}}>
-                      {comp.value_percentage || comp.percentage || 0}%
-                    </td>
-                    <td style={{padding: '0.75rem', textAlign: 'right', color: '#6b7280'}}>
-                      {comp.mfn_rate !== undefined ? `${(comp.mfn_rate * 100).toFixed(1)}%` : 'N/A'}
-                    </td>
-                    <td style={{padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '600'}}>
-                      {comp.usmca_rate !== undefined ? `${(comp.usmca_rate * 100).toFixed(1)}%` : '0%'}
-                    </td>
-                    {results.savings?.annual_savings > 0 && (
-                      <td style={{padding: '0.75rem', textAlign: 'right', color: '#059669', fontWeight: '600'}}>
-                        ${(((comp.mfn_rate || 0) - (comp.usmca_rate || 0)) * (comp.value_percentage || 0) * 0.01 * (results.savings.annual_savings || 0)).toLocaleString()}
-                      </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      {/* PAID ONLY: Full Component Analysis with Tariff Details (via USMCAQualification component) */}
+      {isPaidUser && (
+        <USMCAQualification results={results} />
       )}
 
       {/* PAID ONLY: Executive Summary Button + Strategic Recommendations */}

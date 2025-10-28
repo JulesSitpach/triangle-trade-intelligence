@@ -658,6 +658,16 @@ export default protectedApiHandler({
               return 0;  // Mark for AI enrichment
             }
 
+            // ✅ FALLBACK: For any other rate type code that has an ad valorem rate, use it
+            // This handles cases like rate_type_code="7" which have valid mfn_ad_val_rate values
+            if (mfnAdValRate) {
+              const fallbackRate = parseFloat(mfnAdValRate);
+              if (!isNaN(fallbackRate) && fallbackRate > 0) {
+                console.log(`✅ [getMFNRate] Fallback: Using ad valorem rate ${fallbackRate} for unhandled rate type '${rateTypeCode}'`);
+                return fallbackRate;
+              }
+            }
+
             return component.mfn_rate || 0;
           };
 
