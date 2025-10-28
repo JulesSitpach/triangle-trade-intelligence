@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import html2pdf from 'html2pdf.js';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -240,6 +239,8 @@ export default function EditableCertificatePreview({
         jsPDF: { orientation: 'portrait', unit: 'mm', format: 'letter' }
       };
 
+      // Dynamically import html2pdf (browser-only library)
+      const html2pdf = (await import('html2pdf.js')).default;
       html2pdf()
         .set(options)
         .from(certificateElement)

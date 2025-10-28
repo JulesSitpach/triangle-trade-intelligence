@@ -409,29 +409,29 @@ export default protectedApiHandler({
         // DEBUG: Log extraction results
         console.log(`🔍 [FALLBACK-EXTRACT] Extracting rates for "${comp.description}" (${comp.hs_code}):`, {
           mfnFound: rates.extracted.mfnFound,
-          mfnRate: rates.mfnRate,
+          mfn_rate: rates.mfn_rate,
           section301Found: rates.extracted.section301Found,
-          section301: rates.section301,
+          section_301: rates.section_301,
           source: comp.rate_source
         });
 
         if (rates.extracted.mfnFound || rates.extracted.section301Found) {
-          console.log(`✅ [FALLBACK-SUCCESS] Filled missing rates for ${comp.description}: MFN ${rates.mfnRate}%, Section 301 ${rates.section301}%`);
+          console.log(`✅ [FALLBACK-SUCCESS] Filled missing rates for ${comp.description}: MFN ${rates.mfn_rate}%, Section 301 ${rates.section_301}%`);
         } else {
           console.log(`⚠️  [FALLBACK-MISS] Could not extract rates for ${comp.description} from AI response`);
         }
 
-        const totalRate = rates.mfnRate + rates.section301 + (rates.section232 || 0);
-        const savingsPercent = rates.mfnRate > 0 ? (((rates.mfnRate - rates.usmcaRate) / rates.mfnRate) * 100) : 0;
+        const totalRate = rates.mfn_rate + rates.section_301 + (rates.section_232 || 0);
+        const savingsPercent = rates.mfn_rate > 0 ? (((rates.mfn_rate - rates.usmca_rate) / rates.mfn_rate) * 100) : 0;
 
         // ✅ CRITICAL: Preserve all input fields (including rate_source, stale)
         // Only UPDATE tariff rate fields if successfully extracted from AI
         return {
           ...comp,  // Preserves: rate_source, stale, and all other fields
-          mfn_rate: rates.mfnRate,
-          base_mfn_rate: rates.mfnRate,  // Keep base_mfn_rate consistent with mfn_rate
-          usmca_rate: rates.usmcaRate,
-          section_301: rates.section301,
+          mfn_rate: rates.mfn_rate,
+          base_mfn_rate: rates.mfn_rate,  // Keep base_mfn_rate consistent with mfn_rate
+          usmca_rate: rates.usmca_rate,
+          section_301: rates.section_301,
           section_232: comp.section_232 || 0,  // Preserve existing section_232 if present
           total_rate: totalRate,
           savings_percentage: savingsPercent,

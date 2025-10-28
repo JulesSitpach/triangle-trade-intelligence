@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
     // Format response to match expected structure
     const suggestions = [{
-      hsCode: result.data.hsCode,
+      hs_code: result.data.hs_code,
       description: result.data.description || productDescription,
       accuracy: Math.round((result.data.confidence || 0.85) * 100),
       reasoning: result.data.explanation || 'AI classification completed',

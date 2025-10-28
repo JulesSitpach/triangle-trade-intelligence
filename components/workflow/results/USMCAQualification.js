@@ -175,14 +175,14 @@ export default function USMCAQualification({ results }) {
             </thead>
             <tbody>
               {results.usmca.component_breakdown.map((component, index) => {
-                // ✅ FIX (Oct 26): API returns camelCase field names from transformAPIToFrontend
-                // base_mfn_rate → baseMfnRate, section_301 → section301, usmca_rate → usmcaRate, etc.
+                // ✅ API returns snake_case field names (database canonical format)
+                // All fields use underscore: mfn_rate, base_mfn_rate, section_301, usmca_rate, etc.
                 // Note: Rates are in decimal format (0-1 range), display multiplies by 100
-                const baseMfnRate = component.baseMfnRate || component.mfnRate || 0;
-                const section301 = component.section301 || 0;
-                const section232 = component.section232 || 0;
-                const totalAppliedRate = component.totalRate || baseMfnRate + section301 + section232;
-                const usmcaRate = component.usmcaRate || component.tariff_rates?.usmcaRate || 0;
+                const baseMfnRate = component.base_mfn_rate || component.mfn_rate || 0;
+                const section301 = component.section_301 || 0;
+                const section232 = component.section_232 || 0;
+                const totalAppliedRate = component.total_rate || baseMfnRate + section301 + section232;
+                const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
 
                 // Savings calculation: Only base MFN is eliminated, policy tariffs remain
                 const savingsPercent = baseMfnRate - usmcaRate;
@@ -190,11 +190,11 @@ export default function USMCAQualification({ results }) {
 
                 // DEBUG: Log what we're receiving from the API
                 if (index === 0) {
-                  console.log(`🔍 [FRONTEND] First component from API (camelCase):`, {
+                  console.log(`🔍 [FRONTEND] First component from API (snake_case):`, {
                     description: component.description,
-                    rawMfnRate: component.mfnRate,
-                    rawUsmcaRate: component.usmcaRate,
-                    rawSection301: component.section301,
+                    rawMfnRate: component.mfn_rate,
+                    rawUsmcaRate: component.usmca_rate,
+                    rawSection301: component.section_301,
                     baseMfnRate,
                     usmcaRate,
                     section301,
@@ -204,7 +204,7 @@ export default function USMCAQualification({ results }) {
                 }
 
                 const isExpanded = expandedComponents[index];
-                const hasDetails = component.aiReasoning || component.alternativeCodes || component.confidence || component.hsDescription;
+                const hasDetails = component.ai_reasoning || component.alternative_codes || component.ai_confidence || component.hs_description;
 
                 return (
                   <React.Fragment key={index}>
@@ -232,13 +232,13 @@ export default function USMCAQualification({ results }) {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontFamily: 'monospace', fontSize: '0.8125rem', wordWrap: 'break-word' }}>
-                        {component.hsCode || component.classifiedHsCode || '—'}
+                        {component.hs_code || '—'}
                       </td>
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {component.originCountry || '—'}
+                        {component.origin_country || '—'}
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        {component.valuePercentage}%
+                        {component.value_percentage}%
                       </td>
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: '#1f2937' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
@@ -366,7 +366,7 @@ export default function USMCAQualification({ results }) {
                         {(() => {
                           // ✅ FIXED (Oct 26): Use camelCase field name (originCountry) from transformAPIToFrontend
                           const usmcaCountries = ['US', 'MX', 'CA'];
-                          const isUSMCAOrigin = usmcaCountries.includes(component.originCountry?.toUpperCase());
+                          const isUSMCAOrigin = usmcaCountries.includes(component.origin_country?.toUpperCase());
 
                           return isUSMCAOrigin ? (
                             <span style={{ color: '#059669', fontWeight: '500' }}>✓ USMCA Origin</span>
@@ -405,7 +405,7 @@ export default function USMCAQualification({ results }) {
                             )}
 
                             {/* HS Code Description */}
-                            {component.hsDescription && (
+                            {component.hs_description && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>HS Code Description:</strong>
                                 <div style={{
@@ -416,13 +416,13 @@ export default function USMCAQualification({ results }) {
                                   borderLeft: '3px solid #10b981',
                                   color: '#4b5563'
                                 }}>
-                                  {component.hsDescription}
+                                  {component.hs_description}
                                 </div>
                               </div>
                             )}
 
                             {/* Tariff Rate Information */}
-                            {(component.mfnRate || component.usmcaRate !== undefined) && (
+                            {(component.mfn_rate || component.usmca_rate !== undefined) && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>Tariff Rate Details:</strong>
                                 <div style={{
@@ -436,20 +436,20 @@ export default function USMCAQualification({ results }) {
                                 }}>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>MFN Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{((component.mfnRate || 0) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{((component.mfn_rate || 0) * 100).toFixed(1)}%</div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.usmcaRate || 0) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.usmca_rate || 0) * 100).toFixed(1)}%</div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Savings</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(((component.mfnRate || 0) - (component.usmcaRate || 0)) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(((component.mfn_rate || 0) - (component.usmca_rate || 0)) * 100).toFixed(1)}%</div>
                                   </div>
                                 </div>
 
                                 {/* EDUCATIONAL: Policy Breakdown Explanation */}
-                                {component.policyAdjustments && component.policyAdjustments.length > 0 && (
+                                {component.policy_adjustments && component.policy_adjustments.length > 0 && (
                                   <div style={{
                                     marginTop: '0.75rem',
                                     padding: '0.75rem',
@@ -458,10 +458,10 @@ export default function USMCAQualification({ results }) {
                                     borderLeft: '3px solid #f59e0b'
                                   }}>
                                     <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
-                                      📊 How We Calculate {((component.mfnRate || 0) * 100).toFixed(1)}% Total Rate:
+                                      📊 How We Calculate {((component.mfn_rate || 0) * 100).toFixed(1)}% Total Rate:
                                     </div>
                                     <div style={{ fontSize: '0.8125rem', color: '#78350f', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                                      {component.policyAdjustments.map((adj, idx) => {
+                                      {component.policy_adjustments.map((adj, idx) => {
                                         // ✅ SAFETY: Ensure adj is always a string (AI/DB might return objects)
                                         const safeAdj = typeof adj === 'string' ? adj : JSON.stringify(adj);
                                         return (
@@ -495,13 +495,13 @@ export default function USMCAQualification({ results }) {
                                   💡 Strategic Opportunity: Eliminate Section 301 Exposure
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5', marginBottom: '0.5rem' }}>
-                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.originCountry} is subject to {(section301 * 100).toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.valuePercentage / 100 * (results.company?.trade_volume || 0) * (section301) / 12).toFixed(0)}/month</strong>.
+                                  <strong>Current situation:</strong> Your {component.description || 'component'} from {component.origin_country} is subject to {(section301 * 100).toFixed(1)}% Section 301 tariffs, costing you approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section301) / 12).toFixed(0)}/month</strong>.
                                 </div>
                                 <div style={{ fontSize: '0.8125rem', color: '#78350f', lineHeight: '1.5' }}>
                                   <strong>Strategic alternative:</strong> Switch to a Mexico-based supplier for this component would:
                                   <ul style={{ marginTop: '0.25rem', marginBottom: '0.25rem', marginLeft: '1.5rem' }}>
                                     <li>Eliminate Section 301 exposure entirely</li>
-                                    <li>Increase regional value content (RVC) by ~{component.valuePercentage}%</li>
+                                    <li>Increase regional value content (RVC) by ~{component.value_percentage}%</li>
                                     <li>See AI analysis above for industry-specific cost premiums, timelines, and payback calculations</li>
                                   </ul>
                                 </div>
@@ -512,7 +512,7 @@ export default function USMCAQualification({ results }) {
                             )}
 
                             {/* AI Reasoning */}
-                            {component.aiReasoning && (
+                            {component.ai_reasoning && (
                               <div style={{ marginBottom: '0.75rem' }}>
                                 <strong style={{ color: '#374151' }}>AI Classification Reasoning:</strong>
                                 <div style={{
@@ -524,17 +524,17 @@ export default function USMCAQualification({ results }) {
                                   color: '#4b5563',
                                   fontStyle: 'italic'
                                 }}>
-                                  {component.aiReasoning}
+                                  {component.ai_reasoning}
                                 </div>
                               </div>
                             )}
 
                             {/* Alternative HS Codes */}
-                            {component.alternativeCodes && component.alternativeCodes.length > 0 && (
+                            {component.alternative_codes && component.alternative_codes.length > 0 && (
                               <div>
                                 <strong style={{ color: '#374151' }}>Alternative HS Codes:</strong>
                                 <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                  {component.alternativeCodes.map((alt, altIndex) => (
+                                  {component.alternative_codes.map((alt, altIndex) => (
                                     <div
                                       key={altIndex}
                                       style={{
@@ -547,7 +547,7 @@ export default function USMCAQualification({ results }) {
                                       }}
                                     >
                                       <span style={{ fontFamily: 'monospace', fontWeight: '500', color: '#1f2937' }}>
-                                        {alt.code || alt.hsCode}
+                                        {alt.code || alt.hs_code}
                                       </span>
                                       <span style={{ color: '#6b7280', fontSize: '0.8125rem' }}>
                                         {alt.confidence || alt.accuracy}% confidence

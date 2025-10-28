@@ -475,18 +475,18 @@ Return JSON:
 
       // Get actual cached rates from affected components
       const cachedRates = affectedComponents.map(c => ({
-        baseMFN: c.mfn_rate || c.tariff_rates?.mfn_rate || 0,
-        section301: c.section_301 || c.tariff_rates?.section_301 || 0,
-        totalRate: c.total_rate || c.tariff_rates?.total_rate || (c.mfn_rate || 0),
+        base_mfn: c.mfn_rate || c.tariff_rates?.mfn_rate || 0,
+        section_301: c.section_301 || c.tariff_rates?.section_301 || 0,
+        total_rate: c.total_rate || c.tariff_rates?.total_rate || (c.mfn_rate || 0),
         component: c.component_type || c.description
       }));
 
       // Check if AI claimed any rates significantly different from cache (>10% deviation)
       const significantDeviations = aiPercentages.filter(aiRate => {
         const matchesAnyCache = cachedRates.some(cached =>
-          Math.abs(aiRate - cached.baseMFN) < 1 ||  // Matches base MFN
-          Math.abs(aiRate - cached.section301) < 1 || // Matches Section 301
-          Math.abs(aiRate - cached.totalRate) < 1     // Matches total rate
+          Math.abs(aiRate - cached.base_mfn) < 1 ||  // Matches base MFN
+          Math.abs(aiRate - cached.section_301) < 1 || // Matches Section 301
+          Math.abs(aiRate - cached.total_rate) < 1     // Matches total rate
         );
 
         return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache

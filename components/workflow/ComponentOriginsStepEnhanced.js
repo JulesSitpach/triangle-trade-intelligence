@@ -204,13 +204,13 @@ export default function ComponentOriginsStepEnhanced({
         }));
 
         const suggestion = {
-          hsCode: result.data.hsCode,
+          hs_code: result.data.hs_code,
           description: result.data.description, // ✅ REAL HTS DESCRIPTION
           confidence: result.data.confidence || result.data.adjustedConfidence,
           explanation: safeExplanation,
           source: 'AI Classification Agent',
           // Enhanced features from API - HS CLASSIFICATION ONLY (tariff rates looked up separately)
-          alternativeCodes: safeAlternativeCodes
+          alternative_codes: safeAlternativeCodes
         };
         console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
         setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
@@ -289,7 +289,7 @@ export default function ComponentOriginsStepEnhanced({
       if (result.success && result.data) {
         // Use classification result to populate suggestions
         const suggestion = {
-          hsCode: result.data.hsCode,
+          hs_code: result.data.hs_code,
           description: result.data.description || component.description,
           confidence: result.data.confidence || 85,
           confidenceText: `${Math.round((result.data.confidence || 0.85) * 100)}% accuracy`,
@@ -298,12 +298,12 @@ export default function ComponentOriginsStepEnhanced({
         };
 
         const newComponents = [...components];
-        newComponents[index].hs_code = suggestion.hsCode;
+        newComponents[index].hs_code = suggestion.hs_code;
         newComponents[index].hs_description = suggestion.description;
         newComponents[index].hs_suggestions = [suggestion];
 
         setComponents(newComponents);
-        console.log(`✅ Auto-populated HS code ${suggestion.hsCode} for component ${index + 1}`);
+        console.log(`✅ Auto-populated HS code ${suggestion.hs_code} for component ${index + 1}`);
       } else {
         console.log(`⚠️ No HS code suggestions found for component ${index + 1}`);
         alert('No HS code suggestions found. Try a more specific product description.');
@@ -393,31 +393,31 @@ export default function ComponentOriginsStepEnhanced({
 
   const selectHSCode = (index, suggestion) => {
     const newComponents = [...components];
-    newComponents[index].hs_code = suggestion.hsCode;
+    newComponents[index].hs_code = suggestion.hs_code;
     newComponents[index].hs_description = suggestion.description;
     newComponents[index].showSuggestions = false;
     setComponents(newComponents);
 
     // Update main formData with HS classification and tariff rates for certificate workflow
-    updateFormData('classified_hs_code', suggestion.hsCode);
-    updateFormData('current_tariff_rate', suggestion.mfnRate || 0);
-    updateFormData('usmca_tariff_rate', suggestion.usmcaRate || 0);
-    
+    updateFormData('classified_hs_code', suggestion.hs_code);
+    updateFormData('current_tariff_rate', suggestion.mfn_rate || 0);
+    updateFormData('usmca_tariff_rate', suggestion.usmca_rate || 0);
+
     // Calculate and save annual savings based on trade volume
     // Use the centralized parseTradeVolume utility for consistency across the app
     const tradeVolume = parseTradeVolume(formData.trade_volume);
-    const mfnRate = parseFloat(suggestion.mfnRate || 0);
-    const usmcaRate = parseFloat(suggestion.usmcaRate || 0);
+    const mfnRate = parseFloat(suggestion.mfn_rate || 0);
+    const usmcaRate = parseFloat(suggestion.usmca_rate || 0);
     const tariffSavings = (mfnRate - usmcaRate) / 100; // Convert percentage to decimal
     const annualSavings = tradeVolume * tariffSavings;
-    
+
     updateFormData('calculated_savings', Math.round(annualSavings));
     updateFormData('monthly_savings', Math.round(annualSavings / 12));
-    
+
     console.log('Updated formData with HS classification results:', {
-      hsCode: suggestion.hsCode,
-      mfnRate: suggestion.mfnRate,
-      usmcaRate: suggestion.usmcaRate,
+      hs_code: suggestion.hs_code,
+      mfn_rate: suggestion.mfn_rate,
+      usmca_rate: suggestion.usmca_rate,
       tradeVolumeText: formData.trade_volume,
       tradeVolumeNumeric: tradeVolume,
       tariffSavingsRate: tariffSavings,
@@ -756,24 +756,24 @@ export default function ComponentOriginsStepEnhanced({
                 suggestion={{
                   success: true,
                   data: {
-                    hsCode: agentSuggestions[index].hsCode,
+                    hs_code: agentSuggestions[index].hs_code,
                     description: agentSuggestions[index].description,
-                    value: `HS Code: ${agentSuggestions[index].hsCode}`,
+                    value: `HS Code: ${agentSuggestions[index].hs_code}`,
                     confidence: agentSuggestions[index].confidence,
                     explanation: agentSuggestions[index].explanation,
                     source: agentSuggestions[index].source,
-                    alternativeCodes: agentSuggestions[index].alternativeCodes,
+                    alternative_codes: agentSuggestions[index].alternative_codes,
                     requiredDocumentation: agentSuggestions[index].requiredDocumentation
                   }
                 }}
                 onAccept={() => {
                   // EDUCATIONAL: Preserve AI reasoning in component data
                   const suggestion = agentSuggestions[index];
-                  updateComponent(index, 'hs_code', suggestion.hsCode);
+                  updateComponent(index, 'hs_code', suggestion.hs_code);
                   updateComponent(index, 'hs_description', suggestion.description);
                   updateComponent(index, 'ai_reasoning', suggestion.explanation);
                   updateComponent(index, 'confidence', suggestion.confidence);
-                  updateComponent(index, 'alternative_codes', suggestion.alternativeCodes || []);
+                  updateComponent(index, 'alternative_codes', suggestion.alternative_codes || []);
                   updateComponent(index, 'required_documentation', suggestion.requiredDocumentation || []);
                   updateComponent(index, 'classification_source', 'ai_agent');
 

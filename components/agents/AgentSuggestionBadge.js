@@ -16,7 +16,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
   const confidence = Number(suggestion.data.confidence || suggestion.confidence || 0);
   const confidenceColor = confidence >= 85 ? 'green' : confidence >= 70 ? 'yellow' : 'red';
 
-  const hsCode = String(suggestion.data.suggestion || suggestion.data.value || suggestion.data.hsCode || '');
+  const hsCode = String(suggestion.data.suggestion || suggestion.data.value || suggestion.data.hs_code || '');
   const description = String(suggestion.data.description || '');
 
   // ✅ SAFETY: Use JSON.stringify for objects (String(object) produces "[object Object]")
@@ -25,7 +25,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
     ? rawExplanation
     : JSON.stringify(rawExplanation);
 
-  const hasAlternatives = suggestion.data.alternativeCodes?.length > 0;
+  const hasAlternatives = suggestion.data.alternative_codes?.length > 0;
   const hasExplanation = explanation.length > 0;
 
   return (
@@ -96,7 +96,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
                       🔄 Other Options to Consider:
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                      {suggestion.data.alternativeCodes.map((alt, idx) => {
+                      {suggestion.data.alternative_codes.map((alt, idx) => {
                         // ✅ SAFETY: Ensure code and reason are always strings (AI might return objects)
                         const safeCode = typeof alt.code === 'string' ? alt.code : String(alt.code || '');
                         const safeReason = typeof alt.reason === 'string' ? alt.reason : (alt.reason?.status || 'Alternative classification option');
@@ -144,7 +144,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
         {onAccept && (
           <button
             className="btn-action btn-primary btn-sm"
-            onClick={() => onAccept(suggestion.data.suggestion || suggestion.data.hsCode)}
+            onClick={() => onAccept(suggestion.data.suggestion || suggestion.data.hs_code)}
           >
             Use This
           </button>

@@ -31,6 +31,16 @@ export default function CompanyInformationStep({
     setIsClient(true);
   }, []);
 
+  // 🔍 DIAGNOSTIC: Log what businessTypes the component is receiving
+  useEffect(() => {
+    console.log('🔍 [CompanyInformationStep] Received dropdownOptions:', {
+      businessTypesCount: dropdownOptions.businessTypes?.length || 0,
+      businessTypes: dropdownOptions.businessTypes?.map(bt => bt.label) || [],
+      isLoading: isLoadingOptions,
+      allKeys: Object.keys(dropdownOptions)
+    });
+  }, [dropdownOptions, isLoadingOptions]);
+
   // Auto-calculate trade flow type and cache strategy when countries are selected
   useEffect(() => {
     if (formData.company_country && formData.destination_country) {

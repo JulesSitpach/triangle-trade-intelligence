@@ -125,9 +125,9 @@ export default function SimpleSavingsCalculator() {
       
       if (result.savings) {
         setEstimatedSavings({
-          annual: result.savings.annualTariffSavings,
-          monthly: result.savings.monthlyTariffSavings,
-          percentage: result.savings.savingsPercentage
+          annual: result.savings.annual_tariff_savings,
+          monthly: result.savings.monthly_tariff_savings,
+          percentage: result.savings.savings_percentage
         });
       } else {
         // Fallback calculation - get dynamic tariff rates from database via API
@@ -146,9 +146,9 @@ export default function SimpleSavingsCalculator() {
           const fallbackResult = await fallbackResponse.json();
           if (fallbackResult.savings) {
             setEstimatedSavings({
-              annual: fallbackResult.savings.annualTariffSavings,
-              monthly: fallbackResult.savings.monthlyTariffSavings,
-              percentage: fallbackResult.savings.savingsPercentage
+              annual: fallbackResult.savings.annual_tariff_savings,
+              monthly: fallbackResult.savings.monthly_tariff_savings,
+              percentage: fallbackResult.savings.savings_percentage
             });
             return;
           }

@@ -160,8 +160,8 @@ export default async function handler(req, res) {
         usmcaQualificationString = aiResult.data.usmcaQualification?.status || 'possible';
       }
 
-      // ✅ SAFETY: Normalize alternativeCodes array (AI might return objects in reason field)
-      const safeAlternativeCodes = (aiResult.data.alternativeCodes || []).map(alt => ({
+      // ✅ SAFETY: Normalize alternative_codes array (AI might return objects in reason field)
+      const safeAlternativeCodes = (aiResult.data.alternative_codes || []).map(alt => ({
         code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
         confidence: Number(alt.confidence) || 0,
         reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
@@ -169,13 +169,13 @@ export default async function handler(req, res) {
 
       // 🚨 CRITICAL FIX: Ensure PRIMARY HS code is always the HIGHEST confidence option
       // For financial compliance, the most confident classification must be primary
-      let primaryHSCode = aiResult.data.hsCode;
+      let primary_hs_code = aiResult.data.hs_code;
       let primaryConfidence = Number(aiResult.data.confidence) || 0;
       let finalAlternativeCodes = [...safeAlternativeCodes];
 
       // Check if any alternative code has higher confidence than the primary
       const allCodes = [
-        { code: primaryHSCode, confidence: primaryConfidence, isOriginalPrimary: true },
+        { code: primary_hs_code, confidence: primaryConfidence, isOriginalPrimary: true },
         ...finalAlternativeCodes
       ];
 
@@ -183,10 +183,10 @@ export default async function handler(req, res) {
       const highestConfidenceCode = sortedByConfidence[0];
 
       // If highest confidence is NOT the original primary, swap them
-      if (highestConfidenceCode.code !== primaryHSCode) {
-        console.warn(`⚠️ CLASSIFICATION PRIORITY FIX: Highest confidence code (${highestConfidenceCode.code} at ${highestConfidenceCode.confidence}%) was not primary. Swapping with original primary (${primaryHSCode} at ${primaryConfidence}%). This is a critical fix for compliance accuracy.`);
+      if (highestConfidenceCode.code !== primary_hs_code) {
+        console.warn(`⚠️ CLASSIFICATION PRIORITY FIX: Highest confidence code (${highestConfidenceCode.code} at ${highestConfidenceCode.confidence}%) was not primary. Swapping with original primary (${primary_hs_code} at ${primaryConfidence}%). This is a critical fix for compliance accuracy.`);
 
-        primaryHSCode = highestConfidenceCode.code;
+        primary_hs_code = highestConfidenceCode.code;
         primaryConfidence = highestConfidenceCode.confidence;
 
         // Rebuild alternatives without the new primary
@@ -234,22 +234,22 @@ export default async function handler(req, res) {
           agent_version: 'ai_classification_agent',
           confidence_threshold_met: primaryConfidence >= 75,
           database_match: aiResult.data.databaseMatch || false,
-          classification_priority_adjusted: primaryHSCode !== aiResult.data.hsCode
+          classification_priority_adjusted: primary_hs_code !== aiResult.data.hs_code
         },
 
         // Backward compatibility data
         data: {
-          hsCode: primaryHSCode,
+          hs_code: primary_hs_code,
           description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
           confidence: Math.round(primaryConfidence),
           explanation: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || ''),
           reasoning: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || ''),
           source: 'AI Classification Agent',
-          alternativeCodes: finalAlternativeCodes
+          alternative_codes: finalAlternativeCodes
         }
       };
 
-      console.log(`[AI AGENT] Classification result: ${primaryHSCode} (${primaryConfidence}% confidence)${primaryHSCode !== aiResult.data.hsCode ? ' [CORRECTED from ' + aiResult.data.hsCode + ']' : ''}`);
+      console.log(`[AI AGENT] Classification result: ${primary_hs_code} (${primaryConfidence}% confidence)${primary_hs_code !== aiResult.data.hs_code ? ' [CORRECTED from ' + aiResult.data.hs_code + ']' : ''}`);
 
       // Add subscription context to the response
       const responseWithSubscription = await addSubscriptionContext(req, response, 'classification');

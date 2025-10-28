@@ -27,9 +27,9 @@ export default function TariffSavings({ results }) {
 
   components.forEach(c => {
     const componentValue = tradeVolume * (parseFloat(c.percentage || c.value_percentage || 0) / 100);
-    const baseMFN = parseFloat(c.mfn_rate || c.base_mfn_rate || 0);
-    const section301 = parseFloat(c.section_301 || 0);
-    const totalRate = parseFloat(c.total_rate || baseMFN + section301);
+    const base_mfn = parseFloat(c.mfn_rate || c.base_mfn_rate || 0);
+    const section_301 = parseFloat(c.section_301 || 0);
+    const total_rate = parseFloat(c.total_rate || base_mfn + section_301);
 
     // ✅ CRITICAL FIX: Rates are stored as PERCENTAGES (55 = 55%, not 0.55)
     // For calculations: divide by 100 to convert to decimal, e.g., (55 / 100) = 0.55
@@ -38,18 +38,18 @@ export default function TariffSavings({ results }) {
       description: c.description || c.component_type,
       origin: c.origin_country || c.country,
       percentage: parseFloat(c.percentage || c.value_percentage || 0),
-      baseMFN,
-      section301,
-      totalRate,
+      base_mfn,
+      section_301,
+      total_rate,
       componentValue,
-      baseMFNSavings: componentValue * (baseMFN / 100),  // ✅ Divide by 100 - baseMFN is percentage (55 = 55%)
-      section301Cost: componentValue * (section301 / 100)  // ✅ Divide by 100 - section301 is percentage (25 = 25%)
+      base_mfn_savings: componentValue * (base_mfn / 100),  // ✅ Divide by 100 - base_mfn is percentage (55 = 55%)
+      section_301_cost: componentValue * (section_301 / 100)  // ✅ Divide by 100 - section_301 is percentage (25 = 25%)
     });
 
     // Calculate ONLY for component-level display (not for final number)
-    calculatedBaseMFNSavings += componentValue * (baseMFN / 100);  // ✅ Fixed: Convert percentage to decimal
-    if (section301 > 0) {
-      calculatedSection301Burden += componentValue * (section301 / 100);  // ✅ Fixed: Convert percentage to decimal
+    calculatedBaseMFNSavings += componentValue * (base_mfn / 100);  // ✅ Fixed: Convert percentage to decimal
+    if (section_301 > 0) {
+      calculatedSection301Burden += componentValue * (section_301 / 100);  // ✅ Fixed: Convert percentage to decimal
     }
   });
 
@@ -92,7 +92,7 @@ export default function TariffSavings({ results }) {
       )}
 
       {/* Component-Level Tariff Breakdown */}
-      {componentBreakdown.length > 0 && componentBreakdown.some(c => c.section301 > 0) && (
+      {componentBreakdown.length > 0 && componentBreakdown.some(c => c.section_301 > 0) && (
         <div style={{ padding: '1.5rem', backgroundColor: '#ffffff', borderRadius: '4px', marginBottom: '1rem', border: '1px solid #e5e7eb' }}>
           <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '1rem', fontWeight: '600' }}>📊 Component-Level Tariff Breakdown</div>
           {componentBreakdown.map((comp, idx) => (
@@ -100,21 +100,21 @@ export default function TariffSavings({ results }) {
               <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
                 {comp.description} ({comp.origin}) - {comp.percentage}% of product
               </div>
-              {comp.section301 > 0 ? (
+              {comp.section_301 > 0 ? (
                 <>
                   <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                    Base MFN Rate: {comp.baseMFN}% + Section 301: {comp.section301}% = <strong>Total: {comp.totalRate}%</strong>
+                    Base MFN Rate: {comp.base_mfn}% + Section 301: {comp.section_301}% = <strong>Total: {comp.total_rate}%</strong>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#059669', marginBottom: '0.25rem' }}>
-                    ✅ USMCA Saves: ${comp.baseMFNSavings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.baseMFN}% eliminated)
+                    ✅ USMCA Saves: ${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.base_mfn}% eliminated)
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#dc2626' }}>
-                    ❌ Section 301 Remains: ${comp.section301Cost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.section301}% still applies)
+                    ❌ Section 301 Remains: ${comp.section_301_cost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.section_301}% still applies)
                   </div>
                 </>
               ) : (
                 <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                  Tariff Rate: {comp.totalRate}% | USMCA Saves: ${comp.baseMFNSavings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                  Tariff Rate: {comp.total_rate}% | USMCA Saves: ${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
                 </div>
               )}
             </div>

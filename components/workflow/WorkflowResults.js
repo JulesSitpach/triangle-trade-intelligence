@@ -57,15 +57,17 @@ export default function WorkflowResults({
         const response = await fetch('/api/auth/me', { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
-          const tier = data.user?.subscription_tier || 'trial';
+          const tier = data.user?.subscription_tier;
+          if (!tier) throw new Error('subscription_tier missing from auth response');
           setUserSubscriptionTier(tier);
           console.log('✅ User subscription tier:', tier, '(for results page gating)');
         } else {
-          setUserSubscriptionTier('trial');
+          throw new Error(`Auth check failed: ${response.status}`);
         }
       } catch (error) {
-        console.error('⚠️ Failed to fetch user subscription tier:', error);
-        setUserSubscriptionTier('trial');
+        console.error('❌ FAILED: Cannot determine subscription tier:', error);
+        setUserSubscriptionTier(null);
+        throw error;
       } finally {
         setLoadingTier(false);
       }
@@ -122,23 +124,20 @@ export default function WorkflowResults({
       // Prepare certificate completion data for alerts dashboard
       const certificateData = {
         company: {
-          name: completionResults.company?.name || 'Certificate Holder',
-          business_type: completionResults.company?.business_type || 'manufacturing',
-          industry_sector: completionResults.company?.industry_sector || 'General Manufacturing',
-          trade_volume: completionResults.company?.trade_volume || (() => {
-            console.error('❌ [FORM SCHEMA] Missing company.trade_volume in WorkflowResults sendCertificateDataToAlerts');
-            return 0;
-          })()
+          name: completionResults.company?.name,
+          business_type: completionResults.company?.business_type,
+          industry_sector: completionResults.company?.industry_sector,
+          trade_volume: completionResults.company?.trade_volume
         },
         product: {
-          hs_code: completionResults.product?.hs_code || completionResults.classification?.hs_code,
-          description: completionResults.product?.description || completionResults.classification?.description
+          hs_code: completionResults.product?.hs_code,
+          description: completionResults.product?.description
         },
         certificate: {
-          id: completionResults.certificate.id || 'CERT-' + Date.now(),
+          id: completionResults.certificate.id,
           status: 'completed',
           qualification_result: completionResults.qualification?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-          savings: completionResults.savings?.total_savings || 0
+          savings: completionResults.savings?.total_savings
         },
         workflow_path: 'certificate',
         completion_timestamp: new Date().toISOString()
@@ -185,7 +184,10 @@ export default function WorkflowResults({
       console.log('✅ User chose to SAVE data for alerts and services');
       console.log('📊 Saving workflow to database...');
       // CRITICAL: Normalize all components to preserve enrichment data
-      const rawComponents = results.component_origins || results.components || [];
+      const rawComponents = results.component_origins || results.components;
+      if (!rawComponents || rawComponents.length === 0) {
+        throw new Error('component_origins or components missing from workflow results');
+      }
       const normalizedComponents = rawComponents.map(c => normalizeComponent(c));
 
       // Validate enrichment is preserved
@@ -200,38 +202,44 @@ export default function WorkflowResults({
       }
 
       // If user chose to save, prepare data for alerts
+      // Validate all required fields exist - fail loudly if missing
+      if (!results.company?.name) throw new Error('company.name is required');
+      if (!results.company?.business_type) throw new Error('company.business_type is required');
+      if (!results.company?.industry_sector) throw new Error('company.industry_sector is required');
+      if (!results.company?.trade_volume && results.company?.trade_volume !== 0) throw new Error('company.trade_volume is required');
+      if (!results.company?.company_country) throw new Error('company.company_country is required');
+      if (!results.product?.hs_code) throw new Error('product.hs_code is required');
+      if (!results.product?.description) throw new Error('product.description is required');
+      if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) throw new Error('usmca.north_american_content is required');
+      if (!results.usmca?.threshold_applied && results.usmca?.threshold_applied !== 0) throw new Error('usmca.threshold_applied is required');
+      if (!results.savings?.annual_savings && results.savings?.annual_savings !== 0) throw new Error('savings.annual_savings calculation failed');
+
       const alertData = {
         company: {
-          name: results.company?.name || results.company?.company_name,
-          company_name: results.company?.name || results.company?.company_name,
-          business_type: results.company?.business_type,
-          industry_sector: results.company?.industry_sector,
-          trade_volume: (() => {
-            const tv = results.company?.trade_volume;
-            if (!tv) {
-              console.error('❌ [FORM SCHEMA] Missing company.trade_volume in WorkflowResults handleSaveConsent');
-            }
-            return tv || 0;
-          })(),
-          company_country: results.company?.company_country  // FIX: Include country for certificate generation
+          name: results.company.name,
+          company_name: results.company.name,
+          business_type: results.company.business_type,
+          industry_sector: results.company.industry_sector,
+          trade_volume: results.company.trade_volume,
+          company_country: results.company.company_country
         },
         product: {
-          hs_code: results.product?.hs_code,
-          description: results.product?.description || results.product?.product_description,
-          product_description: results.product?.description || results.product?.product_description
+          hs_code: results.product.hs_code,
+          description: results.product.description,
+          product_description: results.product.description
         },
         usmca: {
           qualified: results.usmca?.qualified,
           qualification_status: results.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-          north_american_content: results.usmca?.north_american_content || results.usmca?.regional_content,
-          threshold_applied: results.usmca?.threshold_applied,
-          gap: results.usmca?.gap || 0
+          north_american_content: results.usmca.north_american_content,
+          threshold_applied: results.usmca.threshold_applied,
+          gap: results.usmca?.gap
         },
-        component_origins: normalizedComponents, // CRITICAL: Use normalized components with ALL fields
-        components: normalizedComponents,        // CRITICAL: Use normalized components with ALL fields
+        component_origins: normalizedComponents,
+        components: normalizedComponents,
         savings: {
-          total_savings: results.savings?.annual_savings || 0,
-          annual_savings: results.savings?.annual_savings || 0
+          total_savings: results.savings.annual_savings,
+          annual_savings: results.savings.annual_savings
         },
         timestamp: new Date().toISOString()
       };
@@ -243,29 +251,37 @@ export default function WorkflowResults({
 
       // **NEW: Save workflow to database with certificate data**
       try {
+        // Validate certificate-required fields
+        if (!results.company?.name) throw new Error('Certificate requires company.name');
+        if (!results.product?.hs_code) throw new Error('Certificate requires product.hs_code');
+        if (!results.product?.description) throw new Error('Certificate requires product.description');
+        if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) throw new Error('Certificate requires usmca.north_american_content');
+        if (!results.usmca?.threshold_applied && results.usmca?.threshold_applied !== 0) throw new Error('Certificate requires usmca.threshold_applied');
+        if (!results.usmca?.manufacturing_location) throw new Error('Certificate requires usmca.manufacturing_location');
+
         // Generate certificate data structure for storage
         const certificateData = {
           certificate_number: `USMCA-${Date.now()}`,
           exporter: {
-            name: results.company?.name || results.company?.company_name || 'Company',
+            name: results.company.name,
             address: results.company?.company_address || '',
             tax_id: results.company?.tax_id || '',
             phone: results.company?.contact_phone || '',
             email: results.company?.contact_email || ''
           },
           product: {
-            hs_code: results.product?.hs_code || '',
-            description: results.product?.description || results.product?.product_description || '',
+            hs_code: results.product.hs_code,
+            description: results.product.description,
             preference_criterion: 'B'
           },
           usmca_analysis: {
             qualified: results.usmca?.qualified,
-            regional_content: results.usmca?.north_american_content || results.usmca?.regional_content || 0,
+            regional_content: results.usmca.north_american_content,
             rule: 'Regional Value Content',
-            threshold: results.usmca?.threshold_applied || 60
+            threshold: results.usmca.threshold_applied
           },
           authorization: {
-            signatory_name: results.company?.contact_person || results.company?.name || 'Authorized Signatory',
+            signatory_name: results.company?.contact_person || results.company.name,
             signatory_title: 'Exporter',
             signatory_date: new Date().toISOString()
           },
@@ -273,7 +289,7 @@ export default function WorkflowResults({
             start_date: new Date().toISOString().split('T')[0],
             end_date: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
           },
-          country_of_origin: results.usmca?.manufacturing_location || 'MX'
+          country_of_origin: results.usmca.manufacturing_location
         };
 
         const workflowData = {
@@ -638,18 +654,28 @@ export default function WorkflowResults({
       setLoadingSummary(true);
       console.log('🎯 Generating Executive Summary for:', results.company?.name);
 
+      // Validate all required fields for executive summary
+      if (!userSubscriptionTier) throw new Error('subscription_tier missing - failed to load user tier');
+      if (!results.company?.industry_sector) throw new Error('industry_sector required for executive summary');
+      if (!results.destination_country) throw new Error('destination_country required for executive summary');
+      const components = results.component_origins || results.components;
+      if (!components || components.length === 0) throw new Error('components required for executive summary');
+      if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) throw new Error('north_american_content required for executive summary');
+      if (!results.trade_volume && results.trade_volume !== 0) throw new Error('annual_trade_volume required for executive summary');
+      if (results.usmca?.qualified === undefined || results.usmca?.qualified === null) throw new Error('usmca_qualified status required for executive summary');
+
       // Prepare payload for the executive trade alert API
       const payload = {
         user_profile: {
-          subscription_tier: userSubscriptionTier || 'trial',
-          industry_sector: results.product_classification?.industry || 'Manufacturing',
-          destination_country: results.destination_country || 'US'
+          subscription_tier: userSubscriptionTier,
+          industry_sector: results.company.industry_sector,
+          destination_country: results.destination_country
         },
         workflow_intelligence: {
-          components: results.component_origins || results.components || [],
-          north_american_content: results.usmca?.north_american_content || 0,
-          annual_trade_volume: results.trade_volume || 0,
-          usmca_qualified: results.usmca?.qualified || false,
+          components: components,
+          north_american_content: results.usmca.north_american_content,
+          annual_trade_volume: results.trade_volume,
+          usmca_qualified: results.usmca.qualified,
           preference_criterion: results.usmca?.preference_criterion || null
         }
       };
