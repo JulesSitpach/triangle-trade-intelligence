@@ -620,6 +620,18 @@ export default protectedApiHandler({
             // Example: Semiconductors are 0% MFN (Free) + 60% Section 301 = 60% total for China origin
             const rateTypeCode = rateData?.mfn_rate_type_code;
             const textRate = rateData?.mfn_text_rate;
+            const mfnAdValRate = rateData?.mfn_ad_val_rate;
+
+            // ✅ DEBUG: Log database values for first component
+            if (!component._debugLogged) {
+              console.log('\n═══════════════════════════════════════════════════════════════');
+              console.log('🔍 [DATABASE ENRICHMENT] getMFNRate() - Raw database values:');
+              console.log(`   HS Code: ${component.hs_code}`);
+              console.log(`   mfn_rate_type_code: "${rateTypeCode}"`);
+              console.log(`   mfn_text_rate: "${textRate}"`);
+              console.log(`   mfn_ad_val_rate: "${mfnAdValRate}" (parsed: ${parseFloat(mfnAdValRate)})`);
+              component._debugLogged = true;
+            }
 
             // Handle "Free" rates (rate_type_code "0" = Free/duty-free)
             if (!rateTypeCode || rateTypeCode === '0' || textRate === 'Free') {
@@ -632,14 +644,17 @@ export default protectedApiHandler({
             if (rateTypeCode === 'A') {
               const baseMfnRate = parseFloat(rateData?.mfn_ad_val_rate) || 0;
               if (!isNaN(baseMfnRate) && baseMfnRate > 0) {
+                console.log(`✅ [getMFNRate] Returning: ${baseMfnRate}`);
                 return baseMfnRate;  // Return decimal format (0-1), no multiplication
               }
+              console.log(`⚠️  [getMFNRate] Ad valorem rate is 0 or invalid`);
               return 0;
             }
 
             // Specific or compound rates - return 0 for now (AI will handle these)
             // TODO: Handle specific rates like "30.9 cents/kg" and compound rates
             if (rateTypeCode === 'S' || rateTypeCode === 'C' || rateTypeCode === 'O') {
+              console.log(`⚠️  [getMFNRate] Returning 0 for ${rateTypeCode} rate type`);
               return 0;  // Mark for AI enrichment
             }
 
@@ -734,6 +749,19 @@ export default protectedApiHandler({
             rate_type: rateTypeCodeForBase,  // Include rate type for debugging: "A"=ad valorem, "S"=specific, "C"=compound
             last_updated: new Date().toISOString()
           };
+
+          // ✅ DEBUG: Log final enriched rates for first component
+          if (!component._ratesLogged) {
+            console.log(`\n✅ [DATABASE ENRICHMENT] Enriched rates for ${component.description}:`);
+            console.log(`   mfn_rate: ${mfnRate}`);
+            console.log(`   base_mfn_rate: ${baseMfnRate}`);
+            console.log(`   section_301: ${section301Rate}`);
+            console.log(`   section_232: ${standardFields.section_232}`);
+            console.log(`   usmca_rate: ${usmcaRate}`);
+            console.log(`   rate_source: ${standardFields.rate_source}`);
+            console.log('═══════════════════════════════════════════════════════════════\n');
+            component._ratesLogged = true;
+          }
 
           enriched.push({
             ...baseComponent,  // Keep all original fields
@@ -1198,6 +1226,13 @@ export default protectedApiHandler({
       const usmcaCountries = ['US', 'MX', 'CA'];
       const isUSMCAMember = usmcaCountries.includes(finalOriginCountry.toUpperCase());
 
+      // ✅ CRITICAL FIX (Oct 28): Calculate total_rate from all tariff components
+      // total_rate = base_mfn_rate + section_301 + section_232
+      const baseMfnRate = component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate || 0;
+      const section301 = component.section_301 || 0;
+      const section232 = component.section_232 || 0;
+      const totalRate = baseMfnRate + section301 + section232;
+
       return {
         ...component,
         // ✅ CRITICAL: Ensure hs_code and origin_country from original input
@@ -1212,7 +1247,10 @@ export default protectedApiHandler({
         // ✅ NEW: Flag indicating if component is from USMCA member country (for UI counter)
         is_usmca_member: isUSMCAMember,
         // Ensure all required fields are present for frontend transformer
-        base_mfn_rate: component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate,
+        base_mfn_rate: baseMfnRate,
+        section_301: section301,
+        section_232: section232,
+        total_rate: totalRate,
         rate_source: component.rate_source || 'database_cache',
         stale: component.stale !== undefined ? component.stale : false,
         // Ensure data_source is set for tracking provenance
@@ -1255,11 +1293,22 @@ export default protectedApiHandler({
     // This transforms componentBreakdown from percentage format to decimal format
     // Required because UI calculates: componentValue × (mfnRate - usmcaRate)
     // If rates are percentages (55) instead of decimals (0.55), calculation is 100x too large
-    const transformedComponents = (componentBreakdown || []).map((component) => {
+    const transformedComponents = (componentBreakdown || []).map((component, compIdx) => {
       try {
         // Step 1: Components are in percentage format (25, 0, 1.5, etc)
         // Apply database_to_api transformations to convert percentages to decimals
         const apiFormatComponent = {};
+
+        // ✅ DEBUG: Log first component to console for verification
+        if (compIdx === 0) {
+          console.log('\n\n═══════════════════════════════════════════════════════════════');
+          console.log('🔍 [API TRANSFORMATION DEBUG] First component from componentBreakdown:');
+          console.log('   description:', component.description);
+          console.log('   mfn_rate (raw):', component.mfn_rate, '(type:', typeof component.mfn_rate + ')');
+          console.log('   section_301 (raw):', component.section_301, '(type:', typeof component.section_301 + ')');
+          console.log('   total_rate (raw):', component.total_rate, '(type:', typeof component.total_rate + ')');
+          console.log('═══════════════════════════════════════════════════════════════\n');
+        }
 
         Object.entries(COMPONENT_DATA_CONTRACT.fields).forEach(([dbFieldName, fieldDef]) => {
           const value = component[dbFieldName];
@@ -1290,6 +1339,10 @@ export default protectedApiHandler({
               if (!isNaN(numValue) && numValue >= 0 && numValue <= 1) {
                 // Already in decimal format - NO transformation needed
                 apiValue = numValue;
+                // ✅ DEBUG: Log first component tariff field transformation
+                if (compIdx === 0 && ['mfn_rate', 'section_301', 'total_rate'].includes(dbFieldName)) {
+                  console.log(`✅ [TRANSFORM] ${dbFieldName}: ${value} → ${apiValue} (already decimal, no transformation)`);
+                }
               } else if (!isNaN(numValue) && numValue > 1) {
                 // In percentage format (25) - apply database_to_api transformation
                 apiValue = COMPONENT_DATA_CONTRACT.transform(
@@ -1298,8 +1351,16 @@ export default protectedApiHandler({
                   'api',       // Transform to API format (decimals 0-1)
                   dbFieldName
                 );
+                // ✅ DEBUG: Log first component tariff field transformation
+                if (compIdx === 0 && ['mfn_rate', 'section_301', 'total_rate'].includes(dbFieldName)) {
+                  console.log(`✅ [TRANSFORM] ${dbFieldName}: ${value} → ${apiValue} (percentage to decimal)`);
+                }
               } else {
                 apiValue = 0;  // Invalid or zero
+                // ✅ DEBUG: Log first component tariff field transformation
+                if (compIdx === 0 && ['mfn_rate', 'section_301', 'total_rate'].includes(dbFieldName)) {
+                  console.log(`⚠️  [TRANSFORM] ${dbFieldName}: ${value} → ${apiValue} (invalid/zero)`);
+                }
               }
             } else {
               // Non-tariff fields: Apply normal transformation
