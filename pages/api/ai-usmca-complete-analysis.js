@@ -1094,7 +1094,13 @@ export default protectedApiHandler({
       return {
         ...component,
         // ✅ CRITICAL: Ensure hs_code and origin_country from original input
-        hs_code: component.hs_code || originalComponent.hs_code || '',
+        hs_code: (() => {
+          const raw = component.hs_code || originalComponent.hs_code || '';
+          if (!raw) return '';
+          // Remove all non-digit characters and pad to 10 digits
+          const digits = Array.from(raw).filter(c => /[0-9]/.test(c)).join('');
+          return (digits + '0000000000').substring(0, 10);
+        })(),
         origin_country: finalOriginCountry,
         // ✅ NEW: Flag indicating if component is from USMCA member country (for UI counter)
         is_usmca_member: isUSMCAMember,
