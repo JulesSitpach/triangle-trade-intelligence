@@ -59,35 +59,54 @@ async function getAIRatesForMissingComponents(missingComponents, destinationCoun
     .map((comp, i) => `${i + 1}. HS Code: ${comp.hs_code}, Origin: ${comp.origin_country}, Description: ${comp.description}`)
     .join('\n');
 
-  const prompt = `You are a tariff expert with access to current 2025 US tariff schedules. Research and provide ACCURATE tariff rates for ${destinationCountry} destination for these components:
+  const prompt = `You are a rigorous tariff expert validating 2025 US tariff rates. Your job is NOT to accept zeros passively - QUESTION and VERIFY every zero rate in the database.
 
+Components requiring tariff analysis for ${destinationCountry} destination:
 ${componentsList}
 
 Product Context: ${productDescription}
 
-Your task:
-1. Look up the CURRENT (2025) MFN tariff rate for each HS code in the US Harmonized Tariff Schedule
-2. Apply Section 301 duties if: Origin = China AND Destination = US (research the actual rate for this HS code)
-3. Apply Section 232 duties if component is steel/aluminum (research the actual rate)
-4. Calculate USMCA preferential rate if applicable to Mexico/Canada origin
-5. Return REAL rates from actual 2025 tariff schedules - not estimates or defaults
+CRITICAL VALIDATION RULES (2025):
+1. IF database shows 0% MFN rate: INVESTIGATE WHY
+   - Is it ITA (Information Technology Agreement)? Provide evidence.
+   - Is it a legitimate zero-duty item? Research and confirm.
+   - Or is the database incomplete? Research the actual rate.
 
-CRITICAL: Do not return zeros unless the actual tariff IS zero (e.g., ITA-covered electronics).
+2. ALWAYS include Section 301/tariff escalations:
+   - China origin → US destination: Apply 50% Section 301 (doubled Jan 2025) + 10% reciprocal tariffs
+   - Research if additional stacking applies for this HS code
+
+3. ALWAYS include Section 232 where applicable:
+   - Steel/aluminum components: Research current 2025 rates (typically 50%)
+   - Verify if USMCA exemptions apply
+
+4. USMCA rates: Research Mexico/Canada preferential rates
+   - If rules of origin unclear, note "qualification pending verification"
+
+Your analysis process:
+- For EVERY component, explain why the rate is correct (not just return it)
+- If a rate is 0%, state explicitly: "Confirmed ITA duty-free item" or "Research shows actual rate is X%"
+- Flag any data quality issues you find
+- Provide confidence level: high/medium/low based on research clarity
 
 Return VALID JSON array with rates AS PERCENTAGES:
 [
   {
     "hs_code": "...",
-    "mfn_rate": <actual MFN rate from 2025 US tariff schedule>,
+    "mfn_rate": <verified 2025 MFN rate from US tariff schedule>,
     "base_mfn_rate": <same as mfn_rate>,
-    "section_301": <0 if not applicable, else actual Section 301 rate>,
-    "section_232": <0 if not applicable, else actual Section 232 rate>,
-    "total_rate": <sum of all applicable duties>,
-    "usmca_rate": <actual preferential rate if qualified>,
+    "section_301": <China origin to US? Verify and include 50% + 10% reciprocal>,
+    "section_232": <steel/aluminum? Research 2025 rate>,
+    "total_rate": <sum of ALL applicable duties>,
+    "usmca_rate": <preferential rate if applicable>,
     "description": "...",
-    "confidence": "high|medium|low"
+    "justification": "<explain why this rate is correct, especially if zero>",
+    "confidence": "high|medium|low",
+    "data_quality_flag": "<any issues found>"
   }
 ]
+
+CRITICAL: Never return zeros without explicit justification. If you cannot verify a 0% rate is correct, research and provide the actual rate. This is for USMCA certificates - accuracy is legally required.
 
 Return ONLY valid JSON array. No explanations.`;
 
@@ -97,7 +116,7 @@ Return ONLY valid JSON array. No explanations.`;
       throw new Error('OPENROUTER_API_KEY not configured');
     }
 
-    console.log(`🎯 [AI-FALLBACK] Calling OpenRouter for ${missingComponents.length} missing components...`);
+    // Debug: Calling OpenRouter for missing components
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -136,14 +155,18 @@ Return ONLY valid JSON array. No explanations.`;
       section_301: (parseFloat(result.section_301) || 0) * 100,
       section_232: (parseFloat(result.section_232) || 0) * 100,
       usmca_rate: (parseFloat(result.usmca_rate) || 0) * 100,
-      total_rate: (parseFloat(result.total_rate) || 0) * 100
+      total_rate: (parseFloat(result.total_rate) || 0) * 100,
+      // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
+      justification: result.justification || 'No justification provided',
+      confidence: result.confidence || 'low',
+      data_quality_flag: result.data_quality_flag || null
     }));
 
-    console.log(`✅ [AI-FALLBACK] Got rates for ${normalizedResults.length} components`);
+    // DEBUG: Fallback rates retrieved with AI validation
     return normalizedResults;
 
   } catch (openrouterError) {
-    console.warn(`⚠️  [AI-FALLBACK] OpenRouter failed, trying Anthropic Direct:`, openrouterError.message);
+    // Fallback to Anthropic Direct (OpenRouter failed)
 
     // TIER 2: Fallback to Anthropic Direct
     try {
@@ -180,7 +203,7 @@ Return ONLY valid JSON array. No explanations.`;
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       const results = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
 
-      // Normalize rates
+      // Normalize rates (matching OpenRouter normalization)
       const normalizedResults = results.map(result => ({
         hs_code: result.hs_code,
         mfn_rate: (parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0) * 100,
@@ -188,10 +211,14 @@ Return ONLY valid JSON array. No explanations.`;
         section_301: (parseFloat(result.section_301) || 0) * 100,
         section_232: (parseFloat(result.section_232) || 0) * 100,
         usmca_rate: (parseFloat(result.usmca_rate) || 0) * 100,
-        total_rate: (parseFloat(result.total_rate) || 0) * 100
+        total_rate: (parseFloat(result.total_rate) || 0) * 100,
+        // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
+        justification: result.justification || 'No justification provided',
+        confidence: result.confidence || 'low',
+        data_quality_flag: result.data_quality_flag || null
       }));
 
-      console.log(`✅ [AI-FALLBACK] Anthropic Direct succeeded for ${normalizedResults.length} components`);
+      // Anthropic Direct fallback succeeded with validation data
       return normalizedResults;
 
     } catch (anthropicError) {
@@ -398,27 +425,14 @@ export default protectedApiHandler({
         // ✅ VALIDATION CHECKPOINT 2: Only use AI rates if database rates are missing
         // Priority: Keep database rates, only use AI as fallback
         if (comp.mfn_rate !== undefined && comp.mfn_rate !== null && comp.mfn_rate !== 0 && comp.mfn_rate !== '') {
-          console.log(`✅ [FALLBACK-SKIP] ${comp.description}: Already has database rate ${comp.mfn_rate}%, skipping AI extraction`);
+          // Database rate exists, skipping AI extraction
           return comp;  // Keep database rates - don't extract from AI
         }
 
         // Only extract from AI if database rate is missing
         const rates = extractComponentRate(comp.description, comp.hs_code, comp.origin_country);
 
-        // DEBUG: Log extraction results
-        console.log(`🔍 [FALLBACK-EXTRACT] Extracting rates for "${comp.description}" (${comp.hs_code}):`, {
-          mfnFound: rates.extracted.mfnFound,
-          mfn_rate: rates.mfn_rate,
-          section301Found: rates.extracted.section301Found,
-          section_301: rates.section_301,
-          source: comp.rate_source
-        });
-
-        if (rates.extracted.mfnFound || rates.extracted.section301Found) {
-          console.log(`✅ [FALLBACK-SUCCESS] Filled missing rates for ${comp.description}: MFN ${rates.mfn_rate}%, Section 301 ${rates.section_301}%`);
-        } else {
-          console.log(`⚠️  [FALLBACK-MISS] Could not extract rates for ${comp.description} from AI response`);
-        }
+        // DEBUG: Extracting fallback rates from AI response for missing components
 
         const totalRate = rates.mfn_rate + rates.section_301 + (rates.section_232 || 0);
         const savingsPercent = rates.mfn_rate > 0 ? (((rates.mfn_rate - rates.usmca_rate) / rates.mfn_rate) * 100) : 0;
@@ -557,7 +571,7 @@ export default protectedApiHandler({
           // If exact match fails, try 6-digit prefix match (more lenient)
           if (!rateData) {
             const sixDigitPrefix = normalizedHsCode.substring(0, 6);
-            console.log(`⚠️  [TARIFF-LOOKUP] Exact match failed for ${normalizedHsCode}, trying 6-digit prefix: ${sixDigitPrefix}`);
+            // DEBUG: Exact match failed, trying 6-digit prefix match
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
@@ -567,7 +581,7 @@ export default protectedApiHandler({
 
             if (prefixMatches && prefixMatches.length > 0) {
               rateData = prefixMatches[0];
-              console.log(`✅ [TARIFF-LOOKUP] Found prefix match: ${rateData.hts8} for input ${component.hs_code}`);
+              // DEBUG: Found prefix match for HS code
             }
           }
 
@@ -575,7 +589,7 @@ export default protectedApiHandler({
           // This is normal for HS codes not in tariff_intelligence_master
           // Proceed gracefully to Phase 3 (AI fallback) instead of crashing
           if (!rateData) {
-            console.log(`⚠️  [TARIFF-LOOKUP] HS code not found: ${normalizedHsCode} (${component.hs_code}) - will use AI fallback`);
+            // DEBUG: HS code not found in database, will use AI fallback
             enriched.push({
               ...baseComponent,
               mfn_rate: 0,
@@ -636,11 +650,7 @@ export default protectedApiHandler({
             ...standardFields  // Overwrite with database rates if available
           });
 
-          if (rateData) {
-            console.log(`✅ [TARIFF-INTEGRATION] Fresh rates loaded for ${component.hs_code}: MFN ${standardFields.mfn_rate}%, Section 301 ${standardFields.section_301}% (rate_source=${standardFields.rate_source})`);
-          } else {
-            console.log(`⚠️ [TARIFF-INTEGRATION] No fresh rates for ${component.hs_code} - using component values (rate_source=${standardFields.rate_source}, stale=${standardFields.stale})`);
-          }
+          // DEBUG: Tariff rates loaded from database or component input
         } catch (dbError) {
           console.error(`❌ [TARIFF-INTEGRATION] Database lookup error for ${component.hs_code}:`, dbError.message);
           // On error: still return consistent structure with original fields preserved
@@ -668,11 +678,7 @@ export default protectedApiHandler({
       formData.destination_country
     );
 
-    console.log('✅ [PHASE 1] Database enrichment complete:', {
-      count: enrichedComponents.length,
-      with_rates: enrichedComponents.filter(c => c.stale === false).length,
-      missing_rates: enrichedComponents.filter(c => c.stale === true).length
-    });
+    // Phase 1: Database enrichment complete
 
     // Phase 2: Identify components missing tariff rates (cache misses)
     // CRITICAL: Only check stale flag, NOT mfn_rate === 0 (zero is valid data from AI)
@@ -680,12 +686,12 @@ export default protectedApiHandler({
       comp.hs_code && comp.stale === true
     );
 
-    console.log(`⏱️  [PHASE 2] Identifying missing rates: ${missingRates.length} components need AI lookup`);
+    // Phase 2: Identifying missing rates for AI lookup
 
     // Phase 3: If any missing, single AI call for just those components
     if (missingRates.length > 0) {
       try {
-        console.log(`🤖 [PHASE 3] Calling AI for ${missingRates.length} missing components...`);
+        // Phase 3: Calling AI for missing components
 
         const aiEnrichedRates = await getAIRatesForMissingComponents(
           missingRates,
@@ -698,12 +704,7 @@ export default protectedApiHandler({
           const aiMatch = aiEnrichedRates.find(air => air.hs_code === comp.hs_code);
           // ✅ FIX: Merge AI data for ANY component marked as needing AI enrichment, not just when mfn_rate === 0
           if (aiMatch && (comp.rate_source === 'database_lookup_miss' || comp.stale === true)) {
-            console.log(`✅ [MERGE] AI enrichment for ${comp.hs_code}:`, {
-              ai_mfn_rate: aiMatch.mfn_rate,
-              ai_usmca_rate: aiMatch.usmca_rate,
-              ai_section_301: aiMatch.section_301,
-              previous_source: comp.rate_source
-            });
+            // DEBUG: Merging AI enrichment for component
             return {
               ...comp,
               mfn_rate: aiMatch.mfn_rate,
@@ -720,25 +721,18 @@ export default protectedApiHandler({
           return comp;
         });
 
-        console.log(`✅ [PHASE 3] AI enrichment complete - merged ${aiEnrichedRates.length} results`);
+        // Phase 3: AI enrichment complete
       } catch (aiError) {
         console.warn(`⚠️  [PHASE 3] AI fallback failed, continuing with database rates:`, aiError.message);
         // Continue with database rates - don't block workflow
       }
     }
 
-    // ✅ DEBUG: Log final enrichment state
+    // DEBUG: Final enrichment state validation
     if (!enrichedComponents || enrichedComponents.length === 0) {
       console.error('🚨 [TARIFF-DATA] enrichedComponents is empty!', {
         input_components: formData.component_origins?.length || 0,
         destination: formData.destination_country
-      });
-    } else {
-      console.log('✅ [TARIFF-DATA] enrichedComponents final state:', {
-        count: enrichedComponents.length,
-        first_component: enrichedComponents[0]?.description,
-        has_mfn_rate: enrichedComponents[0]?.mfn_rate !== undefined,
-        rate_sources: enrichedComponents.map(c => c.rate_source).join(', ')
       });
     }
 
@@ -899,14 +893,7 @@ export default protectedApiHandler({
     // Call OpenRouter API
     const openrouterStartTime = Date.now();
 
-    // ✅ DEBUG: Log what we're sending to OpenRouter
-    console.log('🤖 [OPENROUTER-DEBUG] Request details:', {
-      prompt_length: prompt.length,
-      prompt_first_300_chars: prompt.substring(0, 300),
-      model: 'anthropic/claude-haiku-4.5',
-      max_tokens: 2000,
-      has_api_key: !!process.env.OPENROUTER_API_KEY
-    });
+    // DEBUG: Sending request to OpenRouter (logging disabled for production)
 
     const requestBody = {
       model: 'anthropic/claude-haiku-4.5', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
@@ -948,12 +935,7 @@ export default protectedApiHandler({
       throw new Error('AI response is empty or missing content field');
     }
 
-    // ✅ DEBUG: Log raw AI response to see what's being returned
-    console.log('🤖 [RAW-AI-RESPONSE]', {
-      response_length: aiText.length,
-      first_500_chars: aiText.substring(0, 500),
-      last_200_chars: aiText.substring(Math.max(0, aiText.length - 200))
-    });
+    // DEBUG: Parsing AI response (logging disabled for production)
 
     // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
@@ -1036,11 +1018,7 @@ export default protectedApiHandler({
       }
 
       analysis = JSON.parse(sanitizedJSON);
-      if (repairAttempted) {
-        console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy (after auto-repair)`);
-      } else {
-        console.log(`✅ [JSON PARSE] Success using ${extractionMethod} strategy`);
-      }
+      // DEBUG: JSON parse successful
     } catch (parseError) {
       console.error('❌ [JSON PARSE ERROR]', {
         error: parseError.message,
@@ -1058,14 +1036,7 @@ export default protectedApiHandler({
     // ✅ ROOT CAUSE FIX #3: Validate Preference Criterion Before Building Response
     // CRITICAL: If AI says product is qualified, it MUST have determined the preference criterion
 
-    // 🔍 DEBUG: Log what AI returned for USMCA qualification
-    console.log('🔍 [AI RESPONSE] USMCA Qualification Debug:', {
-      qualified: analysis.usmca?.qualified,
-      preference_criterion: analysis.usmca?.preference_criterion,
-      north_american_content: analysis.usmca?.north_american_content,
-      threshold_applied: analysis.usmca?.threshold_applied,
-      all_usmca_keys: Object.keys(analysis.usmca || {})
-    });
+    // DEBUG: Validating USMCA qualification fields
 
     if (analysis.usmca?.qualified === true) {
       if (!analysis.usmca?.preference_criterion) {
@@ -1365,7 +1336,7 @@ export default protectedApiHandler({
 
     // ========== COMPONENT ENRICHMENT WITH TARIFF INTELLIGENCE ==========
     // Enrich each component with HS codes, tariff rates, and savings calculations
-    console.log('🔍 Enriching components with tariff intelligence...');
+    // DEBUG: Component enrichment phase
 
     // Build COMPLETE context object for component classification
     const fullBusinessContext = {
@@ -1414,16 +1385,11 @@ export default protectedApiHandler({
     // It contains all required fields: base_mfn_rate, rate_source, stale
     // The raw result.usmca.component_breakdown from AI doesn't have these fields
 
-    // ✅ DEBUG: Log final components before returning to frontend
+    // DEBUG: Final component validation before response
     if (!transformedComponents || transformedComponents.length === 0) {
       console.error('🚨 [RESPONSE] transformedComponents is empty! Frontend will show "No tariff data available"', {
         componentBreakdown_count: componentBreakdown?.length || 0,
         transformedComponents_count: transformedComponents?.length || 0
-      });
-    } else {
-      console.log('✅ [RESPONSE] transformedComponents ready for frontend:', {
-        count: transformedComponents.length,
-        first_component_fields: Object.keys(transformedComponents[0])
       });
     }
 
