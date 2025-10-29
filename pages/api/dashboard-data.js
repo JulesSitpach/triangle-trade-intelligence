@@ -297,9 +297,10 @@ export default protectedApiHandler({
             isRelevant = isRelevant && originMatch;
           }
 
-          // 3. Check Industry Match (if alert specifies industries)
+          // 3. Check Industry Match (if alert specifies industries AND user has industries set)
           // Example: "Steel industry faces new restrictions"
-          if (alert.relevant_industries && alert.relevant_industries.length > 0) {
+          // NOTE: If user hasn't set business_type, don't filter by industry (show alerts anyway)
+          if (alert.relevant_industries && alert.relevant_industries.length > 0 && userIndustries.length > 0) {
             const industryMatch = userIndustries.some(userIndustry =>
               alert.relevant_industries.some(alertIndustry =>
                 userIndustry.toLowerCase().includes(alertIndustry.toLowerCase()) ||
@@ -308,6 +309,7 @@ export default protectedApiHandler({
             );
             isRelevant = isRelevant && industryMatch;
           }
+          // If user hasn't set industries, don't filter by industry - show alert anyway
 
           // 4. Check Destination Match (if alert specifies destinations)
           if (alert.affected_destinations && alert.affected_destinations.length > 0) {

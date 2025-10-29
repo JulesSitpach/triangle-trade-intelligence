@@ -46,6 +46,29 @@ export default function TradeRiskAlternatives() {
   const [, setHasSaveDataConsent] = useState(false);
   const [pendingProfile, setPendingProfile] = useState(null);
 
+  // Collapsible component state (must be at component level for React hooks rules)
+  const [expandedComponents, setExpandedComponents] = useState({});
+
+  // Email notification preferences for each component
+  const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
+
+  // Toggle function for component expansion (only if alerts exist)
+  const toggleExpanded = (idx, hasAlerts) => {
+    if (!hasAlerts) return; // Don't expand if no alerts
+    setExpandedComponents(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
+
+  // Toggle email notifications for specific component
+  const toggleComponentEmailNotification = (idx) => {
+    setComponentEmailNotifications(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
+
   const { user } = useSimpleAuth();
 
   useEffect(() => {
@@ -669,25 +692,47 @@ export default function TradeRiskAlternatives() {
           </div>
 
           {/* Component Intelligence - Collapsible rows with component-specific alerts */}
-          {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (() => {
-            // State for tracking which components are expanded (must be outside .map())
-            const [expandedComponents, setExpandedComponents] = React.useState({});
-
-            const toggleExpanded = (idx) => {
-              setExpandedComponents(prev => ({
-                ...prev,
-                [idx]: !prev[idx]
-              }));
-            };
-
-            return (
-              <div className="element-spacing">
+          {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (
+            <div className="element-spacing">
                 <h3 className="card-title">Component Tariff Intelligence</h3>
                 <p className="text-body">
-                  Click any component to see tariff details and relevant alerts:
+                  Click any component with alerts to see tariff details and policy impacts:
                 </p>
 
-                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {/* Table Header */}
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px 8px 0 0',
+                  border: '1px solid #e5e7eb',
+                  borderBottom: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}>
+                  <div style={{ width: '1.25rem' }}></div> {/* Spacer for expand icon */}
+                  <div style={{ flex: '2', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Component
+                  </div>
+                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Origin
+                  </div>
+                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    HS Code
+                  </div>
+                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Value %
+                  </div>
+                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Alerts
+                  </div>
+                  <div style={{ flex: '0.75', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Email
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                   {userProfile.componentOrigins.map((comp, idx) => {
                   const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
                   const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
@@ -706,34 +751,62 @@ export default function TradeRiskAlternatives() {
                     const originMatch = alert.affected_countries?.some(country =>
                       (comp.origin_country || comp.country)?.toUpperCase() === country.toUpperCase()
                     );
+
+                    // Debug logging for first component
+                    if (idx === 0 && consolidatedAlerts.length > 0) {
+                      console.log('🔍 Alert Matching Debug for component:', {
+                        componentName: comp.component_type || comp.description,
+                        componentHS: comp.hs_code,
+                        componentOrigin: comp.origin_country || comp.country,
+                        totalAlerts: consolidatedAlerts.length,
+                        alertTitle: alert.title || alert.consolidated_title,
+                        alertHS: alert.affected_hs_codes,
+                        alertCountries: alert.affected_countries,
+                        hsMatch,
+                        originMatch,
+                        finalMatch: hsMatch || originMatch
+                      });
+                    }
+
                     return hsMatch || originMatch;
                   });
 
                   const isExpanded = expandedComponents[idx] || false;
+                  const hasAlerts = componentAlerts.length > 0;
+                  const emailEnabled = componentEmailNotifications[idx] || false;
+
+                  const isLastRow = idx === userProfile.componentOrigins.length - 1;
 
                   return (
                     <div key={idx} style={{
                       border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
+                      borderTop: idx === 0 ? 'none' : '1px solid #e5e7eb',
+                      borderRadius: isLastRow && !isExpanded ? '0 0 8px 8px' : '0',
                       backgroundColor: 'white',
                       overflow: 'hidden'
                     }}>
                       {/* Collapsed Header - Always visible */}
                       <div
-                        onClick={() => toggleExpanded(idx)}
+                        onClick={() => toggleExpanded(idx, hasAlerts)}
                         style={{
                           padding: '1rem',
-                          cursor: 'pointer',
+                          cursor: hasAlerts ? 'pointer' : 'not-allowed',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '1rem',
                           backgroundColor: isExpanded ? '#f9fafb' : 'white',
-                          transition: 'background-color 0.2s'
+                          transition: 'background-color 0.2s',
+                          opacity: hasAlerts ? 1 : 0.6
                         }}
                       >
                         {/* Expand/Collapse Icon */}
-                        <span style={{ fontSize: '1.25rem', color: '#6b7280' }}>
-                          {isExpanded ? '▼' : '▶'}
+                        <span style={{
+                          fontSize: '1.25rem',
+                          color: hasAlerts ? '#6b7280' : '#d1d5db',
+                          width: '1.25rem',
+                          textAlign: 'center'
+                        }}>
+                          {hasAlerts ? (isExpanded ? '▼' : '▶') : '—'}
                         </span>
 
                         {/* Component Name */}
@@ -757,7 +830,7 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Alert Badge */}
-                        <div style={{ flex: '1', textAlign: 'right' }}>
+                        <div style={{ flex: '1', textAlign: 'center' }}>
                           {componentAlerts.length > 0 ? (
                             <span style={{
                               background: '#fee2e2',
@@ -781,6 +854,24 @@ export default function TradeRiskAlternatives() {
                               ✅ No alerts
                             </span>
                           )}
+                        </div>
+
+                        {/* Email Notification Checkbox - Show for ALL components (alerts might come in future) */}
+                        <div style={{ flex: '0.75', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={emailEnabled}
+                            onChange={(e) => {
+                              e.stopPropagation(); // Prevent row expansion when clicking checkbox
+                              toggleComponentEmailNotification(idx);
+                            }}
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              cursor: 'pointer'
+                            }}
+                            title="Receive email notifications for future alerts affecting this component"
+                          />
                         </div>
                       </div>
 
@@ -899,8 +990,7 @@ export default function TradeRiskAlternatives() {
               </div>
 
             </div>
-            );
-          })()}
+          )}
         </div>
 
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
