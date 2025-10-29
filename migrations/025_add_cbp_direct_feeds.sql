@@ -1,6 +1,6 @@
--- ADD DIRECT CBP FEEDS - "Live Customs Updates" Feature
+-- ADD GOVERNMENT + TRADE INTELLIGENCE FEEDS - "Live Customs Updates" Feature
 -- Addresses LinkedIn member request: "live customs updates? Would be clutch for folks trying to go global"
--- Adds CBP Newsroom and Trade Bulletins for immediate customs clearance intelligence
+-- Adds 4 authoritative data sources: CBP (2 feeds), WTO, and Journal of Commerce (JOC)
 
 -- ============================================================================
 -- CBP Newsroom Spotlight (Real-time customs updates)
@@ -208,6 +208,69 @@ INSERT INTO rss_feeds (
   updated_at = NOW();
 
 -- ============================================================================
+-- Journal of Commerce (JOC) - Trade intelligence and supply chain monitoring
+-- ============================================================================
+INSERT INTO rss_feeds (
+  name,
+  url,
+  category,
+  description,
+  is_active,
+  priority_level,
+  poll_frequency_minutes,
+  keywords,
+  exclusion_keywords
+) VALUES (
+  'Journal of Commerce (JOC)',
+  'https://www.joc.com/api/rssfeed',
+  'trade_news',
+  'Maritime trade, port operations, tariff impacts, supply chain disruptions',
+  true,
+  'high',
+  180,  -- Check every 3 hours (premium trade intelligence)
+  ARRAY[
+    -- Tariff and trade policy
+    'tariff', 'duty', 'section 301', 'section 232',
+    'trade war', 'trade policy', 'customs', 'import duty',
+    'anti-dumping', 'countervailing duty', 'trade agreement',
+
+    -- Port operations (affects shipping timelines)
+    'port congestion', 'vessel delay', 'port closure',
+    'customs hold', 'clearance delay', 'terminal congestion',
+    'los angeles', 'long beach', 'oakland', 'seattle',
+    'savannah', 'charleston', 'houston', 'miami',
+    'laredo', 'el paso', 'detroit', 'border crossing',
+
+    -- Supply chain disruptions
+    'supply chain', 'shortage', 'disruption', 'delay',
+    'capacity constraint', 'equipment shortage', 'container shortage',
+    'freight rate', 'shipping rate', 'rate increase',
+
+    -- Trade volumes (affects tariff exposure)
+    'import volume', 'export volume', 'trade volume',
+    'china imports', 'asia imports', 'mexico trade',
+    'usmca', 'nafta', 'trade lane', 'trans-pacific',
+
+    -- Origin-specific (supplier country risks)
+    'china', 'vietnam', 'mexico', 'taiwan', 'south korea',
+    'thailand', 'india', 'malaysia', 'indonesia',
+
+    -- Product categories (match user industries)
+    'electronics', 'automotive', 'textiles', 'steel',
+    'aluminum', 'machinery', 'chemicals', 'agriculture'
+  ],
+  ARRAY[
+    -- Exclude non-trade content
+    'job posting', 'career opportunity', 'webinar',
+    'conference', 'event registration', 'subscription offer',
+    'cruise ship', 'passenger ferry', 'tourism'
+  ]
+) ON CONFLICT (url) DO UPDATE SET
+  keywords = EXCLUDED.keywords,
+  exclusion_keywords = EXCLUDED.exclusion_keywords,
+  updated_at = NOW();
+
+-- ============================================================================
 -- Verify new feeds
 -- ============================================================================
 DO $$
@@ -224,18 +287,24 @@ BEGIN
   RAISE NOTICE '';
   RAISE NOTICE '🎯 LinkedIn Member Request DELIVERED:';
   RAISE NOTICE '   "live customs updates? Would be clutch for folks trying to go global"';
-  RAISE NOTICE '   ✅ CBP Newsroom Spotlights (real-time customs updates, 30-min polling)';
-  RAISE NOTICE '   ✅ CBP Weekly Bulletins (rulings & regulations, 2-hour polling)';
-  RAISE NOTICE '   ✅ WTO News & Disputes (trade policy & tariff rulings, 2-hour polling)';
-  RAISE NOTICE '   ✅ Federal Register CBP (existing)';
   RAISE NOTICE '';
-  RAISE NOTICE '📊 Coverage:';
+  RAISE NOTICE '✅ Government Sources:';
+  RAISE NOTICE '   • CBP Newsroom Spotlights (real-time customs updates, 30-min polling)';
+  RAISE NOTICE '   • CBP Weekly Bulletins (rulings & regulations, 2-hour polling)';
+  RAISE NOTICE '   • WTO News & Disputes (trade policy & tariff rulings, 2-hour polling)';
+  RAISE NOTICE '';
+  RAISE NOTICE '✅ Trade Intelligence:';
+  RAISE NOTICE '   • Journal of Commerce (JOC) (supply chain & port ops, 3-hour polling)';
+  RAISE NOTICE '';
+  RAISE NOTICE '📊 Comprehensive Coverage:';
   RAISE NOTICE '   • Customs clearance delays & holds';
   RAISE NOTICE '   • Documentation requirements';
   RAISE NOTICE '   • USMCA certificate compliance';
-  RAISE NOTICE '   • Port-specific updates';
+  RAISE NOTICE '   • Port congestion & vessel delays';
   RAISE NOTICE '   • Classification rulings (CBP & WTO)';
   RAISE NOTICE '   • Section 301/232 enforcement';
   RAISE NOTICE '   • WTO dispute settlements (affect tariff rates)';
   RAISE NOTICE '   • Anti-dumping & countervailing duty rulings';
+  RAISE NOTICE '   • Supply chain disruptions & rate changes';
+  RAISE NOTICE '   • Trade volume shifts (China, Mexico, Asia)';
 END $$;
