@@ -782,6 +782,48 @@ export default function WorkflowResults({
               : 'Your product does not meet USMCA regional content requirements'}
           </p>
 
+          {/* Potential Savings - Show prominently for qualified products */}
+          {results.usmca?.qualified && results.savings && (results.savings.annual_savings || 0) > 0 && (
+            <div style={{
+              marginTop: '1.5rem',
+              marginBottom: '1rem',
+              padding: '1.25rem',
+              backgroundColor: '#ecfdf5',
+              borderRadius: '8px',
+              border: '2px solid #059669'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.875rem', color: '#065f46', fontWeight: '500', marginBottom: '0.25rem' }}>
+                    💰 Potential Annual Savings
+                  </div>
+                  <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
+                    ${(results.savings.annual_savings || 0).toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: '#047857', marginTop: '0.25rem' }}>
+                    ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/month • {(results.savings.savings_percentage || 0).toFixed(1)}% tariff reduction
+                  </div>
+                </div>
+                <div style={{
+                  padding: '0.75rem 1.25rem',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '6px',
+                  border: '1px solid #10b981'
+                }}>
+                  <div style={{ fontSize: '0.75rem', color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+                    USMCA Rate
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
+                    {((results.savings.usmca_rate || 0) * 100).toFixed(1)}%
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    vs {((results.savings.mfn_rate || 0) * 100).toFixed(1)}% MFN
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Key Metrics */}
           <div className="metrics-grid">
             <div className="metric-card">
