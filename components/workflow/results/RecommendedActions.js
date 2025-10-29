@@ -55,6 +55,36 @@ export default function RecommendedActions({ results }) {
     }
   }, [isQualified, results, userSubscriptionTier]);
 
+  const saveExecutiveAlertToDatabase = async (alertData) => {
+    try {
+      // Save executive alert detailed_analysis to localStorage first (immediate)
+      const workflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      workflowResults.detailed_analysis = {
+        ...workflowResults.detailed_analysis,  // Keep existing detailed_analysis fields
+        ...alertData  // Merge executive alert fields (situation_brief, broker_insights, etc.)
+      };
+      localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowResults));
+
+      // Update database workflow_data (if user is logged in and workflow exists)
+      const response = await fetch('/api/workflow-session/update-executive-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          detailed_analysis: alertData
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Executive alert saved to database');
+      } else {
+        console.warn('⚠️ Failed to save executive alert to database (will use localStorage)');
+      }
+    } catch (error) {
+      console.error('❌ Error saving executive alert:', error);
+    }
+  };
+
   const loadExecutiveTradeAlert = async () => {
     setLoadingAlert(true);
     try {
@@ -108,6 +138,12 @@ export default function RecommendedActions({ results }) {
         const data = await response.json();
         setExecutiveAlert(data);
         console.log('✅ Executive trade alert loaded:', data);
+
+        // ✅ CRITICAL FIX: Save executive alert detailed_analysis to database
+        // This ensures alert impact analysis service can access rich workflow intelligence
+        if (data.alert) {
+          await saveExecutiveAlertToDatabase(data.alert);
+        }
       } else if (response.status === 403) {
         // User doesn't have paid subscription - show graceful message
         const errorData = await response.json();

@@ -20,6 +20,10 @@ import TRADE_RISK_CONFIG, {
   formatCurrency
 } from '../config/trade-risk-config';
 
+// Import alert impact analysis service
+import AlertImpactAnalysisService from '../lib/services/alert-impact-analysis-service';
+import { getCountryConfig } from '../lib/usmca/usmca-2026-config';
+
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,6 +55,10 @@ export default function TradeRiskAlternatives() {
 
   // Email notification preferences for each component
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
+
+  // Alert Impact Analysis state (ADDITIVE - reuses workflow analysis)
+  const [alertImpactAnalysis, setAlertImpactAnalysis] = useState(null);
+  const [isLoadingAlertImpact, setIsLoadingAlertImpact] = useState(false);
 
   // Toggle function for component expansion (only if alerts exist)
   const toggleExpanded = (idx, hasAlerts) => {
@@ -132,6 +140,8 @@ export default function TradeRiskAlternatives() {
 
             const profile = {
               companyName: alert.company_name || 'Your Company',
+              companyCountry: alert.company_country || 'US',
+              destinationCountry: alert.destination_country || 'US',
               businessType: alert.business_type || 'Not specified',
               hsCode: alert.hs_code || 'Not classified',
               productDescription: alert.product_description || 'Product',
@@ -140,6 +150,7 @@ export default function TradeRiskAlternatives() {
               qualificationStatus: alert.qualification_status || 'NEEDS_REVIEW',
               savings: 0,
               componentOrigins: components,
+              regionalContent: 0,
               recommendedAlternatives: alert.recommendations?.diversification_strategies || [],
               vulnerabilities: alert.primary_vulnerabilities || []
             };
@@ -166,6 +177,8 @@ export default function TradeRiskAlternatives() {
           const profile = {
             userId: user?.id,
             companyName: mostRecentWorkflow.company_name,
+            companyCountry: mostRecentWorkflow.company_country || workflowData.company?.company_country || 'US',
+            destinationCountry: mostRecentWorkflow.destination_country || workflowData.company?.destination_country || 'US',
             businessType: mostRecentWorkflow.business_type,
             industry_sector: mostRecentWorkflow.industry_sector,
             hsCode: mostRecentWorkflow.hs_code,
@@ -174,7 +187,8 @@ export default function TradeRiskAlternatives() {
             supplierCountry: components[0]?.origin_country || components[0]?.country,
             qualificationStatus: mostRecentWorkflow.qualification_status,
             savings: mostRecentWorkflow.estimated_annual_savings || 0,
-            componentOrigins: components
+            componentOrigins: components,
+            regionalContent: workflowData.usmca?.regional_content || 0
           };
 
           // Extract rich workflow intelligence if available
@@ -265,6 +279,8 @@ export default function TradeRiskAlternatives() {
       const profile = {
         userId: user?.id,  // Include userId for workflow intelligence lookup
         companyName: userData.company?.company_name || userData.company?.name,
+        companyCountry: userData.company?.company_country || userData.company?.country || 'US',
+        destinationCountry: userData.company?.destination_country || userData.destination_country || 'US',
         businessType: userData.company?.business_type,
         industry_sector: userData.company?.industry_sector,
         hsCode: userData.product?.hs_code,
@@ -273,7 +289,8 @@ export default function TradeRiskAlternatives() {
         supplierCountry: components[0]?.origin_country || components[0]?.country,  // Try both keys
         qualificationStatus: userData.usmca?.qualification_status,
         savings: userData.savings?.annual_savings || 0,
-        componentOrigins: components  // Fixed: use usmca.component_breakdown
+        componentOrigins: components,  // Fixed: use usmca.component_breakdown
+        regionalContent: userData.usmca?.regional_content || 0
       };
 
       // 🎯 EXTRACT RICH WORKFLOW INTELLIGENCE (Premium content for Professional/Premium tiers)
@@ -608,6 +625,72 @@ export default function TradeRiskAlternatives() {
       setIsConsolidating(false);
     }
   };
+
+  /**
+   * Generate additive alert impact analysis
+   * Reuses existing workflow analysis from results page to avoid re-computation
+   * Only analyzes NEW threats and how they impact existing strategic plan
+   */
+  const generateAlertImpactAnalysis = async () => {
+    if (!consolidatedAlerts || consolidatedAlerts.length === 0) {
+      console.log('⏭️ No alerts to analyze');
+      return;
+    }
+
+    if (!workflowIntelligence) {
+      console.warn('⚠️ No workflow intelligence available - cannot generate additive analysis');
+      return;
+    }
+
+    setIsLoadingAlertImpact(true);
+
+    try {
+      console.log('🔍 Generating additive alert impact analysis...');
+
+      // Extract existing analysis from workflow results
+      const existingAnalysis = {
+        situation_brief: workflowIntelligence.detailed_analysis?.situation_brief || '',
+        current_burden: workflowIntelligence.detailed_analysis?.current_burden || '',
+        potential_savings: workflowIntelligence.detailed_analysis?.potential_savings || '',
+        strategic_roadmap: workflowIntelligence.recommendations || [],
+        action_items: workflowIntelligence.detailed_analysis?.action_items || [],
+        payback_period: workflowIntelligence.detailed_analysis?.payback_period || ''
+      };
+
+      // Build user profile for analysis
+      const analysisProfile = {
+        companyCountry: userProfile.companyCountry || 'US',
+        business_type: userProfile.businessType,
+        industry_sector: userProfile.industry_sector,
+        destination_country: userProfile.destinationCountry || 'US',
+        componentOrigins: userProfile.componentOrigins || [],
+        regionalContent: userProfile.regionalContent || 0,
+        annualTradeVolume: userProfile.tradeVolume || 0
+      };
+
+      // Call alert impact analysis service
+      const analysis = await AlertImpactAnalysisService.generateAlertImpact(
+        existingAnalysis,
+        consolidatedAlerts,
+        analysisProfile
+      );
+
+      console.log('✅ Alert impact analysis complete:', analysis);
+      setAlertImpactAnalysis(analysis);
+    } catch (error) {
+      console.error('❌ Alert impact analysis failed:', error);
+      setAlertImpactAnalysis(null);
+    } finally {
+      setIsLoadingAlertImpact(false);
+    }
+  };
+
+  // Auto-generate alert impact analysis when consolidatedAlerts are loaded
+  useEffect(() => {
+    if (consolidatedAlerts && consolidatedAlerts.length > 0 && workflowIntelligence && !alertImpactAnalysis) {
+      generateAlertImpactAnalysis();
+    }
+  }, [consolidatedAlerts, workflowIntelligence]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading) {
     return (
@@ -992,6 +1075,169 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
         </div>
+
+        {/* Alert Impact Analysis Section - ADDITIVE approach reusing workflow analysis */}
+        {alertImpactAnalysis && consolidatedAlerts.length > 0 && (
+          <div className="form-section" style={{ marginTop: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 className="form-section-title" style={{ margin: 0 }}>
+                Strategic Impact Assessment
+              </h2>
+              <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500 }}>
+                Based on {consolidatedAlerts.length} active alert{consolidatedAlerts.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {/* Alert Impact Summary */}
+            {alertImpactAnalysis.alert_impact_summary && (
+              <div className="alert alert-warning" style={{ marginBottom: '1.5rem' }}>
+                <div className="alert-content">
+                  <div className="alert-title">How Alerts Change Your Strategic Priorities</div>
+                  <div className="text-body" style={{ marginTop: '0.75rem' }}>
+                    {alertImpactAnalysis.alert_impact_summary}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Updated Priorities */}
+            {alertImpactAnalysis.updated_priorities && alertImpactAnalysis.updated_priorities.length > 0 && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 className="card-title" style={{ marginBottom: '1rem' }}>Revised Action Priorities</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {alertImpactAnalysis.updated_priorities.map((priority, idx) => {
+                    const isUrgent = priority.includes('[URGENT]');
+                    const isNew = priority.includes('[NEW]');
+                    const cleanPriority = priority.replace(/\[URGENT\]|\[NEW\]/g, '').trim();
+
+                    return (
+                      <div key={idx} style={{
+                        padding: '1rem',
+                        backgroundColor: isUrgent ? '#fef2f2' : '#f0f9ff',
+                        border: `2px solid ${isUrgent ? '#ef4444' : '#3b82f6'}`,
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.75rem'
+                      }}>
+                        <span style={{ fontSize: '1.5rem' }}>
+                          {isUrgent ? '🚨' : isNew ? '✨' : '📋'}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, color: isUrgent ? '#dc2626' : '#1e40af', marginBottom: '0.25rem' }}>
+                            {isUrgent ? '[URGENT]' : isNew ? '[NEW]' : ''} Priority {idx + 1}
+                          </div>
+                          <div style={{ fontSize: '0.9375rem', color: '#374151' }}>
+                            {cleanPriority}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Updated Timeline */}
+            {alertImpactAnalysis.updated_timeline && alertImpactAnalysis.updated_timeline.length > 0 && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 className="card-title" style={{ marginBottom: '1rem' }}>Critical Deadlines</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {alertImpactAnalysis.updated_timeline.map((item, idx) => (
+                    <div key={idx} style={{
+                      padding: '1rem',
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      borderLeft: '4px solid #f59e0b'
+                    }}>
+                      <div style={{ fontSize: '0.9375rem', color: '#374151', fontWeight: 500 }}>
+                        📅 {item}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* USMCA 2026 Contingency Scenarios */}
+            {alertImpactAnalysis.contingency_scenarios && alertImpactAnalysis.contingency_scenarios.length > 0 && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h3 className="card-title" style={{ marginBottom: '0.5rem' }}>
+                  USMCA 2026 Renegotiation Scenarios
+                </h3>
+                <p className="text-body" style={{ marginBottom: '1rem', color: '#6b7280' }}>
+                  Contingency planning for July 2026 USMCA review based on {
+                    userProfile.companyCountry === 'CA' ? 'Canada' :
+                    userProfile.companyCountry === 'MX' ? 'Mexico' : 'United States'
+                  } negotiation position
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+                  {alertImpactAnalysis.contingency_scenarios.map((scenario, idx) => (
+                    <div key={idx} style={{
+                      padding: '1.25rem',
+                      backgroundColor: 'white',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      transition: 'border-color 0.2s'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ fontWeight: 600, color: '#111827', fontSize: '1rem' }}>
+                          Scenario {scenario.scenario}: {scenario.name}
+                        </div>
+                        <span style={{
+                          backgroundColor: scenario.probability >= 50 ? '#dcfce7' : '#fef3c7',
+                          color: scenario.probability >= 50 ? '#15803d' : '#b45309',
+                          padding: '0.25rem 0.625rem',
+                          borderRadius: '12px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600
+                        }}>
+                          {scenario.probability}%
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+                        {scenario.description}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem' }}>
+                        <strong>Your Action:</strong> {scenario.your_action}
+                      </div>
+                      <div style={{ fontSize: '0.875rem', color: '#374151' }}>
+                        <strong>Cost Impact:</strong> {scenario.cost_impact}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Next Step This Week - Prominent CTA */}
+            {alertImpactAnalysis.next_step_this_week && (
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="alert-title">Recommended Next Step (This Week)</div>
+                  <div className="text-body" style={{ fontSize: '1rem', marginTop: '0.75rem' }}>
+                    🎯 {alertImpactAnalysis.next_step_this_week}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading indicator for alert impact analysis */}
+        {isLoadingAlertImpact && consolidatedAlerts.length > 0 && (
+          <div className="form-section" style={{ marginTop: '2rem' }}>
+            <div className="alert alert-info">
+              <div className="alert-content">
+                <div className="alert-title">Analyzing Strategic Impact...</div>
+                <div className="text-body">
+                  Generating additive analysis based on your existing workflow results and new alerts.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
         <div className="form-section">

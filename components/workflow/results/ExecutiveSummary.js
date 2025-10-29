@@ -55,6 +55,39 @@ export default function ExecutiveSummary({ results }) {
         </div>
       </div>
 
+      {/* SITUATION BRIEF - Executive Alert */}
+      {detailed_analysis?.situation_brief && (
+        <div className="summary-section">
+          <h3 className="summary-section-title">📊 Situation Brief</h3>
+          <div className="insight-box">
+            <p className="text-body">{detailed_analysis.situation_brief}</p>
+          </div>
+        </div>
+      )}
+
+      {/* PROBLEM & ROOT CAUSE - Executive Alert */}
+      {(detailed_analysis?.problem || detailed_analysis?.root_cause) && (
+        <div className="summary-section">
+          <h3 className="summary-section-title">⚠️ Risk Analysis</h3>
+          {detailed_analysis.problem && (
+            <div className="insight-box" style={{ marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#dc2626', marginBottom: '0.25rem' }}>
+                Problem
+              </div>
+              <p className="text-body">{detailed_analysis.problem}</p>
+            </div>
+          )}
+          {detailed_analysis.root_cause && (
+            <div className="insight-box">
+              <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#9333ea', marginBottom: '0.25rem' }}>
+                Root Cause
+              </div>
+              <p className="text-body">{detailed_analysis.root_cause}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* STRATEGIC INSIGHTS */}
       {detailed_analysis?.strategic_insights && (
         <div className="summary-section">
@@ -65,6 +98,31 @@ export default function ExecutiveSummary({ results }) {
                 ? detailed_analysis.strategic_insights
                 : JSON.stringify(detailed_analysis.strategic_insights)}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* BROKER INSIGHTS - Executive Alert */}
+      {detailed_analysis?.broker_insights && (
+        <div className="summary-section">
+          <h3 className="summary-section-title">💼 Professional Advisory</h3>
+          <div className="insight-box" style={{ borderLeft: '4px solid #0284c7' }}>
+            <p className="text-body">{detailed_analysis.broker_insights}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ACTION ITEMS - Executive Alert */}
+      {detailed_analysis?.action_items && detailed_analysis.action_items.length > 0 && (
+        <div className="summary-section">
+          <h3 className="summary-section-title">⚡ Immediate Actions</h3>
+          <div className="recommendations-grid">
+            {detailed_analysis.action_items.map((action, idx) => (
+              <div key={idx} className="recommendation-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+                <div className="recommendation-number" style={{ backgroundColor: '#f59e0b' }}>{idx + 1}</div>
+                <div className="recommendation-text">{action}</div>
+              </div>
+            ))}
           </div>
         </div>
       )}
