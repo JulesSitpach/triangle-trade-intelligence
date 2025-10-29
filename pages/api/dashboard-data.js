@@ -212,18 +212,36 @@ export default protectedApiHandler({
           .filter(dest => dest)  // Remove null/undefined
       )];
 
+      // Get ALL origin countries (supplier countries) from component data
+      const userOriginCountries = [...new Set(
+        allWorkflows
+          .flatMap(w => w.component_origins || [])
+          .map(comp => comp.origin_country || comp.country)
+          .filter(country => country)
+      )];
+
+      // Get user's industries/business types
+      const userIndustries = [...new Set(
+        allWorkflows
+          .map(w => w.business_type || w.workflow_data?.company?.business_type)
+          .filter(industry => industry)
+      )];
+
       // Debug: only log if explicitly requested via query param
       if (req.query.debug === 'alerts') {
         console.log('📍 User Alert Filtering Context:', {
           userId,
           userHSCodes: userHSCodes.length,
           userDestinations,
+          userOriginCountries,
+          userIndustries,
           workflowCount: allWorkflows.length
         });
       }
 
       // Crisis Alerts from RSS Monitoring (real-time government announcements)
-      // Match alerts to user's HS codes AND destination country
+      // Match alerts using 4 criteria: HS codes, origin countries, industries, destinations
+      // Supports both specific alerts (HS 8542.31 from China) and blanket tariffs (all Chinese imports)
       let crisisAlerts = [];
 
       if (userHSCodes.length > 0) {
@@ -253,34 +271,58 @@ export default protectedApiHandler({
         };
 
         const relevantAlerts = (matchedAlerts || []).filter(alert => {
-          // 1. Check HS Code Match
-          let hsCodeMatch = true;
+          // Enhanced matching: Check HS codes, origin countries, industries, and destinations
+          // Alert is relevant if ALL specified criteria match (blanket tariffs have fewer criteria)
+
+          let isRelevant = true;
+
+          // 1. Check HS Code Match (if alert specifies HS codes)
           if (alert.affected_hs_codes && alert.affected_hs_codes.length > 0) {
-            hsCodeMatch = userHSCodes.some(userCode =>
+            const hsCodeMatch = userHSCodes.some(userCode =>
               alert.affected_hs_codes.some(affectedCode =>
                 userCode.startsWith(affectedCode.replace(/\./g, '').substring(0, 6))
               )
             );
+            isRelevant = isRelevant && hsCodeMatch;
           }
 
-          // 2. Check Destination Match (NEW: check against ANY user destination)
-          let destinationMatch = true;
+          // 2. Check Origin Country Match (if alert specifies origin countries)
+          // Example: "All goods FROM China face 25% tariff" (blanket tariff)
+          if (alert.affected_countries && alert.affected_countries.length > 0) {
+            const originMatch = userOriginCountries.some(userOrigin =>
+              alert.affected_countries.some(alertCountry =>
+                normalizeCode(userOrigin) === normalizeCode(alertCountry)
+              )
+            );
+            isRelevant = isRelevant && originMatch;
+          }
+
+          // 3. Check Industry Match (if alert specifies industries)
+          // Example: "Steel industry faces new restrictions"
+          if (alert.relevant_industries && alert.relevant_industries.length > 0) {
+            const industryMatch = userIndustries.some(userIndustry =>
+              alert.relevant_industries.some(alertIndustry =>
+                userIndustry.toLowerCase().includes(alertIndustry.toLowerCase()) ||
+                alertIndustry.toLowerCase().includes(userIndustry.toLowerCase())
+              )
+            );
+            isRelevant = isRelevant && industryMatch;
+          }
+
+          // 4. Check Destination Match (if alert specifies destinations)
           if (alert.affected_destinations && alert.affected_destinations.length > 0) {
-            // Alert has specific destinations - check if ANY of user's destinations match
             if (userDestinations.length > 0) {
-              // User has destinations - check if alert affects any of them
-              destinationMatch = alert.affected_destinations.some(alertDest =>
+              const destinationMatch = alert.affected_destinations.some(alertDest =>
                 userDestinations.some(userDest => normalizeCode(userDest) === normalizeCode(alertDest))
               );
+              isRelevant = isRelevant && destinationMatch;
             } else {
-              // User has no destinations set - show all alerts (don't filter by destination)
-              destinationMatch = true;
+              // User has no destinations set - don't filter by destination
+              isRelevant = isRelevant && true;
             }
           }
-          // If alert has no specific destinations, it affects all destinations (global alert)
 
-          // Alert is relevant if BOTH HS code AND destination match
-          return hsCodeMatch && destinationMatch;
+          return isRelevant;
         });
 
         // Debug logging: only show if requested
@@ -289,7 +331,12 @@ export default protectedApiHandler({
             totalAlerts: (matchedAlerts || []).length,
             relevantAlerts: relevantAlerts.length,
             filtered: (matchedAlerts || []).length - relevantAlerts.length,
-            userDestinations
+            criteria: {
+              hsCodes: userHSCodes.length,
+              origins: userOriginCountries,
+              industries: userIndustries,
+              destinations: userDestinations
+            }
           });
         }
 
