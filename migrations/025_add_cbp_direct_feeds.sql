@@ -44,6 +44,14 @@ INSERT INTO rss_feeds (
     'rules of origin', 'regional value content', 'rvc',
     'nafta', 'free trade agreement',
 
+    -- USMCA Renegotiation 2026 (NEW)
+    'usmca review', 'usmca renegotiation', 'usmca 2026',
+    'usmca amendment', 'usmca joint review', 'usmca extension',
+    'rvc threshold', 'rvc increase', 'rvc change',
+    'china transshipment', 'transshipping', 'country of origin fraud',
+    'minimum wage requirement', 'labor provisions', 'wage compliance',
+    'ustr public comment', 'usmca public input', 'trade representative review',
+
     -- Section 301/232
     'section 301', 'section 232', 'additional duties',
     'steel tariff', 'aluminum tariff', 'china tariff',
@@ -132,6 +140,12 @@ INSERT INTO rss_feeds (
     'trade preference program', 'gsp',
     'generalized system of preferences',
 
+    -- USMCA Renegotiation 2026 (NEW)
+    'usmca review', 'usmca renegotiation', 'usmca 2026',
+    'rvc threshold', 'regional value content change',
+    'china transshipment', 'origin verification',
+    'minimum wage', 'labor compliance',
+
     -- Compliance and procedures
     'entry procedure', 'drawback', 'protest',
     'prior disclosure', 'informed compliance',
@@ -192,6 +206,12 @@ INSERT INTO rss_feeds (
     'usmca', 'nafta', 'cptpp', 'rcep',
     'eu trade', 'china trade', 'us trade policy',
 
+    -- USMCA Renegotiation 2026 (NEW)
+    'usmca review', 'usmca renegotiation', 'north american trade',
+    'regional value content', 'rvc', 'rules of origin update',
+    'transshipment', 'circumvention', 'origin fraud',
+    'labor standards', 'wage requirements',
+
     -- Economic analysis
     'trade intervention', 'trade policy review',
     'market access', 'subsidies', 'state aid'
@@ -251,6 +271,13 @@ INSERT INTO rss_feeds (
     'china imports', 'asia imports', 'mexico trade',
     'usmca', 'nafta', 'trade lane', 'trans-pacific',
 
+    -- USMCA Renegotiation 2026 (NEW)
+    'usmca review', 'usmca renegotiation', 'usmca 2026',
+    'rvc threshold', 'regional value content',
+    'nearshoring', 'reshoring', 'mexico manufacturing',
+    'china alternative', 'supplier diversification',
+    'origin compliance', 'transshipment risk',
+
     -- Origin-specific (supplier country risks)
     'china', 'vietnam', 'mexico', 'taiwan', 'south korea',
     'thailand', 'india', 'malaysia', 'indonesia',
@@ -264,6 +291,72 @@ INSERT INTO rss_feeds (
     'job posting', 'career opportunity', 'webinar',
     'conference', 'event registration', 'subscription offer',
     'cruise ship', 'passenger ferry', 'tourism'
+  ]
+) ON CONFLICT (url) DO UPDATE SET
+  keywords = EXCLUDED.keywords,
+  exclusion_keywords = EXCLUDED.exclusion_keywords,
+  updated_at = NOW();
+
+-- ============================================================================
+-- PBS NewsHour (Authoritative US trade news and policy analysis)
+-- ============================================================================
+INSERT INTO rss_feeds (
+  name,
+  url,
+  category,
+  description,
+  is_active,
+  priority_level,
+  poll_frequency_minutes,
+  keywords,
+  exclusion_keywords
+) VALUES (
+  'PBS NewsHour',
+  'https://www.pbs.org/newshour/feeds/rss/headlines',
+  'trade_news',
+  'PBS NewsHour headlines - authoritative US trade policy, tariff changes, international trade',
+  true,
+  'high',
+  180,  -- Check every 3 hours (authoritative but less frequent)
+  ARRAY[
+    -- Trade policy and tariffs
+    'tariff', 'trade policy', 'trade war', 'trade deal',
+    'trade agreement', 'import duty', 'export restrictions',
+    'section 301', 'section 232', 'usmca', 'nafta',
+
+    -- USMCA Renegotiation 2026 (NEW - Critical Coverage)
+    'usmca review', 'usmca renegotiation', 'usmca 2026',
+    'usmca joint review', 'usmca extension', 'usmca amendment',
+    'north american trade', 'trilateral trade',
+    'rvc threshold', 'regional value content', 'rules of origin',
+    'china transshipment', 'origin fraud', 'circumvention',
+    'minimum wage', 'labor provisions', 'worker protections',
+    'ustr review', 'public comment period', 'trade representative',
+    'congressional hearing', 'senate finance committee',
+    'mexico position', 'canada position', 'trudeau trade',
+
+    -- Customs and border
+    'customs', 'border', 'cbp', 'customs and border protection',
+    'port of entry', 'import restrictions', 'trade compliance',
+
+    -- International trade
+    'china trade', 'mexico trade', 'canada trade',
+    'trade relations', 'trade sanctions', 'trade embargo',
+    'wto', 'world trade organization', 'trade dispute',
+
+    -- Economic policy
+    'commerce department', 'ustr', 'trade representative',
+    'trade deficit', 'trade surplus', 'trade balance',
+
+    -- Supply chain
+    'supply chain', 'manufacturing', 'reshoring', 'nearshoring',
+    'semiconductor', 'critical minerals', 'rare earth'
+  ],
+  ARRAY[
+    -- Exclude non-trade content
+    'election', 'campaign', 'debate', 'voting',
+    'entertainment', 'sports', 'weather', 'local news',
+    'obituary', 'arts and culture', 'book review'
   ]
 ) ON CONFLICT (url) DO UPDATE SET
   keywords = EXCLUDED.keywords,
@@ -307,4 +400,13 @@ BEGIN
   RAISE NOTICE '   • Anti-dumping & countervailing duty rulings';
   RAISE NOTICE '   • Supply chain disruptions & rate changes';
   RAISE NOTICE '   • Trade volume shifts (China, Mexico, Asia)';
+  RAISE NOTICE '';
+  RAISE NOTICE '🔔 USMCA Renegotiation 2026 Monitoring:';
+  RAISE NOTICE '   • RVC threshold changes (65% → 70%?)';
+  RAISE NOTICE '   • China transshipment enforcement';
+  RAISE NOTICE '   • Minimum wage requirements ($16/hr)';
+  RAISE NOTICE '   • USTR public comment periods';
+  RAISE NOTICE '   • Congressional hearings & positions';
+  RAISE NOTICE '   • Mexico/Canada negotiation stance';
+  RAISE NOTICE '   • Joint review timeline (July 2026)';
 END $$;
