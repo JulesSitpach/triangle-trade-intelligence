@@ -31,25 +31,25 @@ export default function TariffSavings({ results }) {
     const section_301 = parseFloat(c.section_301 || 0);
     const total_rate = parseFloat(c.total_rate || base_mfn + section_301);
 
-    // ✅ CRITICAL FIX: Rates are stored as PERCENTAGES (55 = 55%, not 0.55)
-    // For calculations: divide by 100 to convert to decimal, e.g., (55 / 100) = 0.55
-    // Store component details for display (for transparency only)
+    // ✅ FIX (Oct 28): Rates are in DECIMAL format (0.35 = 35%), NOT percentage format
+    // API returns decimals, so NO /100 needed for calculations
+    // For display: multiply by 100 to show as percentage
     componentBreakdown.push({
       description: c.description || c.component_type,
       origin: c.origin_country || c.country,
       percentage: parseFloat(c.percentage || c.value_percentage || 0),
-      base_mfn,
-      section_301,
-      total_rate,
+      base_mfn: base_mfn * 100,  // Convert to percentage for display (0.35 → 35)
+      section_301: section_301 * 100,  // Convert to percentage for display (0.60 → 60)
+      total_rate: total_rate * 100,  // Convert to percentage for display (0.95 → 95)
       componentValue,
-      base_mfn_savings: componentValue * (base_mfn / 100),  // ✅ Divide by 100 - base_mfn is percentage (55 = 55%)
-      section_301_cost: componentValue * (section_301 / 100)  // ✅ Divide by 100 - section_301 is percentage (25 = 25%)
+      base_mfn_savings: componentValue * base_mfn,  // ✅ base_mfn is already decimal (0.35)
+      section_301_cost: componentValue * section_301  // ✅ section_301 is already decimal (0.60)
     });
 
     // Calculate ONLY for component-level display (not for final number)
-    calculatedBaseMFNSavings += componentValue * (base_mfn / 100);  // ✅ Fixed: Convert percentage to decimal
+    calculatedBaseMFNSavings += componentValue * base_mfn;  // ✅ base_mfn already decimal
     if (section_301 > 0) {
-      calculatedSection301Burden += componentValue * (section_301 / 100);  // ✅ Fixed: Convert percentage to decimal
+      calculatedSection301Burden += componentValue * section_301;  // ✅ section_301 already decimal
     }
   });
 

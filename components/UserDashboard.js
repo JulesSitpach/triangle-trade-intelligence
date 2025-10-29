@@ -404,20 +404,28 @@ export default function UserDashboard({ user }) {
                     </div>
 
                     <div className="action-buttons">
-                      {/* QUALIFIED: Download Certificate only (disabled for expired trials) */}
+                      {/* QUALIFIED: Download Certificate + View Results */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
-                        <button
-                          onClick={() => !isTrialExpired && handleDownloadCertificate(selectedWorkflow)}
-                          className="btn-primary"
-                          disabled={isTrialExpired}
-                          style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                          title={isTrialExpired ? 'Upgrade to download certificates' : ''}
-                        >
-                          📥 Download Certificate {isTrialExpired && '(Upgrade Required)'}
-                        </button>
+                        <>
+                          <button
+                            onClick={() => router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
+                            className="btn-secondary"
+                          >
+                            View Results
+                          </button>
+                          <button
+                            onClick={() => !isTrialExpired && handleDownloadCertificate(selectedWorkflow)}
+                            className="btn-primary"
+                            disabled={isTrialExpired}
+                            style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                            title={isTrialExpired ? 'Upgrade to download certificates' : ''}
+                          >
+                            Download Certificate {isTrialExpired && '(Upgrade Required)'}
+                          </button>
+                        </>
                       )}
 
-                      {/* NOT QUALIFIED: [View Analysis] */}
+                      {/* NOT QUALIFIED: View Analysis */}
                       {selectedWorkflow.qualification_status !== 'QUALIFIED' && (
                         <button
                           onClick={() => !isTrialExpired && router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
@@ -425,7 +433,7 @@ export default function UserDashboard({ user }) {
                           disabled={isTrialExpired}
                           style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                         >
-                          📊 View Analysis {isTrialExpired && '(Upgrade Required)'}
+                          View Analysis {isTrialExpired && '(Upgrade Required)'}
                         </button>
                       )}
 

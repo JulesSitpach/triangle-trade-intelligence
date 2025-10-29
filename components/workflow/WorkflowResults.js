@@ -17,7 +17,6 @@ import TariffSavings from './results/TariffSavings';
 import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import PersonalizedAlerts from './results/PersonalizedAlerts';
-import TariffDataFreshness from './results/TariffDataFreshness';
 import PolicyTimeline from './PolicyTimeline';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
@@ -782,67 +781,177 @@ export default function WorkflowResults({
               : 'Your product does not meet USMCA regional content requirements'}
           </p>
 
-          {/* Potential Savings - Show prominently for qualified products */}
-          {results.usmca?.qualified && results.savings && (results.savings.annual_savings || 0) > 0 && (
-            <div style={{
-              marginTop: '1.5rem',
-              marginBottom: '1rem',
-              padding: '1.25rem',
-              backgroundColor: '#ecfdf5',
-              borderRadius: '8px',
-              border: '2px solid #059669'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                <div>
-                  <div style={{ fontSize: '0.875rem', color: '#065f46', fontWeight: '500', marginBottom: '0.25rem' }}>
-                    💰 Potential Annual Savings
-                  </div>
-                  <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
-                    ${(results.savings.annual_savings || 0).toLocaleString()}
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: '#047857', marginTop: '0.25rem' }}>
-                    ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/month • {(results.savings.savings_percentage || 0).toFixed(1)}% tariff reduction
-                  </div>
+          {/* TOP ROW - Priority Alerts & Savings */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '0.75rem',
+            marginTop: '1rem',
+            marginBottom: '0.75rem'
+          }}>
+            {/* Current Savings Card */}
+            {results.usmca?.qualified && results.savings && (results.savings.annual_savings || 0) > 0 && (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#ecfdf5',
+                borderRadius: '6px',
+                border: '1px solid #059669'
+              }}>
+                <div style={{ fontSize: '0.6875rem', color: '#065f46', fontWeight: '500', marginBottom: '0.25rem' }}>
+                  💰 Current Annual Savings
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
+                  ${(results.savings.annual_savings || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.6875rem', color: '#047857', marginTop: '0.25rem' }}>
+                  ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/mo
                 </div>
                 <div style={{
-                  padding: '0.75rem 1.25rem',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '6px',
-                  border: '1px solid #10b981'
+                  marginTop: '0.5rem',
+                  paddingTop: '0.5rem',
+                  borderTop: '1px solid #d1fae5',
+                  fontSize: '0.625rem',
+                  color: '#065f46'
                 }}>
-                  <div style={{ fontSize: '0.75rem', color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
-                    USMCA Rate
-                  </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
-                    {((results.savings.usmca_rate || 0) * 100).toFixed(1)}%
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                    vs {((results.savings.mfn_rate || 0) * 100).toFixed(1)}% MFN
-                  </div>
+                  USMCA {((results.savings.usmca_rate || 0) * 100).toFixed(1)}% vs {((results.savings.mfn_rate || 0) * 100).toFixed(1)}% MFN
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Key Metrics */}
-          <div className="metrics-grid">
-            <div className="metric-card">
-              <div className="metric-label">Required</div>
-              <div className="metric-value">
+            {/* Potential Savings Card */}
+            {results.usmca?.qualified && results.savings?.section_301_exposure?.is_exposed && (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#fffbeb',
+                borderRadius: '6px',
+                border: '1px solid #f59e0b'
+              }}>
+                <div style={{ fontSize: '0.6875rem', color: '#92400e', fontWeight: '500', marginBottom: '0.25rem' }}>
+                  💡 Potential Additional
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#d97706' }}>
+                  ${(results.savings.section_301_exposure.annual_cost_burden || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.6875rem', color: '#b45309', marginTop: '0.25rem' }}>
+                  ${Math.round((results.savings.section_301_exposure.annual_cost_burden || 0) / 12).toLocaleString()}/mo
+                </div>
+                <div style={{
+                  marginTop: '0.5rem',
+                  paddingTop: '0.5rem',
+                  borderTop: '1px solid #fed7aa',
+                  fontSize: '0.625rem',
+                  color: '#92400e'
+                }}>
+                  Nearshore to MX/CA/US
+                </div>
+              </div>
+            )}
+
+            {/* Policy Risk Alert Card */}
+            {results.usmca?.qualified && results.savings?.section_301_exposure?.is_exposed && (
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#fef2f2',
+                borderRadius: '6px',
+                border: '1px solid #ef4444'
+              }}>
+                <div style={{ fontSize: '0.6875rem', fontWeight: '500', color: '#991b1b', marginBottom: '0.25rem' }}>
+                  🚨 POLICY RISK ({results.savings.section_301_exposure.affected_components?.length || 0})
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#dc2626' }}>
+                  {(() => {
+                    const exposedComponents = (results.usmca?.component_breakdown || []).filter(c => {
+                      const origin = (c.origin_country || '').toUpperCase();
+                      return !['US', 'MX', 'CA'].includes(origin);
+                    });
+                    const exposedPercentage = exposedComponents.reduce((sum, c) => sum + (c.value_percentage || 0), 0);
+                    return exposedPercentage.toFixed(0);
+                  })()}% exposed
+                </div>
+                <div style={{ fontSize: '0.6875rem', color: '#991b1b', marginTop: '0.25rem' }}>
+                  ${(results.savings.section_301_exposure.annual_cost_burden || 0).toLocaleString()} opportunity
+                </div>
+              </div>
+            )}
+
+            {/* Buffer Warning Card */}
+            {results.usmca?.qualified && (() => {
+              const margin = results.usmca.north_american_content - results.usmca.threshold_applied;
+              if (margin >= 0 && margin < 5) {
+                return (
+                  <div style={{
+                    padding: '0.75rem',
+                    backgroundColor: '#fffbeb',
+                    borderRadius: '6px',
+                    border: '1px solid #f59e0b'
+                  }}>
+                    <div style={{ fontSize: '0.6875rem', fontWeight: '500', color: '#92400e', marginBottom: '0.25rem' }}>
+                      ⚠️ BUFFER
+                    </div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#d97706' }}>
+                      {margin.toFixed(1)}% margin
+                    </div>
+                    <div style={{ fontSize: '0.6875rem', color: '#b45309', marginTop: '0.25rem' }}>
+                      Consider 70%+
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+
+          {/* BOTTOM ROW - RVC Metrics */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '0.75rem',
+            marginBottom: '0.75rem'
+          }}>
+            {/* Required Card */}
+            <div style={{
+              padding: '0.75rem',
+              backgroundColor: '#f9fafb',
+              borderRadius: '6px',
+              border: '1px solid #d1d5db',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.6875rem', color: '#6b7280', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Required
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' }}>
                 {results.usmca?.threshold_applied || 60}%
               </div>
             </div>
-            <div className="metric-card">
-              <div className="metric-label">Your Content</div>
-              <div className="metric-value">
+
+            {/* Your Content Card */}
+            <div style={{
+              padding: '0.75rem',
+              backgroundColor: '#f9fafb',
+              borderRadius: '6px',
+              border: '1px solid #d1d5db',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.6875rem', color: '#6b7280', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Your Content
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' }}>
                 {(results.usmca?.north_american_content || 0).toFixed(0)}%
               </div>
             </div>
-            <div className="metric-card">
-              <div className="metric-label">
+
+            {/* Margin Card */}
+            <div style={{
+              padding: '0.75rem',
+              backgroundColor: '#f9fafb',
+              borderRadius: '6px',
+              border: '1px solid #d1d5db',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.6875rem', color: '#6b7280', fontWeight: '500', marginBottom: '0.25rem' }}>
                 {results.usmca?.qualified ? 'Margin' : 'Gap'}
               </div>
-              <div className="metric-value">
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' }}>
                 {results.usmca?.qualified
                   ? `+${(results.usmca.north_american_content - results.usmca.threshold_applied).toFixed(0)}%`
                   : `${(results.usmca.north_american_content - results.usmca.threshold_applied).toFixed(0)}%`}
@@ -1024,112 +1133,20 @@ export default function WorkflowResults({
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">💡 Strategic Insights</h3>
-            </div>
-
-            <div className="element-spacing">
-              {/* Section 301 Exposure Alert */}
-              {results.detailed_analysis?.supply_chain_vulnerabilities && (
-                <div className="alert alert-warning">
-                  <div className="alert-content">
-                    <div className="alert-title">⚠️ Supply Chain Exposure</div>
-                    <div className="text-body">
-                      {results.detailed_analysis.supply_chain_vulnerabilities}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Strategic Insights */}
-              {results.detailed_analysis?.strategic_insights && (
-                <div style={{
-                  backgroundColor: '#fffbeb',
-                  padding: '1rem',
-                  borderRadius: '6px',
-                  borderLeft: '4px solid #f59e0b'
-                }}>
-                  <div style={{fontSize: '0.95rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem'}}>
-                    💡 Strategic Insights
-                  </div>
-                  <div style={{fontSize: '0.875rem', color: '#78350f', lineHeight: '1.6'}}>
-                    {typeof results.detailed_analysis.strategic_insights === 'string'
-                      ? results.detailed_analysis.strategic_insights
-                      : JSON.stringify(results.detailed_analysis.strategic_insights)}
-                  </div>
-                </div>
-              )}
-
-              {/* Alternatives */}
-              {results.detailed_analysis?.strategic_alternatives && (
-                <div style={{
-                  backgroundColor: '#f0fdf4',
-                  padding: '1rem',
-                  borderRadius: '6px',
-                  borderLeft: '4px solid #16a34a'
-                }}>
-                  <div style={{fontSize: '0.95rem', fontWeight: '600', color: '#166534', marginBottom: '0.5rem'}}>
-                    🌱 Optimization Opportunities
-                  </div>
-                  <div style={{fontSize: '0.875rem', color: '#15803d', lineHeight: '1.6'}}>
-                    {typeof results.detailed_analysis.strategic_alternatives === 'string'
-                      ? results.detailed_analysis.strategic_alternatives
-                      : JSON.stringify(results.detailed_analysis.strategic_alternatives)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* RECOMMENDED ACTIONS - Show detailed executive guidance (PAID ONLY) */}
           <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
         </>
       )}
-
-      {/* TARIFF DATA FRESHNESS WARNING - Displayed before tariff sections (PAID only) */}
-      {isPaidUser && <TariffDataFreshness />}
 
       {/* NOTE: Recommendations moved to CollapsibleSection "Recommended Actions" above */}
 
       {/* NEXT STEPS */}
       <div className="form-section">
         <h2 className="form-section-title">Next Steps</h2>
-        <p className="text-body">
-          Your USMCA analysis is complete with AI-enriched component data (HS codes, tariff rates, savings calculations). Choose how to store this valuable intelligence.
+        <p className="text-body" style={{ marginBottom: '1rem' }}>
+          Analysis complete. Save to enable alerts, certificate archive, and cross-device access. Or proceed without saving (data stays in browser only).
         </p>
         <div>
-          {/* Privacy & Save Information Card - Always show with checkbox */}
-          <div className="privacy-info-box">
-            <div className="privacy-info-content">
-              <input
-                type="checkbox"
-                id="saveConsent"
-                checked={userMadeChoice}
-                readOnly
-                className="privacy-info-checkbox"
-              />
-              <label htmlFor="saveConsent" className="privacy-info-label">
-                <div className="privacy-info-title">💾 Save to Database (Recommended)</div>
-                <div className="privacy-info-text">
-                  <strong>What gets saved:</strong> Your complete analysis including company info, product classification, AI-enriched component data (HS codes, tariff rates, savings), USMCA qualification results, and certificate data.
-                  <br/><br/>
-                  <strong>Why save to database:</strong>
-                  <ul className="privacy-info-list">
-                    <li><strong>Persistent storage</strong> - Access from any device, survives browser clears</li>
-                    <li><strong>Alert monitoring</strong> - Get notified of tariff changes affecting YOUR components</li>
-                    <li><strong>Service pre-fill</strong> - Request expert services without re-entering data</li>
-                    <li><strong>Certificate archive</strong> - Download certificates anytime from dashboard</li>
-                    <li><strong>Component enrichment preserved</strong> - HS codes, tariff rates, AI confidence scores</li>
-                  </ul>
-                  <strong>Not saving?</strong> Data stays in browser only (temporary) - lost on logout or browser clear.
-                </div>
-                <div className="privacy-info-disclaimer">
-                  <strong>Privacy:</strong> Encrypted PostgreSQL database. Delete anytime from Account Settings. Never shared with third parties.
-                </div>
-              </label>
-            </div>
-          </div>
 
           <div className="hero-buttons">
             {/* Button 1: Save to Database (ALWAYS AVAILABLE) */}

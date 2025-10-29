@@ -16,19 +16,18 @@
  * - Financial implications
  */
 
-import { Section301Agent } from '../../lib/agents/section301-agent.js';
 import MEXICO_SOURCING_CONFIG from '../../config/mexico-sourcing-config.js';  // ✅ REPLACES MexicoSourcingAgent
 import { getIndustryThreshold } from '../../lib/services/industry-thresholds-service.js';
 import { BaseAgent } from '../../lib/agents/base-agent.js';
 
 // Initialize agents
-const section301Agent = new Section301Agent();
 const executiveAgent = new BaseAgent({
   name: 'ExecutiveAdvisor',
   model: 'anthropic/claude-3.5-sonnet',  // ✅ Sonnet for consulting-grade output ($599/mo tier deserves best model)
   maxTokens: 3000  // Longer responses for strategic depth
 });
 // ✅ Removed mexicoAgent - now using config lookup instead of AI calls
+// ✅ Removed section301Agent - now using section_301 field from component_breakdown (already calculated in main analysis)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -316,33 +315,24 @@ async function calculateSection301Impact(components, tradeVolume) {
     sum + (c.value_percentage || 0), 0
   );
 
-  // ✅ DYNAMIC (Oct 27): Get actual Section 301 rate from agent (not hardcoded 25%)
+  // ✅ Use section_301 rates from main analysis (already calculated, NO AI CALLS)
+  // Components from component_breakdown already have section_301 field from main USMCA analysis
   let averageSection301Rate = 0;
   let rateCount = 0;
 
   for (const component of chineseComponents) {
-    if (component.hs_code) {
-      try {
-        const result = await section301Agent.getSection301Rate({
-          hs_code: component.hs_code,
-          origin_country: 'China',
-          destination_country: 'US'
-        });
-
-        if (result.success && result.data.applicable) {
-          averageSection301Rate += result.data.rate;
-          rateCount++;
-        }
-      } catch (error) {
-        console.error(`Failed to get Section 301 rate for ${component.hs_code}:`, error.message);
-      }
+    if (component.section_301 !== undefined && component.section_301 !== null) {
+      averageSection301Rate += component.section_301;
+      rateCount++;
     }
   }
 
-  // If we got rates, use average; otherwise fallback to 20% conservative estimate
+  // If no rates found, that's a bug in main analysis - use conservative fallback
   const effectiveRate = rateCount > 0
     ? averageSection301Rate / rateCount
-    : 0.20; // Conservative fallback
+    : 0.20; // Conservative fallback (should never be reached)
+
+  console.log(`📊 Section 301 Analysis: ${rateCount}/${chineseComponents.length} components with rates, effective rate: ${(effectiveRate * 100).toFixed(1)}%`);
 
   const annualCost = (tradeVolume * totalChineseValue / 100 * effectiveRate);
 
@@ -403,7 +393,7 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
   const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
   const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
 
-  // Build context for AI
+  // Build context for AI - Give it ALL component data (already enriched with tariff rates)
   const components = workflow.components || [];
   const chineseComponents = components.filter(c => c.origin_country === 'China' || c.origin_country === 'CN');
   const totalChineseValue = chineseComponents.reduce((sum, c) => sum + (c.value_percentage || 0), 0);
@@ -412,15 +402,42 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
   const section301Burden = section301Policy?.annual_cost_impact?.annualCost || 'not calculated';
   const section301Rate = section301Policy?.annual_cost_impact?.ratePercent || 'varies';
 
-  // ✅ CONSULTING-GRADE AI PROMPT ($599/mo Premium tier quality)
-  const prompt = `You are a senior trade compliance strategist advising a ${profile.industry_sector || 'manufacturing'} company CEO on tariff policy risks.
+  // ✅ Build detailed component breakdown for AI (no lookups needed - all data already here)
+  const componentDetails = components.map(c =>
+    `  - ${c.description || c.hs_code}: ${c.value_percentage}% of product, Origin: ${c.origin_country}, MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}%, Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}%, USMCA: ${((c.usmca_rate || 0) * 100).toFixed(1)}%`
+  ).join('\n');
 
-**COMPANY SITUATION:**
+  // ✅ CONSULTING-GRADE AI PROMPT ($599/mo Premium tier quality)
+  const prompt = `You are a senior trade compliance strategist advising ${profile.contact_person || 'the CEO'} at ${profile.company_name || 'the company'} on tariff policy risks.
+
+**CLIENT PROFILE:**
+- Company: ${profile.company_name || 'Client company'}
+- Contact: ${profile.contact_person || 'Decision maker'}
+- Business Type: ${profile.business_type || 'Manufacturer'}
 - Industry: ${profile.industry_sector || 'Manufacturing'}
-- Destination: ${profile.destination_country || 'US'}
+- Location: ${profile.company_country || 'Not specified'}
+- Primary Supplier Country: ${profile.supplier_country || 'Multiple'}
+
+**PRODUCT & TRADE:**
+- Product: ${workflow.product_description || 'Manufacturing product'}
+- Shipping To: ${profile.destination_country || 'US'}
 - Annual Trade Volume: ${tradeVolume > 0 ? `$${tradeVolume.toLocaleString()}` : 'Not provided (CRITICAL: ask for this)'}
-- USMCA Qualified: ${workflow.usmca_qualified ? 'Yes' : 'No'}
+
+**CURRENT USMCA STATUS:**
+- Qualified: ${workflow.usmca_qualified ? 'YES' : 'NO'}
 - North American Content: ${workflow.north_american_content || 0}%
+- Required Threshold: ${workflow.threshold_applied || 65}%
+- Safety Margin: ${((workflow.north_american_content || 0) - (workflow.threshold_applied || 65)).toFixed(1)}%
+- Preference Criterion: ${workflow.preference_criterion || 'Not specified'}
+- Current Annual Savings from USMCA: ${workflow.current_annual_savings > 0 ? `$${workflow.current_annual_savings.toLocaleString()}` : 'Not calculated'}
+- Monthly Savings: ${workflow.monthly_savings > 0 ? `$${workflow.monthly_savings.toLocaleString()}` : 'Not calculated'}
+
+**COMPLETE COMPONENT BREAKDOWN (all tariff rates already calculated):**
+${componentDetails}
+
+${workflow.strategic_insights ? `**STRATEGIC CONTEXT FROM ANALYSIS:**
+${workflow.strategic_insights}
+` : ''}
 
 **SUPPLY CHAIN EXPOSURE:**
 ${chineseComponents.length > 0 ? `
@@ -438,54 +455,65 @@ ${rvcPolicy ? `
 ` : ''}
 
 **YOUR TASK:**
-Generate a CEO-level strategic advisory (NOT generic templates). This company pays $599/month for Premium intelligence.
+Generate a personalized CEO-level strategic advisory for ${profile.company_name || 'this client'}. Write as if you're speaking directly to ${profile.contact_person || 'the CEO'}.
+
+This is a Premium client paying $599/month - give them consulting-grade intelligence, not generic templates.
 
 Respond in JSON format:
 {
-  "situation_brief": "1-sentence executive summary of the problem",
-  "problem": "What specific tariff/policy risk affects THIS company's margins (use actual numbers from context)",
-  "root_cause": "Why this company is exposed (their specific sourcing decisions)",
-  "annual_impact": "Dollar impact on this company (use trade_volume if available, otherwise state 'Cannot calculate without trade volume - request immediately')",
-  "why_now": "Why this matters NOW (specific policy timeline or risk event)",
+  "situation_brief": "1-sentence executive summary addressing ${profile.company_name || 'the company'} specifically",
+  "problem": "What specific tariff/policy risk affects ${profile.company_name || 'this company'}'s margins (use actual numbers from context)",
+  "root_cause": "Why ${profile.company_name || 'this company'} is exposed (reference their specific sourcing decisions and supplier countries)",
+  "annual_impact": "Dollar impact on ${profile.company_name || 'this company'} (use trade_volume if available, otherwise state 'Cannot calculate without trade volume - request immediately')",
+  "why_now": "Why ${profile.contact_person || 'they'} should care NOW (specific policy timeline or risk event)",
   "current_burden": "Current annual cost in dollars (calculate from Section 301 exposure if trade_volume available)",
   "potential_savings": "What they could save with nearshoring (specific dollar amount or % if possible)",
   "payback_period": "Realistic timeline to recover nearshoring investment costs (based on their trade volume)",
   "confidence": 85,
   "strategic_roadmap": [
     {
-      "phase": "Phase 1: Assessment (Week 1-2)",
-      "why": "Why this phase matters for THIS company",
-      "actions": ["Specific action 1", "Specific action 2"],
-      "impact": "Expected outcome for THIS company"
+      "phase": "Phase 1: Assessment (Weeks 1-2)",
+      "why": "Why this phase matters for ${profile.company_name || 'this company'} (NO emojis)",
+      "actions": ["Specific action 1 for ${profile.company_name || 'this company'}", "Specific action 2 with measurable outcome"],
+      "impact": "Expected outcome in dollars or percentages for ${profile.company_name || 'this company'}"
     },
     {
-      "phase": "Phase 2: Trial (Week 3-4)",
-      "why": "...",
-      "actions": ["..."],
-      "impact": "..."
+      "phase": "Phase 2: Trial Production (Weeks 3-4)",
+      "why": "Business rationale specific to their situation (NO emojis)",
+      "actions": ["Concrete action with supplier names", "Measurable deliverable"],
+      "impact": "Quantifiable result"
     },
     {
-      "phase": "Phase 3: Migration (Week 5-8)",
-      "why": "...",
-      "actions": ["..."],
-      "impact": "..."
+      "phase": "Phase 3: Full Migration (Weeks 5-8)",
+      "why": "Strategic benefit for their business (NO emojis)",
+      "actions": ["Specific implementation step", "Risk mitigation action"],
+      "impact": "Final outcome with numbers"
     }
   ],
   "action_items": [
-    "Specific action for THIS company (not 'Review suppliers' - which suppliers? which countries?)",
-    "Another specific action with concrete next steps",
-    "Third action with measurable outcome"
+    "Immediate action for ${profile.company_name || 'this company'} with specific supplier/country names (NO emojis, professional tone)",
+    "Second action with concrete deliverable and timeline",
+    "Third action with measurable financial or compliance outcome"
   ],
-  "broker_insights": "One sentence of strategic wisdom from a customs broker's perspective"
+  "broker_insights": "Professional customs broker perspective in formal business language (NO emojis)",
+  "professional_disclaimer": "IMPORTANT: This analysis provides strategic intelligence based on current tariff data and trade regulations. ${profile.company_name || 'The company'} should consult with a licensed customs broker, trade attorney, or USMCA compliance specialist to verify all calculations, timelines, and regulatory requirements before implementing any strategic changes. We recommend engaging professional advisors familiar with ${profile.industry_sector || 'your industry'} sector for implementation planning.",
+  "save_reminder": "To access this analysis again later from your dashboard, save this workflow completion. Unsaved analyses remain in your browser only and will be lost if you clear your cache or switch devices."
 }
 
-CRITICAL RULES:
+CRITICAL RULES - PROFESSIONAL FORMATTING:
+- NO EMOJIS - Use professional business language only
+- ADDRESS ${profile.company_name || 'the company'} BY NAME throughout the advisory
+- Reference ${profile.contact_person || 'the decision maker'} when discussing actions or decisions
+- Mention their specific supplier country (${profile.supplier_country || 'current suppliers'}) and industry (${profile.industry_sector || 'their industry'})
 - NO generic templates ("Review alternatives", "Monitor changes")
-- USE actual numbers from context (trade volume, Section 301 rates, component percentages)
+- USE actual numbers from context (trade volume, Section 301 rates, component percentages, current savings)
+- Reference their current USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) to show what they're protecting
 - If trade_volume is missing/zero, FLAG THIS PROMINENTLY in annual_impact and current_burden
 - Be specific: "Contact Foxconn Mexico for PCB quotes" not "Review Mexico suppliers"
 - Calculate ROI: If saving $50K/year and nearshoring costs $20K, payback is 4-5 months
-- Focus on THIS company's actual situation, not generic advice`;
+- Write as if you're their personal trade advisor who knows their business intimately
+- Use professional consulting language (like McKinsey, Deloitte reports)
+- Format numbers properly: $2,800,000 not "$2.8M", 3 months not "3-month payback"`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');
@@ -494,7 +522,8 @@ CRITICAL RULES:
       format: 'json'
     });
 
-    const advisory = JSON.parse(aiResponse);
+    // Check if aiResponse is already an object or a string
+    const advisory = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
     console.log('✅ AI-generated executive advisory:', advisory);
     return advisory;
 

@@ -10,6 +10,7 @@ import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
 import PersonalizedPolicyAlert from '../components/alerts/PersonalizedPolicyAlert';
 import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAlert';
+import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoringDashboard';
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 
@@ -50,6 +51,13 @@ export default function TradeRiskAlternatives() {
   useEffect(() => {
     loadUserData();
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-load saved alerts from database on page load
+  useEffect(() => {
+    if (userProfile?.userId) {
+      loadSavedAlerts();
+    }
+  }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUserData = async () => {
     if (!user) {
@@ -420,6 +428,57 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
+   * Load saved alerts from database (fast, no AI calls)
+   */
+  const loadSavedAlerts = async () => {
+    try {
+      const response = await fetch('/api/dashboard-data', {
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.alerts && data.alerts.length > 0) {
+          console.log(`✅ Loaded ${data.alerts.length} saved alerts from database`);
+          setConsolidatedAlerts(data.alerts);
+          setOriginalAlertCount(data.alerts.length);
+          setAlertsGenerated(true);
+        } else {
+          console.log('ℹ️ No saved alerts found - user needs to generate');
+        }
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to load saved alerts:', error);
+    }
+  };
+
+  /**
+   * Save generated alerts to database for fast loading on future visits
+   */
+  const saveAlertsToDatabase = async (alerts) => {
+    try {
+      const response = await fetch('/api/save-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          alerts: alerts,
+          user_profile: userProfile
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Alerts saved to database for future visits');
+      } else {
+        console.warn('⚠️ Failed to save alerts to database:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error saving alerts:', error);
+    }
+  };
+
+  /**
    * Load REAL tariff policy alerts from database
    * Filters by user's component origins and HS codes for relevance
    * Now called on-demand with progress tracking
@@ -514,6 +573,9 @@ export default function TradeRiskAlternatives() {
       if (data.success && data.consolidated_alerts) {
         console.log(`✅ Consolidated ${data.original_count} alerts → ${data.consolidated_count} groups`);
         setConsolidatedAlerts(data.consolidated_alerts);
+
+        // Save alerts to database for fast loading on future visits
+        await saveAlertsToDatabase(data.consolidated_alerts);
       }
     } catch (error) {
       console.error('❌ Alert consolidation failed:', error);
@@ -570,26 +632,8 @@ export default function TradeRiskAlternatives() {
           </p>
         </div>
 
-        {/* Compact Monitoring Notification - At Top for Reassurance */}
-        <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
-          <div className="alert-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <div className="alert-title">📡 We're Monitoring For You</div>
-                <p className="text-body">
-                  Real-time surveillance of Section 301 tariffs, USMCA changes, HS code updates, and port fees affecting your {userProfile.componentOrigins?.length || 0} components.
-                </p>
-              </div>
-              <button
-                onClick={() => window.location.href = '/account/settings'}
-                className="btn-secondary"
-                style={{ whiteSpace: 'nowrap' }}
-              >
-                ⚙️ Email Preferences
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Real-Time Monitoring Dashboard - Shows what's being monitored */}
+        <RealTimeMonitoringDashboard userProfile={userProfile} />
 
         {/* 🎯 PREMIUM CONTENT: Rich USMCA Intelligence */}
         {workflowIntelligence && (
@@ -786,6 +830,31 @@ export default function TradeRiskAlternatives() {
                     disabled={isLoadingPolicyAlerts}
                   >
                     {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Show Regenerate button when alerts are already loaded */}
+          {alertsGenerated && consolidatedAlerts.length > 0 && !isLoadingPolicyAlerts && !isConsolidating && (
+            <div className="alert alert-success" style={{ marginBottom: '1.5rem' }}>
+              <div className="alert-content">
+                <div className="alert-title">Alerts Loaded from Database</div>
+                <div className="text-body">
+                  Want fresh analysis? Click below to regenerate alerts with current policy data.
+                </div>
+                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
+                  <button
+                    onClick={() => {
+                      setAlertsGenerated(false);
+                      setConsolidatedAlerts([]);
+                      setRealPolicyAlerts([]);
+                      loadRealPolicyAlerts(userProfile);
+                    }}
+                    className="btn-secondary"
+                  >
+                    Regenerate Alerts
                   </button>
                 </div>
               </div>

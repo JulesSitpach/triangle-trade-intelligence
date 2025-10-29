@@ -370,6 +370,31 @@ export default protectedApiHandler({
         }
       }
 
+      // Load saved consolidated alerts from dashboard_notifications
+      let consolidatedAlerts = [];
+      try {
+        const { data: savedAlerts } = await supabase
+          .from('dashboard_notifications')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('notification_type', 'consolidated_alert')
+          .order('created_at', { ascending: false });
+
+        if (savedAlerts && savedAlerts.length > 0) {
+          console.log(`✅ Loaded ${savedAlerts.length} saved consolidated alerts`);
+          consolidatedAlerts = savedAlerts.map(alert => ({
+            ...alert.data,
+            id: alert.id,
+            created_at: alert.created_at
+          }));
+        }
+      } catch (alertError) {
+        console.error('⚠️ Failed to load consolidated alerts:', alertError);
+      }
+
+      // Merge crisis alerts and consolidated alerts
+      const allAlerts = [...consolidatedAlerts, ...crisisAlerts];
+
       // CRITICAL: Prevent caching of user-specific data
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
       res.setHeader('Pragma', 'no-cache');
@@ -377,7 +402,7 @@ export default protectedApiHandler({
 
       return res.status(200).json({
         workflows: allWorkflows || [],
-        alerts: crisisAlerts || [],
+        alerts: allAlerts || [],
         usage_stats: {
           used: used,
           limit: limit,

@@ -79,15 +79,27 @@ export default function RecommendedActions({ results }) {
         credentials: 'include',
         body: JSON.stringify({
           user_profile: {
+            company_name: results.company?.company_name || null,
             industry_sector: results.company?.industry_sector || 'General Manufacturing',
             destination_country: results.company.destination_country,  // ✅ No fallback - validated above
             supplier_country: results.company?.supplier_country,
+            company_country: results.company?.company_country || null,
+            business_type: results.company?.business_type || null,
+            contact_person: results.company?.contact_person || null,
             subscription_tier: userSubscriptionTier  // ✅ CRITICAL: Pass subscription tier for tier gating
           },
           workflow_intelligence: {
             components: results.usmca?.component_breakdown || [],
             north_american_content: results.usmca?.north_american_content || 0,
-            annual_trade_volume: tradeVolume ? parseFloat(tradeVolume) : 0
+            annual_trade_volume: tradeVolume ? parseFloat(tradeVolume) : 0,
+            // ✅ Add critical context for holistic AI analysis
+            usmca_qualified: results.usmca?.qualified || false,
+            preference_criterion: results.usmca?.preference_criterion || null,
+            threshold_applied: results.usmca?.threshold_applied || 65,
+            current_annual_savings: results.savings?.annual_savings || 0,
+            monthly_savings: results.savings?.monthly_savings || 0,
+            product_description: results.company?.product_description || null,
+            strategic_insights: results.detailed_analysis?.strategic_insights || null
           }
         })
       });
@@ -121,7 +133,7 @@ export default function RecommendedActions({ results }) {
       {hasAIRecommendations && (
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">🤖 AI-Powered Recommendations</h4>
+            <h4 className="card-title">Qualification Improvement Recommendations</h4>
             <p className="text-body">Product-specific strategies to achieve USMCA qualification</p>
           </div>
           <div className="element-spacing">
@@ -141,8 +153,8 @@ export default function RecommendedActions({ results }) {
       {isQualified && executiveAlert?.strategic_roadmap && (
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">📋 3-Phase Strategic Roadmap</h4>
-            <p className="text-body">Implementation plan to lock in USMCA benefits and eliminate policy risks</p>
+            <h4 className="card-title">Strategic Implementation Roadmap</h4>
+            <p className="text-body">Three-phase plan to optimize USMCA benefits and mitigate tariff policy risks</p>
           </div>
           <div className="element-spacing">
             {executiveAlert.strategic_roadmap.map((phase, idx) => (
@@ -169,6 +181,51 @@ export default function RecommendedActions({ results }) {
               </div>
             ))}
           </div>
+
+          {/* Professional Disclaimer */}
+          {executiveAlert?.alert?.professional_disclaimer && (
+            <div style={{
+              backgroundColor: '#fffbeb',
+              padding: '1rem',
+              borderRadius: '4px',
+              borderLeft: '4px solid #f59e0b',
+              marginTop: '1.5rem'
+            }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
+                Professional Advisory Recommendation
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#78350f', lineHeight: '1.6' }}>
+                {executiveAlert.alert.professional_disclaimer}
+              </div>
+            </div>
+          )}
+
+          {/* Save Reminder */}
+          {executiveAlert?.alert?.save_reminder && (
+            <div style={{
+              backgroundColor: '#dbeafe',
+              padding: '1rem',
+              borderRadius: '4px',
+              borderLeft: '4px solid #0284c7',
+              marginTop: '1rem'
+            }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0c4a6e', marginBottom: '0.5rem' }}>
+                Save Your Analysis
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#075985', lineHeight: '1.6', marginBottom: '0.75rem' }}>
+                {executiveAlert.alert.save_reminder}
+              </div>
+              <div style={{
+                fontSize: '0.8125rem',
+                color: '#0c4a6e',
+                lineHeight: '1.5',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid #bfdbfe'
+              }}>
+                <strong>Privacy:</strong> Saved data is encrypted in our secure PostgreSQL database. You can delete ALL saved data anytime from Account Settings. We never share your trade data with third parties.
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -176,7 +233,7 @@ export default function RecommendedActions({ results }) {
       {isQualified && executiveAlert?.cbp_compliance_strategy && (
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">📋 CBP Compliance Checklist</h4>
+            <h4 className="card-title">CBP Compliance Requirements</h4>
             <p className="text-body">Immediate actions to prevent duty assessment and audit risks</p>
           </div>
           <div className="element-spacing">
@@ -264,70 +321,11 @@ export default function RecommendedActions({ results }) {
         </div>
       )}
 
-      {/* Qualified Product Recommendations */}
-      {isQualified && (
-        <div className="card">
-          <div className="card-header">
-            <h4 className="card-title">Recommended Next Steps</h4>
-          </div>
-          <div className="element-spacing">
-            <div className="status-card success">
-              <div className="header-actions">
-                <span className="status-value success">✓</span>
-                <span className="text-body">Download and complete the certificate template</span>
-              </div>
-            </div>
-          <div className="status-card success">
-            <div className="header-actions">
-              <span className="status-value success">✓</span>
-              <span className="text-body">Gather required documentation</span>
-            </div>
-          </div>
-          <div className="status-card success">
-            <div className="header-actions">
-              <span className="status-value success">✓</span>
-              <span className="text-body">Consult with customs broker for implementation</span>
-            </div>
-          </div>
-          <div className="status-card success">
-            <div className="header-actions">
-              <span className="status-value success">✓</span>
-              <span className="text-body">Set up supplier compliance procedures</span>
-            </div>
-          </div>
-          {hasTriangleOpportunities && (
-            <div className="status-card info">
-              <div className="header-actions">
-                <span className="status-value info">🍁🇲🇽</span>
-                <span className="text-body">Explore triangle routing opportunities for additional savings</span>
-              </div>
-            </div>
-          )}
-          {hasBusinessIntelligence && (
-            <div className="status-card info">
-              <div className="header-actions">
-                <span className="status-value info">💡</span>
-                <span className="text-body">Review strategic recommendations for your industry</span>
-              </div>
-            </div>
-          )}
-          {results?.trust_assessment?.expert_validation_required && (
-            <div className="status-card info">
-              <div className="header-actions">
-                <span className="status-value info">✓</span>
-                <span className="text-body">Consider expert validation for high-value transactions</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      )}
-
       {/* Triangle Routing Opportunities */}
       {hasTriangleOpportunities && (
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">🍁🇲🇽 Triangle Routing Opportunities</h4>
+            <h4 className="card-title">Alternative Trade Routes</h4>
             <p className="text-body">Additional savings through Canada-Mexico routing</p>
           </div>
           <div className="element-spacing">
@@ -364,7 +362,7 @@ export default function RecommendedActions({ results }) {
       {hasBusinessIntelligence && (
         <div className="card">
           <div className="card-header">
-            <h4 className="card-title">💡 Strategic Recommendations</h4>
+            <h4 className="card-title">Strategic Opportunities</h4>
             <p className="text-body">Industry-specific USMCA insights</p>
           </div>
           <div className="element-spacing">
