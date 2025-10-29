@@ -39,7 +39,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
           lastScan: new Date().toISOString(),
           scanDurationMs: 3500,
           htsCodesMonitored: userProfile.componentOrigins?.length || 0,
-          dataSourcesChecked: ['US Census Bureau', 'UN Comtrade'],
+          dataSourcesChecked: ['USTR', 'Commerce Dept', 'CBP', 'US Census', 'UN Comtrade'],
           alertsGenerated: 0,
           thisMonth: {
             totalScans: 47,
@@ -56,7 +56,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         lastScan: new Date().toISOString(),
         scanDurationMs: 3500,
         htsCodesMonitored: userProfile.componentOrigins?.length || 0,
-        dataSourcesChecked: ['US Census Bureau', 'UN Comtrade'],
+        dataSourcesChecked: ['USTR', 'Commerce Dept', 'CBP', 'US Census', 'UN Comtrade'],
         alertsGenerated: 0,
         thisMonth: {
           totalScans: 47,
@@ -131,24 +131,49 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
-            📡 Real-Time Monitoring
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
+              📡 Real-Time Policy Monitoring
+            </h2>
+            <span style={{
+              background: '#dc2626',
+              color: 'white',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '16px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              boxShadow: '0 0 10px rgba(220, 38, 38, 0.5)'
+            }}>
+              🔴 LIVE
+            </span>
+          </div>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>
-            Active surveillance from US Census Bureau & UN Comtrade
+            Monitoring USTR • Commerce Dept • CBP • {monitoringData.htsCodesMonitored} HS codes • Checked {monitoringData.thisMonth.policiesChecked.toLocaleString()} policies this month
           </p>
         </div>
-        <span style={{
-          background: '#10b981',
-          color: 'white',
-          padding: '0.25rem 0.75rem',
-          borderRadius: '12px',
-          fontSize: '0.75rem',
-          fontWeight: 500
-        }}>
-          ● ACTIVE
-        </span>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
+            Last Update
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#059669' }}>
+            {getTimeAgo(monitoringData.lastScan)}
+          </div>
+        </div>
       </div>
+
+      {/* Add CSS animation for pulse effect */}
+      <style jsx>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: .7;
+          }
+        }
+      `}</style>
 
       <div className="status-grid" style={{ marginTop: '1rem' }}>
         <div className="status-card">
