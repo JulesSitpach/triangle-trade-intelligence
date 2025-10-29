@@ -199,17 +199,26 @@ export default function USMCAQualification({ results }) {
                 if (index === 0) {
                   console.log(`🔍 [FRONTEND] First component from API (defensive parsing):`, {
                     description: component.description,
+                    origin: component.origin_country,
                     rawMfnRate: component.mfn_rate,
+                    rawBaseMfnRate: component.base_mfn_rate,  // ← Should match mfn_rate for China (0.35)
                     rawUsmcaRate: component.usmca_rate,
                     rawSection301: component.section_301,
+                    rawSection232: component.section_232,
+                    rawTotalRate: component.total_rate,  // ← Should be 0.95 for China (0.35 + 0.60)
                     parsedBaseMfnRate: baseMfnRate,
                     parsedUsmcaRate: usmcaRate,
                     parsedSection301: section301,
+                    parsedTotalRate: totalAppliedRate,
+                    displayMfnRate: baseMfnRate !== null ? `${(baseMfnRate * 100).toFixed(1)}%` : 'N/A',
+                    displayTotalRate: totalAppliedRate !== null ? `${(totalAppliedRate * 100).toFixed(1)}%` : 'N/A',
                     hasCompleteRates,
                     missingFields: {
                       mfn_rate: component.mfn_rate === undefined || component.mfn_rate === null,
+                      base_mfn_rate: component.base_mfn_rate === undefined || component.base_mfn_rate === null,
                       usmca_rate: component.usmca_rate === undefined || component.usmca_rate === null,
-                      section_301: component.section_301 === undefined || component.section_301 === null
+                      section_301: component.section_301 === undefined || component.section_301 === null,
+                      total_rate: component.total_rate === undefined || component.total_rate === null
                     },
                     allKeys: Object.keys(component)
                   });
@@ -279,7 +288,7 @@ export default function USMCAQualification({ results }) {
                             {((section301 + section232) * 100).toFixed(1)}%
                           </span>
                         ) : (
-                          <span style={{ color: '#9ca3af' }}>—</span>
+                          <span style={{ color: '#059669' }}>0.0%</span>
                         )}
                       </td>
 
@@ -496,29 +505,7 @@ export default function USMCAQualification({ results }) {
               📊 Regional Value Content (RVC) Breakdown
             </h4>
 
-            {/* Material RVC */}
-            <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
-                  <Tooltip text="Components from US, Mexico, or Canada that count toward USMCA qualification">
-                    Material Components (USMCA)
-                  </Tooltip>
-                </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>
-                  {(() => {
-                    const materialRVC = results.usmca.component_breakdown
-                      .filter(c => c.is_usmca_member)
-                      .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
-                    return materialRVC.toFixed(1);
-                  })()}%
-                </div>
-              </div>
-              <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
-                {results.usmca.component_breakdown.filter(c => c.is_usmca_member).map(c => c.description).join(', ')}
-              </div>
-            </div>
-
-            {/* Labor RVC (if applicable) */}
+            {/* RVC Breakdown - Only show components if there's labor value added */}
             {(() => {
               const materialRVC = results.usmca.component_breakdown
                 .filter(c => c.is_usmca_member)
@@ -526,25 +513,47 @@ export default function USMCAQualification({ results }) {
               const totalRVC = results.usmca.north_american_content || 0;
               const laborRVC = totalRVC - materialRVC;
 
+              // Only show breakdown if there's significant labor/manufacturing value
               if (laborRVC > 0.1) {
                 return (
-                  <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
-                        <Tooltip text="Value added through substantial transformation (welding, forming, machining, etc.) performed in USMCA countries">
-                          Labor & Manufacturing Value-Added
-                        </Tooltip>
+                  <>
+                    {/* Material RVC */}
+                    <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
+                          <Tooltip text="Components from US, Mexico, or Canada that count toward USMCA qualification">
+                            Material Components (USMCA)
+                          </Tooltip>
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>
+                          {materialRVC.toFixed(1)}%
+                        </div>
                       </div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
-                        {laborRVC.toFixed(1)}%
+                      <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                        {results.usmca.component_breakdown.filter(c => c.is_usmca_member).map(c => c.description).join(', ')}
                       </div>
                     </div>
-                    <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
-                      Manufacturing in {results.manufacturing_location || results.usmca?.manufacturing_location || 'USMCA region'} with substantial transformation
+
+                    {/* Labor RVC */}
+                    <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.9375rem', fontWeight: '500', color: '#1e40af' }}>
+                          <Tooltip text="Value added through substantial transformation (welding, forming, machining, etc.) performed in USMCA countries">
+                            Labor & Manufacturing Value-Added
+                          </Tooltip>
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
+                          {laborRVC.toFixed(1)}%
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                        Manufacturing in {results.manufacturing_location || results.usmca?.manufacturing_location || 'USMCA region'} with substantial transformation
+                      </div>
                     </div>
-                  </div>
+                  </>
                 );
               }
+              // If no labor value, just show component list under total (no redundant boxes)
               return null;
             })()}
 
@@ -560,15 +569,19 @@ export default function USMCAQualification({ results }) {
               </div>
               <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: qualified ? '#047857' : '#991b1b', fontWeight: '500' }}>
                 {qualified
-                  ? `✓ Exceeds ${results.usmca.threshold_applied}% threshold - QUALIFIED`
+                  ? (results.usmca.north_american_content > results.usmca.threshold_applied
+                      ? `✓ Exceeds ${results.usmca.threshold_applied}% threshold - QUALIFIED`
+                      : `✓ Meets ${results.usmca.threshold_applied}% threshold - QUALIFIED`)
                   : `✗ Below ${results.usmca.threshold_applied}% threshold - NOT QUALIFIED`}
               </div>
             </div>
 
-            {/* Educational Note */}
-            <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#fffbeb', borderRadius: '4px', fontSize: '0.8125rem', color: '#92400e', borderLeft: '3px solid #f59e0b' }}>
-              <strong>💡 Why can RVC exceed 100%?</strong> Under USMCA Net Cost method, material components + labor value-added can sum to more than 100%. This is normal and correct - both material costs AND manufacturing labor count toward regional content.
-            </div>
+            {/* Educational Note - Only show when RVC > 100% (otherwise confusing) */}
+            {(results.usmca.north_american_content || 0) > 100 && (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#fffbeb', borderRadius: '4px', fontSize: '0.8125rem', color: '#92400e', borderLeft: '3px solid #f59e0b' }}>
+                <strong>💡 Why can RVC exceed 100%?</strong> Under USMCA Net Cost method, material components + labor value-added can sum to more than 100%. This is normal and correct - both material costs AND manufacturing labor count toward regional content.
+              </div>
+            )}
           </div>
 
           {/* Additional Stats */}
@@ -610,10 +623,9 @@ export default function USMCAQualification({ results }) {
                 })()}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {/* ✅ ISSUE #1: Component-level breakdown (NOT a conflicting calculation)
-                    This breaks down the AI's total savings to show top contributors.
-                    Uses component rates FROM the AI response, not independent calculation.
-                    Does NOT affect the total annual_savings shown in TariffSavings. */}
+                {/* ✅ FIX (Oct 28): Use annual_savings from API response (already calculated correctly)
+                    This ensures Chinese components show $0 (no USMCA benefit)
+                    and only USMCA member components (US/CA/MX) show positive savings */}
                 {(() => {
                   const tv = results.company?.trade_volume;
                   if (!tv) {
@@ -622,22 +634,20 @@ export default function USMCAQualification({ results }) {
                   }
                   return results.usmca.component_breakdown
                     .map((component, index) => {
+                      // ✅ FIX (Oct 28): Use annual_savings from API (already has USMCA member check)
+                      const componentSavings = component.annual_savings || 0;
                       const mfnRate = component.mfn_rate || component.tariff_rates?.mfn_rate || 0;
                       const usmcaRate = component.usmca_rate || component.tariff_rates?.usmca_rate || 0;
-                      // ✅ Rates are DECIMAL format (0.25 = 25%), NO /100 needed for calculation
-                      const savingsPercent = mfnRate - usmcaRate;  // Both already decimal
-                      const tradeVolume = tv;
-                      const componentValue = tradeVolume * (component.value_percentage / 100);
-                      const componentSavings = componentValue * savingsPercent;
+                      const savingsPercent = mfnRate - usmcaRate;  // For display only
 
                       return {
                         ...component,
                         index,
                         componentSavings,
-                        savingsPercent  // Already in decimal format for display
+                        savingsPercent
                       };
                   })
-                  .filter(c => c.componentSavings > 0)
+                  .filter(c => c.componentSavings > 0)  // Only show components with actual savings
                   .sort((a, b) => b.componentSavings - a.componentSavings)
                   .slice(0, 5) // Top 5 contributors
                   .map((component) => (
@@ -658,7 +668,7 @@ export default function USMCAQualification({ results }) {
                           {component.description || 'Component ' + (component.index + 1)}
                         </div>
                         <div style={{ fontSize: '0.8125rem', color: '#047857' }}>
-                          {component.value_percentage}% of product • {component.savingsPercent.toFixed(1)}% tariff savings
+                          {component.value_percentage}% of product • {(component.savingsPercent * 100).toFixed(1)}% MFN rate avoided
                         </div>
                       </div>
                       <div style={{ fontWeight: '600', color: '#065f46', fontSize: '1rem', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
