@@ -669,15 +669,26 @@ export default function TradeRiskAlternatives() {
           </div>
 
           {/* Component Intelligence - Collapsible rows with component-specific alerts */}
-          {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (
-            <div className="element-spacing">
-              <h3 className="card-title">Component Tariff Intelligence</h3>
-              <p className="text-body">
-                Click any component to see tariff details and relevant alerts:
-              </p>
+          {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (() => {
+            // State for tracking which components are expanded (must be outside .map())
+            const [expandedComponents, setExpandedComponents] = React.useState({});
 
-              <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {userProfile.componentOrigins.map((comp, idx) => {
+            const toggleExpanded = (idx) => {
+              setExpandedComponents(prev => ({
+                ...prev,
+                [idx]: !prev[idx]
+              }));
+            };
+
+            return (
+              <div className="element-spacing">
+                <h3 className="card-title">Component Tariff Intelligence</h3>
+                <p className="text-body">
+                  Click any component to see tariff details and relevant alerts:
+                </p>
+
+                <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {userProfile.componentOrigins.map((comp, idx) => {
                   const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
                   const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
                   const totalRate = comp.total_rate || comp.tariff_rates?.total_rate || baseMFN;
@@ -698,7 +709,7 @@ export default function TradeRiskAlternatives() {
                     return hsMatch || originMatch;
                   });
 
-                  const [expanded, setExpanded] = React.useState(false);
+                  const isExpanded = expandedComponents[idx] || false;
 
                   return (
                     <div key={idx} style={{
@@ -709,20 +720,20 @@ export default function TradeRiskAlternatives() {
                     }}>
                       {/* Collapsed Header - Always visible */}
                       <div
-                        onClick={() => setExpanded(!expanded)}
+                        onClick={() => toggleExpanded(idx)}
                         style={{
                           padding: '1rem',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '1rem',
-                          backgroundColor: expanded ? '#f9fafb' : 'white',
+                          backgroundColor: isExpanded ? '#f9fafb' : 'white',
                           transition: 'background-color 0.2s'
                         }}
                       >
                         {/* Expand/Collapse Icon */}
                         <span style={{ fontSize: '1.25rem', color: '#6b7280' }}>
-                          {expanded ? '▼' : '▶'}
+                          {isExpanded ? '▼' : '▶'}
                         </span>
 
                         {/* Component Name */}
@@ -774,7 +785,7 @@ export default function TradeRiskAlternatives() {
                       </div>
 
                       {/* Expanded Content - Tariff Details + Alerts */}
-                      {expanded && (
+                      {isExpanded && (
                         <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
                           {/* Tariff Details Grid */}
                           <div style={{
@@ -888,7 +899,8 @@ export default function TradeRiskAlternatives() {
               </div>
 
             </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* REAL Government Policy Alerts - Relevant to User's Trade Profile */}
