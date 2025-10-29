@@ -668,139 +668,225 @@ export default function TradeRiskAlternatives() {
             </div>
           </div>
 
-          {/* Component Intelligence Table - Show enriched component data if available */}
+          {/* Component Intelligence - Collapsible rows with component-specific alerts */}
           {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (
             <div className="element-spacing">
               <h3 className="card-title">Component Tariff Intelligence</h3>
               <p className="text-body">
-                Detailed tariff analysis for each component in your product:
+                Click any component to see tariff details and relevant alerts:
               </p>
 
-              <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
-                <table className="component-table">
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'left', padding: '0.5rem' }}>Component</th>
-                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>Origin</th>
-                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>Value %</th>
-                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>HS Code</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>Base MFN</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#fef3c7' }}>Section 301</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem', fontWeight: '700' }}>Total Rate</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>USMCA Rate</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>Net After USMCA</th>
-                      <th style={{ textAlign: 'right', padding: '0.5rem' }}>Actual Savings</th>
-                      <th style={{ textAlign: 'center', padding: '0.5rem' }}>AI Confidence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {userProfile.componentOrigins.map((comp, idx) => {
-                      const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
-                      const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
-                      const totalRate = comp.total_rate || comp.tariff_rates?.total_rate || baseMFN;
-                      const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
-                      const netAfterUSMCA = totalRate - (baseMFN - usmcaRate);
-                      const actualSavings = baseMFN - usmcaRate;
+              <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {userProfile.componentOrigins.map((comp, idx) => {
+                  const baseMFN = comp.mfn_rate || comp.tariff_rates?.mfn_rate || 0;
+                  const section301 = comp.section_301 || comp.tariff_rates?.section_301 || 0;
+                  const totalRate = comp.total_rate || comp.tariff_rates?.total_rate || baseMFN;
+                  const usmcaRate = comp.usmca_rate || comp.tariff_rates?.usmca_rate || 0;
+                  const netAfterUSMCA = totalRate - (baseMFN - usmcaRate);
+                  const actualSavings = baseMFN - usmcaRate;
 
-                      return (
-                        <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                          <td style={{ padding: '0.5rem' }}>
-                            {comp.component_type || comp.description || `Component ${idx + 1}`}
-                          </td>
-                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
-                            {comp.origin_country || comp.country}
-                          </td>
-                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
-                            {comp.percentage || comp.value_percentage}%
-                          </td>
-                          <td style={{ textAlign: 'center', padding: '0.5rem', fontFamily: 'monospace' }}>
-                            {comp.hs_code || '—'}
-                          </td>
+                  // Filter alerts for this specific component
+                  const componentAlerts = consolidatedAlerts.filter(alert => {
+                    // Match by HS code
+                    const hsMatch = alert.affected_hs_codes?.some(code =>
+                      comp.hs_code?.startsWith(code.replace(/\./g, '').substring(0, 6))
+                    );
+                    // Match by origin country
+                    const originMatch = alert.affected_countries?.some(country =>
+                      (comp.origin_country || comp.country)?.toUpperCase() === country.toUpperCase()
+                    );
+                    return hsMatch || originMatch;
+                  });
 
-                          {/* Base MFN Rate */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
-                            {baseMFN > 0 ? `${baseMFN.toFixed(1)}%` : '—'}
-                          </td>
+                  const [expanded, setExpanded] = React.useState(false);
 
-                          {/* Section 301 Tariff - HIGHLIGHTED */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: section301 > 0 ? '#fef3c7' : 'transparent' }}>
-                            {section301 > 0 ? (
-                              <span style={{ color: '#92400e', fontWeight: '700', fontSize: '0.9375rem' }}>
-                                +{section301.toFixed(1)}%
-                              </span>
-                            ) : (
-                              <span style={{ color: '#9ca3af' }}>—</span>
-                            )}
-                          </td>
+                  return (
+                    <div key={idx} style={{
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      backgroundColor: 'white',
+                      overflow: 'hidden'
+                    }}>
+                      {/* Collapsed Header - Always visible */}
+                      <div
+                        onClick={() => setExpanded(!expanded)}
+                        style={{
+                          padding: '1rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          backgroundColor: expanded ? '#f9fafb' : 'white',
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        {/* Expand/Collapse Icon */}
+                        <span style={{ fontSize: '1.25rem', color: '#6b7280' }}>
+                          {expanded ? '▼' : '▶'}
+                        </span>
 
-                          {/* Total Rate (Base + Section 301) - BOLD */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
-                            <span style={{ color: '#dc2626', fontWeight: '700', fontSize: '0.9375rem' }}>
-                              {totalRate > 0 ? `${totalRate.toFixed(1)}%` : '—'}
+                        {/* Component Name */}
+                        <div style={{ flex: '2', fontWeight: 600, color: '#111827' }}>
+                          {comp.component_type || comp.description || `Component ${idx + 1}`}
+                        </div>
+
+                        {/* Origin Country */}
+                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontFamily: 'monospace' }}>
+                          {comp.origin_country || comp.country}
+                        </div>
+
+                        {/* HS Code */}
+                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#6b7280' }}>
+                          {comp.hs_code || '—'}
+                        </div>
+
+                        {/* Value Percentage */}
+                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, color: '#111827' }}>
+                          {comp.percentage || comp.value_percentage}%
+                        </div>
+
+                        {/* Alert Badge */}
+                        <div style={{ flex: '1', textAlign: 'right' }}>
+                          {componentAlerts.length > 0 ? (
+                            <span style={{
+                              background: '#fee2e2',
+                              color: '#dc2626',
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '12px',
+                              fontSize: '0.8125rem',
+                              fontWeight: 600
+                            }}>
+                              🚨 {componentAlerts.length} alert{componentAlerts.length !== 1 ? 's' : ''}
                             </span>
-                          </td>
-
-                          {/* USMCA Rate */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
-                            <span style={{ color: '#059669' }}>
-                              {usmcaRate.toFixed(1)}%
+                          ) : (
+                            <span style={{
+                              background: '#dcfce7',
+                              color: '#059669',
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '12px',
+                              fontSize: '0.8125rem',
+                              fontWeight: 600
+                            }}>
+                              ✅ No alerts
                             </span>
-                          </td>
+                          )}
+                        </div>
+                      </div>
 
-                          {/* Net After USMCA (what you actually pay) - HIGHLIGHTED */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem', backgroundColor: '#dcfce7' }}>
-                            <span style={{ color: section301 > 0 ? '#dc2626' : '#059669', fontWeight: '700' }}>
-                              {netAfterUSMCA > 0 ? `${netAfterUSMCA.toFixed(1)}%` : '0%'}
-                            </span>
-                            {section301 > 0 && (
-                              <div style={{ fontSize: '0.6875rem', color: '#92400e', marginTop: '0.125rem' }}>
-                                ⚠️ S301 remains
+                      {/* Expanded Content - Tariff Details + Alerts */}
+                      {expanded && (
+                        <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+                          {/* Tariff Details Grid */}
+                          <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, 1fr)',
+                            gap: '1rem',
+                            marginBottom: componentAlerts.length > 0 ? '1.5rem' : 0
+                          }}>
+                            {/* Base MFN */}
+                            <div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Base MFN</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 600 }}>
+                                {baseMFN > 0 ? `${baseMFN.toFixed(1)}%` : '—'}
                               </div>
-                            )}
-                          </td>
+                            </div>
 
-                          {/* Actual Savings (USMCA saves base MFN only) */}
-                          <td style={{ textAlign: 'right', padding: '0.5rem' }}>
-                            {actualSavings > 0 ? (
-                              <span style={{ color: '#059669', fontWeight: '600' }}>
-                                {actualSavings.toFixed(1)}%
-                              </span>
-                            ) : (
-                              <span style={{ color: '#9ca3af' }}>—</span>
-                            )}
-                          </td>
+                            {/* Section 301 */}
+                            <div style={{ backgroundColor: section301 > 0 ? '#fef3c7' : 'transparent', padding: '0.5rem', borderRadius: '6px' }}>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Section 301</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: section301 > 0 ? '#92400e' : '#9ca3af' }}>
+                                {section301 > 0 ? `+${section301.toFixed(1)}%` : '—'}
+                              </div>
+                            </div>
 
-                          {/* AI Confidence */}
-                          <td style={{ textAlign: 'center', padding: '0.5rem' }}>
-                            {comp.ai_confidence ? (
-                              <span style={{ color: comp.ai_confidence < 80 ? '#dc2626' : '#059669' }}>
-                                {comp.ai_confidence}%
-                                {comp.ai_confidence < 80 && ' ⚠️'}
-                              </span>
-                            ) : (
-                              <span style={{ color: '#9ca3af' }}>N/A</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            {/* Total Rate */}
+                            <div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Total Rate</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#dc2626' }}>
+                                {totalRate > 0 ? `${totalRate.toFixed(1)}%` : '—'}
+                              </div>
+                            </div>
+
+                            {/* USMCA Rate */}
+                            <div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: '#059669' }}>
+                                {usmcaRate.toFixed(1)}%
+                              </div>
+                            </div>
+
+                            {/* Net After USMCA */}
+                            <div style={{ backgroundColor: '#dcfce7', padding: '0.5rem', borderRadius: '6px' }}>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Net After USMCA</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 700, color: section301 > 0 ? '#dc2626' : '#059669' }}>
+                                {netAfterUSMCA > 0 ? `${netAfterUSMCA.toFixed(1)}%` : '0%'}
+                              </div>
+                              {section301 > 0 && (
+                                <div style={{ fontSize: '0.6875rem', color: '#92400e', marginTop: '0.125rem' }}>
+                                  ⚠️ S301 remains
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actual Savings */}
+                            <div>
+                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Actual Savings</div>
+                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: actualSavings > 0 ? '#059669' : '#9ca3af' }}>
+                                {actualSavings > 0 ? `${actualSavings.toFixed(1)}%` : '—'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Component-Specific Alerts */}
+                          {componentAlerts.length > 0 && (
+                            <div style={{ marginTop: '1.5rem' }}>
+                              <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.75rem', color: '#111827' }}>
+                                🚨 Alerts for This Component ({componentAlerts.length})
+                              </h4>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {componentAlerts.map((alert, alertIdx) => (
+                                  <div key={alertIdx} style={{
+                                    background: 'white',
+                                    border: '2px solid #fee2e2',
+                                    borderRadius: '6px',
+                                    padding: '1rem'
+                                  }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                                      <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                                        {alert.consolidated_title || alert.title}
+                                      </div>
+                                      <span style={{
+                                        background: alert.urgency === 'CRITICAL' ? '#dc2626' : alert.urgency === 'HIGH' ? '#f59e0b' : '#6b7280',
+                                        color: 'white',
+                                        padding: '0.125rem 0.5rem',
+                                        borderRadius: '10px',
+                                        fontSize: '0.6875rem',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase'
+                                      }}>
+                                        {alert.urgency || 'MEDIUM'}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                                      {alert.explanation || alert.description}
+                                    </div>
+                                    {alert.broker_summary && (
+                                      <div style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>
+                                        💡 {alert.broker_summary}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Compact insights - only show if actionable */}
-              <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                {userProfile.componentOrigins.some(c => c.ai_confidence && c.ai_confidence < 80) && (
-                  <span style={{ marginRight: '1.5rem' }}>
-                    ⚠️ {userProfile.componentOrigins.filter(c => c.ai_confidence && c.ai_confidence < 80).length} component(s) flagged for expert review
-                  </span>
-                )}
-                {userProfile.componentOrigins.some(c => c.savings_percentage > 5) && (
-                  <span>
-                    💰 Avg savings: {(userProfile.componentOrigins.reduce((sum, c) => sum + (c.savings_percentage || 0), 0) / userProfile.componentOrigins.length).toFixed(1)}%
-                  </span>
-                )}
-              </div>
             </div>
           )}
         </div>
