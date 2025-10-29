@@ -148,6 +148,66 @@ INSERT INTO rss_feeds (
   updated_at = NOW();
 
 -- ============================================================================
+-- WTO News Feed (Dispute settlements, trade policy changes, tariff rulings)
+-- ============================================================================
+INSERT INTO rss_feeds (
+  name,
+  url,
+  category,
+  description,
+  is_active,
+  priority_level,
+  poll_frequency_minutes,
+  keywords,
+  exclusion_keywords
+) VALUES (
+  'WTO News & Disputes',
+  'https://www.wto.org/library/rss/latest_news_e.xml',
+  'international',
+  'WTO dispute settlements, trade policy changes, anti-dumping rulings affecting tariff rates',
+  true,
+  'high',
+  120,  -- Check every 2 hours (WTO news is less frequent but high-impact)
+  ARRAY[
+    -- Dispute settlements (affect tariff rates)
+    'dispute settlement', 'arbitration', 'ruling', 'panel report',
+    'anti-dumping', 'countervailing duty', 'cvd', 'safeguard',
+    'compliance panel', 'retaliation', 'suspension of concessions',
+
+    -- Tariff policy changes
+    'tariff', 'duty', 'most favored nation', 'mfn',
+    'preferential tariff', 'trade agreement', 'free trade',
+    'customs valuation', 'rules of origin', 'classification',
+
+    -- Trade barriers and restrictions
+    'trade barrier', 'import restriction', 'export restriction',
+    'quota', 'license requirement', 'technical barrier',
+    'sanitary', 'phytosanitary', 'sps', 'tbt',
+
+    -- Product-specific (match user industries)
+    'electronics', 'automotive', 'steel', 'aluminum',
+    'textiles', 'agriculture', 'pharmaceuticals',
+
+    -- Regional agreements
+    'usmca', 'nafta', 'cptpp', 'rcep',
+    'eu trade', 'china trade', 'us trade policy',
+
+    -- Economic analysis
+    'trade intervention', 'trade policy review',
+    'market access', 'subsidies', 'state aid'
+  ],
+  ARRAY[
+    -- Exclude non-tariff content
+    'appointment', 'personnel', 'conference schedule',
+    'video', 'podcast', 'webcast', 'press conference logistics',
+    'building renovation', 'internal administration'
+  ]
+) ON CONFLICT (url) DO UPDATE SET
+  keywords = EXCLUDED.keywords,
+  exclusion_keywords = EXCLUDED.exclusion_keywords,
+  updated_at = NOW();
+
+-- ============================================================================
 -- Verify new feeds
 -- ============================================================================
 DO $$
@@ -164,8 +224,9 @@ BEGIN
   RAISE NOTICE '';
   RAISE NOTICE '🎯 LinkedIn Member Request DELIVERED:';
   RAISE NOTICE '   "live customs updates? Would be clutch for folks trying to go global"';
-  RAISE NOTICE '   ✅ CBP Newsroom Spotlights (real-time)';
-  RAISE NOTICE '   ✅ CBP Weekly Bulletins (rulings & regulations)';
+  RAISE NOTICE '   ✅ CBP Newsroom Spotlights (real-time customs updates, 30-min polling)';
+  RAISE NOTICE '   ✅ CBP Weekly Bulletins (rulings & regulations, 2-hour polling)';
+  RAISE NOTICE '   ✅ WTO News & Disputes (trade policy & tariff rulings, 2-hour polling)';
   RAISE NOTICE '   ✅ Federal Register CBP (existing)';
   RAISE NOTICE '';
   RAISE NOTICE '📊 Coverage:';
@@ -173,6 +234,8 @@ BEGIN
   RAISE NOTICE '   • Documentation requirements';
   RAISE NOTICE '   • USMCA certificate compliance';
   RAISE NOTICE '   • Port-specific updates';
-  RAISE NOTICE '   • Classification rulings';
+  RAISE NOTICE '   • Classification rulings (CBP & WTO)';
   RAISE NOTICE '   • Section 301/232 enforcement';
+  RAISE NOTICE '   • WTO dispute settlements (affect tariff rates)';
+  RAISE NOTICE '   • Anti-dumping & countervailing duty rulings';
 END $$;
