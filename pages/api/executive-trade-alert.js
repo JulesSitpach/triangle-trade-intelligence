@@ -19,9 +19,15 @@
 import { Section301Agent } from '../../lib/agents/section301-agent.js';
 import MEXICO_SOURCING_CONFIG from '../../config/mexico-sourcing-config.js';  // ✅ REPLACES MexicoSourcingAgent
 import { getIndustryThreshold } from '../../lib/services/industry-thresholds-service.js';
+import { BaseAgent } from '../../lib/agents/base-agent.js';
 
 // Initialize agents
 const section301Agent = new Section301Agent();
+const executiveAgent = new BaseAgent({
+  name: 'ExecutiveAdvisor',
+  model: 'anthropic/claude-3.5-sonnet',  // ✅ Sonnet for consulting-grade output ($599/mo tier deserves best model)
+  maxTokens: 3000  // Longer responses for strategic depth
+});
 // ✅ Removed mexicoAgent - now using config lookup instead of AI calls
 
 export default async function handler(req, res) {
@@ -166,7 +172,7 @@ export default async function handler(req, res) {
     // ========== STEP 2: Generate ONE Executive Advisory ==========
 
     const headline = generateHeadline(applicablePolicies, userIndustry);
-    const executiveAdvisory = generateExecutiveAdvisory(
+    const executiveAdvisory = await generateExecutiveAdvisoryAI(
       applicablePolicies,
       workflow_intelligence,
       user_profile
@@ -388,7 +394,133 @@ function highestSeverity(policies) {
   return 'MEDIUM';
 }
 
-function generateExecutiveAdvisory(policies, workflow, profile) {
+/**
+ * ✅ AI-POWERED Executive Advisory Generator
+ * Uses Claude 3.5 Sonnet for consulting-grade strategic intelligence
+ * NO MORE HARDCODED TEMPLATES
+ */
+async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
+  const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
+  const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
+
+  // Build context for AI
+  const components = workflow.components || [];
+  const chineseComponents = components.filter(c => c.origin_country === 'China' || c.origin_country === 'CN');
+  const totalChineseValue = chineseComponents.reduce((sum, c) => sum + (c.value_percentage || 0), 0);
+
+  const tradeVolume = profile.annual_trade_volume || workflow.annual_trade_volume || 0;
+  const section301Burden = section301Policy?.annual_cost_impact?.annualCost || 'not calculated';
+  const section301Rate = section301Policy?.annual_cost_impact?.ratePercent || 'varies';
+
+  // ✅ CONSULTING-GRADE AI PROMPT ($599/mo Premium tier quality)
+  const prompt = `You are a senior trade compliance strategist advising a ${profile.industry_sector || 'manufacturing'} company CEO on tariff policy risks.
+
+**COMPANY SITUATION:**
+- Industry: ${profile.industry_sector || 'Manufacturing'}
+- Destination: ${profile.destination_country || 'US'}
+- Annual Trade Volume: ${tradeVolume > 0 ? `$${tradeVolume.toLocaleString()}` : 'Not provided (CRITICAL: ask for this)'}
+- USMCA Qualified: ${workflow.usmca_qualified ? 'Yes' : 'No'}
+- North American Content: ${workflow.north_american_content || 0}%
+
+**SUPPLY CHAIN EXPOSURE:**
+${chineseComponents.length > 0 ? `
+- Chinese Components: ${chineseComponents.length} components (${totalChineseValue}% of product value)
+- Section 301 Tariff Rate: ${section301Rate}
+- Current Annual Burden: ${section301Burden}
+- Components affected: ${chineseComponents.map(c => c.description || c.hs_code).join(', ')}
+` : '- No Chinese components identified'}
+
+${rvcPolicy ? `
+**RVC RISK:**
+- Current RVC: ${workflow.north_american_content}%
+- Required Threshold: ${rvcPolicy.impact}
+- Buffer: ${workflow.north_american_content - (workflow.threshold_applied || 65)}%
+` : ''}
+
+**YOUR TASK:**
+Generate a CEO-level strategic advisory (NOT generic templates). This company pays $599/month for Premium intelligence.
+
+Respond in JSON format:
+{
+  "situation_brief": "1-sentence executive summary of the problem",
+  "problem": "What specific tariff/policy risk affects THIS company's margins (use actual numbers from context)",
+  "root_cause": "Why this company is exposed (their specific sourcing decisions)",
+  "annual_impact": "Dollar impact on this company (use trade_volume if available, otherwise state 'Cannot calculate without trade volume - request immediately')",
+  "why_now": "Why this matters NOW (specific policy timeline or risk event)",
+  "current_burden": "Current annual cost in dollars (calculate from Section 301 exposure if trade_volume available)",
+  "potential_savings": "What they could save with nearshoring (specific dollar amount or % if possible)",
+  "payback_period": "Realistic timeline to recover nearshoring investment costs (based on their trade volume)",
+  "confidence": 85,
+  "strategic_roadmap": [
+    {
+      "phase": "Phase 1: Assessment (Week 1-2)",
+      "why": "Why this phase matters for THIS company",
+      "actions": ["Specific action 1", "Specific action 2"],
+      "impact": "Expected outcome for THIS company"
+    },
+    {
+      "phase": "Phase 2: Trial (Week 3-4)",
+      "why": "...",
+      "actions": ["..."],
+      "impact": "..."
+    },
+    {
+      "phase": "Phase 3: Migration (Week 5-8)",
+      "why": "...",
+      "actions": ["..."],
+      "impact": "..."
+    }
+  ],
+  "action_items": [
+    "Specific action for THIS company (not 'Review suppliers' - which suppliers? which countries?)",
+    "Another specific action with concrete next steps",
+    "Third action with measurable outcome"
+  ],
+  "broker_insights": "One sentence of strategic wisdom from a customs broker's perspective"
+}
+
+CRITICAL RULES:
+- NO generic templates ("Review alternatives", "Monitor changes")
+- USE actual numbers from context (trade volume, Section 301 rates, component percentages)
+- If trade_volume is missing/zero, FLAG THIS PROMINENTLY in annual_impact and current_burden
+- Be specific: "Contact Foxconn Mexico for PCB quotes" not "Review Mexico suppliers"
+- Calculate ROI: If saving $50K/year and nearshoring costs $20K, payback is 4-5 months
+- Focus on THIS company's actual situation, not generic advice`;
+
+  try {
+    console.log('🤖 Calling AI for executive advisory...');
+    const aiResponse = await executiveAgent.execute(prompt, {
+      temperature: 0.7,  // Creative but grounded
+      format: 'json'
+    });
+
+    const advisory = JSON.parse(aiResponse);
+    console.log('✅ AI-generated executive advisory:', advisory);
+    return advisory;
+
+  } catch (error) {
+    console.error('❌ AI call failed for executive advisory:', error);
+
+    // ⚠️ FALLBACK: Return minimal structure (but flag the failure)
+    return {
+      situation_brief: '⚠️ AI generation failed - using fallback',
+      problem: `Unable to generate custom advisory. Error: ${error.message}`,
+      root_cause: 'AI service temporarily unavailable',
+      annual_impact: 'Unable to calculate',
+      why_now: 'Please retry or contact support',
+      current_burden: section301Burden || 'Unknown',
+      potential_savings: 'Calculation unavailable',
+      payback_period: 'Unable to estimate',
+      confidence: 0,
+      strategic_roadmap: [],
+      action_items: ['Retry request', 'Contact support if issue persists'],
+      broker_insights: 'AI advisor temporarily unavailable'
+    };
+  }
+}
+
+// ❌ OLD HARDCODED FUNCTION (KEPT FOR REFERENCE - DELETE AFTER TESTING)
+function generateExecutiveAdvisory_HARDCODED_OLD(policies, workflow, profile) {
   const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
   const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
 

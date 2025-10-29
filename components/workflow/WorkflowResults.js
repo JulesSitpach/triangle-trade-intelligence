@@ -690,7 +690,8 @@ export default function WorkflowResults({
         user_profile: {
           subscription_tier: userSubscriptionTier,
           industry_sector: results.company.industry_sector,
-          destination_country: results.company.destination_country
+          destination_country: results.company.destination_country,
+          annual_trade_volume: results.company.trade_volume  // ✅ FIX: AI needs this for ROI calculations
         },
         workflow_intelligence: {
           components: components,
