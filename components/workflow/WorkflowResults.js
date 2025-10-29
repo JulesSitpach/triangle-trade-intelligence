@@ -655,14 +655,35 @@ export default function WorkflowResults({
       console.log('🎯 Generating Executive Summary for:', results.company?.name);
 
       // Validate all required fields for executive summary
-      if (!userSubscriptionTier) throw new Error('subscription_tier missing - failed to load user tier');
-      if (!results.company?.industry_sector) throw new Error('industry_sector required for executive summary');
-      if (!results.company?.destination_country) throw new Error('destination_country required for executive summary');
+      if (!userSubscriptionTier) {
+        alert('⚠️ Unable to load subscription tier. Please refresh the page and try again.');
+        throw new Error('subscription_tier missing - failed to load user tier');
+      }
+      if (!results.company?.industry_sector) {
+        alert('⚠️ Missing required field: industry_sector. Please complete your company profile.');
+        throw new Error('industry_sector required for executive summary');
+      }
+      if (!results.company?.destination_country) {
+        alert('⚠️ Missing required field: destination_country. Please restart the analysis.');
+        throw new Error('destination_country required for executive summary');
+      }
       const components = results.component_origins || results.components;
-      if (!components || components.length === 0) throw new Error('components required for executive summary');
-      if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) throw new Error('north_american_content required for executive summary');
-      if (!results.company?.trade_volume && results.company?.trade_volume !== 0) throw new Error('annual_trade_volume required for executive summary');
-      if (results.usmca?.qualified === undefined || results.usmca?.qualified === null) throw new Error('usmca_qualified status required for executive summary');
+      if (!components || components.length === 0) {
+        alert('⚠️ No components found. Please add components to your analysis.');
+        throw new Error('components required for executive summary');
+      }
+      if (results.usmca?.north_american_content === undefined || results.usmca?.north_american_content === null) {
+        alert('⚠️ USMCA qualification data missing. Please restart the analysis.');
+        throw new Error('north_american_content required for executive summary');
+      }
+      if (!results.company?.trade_volume && results.company?.trade_volume !== 0) {
+        alert('⚠️ Missing trade volume. Please provide your annual trade volume.');
+        throw new Error('annual_trade_volume required for executive summary');
+      }
+      if (results.usmca?.qualified === undefined || results.usmca?.qualified === null) {
+        alert('⚠️ USMCA qualification status missing. Please restart the analysis.');
+        throw new Error('usmca_qualified status required for executive summary');
+      }
 
       // Prepare payload for the executive trade alert API
       const payload = {
@@ -680,7 +701,14 @@ export default function WorkflowResults({
         }
       };
 
-      console.log('📊 Executive Summary payload:', payload);
+      console.log('📊 Executive Summary payload:', {
+        ...payload,
+        frontend_tier_check: {
+          userSubscriptionTier,
+          isPaidUser,
+          tierCheck: !['trial', 'free'].includes((userSubscriptionTier || '').toLowerCase())
+        }
+      });
 
       // Call the executive trade alert API
       const response = await fetch('/api/executive-trade-alert', {
@@ -690,13 +718,40 @@ export default function WorkflowResults({
       });
 
       if (!response.ok) {
+        // ✅ FIX (Oct 28): Handle tier-gated 403 errors specially
+        if (response.status === 403) {
+          const errorData = await response.json();
+          if (errorData.code === 'ALERTS_REQUIRE_PAID_SUBSCRIPTION') {
+            alert(`⚠️ Upgrade Required\n\n${errorData.message}\n\nVisit the Pricing page to upgrade your subscription.`);
+            return;
+          }
+        }
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('✅ Executive Summary generated:', data);
 
-      setExecutiveSummary(data);
+      // ✅ FIX: Extract alert object and transform for UI display
+      const alert = data.alert || data;
+      const transformedSummary = {
+        headline: alert.headline || '',
+        // Transform financial_impact object to readable string
+        financial_impact: alert.financial_impact ?
+          `Current burden: ${alert.financial_impact.current_annual_burden || 'N/A'}. Potential savings: ${alert.financial_impact.potential_annual_savings || 'N/A'}. Payback period: ${alert.financial_impact.payback_period || 'N/A'}.`
+          : 'Financial impact data unavailable',
+        // Transform strategic_roadmap array to readable string
+        strategic_recommendation: alert.strategic_roadmap?.length > 0 ?
+          alert.strategic_roadmap.map(item => `${item.phase || item.title || ''}: ${item.action || item.description || ''}`).join(' → ')
+          : (alert.situation_brief || 'Strategic recommendations unavailable'),
+        // Transform action_this_week array to readable string
+        immediate_actions: alert.action_this_week?.length > 0 ?
+          alert.action_this_week.map((action, i) => `${i + 1}. ${action.action || action.title || action}`).join('. ')
+          : 'No immediate actions identified'
+      };
+
+      console.log('✅ Transformed summary for UI:', transformedSummary);
+      setExecutiveSummary(transformedSummary);
       setShowSummary(true);
     } catch (error) {
       console.error('❌ Failed to generate Executive Summary:', error);
