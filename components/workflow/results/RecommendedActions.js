@@ -120,7 +120,7 @@ export default function RecommendedActions({ results }) {
         credentials: 'include',
         body: JSON.stringify({
           user_profile: {
-            company_name: results.company?.company_name || null,
+            company_name: results.company?.name || null,  // ✅ FIXED: Use correct field name
             industry_sector: results.company?.industry_sector || 'General Manufacturing',
             destination_country: results.company.destination_country,  // ✅ No fallback - validated above
             supplier_country: results.company?.supplier_country,
