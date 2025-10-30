@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator.js';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -353,72 +354,115 @@ export default function EditableCertificatePreview({
       return;
     }
 
-    console.log('📄 PDF DOWNLOAD STARTING - Capturing preview as PDF...');
-    console.log('🔍 [DEBUG] editedCert state at download time:');
-    console.log('  - certifier_name:', editedCert.certifier_name);
-    console.log('  - exporter_name:', editedCert.exporter_name);
-    console.log('  - importer_name:', editedCert.importer_name);
-    console.log('  - importer_address:', editedCert.importer_address);
-    console.log('  - product_description:', editedCert.product_description);
-    console.log('  - hs_code:', editedCert.hs_code);
-    console.log('  - signatory_name:', editedCert.signatory_name);
-    console.log('🔍 [DEBUG] Full editedCert:', editedCert);
+    console.log('📄 PDF DOWNLOAD STARTING with jsPDF...');
+    console.log('📄 Using editedCert state:', editedCert);
 
     try {
-      // Get the certificate preview element
-      const certificateElement = document.getElementById('certificate-preview-for-pdf');
+      // Map editedCert state to jsPDF generator format
+      const certificateData = {
+        certifier_type: editedCert.certifier_type || 'EXPORTER',
+        certificate_number: `CERT-${Date.now()}`,
 
-      if (!certificateElement) {
-        alert('❌ Certificate preview not found');
-        return;
-      }
+        // Blanket period
+        blanket_period: {
+          start_date: editedCert.blanket_from || new Date().toISOString().split('T')[0],
+          end_date: editedCert.blanket_to || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
+        },
 
-      console.log('📄 Certificate element found');
-      console.log('🔍 [DEBUG] Checking if inputs have values in the DOM...');
-      const inputs = certificateElement.querySelectorAll('input, textarea, select');
-      console.log('🔍 [DEBUG] Total input fields:', inputs.length);
-      let filledCount = 0;
-      inputs.forEach((input, i) => {
-        if (input.value) {
-          filledCount++;
-          if (i < 10) { // Log first 10 filled inputs
-            console.log(`  Input ${i}: ${input.value.substring(0, 50)}`);
-          }
+        // Box 2: Certifier (company info based on certifier_type)
+        certifier: {
+          name: editedCert.certifier_name || '',
+          address: editedCert.certifier_address || '',
+          country: editedCert.certifier_country || '',
+          phone: editedCert.certifier_phone || '',
+          email: editedCert.certifier_email || '',
+          tax_id: editedCert.certifier_tax_id || ''
+        },
+
+        // Box 3: Exporter
+        exporter: {
+          name: editedCert.exporter_name || '',
+          address: editedCert.exporter_address || '',
+          country: editedCert.exporter_country || '',
+          phone: editedCert.exporter_phone || '',
+          email: editedCert.exporter_email || '',
+          tax_id: editedCert.exporter_tax_id || ''
+        },
+
+        // Box 4: Producer
+        producer: {
+          name: editedCert.producer_name || '',
+          address: editedCert.producer_address || '',
+          country: editedCert.producer_country || '',
+          phone: editedCert.producer_phone || '',
+          email: editedCert.producer_email || '',
+          tax_id: editedCert.producer_tax_id || '',
+          same_as_exporter: !editedCert.producer_name && !editedCert.producer_address
+        },
+
+        // Box 5: Importer
+        importer: {
+          name: editedCert.importer_name || '',
+          address: editedCert.importer_address || '',
+          country: editedCert.importer_country || '',
+          phone: editedCert.importer_phone || '',
+          email: editedCert.importer_email || '',
+          tax_id: editedCert.importer_tax_id || ''
+        },
+
+        // Product details (Box 6-11)
+        product: {
+          description: editedCert.product_description || ''
+        },
+        product_description: editedCert.product_description || '',
+
+        hs_classification: {
+          code: editedCert.hs_code || ''
+        },
+        hs_code: editedCert.hs_code || '',
+
+        preference_criterion: editedCert.origin_criterion || 'B',
+        origin_criterion: editedCert.origin_criterion || 'B',
+
+        producer_declaration: {
+          is_producer: editedCert.is_producer || false
+        },
+
+        qualification_method: {
+          method: editedCert.qualification_method || 'RVC'
+        },
+
+        country_of_origin: editedCert.country_of_origin || '',
+
+        // Box 12: Authorization
+        authorization: {
+          signatory_name: editedCert.signatory_name || '',
+          signatory_title: editedCert.signatory_title || '',
+          signature_date: editedCert.signature_date || new Date().toISOString().split('T')[0],
+          phone: editedCert.signatory_phone || '',
+          email: editedCert.signatory_email || ''
         }
-      });
-      console.log(`🔍 [DEBUG] Filled inputs: ${filledCount} / ${inputs.length}`);
-
-      // Import html2pdf library
-      const html2pdf = (await import('html2pdf.js')).default;
-
-      // PDF options - single page, tight margins
-      const options = {
-        margin: 10,
-        filename: `USMCA-Certificate-${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          scrollY: 0,
-          scrollX: 0
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'letter',
-          orientation: 'portrait',
-          compress: true
-        },
-        pagebreak: { mode: 'avoid-all' }  // Keep everything on one page
       };
 
-      // Generate and download PDF from the preview HTML
-      await html2pdf()
-        .set(options)
-        .from(certificateElement)
-        .save();
+      console.log('📄 Mapped certificate data for jsPDF:', certificateData);
 
-      console.log('✅ PDF download completed successfully');
+      // Generate PDF using jsPDF
+      const pdfBlob = await generateUSMCACertificatePDF(certificateData, {
+        watermark: isTrialUser,
+        userTier: userTier
+      });
+
+      // Download the PDF
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = pdfBlob.filename || `USMCA-Certificate-${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log('✅ PDF downloaded successfully via jsPDF');
 
       // Now save the data
       const updatedData = {
