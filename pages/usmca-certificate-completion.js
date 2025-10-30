@@ -366,38 +366,38 @@ export default function USMCACertificateCompletion() {
           </div>
 
           <div>
-            {/* STEP 1: Authorization Form */}
-            {!showPreview && (
-              <AuthorizationStep
-                formData={certificateData.authorization || {}}
-                updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
-                workflowData={workflowData}
-                certificateData={certificateData}
-                onPreviewCertificate={handlePreviewCertificate}
-                // ✅ Removed old PDF props (Oct 30): onDownloadCertificate, onEmailToImporter, generatedPDF
-                previewData={previewData}
-                userTier={userTier}
-              />
-            )}
+            {/* STEP 1: Authorization Form - ALWAYS VISIBLE */}
+            <AuthorizationStep
+              formData={certificateData.authorization || {}}
+              updateFormData={(field, value) => updateCertificateData('authorization', { [field]: value })}
+              workflowData={workflowData}
+              certificateData={certificateData}
+              onPreviewCertificate={handlePreviewCertificate}
+              // ✅ Removed old PDF props (Oct 30): onDownloadCertificate, onEmailToImporter, generatedPDF
+              previewData={previewData}
+              userTier={userTier}
+            />
 
-            {/* STEP 2: Editable Certificate Preview */}
+            {/* STEP 2: Editable Certificate Preview - Shows BELOW authorization form when ready */}
             {showPreview && previewData && (
-              <EditableCertificatePreview
-                previewData={previewData}
-                userTier={userTier}
-                onSave={async (editedCertificate) => {
-                  // ✅ CRITICAL FIX (Oct 30, 2025): EditableCertificatePreview handles PDF download internally via html2pdf.js
-                  // DO NOT call old handleDownloadCertificate() - that caused DOUBLE download (old black/white + new blue/white)
-                  // Just update preview data with edits and close preview
-                  setPreviewData(prev => ({
-                    ...prev,
-                    professional_certificate: editedCertificate
-                  }));
-                  // Close preview - PDF already downloaded by EditableCertificatePreview
-                  setShowPreview(false);
-                }}
-                onCancel={() => setShowPreview(false)}
-              />
+              <div style={{ marginTop: '2rem' }}>
+                <EditableCertificatePreview
+                  previewData={previewData}
+                  userTier={userTier}
+                  onSave={async (editedCertificate) => {
+                    // ✅ CRITICAL FIX (Oct 30, 2025): EditableCertificatePreview handles PDF download internally via html2pdf.js
+                    // DO NOT call old handleDownloadCertificate() - that caused DOUBLE download (old black/white + new blue/white)
+                    // Just update preview data with edits and close preview
+                    setPreviewData(prev => ({
+                      ...prev,
+                      professional_certificate: editedCertificate
+                    }));
+                    // Close preview - PDF already downloaded by EditableCertificatePreview
+                    setShowPreview(false);
+                  }}
+                  onCancel={() => setShowPreview(false)}
+                />
+              </div>
             )}
           </div>
 
