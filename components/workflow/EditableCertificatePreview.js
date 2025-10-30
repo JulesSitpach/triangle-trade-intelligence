@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { fillOfficialUSMCATemplate } from '../../lib/utils/official-usmca-template-filler.js';
+import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator.js';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -552,11 +552,10 @@ export default function EditableCertificatePreview({
         }
       };
 
-      console.log('📄 Generating PDF using official USMCA template...');
+      console.log('📄 Generating PDF with working jsPDF generator (professional polish applied)...');
 
-      // ✅ STEP 3: Fill official government template with user data (async)
-      // This approach guarantees perfect layout match since we use the actual official form
-      const blob = await fillOfficialUSMCATemplate(certificateData, {
+      // ✅ STEP 3: Generate PDF using working jsPDF generator with professional polish
+      const blob = await generateUSMCACertificatePDF(certificateData, {
         watermark: isTrialUser,
         userTier: userTier
       });
