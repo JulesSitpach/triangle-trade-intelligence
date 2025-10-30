@@ -889,6 +889,27 @@ export default function TradeRiskAlternatives() {
                   Click any component with alerts to see tariff details and policy impacts:
                 </p>
 
+                {/* DEBUG: Alert Matching Status */}
+                {(() => {
+                  console.log('🔍 COMPONENT TABLE DEBUG:', {
+                    totalAlerts: consolidatedAlerts.length,
+                    alertsGenerated,
+                    alertSample: consolidatedAlerts[0] ? {
+                      title: consolidatedAlerts[0].title || consolidatedAlerts[0].consolidated_title,
+                      affectedHS: consolidatedAlerts[0].affected_hs_codes,
+                      affectedCountries: consolidatedAlerts[0].affected_countries,
+                      relevantIndustries: consolidatedAlerts[0].relevant_industries
+                    } : 'No alerts',
+                    componentSample: userProfile.componentOrigins[0] ? {
+                      name: userProfile.componentOrigins[0].component_type || userProfile.componentOrigins[0].description,
+                      hs: userProfile.componentOrigins[0].hs_code,
+                      origin: userProfile.componentOrigins[0].origin_country || userProfile.componentOrigins[0].country,
+                      industry: userProfile.componentOrigins[0].industry || userProfile.industry_sector
+                    } : 'No components'
+                  });
+                  return null;
+                })()}
+
                 {/* Table Header */}
                 <div style={{
                   marginTop: '1rem',
