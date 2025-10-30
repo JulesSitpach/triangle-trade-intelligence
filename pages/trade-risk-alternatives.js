@@ -1332,8 +1332,8 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Next Steps - After Reviewing Alerts */}
-        {alertsGenerated && (consolidatedAlerts.length > 0 || realPolicyAlerts.length > 0) && (
+        {/* Next Steps - ALWAYS show after analysis runs (even if 0 alerts) */}
+        {alertsGenerated && (
           <div className="form-section">
             <h2 className="form-section-title">Next Steps</h2>
             <p className="text-body" style={{ marginBottom: '1rem' }}>
