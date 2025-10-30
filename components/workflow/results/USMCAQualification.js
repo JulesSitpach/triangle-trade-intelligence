@@ -4,12 +4,12 @@
  * NO duplicate qualification status (shown in hero section)
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 // EDUCATIONAL: Simple tooltip component for trade terminology
 const Tooltip = ({ text, children }) => {
-  const [show, setShow] = React.useState(false);
+  const [show, setShow] = useState(false);
 
   return (
     <span style={{ position: 'relative', display: 'inline-block' }}>
@@ -57,7 +57,7 @@ const Tooltip = ({ text, children }) => {
 
 export default function USMCAQualification({ results }) {
   console.log('🚨 USMCAQualification component called with:', results);
-  const [expandedComponents, setExpandedComponents] = React.useState({});
+  const [expandedComponents, setExpandedComponents] = useState({});
 
   if (!results?.usmca) return null;
 
