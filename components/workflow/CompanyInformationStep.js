@@ -388,11 +388,12 @@ export default function CompanyInformationStep({
           <div className="form-group">
             <label className="form-label required">Destination Market</label>
             <select
-              className="form-select"
-              value={formData.destination_country || SYSTEM_CONFIG.countries.defaultDestination}
+              className={`form-select ${formData.destination_country ? 'has-value' : ''}`}
+              value={formData.destination_country || ''}
               onChange={(e) => updateFormData('destination_country', e.target.value)}
               required
             >
+              <option value="">Select destination country</option>
               {dropdownOptions.usmcaCountries?.map(country => {
                 const countryCode = country.code || country.value;
                 const countryName = country.label || country.name;
