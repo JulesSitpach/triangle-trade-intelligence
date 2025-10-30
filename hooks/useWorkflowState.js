@@ -138,10 +138,13 @@ export function useWorkflowState() {
         setFormData(saved);
         console.log('✅ Loaded saved form data from localStorage (after options loaded):', {
           company_name: saved.company_name,
+          company_country: saved.company_country,  // ✅ Debug: Check if this is being loaded
           business_type: saved.business_type,
           industry_sector: saved.industry_sector,
+          supplier_country: saved.supplier_country,  // ✅ Debug: Check if this is being loaded
           destination_country: saved.destination_country,
           manufacturing_location: saved.manufacturing_location,
+          substantial_transformation: saved.substantial_transformation,  // ✅ Debug: Check if this is being loaded
           product_description: saved.product_description,
           component_origins_count: saved.component_origins?.length
         });
