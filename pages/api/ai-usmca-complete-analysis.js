@@ -649,6 +649,29 @@ export default protectedApiHandler({
             continue;  // Skip to next component, let Phase 3 handle this
           }
 
+          // ✅ HYBRID (Oct 30): Check policy_tariffs_cache for volatile rates
+          // Overwrite Section 301/232 from master table with fresh cache values
+          let policyRates = { section_301: rateData?.section_301 || 0, section_232: rateData?.section_232 || 0 };
+          try {
+            const { data: policyCache } = await supabase
+              .from('policy_tariffs_cache')
+              .select('section_301, section_232, verified_date, is_stale')
+              .eq('hs_code', normalizedHsCode)
+              .single();
+
+            if (policyCache && !policyCache.is_stale) {
+              // Use cached policy rates (fresher than master table)
+              policyRates.section_301 = policyCache.section_301 || 0;
+              policyRates.section_232 = policyCache.section_232 || 0;
+              console.log(`✅ [POLICY-CACHE] Using fresh policy rates for ${component.hs_code} (verified ${policyCache.verified_date})`);
+            } else if (policyCache?.is_stale) {
+              console.log(`⚠️ [POLICY-CACHE] Stale policy rates for ${component.hs_code}, using master table fallback`);
+            }
+          } catch (policyCacheError) {
+            // No policy cache entry - use master table values
+            // Not an error, just means no volatile rates have been cached yet
+          }
+
           // Map USITC columns to our standard format
           // Handle multiple rate types: Ad valorem (%), Specific (per unit), Compound (% + per unit), Free
           // Rate type codes: "A" = ad valorem, "S" = specific, "C" = compound, NULL = free
@@ -701,17 +724,18 @@ export default protectedApiHandler({
           };
 
           const getSection301Rate = () => {
-            // Section 301 is stored in tariff_intelligence_master (updated daily with policy changes)
+            // ✅ HYBRID (Oct 30): Section 301 rates from policy_tariffs_cache (7-day freshness)
+            // Falls back to tariff_intelligence_master if not in cache
             // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
 
             // Check if origin is China AND destination is US
             const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
             const isUSDestination = destinationCountry === 'US';
 
-            if (isChineseOrigin && isUSDestination && rateData) {
-              // Read Section 301 from database (e.g., 0.60 for semiconductors)
-              const section301FromDB = parseFloat(rateData?.section_301) || 0;
-              return section301FromDB;  // Return decimal format (0-1)
+            if (isChineseOrigin && isUSDestination) {
+              // Use policy cache value (overrides master table if present)
+              const section301Rate = parseFloat(policyRates.section_301) || 0;
+              return section301Rate;  // Return decimal format (0-1)
             }
 
             // Section 301 doesn't apply to non-China origins or non-US destinations
@@ -758,9 +782,10 @@ export default protectedApiHandler({
           const standardFields = {
             mfn_rate: mfnRate,
             base_mfn_rate: baseMfnRate,
-            section_301: section301Rate,  // Read from database tariff_intelligence_master
-            section_232: parseFloat(rateData?.section_232) || 0,  // Read from database
+            section_301: section301Rate,  // ✅ HYBRID: From policy_tariffs_cache (7-day freshness)
+            section_232: parseFloat(policyRates.section_232) || 0,  // ✅ HYBRID: From policy_tariffs_cache (30-day freshness)
             usmca_rate: usmcaRate,
+            mfn_text_rate: rateData?.mfn_text_rate || null,  // ✅ Track "Free" vs missing data
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // All rates now from database - no AI enrichment needed
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
@@ -829,10 +854,18 @@ export default protectedApiHandler({
 
     // Phase 2: AI FALLBACK for missing components (HYBRID approach)
     // ✅ DATABASE-FIRST: Only call AI if component is missing from database
-    // Don't overwrite database rates with AI - only fill gaps
-    const missingFromDatabase = enrichedComponents.filter(c =>
-      c.stale === true || c.rate_source === 'no_data' || c.mfn_rate === 0
-    );
+    // ✅ FIX (Oct 30): Respect legitimate 0% duty-free rates (mfn_text_rate: "Free")
+    // Don't treat mfn_rate === 0 as missing if mfn_text_rate is "Free"
+    const missingFromDatabase = enrichedComponents.filter(c => {
+      // If stale or no_data, definitely needs AI
+      if (c.stale === true || c.data_source === 'no_data') return true;
+
+      // If mfn_rate is 0 AND mfn_text_rate is null/empty, it's incomplete data
+      if (c.mfn_rate === 0 && !c.mfn_text_rate) return true;
+
+      // Otherwise, data is complete (includes "Free" duty-free rates)
+      return false;
+    });
 
     if (missingFromDatabase.length > 0) {
       console.log(`⏳ [HYBRID] ${missingFromDatabase.length} components missing from database, calling AI for 2025 rates...`);
@@ -864,44 +897,75 @@ export default protectedApiHandler({
           return comp;
         });
 
-        // ✅ FIXED (Oct 29): Save AI results to tariff_rates_cache (not master table)
-        // This grows the cache organically and prevents future AI calls
+        // ✅ HYBRID SAVE (Oct 30): Split stable vs volatile rates
+        // Stable rates (MFN, USMCA) → tariff_intelligence_master (permanent)
+        // Volatile rates (Section 301, 232) → policy_tariffs_cache (7-30 day expiration)
         if (aiRates && aiRates.length > 0) {
           try {
-            console.log(`💾 [CACHE-GROWTH] Saving ${aiRates.length} AI-discovered rates to tariff_rates_cache...`);
+            console.log(`💾 [HYBRID-SAVE] Saving ${aiRates.length} AI-discovered rates (split stable/volatile)...`);
 
             for (const aiRate of aiRates) {
-              // Normalize HS code to 8-digit format
               const normalizedHS = aiRate.hs_code.replace(/\D/g, '').substring(0, 8).padEnd(8, '0');
+              const mfnTextRate = (aiRate.mfn_rate === 0 || aiRate.base_mfn_rate === 0) ? 'Free' : `${(aiRate.mfn_rate * 100).toFixed(1)}%`;
 
-              // Save to tariff_rates_cache (AI-discovered rates)
-              const { error: cacheError } = await supabase
-                .from('tariff_rates_cache')
+              // 1. Save STABLE rates to master table (permanent)
+              const { error: masterError } = await supabase
+                .from('tariff_intelligence_master')
                 .upsert({
-                  hs_code: normalizedHS,
-                  destination_country: formData.destination_country,
-                  mfn_rate: aiRate.mfn_rate || 0,
-                  section_301: aiRate.section_301 || 0,
-                  section_232: aiRate.section_232 || 0,
-                  usmca_rate: aiRate.usmca_rate || 0,
-                  rate_source: 'ai_research_2025',
-                  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h cache for US
+                  hts8: normalizedHS,
+                  brief_description: aiRate.description || 'AI-verified component',
+                  mfn_text_rate: mfnTextRate,
+                  mfn_ad_val_rate: aiRate.base_mfn_rate || aiRate.mfn_rate || 0,
+                  usmca_ad_val_rate: aiRate.usmca_rate || 0,
+                  // DON'T save section_301/232 here - too volatile
+                  data_source: 'ai_verified_2025',
+                  needs_ai_enrichment: false,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
                 }, {
-                  onConflict: 'hs_code,destination_country'  // Unique key is (hs_code, destination)
+                  onConflict: 'hts8'
                 });
 
-              if (cacheError) {
-                console.error(`⚠️ [CACHE-GROWTH] Failed to cache ${normalizedHS}:`, cacheError.message);
+              if (masterError) {
+                console.error(`⚠️ [HYBRID-SAVE] Failed to save stable rates ${normalizedHS}:`, masterError.message);
               } else {
-                console.log(`✅ [CACHE-GROWTH] Cached ${normalizedHS} for ${formData.destination_country} (future requests will hit cache)`);
+                console.log(`✅ [HYBRID-SAVE] Saved stable rates ${normalizedHS} to master (permanent)`);
+              }
+
+              // 2. Save VOLATILE policy rates to cache (with expiration)
+              const hasVolatileRates = (aiRate.section_301 > 0) || (aiRate.section_232 > 0);
+              if (hasVolatileRates) {
+                // Section 301 (China): 7-day freshness
+                // Section 232 (Steel): 30-day freshness
+                const expirationDays = aiRate.section_301 > 0 ? 7 : 30;
+                const expiresAt = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000);
+
+                const { error: policyError } = await supabase
+                  .from('policy_tariffs_cache')
+                  .upsert({
+                    hs_code: normalizedHS,
+                    section_301: aiRate.section_301 || 0,
+                    section_232: aiRate.section_232 || 0,
+                    verified_date: new Date().toISOString().split('T')[0],
+                    expires_at: expiresAt.toISOString(),
+                    data_source: 'ai_verified',
+                    last_updated_by: 'system',
+                    update_notes: `AI discovered rate on ${new Date().toISOString()}`
+                  }, {
+                    onConflict: 'hs_code'
+                  });
+
+                if (policyError) {
+                  console.error(`⚠️ [HYBRID-SAVE] Failed to cache policy rates ${normalizedHS}:`, policyError.message);
+                } else {
+                  console.log(`✅ [HYBRID-SAVE] Cached policy rates ${normalizedHS} (expires in ${expirationDays} days)`);
+                }
               }
             }
 
-            console.log(`💾 [CACHE-GROWTH] Cache coverage increased by ${aiRates.length} HS codes`);
+            console.log(`💾 [HYBRID-SAVE] Database expanded: stable rates permanent, policy rates cached`);
           } catch (saveError) {
-            console.error(`⚠️ [CACHE-GROWTH] Error saving AI rates to cache:`, saveError.message);
+            console.error(`⚠️ [HYBRID-SAVE] Error saving AI rates:`, saveError.message);
             // Non-fatal error - continue with request even if save fails
           }
         }

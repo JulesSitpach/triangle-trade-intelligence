@@ -199,11 +199,17 @@ export default protectedApiHandler({
         .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
 
       // Get user's HS codes from workflows to match with crisis alerts
-      const userHSCodes = [...new Set(
-        allWorkflows
-          .map(w => w.hs_code)
-          .filter(code => code && code !== 'Not classified')
-      )];
+      // CRITICAL FIX: Extract HS codes from BOTH workflow-level AND component-level
+      const workflowHSCodes = allWorkflows
+        .map(w => w.hs_code)
+        .filter(code => code && code !== 'Not classified');
+
+      const componentHSCodes = allWorkflows
+        .flatMap(w => w.component_origins || [])
+        .map(comp => comp.hs_code)
+        .filter(code => code);
+
+      const userHSCodes = [...new Set([...workflowHSCodes, ...componentHSCodes])];
 
       // Get ALL destination countries from ALL workflows (user may ship to multiple destinations)
       const userDestinations = [...new Set(
