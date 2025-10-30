@@ -894,18 +894,19 @@ export default function TradeRiskAlternatives() {
                   console.log('🔍 COMPONENT TABLE DEBUG:', {
                     totalAlerts: consolidatedAlerts.length,
                     alertsGenerated,
-                    alertSample: consolidatedAlerts[0] ? {
-                      title: consolidatedAlerts[0].title || consolidatedAlerts[0].consolidated_title,
-                      affectedHS: consolidatedAlerts[0].affected_hs_codes,
-                      affectedCountries: consolidatedAlerts[0].affected_countries,
-                      relevantIndustries: consolidatedAlerts[0].relevant_industries
-                    } : 'No alerts',
-                    componentSample: userProfile.componentOrigins[0] ? {
-                      name: userProfile.componentOrigins[0].component_type || userProfile.componentOrigins[0].description,
-                      hs: userProfile.componentOrigins[0].hs_code,
-                      origin: userProfile.componentOrigins[0].origin_country || userProfile.componentOrigins[0].country,
-                      industry: userProfile.componentOrigins[0].industry || userProfile.industry_sector
-                    } : 'No components'
+                    alertsArray: consolidatedAlerts.map(a => ({
+                      title: a.title || a.consolidated_title,
+                      affectedHS: a.affected_hs_codes,
+                      affectedCountries: a.affected_countries,
+                      relevantIndustries: a.relevant_industries,
+                      source: a.source || a.alert_type
+                    })),
+                    componentsArray: userProfile.componentOrigins.map(c => ({
+                      name: c.component_type || c.description,
+                      hs: c.hs_code,
+                      origin: c.origin_country || c.country,
+                      industry: c.industry || userProfile.industry_sector
+                    }))
                   });
                   return null;
                 })()}
