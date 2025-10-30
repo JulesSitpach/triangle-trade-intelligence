@@ -119,20 +119,23 @@ export default async function handler(req, res) {
 
     // Section 301: China + US destination
     if (hasChineseComponents && userDestination === 'US') {
+      // ✅ Calculate once, reuse for both annual_cost_impact and strategic_options
+      const section301Impact = await calculateSection301Impact(
+        workflow_intelligence.components,
+        user_profile.annual_trade_volume || 0
+      );
+
       applicablePolicies.push({
         policy: 'Section 301 Tariffs',
         severity: 'CRITICAL',
         affects_user: true,
         impact: 'Additional tariff on Chinese-origin components (rate varies by HS code)',
-        annual_cost_impact: await calculateSection301Impact(
-          workflow_intelligence.components,
-          user_profile.annual_trade_volume || 0
-        ),
+        annual_cost_impact: section301Impact,
         description: 'China-origin goods entering the US remain subject to Section 301 tariffs despite USMCA qualification.',
         strategic_options: await generateMexicoNearshoringOptions(
           user_profile,
           workflow_intelligence,
-          await calculateSection301Impact(workflow_intelligence.components, user_profile.annual_trade_volume || 0)
+          section301Impact
         )
       });
     }
@@ -148,7 +151,7 @@ export default async function handler(req, res) {
         severity: rvcBuffer < 5 ? 'CRITICAL' : 'HIGH',
         affects_user: true,
         impact: 'Low RVC buffer could cause disqualification with threshold changes',
-        annual_cost_impact: await calculateRiskImpact(workflow_intelligence, user_profile),
+        annual_cost_impact: await calculateRiskImpact(workflow_intelligence, user_profile, industryThreshold),
         description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%+.`,
         strategic_options: [
           {
@@ -343,22 +346,9 @@ async function calculateSection301Impact(components, tradeVolume) {
   };
 }
 
-async function calculateRiskImpact(workflow, userProfile) {
-  // ✅ DYNAMIC: Get actual threshold from database (not hardcoded 60%)
-  let thresholdApplied = workflow.threshold_applied;
-
-  if (!thresholdApplied) {
-    if (!userProfile.industry_sector) {
-      throw new Error('Unable to calculate risk impact: missing industry_sector and workflow.threshold_applied');
-    }
-    try {
-      const thresholdData = await getIndustryThreshold(userProfile.industry_sector);
-      thresholdApplied = thresholdData.rvc;
-    } catch (error) {
-      console.error('Failed to get industry threshold:', error.message);
-      throw new Error(`Failed to load USMCA threshold for risk calculation: ${error.message}`);
-    }
-  }
+async function calculateRiskImpact(workflow, userProfile, industryThreshold) {
+  // ✅ Use passed threshold to avoid duplicate database call
+  const thresholdApplied = workflow.threshold_applied || industryThreshold.rvc;
 
   // ✅ Risk is proportional to how close they are to minimum threshold
   const buffer = (workflow.north_american_content || 0) - thresholdApplied;
