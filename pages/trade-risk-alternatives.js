@@ -933,10 +933,13 @@ export default function TradeRiskAlternatives() {
 
                   // Filter alerts for this specific component
                   const componentAlerts = consolidatedAlerts.filter(alert => {
-                    // Match by HS code
-                    const hsMatch = alert.affected_hs_codes?.some(code =>
-                      comp.hs_code?.startsWith(code.replace(/\./g, '').substring(0, 6))
-                    );
+                    // Match by HS code - NULL means match ALL (blanket alert)
+                    const hsMatch = alert.affected_hs_codes === null || alert.affected_hs_codes === undefined
+                      ? true  // NULL = blanket alert, matches all HS codes
+                      : alert.affected_hs_codes?.some(code =>
+                          comp.hs_code?.startsWith(code.replace(/\./g, '').substring(0, 6))
+                        );
+
                     // Match by origin country
                     const originMatch = alert.affected_countries?.some(country =>
                       (comp.origin_country || comp.country)?.toUpperCase() === country.toUpperCase()
@@ -954,11 +957,11 @@ export default function TradeRiskAlternatives() {
                         alertCountries: alert.affected_countries,
                         hsMatch,
                         originMatch,
-                        finalMatch: hsMatch || originMatch
+                        finalMatch: hsMatch && originMatch  // BOTH must match
                       });
                     }
 
-                    return hsMatch || originMatch;
+                    return hsMatch && originMatch;  // BOTH must match (HS + origin)
                   });
 
                   const isExpanded = expandedComponents[idx] || false;
