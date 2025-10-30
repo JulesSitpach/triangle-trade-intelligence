@@ -781,6 +781,7 @@ export default function WorkflowResults({
       // Prepare payload for the executive trade alert API
       const payload = {
         user_profile: {
+          company_name: results.company?.name || null,  // ✅ FIX (Oct 30): AI needs company name for personalized output
           subscription_tier: userSubscriptionTier,
           industry_sector: results.company.industry_sector,
           destination_country: results.company.destination_country,
