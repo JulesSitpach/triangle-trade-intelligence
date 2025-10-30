@@ -117,6 +117,93 @@ export default function EditableCertificatePreview({
     };
   });
 
+  // ✅ FIX: Update editedCert when previewData changes (async data arrives after mount)
+  useEffect(() => {
+    if (!previewData?.professional_certificate) return;
+
+    console.log('🔄 Updating certificate state with preview data:', previewData.professional_certificate);
+
+    // Get certifier type to determine which company info to use for Box 2
+    const certifierType = previewData?.professional_certificate?.certifier?.type ||
+                         previewData?.professional_certificate?.certifier_type ||
+                         'EXPORTER';
+
+    // Box 2: Use company information based on certifier_type
+    let certifierInfo = {};
+    if (certifierType === 'IMPORTER') {
+      certifierInfo = {
+        certifier_name: previewData?.professional_certificate?.importer?.name || '',
+        certifier_address: previewData?.professional_certificate?.importer?.address || '',
+        certifier_country: previewData?.professional_certificate?.importer?.country || '',
+        certifier_phone: previewData?.professional_certificate?.importer?.phone || '',
+        certifier_email: previewData?.professional_certificate?.importer?.email || '',
+        certifier_tax_id: previewData?.professional_certificate?.importer?.tax_id || ''
+      };
+    } else if (certifierType === 'PRODUCER') {
+      certifierInfo = {
+        certifier_name: previewData?.professional_certificate?.producer?.name || '',
+        certifier_address: previewData?.professional_certificate?.producer?.address || '',
+        certifier_country: previewData?.professional_certificate?.producer?.country || '',
+        certifier_phone: previewData?.professional_certificate?.producer?.phone || '',
+        certifier_email: previewData?.professional_certificate?.producer?.email || '',
+        certifier_tax_id: previewData?.professional_certificate?.producer?.tax_id || ''
+      };
+    } else {
+      // Default: EXPORTER
+      certifierInfo = {
+        certifier_name: previewData?.professional_certificate?.exporter?.name || '',
+        certifier_address: previewData?.professional_certificate?.exporter?.address || '',
+        certifier_country: previewData?.professional_certificate?.exporter?.country || '',
+        certifier_phone: previewData?.professional_certificate?.exporter?.phone || '',
+        certifier_email: previewData?.professional_certificate?.exporter?.email || '',
+        certifier_tax_id: previewData?.professional_certificate?.exporter?.tax_id || ''
+      };
+    }
+
+    setEditedCert({
+      certifier_type: certifierType,
+      blanket_from: previewData?.professional_certificate?.blanket_period?.start_date || '',
+      blanket_to: previewData?.professional_certificate?.blanket_period?.end_date || '',
+      ...certifierInfo,
+      exporter_name: previewData?.professional_certificate?.exporter?.name || '',
+      exporter_address: previewData?.professional_certificate?.exporter?.address || '',
+      exporter_country: previewData?.professional_certificate?.exporter?.country || '',
+      exporter_phone: previewData?.professional_certificate?.exporter?.phone || '',
+      exporter_email: previewData?.professional_certificate?.exporter?.email || '',
+      exporter_tax_id: previewData?.professional_certificate?.exporter?.tax_id || '',
+      producer_name: previewData?.professional_certificate?.producer?.name || '',
+      producer_address: previewData?.professional_certificate?.producer?.address || '',
+      producer_country: previewData?.professional_certificate?.producer?.country || '',
+      producer_phone: previewData?.professional_certificate?.producer?.phone || '',
+      producer_email: previewData?.professional_certificate?.producer?.email || '',
+      producer_tax_id: previewData?.professional_certificate?.producer?.tax_id || '',
+      importer_name: previewData?.professional_certificate?.importer?.name || '',
+      importer_address: previewData?.professional_certificate?.importer?.address || '',
+      importer_country: previewData?.professional_certificate?.importer?.country || '',
+      importer_phone: previewData?.professional_certificate?.importer?.phone || '',
+      importer_email: previewData?.professional_certificate?.importer?.email || '',
+      importer_tax_id: previewData?.professional_certificate?.importer?.tax_id || '',
+      product_description: previewData?.professional_certificate?.product?.description || '',
+      hs_code: previewData?.professional_certificate?.hs_classification?.code || '',
+      origin_criterion: previewData?.professional_certificate?.preference_criterion || 'B',
+      is_producer: previewData?.professional_certificate?.producer_declaration?.is_producer || false,
+      qualification_method: previewData?.professional_certificate?.qualification_method?.method || 'RVC',
+      country_of_origin: previewData?.professional_certificate?.country_of_origin || '',
+      components: previewData?.professional_certificate?.components || [],
+      signatory_name: previewData?.professional_certificate?.authorization?.signatory_name || '',
+      signatory_title: previewData?.professional_certificate?.authorization?.signatory_title || '',
+      signature_date: previewData?.professional_certificate?.authorization?.signature_date ?
+        new Date(previewData.professional_certificate.authorization.signature_date).toISOString().split('T')[0] :
+        new Date().toISOString().split('T')[0],
+      signatory_phone: previewData?.professional_certificate?.authorization?.signatory_phone || '',
+      signatory_email: previewData?.professional_certificate?.authorization?.signatory_email || '',
+      user_accepts_responsibility: false,
+      user_confirms_accuracy: false
+    });
+
+    console.log('✅ Certificate state updated with all fields');
+  }, [previewData]);
+
   const handleFieldChange = (field, value) => {
     // Prevent editing for Trial users
     if (isTrialUser && field !== 'user_accepts_responsibility' && field !== 'user_confirms_accuracy') {
