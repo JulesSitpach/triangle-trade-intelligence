@@ -47,15 +47,7 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
   console.log('🎯 AlertImpactAnalysisDisplay rendering with:', displayData);
 
   return (
-    <div style={{
-      marginTop: '2rem',
-      padding: '2.5rem',
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      maxWidth: '900px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    }}>
+    <div>
       {/* Header */}
       <div style={{
         display: 'flex',
