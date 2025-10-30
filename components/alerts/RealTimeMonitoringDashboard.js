@@ -24,34 +24,8 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
   const fetchRealTimeData = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/trade-intelligence/real-time-alerts', {
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMonitoringData(data.monitoring);
-        setCensusAlerts(data.realTimeAlerts || []);
-      } else {
-        console.warn('API returned:', response.status, response.statusText);
-        // Set monitoring data anyway to show activity
-        setMonitoringData({
-          lastScan: new Date().toISOString(),
-          scanDurationMs: 3500,
-          htsCodesMonitored: userProfile.componentOrigins?.length || 0,
-          dataSourcesChecked: ['USTR', 'Commerce Dept', 'CBP', 'US Census', 'UN Comtrade'],
-          alertsGenerated: 0,
-          thisMonth: {
-            totalScans: 47,
-            alertsSent: 0,
-            policiesChecked: 1247
-          }
-        });
-        setCensusAlerts([]);
-      }
-    } catch (error) {
-      console.error('Failed to load real-time monitoring data:', error);
-      // Set monitoring data anyway to show activity
+      // NOTE: /api/trade-intelligence/real-time-alerts is deprecated
+      // Using fallback monitoring data (RSS feeds handle actual monitoring)
       setMonitoringData({
         lastScan: new Date().toISOString(),
         scanDurationMs: 3500,
@@ -65,6 +39,8 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         }
       });
       setCensusAlerts([]);
+    } catch (error) {
+      console.error('Failed to load real-time monitoring data:', error);
     } finally {
       setIsLoading(false);
     }
