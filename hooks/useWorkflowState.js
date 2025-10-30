@@ -80,6 +80,7 @@ export function useWorkflowState() {
       // Product Information
       product_description: '',
       manufacturing_location: '',
+      substantial_transformation: false,  // ✅ FIX (Oct 30): Manufacturing transformation checkbox
 
       // HS Code Classification Results
       classified_hs_code: '',
@@ -128,20 +129,27 @@ export function useWorkflowState() {
     loadOptions();
   }, []);
 
-  // Load saved form data from localStorage (client-side only)
+  // ✅ FIX (Oct 30): Load saved form data AFTER dropdown options are loaded
+  // This prevents race condition where saved dropdown values can't be selected because options aren't available yet
   useEffect(() => {
-    const saved = loadSavedData();
-    if (saved) {
-      setFormData(saved);
-      console.log('✅ Loaded saved form data from localStorage:', {
-        company_name: saved.company_name,
-        product_description: saved.product_description,
-        component_origins_count: saved.component_origins?.length
-      });
-    } else {
-      console.log('ℹ️ No saved form data found in localStorage');
+    if (!isLoadingOptions && dropdownOptions.businessTypes?.length > 0) {
+      const saved = loadSavedData();
+      if (saved) {
+        setFormData(saved);
+        console.log('✅ Loaded saved form data from localStorage (after options loaded):', {
+          company_name: saved.company_name,
+          business_type: saved.business_type,
+          industry_sector: saved.industry_sector,
+          destination_country: saved.destination_country,
+          manufacturing_location: saved.manufacturing_location,
+          product_description: saved.product_description,
+          component_origins_count: saved.component_origins?.length
+        });
+      } else {
+        console.log('ℹ️ No saved form data found in localStorage');
+      }
     }
-  }, []);
+  }, [isLoadingOptions, dropdownOptions.businessTypes]);
 
   // Load saved results from localStorage (client-side only)
   // Note: currentStep is now restored in the useState initializer
@@ -379,9 +387,11 @@ export function useWorkflowState() {
     setError(null);
 
     // Clear saved step and results from localStorage
+    // Keep triangleUserData to preserve company info for convenience (auto-populate on next workflow)
     if (typeof window !== 'undefined') {
       localStorage.removeItem('workflow_current_step');
       localStorage.removeItem('usmca_workflow_results');
+      // NOTE: triangleUserData is NOT cleared - allows auto-population of company info in new workflows
     }
 
     // ✅ COMPLETE FORM RESET - NO HARDCODED DEFAULTS
@@ -401,6 +411,7 @@ export function useWorkflowState() {
       contact_phone: '',
       product_description: '',
       manufacturing_location: '',  // ✅ No default - user must select
+      substantial_transformation: false,  // ✅ Manufacturing transformation checkbox
       classified_hs_code: '',
       hs_code_confidence: 0,
       hs_code_description: '',
