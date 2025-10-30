@@ -91,20 +91,21 @@ export default function WorkflowResults({
       console.log('✅ Certificate already generated this session');
     }
 
-    // Restore executive summary from localStorage on page load
-    try {
-      const storedData = localStorage.getItem('usmca_workflow_results');
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        if (parsed.detailed_analysis?.situation_brief) {
-          console.log('✅ Restoring executive summary from localStorage on page load');
-          setExecutiveSummary(parsed.detailed_analysis);
-          setShowSummary(true);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to restore executive summary:', e);
-    }
+    // ❌ DISABLED (Oct 30, 2025): Auto-restore removed - was showing old/generic data instead of user's actual company
+    // User must manually click "📊 Generate Business Impact Summary" button to get fresh, personalized analysis
+    // try {
+    //   const storedData = localStorage.getItem('usmca_workflow_results');
+    //   if (storedData) {
+    //     const parsed = JSON.parse(storedData);
+    //     if (parsed.detailed_analysis?.situation_brief) {
+    //       console.log('✅ Restoring executive summary from localStorage on page load');
+    //       setExecutiveSummary(parsed.detailed_analysis);
+    //       setShowSummary(true);
+    //     }
+    //   }
+    // } catch (e) {
+    //   console.error('Failed to restore executive summary:', e);
+    // }
   }, []);
 
   // DISABLED: Auto-modal removed - users now use manual "Save to Dashboard" button
