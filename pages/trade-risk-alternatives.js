@@ -1307,14 +1307,6 @@ export default function TradeRiskAlternatives() {
 
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
             <div className="element-spacing">
-              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
-                  TRADE RISK ANALYSIS REPORT
-                </div>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {consolidatedAlerts.length} policy alert{consolidatedAlerts.length !== 1 ? 's' : ''}
-                </div>
-              </div>
               {consolidatedAlerts.map((alert, idx) => (
                 <ConsolidatedPolicyAlert
                   key={idx}
@@ -1329,14 +1321,6 @@ export default function TradeRiskAlternatives() {
           {/* Fallback: Show individual alerts if consolidation failed */}
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
             <div className="element-spacing">
-              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', color: '#475569', fontWeight: 500, marginBottom: '0.5rem' }}>
-                  TRADE RISK ANALYSIS REPORT
-                </div>
-                <div style={{ fontSize: '0.8125rem', color: '#64748b' }}>
-                  Based on {userProfile.componentOrigins?.length || 0} component{(userProfile.componentOrigins?.length || 0) !== 1 ? 's' : ''} with {realPolicyAlerts.length} policy alert{realPolicyAlerts.length !== 1 ? 's' : ''}
-                </div>
-              </div>
               {realPolicyAlerts.map((alert, idx) => (
                 <PersonalizedPolicyAlert
                   key={idx}
@@ -1349,42 +1333,60 @@ export default function TradeRiskAlternatives() {
         </div>
 
         {/* Next Steps - After Reviewing Alerts */}
-        <div className="form-section">
-          <h2 className="form-section-title">✅ Next Steps for {userProfile.companyName}</h2>
+        {alertsGenerated && (consolidatedAlerts.length > 0 || realPolicyAlerts.length > 0) && (
+          <div className="form-section">
+            <h2 className="form-section-title">Next Steps</h2>
+            <p className="text-body" style={{ marginBottom: '1rem' }}>
+              Analysis complete. Save to enable alerts and cross-device access. Or proceed without saving (data stays in browser only).
+            </p>
 
-          <div className="alert alert-warning">
-            <div className="alert-content">
-              <div className="alert-title">Priority Actions Based on Your Profile</div>
-              <div className="text-body">
-                <ol>
-                  {userProfile.supplierCountry === 'CN' && (
-                    <li><strong>Immediate:</strong> Identify alternative suppliers to reduce single-country dependency</li>
-                  )}
-                  {userProfile.qualificationStatus !== 'QUALIFIED' && (
-                    <li><strong>This week:</strong> Explore Mexico manufacturing options for USMCA qualification</li>
-                  )}
-                  <li><strong>This month:</strong> Map backup logistics routes for {userProfile.productDescription}</li>
-                  <li><strong>Ongoing:</strong> Monitor trade policy changes affecting HS code {userProfile.hsCode}</li>
-                </ol>
-              </div>
-              <div className="hero-buttons">
-                <button
-                  className="btn-secondary"
-                  onClick={() => {
-                    if (userTier === 'Trial') {
-                      alert('Risk assessment download is available for paying subscribers. Upgrade to access detailed reports.');
-                      window.location.href = '/pricing';
-                    }
-                  }}
-                  disabled={userTier === 'Trial'}
-                  title={userTier === 'Trial' ? 'Upgrade to download risk assessments' : ''}
-                >
-                  {userTier === 'Trial' ? '🔒 Download Risk Assessment (Upgrade)' : '📋 Download Risk Assessment'}
-                </button>
-              </div>
+            <div className="hero-buttons">
+              {/* Save Alert Analysis to Database */}
+              <button
+                onClick={handleSaveAlertAnalysis}
+                className="btn-primary"
+              >
+                💾 Save Alert to Database
+              </button>
+
+              {/* Generate Final Report */}
+              <button
+                onClick={() => {
+                  if (userTier === 'Trial') {
+                    alert('Final report generation is available for paying subscribers. Upgrade to access detailed reports.');
+                    window.location.href = '/pricing';
+                  } else {
+                    window.print();
+                  }
+                }}
+                className="btn-primary"
+                disabled={userTier === 'Trial'}
+                title={userTier === 'Trial' ? 'Upgrade to generate final reports' : ''}
+              >
+                {userTier === 'Trial' ? '🔒 Generate Final Report (Upgrade)' : '📊 Generate Final Report'}
+              </button>
+
+              {/* New Analysis */}
+              <button
+                onClick={() => {
+                  if (confirm('Start a new analysis? Your current alerts will be cleared.')) {
+                    // Clear alert data
+                    localStorage.removeItem('alert_impact_analysis');
+                    setAlertImpactAnalysis(null);
+                    setConsolidatedAlerts([]);
+                    setRealPolicyAlerts([]);
+                    setAlertsGenerated(false);
+                    // Go back to dashboard
+                    window.location.href = '/dashboard';
+                  }
+                }}
+                className="btn-secondary"
+              >
+                🔄 New Analysis
+              </button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Save Data Consent Modal - Privacy First with Alerts Context */}
         <SaveDataConsentModal
