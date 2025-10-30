@@ -48,14 +48,13 @@ export default function RecommendedActions({ results }) {
     fetchUserSubscriptionTier();
   }, []);
 
-  // ❌ DISABLED (Oct 30, 2025): Auto-trigger removed to prevent unwanted AI costs (~$0.02 per page load)
-  // User must manually click "📊 Generate Business Impact Summary" button
-  // useEffect(() => {
-  //   // Load executive trade alert with strategic roadmap if qualified and subscription tier is loaded
-  //   if (isQualified && results?.company && !loadingAlert && userSubscriptionTier) {
-  //     loadExecutiveTradeAlert();
-  //   }
-  // }, [isQualified, results, userSubscriptionTier]);
+  useEffect(() => {
+    // ✅ RE-ENABLED (Oct 30, 2025): Auto-trigger restored after fixing company_name field (line 123)
+    // Now sends correct data: results.company.name instead of results.company.company_name
+    if (isQualified && results?.company && !loadingAlert && userSubscriptionTier) {
+      loadExecutiveTradeAlert();
+    }
+  }, [isQualified, results, userSubscriptionTier]);
 
   const saveExecutiveAlertToDatabase = async (alertData) => {
     try {
