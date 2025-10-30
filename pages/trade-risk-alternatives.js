@@ -1277,20 +1277,6 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {!isLoadingPolicyAlerts && !isConsolidating && alertsGenerated && realPolicyAlerts.length === 0 && (
-            <div className="alert alert-success">
-              <div className="alert-content">
-                <div className="alert-title">✅ Strategic Analysis Complete</div>
-                <div className="text-body">
-                  Analysis complete. Your comprehensive business intelligence report is ready below, including USMCA 2026 contingency planning and strategic guidance.
-                </div>
-                <div className="text-body" style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                  No critical government policy changes currently affecting your components. We monitor official sources continuously.
-                </div>
-              </div>
-            </div>
-          )}
-
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
             <div className="element-spacing">
               {consolidatedAlerts.map((alert, idx) => (
