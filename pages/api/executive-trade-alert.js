@@ -502,7 +502,21 @@ CRITICAL RULES - PROFESSIONAL FORMATTING:
 - Calculate ROI: If saving $50K/year and nearshoring costs $20K, payback is 4-5 months
 - Write as if you're their personal trade advisor who knows their business intimately
 - Use professional consulting language (like McKinsey, Deloitte reports)
-- Format numbers properly: $2,800,000 not "$2.8M", 3 months not "3-month payback"`;
+- Format numbers properly: $2,800,000 not "$2.8M", 3 months not "3-month payback"
+
+⚠️ CRITICAL: AVOID REPETITION - Each field should add NEW information:
+- Do NOT repeat the same dollar amount ($1,785,000) in multiple fields
+- Do NOT repeat "65% RVC" or "0% buffer" in every field
+- Do NOT repeat "Chinese microprocessor" or "Section 301" in every sentence
+- VARY how you present information:
+  * situation_brief: High-level risk summary
+  * problem: Specific compliance/tariff issue (mention RVC/buffer ONCE)
+  * root_cause: Sourcing decision explanation (mention supplier country ONCE)
+  * annual_impact: Total financial exposure (state dollar amount ONCE)
+  * current_burden: Breakdown/calculation (can reference same number differently)
+  * potential_savings: Future state outcome (focus on benefit, not cost repeat)
+- Each strategic_roadmap phase should focus on DIFFERENT aspects (qualification, trial, migration)
+- Each action_item should be DISTINCT (no duplicate supplier contacts)`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');

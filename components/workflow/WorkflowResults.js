@@ -773,17 +773,26 @@ export default function WorkflowResults({
       const payload = {
         user_profile: {
           company_name: results.company?.name || null,  // ✅ FIX (Oct 30): AI needs company name for personalized output
+          contact_person: results.company?.contact_person || null,  // ✅ More personal addressing
+          business_type: results.company?.business_type || null,  // ✅ Manufacturer vs Importer changes advice
+          company_country: results.company?.country || null,  // ✅ Company location context
+          supplier_country: results.company?.supplier_country || null,  // ✅ Primary supplier location
           subscription_tier: userSubscriptionTier,
           industry_sector: results.company.industry_sector,
           destination_country: results.company.destination_country,
           annual_trade_volume: results.company.trade_volume  // ✅ FIX: AI needs this for ROI calculations
         },
         workflow_intelligence: {
+          product_description: results.product?.description || null,  // ✅ Specific product context
           components: components,
           north_american_content: results.usmca.north_american_content,
+          threshold_applied: results.usmca?.threshold_applied || null,  // ✅ Required RVC threshold
           annual_trade_volume: results.company.trade_volume,
           usmca_qualified: results.usmca.qualified,
-          preference_criterion: results.usmca?.preference_criterion || null
+          preference_criterion: results.usmca?.preference_criterion || null,
+          current_annual_savings: results.savings?.annual_savings || null,  // ✅ Current USMCA savings
+          monthly_savings: results.savings?.monthly_savings || null,  // ✅ Monthly breakdown
+          strategic_insights: results.detailed_analysis?.strategic_insights || null  // ✅ Context from main analysis
         }
       };
 
