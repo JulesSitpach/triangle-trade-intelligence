@@ -544,7 +544,9 @@ export function useWorkflowState() {
         ...workflowData.savings
       },
       component_origins: workflow.component_origins || workflowData.components || [],
-      components: workflow.component_origins || workflowData.components || []
+      components: workflow.component_origins || workflowData.components || [],
+      detailed_analysis: workflowData.detailed_analysis || null, // ✅ ADDED: Load executive summary + alert analysis from database
+      workflow_data: workflowData // ✅ ADDED: Include full workflow_data for any additional fields
     };
 
     // ✅ Populate formData from loaded workflow - NO HARDCODED DEFAULTS

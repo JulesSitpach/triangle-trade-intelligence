@@ -603,11 +603,38 @@ export default protectedApiHandler({
             }
           }
 
-          // CRITICAL: Handle null rateData (record not found in database)
-          // This is normal for HS codes not in tariff_intelligence_master
-          // Proceed gracefully to Phase 3 (AI fallback) instead of crashing
+          // CRITICAL: Handle null rateData (record not found in tariff_intelligence_master)
+          // Before giving up, check tariff_rates_cache for AI-discovered rates
           if (!rateData) {
-            // DEBUG: HS code not found in database, will use AI fallback
+            console.log(`⚠️ [HYBRID] ${component.hs_code} not in tariff_intelligence_master, checking tariff_rates_cache...`);
+
+            // Check tariff_rates_cache (AI-discovered rates from previous lookups)
+            const { data: cachedRate } = await supabase
+              .from('tariff_rates_cache')
+              .select('*')
+              .eq('hs_code', normalizedHsCode)
+              .eq('destination_country', destinationCountry)
+              .single();
+
+            if (cachedRate) {
+              console.log(`✅ [CACHE HIT] Found cached AI rate for ${component.hs_code}`);
+              // Use cached rate instead of making AI call
+              enriched.push({
+                ...baseComponent,
+                mfn_rate: parseFloat(cachedRate.mfn_rate) || 0,
+                base_mfn_rate: parseFloat(cachedRate.mfn_rate) || 0,
+                section_301: parseFloat(cachedRate.section_301) || 0,
+                section_232: parseFloat(cachedRate.section_232) || 0,
+                usmca_rate: parseFloat(cachedRate.usmca_rate) || 0,
+                rate_source: 'tariff_rates_cache',
+                stale: false,  // Cache hit - no AI call needed
+                data_source: 'tariff_rates_cache'
+              });
+              continue;  // Skip to next component, no AI call needed
+            }
+
+            // Not in master table OR cache - need AI enrichment
+            console.log(`⏳ Database Cache MISS - Making AI call for "${component.description}"...`);
             enriched.push({
               ...baseComponent,
               mfn_rate: 0,
@@ -616,7 +643,7 @@ export default protectedApiHandler({
               section_232: 0,
               usmca_rate: 0,
               rate_source: 'database_lookup_miss',
-              stale: true,  // Missing from database, needs AI enrichment
+              stale: true,  // Missing from both tables, needs AI enrichment
               data_source: 'no_data'
             });
             continue;  // Skip to next component, let Phase 3 handle this
@@ -837,42 +864,44 @@ export default protectedApiHandler({
           return comp;
         });
 
-        // ✅ NEW (Oct 28): Save AI results back to database to grow coverage
-        // This increases database hit rate from 95% → 100% over time
+        // ✅ FIXED (Oct 29): Save AI results to tariff_rates_cache (not master table)
+        // This grows the cache organically and prevents future AI calls
         if (aiRates && aiRates.length > 0) {
           try {
-            console.log(`💾 [DATABASE-GROWTH] Saving ${aiRates.length} AI-discovered rates to tariff_intelligence_master...`);
+            console.log(`💾 [CACHE-GROWTH] Saving ${aiRates.length} AI-discovered rates to tariff_rates_cache...`);
 
             for (const aiRate of aiRates) {
-              // Normalize HS code to 8-digit format (database uses hts8)
+              // Normalize HS code to 8-digit format
               const normalizedHS = aiRate.hs_code.replace(/\D/g, '').substring(0, 8).padEnd(8, '0');
 
-              // Insert or update tariff_intelligence_master with AI-discovered rates
-              const { error: upsertError } = await supabase
-                .from('tariff_intelligence_master')
+              // Save to tariff_rates_cache (AI-discovered rates)
+              const { error: cacheError } = await supabase
+                .from('tariff_rates_cache')
                 .upsert({
-                  hts8: normalizedHS,
-                  mfn_ad_val_rate: aiRate.base_mfn_rate || aiRate.mfn_rate || 0,  // WTO base rate
-                  section_301: aiRate.section_301 || 0,      // Policy tariff
-                  section_232: aiRate.section_232 || 0,      // Safeguard tariff
-                  usmca_ad_val_rate: aiRate.usmca_rate || 0, // USMCA preferential rate
-                  brief_description: aiRate.description || 'AI-discovered HS code',
-                  data_source: 'ai_research_2025',
-                  updated_at: new Date().toISOString()       // ✅ FIX (Oct 28): Use updated_at (actual column name)
+                  hs_code: normalizedHS,
+                  destination_country: formData.destination_country,
+                  mfn_rate: aiRate.mfn_rate || 0,
+                  section_301: aiRate.section_301 || 0,
+                  section_232: aiRate.section_232 || 0,
+                  usmca_rate: aiRate.usmca_rate || 0,
+                  rate_source: 'ai_research_2025',
+                  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h cache for US
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
                 }, {
-                  onConflict: 'hts8'  // Update if exists, insert if new
+                  onConflict: 'hs_code,destination_country'  // Unique key is (hs_code, destination)
                 });
 
-              if (upsertError) {
-                console.error(`⚠️ [DATABASE-GROWTH] Failed to save ${normalizedHS}:`, upsertError.message);
+              if (cacheError) {
+                console.error(`⚠️ [CACHE-GROWTH] Failed to cache ${normalizedHS}:`, cacheError.message);
               } else {
-                console.log(`✅ [DATABASE-GROWTH] Saved ${normalizedHS} to database (future requests will hit cache)`);
+                console.log(`✅ [CACHE-GROWTH] Cached ${normalizedHS} for ${formData.destination_country} (future requests will hit cache)`);
               }
             }
 
-            console.log(`💾 [DATABASE-GROWTH] Database coverage increased by ${aiRates.length} HS codes`);
+            console.log(`💾 [CACHE-GROWTH] Cache coverage increased by ${aiRates.length} HS codes`);
           } catch (saveError) {
-            console.error(`⚠️ [DATABASE-GROWTH] Error saving AI rates to database:`, saveError.message);
+            console.error(`⚠️ [CACHE-GROWTH] Error saving AI rates to cache:`, saveError.message);
             // Non-fatal error - continue with request even if save fails
           }
         }

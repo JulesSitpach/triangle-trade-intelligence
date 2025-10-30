@@ -51,10 +51,10 @@ export default protectedApiHandler({
       // Update workflow_sessions if exists
       if (sessionsRows && sessionsRows.length > 0) {
         const session = sessionsRows[0];
-        const updatedWorkflowData = {
-          ...session.workflow_data,
+        const updatedData = {
+          ...session.data,
           detailed_analysis: {
-            ...session.workflow_data?.detailed_analysis,  // Keep existing fields
+            ...session.data?.detailed_analysis,  // Keep existing fields
             ...detailed_analysis  // Merge executive alert fields
           }
         };
@@ -62,8 +62,7 @@ export default protectedApiHandler({
         const { error: updateError } = await supabase
           .from('workflow_sessions')
           .update({
-            workflow_data: updatedWorkflowData,
-            updated_at: new Date().toISOString()
+            data: updatedData
           })
           .eq('id', session.id);
 

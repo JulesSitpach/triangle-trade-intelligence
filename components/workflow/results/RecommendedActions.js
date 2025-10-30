@@ -57,13 +57,22 @@ export default function RecommendedActions({ results }) {
 
   const saveExecutiveAlertToDatabase = async (alertData) => {
     try {
+      console.log('💾 [SAVE] Starting saveExecutiveAlertToDatabase with alertData:', alertData);
+
       // Save executive alert detailed_analysis to localStorage first (immediate)
       const workflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      console.log('💾 [SAVE] Existing workflowResults.detailed_analysis BEFORE merge:', workflowResults.detailed_analysis);
+
       workflowResults.detailed_analysis = {
         ...workflowResults.detailed_analysis,  // Keep existing detailed_analysis fields
         ...alertData  // Merge executive alert fields (situation_brief, broker_insights, etc.)
       };
+
+      console.log('💾 [SAVE] workflowResults.detailed_analysis AFTER merge:', workflowResults.detailed_analysis);
+      console.log('💾 [SAVE] Merged has situation_brief?', !!workflowResults.detailed_analysis.situation_brief);
+
       localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowResults));
+      console.log('💾 [SAVE] Saved to localStorage successfully');
 
       // Update database workflow_data (if user is logged in and workflow exists)
       const response = await fetch('/api/workflow-session/update-executive-alert', {
@@ -141,8 +150,9 @@ export default function RecommendedActions({ results }) {
 
         // ✅ CRITICAL FIX: Save executive alert detailed_analysis to database
         // This ensures alert impact analysis service can access rich workflow intelligence
-        if (data.alert) {
-          await saveExecutiveAlertToDatabase(data.alert);
+        if (data.data) {
+          await saveExecutiveAlertToDatabase(data.data);
+          console.log('✅ Saving executive alert to localStorage and database:', data.data);
         }
       } else if (response.status === 403) {
         // User doesn't have paid subscription - show graceful message

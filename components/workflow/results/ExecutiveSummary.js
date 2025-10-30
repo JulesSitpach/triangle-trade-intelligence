@@ -4,18 +4,42 @@
  * NO duplication - consolidates all AI analysis in one view
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ExecutiveSummary({ results }) {
   if (!results) return null;
+
+  // State for detailed_analysis (will merge prop data + localStorage data)
+  const [mergedDetailedAnalysis, setMergedDetailedAnalysis] = useState(results.detailed_analysis || null);
+
+  // On mount and when results change, check localStorage for updated detailed_analysis
+  useEffect(() => {
+    try {
+      const workflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      if (workflowResults.detailed_analysis) {
+        // Merge localStorage data with prop data (localStorage takes precedence for executive alert fields)
+        setMergedDetailedAnalysis({
+          ...(results.detailed_analysis || {}),
+          ...workflowResults.detailed_analysis
+        });
+      } else {
+        setMergedDetailedAnalysis(results.detailed_analysis || null);
+      }
+    } catch (error) {
+      console.error('Error reading detailed_analysis from localStorage:', error);
+      setMergedDetailedAnalysis(results.detailed_analysis || null);
+    }
+  }, [results]);
 
   const {
     company,
     usmca,
     savings,
-    detailed_analysis,
     recommendations
   } = results;
+
+  // Use merged detailed_analysis instead of prop value
+  const detailed_analysis = mergedDetailedAnalysis;
 
   return (
     <div className="executive-summary">

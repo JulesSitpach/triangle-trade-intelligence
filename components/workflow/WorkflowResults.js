@@ -18,6 +18,7 @@ import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
 import PersonalizedAlerts from './results/PersonalizedAlerts';
 import PolicyTimeline from './PolicyTimeline';
+import ExecutiveSummaryDisplay from './results/ExecutiveSummaryDisplay';
 import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
@@ -88,6 +89,21 @@ export default function WorkflowResults({
     if (certGenerated === 'true') {
       setCertificateGenerated(true);
       console.log('✅ Certificate already generated this session');
+    }
+
+    // Restore executive summary from localStorage on page load
+    try {
+      const storedData = localStorage.getItem('usmca_workflow_results');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        if (parsed.detailed_analysis?.situation_brief) {
+          console.log('✅ Restoring executive summary from localStorage on page load');
+          setExecutiveSummary(parsed.detailed_analysis);
+          setShowSummary(true);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore executive summary:', e);
     }
   }, []);
 
@@ -213,6 +229,10 @@ export default function WorkflowResults({
       if (!results.usmca?.threshold_applied && results.usmca?.threshold_applied !== 0) throw new Error('usmca.threshold_applied is required');
       if (!results.savings?.annual_savings && results.savings?.annual_savings !== 0) throw new Error('savings.annual_savings calculation failed');
 
+      // CRITICAL: Preserve executive summary from localStorage if it exists
+      const existingWorkflowData = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      const executiveSummaryData = executiveSummary || existingWorkflowData.detailed_analysis || null;
+
       const alertData = {
         company: {
           name: results.company.name,
@@ -236,10 +256,8 @@ export default function WorkflowResults({
         },
         component_origins: normalizedComponents,
         components: normalizedComponents,
-        savings: {
-          total_savings: results.savings.annual_savings,
-          annual_savings: results.savings.annual_savings
-        },
+        savings: results.savings,  // ✅ SAVE FULL SAVINGS OBJECT (includes section_301_exposure, monthly_savings, etc.)
+        detailed_analysis: executiveSummaryData, // PRESERVE executive summary (from state or localStorage)
         timestamp: new Date().toISOString()
       };
 
@@ -307,6 +325,7 @@ export default function WorkflowResults({
             },
             components: normalizedComponents, // FIX: Use normalized components with section_301 field
             savings: results.savings,
+            detailed_analysis: executiveSummaryData, // ADDED: Include executive summary (situation_brief, problem, action_items, broker_insights, etc.) - from state or localStorage
             steps_completed: 4,
             total_steps: 4,
             certificate_generated: true,
@@ -546,10 +565,7 @@ export default function WorkflowResults({
       },
       component_origins: normalizedComponents, // CRITICAL: Use normalized components
       components: normalizedComponents,        // CRITICAL: Use normalized components
-      savings: {
-        total_savings: results.savings?.annual_savings || 0,
-        annual_savings: results.savings?.annual_savings || 0
-      },
+      savings: results.savings,  // ✅ SAVE FULL SAVINGS OBJECT (includes section_301_exposure for alert impact analysis)
       workflow_path: 'alerts',
       timestamp: new Date().toISOString()
     };
@@ -651,7 +667,84 @@ export default function WorkflowResults({
   const generateExecutiveSummary = async () => {
     try {
       setLoadingSummary(true);
-      console.log('🎯 Generating Executive Summary for:', results.company?.name);
+      console.log('🎯 Loading Executive Summary...');
+
+      // Check 1: Try localStorage first (most recent, from fresh workflow or RecommendedActions)
+      let workflowResults = {};
+      try {
+        const storedData = localStorage.getItem('usmca_workflow_results');
+        if (storedData) {
+          workflowResults = JSON.parse(storedData);
+        }
+      } catch (parseError) {
+        console.error('Error parsing localStorage:', parseError);
+      }
+      const detailed_analysis = workflowResults.detailed_analysis || {};
+
+      // Try to find the data in any available source
+      const executiveData = detailed_analysis.situation_brief
+        ? detailed_analysis
+        : results?.detailed_analysis?.situation_brief
+          ? results.detailed_analysis
+          : null;
+
+      console.log('🔍 Executive alert data check (DETAILED):', {
+        localStorage_keys: Object.keys(localStorage),
+        localStorage_has_usmca_workflow_results: !!localStorage.getItem('usmca_workflow_results'),
+        workflowResults_keys: Object.keys(workflowResults),
+        workflowResults_has_detailed_analysis: !!workflowResults.detailed_analysis,
+        detailed_analysis_keys: Object.keys(detailed_analysis),
+        detailed_analysis_has_situation_brief: !!detailed_analysis.situation_brief,
+        detailed_analysis_sample: JSON.stringify(detailed_analysis).substring(0, 200),
+        results_has_detailed_analysis: !!results?.detailed_analysis,
+        results_detailed_analysis_sample: results?.detailed_analysis ? JSON.stringify(results.detailed_analysis).substring(0, 200) : 'N/A',
+        executiveData: executiveData,
+        foundInLocalStorage: !!detailed_analysis.situation_brief,
+        foundInResults: !!results?.detailed_analysis?.situation_brief
+      });
+
+      if (executiveData && executiveData.situation_brief) {
+        console.log('✅ Loaded executive summary from cache:', executiveData);
+        setExecutiveSummary(executiveData);
+        setShowSummary(true);
+        setLoadingSummary(false);
+        return;
+      }
+
+      // Check 2: Try loading from database (if coming from dashboard)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get('session') || urlParams.get('sessionId');
+
+      if (sessionId) {
+        console.log('🔍 Checking database for executive alert data (session:', sessionId, ')');
+        try {
+          const dbResponse = await fetch(`/api/workflow-session?sessionId=${sessionId}`, {
+            credentials: 'include'
+          });
+
+          if (dbResponse.ok) {
+            const dbData = await dbResponse.json();
+            console.log('📦 Database workflow data:', dbData);
+
+            const dbExecutiveData = dbData.workflow_data?.detailed_analysis?.situation_brief
+              ? dbData.workflow_data.detailed_analysis
+              : null;
+
+            if (dbExecutiveData && dbExecutiveData.situation_brief) {
+              console.log('✅ Loaded executive summary from database:', dbExecutiveData);
+              setExecutiveSummary(dbExecutiveData);
+              setShowSummary(true);
+              setLoadingSummary(false);
+              return;
+            }
+          }
+        } catch (dbError) {
+          console.warn('⚠️ Could not load from database:', dbError);
+        }
+      }
+
+      // No cached data - generate fresh executive summary via API
+      console.log('🎯 No cached data found - generating fresh Executive Summary for:', results.company?.name);
 
       // Validate all required fields for executive summary
       if (!userSubscriptionTier) {
@@ -730,31 +823,42 @@ export default function WorkflowResults({
       }
 
       const data = await response.json();
-      console.log('✅ Executive Summary generated:', data);
+      console.log('✅ Executive Summary API response (RAW):', data);
 
-      // ✅ FIX: Extract alert object and transform for UI display
-      const alert = data.alert || data;
-      const transformedSummary = {
-        headline: alert.headline || '',
-        // Transform financial_impact object to readable string
-        financial_impact: alert.financial_impact ?
-          `Current burden: ${alert.financial_impact.current_annual_burden || 'N/A'}. Potential savings: ${alert.financial_impact.potential_annual_savings || 'N/A'}. Payback period: ${alert.financial_impact.payback_period || 'N/A'}.`
-          : 'Financial impact data unavailable',
-        // Transform strategic_roadmap array to readable string
-        strategic_recommendation: alert.strategic_roadmap?.length > 0 ?
-          alert.strategic_roadmap.map(item => `${item.phase || item.title || ''}: ${item.action || item.description || ''}`).join(' → ')
-          : (alert.situation_brief || 'Strategic recommendations unavailable'),
-        // Transform action_this_week array to readable string
-        immediate_actions: alert.action_this_week?.length > 0 ?
-          alert.action_this_week.map((action, i) => `${i + 1}. ${action.action || action.title || action}`).join('. ')
-          : 'No immediate actions identified'
+      // Extract the alert - API returns { success: true, alert: {...} }
+      const rawAlert = data.data || data.alert || data;
+      console.log('✅ Extracted raw alert:', rawAlert);
+
+      // FLATTEN nested structure for component compatibility
+      const alertData = {
+        situation_brief: rawAlert.situation_brief,
+        problem: rawAlert.the_situation?.problem,
+        root_cause: rawAlert.the_situation?.root_cause,
+        annual_impact: rawAlert.the_situation?.annual_impact,
+        why_now: rawAlert.the_situation?.why_now,
+        current_burden: rawAlert.financial_impact?.current_annual_burden,
+        potential_savings: rawAlert.financial_impact?.potential_annual_savings,
+        payback_period: rawAlert.financial_impact?.payback_period,
+        action_items: rawAlert.action_this_week || [],
+        strategic_roadmap: rawAlert.strategic_roadmap || [],
+        broker_insights: rawAlert.from_your_broker,
+        professional_disclaimer: rawAlert.professional_disclaimer
       };
+      console.log('✅ Flattened for display:', alertData);
 
-      console.log('✅ Transformed summary for UI:', transformedSummary);
-      setExecutiveSummary(transformedSummary);
+      // Save alert to localStorage for persistence (data is already in correct format)
+      const savedWorkflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      savedWorkflowResults.detailed_analysis = alertData;
+      localStorage.setItem('usmca_workflow_results', JSON.stringify(savedWorkflowResults));
+      console.log('✅ Saved executive alert to localStorage');
+
+      // Display the executive summary (data is already in correct format)
+      setExecutiveSummary(alertData);
       setShowSummary(true);
     } catch (error) {
       console.error('❌ Failed to generate Executive Summary:', error);
+      console.error('❌ Error stack:', error.stack);
+      console.error('❌ Error message:', error.message);
       alert('Failed to generate summary. Please try again.');
     } finally {
       setLoadingSummary(false);
@@ -1055,87 +1159,21 @@ export default function WorkflowResults({
                 Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
               </p>
 
-              {/* Executive Summary Display Section */}
-              {showSummary && executiveSummary && (
-                <div style={{
-                  marginTop: '1.5rem',
-                  padding: '1.5rem',
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #86efac',
-                  borderRadius: '8px'
-                }}>
-                  <h4 style={{fontSize: '1rem', fontWeight: 600, margin: '0 0 1rem 0', color: '#166534'}}>
-                    📊 Your Personalized Business Impact Analysis
-                  </h4>
-
-                  {/* Headline */}
-                  {executiveSummary.headline && (
-                    <p style={{fontSize: '0.95rem', fontWeight: 500, color: '#166534', marginBottom: '1rem'}}>
-                      {executiveSummary.headline}
-                    </p>
-                  )}
-
-                  {/* Financial Impact Section */}
-                  {executiveSummary.financial_impact && (
-                    <div style={{marginBottom: '1rem'}}>
-                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
-                        💰 Financial Impact
-                      </h5>
-                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
-                        {executiveSummary.financial_impact}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Strategic Recommendation */}
-                  {executiveSummary.strategic_recommendation && (
-                    <div style={{marginBottom: '1rem'}}>
-                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
-                        🎯 Strategic Recommendation
-                      </h5>
-                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
-                        {executiveSummary.strategic_recommendation}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Immediate Actions */}
-                  {executiveSummary.immediate_actions && (
-                    <div style={{marginBottom: '1rem'}}>
-                      <h5 style={{fontSize: '0.9rem', fontWeight: 600, color: '#166534', marginBottom: '0.5rem'}}>
-                        ⚡ Immediate Actions
-                      </h5>
-                      <p style={{fontSize: '0.85rem', color: '#15803d', lineHeight: '1.6', margin: 0}}>
-                        {executiveSummary.immediate_actions}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Close button */}
-                  <button
-                    onClick={() => setShowSummary(false)}
-                    style={{
-                      marginTop: '1rem',
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#86efac',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      fontWeight: 500,
-                      color: '#166534',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ✕ Close Summary
-                  </button>
-                </div>
-              )}
+              {/* Executive Summary Display Section - Dynamic Component */}
             </div>
           </div>
 
           {/* RECOMMENDED ACTIONS - Show detailed executive guidance (PAID ONLY) */}
           <RecommendedActions results={results} onDownloadCertificate={onDownloadCertificate} trustIndicators={trustIndicators} />
         </>
+      )}
+
+      {/* Executive Summary Display - OUTSIDE tier gate so it always shows when generated */}
+      {showSummary && executiveSummary && (
+        <ExecutiveSummaryDisplay
+          data={executiveSummary}
+          onClose={() => setShowSummary(false)}
+        />
       )}
 
       {/* NOTE: Recommendations moved to CollapsibleSection "Recommended Actions" above */}

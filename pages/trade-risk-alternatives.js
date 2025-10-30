@@ -13,6 +13,8 @@ import ConsolidatedPolicyAlert from '../components/alerts/ConsolidatedPolicyAler
 import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoringDashboard';
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
+import ExecutiveSummaryDisplay from '../components/workflow/results/ExecutiveSummaryDisplay';
+import AlertImpactAnalysisDisplay from '../components/alerts/AlertImpactAnalysisDisplay';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -60,6 +62,10 @@ export default function TradeRiskAlternatives() {
   const [alertImpactAnalysis, setAlertImpactAnalysis] = useState(null);
   const [isLoadingAlertImpact, setIsLoadingAlertImpact] = useState(false);
 
+  // Executive Alert state (strategic consulting letter)
+  const [executiveAlertData, setExecutiveAlertData] = useState(null);
+  const [showExecutiveAlert, setShowExecutiveAlert] = useState(false);
+
   // Toggle function for component expansion (only if alerts exist)
   const toggleExpanded = (idx, hasAlerts) => {
     if (!hasAlerts) return; // Don't expand if no alerts
@@ -89,6 +95,22 @@ export default function TradeRiskAlternatives() {
       loadSavedAlerts();
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore alert impact analysis from localStorage on page load
+  useEffect(() => {
+    try {
+      const storedAnalysis = localStorage.getItem('alert_impact_analysis');
+      if (storedAnalysis) {
+        const parsed = JSON.parse(storedAnalysis);
+        if (parsed.alert_impact_summary || parsed.updated_priorities) {
+          console.log('✅ Restoring alert impact analysis from localStorage on page load');
+          setAlertImpactAnalysis(parsed);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore alert impact analysis:', e);
+    }
+  }, []); // Run once on mount
 
   const loadUserData = async () => {
     if (!user) {
@@ -468,6 +490,65 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
+   * Save alert impact analysis to database (with user consent)
+   */
+  const handleSaveAlertAnalysis = async () => {
+    if (!user) {
+      alert('⚠️ Please sign in to save alert analysis to your dashboard.');
+      return;
+    }
+
+    if (!alertImpactAnalysis) {
+      alert('⚠️ No alert analysis to save. Please generate the analysis first.');
+      return;
+    }
+
+    // Check for user consent
+    const savedConsent = localStorage.getItem('save_data_consent');
+    if (savedConsent !== 'save') {
+      alert('⚠️ You must consent to save data before saving alert analysis. Please use the consent modal at the top of the page.');
+      return;
+    }
+
+    try {
+      console.log('💾 Saving alert impact analysis to database...');
+
+      // Save alert impact analysis to workflow detailed_analysis
+      const response = await fetch('/api/workflow-session/update-executive-alert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          detailed_analysis: {
+            alert_impact_analysis: {
+              alert_impact_summary: alertImpactAnalysis.alert_impact_summary || '',
+              updated_priorities: alertImpactAnalysis.updated_priorities || [],
+              updated_timeline: alertImpactAnalysis.updated_timeline || [],
+              contingency_scenarios: alertImpactAnalysis.contingency_scenarios || [],
+              next_step_this_week: alertImpactAnalysis.next_step_this_week || ''
+            },
+            analysis_generated_at: new Date().toISOString()
+          }
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Alert impact analysis saved to database');
+        alert('✅ Alert analysis saved to your dashboard!\n\nYou can view it anytime from your workflow history.');
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Failed to save alert analysis:', errorData);
+        alert('⚠️ Failed to save alert analysis. Please try again or contact support.');
+      }
+    } catch (error) {
+      console.error('❌ Error saving alert analysis:', error);
+      alert('⚠️ Failed to save alert analysis. Please try again or contact support.');
+    }
+  };
+
+  /**
    * Load saved alerts from database (fast, no AI calls)
    */
   const loadSavedAlerts = async () => {
@@ -669,14 +750,37 @@ export default function TradeRiskAlternatives() {
       };
 
       // Call alert impact analysis service
-      const analysis = await AlertImpactAnalysisService.generateAlertImpact(
+      const rawAnalysis = await AlertImpactAnalysisService.generateAlertImpact(
         existingAnalysis,
         consolidatedAlerts,
         analysisProfile
       );
 
-      console.log('✅ Alert impact analysis complete:', analysis);
+      console.log('✅ Alert impact analysis complete (RAW):', rawAnalysis);
+
+      // ✅ UNWRAP if response has wrapper (like {success: true, data: {...}})
+      let analysis = rawAnalysis;
+      if (rawAnalysis && typeof rawAnalysis === 'object') {
+        if (rawAnalysis.success && rawAnalysis.data) {
+          console.log('🔓 Unwrapping response data');
+          analysis = rawAnalysis.data;
+        } else if (rawAnalysis.data && !rawAnalysis.alert_impact_summary) {
+          // If data exists but no alert_impact_summary at top level, might be wrapped
+          console.log('🔓 Found nested data structure');
+          analysis = rawAnalysis.data;
+        }
+      }
+
+      console.log('✅ Final alert impact analysis:', analysis);
       setAlertImpactAnalysis(analysis);
+
+      // Save to localStorage for persistence
+      try {
+        localStorage.setItem('alert_impact_analysis', JSON.stringify(analysis));
+        console.log('💾 Saved alert impact analysis to localStorage');
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+      }
     } catch (error) {
       console.error('❌ Alert impact analysis failed:', error);
       setAlertImpactAnalysis(null);
@@ -744,6 +848,14 @@ export default function TradeRiskAlternatives() {
         {/* 🎯 PREMIUM CONTENT: Rich USMCA Intelligence */}
         {workflowIntelligence && (
           <USMCAIntelligenceDisplay workflowIntelligence={workflowIntelligence} />
+        )}
+
+        {/* 📊 EXECUTIVE TRADE ADVISORY: Strategic consulting letter */}
+        {workflowIntelligence?.detailed_analysis?.situation_brief && (
+          <ExecutiveSummaryDisplay
+            data={workflowIntelligence.detailed_analysis}
+            onClose={() => console.log('Executive summary closed')}
+          />
         )}
 
         {/* Dynamic User Trade Profile */}
@@ -1076,152 +1188,36 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Alert Impact Analysis Section - ADDITIVE approach reusing workflow analysis */}
+        {/* Alert Impact Analysis Section - Professional Display Component */}
         {alertImpactAnalysis && consolidatedAlerts.length > 0 && (
-          <div className="form-section" style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 className="form-section-title" style={{ margin: 0 }}>
-                Strategic Impact Assessment
-              </h2>
-              <span style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: 500 }}>
-                Based on {consolidatedAlerts.length} active alert{consolidatedAlerts.length !== 1 ? 's' : ''}
-              </span>
+          <div>
+            <AlertImpactAnalysisDisplay
+              data={alertImpactAnalysis}
+              consolidatedAlertsCount={consolidatedAlerts.length}
+              onClose={null}
+            />
+
+            {/* Save Alert Analysis to Database Button */}
+            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+              <button
+                onClick={handleSaveAlertAnalysis}
+                className="btn-primary"
+                style={{
+                  padding: '0.875rem 2rem',
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                ✅ Save Alert Analysis to Database
+              </button>
+              <p style={{
+                marginTop: '0.75rem',
+                fontSize: '0.875rem',
+                color: '#6b7280'
+              }}>
+                Save this strategic analysis to your dashboard for future reference
+              </p>
             </div>
-
-            {/* Alert Impact Summary */}
-            {alertImpactAnalysis.alert_impact_summary && (
-              <div className="alert alert-warning" style={{ marginBottom: '1.5rem' }}>
-                <div className="alert-content">
-                  <div className="alert-title">How Alerts Change Your Strategic Priorities</div>
-                  <div className="text-body" style={{ marginTop: '0.75rem' }}>
-                    {alertImpactAnalysis.alert_impact_summary}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Updated Priorities */}
-            {alertImpactAnalysis.updated_priorities && alertImpactAnalysis.updated_priorities.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 className="card-title" style={{ marginBottom: '1rem' }}>Revised Action Priorities</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {alertImpactAnalysis.updated_priorities.map((priority, idx) => {
-                    const isUrgent = priority.includes('[URGENT]');
-                    const isNew = priority.includes('[NEW]');
-                    const cleanPriority = priority.replace(/\[URGENT\]|\[NEW\]/g, '').trim();
-
-                    return (
-                      <div key={idx} style={{
-                        padding: '1rem',
-                        backgroundColor: isUrgent ? '#fef2f2' : '#f0f9ff',
-                        border: `2px solid ${isUrgent ? '#ef4444' : '#3b82f6'}`,
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.75rem'
-                      }}>
-                        <span style={{ fontSize: '1.5rem' }}>
-                          {isUrgent ? '🚨' : isNew ? '✨' : '📋'}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, color: isUrgent ? '#dc2626' : '#1e40af', marginBottom: '0.25rem' }}>
-                            {isUrgent ? '[URGENT]' : isNew ? '[NEW]' : ''} Priority {idx + 1}
-                          </div>
-                          <div style={{ fontSize: '0.9375rem', color: '#374151' }}>
-                            {cleanPriority}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Updated Timeline */}
-            {alertImpactAnalysis.updated_timeline && alertImpactAnalysis.updated_timeline.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 className="card-title" style={{ marginBottom: '1rem' }}>Critical Deadlines</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {alertImpactAnalysis.updated_timeline.map((item, idx) => (
-                    <div key={idx} style={{
-                      padding: '1rem',
-                      backgroundColor: '#f9fafb',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      borderLeft: '4px solid #f59e0b'
-                    }}>
-                      <div style={{ fontSize: '0.9375rem', color: '#374151', fontWeight: 500 }}>
-                        📅 {item}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* USMCA 2026 Contingency Scenarios */}
-            {alertImpactAnalysis.contingency_scenarios && alertImpactAnalysis.contingency_scenarios.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 className="card-title" style={{ marginBottom: '0.5rem' }}>
-                  USMCA 2026 Renegotiation Scenarios
-                </h3>
-                <p className="text-body" style={{ marginBottom: '1rem', color: '#6b7280' }}>
-                  Contingency planning for July 2026 USMCA review based on {
-                    userProfile.companyCountry === 'CA' ? 'Canada' :
-                    userProfile.companyCountry === 'MX' ? 'Mexico' : 'United States'
-                  } negotiation position
-                </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-                  {alertImpactAnalysis.contingency_scenarios.map((scenario, idx) => (
-                    <div key={idx} style={{
-                      padding: '1.25rem',
-                      backgroundColor: 'white',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      transition: 'border-color 0.2s'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                        <div style={{ fontWeight: 600, color: '#111827', fontSize: '1rem' }}>
-                          Scenario {scenario.scenario}: {scenario.name}
-                        </div>
-                        <span style={{
-                          backgroundColor: scenario.probability >= 50 ? '#dcfce7' : '#fef3c7',
-                          color: scenario.probability >= 50 ? '#15803d' : '#b45309',
-                          padding: '0.25rem 0.625rem',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          fontWeight: 600
-                        }}>
-                          {scenario.probability}%
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-                        {scenario.description}
-                      </div>
-                      <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem' }}>
-                        <strong>Your Action:</strong> {scenario.your_action}
-                      </div>
-                      <div style={{ fontSize: '0.875rem', color: '#374151' }}>
-                        <strong>Cost Impact:</strong> {scenario.cost_impact}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Next Step This Week - Prominent CTA */}
-            {alertImpactAnalysis.next_step_this_week && (
-              <div className="alert alert-info">
-                <div className="alert-content">
-                  <div className="alert-title">Recommended Next Step (This Week)</div>
-                  <div className="text-body" style={{ fontSize: '1rem', marginTop: '0.75rem' }}>
-                    🎯 {alertImpactAnalysis.next_step_this_week}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 

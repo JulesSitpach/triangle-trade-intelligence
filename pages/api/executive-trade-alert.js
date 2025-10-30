@@ -523,7 +523,13 @@ CRITICAL RULES - PROFESSIONAL FORMATTING:
     });
 
     // Check if aiResponse is already an object or a string
-    const advisory = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+    let advisory = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+
+    // ✅ UNWRAP if AI returned {success: true, data: {...}} wrapper
+    if (advisory.success && advisory.data) {
+      advisory = advisory.data;
+    }
+
     console.log('✅ AI-generated executive advisory:', advisory);
     return advisory;
 

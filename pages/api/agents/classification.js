@@ -13,9 +13,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Cache key normalization (lowercase + trim for consistent lookups)
+// Cache key normalization (lowercase + trim + remove quotes for consistent lookups)
 function getCacheKey(productDescription) {
-  return productDescription.toLowerCase().trim();
+  return productDescription.toLowerCase().trim().replace(/^["']+|["']+$/g, '');
 }
 
 function extractShortDescription(explanation, productDescription) {
@@ -68,12 +68,14 @@ export default async function handler(req, res) {
     if (action === 'suggest_hs_code' && productDescription) {
       // ✅ CHECK DATABASE CACHE FIRST - Avoid 13-second AI calls for repeated requests
       const cacheKey = getCacheKey(productDescription);
+      console.log(`🔍 Checking cache for: "${cacheKey}"`);
 
-      const { data: cached, error: cacheError } = await supabase
+      const { data: cacheResults, error: cacheError } = await supabase
         .from('hs_code_classifications')
         .select('*')
-        .ilike('component_description', cacheKey)
-        .single();
+        .eq('component_description', cacheKey);  // EXACT match, not LIKE pattern
+
+      const cached = cacheResults && cacheResults.length > 0 ? cacheResults[0] : null;
 
       if (cached && !cacheError) {
         console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (saved ~13 seconds)`);
@@ -113,6 +115,8 @@ export default async function handler(req, res) {
           },
           data: {
             hsCode: cached.hs_code,
+            hs_code: cached.hs_code,  // ✅ ADD: snake_case for backward compatibility with button
+            suggestion: cached.hs_code,  // ✅ ADD: "suggestion" field for button compatibility
             description: cached.hs_description,
             confidence: cached.confidence,
             explanation: safeExplanation,
@@ -240,6 +244,8 @@ export default async function handler(req, res) {
         // Backward compatibility data
         data: {
           hs_code: primary_hs_code,
+          hsCode: primary_hs_code,  // ✅ ADD: camelCase variant
+          suggestion: primary_hs_code,  // ✅ ADD: "suggestion" field for button compatibility
           description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
           confidence: Math.round(primaryConfidence),
           explanation: typeof aiResult.data.explanation === 'string' ? aiResult.data.explanation : JSON.stringify(aiResult.data.explanation || ''),
