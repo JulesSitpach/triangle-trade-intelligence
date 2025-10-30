@@ -1290,42 +1290,6 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {/* Generate Strategic Analysis Button - Show after alerts displayed */}
-          {alertsGenerated && !alertImpactAnalysis && !isLoadingAlertImpact && workflowIntelligence && (
-            <div className="form-section" style={{ marginTop: '2rem' }}>
-              <div className="alert alert-info">
-                <div className="alert-content">
-                  <div className="alert-title">📊 Generate Strategic Business Intelligence</div>
-                  <div className="text-body">
-                    Get your comprehensive strategic analysis including USMCA 2026 contingency planning, scenario analysis, and government resource guidance.
-                  </div>
-                  <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-                    <button
-                      onClick={generateAlertImpactAnalysis}
-                      className="btn-primary"
-                      disabled={isLoadingAlertImpact}
-                    >
-                      {isLoadingAlertImpact ? 'Generating Analysis...' : '📊 Generate Strategic Analysis'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAlertsGenerated(false);
-                        setRealPolicyAlerts([]);
-                        setConsolidatedAlerts([]);
-                        setAlertImpactAnalysis(null);
-                      }}
-                      className="btn-secondary"
-                    >
-                      🔄 Run Analysis Again
-                    </button>
-                  </div>
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.75rem', margin: 0 }}>
-                    This analysis reuses your existing workflow data and costs ~$0.01
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Fallback: Show individual alerts if consolidation failed */}
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
