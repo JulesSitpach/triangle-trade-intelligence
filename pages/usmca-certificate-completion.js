@@ -11,14 +11,13 @@ import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
-import { generateUSMCACertificatePDF } from '../lib/utils/usmca-certificate-pdf-generator.js';
 
 export default function USMCACertificateCompletion() {
   const router = useRouter();
   const [workflowData, setWorkflowData] = useState(null);
   const [dynamicTrustData, setDynamicTrustData] = useState(null);
   const [previewData, setPreviewData] = useState(null);
-  const [generatedPDF, setGeneratedPDF] = useState(null);
+  // ✅ Removed generatedPDF state - old PDF system no longer used
   const [userTier, setUserTier] = useState('Trial'); // Default to Trial for safety
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false); // Track whether to show preview or authorization
@@ -305,101 +304,12 @@ export default function USMCACertificateCompletion() {
     }
   };
 
-  const generatePDFFromCertificate = async (professionalCertificate, options = {}) => {
-    // Use the official USMCA PDF generator with userTier for watermarking
-    return await generateUSMCACertificatePDF(professionalCertificate, {
-      userTier: userTier,
-      ...options
-    });
-  };
-
-  const handleDownloadCertificate = async () => {
-    // Check if user is on Trial tier
-    if (userTier === 'Trial') {
-      setShowUpgradeModal(true);
-      return;
-    }
-
-    if (previewData?.professional_certificate) {
-      try {
-        const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
-
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        const certificateNumber = previewData.professional_certificate.certificate_number || 'Certificate';
-        const filename = pdfBlob.filename || `USMCA_Certificate_${certificateNumber}.pdf`;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-        alert('Error downloading certificate. Please try again.');
-      }
-    } else {
-      alert('Please generate the certificate first');
-    }
-  };
-
-  const handleViewCertificatePreview = async () => {
-    // Allow preview for all users (including Trial)
-    if (previewData?.professional_certificate) {
-      try {
-        const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
-
-        const url = URL.createObjectURL(pdfBlob);
-        window.open(url, '_blank');
-
-        // Clean up after a delay
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      } catch (error) {
-        console.error('Error generating preview:', error);
-        alert('Error previewing certificate. Please try again.');
-      }
-    } else {
-      alert('Please generate the certificate first');
-    }
-  };
-
-  const handleEmailToImporter = async (authData) => {
-    // Check if user is on Trial tier
-    if (userTier === 'Trial') {
-      setShowUpgradeModal(true);
-      return;
-    }
-
-    if (previewData?.professional_certificate && authData?.importer_email) {
-      try {
-        const pdfBlob = await generatePDFFromCertificate(previewData.professional_certificate);
-
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        const certificateNumber = previewData.professional_certificate.certificate_number || 'Certificate';
-        const filename = pdfBlob.filename || `USMCA_Certificate_${certificateNumber}.pdf`;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        const subject = `USMCA Certificate of Origin - ${certificateNumber}`;
-        const body = `Dear Importer,\n\nPlease find attached your USMCA Certificate of Origin.\n\nCertificate Number: ${certificateNumber}\nTrust Score: ${(previewData.professional_certificate.trust_verification?.overall_trust_score * 100).toFixed(1)}%\n\nBest regards,\n${authData.signatory_name || 'Authorized Representative'}`;
-
-        const mailtoLink = `mailto:${authData.importer_email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        window.location.href = mailtoLink;
-
-        alert('Certificate PDF downloaded. Email client opened - please attach the downloaded PDF.');
-      } catch (error) {
-        console.error('Error generating certificate for email:', error);
-        alert('Error preparing certificate for email. Please try again.');
-      }
-    } else {
-      alert('Please provide importer email address to send certificate.');
-    }
-  };
+  // ✅ Removed old PDF functions (Oct 30, 2025):
+  // - generatePDFFromCertificate (used old black/white PDF generator)
+  // - handleDownloadCertificate (downloaded old PDF)
+  // - handleViewCertificatePreview (previewed old PDF)
+  // - handleEmailToImporter (emailed old PDF)
+  // New blue/white editable certificate (EditableCertificatePreview) handles PDF download internally via html2pdf.js
 
   if (!workflowData) {
     return (
@@ -462,10 +372,8 @@ export default function USMCACertificateCompletion() {
                 workflowData={workflowData}
                 certificateData={certificateData}
                 onPreviewCertificate={handlePreviewCertificate}
-                onDownloadCertificate={handleDownloadCertificate}
-                onEmailToImporter={handleEmailToImporter}
+                // ✅ Removed old PDF props (Oct 30): onDownloadCertificate, onEmailToImporter, generatedPDF
                 previewData={previewData}
-                generatedPDF={generatedPDF}
                 userTier={userTier}
               />
             )}
@@ -476,14 +384,15 @@ export default function USMCACertificateCompletion() {
                 previewData={previewData}
                 userTier={userTier}
                 onSave={async (editedCertificate) => {
-                  // Update preview data with edits
+                  // ✅ CRITICAL FIX (Oct 30, 2025): EditableCertificatePreview handles PDF download internally via html2pdf.js
+                  // DO NOT call old handleDownloadCertificate() - that caused DOUBLE download (old black/white + new blue/white)
+                  // Just update preview data with edits and close preview
                   setPreviewData(prev => ({
                     ...prev,
                     professional_certificate: editedCertificate
                   }));
-                  // Proceed to download
+                  // Close preview - PDF already downloaded by EditableCertificatePreview
                   setShowPreview(false);
-                  setTimeout(() => handleDownloadCertificate(), 100);
                 }}
                 onCancel={() => setShowPreview(false)}
               />
@@ -542,8 +451,8 @@ export default function USMCACertificateCompletion() {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button onClick={handleViewCertificatePreview} className="btn-secondary">
-                    Preview with Watermark
+                  <button onClick={() => setShowUpgradeModal(false)} className="btn-secondary">
+                    Close
                   </button>
                   <a href="/pricing" className="btn-primary">
                     View Plans &amp; Upgrade
