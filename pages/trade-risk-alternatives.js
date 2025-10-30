@@ -1242,22 +1242,14 @@ export default function TradeRiskAlternatives() {
           </div>
 
           {!alertsGenerated && (
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <div className="alert-title">Generate Personalized Risk Analysis</div>
-                <div className="text-body">
-                  Click below to analyze your components for applicable trade policies and tariff risks.
-                </div>
-                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-                  <button
-                    onClick={() => loadRealPolicyAlerts(userProfile)}
-                    className="btn-primary"
-                    disabled={isLoadingPolicyAlerts}
-                  >
-                    {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
-                  </button>
-                </div>
-              </div>
+            <div className="hero-buttons">
+              <button
+                onClick={() => loadRealPolicyAlerts(userProfile)}
+                className="btn-primary"
+                disabled={isLoadingPolicyAlerts}
+              >
+                {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
+              </button>
             </div>
           )}
 
