@@ -932,36 +932,46 @@ export default function TradeRiskAlternatives() {
                   const actualSavings = baseMFN - usmcaRate;
 
                   // Filter alerts for this specific component
+                  // BROADER MATCHING: Every component gets tagged with ALL applicable alerts
+                  // - Blanket country tariffs (NULL HS codes + origin match)
+                  // - Industry-wide tariffs (industry match + origin match)
+                  // - Specific tariffs (HS code + origin match)
                   const componentAlerts = consolidatedAlerts.filter(alert => {
-                    // Match by HS code - NULL means match ALL (blanket alert)
-                    const hsMatch = alert.affected_hs_codes === null || alert.affected_hs_codes === undefined
-                      ? true  // NULL = blanket alert, matches all HS codes
-                      : alert.affected_hs_codes?.some(code =>
-                          comp.hs_code?.startsWith(code.replace(/\./g, '').substring(0, 6))
-                        );
+                    const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
+                    const componentHS = comp.hs_code;
+                    const componentIndustry = comp.industry || userProfile.industry_sector;
 
-                    // Match by origin country
+                    // Check origin match
                     const originMatch = alert.affected_countries?.some(country =>
-                      (comp.origin_country || comp.country)?.toUpperCase() === country.toUpperCase()
+                      componentOrigin === country.toUpperCase()
                     );
 
-                    // Debug logging for first component
-                    if (idx === 0 && consolidatedAlerts.length > 0) {
-                      console.log('🔍 Alert Matching Debug for component:', {
-                        componentName: comp.component_type || comp.description,
-                        componentHS: comp.hs_code,
-                        componentOrigin: comp.origin_country || comp.country,
-                        totalAlerts: consolidatedAlerts.length,
-                        alertTitle: alert.title || alert.consolidated_title,
-                        alertHS: alert.affected_hs_codes,
-                        alertCountries: alert.affected_countries,
-                        hsMatch,
-                        originMatch,
-                        finalMatch: hsMatch && originMatch  // BOTH must match
-                      });
+                    // Check HS code match (NULL = matches all)
+                    const hsMatch = alert.affected_hs_codes === null || alert.affected_hs_codes === undefined
+                      ? true
+                      : alert.affected_hs_codes?.some(code =>
+                          componentHS?.startsWith(code.replace(/\./g, '').substring(0, 6))
+                        );
+
+                    // Check industry match (NULL = matches all)
+                    const industryMatch = alert.relevant_industries === null || alert.relevant_industries === undefined
+                      ? true
+                      : alert.relevant_industries?.some(industry =>
+                          componentIndustry?.toLowerCase().includes(industry.toLowerCase())
+                        );
+
+                    // TYPE 1: Blanket country tariff (NULL HS codes + origin match)
+                    if ((alert.affected_hs_codes === null || alert.affected_hs_codes === undefined) && originMatch) {
+                      return true;
                     }
 
-                    return hsMatch && originMatch;  // BOTH must match (HS + origin)
+                    // TYPE 2: Industry tariff (industry match + origin match)
+                    if (industryMatch && originMatch) {
+                      return true;
+                    }
+
+                    // TYPE 3: Specific tariff (HS + origin match)
+                    return hsMatch && originMatch;
                   });
 
                   const isExpanded = expandedComponents[idx] || false;
