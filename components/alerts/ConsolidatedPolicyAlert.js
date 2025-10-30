@@ -315,82 +315,8 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
           </div>
         )}
 
-        {/* Share Options */}
-        <div className="element-spacing">
-          <div style={{
-            display: 'flex',
-            gap: '0.75rem',
-            flexWrap: 'wrap',
-            padding: '1rem',
-            backgroundColor: '#f9fafb',
-            borderRadius: '4px',
-            border: '1px solid #e5e7eb'
-          }}>
-            <button
-              className="btn-secondary"
-              style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-              onClick={() => {
-                if (userTier === 'Trial') {
-                  alert('Email sharing is available for paying subscribers. Upgrade to share alerts with your team.');
-                  window.location.href = '/pricing';
-                  return;
-                }
-                const subject = encodeURIComponent(`Trade Alert: ${consolidatedAlert.title}`);
-                const body = encodeURIComponent(`${consolidatedAlert.broker_summary}\n\nView full alert: ${window.location.href}`);
-                window.location.href = `mailto:?subject=${subject}&body=${body}`;
-              }}
-              disabled={userTier === 'Trial'}
-              title={userTier === 'Trial' ? 'Upgrade to email alerts to your team' : ''}
-            >
-              {userTier === 'Trial' ? '🔒 Email to Team (Upgrade)' : '📤 Email to Team'}
-            </button>
-            <button
-              className="btn-secondary"
-              style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
-              }}
-            >
-              📋 Copy Link
-            </button>
-            <button
-              className="btn-secondary"
-              style={{ fontSize: '0.875rem', padding: '0.5rem 1rem' }}
-              onClick={() => {
-                if (userTier === 'Trial') {
-                  alert('PDF export is available for paying subscribers. Upgrade to export and share reports.');
-                  window.location.href = '/pricing';
-                  return;
-                }
-                window.print();
-              }}
-              disabled={userTier === 'Trial'}
-              title={userTier === 'Trial' ? 'Upgrade to export PDF reports' : ''}
-            >
-              {userTier === 'Trial' ? '🔒 Export PDF (Upgrade)' : '📄 Export PDF'}
-            </button>
-          </div>
-        </div>
-
-        {/* Toggle Details and Expert Help - Show what you probably already know */}
-        <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="btn-secondary"
-          >
-            {showDetails ? '▲ Hide' : '▼ Show'} Related Policies & Generic Advice
-          </button>
-          <button
-            onClick={() => window.location.href = '/services/request-form'}
-            className="btn-primary"
-          >
-            🎯 Get Expert Help
-          </button>
-        </div>
-
-        {/* Details Section (what you probably already know) */}
-        {showDetails && (
+        {/* Details Section (what you probably already know) - removed toggle, always hidden */}
+        {false && (
           <div className="element-spacing" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
             {/* What you probably already know */}
             {consolidatedAlert.what_you_know && consolidatedAlert.what_you_know.length > 0 && (

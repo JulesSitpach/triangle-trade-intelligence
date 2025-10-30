@@ -1266,30 +1266,6 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {/* Show Regenerate button when alerts are already loaded */}
-          {alertsGenerated && consolidatedAlerts.length > 0 && !isLoadingPolicyAlerts && !isConsolidating && (
-            <div className="alert alert-success" style={{ marginBottom: '1.5rem' }}>
-              <div className="alert-content">
-                <div className="alert-title">Alerts Loaded from Database</div>
-                <div className="text-body">
-                  Want fresh analysis? Click below to regenerate alerts with current policy data.
-                </div>
-                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-                  <button
-                    onClick={() => {
-                      setAlertsGenerated(false);
-                      setConsolidatedAlerts([]);
-                      setRealPolicyAlerts([]);
-                      loadRealPolicyAlerts(userProfile);
-                    }}
-                    className="btn-secondary"
-                  >
-                    Regenerate Alerts
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {(isLoadingPolicyAlerts || isConsolidating) && (
             <div className="alert alert-info">
@@ -1408,16 +1384,6 @@ export default function TradeRiskAlternatives() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="hero-buttons">
-          <button
-            onClick={() => window.location.href = '/usmca-workflow'}
-            className="btn-secondary"
-          >
-            🔄 Update Trade Profile
-          </button>
         </div>
 
         {/* Save Data Consent Modal - Privacy First with Alerts Context */}
