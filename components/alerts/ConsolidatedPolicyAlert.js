@@ -71,35 +71,6 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
           </div>
         )}
 
-        {/* Urgency Box - Unified with Icons */}
-        <div className="element-spacing">
-          <div className="status-card" style={{
-            backgroundColor: consolidatedAlert.urgency === 'URGENT' ? '#fee2e2' :
-                            consolidatedAlert.urgency === 'HIGH' ? '#fef3c7' : '#e0f2fe',
-            borderLeft: `4px solid ${consolidatedAlert.urgency === 'URGENT' ? '#dc2626' :
-                                      consolidatedAlert.urgency === 'HIGH' ? '#f59e0b' : '#3b82f6'}`,
-            padding: '1rem'
-          }}>
-            <div style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem',
-                         color: consolidatedAlert.urgency === 'URGENT' ? '#991b1b' :
-                               consolidatedAlert.urgency === 'HIGH' ? '#92400e' : '#0c4a6e' }}>
-              {consolidatedAlert.urgency === 'URGENT' ? '🔴' : consolidatedAlert.urgency === 'HIGH' ? '🟠' : '🔵'} {consolidatedAlert.urgency} URGENCY
-            </div>
-            {consolidatedAlert.timeline && (
-              <div style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1rem' }}>⏰</span>
-                <span className="text-body"><strong>Act within:</strong> {consolidatedAlert.timeline}</span>
-              </div>
-            )}
-            {consolidatedAlert.effective_date && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1rem' }}>📅</span>
-                <span className="text-body"><strong>Effective:</strong> {consolidatedAlert.effective_date}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Consolidated Financial Impact - THE MONEY SHOT */}
         {consolidatedAlert.consolidated_impact && (
           <div className="element-spacing">
