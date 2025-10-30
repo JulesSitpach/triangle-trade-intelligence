@@ -9,21 +9,24 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
   const [displayData, setDisplayData] = useState(null);
 
   useEffect(() => {
-    // BYPASS props - read directly from localStorage
-    try {
-      const stored = localStorage.getItem('usmca_workflow_results');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const executive = parsed.detailed_analysis;
-        console.log('🎯 ExecutiveSummaryDisplay reading from localStorage:', executive);
-        setDisplayData(executive);
-      } else if (data) {
-        console.log('🎯 ExecutiveSummaryDisplay using props:', data);
-        setDisplayData(data);
-      }
-    } catch (e) {
-      console.error('Failed to read executive summary:', e);
+    // ✅ FIXED (Oct 30, 2025): Trust props first (fresh AI data), localStorage as fallback only
+    // This ensures we always show the user's actual company data from the button-triggered AI call
+    if (data && data.situation_brief) {
+      console.log('🎯 ExecutiveSummaryDisplay using FRESH props (from AI call):', data);
       setDisplayData(data);
+    } else {
+      // Fallback to localStorage only if no props provided
+      try {
+        const stored = localStorage.getItem('usmca_workflow_results');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const executive = parsed.detailed_analysis;
+          console.log('🎯 ExecutiveSummaryDisplay using localStorage fallback:', executive);
+          setDisplayData(executive);
+        }
+      } catch (e) {
+        console.error('Failed to read executive summary:', e);
+      }
     }
   }, [data]);
 
