@@ -294,7 +294,9 @@ export default function USMCACertificateCompletion() {
         });
         setShowPreview(true);
 
-        console.log('Certificate generated successfully');
+        console.log('✅ Certificate generated successfully');
+        console.log('🔍 showPreview should now be TRUE - preview should display on same page');
+        console.log('🔍 If you see navigation to alerts page, something else is triggering it');
       } else {
         throw new Error(result.error || 'Certificate generation failed');
       }
