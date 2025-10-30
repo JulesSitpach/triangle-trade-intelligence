@@ -7,18 +7,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
-import CompanyProfile from './results/CompanyProfile';
-import ProductClassification from './results/ProductClassification';
-import DataSourceAttribution from './results/DataSourceAttribution';
-import CollapsibleSection from './results/CollapsibleSection';
 import USMCAQualification from './results/USMCAQualification';
-import TariffSavings from './results/TariffSavings';
-import CertificateSection from './results/CertificateSection';
 import RecommendedActions from './results/RecommendedActions';
-import PersonalizedAlerts from './results/PersonalizedAlerts';
 import PolicyTimeline from './PolicyTimeline';
 import ExecutiveSummaryDisplay from './results/ExecutiveSummaryDisplay';
-import SubscriptionContext, { AgentIntelligenceBadges } from '../shared/SubscriptionContext';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 
