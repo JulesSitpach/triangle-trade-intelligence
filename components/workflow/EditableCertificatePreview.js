@@ -119,9 +119,20 @@ export default function EditableCertificatePreview({
 
   // ✅ FIX: Update editedCert when previewData changes (async data arrives after mount)
   useEffect(() => {
-    if (!previewData?.professional_certificate) return;
+    console.log('🔍 [DEBUG] useEffect triggered');
+    console.log('🔍 [DEBUG] previewData:', previewData);
+    console.log('🔍 [DEBUG] previewData?.professional_certificate:', previewData?.professional_certificate);
 
-    console.log('🔄 Updating certificate state with preview data:', previewData.professional_certificate);
+    if (!previewData?.professional_certificate) {
+      console.log('❌ [DEBUG] No professional_certificate data - exiting useEffect');
+      return;
+    }
+
+    console.log('🔄 Updating certificate state with preview data');
+    console.log('🔍 [DEBUG] Exporter data:', previewData.professional_certificate.exporter);
+    console.log('🔍 [DEBUG] Importer data:', previewData.professional_certificate.importer);
+    console.log('🔍 [DEBUG] Product data:', previewData.professional_certificate.product);
+    console.log('🔍 [DEBUG] Authorization data:', previewData.professional_certificate.authorization);
 
     // Get certifier type to determine which company info to use for Box 2
     const certifierType = previewData?.professional_certificate?.certifier?.type ||
@@ -343,6 +354,15 @@ export default function EditableCertificatePreview({
     }
 
     console.log('📄 PDF DOWNLOAD STARTING - Capturing preview as PDF...');
+    console.log('🔍 [DEBUG] editedCert state at download time:');
+    console.log('  - certifier_name:', editedCert.certifier_name);
+    console.log('  - exporter_name:', editedCert.exporter_name);
+    console.log('  - importer_name:', editedCert.importer_name);
+    console.log('  - importer_address:', editedCert.importer_address);
+    console.log('  - product_description:', editedCert.product_description);
+    console.log('  - hs_code:', editedCert.hs_code);
+    console.log('  - signatory_name:', editedCert.signatory_name);
+    console.log('🔍 [DEBUG] Full editedCert:', editedCert);
 
     try {
       // Get the certificate preview element
@@ -353,7 +373,20 @@ export default function EditableCertificatePreview({
         return;
       }
 
-      console.log('📄 Certificate element found, generating PDF from preview...');
+      console.log('📄 Certificate element found');
+      console.log('🔍 [DEBUG] Checking if inputs have values in the DOM...');
+      const inputs = certificateElement.querySelectorAll('input, textarea, select');
+      console.log('🔍 [DEBUG] Total input fields:', inputs.length);
+      let filledCount = 0;
+      inputs.forEach((input, i) => {
+        if (input.value) {
+          filledCount++;
+          if (i < 10) { // Log first 10 filled inputs
+            console.log(`  Input ${i}: ${input.value.substring(0, 50)}`);
+          }
+        }
+      });
+      console.log(`🔍 [DEBUG] Filled inputs: ${filledCount} / ${inputs.length}`);
 
       // Import html2pdf library
       const html2pdf = (await import('html2pdf.js')).default;
