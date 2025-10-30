@@ -7,9 +7,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
-export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onGenerateCertificate, onPreviewCertificate, onDownloadCertificate, onEmailToImporter, previewData, generatedPDF, userTier = 'Trial' }) {
+export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onPreviewCertificate, userTier = 'Trial' }) {
   const router = useRouter();
-  const previewRef = useRef(null);
+  // ✅ Removed previewRef - old certificate preview system removed
   const [authData, setAuthData] = useState({
     // Authorized Signatory Information (NEW DATA COLLECTION)
     signatory_name: '',
@@ -94,30 +94,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     }
   }, [authData, updateFormData]); // Include all dependencies used in effect
 
-  // Auto-check certification boxes when certificate is generated
-  useEffect(() => {
-    if (previewData && previewData.professional_certificate) {
-      // Automatically check both certification boxes once certificate is successfully generated
-      if (!authData.accuracy_certification || !authData.authority_certification) {
-        setAuthData(prev => ({
-          ...prev,
-          accuracy_certification: true,
-          authority_certification: true
-        }));
-      }
-    }
-  }, [previewData, authData.accuracy_certification, authData.authority_certification]);
-
-  // Auto-scroll to certificate preview when generated
-  useEffect(() => {
-    if (previewData && previewData.professional_certificate && previewRef.current) {
-      // Scroll to preview with smooth animation
-      previewRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  }, [previewData]);
+  // ✅ REMOVED: Old useEffects for previewData auto-check and auto-scroll
+  // New system uses EditableCertificatePreview component which handles its own state
 
   const handleFieldChange = (field, value) => {
     setAuthData(prev => ({
@@ -131,15 +109,14 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     console.log('📊 Certificate data structure:', {
       has_workflow_data: !!workflowData,
       has_certificate_data: !!certificateData,
-      has_preview_data: !!previewData,
       component_origins: workflowData?.component_origins || workflowData?.components || certificateData?.analysis_results?.component_breakdown
     });
 
     // Prepare complete workflow data for AI vulnerability analysis
     const alertData = {
       company: {
-        name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
-        company_name: workflowData?.company?.name || workflowData?.company?.company_name || previewData?.professional_certificate?.exporter?.name,
+        name: workflowData?.company?.name || workflowData?.company?.company_name || '',
+        company_name: workflowData?.company?.name || workflowData?.company?.company_name || '',
         business_type: workflowData?.company?.business_type,
         trade_volume: (() => {
           const tv = workflowData?.company?.trade_volume;
@@ -151,9 +128,9 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         company_country: workflowData?.company?.company_country  // FIX: Include country for certificate generation
       },
       product: {
-        hs_code: workflowData?.product?.hs_code || previewData?.professional_certificate?.hs_classification?.code,
-        description: workflowData?.product?.description || workflowData?.product?.product_description || previewData?.professional_certificate?.product?.description,
-        product_description: workflowData?.product?.description || workflowData?.product?.product_description || previewData?.professional_certificate?.product?.description
+        hs_code: workflowData?.product?.hs_code || '',
+        description: workflowData?.product?.description || workflowData?.product?.product_description || '',
+        product_description: workflowData?.product?.description || workflowData?.product?.product_description || ''
       },
       usmca: {
         qualified: workflowData?.usmca?.qualified || certificateData?.analysis_results?.qualification_status === 'QUALIFIED',
@@ -819,390 +796,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         </button>
       </div>
 
-      {/* 4. Certificate Preview */}
-      <div className="form-section">
-        <h2 className="form-section-title">📋 Certificate Preview</h2>
-        <p className="form-section-description">
-          Review the information that will appear on your USMCA Certificate of Origin
-        </p>
+      {/* ✅ REMOVED: Old black/white certificate preview section (lines 799-1182)
+          New system uses EditableCertificatePreview component on separate page */}
 
-        {/* Certificate Preview Window - Shows professional certificate when generated */}
-        {previewData && previewData.professional_certificate ? (
-            <div className="element-spacing" ref={previewRef}>
-              <div className="alert alert-success">
-                <div className="alert-content">
-                  <div className="alert-title">✅ Official USMCA Certificate Generated</div>
-                  <div className="text-body">
-                    Certificate #{previewData.professional_certificate.certificate_number} | Trust Score: {(previewData.professional_certificate.trust_verification?.overall_trust_score * 100).toFixed(1)}%
-                  </div>
-                </div>
-              </div>
-
-              {/* Official USMCA Certificate - Matching PDF Template */}
-              <div style={{position: 'relative'}}>
-                {/* Watermark Overlay for Trial Users */}
-                {userTier === 'Trial' && (
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    pointerEvents: 'none',
-                    zIndex: 10
-                  }}>
-                    <div style={{
-                      transform: 'rotate(-45deg)',
-                      fontSize: '72px',
-                      fontWeight: 'bold',
-                      color: 'rgba(220, 38, 38, 0.15)',
-                      textAlign: 'center',
-                      userSelect: 'none'
-                    }}>
-                      TRIAL PREVIEW
-                      <div style={{fontSize: '36px', marginTop: '10px'}}>
-                        SUBSCRIBE TO DOWNLOAD
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div style={{
-                  border: '3px solid #000',
-                  backgroundColor: '#ffffff',
-                  fontFamily: 'Arial, sans-serif',
-                  fontSize: '11px',
-                  maxWidth: '850px',
-                  margin: '0 auto'
-                }}>
-                {/* Trial Banner */}
-                {userTier === 'Trial' && (
-                  <div style={{
-                    backgroundColor: '#dc2626',
-                    color: '#ffffff',
-                    textAlign: 'center',
-                    padding: '8px',
-                    fontWeight: 'bold',
-                    fontSize: '12px'
-                  }}>
-                    ⚠️ FREE TRIAL PREVIEW - Not valid for customs submissions - Subscribe to download official certificate
-                  </div>
-                )}
-
-                {/* Header */}
-                <div style={{
-                  textAlign: 'center',
-                  borderBottom: '2px solid #000',
-                  padding: '10px',
-                  backgroundColor: '#ffffff'
-                }}>
-                  <div style={{fontWeight: 'bold', fontSize: '14px', marginBottom: '4px'}}>
-                    UNITED STATES MEXICO CANADA AGREEMENT (USMCA)
-                  </div>
-                  <div style={{fontWeight: 'bold', fontSize: '13px'}}>
-                    CERTIFICATION OF ORIGIN
-                  </div>
-                </div>
-
-                {/* Section 1: Certifier Type & Blanket Period */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '60% 40%',
-                  borderBottom: '1px solid #000'
-                }}>
-                  <div style={{borderRight: '1px solid #000', padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '6px'}}>
-                      1. CERTIFIER TYPE (INDICATE "X")
-                    </div>
-                    <div style={{display: 'flex', gap: '20px', marginLeft: '10px'}}>
-                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'IMPORTER'} />
-                        IMPORTER
-                      </label>
-                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'EXPORTER'} />
-                        EXPORTER
-                      </label>
-                      <label style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                        <input type="checkbox" disabled checked={previewData.professional_certificate.certifier?.type === 'PRODUCER'} />
-                        PRODUCER
-                      </label>
-                    </div>
-                  </div>
-                  <div style={{padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
-                      BLANKET PERIOD (MM/DD/YYYY)
-                    </div>
-                    <div style={{marginLeft: '10px'}}>
-                      <div>FROM: {previewData.professional_certificate.blanket_period?.start_date || 'N/A'}</div>
-                      <div>TO: {previewData.professional_certificate.blanket_period?.end_date || 'N/A'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sections 2-5: Contact Information Grid */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  borderBottom: '1px solid #000'
-                }}>
-                  {/* Section 2: Certifier */}
-                  <div style={{borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
-                      2. CERTIFIER NAME, ADDRESS, PHONE, AND EMAIL
-                    </div>
-                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
-                      <div><strong>NAME</strong></div>
-                      <div>{previewData.professional_certificate.certifier?.name || previewData.professional_certificate.exporter?.name}</div>
-                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
-                      <div>{previewData.professional_certificate.certifier?.address || previewData.professional_certificate.exporter?.address}</div>
-                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.certifier?.country || previewData.professional_certificate.exporter?.country}</div>
-                      <div><strong>PHONE</strong> {previewData.professional_certificate.certifier?.phone || 'N/A'}</div>
-                      <div><strong>EMAIL</strong> {previewData.professional_certificate.certifier?.email || 'N/A'}</div>
-                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
-                      <div>{previewData.professional_certificate.certifier?.tax_id || previewData.professional_certificate.exporter?.tax_id}</div>
-                    </div>
-                  </div>
-
-                  {/* Section 3: Exporter */}
-                  <div style={{borderBottom: '1px solid #000', padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
-                      3. EXPORTER NAME, ADDRESS, PHONE, AND EMAIL
-                    </div>
-                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
-                      <div><strong>NAME</strong></div>
-                      <div>{previewData.professional_certificate.exporter?.name}</div>
-                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
-                      <div>{previewData.professional_certificate.exporter?.address}</div>
-                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.exporter?.country}</div>
-                      <div><strong>PHONE</strong> {previewData.professional_certificate.exporter?.phone || 'N/A'}</div>
-                      <div><strong>EMAIL</strong> {previewData.professional_certificate.exporter?.email || 'N/A'}</div>
-                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
-                      <div>{previewData.professional_certificate.exporter?.tax_id}</div>
-                    </div>
-                  </div>
-
-                  {/* Section 4: Producer */}
-                  <div style={{borderRight: '1px solid #000', padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
-                      4. PRODUCER NAME, ADDRESS, PHONE, AND EMAIL
-                    </div>
-                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
-                      <div><strong>NAME</strong></div>
-                      <div>{previewData.professional_certificate.producer?.same_as_exporter ? 'SAME AS EXPORTER' : previewData.professional_certificate.producer?.name}</div>
-                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
-                      <div>{previewData.professional_certificate.producer?.same_as_exporter ? 'SAME AS EXPORTER' : previewData.professional_certificate.producer?.address}</div>
-                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.producer?.country || previewData.professional_certificate.exporter?.country}</div>
-                      <div><strong>PHONE</strong> {previewData.professional_certificate.producer?.phone || 'N/A'}</div>
-                      <div><strong>EMAIL</strong> {previewData.professional_certificate.producer?.email || 'N/A'}</div>
-                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
-                      <div>{previewData.professional_certificate.producer?.tax_id || previewData.professional_certificate.exporter?.tax_id}</div>
-                    </div>
-                  </div>
-
-                  {/* Section 5: Importer */}
-                  <div style={{padding: '8px'}}>
-                    <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '4px'}}>
-                      5. IMPORTER NAME, ADDRESS, PHONE, AND EMAIL
-                    </div>
-                    <div style={{marginLeft: '8px', fontSize: '10px'}}>
-                      <div><strong>NAME</strong></div>
-                      <div>{previewData.professional_certificate.importer?.name}</div>
-                      <div style={{marginTop: '4px'}}><strong>ADDRESS</strong></div>
-                      <div>{previewData.professional_certificate.importer?.address}</div>
-                      <div style={{marginTop: '4px'}}><strong>COUNTRY</strong> {previewData.professional_certificate.importer?.country}</div>
-                      <div><strong>PHONE</strong> {previewData.professional_certificate.importer?.phone || 'N/A'}</div>
-                      <div><strong>EMAIL</strong> {previewData.professional_certificate.importer?.email || 'N/A'}</div>
-                      <div style={{marginTop: '4px'}}><strong>TAX IDENTIFICATION NUMBER</strong></div>
-                      <div>{previewData.professional_certificate.importer?.tax_id}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 6: Goods Description Table */}
-                <div style={{borderBottom: '1px solid #000'}}>
-                  <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '10px'}}>
-                    <thead>
-                      <tr style={{backgroundColor: '#f5f5f5'}}>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'left', fontWeight: 'bold', width: '30%'}}>
-                          6. DESCRIPTION OF GOOD(S)
-                        </th>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%'}}>
-                          7. HTS
-                        </th>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '15%'}}>
-                          8. ORIGIN CRITERION
-                        </th>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '12%'}}>
-                          9. PRODUCER (YES/NO)
-                        </th>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '18%'}}>
-                          10. METHOD OF QUALIFICATION
-                        </th>
-                        <th style={{border: '1px solid #000', padding: '6px', textAlign: 'center', fontWeight: 'bold', width: '13%'}}>
-                          11. COUNTRY OF ORIGIN
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td style={{border: '1px solid #000', padding: '6px', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.product?.description}
-                        </td>
-                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.hs_classification?.code}
-                        </td>
-                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {/* ✅ REMOVED: || 'B' default (line 1024)
-                              REASON: FALSE CERTIFICATION if AI didn't determine criterion
-                              FIX: Show blank or warning indicator instead */}
-                          {previewData.professional_certificate.preference_criterion || ''}
-                        </td>
-                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.producer_declaration?.is_producer ? 'YES' : 'NO'}
-                        </td>
-                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.qualification_method?.method || 'RVC'}
-                        </td>
-                        <td style={{border: '1px solid #000', padding: '6px', textAlign: 'center', verticalAlign: 'top'}}>
-                          {previewData.professional_certificate.country_of_origin}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Certification Statement */}
-                <div style={{borderBottom: '2px solid #000', padding: '10px', fontSize: '9px', lineHeight: '1.4'}}>
-                  I CERTIFY THAT THE GOODS DESCRIBED IN THIS DOCUMENT QUALIFY AS ORIGINATING AND THE INFORMATION CONTAINED IN THIS DOCUMENT IS TRUE
-                  AND ACCURATE. I ASSUME RESPONSIBILITY FOR PROVING SUCH REPRESENTATIONS AND AGREE TO MAINTAIN AND PRESENT UPON REQUEST OR TO MAKE
-                  AVAILABLE DURING A VERIFICATION VISIT, DOCUMENTATION NECESSARY TO SUPPORT THIS CERTIFICATION
-                </div>
-
-                {/* Section 12: Authorization */}
-                <div style={{padding: '10px'}}>
-                  <div style={{fontWeight: 'bold', fontSize: '10px', marginBottom: '8px'}}>
-                    THIS CERTIFICATE CONSISTS OF _____ PAGES, INCLUDING ALL ATTACHMENTS.
-                  </div>
-
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '10px',
-                    fontSize: '10px'
-                  }}>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12a. AUTHORIZED SIGNATURE</div>
-                      <div style={{borderBottom: '1px solid #000', minHeight: '30px', marginBottom: '8px'}}></div>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12b. COMPANY</div>
-                      <div>{previewData.professional_certificate.exporter?.name}</div>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12c. NAME</div>
-                      <div>{previewData.professional_certificate.authorization?.signatory_name}</div>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12d. TITLE</div>
-                      <div>{previewData.professional_certificate.authorization?.signatory_title}</div>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12e. DATE (MM/DD/YYYY)</div>
-                      <div>{previewData.professional_certificate.authorization?.signature_date
-                        ? new Date(previewData.professional_certificate.authorization.signature_date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
-                        : new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}</div>
-                    </div>
-                    <div>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12f. TELEPHONE NUMBER</div>
-                      <div>{previewData.professional_certificate.authorization?.phone || 'N/A'}</div>
-                    </div>
-                    <div style={{gridColumn: '1 / -1'}}>
-                      <div style={{fontWeight: 'bold', marginBottom: '4px'}}>12g. EMAIL</div>
-                      <div>{previewData.professional_certificate.authorization?.email || 'N/A'}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div style={{
-                  textAlign: 'right',
-                  padding: '8px',
-                  fontSize: '9px',
-                  borderTop: '1px solid #000'
-                }}>
-                  USMCA CERTIFICATE V3
-                </div>
-              </div>
-              </div>
-
-              {/* Platform Disclaimer - Below certificate preview */}
-              <div className="alert alert-info" style={{marginTop: '1.5rem', marginBottom: '1.5rem'}}>
-                <div className="alert-content">
-                  <div className="alert-title">⚖️ Platform Disclaimer</div>
-                  <div className="text-body" style={{fontSize: '11px', lineHeight: '1.5'}}>
-                    This certificate was prepared by the signatory identified above using Triangle Trade Intelligence tools.
-                    Triangle Trade Intelligence provides software tools only and assumes no legal responsibility for the accuracy,
-                    completeness, or compliance of this certificate. The signatory assumes full legal responsibility for all
-                    information contained herein and certifies compliance with all applicable regulations.
-                  </div>
-                </div>
-              </div>
-
-              {/* Certificate Actions - Below Preview */}
-              <div style={{marginTop: '2rem'}}>
-                <div className="hero-buttons">
-                  <button
-                    className="btn-primary"
-                    onClick={() => onDownloadCertificate && onDownloadCertificate()}
-                    disabled={!authData.accuracy_certification || !authData.authority_certification || userTier === 'Trial'}
-                    title={userTier === 'Trial' ? 'Upgrade to download certificates' : ''}
-                  >
-                    {userTier === 'Trial' ? '🔒 Download (Upgrade Required)' : '💾 Download PDF Certificate'}
-                  </button>
-
-                  <button
-                    className="btn-primary"
-                    onClick={handleSetUpAlerts}
-                    disabled={userTier === 'Trial'}
-                    title={userTier === 'Trial' ? 'Upgrade to set up trade alerts' : ''}
-                  >
-                    {userTier === 'Trial' ? '🔒 Set Up Trade Alerts (Upgrade Required)' : '🚨 Set Up Trade Alerts'}
-                  </button>
-                </div>
-
-                {userTier === 'Trial' && (
-                  <div className="alert alert-warning" style={{marginTop: '1rem'}}>
-                    <div className="alert-content">
-                      <div className="alert-title">🚀 Free Trial - Preview Only</div>
-                      <div className="text-body">
-                        Upgrade to download certificates and access trade alerts. Starting at $99/month.
-                      </div>
-                      <button
-                        className="btn-primary"
-                        style={{marginTop: '0.5rem'}}
-                        onClick={() => router.push('/pricing')}
-                      >
-                        View Pricing Plans
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <div className="text-body">
-                  ℹ️ Complete the Digital Signature section above and click "Generate & Preview Certificate" to view your certificate.
-                </div>
-              </div>
-            </div>
-          )}
-      </div>
-    </div>
   );
 }
