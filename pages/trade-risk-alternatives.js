@@ -789,12 +789,7 @@ export default function TradeRiskAlternatives() {
     }
   };
 
-  // Auto-generate alert impact analysis when consolidatedAlerts are loaded
-  useEffect(() => {
-    if (consolidatedAlerts && consolidatedAlerts.length > 0 && workflowIntelligence && !alertImpactAnalysis) {
-      generateAlertImpactAnalysis();
-    }
-  }, [consolidatedAlerts, workflowIntelligence]); // eslint-disable-line react-hooks/exhaustive-deps
+  // REMOVED AUTO-TRIGGER: User must manually click button to generate analysis (saves API costs on page reload)
 
   if (isLoading) {
     return (
@@ -1285,21 +1280,12 @@ export default function TradeRiskAlternatives() {
           {!isLoadingPolicyAlerts && !isConsolidating && alertsGenerated && realPolicyAlerts.length === 0 && (
             <div className="alert alert-success">
               <div className="alert-content">
-                <div className="alert-title">No Critical Policy Changes Affecting Your Trade</div>
+                <div className="alert-title">✅ Strategic Analysis Complete</div>
                 <div className="text-body">
-                  Your components are not currently affected by government-announced tariff or policy changes. We monitor official sources continuously and will alert you when relevant changes occur.
+                  Analysis complete. Your comprehensive business intelligence report is ready below, including USMCA 2026 contingency planning and strategic guidance.
                 </div>
-                <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-                  <button
-                    onClick={() => {
-                      setAlertsGenerated(false);
-                      setRealPolicyAlerts([]);
-                      setConsolidatedAlerts([]);
-                    }}
-                    className="btn-secondary"
-                  >
-                    Run Analysis Again
-                  </button>
+                <div className="text-body" style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>
+                  No critical government policy changes currently affecting your components. We monitor official sources continuously.
                 </div>
               </div>
             </div>
@@ -1315,6 +1301,43 @@ export default function TradeRiskAlternatives() {
                   userTier={userTier}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Generate Strategic Analysis Button - Show after alerts displayed */}
+          {alertsGenerated && !alertImpactAnalysis && !isLoadingAlertImpact && workflowIntelligence && (
+            <div className="form-section" style={{ marginTop: '2rem' }}>
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="alert-title">📊 Generate Strategic Business Intelligence</div>
+                  <div className="text-body">
+                    Get your comprehensive strategic analysis including USMCA 2026 contingency planning, scenario analysis, and government resource guidance.
+                  </div>
+                  <div className="hero-buttons" style={{ marginTop: '1rem' }}>
+                    <button
+                      onClick={generateAlertImpactAnalysis}
+                      className="btn-primary"
+                      disabled={isLoadingAlertImpact}
+                    >
+                      {isLoadingAlertImpact ? 'Generating Analysis...' : '📊 Generate Strategic Analysis'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAlertsGenerated(false);
+                        setRealPolicyAlerts([]);
+                        setConsolidatedAlerts([]);
+                        setAlertImpactAnalysis(null);
+                      }}
+                      className="btn-secondary"
+                    >
+                      🔄 Run Analysis Again
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.75rem', margin: 0 }}>
+                    This analysis reuses your existing workflow data and costs ~$0.01
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
