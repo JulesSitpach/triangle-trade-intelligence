@@ -15,11 +15,8 @@ export default function RecommendedActions({ results }) {
   const hasBusinessIntelligence = results?.business_intelligence && results.business_intelligence.length > 0;
   const hasAIRecommendations = !isQualified && results?.recommendations && results.recommendations.length > 0;
 
-  // Get trade volume for calculations
-  const tradeVolume = results?.company?.trade_volume;
-  if (!tradeVolume) {
-    console.error('❌ [FORM SCHEMA] Missing company.trade_volume in RecommendedActions');
-  }
+  // Get trade volume for calculations (gracefully handle missing value)
+  const tradeVolume = results?.company?.trade_volume || 0;
 
   // Phase 3 Enhancement: Load executive trade alert for strategic roadmap
   const [executiveAlert, setExecutiveAlert] = useState(null);
