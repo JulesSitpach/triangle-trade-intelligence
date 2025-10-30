@@ -40,11 +40,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         ...prev,
         exporter_same_as_company: true,  // Check the box automatically
         exporter_name: workflowData.company.name || workflowData.company.company_name || '',
-        exporter_address: workflowData.company.company_address || '',
+        exporter_address: workflowData.company.company_address || workflowData.company.address || '',
         exporter_tax_id: workflowData.company.tax_id || '',
+        exporter_contact_person: workflowData.company.contact_person || '',  // ✅ FIX (Oct 30): Added contact person
         exporter_phone: workflowData.company.contact_phone || '',
         exporter_email: workflowData.company.contact_email || '',
-        exporter_country: workflowData.company.company_country || ''
+        exporter_country: workflowData.company.company_country || workflowData.company.country || ''
       }));
     }
   }, [workflowData, authData.exporter_same_as_company]); // Run when workflowData or exporter_same_as_company changes
@@ -382,16 +383,18 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 // Auto-populate exporter fields from company data if checked
                 if (e.target.checked) {
                   handleFieldChange('exporter_name', workflowData?.company?.name || '');
-                  handleFieldChange('exporter_address', workflowData?.company?.company_address || '');
+                  handleFieldChange('exporter_address', workflowData?.company?.company_address || workflowData?.company?.address || '');
                   handleFieldChange('exporter_tax_id', workflowData?.company?.tax_id || '');
+                  handleFieldChange('exporter_contact_person', workflowData?.company?.contact_person || '');  // ✅ FIX (Oct 30): Added contact person
                   handleFieldChange('exporter_phone', workflowData?.company?.contact_phone || '');
                   handleFieldChange('exporter_email', workflowData?.company?.contact_email || '');
-                  handleFieldChange('exporter_country', workflowData?.company?.company_country || '');
+                  handleFieldChange('exporter_country', workflowData?.company?.company_country || workflowData?.company?.country || '');
                 } else {
                   // Clear fields if unchecked
                   handleFieldChange('exporter_name', '');
                   handleFieldChange('exporter_address', '');
                   handleFieldChange('exporter_tax_id', '');
+                  handleFieldChange('exporter_contact_person', '');
                   handleFieldChange('exporter_phone', '');
                   handleFieldChange('exporter_email', '');
                   handleFieldChange('exporter_country', '');
