@@ -92,7 +92,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         updateFormData(key, authData[key]);
       });
     }
-  }, [authData, updateFormData]); // Include all dependencies used in effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authData]); // Only depend on authData, NOT updateFormData (prevents infinite loop)
 
   // ✅ REMOVED: Old useEffects for previewData auto-check and auto-scroll
   // New system uses EditableCertificatePreview component which handles its own state
