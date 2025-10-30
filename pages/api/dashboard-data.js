@@ -369,6 +369,13 @@ export default protectedApiHandler({
             // ✅ FIXED: Add missing alert_count field
             alert_count: 1,
 
+            // ✅ CRITICAL: Preserve original alert fields for component matching
+            affected_hs_codes: alert.affected_hs_codes,
+            affected_countries: alert.affected_countries,
+            relevant_industries: alert.relevant_industries,
+            title: alert.title,
+            description: alert.description,
+
             // Transform crisis alert into vulnerability analysis format
             primary_vulnerabilities: [
               {
