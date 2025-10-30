@@ -49,9 +49,9 @@ export default function Login() {
         if (redirect) {
           router.push(redirect);
         }
-        // Priority 2: Admin users go to admin dashboard
+        // Priority 2: Admin users go to admin dev dashboard
         else if (result.user && result.user.isAdmin) {
-          router.push('/admin/broker-dashboard');
+          router.push('/admin/dev-dashboard');
         }
         // Priority 3: Regular users go to user dashboard
         else {
