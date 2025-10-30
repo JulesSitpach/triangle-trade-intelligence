@@ -1287,11 +1287,11 @@ export default function TradeRiskAlternatives() {
                 💾 Save Alert to Database
               </button>
 
-              {/* Generate Final Report */}
+              {/* Download PDF of Strategic Analysis */}
               <button
                 onClick={() => {
                   if (userTier === 'Trial') {
-                    alert('Final report generation is available for paying subscribers. Upgrade to access detailed reports.');
+                    alert('PDF download is available for paying subscribers. Upgrade to download your strategic analysis.');
                     window.location.href = '/pricing';
                   } else {
                     window.print();
@@ -1299,9 +1299,9 @@ export default function TradeRiskAlternatives() {
                 }}
                 className="btn-primary"
                 disabled={userTier === 'Trial'}
-                title={userTier === 'Trial' ? 'Upgrade to generate final reports' : ''}
+                title={userTier === 'Trial' ? 'Upgrade to download PDF' : ''}
               >
-                {userTier === 'Trial' ? '🔒 Generate Final Report (Upgrade)' : '📊 Generate Final Report'}
+                {userTier === 'Trial' ? '🔒 Download PDF (Upgrade)' : '📄 Download PDF'}
               </button>
 
               {/* New Analysis */}
