@@ -1290,6 +1290,29 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
+          {/* Generate Strategic Analysis Button - NO BLUE BOX */}
+          {alertsGenerated && !alertImpactAnalysis && !isLoadingAlertImpact && workflowIntelligence && (
+            <div className="hero-buttons" style={{ marginTop: '2rem' }}>
+              <button
+                onClick={generateAlertImpactAnalysis}
+                className="btn-primary"
+                disabled={isLoadingAlertImpact}
+              >
+                {isLoadingAlertImpact ? 'Generating Analysis...' : '📊 Generate Strategic Analysis'}
+              </button>
+              <button
+                onClick={() => {
+                  setAlertsGenerated(false);
+                  setRealPolicyAlerts([]);
+                  setConsolidatedAlerts([]);
+                  setAlertImpactAnalysis(null);
+                }}
+                className="btn-secondary"
+              >
+                🔄 Run Analysis Again
+              </button>
+            </div>
+          )}
 
           {/* Fallback: Show individual alerts if consolidation failed */}
           {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
