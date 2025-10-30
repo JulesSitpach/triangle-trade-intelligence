@@ -221,11 +221,23 @@ export default function EditableCertificatePreview({
       return;
     }
 
+    console.log('🔍 PDF DOWNLOAD STARTING...');
+
     try {
       // Get the certificate preview element
       const certificateElement = document.getElementById('certificate-preview-for-pdf');
+      console.log('🔍 Certificate element found:', !!certificateElement);
+      console.log('🔍 Element innerHTML length:', certificateElement?.innerHTML?.length || 0);
+      console.log('🔍 Element visible:', certificateElement?.offsetHeight > 0);
+
       if (!certificateElement) {
         alert('❌ Certificate preview not found');
+        return;
+      }
+
+      if (!certificateElement.innerHTML || certificateElement.innerHTML.length < 100) {
+        console.error('❌ Certificate element is empty or too small');
+        alert('❌ Certificate content is empty. Please refresh and try again.');
         return;
       }
 
@@ -241,11 +253,17 @@ export default function EditableCertificatePreview({
       };
 
       // Dynamically import html2pdf (browser-only library)
+      console.log('🔍 Loading html2pdf library...');
       const html2pdf = (await import('html2pdf.js')).default;
-      html2pdf()
+      console.log('🔍 html2pdf loaded successfully');
+      console.log('🔍 Starting PDF generation from element...');
+
+      await html2pdf()
         .set(options)
         .from(certificateElement)
         .save();
+
+      console.log('✅ PDF download completed successfully');
 
       // Now save the data
       const updatedData = {
