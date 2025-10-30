@@ -33,6 +33,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   // Agent orchestration removed - was causing excessive AI calls on every field change
 
   // 🚀 AUTO-FILL COMPANY DATA ON MOUNT (so user doesn't have to manually check box)
+  // ✅ FIX (Oct 30): Removed authData.exporter_same_as_company from dependencies to prevent re-check loop
+  // This useEffect should ONLY run once on mount to auto-fill, not every time checkbox changes
   useEffect(() => {
     if (workflowData?.company && !authData.exporter_same_as_company) {
       console.log('📋 Auto-filling company data from workflow:', workflowData.company);
@@ -48,7 +50,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         exporter_country: workflowData.company.company_country || workflowData.company.country || ''
       }));
     }
-  }, [workflowData, authData.exporter_same_as_company]); // Run when workflowData or exporter_same_as_company changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowData]); // Only run when workflowData changes (on mount), NOT when checkbox changes
 
   // 🎯 AUTO-EXPAND SECTIONS BASED ON CERTIFIER TYPE
   useEffect(() => {
@@ -427,7 +430,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   onChange={(e) => handleFieldChange('exporter_name', e.target.value)}
                   placeholder="Enter exporting company name"
                   required
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -440,7 +442,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   placeholder="Complete address including street, city, state/province, postal code"
                   rows="3"
                   required
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -453,7 +454,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   onChange={(e) => handleFieldChange('exporter_tax_id', e.target.value)}
                   placeholder="Enter exporter's tax identification number"
                   required
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -465,7 +465,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   value={authData.exporter_contact_person || ''}
                   onChange={(e) => handleFieldChange('exporter_contact_person', e.target.value)}
                   placeholder="Primary contact at exporting company"
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -477,7 +476,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   value={authData.exporter_phone || ''}
                   onChange={(e) => handleFieldChange('exporter_phone', e.target.value)}
                   placeholder="(555) 123-4567"
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -489,7 +487,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   value={authData.exporter_email || ''}
                   onChange={(e) => handleFieldChange('exporter_email', e.target.value)}
                   placeholder="contact@exporter.com"
-                  disabled={authData.exporter_same_as_company}
                 />
               </div>
 
@@ -500,7 +497,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   value={authData.exporter_country || ''}
                   onChange={(e) => handleFieldChange('exporter_country', e.target.value)}
                   required
-                  disabled={authData.exporter_same_as_company}
                 >
                   <option value="">Select country</option>
                   <option value="United States">United States</option>
