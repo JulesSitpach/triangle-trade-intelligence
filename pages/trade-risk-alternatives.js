@@ -1218,15 +1218,8 @@ export default function TradeRiskAlternatives() {
 
         {/* Loading indicator for alert impact analysis */}
         {isLoadingAlertImpact && consolidatedAlerts.length > 0 && (
-          <div className="form-section" style={{ marginTop: '2rem' }}>
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <div className="alert-title">Analyzing Strategic Impact...</div>
-                <div className="text-body">
-                  Generating additive analysis based on your existing workflow results and new alerts.
-                </div>
-              </div>
-            </div>
+          <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
+            Analyzing Strategic Impact...
           </div>
         )}
 
@@ -1255,17 +1248,15 @@ export default function TradeRiskAlternatives() {
 
 
           {(isLoadingPolicyAlerts || isConsolidating) && (
-            <div className="alert alert-info">
-              <div className="alert-content">
-                <div className="alert-title">Analyzing your trade profile...</div>
-                <div style={{ marginTop: '0.75rem' }}>
-                  {progressSteps.map((step, idx) => (
-                    <div key={idx} style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '0.5rem' }}>
-                      {idx < progressSteps.length - 1 ? '✓' : '→'} {step}
-                    </div>
-                  ))}
-                </div>
+            <div style={{ marginTop: '1rem' }}>
+              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                Analyzing your trade profile...
               </div>
+              {progressSteps.map((step, idx) => (
+                <div key={idx} style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem', paddingLeft: '1rem' }}>
+                  {idx < progressSteps.length - 1 ? '✓' : '→'} {step}
+                </div>
+              ))}
             </div>
           )}
 
