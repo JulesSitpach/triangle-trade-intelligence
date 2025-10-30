@@ -798,6 +798,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
       {/* ✅ REMOVED: Old black/white certificate preview section (lines 799-1182)
           New system uses EditableCertificatePreview component on separate page */}
-
+    </div>
   );
 }
