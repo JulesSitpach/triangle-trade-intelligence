@@ -1188,8 +1188,8 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Alert Impact Analysis Section - Professional Display Component */}
-        {alertImpactAnalysis && consolidatedAlerts.length > 0 && (
+        {/* Alert Impact Analysis Section - ALWAYS show after analysis runs (alert or no alert) */}
+        {alertImpactAnalysis && alertsGenerated && (
           <div>
             <AlertImpactAnalysisDisplay
               data={alertImpactAnalysis}

@@ -258,6 +258,94 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
           </div>
         )}
 
+        {/* Develop Contingency Plans - ALWAYS SHOW */}
+        <div style={{ marginBottom: '2rem' }}>
+          <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '1.125rem' }}>
+            📋 Develop Contingency Plans
+          </p>
+          <p style={{ marginBottom: '1rem', fontSize: '0.9375rem', color: '#374151' }}>
+            With the potential for disruption, scenario planning is essential for anticipating different outcomes.
+          </p>
+
+          {/* Scenario A: Minimal Changes */}
+          <div style={{
+            padding: '1.25rem',
+            backgroundColor: '#f0fdf4',
+            border: '2px solid #10b981',
+            borderRadius: '8px',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ fontWeight: 600, color: '#065f46', fontSize: '1rem', marginBottom: '0.75rem' }}>
+              Scenario A: Minimal Changes
+            </div>
+            <p style={{ fontSize: '0.9375rem', color: '#374151', margin: 0 }}>
+              If the agreement remains largely intact, your main focus will be on maintaining your current supply chain and looking for small opportunities from any improvements to border processes.
+            </p>
+          </div>
+
+          {/* Scenario B: Substantial Renegotiation */}
+          <div style={{
+            padding: '1.25rem',
+            backgroundColor: '#fef3c7',
+            border: '2px solid #f59e0b',
+            borderRadius: '8px',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ fontWeight: 600, color: '#92400e', fontSize: '1rem', marginBottom: '0.75rem' }}>
+              Scenario B: Substantial Renegotiation
+            </div>
+            <p style={{ fontSize: '0.9375rem', color: '#374151', marginBottom: '0.75rem' }}>
+              If significant changes occur, particularly with the U.S. possibly negotiating bilateral deals, you should:
+            </p>
+            <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Adjust sourcing:</strong> Evaluate whether changes to rules of origin will necessitate resourcing from within North America to maintain USMCA benefits.
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Revise supply chain:</strong> Be ready to adjust supplier contracts, logistics networks, or sourcing strategies.
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Prepare for higher tariffs:</strong> If your products no longer qualify for USMCA benefits, prepare for increased costs from tariffs.
+              </li>
+              <li style={{ marginBottom: 0 }}>
+                <strong>Diversify suppliers:</strong> To mitigate risk from potential changes or disruptions in North America, consider diversifying your supply base to include countries outside the USMCA region.
+              </li>
+            </ul>
+          </div>
+
+          {/* Engage with Industry Resources */}
+          <div style={{
+            padding: '1.25rem',
+            backgroundColor: '#eff6ff',
+            border: '2px solid #3b82f6',
+            borderRadius: '8px'
+          }}>
+            <div style={{ fontWeight: 600, color: '#1e40af', fontSize: '1rem', marginBottom: '0.75rem' }}>
+              🤝 Engage with Industry Resources and Government Channels
+            </div>
+            <p style={{ fontSize: '0.9375rem', color: '#374151', marginBottom: '0.75rem' }}>
+              SMBs can influence the renegotiation process and receive support by utilizing available resources:
+            </p>
+            <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Participate in the public comment period:</strong> The USTR regularly opens public comment periods to receive feedback from businesses on how the USMCA is functioning. Your input can help shape future negotiations.
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Consult with government agencies:</strong> Contact agencies like the U.S. Small Business Administration (SBA), U.S. Customs and Border Protection (CBP), and the International Trade Administration (ITA) for guidance and resources.
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Engage with trade associations:</strong> Industry associations often serve as advocates for their members during trade negotiations. Joining and participating can help you stay informed and have your voice heard.
+              </li>
+              <li style={{ marginBottom: '0.5rem' }}>
+                <strong>Attend forums and events:</strong> Organizations like the Brookings Institution and law firms like Holland & Knight host events and provide analysis on the USMCA review process.
+              </li>
+              <li style={{ marginBottom: 0 }}>
+                <strong>Leverage online tools:</strong> The SBA and USTR provide online resources specifically to help SMBs understand and navigate trade agreements.
+              </li>
+            </ul>
+          </div>
+        </div>
+
         {/* Next Step This Week - Prominent CTA */}
         {displayData.next_step_this_week && (
           <div style={{
