@@ -1233,7 +1233,7 @@ export default function TradeRiskAlternatives() {
         {/* Strategic AI Summary - Business Intelligence Report */}
         <div className="form-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 className="form-section-title" style={{ margin: 0 }}>Strategic Business Intelligence</h2>
+            <h2 className="form-section-title" style={{ margin: 0 }}>📊 Strategic Analysis</h2>
             {consolidatedAlerts.length > 0 && originalAlertCount > consolidatedAlerts.length && (
               <span style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 500 }}>
                 Consolidated {originalAlertCount} policies → {consolidatedAlerts.length} alert{consolidatedAlerts.length !== 1 ? 's' : ''}
