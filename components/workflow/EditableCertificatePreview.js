@@ -763,21 +763,6 @@ export default function EditableCertificatePreview({
         borderRadius: '8px',
         border: '2px solid #3b82f6'
       }}>
-        <button
-          onClick={onCancel}
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            backgroundColor: '#6b7280',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          ← Back to Edit Authorization
-        </button>
         {isTrialUser ? (
           <a
             href="/pricing"
