@@ -38,21 +38,20 @@ export default async function handler(req, res) {
     const { user_profile, workflow_intelligence, raw_alerts, user_id } = req.body;
 
     // ✅ TIER-GATING: Alerts are PAID-ONLY feature
-    // Free/Trial users should NOT access real-time crisis alerts
-    // Starter, Professional, and Premium tiers get alerts (Enterprise is future)
-    const subscriptionTier = user_profile?.subscription_tier || 'trial';
-    const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
-    // Database stores as 'Premium', 'Starter' (capital letters)
-    // But we normalize to lowercase for comparison with standard tier names
-    const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
+    // Trial users should NOT access real-time crisis alerts
+    // Starter, Professional, Premium, and Enterprise tiers get alerts
+    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
+    // Database stores exact values: "Trial", "Starter", "Professional", "Premium", "Enterprise"
+    const isPaidTier = ['Starter', 'Professional', 'Premium', 'Enterprise'].includes(subscriptionTier);
 
     // ✅ DEBUG: Log tier information to diagnose 403 errors
     console.log('📋 [EXECUTIVE-ALERT] Tier Check:', {
       received_tier: user_profile?.subscription_tier,
+      normalized_tier: subscriptionTier,
       fallback_applied: !user_profile?.subscription_tier,
-      tier_lowercase: tierLowercase,
       is_paid: isPaidTier,
-      allowed_tiers: ['starter', 'professional', 'premium', 'enterprise']
+      blocked_tier: 'Trial',
+      allowed_tiers: ['Starter', 'Professional', 'Premium', 'Enterprise']
     });
 
     if (!isPaidTier) {
