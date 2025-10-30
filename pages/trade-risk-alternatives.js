@@ -1223,65 +1223,36 @@ export default function TradeRiskAlternatives() {
           </div>
         )}
 
-        {/* Strategic AI Summary - Business Intelligence Report */}
+        {/* Strategic Analysis Section - Clean Rebuild */}
         <div className="form-section">
           <h2 className="form-section-title">📊 Strategic Analysis</h2>
+          <p className="text-body" style={{ marginBottom: '1.5rem' }}>
+            Comprehensive business intelligence including USMCA 2026 contingency planning, scenario analysis, and government resource guidance.
+          </p>
 
           {!alertsGenerated && (
+            <button
+              onClick={() => loadRealPolicyAlerts(userProfile)}
+              className="btn-primary"
+              disabled={isLoadingPolicyAlerts}
+            >
+              {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
+            </button>
+          )}
+
+          {alertsGenerated && !alertImpactAnalysis && (
             <div className="hero-buttons">
-              <button
-                onClick={() => loadRealPolicyAlerts(userProfile)}
-                className="btn-primary"
-                disabled={isLoadingPolicyAlerts}
-              >
-                {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
-              </button>
-            </div>
-          )}
-
-
-          {(isLoadingPolicyAlerts || isConsolidating) && (
-            <div style={{ marginTop: '1rem' }}>
-              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-                Analyzing your trade profile...
-              </div>
-              {progressSteps.map((step, idx) => (
-                <div key={idx} style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem', paddingLeft: '1rem' }}>
-                  {idx < progressSteps.length - 1 ? '✓' : '→'} {step}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length > 0 && (
-            <div className="element-spacing">
-              {consolidatedAlerts.map((alert, idx) => (
-                <ConsolidatedPolicyAlert
-                  key={idx}
-                  consolidatedAlert={alert}
-                  userProfile={userProfile}
-                  userTier={userTier}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Generate Strategic Analysis Button - NO BLUE BOX */}
-          {alertsGenerated && !alertImpactAnalysis && !isLoadingAlertImpact && workflowIntelligence && (
-            <div className="hero-buttons" style={{ marginTop: '2rem' }}>
               <button
                 onClick={generateAlertImpactAnalysis}
                 className="btn-primary"
-                disabled={isLoadingAlertImpact}
               >
-                {isLoadingAlertImpact ? 'Generating Analysis...' : '📊 Generate Strategic Analysis'}
+                📊 Generate Strategic Analysis
               </button>
               <button
                 onClick={() => {
                   setAlertsGenerated(false);
                   setRealPolicyAlerts([]);
                   setConsolidatedAlerts([]);
-                  setAlertImpactAnalysis(null);
                 }}
                 className="btn-secondary"
               >
@@ -1290,17 +1261,12 @@ export default function TradeRiskAlternatives() {
             </div>
           )}
 
-          {/* Fallback: Show individual alerts if consolidation failed */}
-          {!isLoadingPolicyAlerts && !isConsolidating && consolidatedAlerts.length === 0 && realPolicyAlerts.length > 0 && (
-            <div className="element-spacing">
-              {realPolicyAlerts.map((alert, idx) => (
-                <PersonalizedPolicyAlert
-                  key={idx}
-                  alert={alert}
-                  userProfile={userProfile}
-                />
-              ))}
-            </div>
+          {alertImpactAnalysis && (
+            <AlertImpactAnalysisDisplay
+              data={alertImpactAnalysis}
+              consolidatedAlertsCount={consolidatedAlerts.length}
+              onClose={null}
+            />
           )}
         </div>
 
