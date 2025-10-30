@@ -753,7 +753,16 @@ export default function EditableCertificatePreview({
       </div>
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        justifyContent: 'flex-end',
+        marginTop: '20px',
+        padding: '20px',
+        backgroundColor: '#f3f4f6',
+        borderRadius: '8px',
+        border: '2px solid #3b82f6'
+      }}>
         <button
           onClick={onCancel}
           style={{
