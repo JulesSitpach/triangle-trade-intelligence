@@ -763,6 +763,80 @@ export default function EditableCertificatePreview({
         borderRadius: '8px',
         border: '2px solid #3b82f6'
       }}>
+        {/* Save to Database Button */}
+        <button
+          onClick={async () => {
+            try {
+              // Save certificate to database via workflow-session endpoint
+              const response = await fetch('/api/workflow-session/update-certificate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  certificate_data: editedCert,
+                  professional_certificate: previewData.professional_certificate
+                })
+              });
+
+              if (response.ok) {
+                alert('✅ Certificate saved to database successfully!');
+              } else {
+                alert('⚠️ Failed to save certificate. Please try again.');
+              }
+            } catch (error) {
+              console.error('Save error:', error);
+              alert('❌ Error saving certificate. Please check your connection.');
+            }
+          }}
+          style={{
+            padding: '12px 24px',
+            fontSize: '14px',
+            backgroundColor: '#8b5cf6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          💾 Save to Database
+        </button>
+
+        {/* Set Up Alerts Button */}
+        <button
+          onClick={() => {
+            // Save workflow data to localStorage for alerts page
+            const alertData = {
+              company: previewData.professional_certificate?.exporter || {},
+              product: previewData.professional_certificate?.product || {},
+              usmca: {
+                qualified: true,
+                regional_content: previewData.professional_certificate?.usmca_analysis?.regional_content || 100
+              },
+              component_origins: previewData.professional_certificate?.supply_chain?.component_origins || [],
+              components: previewData.professional_certificate?.supply_chain?.component_origins || []
+            };
+
+            localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
+            localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
+
+            // Navigate to alerts page
+            window.location.href = '/trade-risk-alternatives';
+          }}
+          style={{
+            padding: '12px 24px',
+            fontSize: '14px',
+            backgroundColor: '#f59e0b',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🔔 Set Up Alerts
+        </button>
+
         {isTrialUser ? (
           <a
             href="/pricing"
