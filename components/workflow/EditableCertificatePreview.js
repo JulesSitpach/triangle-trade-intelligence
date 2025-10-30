@@ -21,6 +21,18 @@ export default function EditableCertificatePreview({
   const isTrialUser = userTier === 'trial' || userTier === 'free' || userTier === 'Free';
 
   const [editedCert, setEditedCert] = useState(() => {
+    // ✅ Generate unique certificate number: USMCA-{YEAR}-{6-CHAR-ID}
+    // Use existing certificate number if available, otherwise generate new one
+    const generateCertificateNumber = () => {
+      const year = new Date().getFullYear();
+      const timestamp = Date.now().toString(36).toUpperCase(); // Base-36 timestamp
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 random chars
+      return `USMCA-${year}-${timestamp.slice(-2)}${random}`;
+    };
+
+    const certificateNumber = previewData?.professional_certificate?.certificate_number ||
+                             generateCertificateNumber();
+
     // Get certifier type to determine which company info to use for Box 2
     const certifierType = previewData?.professional_certificate?.certifier?.type ||
                          previewData?.professional_certificate?.certifier_type ||
@@ -60,6 +72,9 @@ export default function EditableCertificatePreview({
     }
 
     return {
+      // ✅ CRITICAL: Unique Certificate Number (primary key for legal compliance)
+      certificate_number: certificateNumber,
+
       // Section 1: Certifier Type
       certifier_type: certifierType,
       blanket_from: previewData?.professional_certificate?.blanket_period?.start_date || '',
@@ -172,7 +187,21 @@ export default function EditableCertificatePreview({
       };
     }
 
+    // ✅ Generate certificate number if not already present
+    const generateCertificateNumber = () => {
+      const year = new Date().getFullYear();
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+      return `USMCA-${year}-${timestamp.slice(-2)}${random}`;
+    };
+
+    const certificateNumber = previewData?.professional_certificate?.certificate_number ||
+                             generateCertificateNumber();
+
     setEditedCert({
+      // ✅ CRITICAL: Preserve certificate number across updates
+      certificate_number: certificateNumber,
+
       certifier_type: certifierType,
       blanket_from: previewData?.professional_certificate?.blanket_period?.start_date || '',
       blanket_to: previewData?.professional_certificate?.blanket_period?.end_date || '',
@@ -283,6 +312,19 @@ export default function EditableCertificatePreview({
 
     const updatedData = {
       ...previewData.professional_certificate,
+      // ✅ CRITICAL: Include certificate number for audit trail
+      certificate_number: editedCert.certificate_number,
+
+      // ✅ Certifier type and blanket period (Section 1)
+      certifier_type: editedCert.certifier_type,
+      blanket_period: {
+        start_date: editedCert.blanket_from,
+        end_date: editedCert.blanket_to,
+        from: editedCert.blanket_from,  // Keep for backward compatibility
+        to: editedCert.blanket_to       // Keep for backward compatibility
+      },
+
+      // Section 2: Certifier
       certifier: {
         type: editedCert.certifier_type,
         name: editedCert.certifier_name,
@@ -292,6 +334,8 @@ export default function EditableCertificatePreview({
         email: editedCert.certifier_email,
         tax_id: editedCert.certifier_tax_id
       },
+
+      // Section 3: Exporter
       exporter: {
         name: editedCert.exporter_name,
         address: editedCert.exporter_address,
@@ -300,14 +344,19 @@ export default function EditableCertificatePreview({
         email: editedCert.exporter_email,
         tax_id: editedCert.exporter_tax_id
       },
+
+      // Section 4: Producer
       producer: {
         name: editedCert.producer_name,
         address: editedCert.producer_address,
         country: editedCert.producer_country,
         phone: editedCert.producer_phone,
         email: editedCert.producer_email,
-        tax_id: editedCert.producer_tax_id
+        tax_id: editedCert.producer_tax_id,
+        same_as_exporter: editedCert.producer_same_as_exporter
       },
+
+      // Section 5: Importer
       importer: {
         name: editedCert.importer_name,
         address: editedCert.importer_address,
@@ -316,8 +365,11 @@ export default function EditableCertificatePreview({
         email: editedCert.importer_email,
         tax_id: editedCert.importer_tax_id
       },
+
+      // Sections 6-11: Product information
       product: {
-        description: editedCert.product_description
+        description: editedCert.product_description,
+        hs_code: editedCert.hs_code
       },
       hs_classification: {
         code: editedCert.hs_code
@@ -330,7 +382,11 @@ export default function EditableCertificatePreview({
         method: editedCert.qualification_method
       },
       country_of_origin: editedCert.country_of_origin,
+
+      // Components (if multiple products)
       components: editedCert.components,
+
+      // Section 12: Authorization
       authorization: {
         signatory_name: editedCert.signatory_name,
         signatory_title: editedCert.signatory_title,
@@ -340,11 +396,13 @@ export default function EditableCertificatePreview({
       }
     };
 
+    console.log('💾 Saving ALL certificate edits to database...');
     onSave(updatedData);
+    console.log('✅ Certificate edits saved successfully');
   };
 
   const handleDownloadPDF = async () => {
-    // First validate and save
+    // First validate
     if (!editedCert.user_accepts_responsibility) {
       alert('❌ You must confirm that you accept responsibility for the accuracy of this certificate');
       return;
@@ -354,119 +412,20 @@ export default function EditableCertificatePreview({
       return;
     }
 
-    console.log('📄 PDF DOWNLOAD STARTING with jsPDF...');
-    console.log('📄 Using editedCert state:', editedCert);
+    console.log('📄 PDF DOWNLOAD STARTING - Using working PDF generator with measured coordinates...');
 
     try {
-      // Map editedCert state to jsPDF generator format
-      const certificateData = {
-        certifier_type: editedCert.certifier_type || 'EXPORTER',
-        certificate_number: `CERT-${Date.now()}`,
-
-        // Blanket period
-        blanket_period: {
-          start_date: editedCert.blanket_from || new Date().toISOString().split('T')[0],
-          end_date: editedCert.blanket_to || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
-        },
-
-        // Box 2: Certifier (company info based on certifier_type)
-        certifier: {
-          name: editedCert.certifier_name || '',
-          address: editedCert.certifier_address || '',
-          country: editedCert.certifier_country || '',
-          phone: editedCert.certifier_phone || '',
-          email: editedCert.certifier_email || '',
-          tax_id: editedCert.certifier_tax_id || ''
-        },
-
-        // Box 3: Exporter
-        exporter: {
-          name: editedCert.exporter_name || '',
-          address: editedCert.exporter_address || '',
-          country: editedCert.exporter_country || '',
-          phone: editedCert.exporter_phone || '',
-          email: editedCert.exporter_email || '',
-          tax_id: editedCert.exporter_tax_id || ''
-        },
-
-        // Box 4: Producer
-        producer: {
-          name: editedCert.producer_name || '',
-          address: editedCert.producer_address || '',
-          country: editedCert.producer_country || '',
-          phone: editedCert.producer_phone || '',
-          email: editedCert.producer_email || '',
-          tax_id: editedCert.producer_tax_id || '',
-          same_as_exporter: !editedCert.producer_name && !editedCert.producer_address
-        },
-
-        // Box 5: Importer
-        importer: {
-          name: editedCert.importer_name || '',
-          address: editedCert.importer_address || '',
-          country: editedCert.importer_country || '',
-          phone: editedCert.importer_phone || '',
-          email: editedCert.importer_email || '',
-          tax_id: editedCert.importer_tax_id || ''
-        },
-
-        // Product details (Box 6-11)
-        product: {
-          description: editedCert.product_description || ''
-        },
-        product_description: editedCert.product_description || '',
-
-        hs_classification: {
-          code: editedCert.hs_code || ''
-        },
-        hs_code: editedCert.hs_code || '',
-
-        preference_criterion: editedCert.origin_criterion || 'B',
-        origin_criterion: editedCert.origin_criterion || 'B',
-
-        producer_declaration: {
-          is_producer: editedCert.is_producer || false
-        },
-
-        qualification_method: {
-          method: editedCert.qualification_method || 'RVC'
-        },
-
-        country_of_origin: editedCert.country_of_origin || '',
-
-        // Box 12: Authorization
-        authorization: {
-          signatory_name: editedCert.signatory_name || '',
-          signatory_title: editedCert.signatory_title || '',
-          signature_date: editedCert.signature_date || new Date().toISOString().split('T')[0],
-          phone: editedCert.signatory_phone || '',
-          email: editedCert.signatory_email || ''
-        }
-      };
-
-      console.log('📄 Mapped certificate data for jsPDF:', certificateData);
-
-      // Generate PDF using jsPDF
-      const pdfBlob = await generateUSMCACertificatePDF(certificateData, {
-        watermark: isTrialUser,
-        userTier: userTier
-      });
-
-      // Download the PDF
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = pdfBlob.filename || `USMCA-Certificate-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      console.log('✅ PDF downloaded successfully via jsPDF');
-
-      // Now save the data
+      // ✅ STEP 1: Save all edits to database BEFORE generating PDF
       const updatedData = {
         ...previewData.professional_certificate,
+        certificate_number: editedCert.certificate_number,
+        certifier_type: editedCert.certifier_type,
+        blanket_period: {
+          start_date: editedCert.blanket_from,
+          end_date: editedCert.blanket_to,
+          from: editedCert.blanket_from,  // Keep for backward compatibility
+          to: editedCert.blanket_to       // Keep for backward compatibility
+        },
         certifier: {
           type: editedCert.certifier_type,
           name: editedCert.certifier_name,
@@ -490,7 +449,8 @@ export default function EditableCertificatePreview({
           country: editedCert.producer_country,
           phone: editedCert.producer_phone,
           email: editedCert.producer_email,
-          tax_id: editedCert.producer_tax_id
+          tax_id: editedCert.producer_tax_id,
+          same_as_exporter: editedCert.producer_same_as_exporter
         },
         importer: {
           name: editedCert.importer_name,
@@ -501,7 +461,8 @@ export default function EditableCertificatePreview({
           tax_id: editedCert.importer_tax_id
         },
         product: {
-          description: editedCert.product_description
+          description: editedCert.product_description,
+          hs_code: editedCert.hs_code
         },
         hs_classification: {
           code: editedCert.hs_code
@@ -524,7 +485,95 @@ export default function EditableCertificatePreview({
         }
       };
 
+      console.log('💾 Saving ALL edits to database before PDF generation...');
       onSave(updatedData);
+
+      // ✅ STEP 2: Prepare certificate data for PDF generator
+      const certificateData = {
+        certificate_number: editedCert.certificate_number,
+        certifier: {
+          type: editedCert.certifier_type,
+          name: editedCert.certifier_name,
+          address: editedCert.certifier_address,
+          country: editedCert.certifier_country,
+          phone: editedCert.certifier_phone,
+          email: editedCert.certifier_email,
+          tax_id: editedCert.certifier_tax_id
+        },
+        exporter: {
+          name: editedCert.exporter_name,
+          address: editedCert.exporter_address,
+          country: editedCert.exporter_country,
+          phone: editedCert.exporter_phone,
+          email: editedCert.exporter_email,
+          tax_id: editedCert.exporter_tax_id
+        },
+        producer: {
+          name: editedCert.producer_name,
+          address: editedCert.producer_address,
+          country: editedCert.producer_country,
+          phone: editedCert.producer_phone,
+          email: editedCert.producer_email,
+          tax_id: editedCert.producer_tax_id,
+          same_as_exporter: editedCert.producer_same_as_exporter
+        },
+        importer: {
+          name: editedCert.importer_name,
+          address: editedCert.importer_address,
+          country: editedCert.importer_country,
+          phone: editedCert.importer_phone,
+          email: editedCert.importer_email,
+          tax_id: editedCert.importer_tax_id
+        },
+        product: {
+          description: editedCert.product_description,
+          hs_code: editedCert.hs_code
+        },
+        preference_criterion: editedCert.origin_criterion,
+        producer_declaration: {
+          is_producer: editedCert.is_producer
+        },
+        qualification_method: {
+          method: editedCert.qualification_method
+        },
+        country_of_origin: editedCert.country_of_origin,
+        blanket_period: {
+          start_date: editedCert.blanket_from,
+          end_date: editedCert.blanket_to,
+          from: editedCert.blanket_from,  // Keep for backward compatibility
+          to: editedCert.blanket_to       // Keep for backward compatibility
+        },
+        authorization: {
+          signatory_name: editedCert.signatory_name,
+          signatory_title: editedCert.signatory_title,
+          signature_date: editedCert.signature_date,
+          phone: editedCert.signatory_phone,
+          email: editedCert.signatory_email
+        }
+      };
+
+      console.log('📄 Generating PDF with working generator (measured coordinates)...');
+
+      // ✅ STEP 3: Generate PDF using working generator with measured coordinates (async)
+      const blob = await generateUSMCACertificatePDF(certificateData, {
+        watermark: isTrialUser,
+        userTier: userTier
+      });
+
+      // ✅ STEP 4: Download the PDF blob
+      const filename = `USMCA-Certificate-${editedCert.certificate_number}-${new Date().toISOString().split('T')[0]}.pdf`;
+
+      // Create download link for blob
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log(`✅ PDF downloaded successfully: ${filename}`);
     } catch (error) {
       console.error('❌ PDF download failed:', error);
       alert('Failed to download PDF. Please try again.');
@@ -646,13 +695,28 @@ export default function EditableCertificatePreview({
           textAlign: 'center',
           borderBottom: '2px solid #000',
           padding: '12px',
-          fontSize: '12px'
+          fontSize: '12px',
+          position: 'relative'
         }}>
           <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '2px' }}>
             UNITED STATES MEXICO CANADA AGREEMENT (USMCA)
           </div>
           <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
             CERTIFICATION OF ORIGIN
+          </div>
+          {/* ✅ Certificate Number - Top Right */}
+          <div style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            color: '#000',
+            border: '2px solid #000',
+            padding: '4px 8px',
+            backgroundColor: '#fff'
+          }}>
+            {editedCert.certificate_number}
           </div>
         </div>
 
@@ -695,22 +759,38 @@ export default function EditableCertificatePreview({
           </div>
 
           {/* Blanket Period */}
-          <div style={{ borderRight: '1px solid #000', padding: '8px' }}></div>
-          <div style={{ padding: '8px', minWidth: '140px' }}>
-            <div style={labelStyle}>BLANKET PERIOD<br />(MM/DD/YYYY)</div>
-            <div style={{ marginTop: '2px', fontSize: '8px' }}>FROM:</div>
+          <div style={{ borderLeft: '1px solid #999', padding: '8px', minWidth: '160px', backgroundColor: '#f9fafb' }}>
+            <div style={{ ...labelStyle, marginBottom: '4px', fontSize: '9px', fontWeight: 'bold' }}>
+              BLANKET PERIOD<br />(MM/DD/YYYY)
+            </div>
+            <div style={{ fontSize: '7px', fontWeight: 'bold', marginTop: '6px' }}>FROM:</div>
             <input
               type="text"
-              value={editedCert.blanket_from}
+              placeholder="01/01/2025"
+              value={editedCert.blanket_from || ''}
               onChange={(e) => handleFieldChange('blanket_from', e.target.value)}
-              style={{ ...inputStyle, marginBottom: '3px' }}
+              disabled={isTrialUser}
+              style={{
+                ...inputStyle,
+                marginBottom: '6px',
+                fontSize: '9px',
+                padding: '4px',
+                width: '100%'
+              }}
             />
-            <div style={{ fontSize: '8px' }}>TO:</div>
+            <div style={{ fontSize: '7px', fontWeight: 'bold' }}>TO:</div>
             <input
               type="text"
-              value={editedCert.blanket_to}
+              placeholder="12/31/2025"
+              value={editedCert.blanket_to || ''}
               onChange={(e) => handleFieldChange('blanket_to', e.target.value)}
-              style={inputStyle}
+              disabled={isTrialUser}
+              style={{
+                ...inputStyle,
+                fontSize: '9px',
+                padding: '4px',
+                width: '100%'
+              }}
             />
           </div>
         </div>
@@ -1034,6 +1114,24 @@ export default function EditableCertificatePreview({
           }}
         >
           🔔 Set Up Alerts
+        </button>
+
+        <button
+          onClick={handleSave}
+          disabled={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy}
+          style={{
+            padding: '12px 24px',
+            fontSize: '14px',
+            backgroundColor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? '#3b82f6' : '#cccccc',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: editedCert.user_accepts_responsibility && editedCert.user_confirms_accuracy ? 'pointer' : 'not-allowed',
+            fontWeight: 'bold'
+          }}
+          title={!editedCert.user_accepts_responsibility || !editedCert.user_confirms_accuracy ? 'Accept responsibility and confirm accuracy to save' : 'Save all edits to database'}
+        >
+          💾 Save Changes
         </button>
 
         {isTrialUser ? (

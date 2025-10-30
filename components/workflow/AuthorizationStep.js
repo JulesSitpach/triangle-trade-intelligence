@@ -10,17 +10,37 @@ import { useRouter } from 'next/router';
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onPreviewCertificate, userTier = 'Trial' }) {
   const router = useRouter();
   // ✅ Removed previewRef - old certificate preview system removed
-  const [authData, setAuthData] = useState({
-    // Authorized Signatory Information (NEW DATA COLLECTION)
-    signatory_name: '',
-    signatory_title: '',
-    signatory_email: '',
-    signatory_phone: '',
+  const [authData, setAuthData] = useState(() => {
+    // ✅ RESTORE from localStorage on mount (prevent data loss on refresh)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('usmca_authorization_data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          console.log('✅ Restored authorization data from localStorage');
+          return {
+            ...parsed,
+            ...formData // Merge with formData to get latest workflow data
+          };
+        } catch (e) {
+          console.error('Failed to restore authorization data:', e);
+        }
+      }
+    }
 
-    // Authorization checkboxes
-    accuracy_certification: false,
-    authority_certification: false,
-    ...formData
+    // Default initial state
+    return {
+      // Authorized Signatory Information (NEW DATA COLLECTION)
+      signatory_name: '',
+      signatory_title: '',
+      signatory_email: '',
+      signatory_phone: '',
+
+      // Authorization checkboxes
+      accuracy_certification: false,
+      authority_certification: false,
+      ...formData
+    };
   });
 
   // 🎯 Collapsible sections state
@@ -82,6 +102,14 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       setExpandedSections(newExpanded);
     }
   }, [authData.certifier_type]); // Run when certifier type changes
+
+  // ✅ SAVE to localStorage whenever authData changes (prevent data loss on refresh)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('usmca_authorization_data', JSON.stringify(authData));
+      console.log('💾 Saved authorization data to localStorage');
+    }
+  }, [authData]);
 
   // Update parent when authData changes - use ref to avoid infinite loop
   // Only update on initial mount and when certifications are confirmed

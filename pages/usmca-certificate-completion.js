@@ -58,9 +58,11 @@ export default function USMCACertificateCompletion() {
     // Load workflow data from localStorage
     try {
       const storedData = localStorage.getItem('usmca_workflow_results');
+      const storedAuth = localStorage.getItem('usmca_authorization_data');
+
       if (storedData) {
         const initialData = JSON.parse(storedData);
-        console.log('Loading workflow data from localStorage:', initialData);
+        console.log('✅ Loading workflow data from localStorage:', initialData);
         setWorkflowData(initialData);
 
         // Calculate dynamic trust score
@@ -90,9 +92,53 @@ export default function USMCACertificateCompletion() {
           calculated_at: new Date().toISOString()
         };
 
-        // Auto-populate certificate data
+        // ✅ Restore authorization data from localStorage (if exists)
+        let restoredAuthData = {};
+        if (storedAuth) {
+          try {
+            const authData = JSON.parse(storedAuth);
+            console.log('✅ Restoring authorization data:', authData);
+            restoredAuthData = {
+              authorization: {
+                signatory_name: authData.signatory_name || '',
+                signatory_title: authData.signatory_title || '',
+                signatory_email: authData.signatory_email || '',
+                signatory_phone: authData.signatory_phone || '',
+                certifier_type: authData.certifier_type || 'EXPORTER'
+              },
+              exporter_same_as_company: authData.exporter_same_as_company,
+              producer_same_as_exporter: authData.producer_same_as_exporter,
+              // Exporter details
+              exporter_name: authData.exporter_name || '',
+              exporter_address: authData.exporter_address || '',
+              exporter_country: authData.exporter_country || '',
+              exporter_tax_id: authData.exporter_tax_id || '',
+              exporter_phone: authData.exporter_phone || '',
+              exporter_email: authData.exporter_email || '',
+              // Importer details
+              importer_name: authData.importer_name || '',
+              importer_address: authData.importer_address || '',
+              importer_country: authData.importer_country || '',
+              importer_tax_id: authData.importer_tax_id || '',
+              importer_phone: authData.importer_phone || '',
+              importer_email: authData.importer_email || '',
+              // Producer details
+              producer_name: authData.producer_name || '',
+              producer_address: authData.producer_address || '',
+              producer_country: authData.producer_country || '',
+              producer_tax_id: authData.producer_tax_id || '',
+              producer_phone: authData.producer_phone || '',
+              producer_email: authData.producer_email || ''
+            };
+          } catch (e) {
+            console.error('Failed to restore authorization data:', e);
+          }
+        }
+
+        // Auto-populate certificate data (merge with restored authorization data)
         setCertificateData(prev => ({
           ...prev,
+          ...restoredAuthData,
           analysis_results: analysisResults,
           company_info: {
             exporter_name: initialData.company?.name || initialData.company?.company_name || '',
@@ -113,6 +159,32 @@ export default function USMCACertificateCompletion() {
       console.error('Error loading workflow data:', error);
     }
   }, []);
+
+  // ✅ NEW: Restore certificate edits from localStorage on page load
+  useEffect(() => {
+    try {
+      const savedEdits = localStorage.getItem('usmca_certificate_edits');
+      if (savedEdits) {
+        const parsed = JSON.parse(savedEdits);
+        console.log('🔄 Restoring certificate edits from localStorage:', {
+          timestamp: parsed.timestamp,
+          has_certificate: !!parsed.certificate,
+          product_description: parsed.product_description
+        });
+
+        // Restore to preview data if we have a certificate
+        if (parsed.certificate && showPreview) {
+          setPreviewData(prev => ({
+            ...prev,
+            professional_certificate: parsed.certificate
+          }));
+          console.log('✅ Certificate edits restored successfully');
+        }
+      }
+    } catch (error) {
+      console.error('⚠️ Failed to restore certificate edits from localStorage:', error);
+    }
+  }, [showPreview]); // Run when preview is shown
 
   const updateCertificateData = (section, data) => {
     setCertificateData(prev => ({
@@ -385,15 +457,63 @@ export default function USMCACertificateCompletion() {
                   previewData={previewData}
                   userTier={userTier}
                   onSave={async (editedCertificate) => {
-                    // ✅ CRITICAL FIX (Oct 30, 2025): EditableCertificatePreview handles PDF download internally via html2pdf.js
-                    // DO NOT call old handleDownloadCertificate() - that caused DOUBLE download (old black/white + new blue/white)
-                    // Just update preview data with edits and close preview
+                    // ✅ Update preview data with edits but KEEP preview visible
                     setPreviewData(prev => ({
                       ...prev,
                       professional_certificate: editedCertificate
                     }));
-                    // Close preview - PDF already downloaded by EditableCertificatePreview
-                    setShowPreview(false);
+
+                    // ✅ TIER 2: Save to localStorage FIRST (immediate backup, no network dependency)
+                    try {
+                      const localStorageBackup = {
+                        certificate: editedCertificate,
+                        timestamp: new Date().toISOString(),
+                        product_description: workflowData?.product?.description || workflowData?.product?.product_description,
+                        hs_code: workflowData?.product?.hs_code || editedCertificate?.hs_classification?.code
+                      };
+                      localStorage.setItem('usmca_certificate_edits', JSON.stringify(localStorageBackup));
+                      console.log('💾 ✅ Certificate edits saved to localStorage (backup)');
+                    } catch (localStorageError) {
+                      console.error('⚠️ localStorage save failed:', localStorageError);
+                    }
+
+                    // ✅ TIER 1: Save to database (permanent, cross-device)
+                    try {
+                      console.log('💾 Saving certificate edits to database...');
+
+                      const savePayload = {
+                        // Product description from workflow data (API has 3-strategy fallback)
+                        product_description: workflowData?.product?.description ||
+                                            workflowData?.product?.product_description,
+                        hs_code: workflowData?.product?.hs_code ||
+                                editedCertificate?.hs_classification?.code,
+                        certificate_data: editedCertificate
+                      };
+
+                      console.log('💾 Database save payload:', JSON.stringify(savePayload, null, 2));
+
+                      const response = await fetch('/api/workflow-session/update-certificate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(savePayload)
+                      });
+
+                      if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('❌ Database save failed:', errorData);
+                        // Don't show alert - localStorage backup already saved
+                        console.log('ℹ️ Certificate edits preserved in localStorage backup');
+                      } else {
+                        const result = await response.json();
+                        console.log('✅ ✅ Certificate saved to database + localStorage - fully protected!');
+                      }
+                    } catch (error) {
+                      console.error('❌ Database save error:', error);
+                      console.log('ℹ️ Certificate edits preserved in localStorage backup');
+                    }
+
+                    // DO NOT close preview - user wants it to stay visible after download
                   }}
                   onCancel={() => setShowPreview(false)}
                 />

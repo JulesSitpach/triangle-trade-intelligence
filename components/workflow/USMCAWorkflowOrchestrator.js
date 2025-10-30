@@ -23,6 +23,7 @@ import AuthorizationStep from './AuthorizationStep';
 import BrokerChatbot from '../chatbot/BrokerChatbot';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
+import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator';
 
 export default function USMCAWorkflowOrchestrator() {
   const router = useRouter();
@@ -369,8 +370,11 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       );
 
       if (certificateResult.success) {
-        // Generate PDF and download
-        const pdfBlob = await generatePDFFromCertificate(certificateResult.certificate);
+        // Generate PDF using official generator
+        const pdfBlob = await generateUSMCACertificatePDF(certificateResult.certificate, {
+          watermark: false,
+          userTier
+        });
         
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
@@ -393,54 +397,6 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       });
       alert('Error generating certificate. Please try again.');
     }
-  };
-
-  const generatePDFFromCertificate = async (certificateData) => {
-    const jsPDFModule = await import('jspdf');
-    const jsPDF = jsPDFModule.default || jsPDFModule;
-    
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('USMCA CERTIFICATE OF ORIGIN', 105, 20, { align: 'center' });
-    
-    // Certificate details
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Certificate ID: ${certificateData.certificate_id}`, 20, 40);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 47);
-    
-    // Exporter information
-    let yPos = 60;
-    doc.setFont(undefined, 'bold');
-    doc.text('EXPORTER INFORMATION', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    yPos += 8;
-    doc.text(`Name: ${certificateData.exporter?.name}`, 20, yPos);
-    yPos += 6;
-    doc.text(`Address: ${certificateData.exporter?.address}`, 20, yPos);
-    
-    // Product information
-    yPos += 15;
-    doc.setFont(undefined, 'bold');
-    doc.text('PRODUCT INFORMATION', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    yPos += 8;
-    doc.text(`HS Code: ${certificateData.product?.hs_code}`, 20, yPos);
-    yPos += 6;
-    doc.text(`Description: ${certificateData.product?.description}`, 20, yPos);
-    
-    // Trust verification
-    yPos += 15;
-    doc.setFont(undefined, 'bold');
-    doc.text('TRUST VERIFICATION', 20, yPos);
-    doc.setFont(undefined, 'normal');
-    yPos += 8;
-    doc.text(`Trust Score: ${(certificateData.trust_verification?.overall_trust_score * 100).toFixed(1)}%`, 20, yPos);
-    
-    return doc.output('blob');
   };
 
   // Path selection handlers
