@@ -545,7 +545,8 @@ CRITICAL RULES - PROFESSIONAL FORMATTING:
       advisory = advisory.data;
     }
 
-    console.log('✅ AI-generated executive advisory:', advisory);
+    // ✅ DEEP LOG: Use JSON.stringify to see full nested arrays (actions, etc.)
+    console.log('✅ AI-generated executive advisory:', JSON.stringify(advisory, null, 2));
     return advisory;
 
   } catch (error) {
