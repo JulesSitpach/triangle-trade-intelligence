@@ -1228,15 +1228,19 @@ export default function EditableCertificatePreview({
           onClick={() => {
             // Check if user has already made a choice
             const savedChoice = localStorage.getItem('save_data_consent');
+            console.log('💾 Save to Database clicked - current consent:', savedChoice);
 
             if (!savedChoice) {
               // No consent given yet - show modal
+              console.log('✅ No consent found - showing modal');
               setShowSaveConsentModal(true);
             } else if (savedChoice === 'save') {
               // User already consented to save - proceed directly
+              console.log('✅ User already consented - saving directly (skip modal)');
               handleSaveConsent(true);
             } else {
               // User previously chose not to save - ask again
+              console.log('⚠️ User previously declined - showing modal again');
               setShowSaveConsentModal(true);
             }
           }}
