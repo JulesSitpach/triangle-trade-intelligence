@@ -180,8 +180,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
     // Save to localStorage for alerts page
     localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
-    localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
-    localStorage.setItem('usmca_company_data', JSON.stringify(alertData.company));
+    // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
     console.log('✅ Alert data prepared and saved to localStorage:', {
       company: alertData.company?.name,

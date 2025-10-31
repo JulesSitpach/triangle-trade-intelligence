@@ -267,7 +267,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     };
 
     // Store in localStorage for trade-risk-alternatives page
-    localStorage.setItem('usmca_workflow_data', JSON.stringify(workflowDataForAlerts));
+    localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowDataForAlerts));
 
     // Navigate to trade-risk-alternatives page
     window.location.href = '/trade-risk-alternatives';

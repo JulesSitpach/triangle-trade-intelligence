@@ -351,8 +351,7 @@ export default function USMCACertificateCompletion() {
             }
           };
 
-          localStorage.setItem('usmca_workflow_data', JSON.stringify(completionData));
-          localStorage.setItem('usmca_company_data', JSON.stringify(cert.exporter));
+          // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
           localStorage.setItem('usmca_workflow_results', JSON.stringify(completionData));
 
           console.log('🎯 Certificate saved to localStorage for alerts');

@@ -140,14 +140,8 @@ export default function CrisisCalculatorResults({
       };
 
       // Save to localStorage for alerts dashboard pickup
-      localStorage.setItem('usmca_workflow_data', JSON.stringify(userWorkflowData));
-      localStorage.setItem('usmca_company_data', JSON.stringify({
-        name: formData.company_name,
-        business_type: formData.business_type,
-        trade_volume: tradeVolume,
-        hs_code: formData.hs_code,  // ✅ Include actual HS code
-        supplier_country: formData.supplier_country || formData.origin_country  // ✅ Include actual origin
-      }));
+      localStorage.setItem('usmca_workflow_results', JSON.stringify(userWorkflowData));
+      // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
       console.log('Crisis Calculator data saved to alerts system:', userWorkflowData);
       setDataSentToAlerts(true);

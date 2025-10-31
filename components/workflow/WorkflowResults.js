@@ -151,8 +151,7 @@ export default function WorkflowResults({
       };
 
       // Save to localStorage for alerts dashboard pickup
-      localStorage.setItem('usmca_workflow_data', JSON.stringify(certificateData));
-      localStorage.setItem('usmca_company_data', JSON.stringify(certificateData.company));
+      // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
       console.log('Certificate completion data sent to alerts system:', certificateData);
       setDataSentToAlerts(true);
@@ -255,8 +254,7 @@ export default function WorkflowResults({
 
       // Save to localStorage for alerts and services
       localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
-      localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
-      localStorage.setItem('usmca_company_data', JSON.stringify(alertData.company));
+      // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
       // **NEW: Save workflow to database with certificate data**
       try {
@@ -563,8 +561,7 @@ export default function WorkflowResults({
 
     // Save to localStorage for alerts page
     localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
-    localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
-    localStorage.setItem('usmca_company_data', JSON.stringify(alertData.company));
+    // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
     console.log('✅ Alert data prepared and saved to localStorage:', {
       company: alertData.company?.name,
