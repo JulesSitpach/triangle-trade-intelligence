@@ -450,7 +450,7 @@ export default protectedApiHandler({
     // Log discrepancy if client tried to manipulate
     if (clientSentCount > 0 && actualLockedCount !== clientSentCount) {
       console.warn(`[SECURITY] used_components_count mismatch for user ${userId}: client=${clientSentCount}, actual=${actualLockedCount}`);
-      await DevIssue.securityEvent('ai_usmca_analysis', 'used_components_count_mismatch', {
+      await DevIssue.unexpectedBehavior('ai_usmca_analysis', 'Component count mismatch - possible manipulation attempt', {
         userId,
         clientSentCount,
         actualLockedCount,
