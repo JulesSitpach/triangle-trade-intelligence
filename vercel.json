@@ -8,14 +8,31 @@
     "SKIP_TYPE_CHECK": "true"
   },
   "crons": [
-    // ⚠️ DISABLED (Oct 31, 2025): RSS polling was making 12 AI calls/day
-    // This was causing unexpected OpenRouter costs (~$7.20/month)
-    // and triggering rate limits during manual testing
-    // Re-enable when you want automated tariff policy monitoring
-    // {
-    //   "path": "/api/cron/rss-polling",
-    //   "schedule": "0 */2 * * *"
-    // },
+    // ⚠️ DISABLED (Oct 31, 2025): RSS polling was making 12 AI calls/day (~$7.20/month)
+    // This was causing unexpected OpenRouter costs and triggering rate limits during manual testing
+    //
+    // 📋 PRODUCTION LAUNCH OPTIONS (when ready):
+    //
+    // Option A - WEEKLY CHECK (Recommended for launch):
+    // { "path": "/api/cron/rss-polling", "schedule": "0 10 * * 1" }
+    // → Mondays at 10 AM only
+    // → 4 calls/month = $0.08/month (99% savings)
+    // → Best for: MVP launch, validate if users care about policy alerts
+    //
+    // Option B - DAILY CHECK (If users request faster alerts):
+    // { "path": "/api/cron/rss-polling", "schedule": "0 10 * * 1-5" }
+    // → Weekdays at 10 AM
+    // → 20 calls/month = $0.40/month (94% savings)
+    // → Best for: Active user base that wants timely policy updates
+    //
+    // Option C - TWICE DAILY (Only if absolutely necessary):
+    // { "path": "/api/cron/rss-polling", "schedule": "0 9,17 * * 1-5" }
+    // → 9 AM & 5 PM weekdays
+    // → 40 calls/month = $0.80/month (89% savings)
+    // → Best for: Premium tier users who pay for real-time monitoring
+    //
+    // ❌ DO NOT USE: "0 */2 * * *" (every 2 hours = $7.20/month waste)
+    //
     {
       "path": "/api/cron/flag-stale-policy-rates",
       "schedule": "0 0 * * *"
