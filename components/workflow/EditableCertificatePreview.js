@@ -340,28 +340,46 @@ export default function EditableCertificatePreview({
 
       // Now save to database
       try {
+        // Extract product info from previewData for API matching
+        const productDescription = previewData?.professional_certificate?.product?.description ||
+                                  previewData?.professional_certificate?.product?.product_description ||
+                                  'USMCA Certificate';
+        const hsCode = previewData?.professional_certificate?.product?.hs_code || '';
+
+        console.log('📤 Sending certificate to database:', {
+          product_description: productDescription,
+          hs_code: hsCode,
+          has_certificate_data: !!editedCert
+        });
+
         const response = await fetch('/api/workflow-session/update-certificate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify({
+            product_description: productDescription,
+            hs_code: hsCode,
             certificate_data: editedCert,
             professional_certificate: previewData.professional_certificate
           })
         });
 
         if (response.ok) {
-          alert('✅ Certificate saved to database successfully!');
+          const result = await response.json();
+          console.log('✅ Certificate saved successfully:', result);
+          alert('✅ Certificate saved to database successfully!\n\nYou can re-download this certificate anytime from your dashboard.');
         } else {
-          alert('⚠️ Failed to save certificate. Please try again.');
+          const errorData = await response.json();
+          console.error('❌ Save failed:', errorData);
+          alert(`⚠️ Failed to save certificate: ${errorData.error || 'Unknown error'}\n\nPlease try again or contact support.`);
         }
       } catch (error) {
-        console.error('Save error:', error);
-        alert('❌ Error saving certificate. Please check your connection.');
+        console.error('❌ Save error:', error);
+        alert('❌ Error saving certificate. Please check your connection and try again.');
       }
     } else {
       console.log('❌ User chose NOT to save - certificate stays in browser only');
-      alert('ℹ️ Certificate NOT saved to database. Data will be lost when you close the browser.');
+      alert('ℹ️ Certificate NOT saved to database.\n\n⚠️ Warning: Certificate data will be lost when you close the browser or clear cache.');
     }
   };
 
