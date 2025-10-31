@@ -339,11 +339,45 @@ export function useWorkflowState() {
       return;
     }
 
-    console.log('✅ Validation passed, calling workflow service...');
+    console.log('✅ Validation passed, checking for cached enriched data...');
     setIsLoading(true);
     setError(null);
 
     try {
+      // ✅ CHECK FOR CACHED ENRICHED DATA FIRST (avoid redundant API calls)
+      // If database enrichment already provided all tariff rates, use cached results
+      const cachedResults = localStorage.getItem('usmca_workflow_results');
+      if (cachedResults) {
+        try {
+          const parsed = JSON.parse(cachedResults);
+          const components = parsed.component_origins || parsed.components || [];
+
+          // Check if all components have complete enrichment from database
+          const allEnriched = components.length > 0 && components.every(c =>
+            (c.rate_source === 'tariff_intelligence_master' || c.rate_source === 'database_cache') &&
+            c.stale === false &&
+            c.mfn_rate !== null &&
+            c.mfn_rate !== undefined &&
+            c.usmca_rate !== null &&
+            c.usmca_rate !== undefined
+          );
+
+          if (allEnriched) {
+            console.log('✅ Using cached enriched data - all components have fresh database rates');
+            console.log(`📊 Cached components: ${components.length}, all from ${components[0]?.rate_source}`);
+            setResults(parsed);
+            setCurrentStep(5); // Results step
+            setIsLoading(false);
+            return; // Skip API call entirely
+          } else {
+            console.log('⚠️ Cached data incomplete or stale - will make fresh API call');
+          }
+        } catch (e) {
+          console.log('⚠️ Failed to parse cached results - will make fresh API call');
+        }
+      }
+
+      // No cached data or incomplete - proceed with API call
       const workflowResult = await workflowService.processCompleteWorkflow(formData);
 
       if (workflowResult.success) {
