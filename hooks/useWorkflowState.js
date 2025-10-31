@@ -365,6 +365,22 @@ export function useWorkflowState() {
           if (allEnriched) {
             console.log('✅ Using cached enriched data - all components have fresh database rates');
             console.log(`📊 Cached components: ${components.length}, all from ${components[0]?.rate_source}`);
+
+            // ✅ CALCULATE SAVINGS if missing (when using cached database enrichment)
+            if (!parsed.savings || !parsed.savings.annual_savings) {
+              const totalAnnualSavings = components.reduce((sum, c) => sum + (c.annual_savings || 0), 0);
+              const tradeVolume = parsed.company?.trade_volume || formData.trade_volume || 0;
+
+              parsed.savings = {
+                annual_savings: Math.round(totalAnnualSavings),
+                monthly_savings: Math.round(totalAnnualSavings / 12),
+                savings_percentage: tradeVolume > 0 ? Math.round((totalAnnualSavings / tradeVolume) * 10000) / 100 : 0,
+                source: 'calculated_from_components'
+              };
+
+              console.log('💰 Calculated savings from components:', parsed.savings);
+            }
+
             setResults(parsed);
             setCurrentStep(5); // Results step
             setIsLoading(false);
