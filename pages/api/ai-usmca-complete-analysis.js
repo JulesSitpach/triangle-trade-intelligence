@@ -379,7 +379,7 @@ export default protectedApiHandler({
 
     const subscriptionTier = userProfile?.subscription_tier || 'Trial';
 
-    // Check if user can perform this analysis
+    // Check 1: Monthly analysis limit
     const usageStatus = await checkAnalysisLimit(userId, subscriptionTier);
 
     if (!usageStatus.canProceed) {
@@ -391,6 +391,40 @@ export default protectedApiHandler({
           current_count: usageStatus.currentCount,
           tier_limit: usageStatus.tierLimit,
           remaining: usageStatus.remaining
+        },
+        upgrade_required: true,
+        upgrade_url: '/pricing'
+      });
+    }
+
+    // Check 2: Component limit (prevent complex analyses on lower tiers)
+    const componentCount = formData.component_origins?.length || 0;
+    const TIER_COMPONENT_LIMITS = {
+      'Trial': 3,
+      'trial': 3,
+      'Free': 3,
+      'free': 3,
+      'Starter': 10,
+      'starter': 10,
+      'Professional': 15,
+      'professional': 15,
+      'Premium': 20,
+      'premium': 20,
+      'Enterprise': 50,
+      'enterprise': 50
+    };
+
+    const maxComponents = TIER_COMPONENT_LIMITS[subscriptionTier] || 3;
+
+    if (componentCount > maxComponents) {
+      return res.status(403).json({
+        success: false,
+        error: 'Component limit exceeded',
+        message: `Your ${subscriptionTier} plan allows max ${maxComponents} components. You submitted ${componentCount} components.`,
+        limit_info: {
+          tier: subscriptionTier,
+          component_count: componentCount,
+          max_components: maxComponents
         },
         upgrade_required: true,
         upgrade_url: '/pricing'

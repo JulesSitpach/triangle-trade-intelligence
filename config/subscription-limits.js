@@ -76,7 +76,7 @@ export const TIER_LIMITS = {
 
   [SUBSCRIPTION_TIERS.PROFESSIONAL]: {
     // USMCA Analysis
-    components_per_analysis: 25,
+    components_per_analysis: 15, // Aligned with API limits
     analyses_per_month: 100, // 100 analyses per month
     certificate_download: true,
     certificate_preview: true,
@@ -106,8 +106,8 @@ export const TIER_LIMITS = {
 
   [SUBSCRIPTION_TIERS.PREMIUM]: {
     // USMCA Analysis
-    components_per_analysis: null, // Unlimited
-    analyses_per_month: null, // Unlimited
+    components_per_analysis: 20, // Premium gets 20 components (not unlimited)
+    analyses_per_month: 100, // Same as Professional (volume discount on price)
     certificate_download: true,
     certificate_preview: true,
     preview_watermarked: false,
