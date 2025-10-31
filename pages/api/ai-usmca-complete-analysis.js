@@ -348,7 +348,28 @@ export default protectedApiHandler({
 
     // ⚡ PERFORMANCE: Disabled verbose startup logging
 
-    // ========== STEP 0: CHECK USAGE LIMITS ==========
+    // ========== STEP 0A: CHECK IF WORKFLOW ALREADY COMPLETED ==========
+    // Prevent AI regeneration for completed workflows (cost protection)
+    if (formData.workflow_session_id) {
+      const { data: existingSession } = await supabase
+        .from('workflow_sessions')
+        .select('workflow_status, completed_at')
+        .eq('id', formData.workflow_session_id)
+        .single();
+
+      if (existingSession?.workflow_status === 'completed') {
+        return res.status(403).json({
+          success: false,
+          error: 'Analysis already completed - AI regeneration disabled',
+          message: 'This workflow has been completed and saved to your dashboard. To run a new analysis, please start a fresh workflow.',
+          completed_at: existingSession.completed_at,
+          action_required: 'start_new_workflow',
+          dashboard_url: '/trade-risk-alternatives'
+        });
+      }
+    }
+
+    // ========== STEP 0B: CHECK USAGE LIMITS ==========
     // Get user's subscription tier from database
     const { data: userProfile } = await supabase
       .from('user_profiles')
@@ -1690,6 +1711,29 @@ export default protectedApiHandler({
     incrementAnalysisCount(userId, subscriptionTier).catch(err => {
       console.error('[USAGE-TRACKING] Failed to increment count for user', userId, ':', err.message);
     });
+
+    // ✅ WORKFLOW COMPLETION: Mark workflow as completed to prevent AI regeneration (fire-and-forget)
+    // This protects OpenRouter costs (~$0.02/request) and maintains analysis integrity
+    if (formData.workflow_session_id) {
+      supabase
+        .from('workflow_sessions')
+        .update({
+          workflow_status: 'completed',
+          completed_at: new Date().toISOString(),
+          ai_regeneration_allowed: false
+        })
+        .eq('id', formData.workflow_session_id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('[WORKFLOW-COMPLETION] Failed to mark workflow as completed:', error.message);
+          } else {
+            console.log(`[WORKFLOW-COMPLETION] ✅ Workflow ${formData.workflow_session_id} marked as completed`);
+          }
+        })
+        .catch(err => {
+          console.error('[WORKFLOW-COMPLETION] Exception marking workflow completed:', err.message);
+        });
+    }
 
     // DEBUG: Log what's being returned in component_origins
     console.log('📊 [RESPONSE-DEBUG] Tariff rates in API response:',
