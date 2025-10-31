@@ -331,11 +331,11 @@ export default protectedApiHandler({
     if (formData.workflow_session_id) {
       const { data: existingSession } = await supabase
         .from('workflow_sessions')
-        .select('workflow_status, completed_at')
+        .select('completed_at')
         .eq('id', formData.workflow_session_id)
         .single();
 
-      if (existingSession?.workflow_status === 'completed') {
+      if (existingSession?.completed_at) {
         return res.status(403).json({
           success: false,
           error: 'Analysis already completed - AI regeneration disabled',
@@ -1792,9 +1792,7 @@ export default protectedApiHandler({
       supabase
         .from('workflow_sessions')
         .update({
-          workflow_status: 'completed',
-          completed_at: new Date().toISOString(),
-          ai_regeneration_allowed: false
+          completed_at: new Date().toISOString()
         })
         .eq('id', formData.workflow_session_id)
         .then(({ error }) => {
