@@ -348,7 +348,67 @@ export default protectedApiHandler({
           });
         }
 
-        // Transform crisis alerts to match expected structure
+        // ✅ ALERT LIFECYCLE: Get user-specific tracking data
+        const relevantAlertIds = relevantAlerts.map(a => a.id);
+        let alertTracking = {};
+
+        if (relevantAlertIds.length > 0) {
+          try {
+            const { data: trackingData } = await supabase
+              .from('user_alert_tracking')
+              .select('*')
+              .eq('user_id', userId)
+              .in('crisis_alert_id', relevantAlertIds);
+
+            // Map tracking data by crisis_alert_id for fast lookup
+            alertTracking = (trackingData || []).reduce((acc, track) => {
+              acc[track.crisis_alert_id] = track;
+              return acc;
+            }, {});
+
+            // Auto-create tracking records for NEW alerts (first time user sees them)
+            const newAlerts = relevantAlerts.filter(a => !alertTracking[a.id]);
+            if (newAlerts.length > 0) {
+              const newTrackingRecords = newAlerts.map(alert => ({
+                user_id: userId,
+                crisis_alert_id: alert.id,
+                status: 'NEW',
+                first_seen_at: new Date().toISOString(),
+                last_seen_at: new Date().toISOString()
+              }));
+
+              const { data: inserted } = await supabase
+                .from('user_alert_tracking')
+                .insert(newTrackingRecords)
+                .select();
+
+              // Add newly created tracking records to map
+              (inserted || []).forEach(track => {
+                alertTracking[track.crisis_alert_id] = track;
+              });
+
+              console.log(`✅ Created tracking for ${newAlerts.length} new alerts`);
+            }
+
+            // Update last_seen_at for all existing alerts
+            const existingAlertIds = relevantAlerts
+              .filter(a => alertTracking[a.id] && alertTracking[a.id].status !== 'ARCHIVED')
+              .map(a => a.id);
+
+            if (existingAlertIds.length > 0) {
+              await supabase
+                .from('user_alert_tracking')
+                .update({ last_seen_at: new Date().toISOString() })
+                .eq('user_id', userId)
+                .in('crisis_alert_id', existingAlertIds);
+            }
+          } catch (trackingError) {
+            console.error('⚠️ Alert tracking query failed:', trackingError);
+            // Continue without tracking data - don't fail the entire request
+          }
+        }
+
+        // Transform crisis alerts to match expected structure (with lifecycle status)
         crisisAlerts = relevantAlerts.slice(0, 5).map(alert => {
           // Find the most recent workflow for context
           const contextWorkflow = allWorkflows[0] || {};
@@ -381,6 +441,16 @@ export default protectedApiHandler({
             relevant_industries: alert.relevant_industries,
             title: alert.title,
             description: alert.description,
+
+            // ✅ ALERT LIFECYCLE: User-specific tracking data
+            lifecycle_status: alertTracking[alert.id]?.status || 'NEW',
+            first_seen_at: alertTracking[alert.id]?.first_seen_at,
+            last_seen_at: alertTracking[alert.id]?.last_seen_at,
+            resolved_at: alertTracking[alert.id]?.resolved_at,
+            resolution_notes: alertTracking[alert.id]?.resolution_notes,
+            estimated_cost_impact: alertTracking[alert.id]?.estimated_cost_impact,
+            actions_taken: alertTracking[alert.id]?.actions_taken || [],
+            email_notifications_enabled: alertTracking[alert.id]?.email_notifications_enabled ?? true,
 
             // Transform crisis alert into vulnerability analysis format
             primary_vulnerabilities: [
@@ -457,6 +527,47 @@ export default protectedApiHandler({
       // Merge crisis alerts and consolidated alerts
       const allAlerts = [...consolidatedAlerts, ...crisisAlerts];
 
+      // ✅ ALERT LIFECYCLE: Fetch historical context (resolved alerts summary)
+      let alertHistoricalContext = null;
+      try {
+        const { data: resolvedSummary } = await supabase
+          .from('user_resolved_alerts_summary')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        alertHistoricalContext = resolvedSummary || {
+          total_resolved: 0,
+          total_cost_impact_prevented: 0,
+          resolved_last_30d: 0,
+          most_recent_resolution: null
+        };
+      } catch (err) {
+        console.log('ℹ️ No historical alert data (expected for new users)');
+        alertHistoricalContext = {
+          total_resolved: 0,
+          total_cost_impact_prevented: 0,
+          resolved_last_30d: 0,
+          most_recent_resolution: null
+        };
+      }
+
+      // ✅ ALERT LIFECYCLE: Fetch recent activity (30-day timeline)
+      let recentAlertActivity = [];
+      try {
+        const { data: recentActivity } = await supabase
+          .from('user_alert_activity_30d')
+          .select('*')
+          .eq('user_id', userId)
+          .order('first_seen_at', { ascending: false })
+          .limit(20);
+
+        recentAlertActivity = recentActivity || [];
+      } catch (err) {
+        console.log('ℹ️ No recent alert activity');
+        recentAlertActivity = [];
+      }
+
       // CRITICAL: Prevent caching of user-specific data
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
       res.setHeader('Pragma', 'no-cache');
@@ -473,7 +584,11 @@ export default protectedApiHandler({
           limit_reached: limitReached,
           is_unlimited: isUnlimited
         },
-        user_profile: profile || {}
+        user_profile: profile || {},
+
+        // ✅ ALERT LIFECYCLE: Historical context and recent activity
+        alert_historical_context: alertHistoricalContext,
+        recent_alert_activity: recentAlertActivity
       });
 
     } catch (error) {

@@ -66,6 +66,10 @@ export default function TradeRiskAlternatives() {
   const [executiveAlertData, setExecutiveAlertData] = useState(null);
   const [showExecutiveAlert, setShowExecutiveAlert] = useState(false);
 
+  // Alert Lifecycle Management state
+  const [alertHistoricalContext, setAlertHistoricalContext] = useState(null);
+  const [recentAlertActivity, setRecentAlertActivity] = useState([]);
+
   // Toggle function for component expansion (only if alerts exist)
   const toggleExpanded = (idx, hasAlerts) => {
     if (!hasAlerts) return; // Don't expand if no alerts
@@ -550,6 +554,7 @@ export default function TradeRiskAlternatives() {
 
   /**
    * Load saved alerts from database (fast, no AI calls)
+   * NOW INCLUDES: Alert lifecycle status, historical context, recent activity
    */
   const loadSavedAlerts = async () => {
     try {
@@ -567,6 +572,17 @@ export default function TradeRiskAlternatives() {
           setAlertsGenerated(true);
         } else {
           console.log('ℹ️ No saved alerts found - user needs to generate');
+        }
+
+        // ✅ ALERT LIFECYCLE: Load historical context and recent activity
+        if (data.alert_historical_context) {
+          console.log('✅ Loaded alert historical context:', data.alert_historical_context);
+          setAlertHistoricalContext(data.alert_historical_context);
+        }
+
+        if (data.recent_alert_activity && data.recent_alert_activity.length > 0) {
+          console.log(`✅ Loaded ${data.recent_alert_activity.length} recent alert activities`);
+          setRecentAlertActivity(data.recent_alert_activity);
         }
       }
     } catch (error) {
@@ -596,6 +612,79 @@ export default function TradeRiskAlternatives() {
       }
     } catch (error) {
       console.error('❌ Error saving alerts:', error);
+    }
+  };
+
+  /**
+   * ✅ ALERT LIFECYCLE: Update alert status (RESOLVED, ARCHIVED, etc.)
+   */
+  const updateAlertStatus = async (alertId, status, resolutionData = {}) => {
+    try {
+      const response = await fetch('/api/alert-status-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          crisis_alert_id: alertId,
+          status,
+          ...resolutionData  // resolution_notes, estimated_cost_impact, actions_taken
+        })
+      });
+
+      if (response.ok) {
+        console.log(`✅ Alert ${alertId} status updated to ${status}`);
+
+        // Reload alerts to reflect new status
+        await loadSavedAlerts();
+
+        return true;
+      } else {
+        console.error('⚠️ Failed to update alert status:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error updating alert status:', error);
+      return false;
+    }
+  };
+
+  /**
+   * ✅ ALERT LIFECYCLE: Mark alert as resolved (with user confirmation)
+   */
+  const handleResolveAlert = async (alert) => {
+    const confirmed = confirm(`Mark this alert as RESOLVED?\n\n"${alert.title || alert.consolidated_title}"\n\nOptionally, add resolution notes on the next screen.`);
+
+    if (!confirmed) return;
+
+    // Prompt for optional resolution details
+    const notes = prompt('Resolution notes (optional):\nHow did you address this alert?');
+    const costImpact = prompt('Estimated cost prevented (optional):\nEnter dollar amount (e.g., 5000)');
+
+    const resolutionData = {};
+    if (notes) resolutionData.resolution_notes = notes;
+    if (costImpact && !isNaN(parseFloat(costImpact))) {
+      resolutionData.estimated_cost_impact = parseFloat(costImpact);
+    }
+
+    const success = await updateAlertStatus(alert.id, 'RESOLVED', resolutionData);
+
+    if (success) {
+      alert('✅ Alert marked as RESOLVED!\n\nIt will be moved to your resolution history.');
+    }
+  };
+
+  /**
+   * ✅ ALERT LIFECYCLE: Archive alert (hide from view)
+   */
+  const handleArchiveAlert = async (alert) => {
+    const confirmed = confirm(`Archive this alert?\n\n"${alert.title || alert.consolidated_title}"\n\nArchived alerts are hidden from your dashboard but can be viewed in Recent Activity.`);
+
+    if (!confirmed) return;
+
+    const success = await updateAlertStatus(alert.id, 'ARCHIVED');
+
+    if (success) {
+      alert('✅ Alert archived!\n\nIt will no longer appear in your active alerts.');
     }
   };
 
@@ -728,15 +817,10 @@ export default function TradeRiskAlternatives() {
     try {
       console.log('🔍 Generating additive alert impact analysis...');
 
-      // Extract existing analysis from workflow results
-      const existingAnalysis = {
-        situation_brief: workflowIntelligence.detailed_analysis?.situation_brief || '',
-        current_burden: workflowIntelligence.detailed_analysis?.current_burden || '',
-        potential_savings: workflowIntelligence.detailed_analysis?.potential_savings || '',
-        strategic_roadmap: workflowIntelligence.recommendations || [],
-        action_items: workflowIntelligence.detailed_analysis?.action_items || [],
-        payback_period: workflowIntelligence.detailed_analysis?.payback_period || ''
-      };
+      // Pass FULL detailed_analysis to AI for complete strategic context
+      // This includes: situation_brief, problem, root_cause, annual_impact, why_now,
+      // current_burden, potential_savings, payback_period, strategic_roadmap, action_items, broker_insights
+      const existingAnalysis = workflowIntelligence.detailed_analysis || {};
 
       // Build user profile for analysis
       const analysisProfile = {
