@@ -398,7 +398,10 @@ export default protectedApiHandler({
     }
 
     // Check 2: Component limit (prevent complex analyses on lower tiers)
-    const componentCount = formData.component_origins?.length || 0;
+    // Use USED component count (including deleted locked ones) to prevent gaming
+    const usedComponentCount = formData.used_components_count || formData.component_origins?.filter(c => c.is_locked).length || 0;
+    const currentComponentCount = formData.component_origins?.length || 0;
+
     const TIER_COMPONENT_LIMITS = {
       'Trial': 3,
       'trial': 3,
@@ -416,14 +419,16 @@ export default protectedApiHandler({
 
     const maxComponents = TIER_COMPONENT_LIMITS[subscriptionTier] || 3;
 
-    if (componentCount > maxComponents) {
+    // Validate using USED count (not current count) to prevent gaming HS lookup
+    if (usedComponentCount > maxComponents) {
       return res.status(403).json({
         success: false,
         error: 'Component limit exceeded',
-        message: `Your ${subscriptionTier} plan allows max ${maxComponents} components. You submitted ${componentCount} components.`,
+        message: `Your ${subscriptionTier} plan allows max ${maxComponents} components. You have used ${usedComponentCount} component slots (${currentComponentCount} active). HS lookups count toward your limit even if components are deleted.`,
         limit_info: {
           tier: subscriptionTier,
-          component_count: componentCount,
+          used_component_count: usedComponentCount,
+          current_component_count: currentComponentCount,
           max_components: maxComponents
         },
         upgrade_required: true,

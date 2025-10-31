@@ -39,7 +39,8 @@ export default function ComponentOriginsStepEnhanced({
       enrichment_error: component?.enrichment_error ?? null,
       mfn_rate: component?.mfn_rate ?? null,
       usmca_rate: component?.usmca_rate ?? null,
-      is_usmca_member: component?.is_usmca_member ?? false
+      is_usmca_member: component?.is_usmca_member ?? false,
+      is_locked: component?.is_locked ?? false // Track if component used an HS lookup
     };
   };
 
@@ -56,6 +57,15 @@ export default function ComponentOriginsStepEnhanced({
         manufacturing_location: formData.manufacturing_location
       })
     ];
+  });
+
+  // Track total components used (including deleted locked ones) - prevents gaming HS lookup
+  const [usedComponentsCount, setUsedComponentsCount] = useState(() => {
+    if (formData.component_origins && formData.component_origins.length > 0) {
+      // Count how many components have is_locked: true
+      return formData.component_origins.filter(c => c.is_locked).length;
+    }
+    return 0;
   });
 
   const [searchingHS, setSearchingHS] = useState({});
@@ -82,6 +92,12 @@ export default function ComponentOriginsStepEnhanced({
   // - updateFormData is recreated on every render in useWorkflowState
   // - Including it would cause this effect to run on every render (infinite loop)
   // - We only need to depend on components changing
+
+  // Sync used_components_count to formData for API validation
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    updateFormData('used_components_count', usedComponentsCount);
+  }, [usedComponentsCount]);
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
@@ -215,6 +231,16 @@ export default function ComponentOriginsStepEnhanced({
         console.log(`✅ Setting agent suggestion for component ${index + 1}:`, suggestion);
         setAgentSuggestions(prev => ({ ...prev, [index]: suggestion }));
 
+        // 🔒 LOCK COMPONENT: Once HS lookup performed, component slot is consumed
+        // Even if user deletes it later, this prevents gaming the system
+        const newComponents = [...components];
+        if (!newComponents[index].is_locked) {
+          newComponents[index].is_locked = true;
+          setComponents(newComponents);
+          setUsedComponentsCount(prev => prev + 1);
+          console.log(`🔒 Component ${index + 1} locked after HS lookup. Used count: ${usedComponentsCount + 1}`);
+        }
+
         // ✅ REMOVED AUTO-ACCEPT - User now sees suggestion and decides to accept or not
         // This gives user time to read AI explanation before committing
       } else {
@@ -302,6 +328,13 @@ export default function ComponentOriginsStepEnhanced({
         newComponents[index].hs_description = suggestion.description;
         newComponents[index].hs_suggestions = [suggestion];
 
+        // 🔒 LOCK COMPONENT: Once HS lookup performed, component slot is consumed
+        if (!newComponents[index].is_locked) {
+          newComponents[index].is_locked = true;
+          setUsedComponentsCount(prev => prev + 1);
+          console.log(`🔒 Component ${index + 1} locked after manual HS lookup. Used count: ${usedComponentsCount + 1}`);
+        }
+
         setComponents(newComponents);
         console.log(`✅ Auto-populated HS code ${suggestion.hs_code} for component ${index + 1}`);
       } else {
@@ -356,8 +389,9 @@ export default function ComponentOriginsStepEnhanced({
   };
 
   const addComponent = () => {
-    // Check component limit before adding
-    if (!canAddComponent(userTier, components.length)) {
+    // Check component limit using USED count (not current count) - prevents gaming
+    // Once a component uses HS lookup, it's counted even if deleted
+    if (!canAddComponent(userTier, usedComponentsCount)) {
       setShowUpgradeModal(true);
       return;
     }
@@ -368,7 +402,8 @@ export default function ComponentOriginsStepEnhanced({
       value_percentage: '',
       hs_code: '',
       hs_suggestions: [],
-      manufacturing_location: formData.manufacturing_location || ''
+      manufacturing_location: formData.manufacturing_location || '',
+      is_locked: false
     }]);
 
     // Scroll to the new component after it's added
@@ -653,7 +688,7 @@ export default function ComponentOriginsStepEnhanced({
               {/* Component Description */}
               <div className="form-group">
                 <label className="form-label">
-                  Component Description
+                  Component Description {component.is_locked && '🔒'}
                 </label>
                 <input
                   type="text"
@@ -663,18 +698,27 @@ export default function ComponentOriginsStepEnhanced({
                   }}
                   placeholder="Example: 'Polyester fabric outer shell' or 'Stainless steel fasteners'"
                   className="form-input"
+                  disabled={component.is_locked}
+                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                 />
+                {component.is_locked && (
+                  <div className="form-help" style={{ color: '#f59e0b', fontWeight: 500 }}>
+                    🔒 Component locked after HS lookup (counts toward your tier limit)
+                  </div>
+                )}
               </div>
 
               {/* Origin Country */}
               <div className="form-group">
                 <label className="form-label">
-                  Origin Country
+                  Origin Country {component.is_locked && '🔒'}
                 </label>
                 <select
                   value={component.origin_country || ''}
                   onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
                   className={`form-select ${component.origin_country ? 'has-value' : ''}`}
+                  disabled={component.is_locked}
+                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                 >
                   <option value="">Select origin country...</option>
                   {dropdownOptions.countries?.map((country, idx) => {
@@ -692,7 +736,7 @@ export default function ComponentOriginsStepEnhanced({
               {/* Value Percentage */}
               <div className="form-group">
                 <label className="form-label">
-                  Value Percentage
+                  Value Percentage {component.is_locked && '🔒'}
                 </label>
                 <div className="form-input-group">
                   <input
@@ -703,6 +747,8 @@ export default function ComponentOriginsStepEnhanced({
                     onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || '')}
                     placeholder="Example: 45"
                     className="form-input"
+                    disabled={component.is_locked}
+                    style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                   />
                   <span className="form-input-suffix">%</span>
                 </div>
@@ -711,7 +757,7 @@ export default function ComponentOriginsStepEnhanced({
               {/* HS Code Input - Simple Hybrid Approach */}
               <div className="form-group">
                 <label className="form-label">
-                  HS Code *
+                  HS Code * {component.is_locked && '🔒'}
                 </label>
                 <div className="form-help">
                   Required for accurate AI classification (like a tax form needs accurate information)
@@ -722,31 +768,35 @@ export default function ComponentOriginsStepEnhanced({
                   onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
                   placeholder="Enter if known (e.g., 8544.42.90)"
                   className="form-input"
+                  disabled={component.is_locked}
+                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                 />
                 <div className="form-help">
                   Don&apos;t know your HS code? Get AI suggestion below.
                 </div>
 
-                {/* Get AI Suggestion Button - Turns BLUE when all fields are filled (like Continue button) */}
-                <button
-                  type="button"
-                  onClick={() => getComponentHSSuggestion(index)}
-                  disabled={
-                    !component.description ||
-                    component.description.length < 10 ||
-                    !component.origin_country ||
-                    !component.value_percentage ||
-                    searchingHS[index]
-                  }
-                  className={
-                    component.description && component.description.length >= 10 &&
-                    component.origin_country && component.value_percentage && !searchingHS[index]
-                      ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
-                      : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
-                  }
-                >
-                  {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
-                </button>
+                {/* Get AI Suggestion Button - Disabled when component is locked */}
+                {!component.is_locked && (
+                  <button
+                    type="button"
+                    onClick={() => getComponentHSSuggestion(index)}
+                    disabled={
+                      !component.description ||
+                      component.description.length < 10 ||
+                      !component.origin_country ||
+                      !component.value_percentage ||
+                      searchingHS[index]
+                    }
+                    className={
+                      component.description && component.description.length >= 10 &&
+                      component.origin_country && component.value_percentage && !searchingHS[index]
+                        ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
+                        : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
+                    }
+                  >
+                    {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -851,11 +901,16 @@ export default function ComponentOriginsStepEnhanced({
             Add Component
           </button>
           <div className="form-help" style={{marginTop: '0.5rem', textAlign: 'center'}}>
-            {getComponentLimitMessage(userTier, components.length)}
-            {!canAddComponent(userTier, components.length) && (
+            {getComponentLimitMessage(userTier, usedComponentsCount)}
+            {!canAddComponent(userTier, usedComponentsCount) && (
               <span style={{color: '#f59e0b', marginLeft: '0.5rem'}}>
                 {getUpgradeMessage(userTier, 'component_limit')}
               </span>
+            )}
+            {usedComponentsCount > components.length && (
+              <div style={{color: '#f59e0b', marginTop: '0.25rem', fontSize: '0.875rem'}}>
+                ({components.length} active, {usedComponentsCount} total used including deleted)
+              </div>
             )}
           </div>
         </div>
