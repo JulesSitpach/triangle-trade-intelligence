@@ -124,18 +124,22 @@ export default protectedApiHandler({
           }
         }
 
+        // ✅ FIX: Fallback to JSONB workflow_data when top-level columns are NULL
         return {
           id: row.id,
           source: 'session',
-          company_name: row.company_name,
-          business_type: row.business_type,
-          product_description: row.product_description,
-          hs_code: row.hs_code,
-          qualification_status: row.qualification_status,
-          regional_content_percentage: parseFloat(row.regional_content_percentage) || 0,
+          company_name: row.company_name || workflowData.company?.company_name,
+          company_country: row.company_country || workflowData.company?.company_country,
+          destination_country: row.destination_country || workflowData.company?.destination_country,
+          business_type: row.business_type || workflowData.company?.business_type,
+          industry_sector: row.industry_sector || workflowData.company?.industry_sector,
+          product_description: row.product_description || workflowData.product?.description,
+          hs_code: row.hs_code || workflowData.product?.hs_code,
+          qualification_status: row.qualification_status || workflowData.usmca?.qualification_status,
+          regional_content_percentage: parseFloat(row.regional_content_percentage || workflowData.usmca?.regional_content) || 0,
           required_threshold: parseFloat(row.required_threshold) || 60,
-          trade_volume: volumeResult.normalized || 0,  // ✅ Use validated value
-          estimated_annual_savings: parseFloat(row.estimated_annual_savings) || 0,  // ✅ FIXED: Use actual savings
+          trade_volume: volumeResult.normalized || workflowData.company?.trade_volume || 0,  // ✅ Fallback to JSONB
+          estimated_annual_savings: parseFloat(row.estimated_annual_savings || workflowData.savings?.annual_savings) || 0,
           component_origins: row.component_origins || [],
           completed_at: row.completed_at || row.created_at,
           manufacturing_location: row.manufacturing_location,
@@ -502,30 +506,8 @@ export default protectedApiHandler({
         }
       }
 
-      // Load saved consolidated alerts from dashboard_notifications
-      let consolidatedAlerts = [];
-      try {
-        const { data: savedAlerts } = await supabase
-          .from('dashboard_notifications')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('notification_type', 'consolidated_alert')
-          .order('created_at', { ascending: false });
-
-        if (savedAlerts && savedAlerts.length > 0) {
-          console.log(`✅ Loaded ${savedAlerts.length} saved consolidated alerts`);
-          consolidatedAlerts = savedAlerts.map(alert => ({
-            ...alert.data,
-            id: alert.id,
-            created_at: alert.created_at
-          }));
-        }
-      } catch (alertError) {
-        console.error('⚠️ Failed to load consolidated alerts:', alertError);
-      }
-
-      // Merge crisis alerts and consolidated alerts
-      const allAlerts = [...consolidatedAlerts, ...crisisAlerts];
+      // Alerts come from crisis_alerts table (matched to user's products via user_alert_tracking)
+      const allAlerts = crisisAlerts;
 
       // ✅ ALERT LIFECYCLE: Fetch historical context (resolved alerts summary)
       let alertHistoricalContext = null;

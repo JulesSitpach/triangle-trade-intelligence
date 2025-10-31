@@ -59,16 +59,8 @@ export default protectedApiHandler({
         return res.status(403).json({ error: 'You do not have permission to delete this workflow' });
       }
 
-      // ✅ Delete associated certificates FIRST (foreign key constraint)
-      const { error: deleteCertsError } = await supabase
-        .from('certificates')
-        .delete()
-        .eq('workflow_completion_id', workflowId);
-
-      if (deleteCertsError) {
-        console.warn('Warning deleting certificates:', deleteCertsError.message);
-        // Don't fail - certificates may not exist for this workflow
-      }
+      // Certificate data stored in workflow_completions.workflow_data.certificate
+      // No separate certificates table to delete from
 
       // ✅ Delete from workflow_sessions
       const { error: deleteSessionError } = await supabase

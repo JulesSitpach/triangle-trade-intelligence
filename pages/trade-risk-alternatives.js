@@ -23,7 +23,7 @@ import TRADE_RISK_CONFIG, {
 } from '../config/trade-risk-config';
 
 // Import alert impact analysis service
-import AlertImpactAnalysisService from '../lib/services/alert-impact-analysis-service';
+// AlertImpactAnalysisService moved to server-side API endpoint: /api/alert-impact-analysis
 import { getCountryConfig } from '../lib/usmca/usmca-2026-config';
 import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
 
@@ -101,20 +101,14 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Restore alert impact analysis from localStorage on page load
+  // REMOVED: Auto-restore from localStorage
+  // Strategic analysis should ONLY display when user explicitly clicks the button
+  // Users found it confusing to see generic analysis auto-display on page load
+
+  // Clear old localStorage data on page load (one-time cleanup)
   useEffect(() => {
-    try {
-      const storedAnalysis = localStorage.getItem('alert_impact_analysis');
-      if (storedAnalysis) {
-        const parsed = JSON.parse(storedAnalysis);
-        if (parsed.alert_impact_summary || parsed.updated_priorities) {
-          console.log('✅ Restoring alert impact analysis from localStorage on page load');
-          setAlertImpactAnalysis(parsed);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to restore alert impact analysis:', e);
-    }
+    localStorage.removeItem('alert_impact_analysis');
+    console.log('🧹 Cleared old alert impact analysis from localStorage');
   }, []); // Run once on mount
 
   const loadUserData = async () => {
@@ -135,11 +129,16 @@ export default function TradeRiskAlternatives() {
         hasUser: !!user
       });
 
-      // Load workflow data from database
-      console.log('📊 Loading workflow data from database...');
-      const response = await fetch('/api/dashboard-data', {
-        credentials: 'include'
-      });
+      // ✅ FIXED: Try localStorage FIRST (immediate), then database (backup)
+      console.log('📊 Trying localStorage first...');
+      loadLocalStorageData();
+
+      // Only load from database if localStorage failed
+      if (!userProfile) {
+        console.log('📊 localStorage empty, loading from database...');
+        const response = await fetch('/api/dashboard-data', {
+          credentials: 'include'
+        });
 
       if (response.ok) {
         const dashboardData = await response.json();
@@ -201,22 +200,35 @@ export default function TradeRiskAlternatives() {
           const workflowData = mostRecentWorkflow.workflow_data || {};
           const components = mostRecentWorkflow.component_origins || [];
 
+          // ✅ FIX: Fallback to JSONB workflow_data when top-level columns are NULL
+          // Parse trade_volume (comes as string from database)
+          const rawTradeVolume = mostRecentWorkflow.trade_volume || workflowData.company?.trade_volume;
+          const parsedTradeVolume = rawTradeVolume
+            ? (typeof rawTradeVolume === 'string' ? parseFloat(rawTradeVolume.replace(/,/g, '')) : rawTradeVolume)
+            : 0;
+
           const profile = {
             userId: user?.id,
-            companyName: mostRecentWorkflow.company_name,
+            companyName: mostRecentWorkflow.company_name || workflowData.company?.company_name,
             companyCountry: mostRecentWorkflow.company_country || workflowData.company?.company_country || 'US',
             destinationCountry: mostRecentWorkflow.destination_country || workflowData.company?.destination_country || 'US',
-            businessType: mostRecentWorkflow.business_type,
-            industry_sector: mostRecentWorkflow.industry_sector,
-            hsCode: mostRecentWorkflow.hs_code,
-            productDescription: mostRecentWorkflow.product_description,
-            tradeVolume: mostRecentWorkflow.trade_volume,
+            businessType: mostRecentWorkflow.business_type || workflowData.company?.business_type,
+            industry_sector: mostRecentWorkflow.industry_sector || workflowData.company?.industry_sector,
+            hsCode: mostRecentWorkflow.hs_code || workflowData.product?.hs_code,
+            productDescription: mostRecentWorkflow.product_description || workflowData.product?.description,
+            tradeVolume: parsedTradeVolume,
             supplierCountry: components[0]?.origin_country || components[0]?.country,
-            qualificationStatus: mostRecentWorkflow.qualification_status,
-            savings: mostRecentWorkflow.estimated_annual_savings || 0,
+            qualificationStatus: mostRecentWorkflow.qualification_status || workflowData.usmca?.qualification_status,
+            savings: mostRecentWorkflow.estimated_annual_savings || workflowData.savings?.annual_savings || 0,
             componentOrigins: components,
             regionalContent: workflowData.usmca?.regional_content || 0
           };
+
+          console.log('✅ Loaded user profile from database:', {
+            companyName: profile.companyName,
+            tradeVolume: profile.tradeVolume,
+            hasTradeVolume: !!profile.tradeVolume
+          });
 
           // Extract rich workflow intelligence if available
           if (workflowData.recommendations || workflowData.detailed_analysis) {
@@ -235,17 +247,16 @@ export default function TradeRiskAlternatives() {
           setIsLoading(false);
           return;
         } else {
-          console.warn('⚠️ No workflows found in database - falling back to localStorage');
+          console.warn('⚠️ No workflows found in database');
         }
       } else {
         console.error('❌ Dashboard data fetch failed:', response.status, response.statusText);
       }
-
-      // Fallback to localStorage (current session)
-      console.log('🔄 Falling back to localStorage data');
-      loadLocalStorageData();
+    }  // Close if (!userProfile) block
     } catch (error) {
       console.error('Error loading trade profile:', error);
+      // Fallback to localStorage (current session)
+      console.log('🔄 Falling back to localStorage data');
       loadLocalStorageData();
     }
   };
@@ -396,9 +407,9 @@ export default function TradeRiskAlternatives() {
         setShowSaveDataConsent(true);
       } else if (isAuthenticated && savedConsent === 'save') {
         // User previously chose to save - honor that choice
-        console.log('✅ User previously consented to save - saving to database');
+        console.log('✅ User previously consented to save - data already in workflow_sessions');
         setHasSaveDataConsent(true); // Used to control detailed consent display
-        saveTradeProfile(profile);
+        // Removed saveTradeProfile() - workflow data already saved via workflow_sessions
       } else if (isAuthenticated && savedConsent === 'erase') {
         // User chose to erase - respect that choice
         console.log('🔒 User previously chose to erase - respecting privacy choice');
@@ -413,43 +424,6 @@ export default function TradeRiskAlternatives() {
     setIsLoading(false);
   };
 
-  const saveTradeProfile = async (profile) => {
-    if (!user || !profile.hsCode || profile.hsCode === 'Not classified') {
-      console.log('⚠️ Cannot save to database: User not authenticated or no HS code');
-      return false;
-    }
-
-    try {
-      // Use cookie-based authentication (credentials: 'include')
-      const response = await fetch('/api/trade-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Use cookie authentication
-        body: JSON.stringify({
-          hs_codes: [profile.hsCode],
-          business_types: profile.businessType ? [profile.businessType] : [],
-          origin_countries: profile.supplierCountry ? [profile.supplierCountry] : [],
-          usmca_qualification_status: profile.qualificationStatus,
-          qualified_products: profile.qualificationStatus === 'QUALIFIED' ? 1 : 0,
-          total_products: 1
-        })
-      });
-
-      if (response.ok) {
-        console.log('✅ Trade profile saved to database via cookie auth');
-        return true;
-      } else {
-        console.warn(`⚠️ Database save failed: ${response.status} ${response.statusText}`);
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ Error saving trade profile:', error);
-      return false;
-    }
-  };
-
   // Handle user choosing to SAVE their data
   const handleSaveDataConsent = async () => {
     console.log('✅ User chose to SAVE data for alerts and services');
@@ -459,11 +433,8 @@ export default function TradeRiskAlternatives() {
     setHasSaveDataConsent(true);
     setShowSaveDataConsent(false);
 
-    // Save the pending profile to database
-    if (pendingProfile) {
-      await saveTradeProfile(pendingProfile);
-      setPendingProfile(null);
-    }
+    // Workflow data already saved via workflow_sessions - no additional save needed
+    setPendingProfile(null);
   };
 
   // Handle user choosing to ERASE their data / Skip alerts
@@ -588,9 +559,13 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
-   * Save generated alerts to database for fast loading on future visits
+   * DEAD CODE: Disabled - dashboard_notifications table doesn't exist
+   * Alerts are already loaded from crisis_alerts + user_alert_tracking
    */
   const saveAlertsToDatabase = async (alerts) => {
+    // Table doesn't exist - this was an optimization that's no longer needed
+    return;
+    /* DEAD CODE BELOW
     try {
       const response = await fetch('/api/save-alerts', {
         method: 'POST',
@@ -610,6 +585,7 @@ export default function TradeRiskAlternatives() {
     } catch (error) {
       console.error('❌ Error saving alerts:', error);
     }
+    */
   };
 
   /**
@@ -822,20 +798,34 @@ export default function TradeRiskAlternatives() {
       // Build user profile for analysis
       const analysisProfile = {
         companyCountry: userProfile.companyCountry || 'US',
+        companyName: userProfile.companyName,
         business_type: userProfile.businessType,
         industry_sector: userProfile.industry_sector,
         destination_country: userProfile.destinationCountry || 'US',
         componentOrigins: userProfile.componentOrigins || [],
         regionalContent: userProfile.regionalContent || 0,
-        annualTradeVolume: userProfile.tradeVolume || 0
+        tradeVolume: userProfile.tradeVolume || 0,
+        trade_volume: userProfile.tradeVolume || 0 // Alias for compatibility
       };
 
-      // Call alert impact analysis service
-      const rawAnalysis = await AlertImpactAnalysisService.generateAlertImpact(
-        existingAnalysis,
-        consolidatedAlerts,
-        analysisProfile
-      );
+      // Call alert impact analysis API endpoint (server-side)
+      const response = await fetch('/api/alert-impact-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          existingAnalysis,
+          consolidatedAlerts,
+          userProfile: analysisProfile
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate analysis');
+      }
+
+      const rawAnalysis = await response.json();
 
       console.log('✅ Alert impact analysis complete (RAW):', rawAnalysis);
 
@@ -926,13 +916,7 @@ export default function TradeRiskAlternatives() {
           <USMCAIntelligenceDisplay workflowIntelligence={workflowIntelligence} />
         )}
 
-        {/* 📊 EXECUTIVE TRADE ADVISORY: Strategic consulting letter */}
-        {workflowIntelligence?.detailed_analysis?.situation_brief && (
-          <ExecutiveSummaryDisplay
-            data={workflowIntelligence.detailed_analysis}
-            onClose={() => console.log('Executive summary closed')}
-          />
-        )}
+        {/* 📊 EXECUTIVE TRADE ADVISORY: Removed auto-display - user must click button to view */}
 
         {/* Dynamic User Trade Profile */}
         <div className="form-section">
@@ -1481,8 +1465,8 @@ export default function TradeRiskAlternatives() {
 
           {alertsGenerated && !alertImpactAnalysis && (
             <div>
-              {/* Check if workflow intelligence is available */}
-              {!workflowIntelligence ? (
+              {/* ✅ FIXED: Check for workflow data (components), NOT optional executive summary */}
+              {!userProfile || !userProfile.componentOrigins || userProfile.componentOrigins.length === 0 ? (
                 <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
                   <div className="alert-content">
                     <div className="alert-title">⚠️ Complete USMCA Workflow First</div>

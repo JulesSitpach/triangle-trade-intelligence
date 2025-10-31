@@ -114,78 +114,17 @@ export default protectedApiHandler({
 
       console.log(`✅ Successfully updated workflow_completions ${workflowId} with certificate data`);
 
-      // ========== TABLE 2: Save to dedicated certificates table ==========
-      // Check if certificate already exists for this workflow
-      const { data: existingCert } = await supabase
-        .from('certificates')
-        .select('id, certificate_number')
-        .eq('workflow_completion_id', workflowId)
-        .single();
-
+      // Certificate data is now stored in workflow_completions.workflow_data.certificate
       const certificateNumber = certificate_data?.certificate_number ||
-                               existingCert?.certificate_number ||
                                `USMCA-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-      // Extract validity dates (default: today to +1 year)
-      const validFrom = certificate_data?.blanket_from ||
-                       certificate_data?.blanket_period?.start_date ||
-                       new Date().toISOString().split('T')[0];
-      const validUntil = certificate_data?.blanket_to ||
-                        certificate_data?.blanket_period?.end_date ||
-                        new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0];
-
-      const certificateRecord = {
-        user_id: userId,
-        email: req.user.email || null,
-        certificate_type: 'usmca-origin',
-        certificate_name: `USMCA Certificate - ${product_description}`,
-        certificate_number: certificateNumber,
-        certificate_data: certificate_data,
-        workflow_completion_id: workflowId,
-        hs_code: hs_code,
-        valid_from: validFrom,
-        valid_until: validUntil,
-        status: 'active',
-        is_active: true,
-        updated_at: new Date().toISOString()
-      };
-
-      if (existingCert) {
-        // UPDATE existing certificate
-        console.log(`🔄 Updating existing certificate ${existingCert.certificate_number}...`);
-        const { error: certUpdateError } = await supabase
-          .from('certificates')
-          .update(certificateRecord)
-          .eq('id', existingCert.id);
-
-        if (certUpdateError) {
-          console.error('⚠️ Warning: Failed to update certificates table:', certUpdateError);
-          // Don't fail the request - workflow_completions already saved
-        } else {
-          console.log(`✅ Successfully updated certificate ${certificateNumber} in certificates table`);
-        }
-      } else {
-        // INSERT new certificate
-        console.log(`➕ Creating new certificate ${certificateNumber}...`);
-        const { error: certInsertError } = await supabase
-          .from('certificates')
-          .insert(certificateRecord);
-
-        if (certInsertError) {
-          console.error('⚠️ Warning: Failed to insert into certificates table:', certInsertError);
-          // Don't fail the request - workflow_completions already saved
-        } else {
-          console.log(`✅ Successfully created certificate ${certificateNumber} in certificates table`);
-        }
-      }
 
       return res.status(200).json({
         success: true,
-        message: 'Certificate saved successfully to both tables',
+        message: 'Certificate saved successfully',
         workflow_id: workflowId,
         certificate_number: certificateNumber,
         product_description: workflows[0].product_description,
-        saved_to: ['workflow_completions', 'certificates']
+        saved_to: ['workflow_completions']
       });
 
     } catch (error) {

@@ -1167,7 +1167,7 @@ export default function EditableCertificatePreview({
               <div style={labelStyle}>12d. TITLE</div>
               <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signatory_title} onChange={(e) => handleFieldChange('signatory_title', e.target.value)} style={inputStyle} />
             </div>
-            <div style={{ borderRight: '1px solid #000', paddingRight: '8px' }}>
+            <div>
               <div style={labelStyle}>12e. DATE (MM/DD/YYYY)</div>
               <input type="date" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.signature_date} onChange={(e) => handleFieldChange('signature_date', e.target.value)} style={inputStyle} />
             </div>

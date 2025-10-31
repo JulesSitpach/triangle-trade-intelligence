@@ -19,7 +19,7 @@ The Triangle Intelligence Platform enforces **two separate limits** per subscrip
 
 | Tier | Monthly Workflows | Code Reference |
 |------|------------------|----------------|
-| **Trial** | 1 total (7 days) | `tierLimitMap['Trial'] = 1` |
+| **Free Trial** | 1 total (7 days) | `tierLimitMap['Trial'] = 1` |
 | **Starter** | 10 per month | `tierLimitMap['Starter'] = 10` |
 | **Professional** | 100 per month | `tierLimitMap['Professional'] = 100` |
 | **Premium** | Unlimited | `tierLimitMap['Premium'] = 999999` |
@@ -38,12 +38,11 @@ The Triangle Intelligence Platform enforces **two separate limits** per subscrip
 
 | Tier | Components per Workflow | Code Reference |
 |------|------------------------|----------------|
-| **Trial** | 3 components | `TIER_COMPONENT_LIMITS['Trial'] = 3` |
-| **Free** | 3 components | `TIER_COMPONENT_LIMITS['Free'] = 3` |
+| **Free Trial** | 3 components | `TIER_COMPONENT_LIMITS['Trial'] = 3` |
 | **Starter** | 10 components | `TIER_COMPONENT_LIMITS['Starter'] = 10` |
 | **Professional** | 15 components | `TIER_COMPONENT_LIMITS['Professional'] = 15` |
 | **Premium** | 20 components | `TIER_COMPONENT_LIMITS['Premium'] = 20` |
-| **Enterprise** | 50 components | `TIER_COMPONENT_LIMITS['Enterprise'] = 50` |
+
 
 **How it works:**
 - Tracks **HS code lookups** (not just current component count)

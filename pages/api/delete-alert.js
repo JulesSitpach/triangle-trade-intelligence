@@ -26,9 +26,10 @@ export default protectedApiHandler({
       }
 
       // ✅ Verify user owns this alert before deletion
-      // Alerts are stored in dashboard_notifications table with user_id
+      // User alerts are tracked in user_alert_tracking table
+      // (Global crisis_alerts remain - we just delete the user's tracking record)
       const { data: alerts, error: fetchError } = await supabase
-        .from('dashboard_notifications')
+        .from('user_alert_tracking')
         .select('id, user_id')
         .eq('id', alertId);
 
@@ -48,9 +49,9 @@ export default protectedApiHandler({
         return res.status(403).json({ error: 'You do not have permission to delete this alert' });
       }
 
-      // ✅ Delete the alert from dashboard_notifications
+      // ✅ Delete the user's alert tracking record
       const { error: deleteError } = await supabase
-        .from('dashboard_notifications')
+        .from('user_alert_tracking')
         .delete()
         .eq('id', alertId)
         .eq('user_id', userId);
@@ -59,12 +60,12 @@ export default protectedApiHandler({
         await DevIssue.apiError('dashboard', 'delete-alert', deleteError, {
           alertId,
           userId,
-          table: tableUsed
+          table: 'user_alert_tracking'
         });
         return res.status(500).json({ error: 'Failed to delete alert' });
       }
 
-      console.log(`✅ Deleted alert ${alertId} for user ${userId} from ${tableUsed}`);
+      console.log(`✅ Deleted alert tracking ${alertId} for user ${userId}`);
 
       return res.status(200).json({
         success: true,
