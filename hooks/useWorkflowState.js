@@ -4,8 +4,9 @@
  * Implements clean state management patterns
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { workflowService } from '../lib/services/workflow-service.js';
+import { CrossTabSync } from '../lib/utils/cross-tab-sync.js';
 
 export function useWorkflowState() {
   // Initialize step - check localStorage for saved session
@@ -104,6 +105,39 @@ export function useWorkflowState() {
       // Component Origins
       component_origins: []
   });
+
+  // 🔄 CROSS-TAB SYNC: Keep workflow data synchronized across multiple browser tabs
+  const syncRef = useRef(null);
+
+  // Initialize cross-tab sync on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    syncRef.current = new CrossTabSync({
+      watchedKeys: ['triangleUserData', 'usmca_workflow_results'],
+      onSync: (key, newValue) => {
+        console.log(`[CrossTabSync] Received update for ${key} from another tab`);
+
+        if (key === 'triangleUserData' && newValue) {
+          // Remove sync metadata before updating state
+          const { _sync_meta, ...cleanValue } = newValue;
+          setFormData(cleanValue);
+        } else if (key === 'usmca_workflow_results' && newValue) {
+          // Remove sync metadata before updating state
+          const { _sync_meta, ...cleanValue } = newValue;
+          setResults(cleanValue);
+        }
+      },
+      onConflict: (key, oldValue, newValue) => {
+        console.warn(`[CrossTabSync] Conflict detected for ${key} - Using newest value`);
+        // Default behavior: newest value wins (already applied via storage event)
+      }
+    });
+
+    return () => {
+      syncRef.current?.destroy();
+    };
+  }, []);
 
   // Save current step to localStorage whenever it changes
   useEffect(() => {
@@ -231,9 +265,15 @@ export function useWorkflowState() {
   // ✅ REMOVED AUTO-SAVE - Now saves only when user clicks "Next"
   // This eliminates 150+ unnecessary database writes during form filling
   // localStorage still updates immediately for instant form restoration
+  // 🔄 BROADCASTS changes to other tabs via cross-tab sync
   useEffect(() => {
     if (typeof window !== 'undefined' && formData.company_name) {
       localStorage.setItem('triangleUserData', JSON.stringify(formData));
+
+      // Broadcast change to other tabs
+      if (syncRef.current) {
+        syncRef.current.broadcastChange('triangleUserData', formData);
+      }
     }
   }, [formData]);
 
@@ -329,6 +369,12 @@ export function useWorkflowState() {
         };
 
         localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
+
+        // 🔄 Broadcast workflow results to other tabs
+        if (syncRef.current) {
+          syncRef.current.broadcastChange('usmca_workflow_results', workflowData);
+        }
+
         console.log('✅ Workflow data saved to localStorage with ENRICHED components:', {
           has_company_country: !!workflowData.company.company_country,
           has_certifier_type: !!workflowData.company.certifier_type,
