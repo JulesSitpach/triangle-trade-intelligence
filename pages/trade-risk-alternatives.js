@@ -965,6 +965,52 @@ export default function TradeRiskAlternatives() {
             </div>
           </div>
 
+          {/* ✅ ALERT LIFECYCLE: Historical Context - Show Past Successes */}
+          {alertHistoricalContext && alertHistoricalContext.total_resolved > 0 && (
+            <div style={{
+              marginTop: '2rem',
+              padding: '1.5rem',
+              background: 'linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%)',
+              borderRadius: '12px',
+              border: '2px solid #059669'
+            }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#065f46', marginBottom: '1rem' }}>
+                📊 Your Alert Resolution History
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#059669' }}>
+                    {alertHistoricalContext.total_resolved}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#065f46', fontWeight: 500 }}>
+                    Total Alerts Resolved
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#059669' }}>
+                    ${Math.round(alertHistoricalContext.total_cost_impact_prevented || 0).toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#065f46', fontWeight: 500 }}>
+                    Cost Impact Prevented
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#059669' }}>
+                    {alertHistoricalContext.resolved_last_30d}
+                  </div>
+                  <div style={{ fontSize: '0.875rem', color: '#065f46', fontWeight: 500 }}>
+                    Resolved Last 30 Days
+                  </div>
+                </div>
+              </div>
+              {alertHistoricalContext.most_recent_resolution && (
+                <div style={{ marginTop: '0.75rem', fontSize: '0.8125rem', color: '#065f46', textAlign: 'center' }}>
+                  Most Recent: {new Date(alertHistoricalContext.most_recent_resolution).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Component Intelligence - Collapsible rows with component-specific alerts */}
           {userProfile.componentOrigins && userProfile.componentOrigins.length > 0 && (
             <div className="element-spacing">
@@ -1258,32 +1304,109 @@ export default function TradeRiskAlternatives() {
                                 {componentAlerts.map((alert, alertIdx) => (
                                   <div key={alertIdx} style={{
                                     background: 'white',
-                                    border: '2px solid #fee2e2',
+                                    border: alert.lifecycle_status === 'RESOLVED' ? '2px solid #dcfce7' : '2px solid #fee2e2',
                                     borderRadius: '6px',
-                                    padding: '1rem'
+                                    padding: '1rem',
+                                    opacity: alert.lifecycle_status === 'RESOLVED' ? 0.7 : 1
                                   }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                      <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                                      <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', flex: 1 }}>
                                         {alert.consolidated_title || alert.title}
                                       </div>
-                                      <span style={{
-                                        background: alert.urgency === 'CRITICAL' ? '#dc2626' : alert.urgency === 'HIGH' ? '#f59e0b' : '#6b7280',
-                                        color: 'white',
-                                        padding: '0.125rem 0.5rem',
-                                        borderRadius: '10px',
-                                        fontSize: '0.6875rem',
-                                        fontWeight: 600,
-                                        textTransform: 'uppercase'
-                                      }}>
-                                        {alert.urgency || 'MEDIUM'}
-                                      </span>
+                                      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                                        {/* ✅ LIFECYCLE STATUS BADGE */}
+                                        <span style={{
+                                          background: alert.lifecycle_status === 'NEW' ? '#3b82f6' :
+                                                      alert.lifecycle_status === 'UPDATED' ? '#f59e0b' :
+                                                      alert.lifecycle_status === 'RESOLVED' ? '#059669' : '#6b7280',
+                                          color: 'white',
+                                          padding: '0.125rem 0.5rem',
+                                          borderRadius: '10px',
+                                          fontSize: '0.6875rem',
+                                          fontWeight: 600,
+                                          textTransform: 'uppercase'
+                                        }}>
+                                          {alert.lifecycle_status || 'NEW'}
+                                        </span>
+                                        {/* URGENCY BADGE */}
+                                        <span style={{
+                                          background: alert.urgency === 'CRITICAL' ? '#dc2626' : alert.urgency === 'HIGH' ? '#f59e0b' : '#6b7280',
+                                          color: 'white',
+                                          padding: '0.125rem 0.5rem',
+                                          borderRadius: '10px',
+                                          fontSize: '0.6875rem',
+                                          fontWeight: 600,
+                                          textTransform: 'uppercase'
+                                        }}>
+                                          {alert.urgency || 'MEDIUM'}
+                                        </span>
+                                      </div>
                                     </div>
                                     <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
                                       {alert.explanation || alert.description}
                                     </div>
                                     {alert.broker_summary && (
-                                      <div style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>
+                                      <div style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500, marginBottom: '0.75rem' }}>
                                         💡 {alert.broker_summary}
+                                      </div>
+                                    )}
+
+                                    {/* ✅ ALERT ACTION BUTTONS (Resolve/Archive) */}
+                                    {alert.lifecycle_status !== 'RESOLVED' && alert.lifecycle_status !== 'ARCHIVED' && (
+                                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleResolveAlert(alert);
+                                          }}
+                                          style={{
+                                            background: '#059669',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '0.375rem 0.75rem',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer'
+                                          }}
+                                        >
+                                          ✅ Mark Resolved
+                                        </button>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleArchiveAlert(alert);
+                                          }}
+                                          style={{
+                                            background: '#6b7280',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '0.375rem 0.75rem',
+                                            borderRadius: '6px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer'
+                                          }}
+                                        >
+                                          📦 Archive
+                                        </button>
+                                      </div>
+                                    )}
+
+                                    {/* Show resolution notes if resolved */}
+                                    {alert.lifecycle_status === 'RESOLVED' && alert.resolution_notes && (
+                                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#dcfce7', borderRadius: '6px' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669', marginBottom: '0.25rem' }}>
+                                          ✅ Resolution Notes:
+                                        </div>
+                                        <div style={{ fontSize: '0.8125rem', color: '#166534' }}>
+                                          {alert.resolution_notes}
+                                        </div>
+                                        {alert.estimated_cost_impact && (
+                                          <div style={{ fontSize: '0.75rem', color: '#059669', marginTop: '0.25rem', fontWeight: 600 }}>
+                                            Cost Impact Prevented: ${alert.estimated_cost_impact.toLocaleString()}
+                                          </div>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -1442,6 +1565,122 @@ export default function TradeRiskAlternatives() {
                 🔄 New Analysis
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ✅ ALERT LIFECYCLE: Recent Activity Timeline (30-Day History) */}
+        {recentAlertActivity && recentAlertActivity.length > 0 && (
+          <div className="form-section">
+            <h2 className="form-section-title">📅 Recent Alert Activity (Last 30 Days)</h2>
+            <p className="text-body" style={{ marginBottom: '1rem' }}>
+              Timeline of your alert management activities, showing when alerts appeared and how you resolved them.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {recentAlertActivity.map((activity, idx) => {
+                const statusColor = activity.status === 'RESOLVED' ? '#059669' :
+                                   activity.status === 'ARCHIVED' ? '#6b7280' :
+                                   activity.status === 'NEW' ? '#3b82f6' : '#f59e0b';
+
+                return (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    padding: '1rem',
+                    background: 'white',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    alignItems: 'start'
+                  }}>
+                    {/* Timeline Dot */}
+                    <div style={{ flexShrink: 0, paddingTop: '0.25rem' }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: statusColor
+                      }} />
+                    </div>
+
+                    {/* Activity Content */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                        <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                          {activity.alert_title}
+                        </div>
+                        <span style={{
+                          background: statusColor,
+                          color: 'white',
+                          padding: '0.125rem 0.5rem',
+                          borderRadius: '10px',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase'
+                        }}>
+                          {activity.status}
+                        </span>
+                      </div>
+
+                      <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                        <span style={{ fontWeight: 500 }}>First Seen:</span> {new Date(activity.first_seen_at).toLocaleDateString()}
+                        {activity.resolved_at && (
+                          <span style={{ marginLeft: '1rem' }}>
+                            <span style={{ fontWeight: 500 }}>Resolved:</span> {new Date(activity.resolved_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+
+                      {activity.resolution_notes && (
+                        <div style={{
+                          padding: '0.75rem',
+                          background: '#f9fafb',
+                          borderRadius: '6px',
+                          fontSize: '0.8125rem',
+                          color: '#374151'
+                        }}>
+                          <span style={{ fontWeight: 600 }}>Resolution:</span> {activity.resolution_notes}
+                        </div>
+                      )}
+
+                      {activity.estimated_cost_impact && (
+                        <div style={{
+                          marginTop: '0.5rem',
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
+                          color: '#059669'
+                        }}>
+                          💰 Cost Impact Prevented: ${activity.estimated_cost_impact.toLocaleString()}
+                        </div>
+                      )}
+
+                      {activity.actions_taken && activity.actions_taken.length > 0 && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', marginBottom: '0.25rem' }}>
+                            Actions Taken:
+                          </div>
+                          <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#374151' }}>
+                            {activity.actions_taken.map((action, actionIdx) => (
+                              <li key={actionIdx}>{action}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {recentAlertActivity.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: '2rem',
+                color: '#6b7280',
+                fontSize: '0.875rem'
+              }}>
+                No alert activity in the last 30 days. New alerts will appear here as they're detected.
+              </div>
+            )}
           </div>
         )}
 
