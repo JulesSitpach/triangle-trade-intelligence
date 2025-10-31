@@ -3,7 +3,7 @@
  * Shows crisis analysis and automatically sends data to alerts dashboard
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import AlertsSubscriptionFlow from './AlertsSubscriptionFlow';
 
 // Simple icon components
@@ -34,11 +34,61 @@ export default function CrisisCalculatorResults({
   const [dataSentToAlerts, setDataSentToAlerts] = useState(false);
   const [showSubscriptionFlow, setShowSubscriptionFlow] = useState(false);
 
-  useEffect(() => {
-    calculateCrisisImpact();
+  const getTradeVolumeValue = useCallback((volumeInput) => {
+    // ✅ FAIL LOUDLY: No hardcoded defaults
+    if (!volumeInput) {
+      throw new Error('Annual trade volume is required');
+    }
+
+    // Parse user's numeric input (user enters "4800000" or "4,800,000")
+    const numericValue = parseFloat(String(volumeInput).replace(/[^0-9.-]/g, ''));
+
+    // ✅ Validate parsed value is valid
+    if (isNaN(numericValue) || numericValue <= 0) {
+      throw new Error(`Invalid trade volume: "${volumeInput}". Please enter a positive number.`);
+    }
+
+    return numericValue;
+  }, []);
+
+  const saveToAlertsSystem = useCallback(async (crisisResult, tradeVolume) => {
+    try {
+      // ✅ NO HARDCODES: Use validated user data
+      // Note: At this point, formData.hs_code is guaranteed to exist (validated in calculateCrisisImpact)
+      // Also: destination_country was validated in calculateCrisisImpact (though not explicitly checked, it's required in workflow)
+      if (!formData.destination_country) {
+        throw new Error('destination_country is required for alerts system. Expected: US, CA, or MX');
+      }
+
+      const userWorkflowData = {
+        company: {
+          name: formData.company_name,
+          business_type: formData.business_type,
+          trade_volume: tradeVolume
+        },
+        product: {
+          hs_code: formData.hs_code  // ✅ No fallback - already validated
+        },
+        supplier_country: formData.supplier_country || formData.origin_country,  // ✅ Actual origin
+        destination_country: formData.destination_country,  // ✅ No fallback - validated above
+        workflow_path: 'crisis-calculator',
+        crisis_data: crisisResult,
+        timestamp: new Date().toISOString()
+      };
+
+      // Save to localStorage for alerts dashboard pickup
+      localStorage.setItem('usmca_workflow_results', JSON.stringify(userWorkflowData));
+      // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
+
+      console.log('Crisis Calculator data saved to alerts system:', userWorkflowData);
+      setDataSentToAlerts(true);
+
+    } catch (error) {
+      console.error('Failed to save data to alerts system:', error);
+    }
   }, [formData]);
 
-  const calculateCrisisImpact = async () => {
+  const calculateCrisisImpact = useCallback(async () => {
     // ✅ FAIL LOUDLY: Validate all required fields before calculation
     if (!formData.company_name) {
       setCrisisData({ error: 'Company name is required' });
@@ -95,61 +145,12 @@ export default function CrisisCalculatorResults({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [formData, getTradeVolumeValue, saveToAlertsSystem]);
 
-  const getTradeVolumeValue = (volumeInput) => {
-    // ✅ FAIL LOUDLY: No hardcoded defaults
-    if (!volumeInput) {
-      throw new Error('Annual trade volume is required');
-    }
-
-    // Parse user's numeric input (user enters "4800000" or "4,800,000")
-    const numericValue = parseFloat(String(volumeInput).replace(/[^0-9.-]/g, ''));
-
-    // ✅ Validate parsed value is valid
-    if (isNaN(numericValue) || numericValue <= 0) {
-      throw new Error(`Invalid trade volume: "${volumeInput}". Please enter a positive number.`);
-    }
-
-    return numericValue;
-  };
-
-  const saveToAlertsSystem = async (crisisResult, tradeVolume) => {
-    try {
-      // ✅ NO HARDCODES: Use validated user data
-      // Note: At this point, formData.hs_code is guaranteed to exist (validated in calculateCrisisImpact)
-      // Also: destination_country was validated in calculateCrisisImpact (though not explicitly checked, it's required in workflow)
-      if (!formData.destination_country) {
-        throw new Error('destination_country is required for alerts system. Expected: US, CA, or MX');
-      }
-
-      const userWorkflowData = {
-        company: {
-          name: formData.company_name,
-          business_type: formData.business_type,
-          trade_volume: tradeVolume
-        },
-        product: {
-          hs_code: formData.hs_code  // ✅ No fallback - already validated
-        },
-        supplier_country: formData.supplier_country || formData.origin_country,  // ✅ Actual origin
-        destination_country: formData.destination_country,  // ✅ No fallback - validated above
-        workflow_path: 'crisis-calculator',
-        crisis_data: crisisResult,
-        timestamp: new Date().toISOString()
-      };
-
-      // Save to localStorage for alerts dashboard pickup
-      localStorage.setItem('usmca_workflow_results', JSON.stringify(userWorkflowData));
-      // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
-
-      console.log('Crisis Calculator data saved to alerts system:', userWorkflowData);
-      setDataSentToAlerts(true);
-
-    } catch (error) {
-      console.error('Failed to save data to alerts system:', error);
-    }
-  };
+  // Run calculation when formData changes
+  useEffect(() => {
+    calculateCrisisImpact();
+  }, [calculateCrisisImpact]);
 
   const formatCurrency = (amount) => {
     if (!amount) return '$0';
