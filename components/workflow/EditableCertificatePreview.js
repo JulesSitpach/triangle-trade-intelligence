@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator.js';
 
 export default function EditableCertificatePreview({
@@ -19,6 +20,7 @@ export default function EditableCertificatePreview({
   // Only 'trial' or 'free' tier users have read-only access
   // Starter, Professional, and Premium users can edit and download
   const isTrialUser = userTier === 'trial' || userTier === 'free' || userTier === 'Free';
+  const router = useRouter();
 
   const [editedCert, setEditedCert] = useState(() => {
     // ✅ Generate unique certificate number: USMCA-{YEAR}-{6-CHAR-ID}
@@ -298,6 +300,139 @@ export default function EditableCertificatePreview({
       ...prev,
       components: prev.components.filter((_, i) => i !== index)
     }));
+  };
+
+  // Helper function to normalize component data
+  const normalizeComponent = (component) => {
+    return {
+      description: component.description || component.component_description || component.name,
+      hs_code: component.hs_code || component.hts_code,
+      origin_country: component.origin_country || component.country_of_origin || component.manufacturing_location,
+      value_percentage: component.value_percentage || component.percentage || 0,
+      // Preserve enrichment data
+      mfn_rate: component.mfn_rate,
+      usmca_rate: component.usmca_rate,
+      section_301: component.section_301,
+      section_232: component.section_232,
+      total_rate: component.total_rate,
+      savings_percentage: component.savings_percentage
+    };
+  };
+
+  // Set Up Alerts function - matches WorkflowResults.js implementation
+  const handleSetUpAlerts = async () => {
+    console.log('🚨 ========== SETTING UP TRADE ALERTS FROM CERTIFICATE ==========');
+
+    // Prepare components from previewData
+    let rawComponents = previewData?.professional_certificate?.supply_chain?.component_origins ||
+                       previewData?.professional_certificate?.components ||
+                       [];
+
+    // Check if user has saved to database
+    const savedChoice = localStorage.getItem('save_data_consent');
+
+    // If components are empty or missing enrichment, try to recover from database/localStorage
+    if (rawComponents.length === 0 || !rawComponents[0]?.hs_code) {
+      console.log('⚠️ Components missing or not enriched - attempting to recover...');
+
+      if (savedChoice === 'save') {
+        // User chose to save - fetch from database
+        console.log('🔄 Fetching enriched components from database...');
+        try {
+          const response = await fetch('/api/dashboard-data', { credentials: 'include' });
+          if (response.ok) {
+            const data = await response.json();
+            const latestWorkflow = data.workflows?.[0];
+            if (latestWorkflow && latestWorkflow.component_origins) {
+              console.log('✅ Fetched enriched components from database:', latestWorkflow.component_origins.length);
+              rawComponents = latestWorkflow.component_origins;
+            } else {
+              alert('⚠️ Component data not found in database. Please complete the workflow again to set up alerts.');
+              return;
+            }
+          } else {
+            alert('⚠️ Unable to fetch component data from database. Please try again or redo the workflow.');
+            return;
+          }
+        } catch (error) {
+          console.error('❌ Database fetch error:', error);
+          alert('⚠️ Error fetching component data. Please complete the workflow again.');
+          return;
+        }
+      } else {
+        // Try localStorage
+        console.log('⚠️ Checking localStorage for enriched components...');
+        const localStorageData = localStorage.getItem('usmca_workflow_results');
+        if (localStorageData) {
+          try {
+            const parsed = JSON.parse(localStorageData);
+            const localComponents = parsed.component_origins || parsed.components || [];
+            if (localComponents.length > 0 && localComponents[0]?.hs_code) {
+              console.log('✅ Found enriched components in localStorage:', localComponents.length);
+              rawComponents = localComponents;
+            } else {
+              alert('⚠️ Component enrichment data is missing.\n\nTo set up alerts, you need to:\n1. Complete a new workflow analysis, OR\n2. Choose "Save to Database" to preserve enriched data');
+              return;
+            }
+          } catch (e) {
+            console.error('❌ Failed to parse localStorage:', e);
+            alert('⚠️ Unable to recover component data. Please complete the workflow again.');
+            return;
+          }
+        } else {
+          alert('⚠️ Component data not found.\n\nTo set up alerts, please:\n1. Complete the workflow analysis again, OR\n2. Choose "Save to Database" to preserve your data across sessions');
+          return;
+        }
+      }
+    }
+
+    // Normalize components
+    const normalizedComponents = rawComponents.map(c => normalizeComponent(c));
+
+    // Prepare complete workflow data for alerts page
+    const alertData = {
+      company: {
+        name: previewData?.professional_certificate?.exporter?.name || '',
+        company_name: previewData?.professional_certificate?.exporter?.name || '',
+        business_type: previewData?.professional_certificate?.company?.business_type,
+        industry_sector: previewData?.professional_certificate?.company?.industry_sector,
+        trade_volume: previewData?.professional_certificate?.company?.trade_volume,
+        annual_trade_volume: previewData?.professional_certificate?.company?.trade_volume
+      },
+      product: {
+        hs_code: previewData?.professional_certificate?.product?.hs_code,
+        description: previewData?.professional_certificate?.product?.description || previewData?.professional_certificate?.product?.product_description,
+        product_description: previewData?.professional_certificate?.product?.description || previewData?.professional_certificate?.product?.product_description
+      },
+      usmca: {
+        qualified: true, // Certificate page assumes qualified
+        qualification_status: 'QUALIFIED',
+        north_american_content: previewData?.professional_certificate?.usmca_analysis?.regional_content || 100,
+        regional_content: previewData?.professional_certificate?.usmca_analysis?.regional_content || 100,
+        threshold_applied: previewData?.professional_certificate?.usmca_analysis?.threshold_applied,
+        gap: 0
+      },
+      component_origins: normalizedComponents,
+      components: normalizedComponents,
+      savings: previewData?.professional_certificate?.savings || {},
+      workflow_path: 'alerts',
+      timestamp: new Date().toISOString()
+    };
+
+    // Save to localStorage for alerts page
+    localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
+    localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
+    localStorage.setItem('usmca_company_data', JSON.stringify(alertData.company));
+
+    console.log('✅ Alert data prepared and saved to localStorage:', {
+      company: alertData.company?.name,
+      component_origins_count: alertData.component_origins?.length,
+      qualified: alertData.usmca?.qualified
+    });
+
+    // Navigate to alerts page
+    console.log('🔄 Navigating to /trade-risk-alternatives...');
+    router.push('/trade-risk-alternatives');
   };
 
   const handleSave = () => {
@@ -1083,25 +1218,7 @@ export default function EditableCertificatePreview({
 
         {/* Set Up Alerts Button */}
         <button
-          onClick={() => {
-            // Save workflow data to localStorage for alerts page
-            const alertData = {
-              company: previewData.professional_certificate?.exporter || {},
-              product: previewData.professional_certificate?.product || {},
-              usmca: {
-                qualified: true,
-                regional_content: previewData.professional_certificate?.usmca_analysis?.regional_content || 100
-              },
-              component_origins: previewData.professional_certificate?.supply_chain?.component_origins || [],
-              components: previewData.professional_certificate?.supply_chain?.component_origins || []
-            };
-
-            localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
-            localStorage.setItem('usmca_workflow_data', JSON.stringify(alertData));
-
-            // Navigate to alerts page
-            window.location.href = '/trade-risk-alternatives';
-          }}
+          onClick={handleSetUpAlerts}
           style={{
             padding: '12px 24px',
             fontSize: '14px',
