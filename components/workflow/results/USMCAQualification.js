@@ -56,7 +56,14 @@ const Tooltip = ({ text, children }) => {
 };
 
 export default function USMCAQualification({ results }) {
-  console.log('🚨 USMCAQualification component called with:', results);
+  // DEBUG: Only log in development mode (removed noisy production logs)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 USMCAQualification rendered:', {
+      has_usmca: !!results?.usmca,
+      qualified: results?.usmca?.qualified,
+      component_count: results?.component_origins?.length || results?.components?.length || 0
+    });
+  }
   const [expandedComponents, setExpandedComponents] = useState({});
 
   if (!results?.usmca) return null;
