@@ -331,8 +331,8 @@ export default function EditableCertificatePreview({
     // Close modal immediately
     setShowSaveConsentModal(false);
 
-    // Save user's choice to localStorage
-    localStorage.setItem('save_data_consent', shouldSave ? 'save' : 'erase');
+    // Save user's choice to localStorage (CERTIFICATE-specific key)
+    localStorage.setItem('certificate_save_consent', shouldSave ? 'save' : 'erase');
     setUserMadeChoice(true);
 
     if (shouldSave) {
@@ -1226,21 +1226,21 @@ export default function EditableCertificatePreview({
         {/* Save to Database Button */}
         <button
           onClick={() => {
-            // Check if user has already made a choice
-            const savedChoice = localStorage.getItem('save_data_consent');
-            console.log('💾 Save to Database clicked - current consent:', savedChoice);
+            // CERTIFICATE SAVE: Check for CERTIFICATE-specific consent (separate from workflow consent)
+            const certificateConsent = localStorage.getItem('certificate_save_consent');
+            console.log('💾 Save Certificate to Database clicked - certificate consent:', certificateConsent);
 
-            if (!savedChoice) {
-              // No consent given yet - show modal
-              console.log('✅ No consent found - showing modal');
+            if (!certificateConsent) {
+              // No certificate consent given yet - show modal
+              console.log('✅ No certificate consent found - showing modal');
               setShowSaveConsentModal(true);
-            } else if (savedChoice === 'save') {
-              // User already consented to save - proceed directly
-              console.log('✅ User already consented - saving directly (skip modal)');
+            } else if (certificateConsent === 'save') {
+              // User already consented to save certificates - proceed directly
+              console.log('✅ User already consented to save certificates - saving directly');
               handleSaveConsent(true);
             } else {
-              // User previously chose not to save - ask again
-              console.log('⚠️ User previously declined - showing modal again');
+              // User previously chose not to save certificates - ask again
+              console.log('⚠️ User previously declined certificate save - showing modal again');
               setShowSaveConsentModal(true);
             }
           }}
@@ -1357,10 +1357,10 @@ export default function EditableCertificatePreview({
             overflowY: 'auto'
           }}>
             <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937' }}>
-              💾 Save Analysis to Database?
+              💾 Save Certificate to Database?
             </h2>
             <p style={{ marginBottom: '20px', color: '#4b5563' }}>
-              <strong>Why save?</strong> Your tariff analysis includes valuable HS code classifications, component enrichment data, and USMCA qualification results. Saving to database enables persistent alerts, pre-filled service requests, and certificate access from any device.
+              <strong>Why save?</strong> Your USMCA certificate includes company details, product information, authorization signatures, and legal declarations. Saving to database enables certificate archive, re-download from any device, and audit trail for compliance.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
@@ -1385,11 +1385,11 @@ export default function EditableCertificatePreview({
                   <strong style={{ fontSize: '16px' }}>SAVE TO DATABASE (Recommended)</strong>
                 </div>
                 <div style={{ fontSize: '14px', color: '#4b5563', paddingLeft: '28px' }}>
-                  ✅ <strong>Database storage</strong> - Access from any device, anytime<br/>
-                  ✅ <strong>Persistent alerts</strong> - Get notified of tariff changes even after logout<br/>
-                  ✅ <strong>Pre-filled service requests</strong> - No re-entering company/product data<br/>
-                  ✅ <strong>Certificate archive</strong> - Download past certificates from dashboard<br/>
-                  ✅ <strong>Component enrichment preserved</strong> - HS codes, tariff rates, savings calculations
+                  ✅ <strong>Certificate archive</strong> - Download this certificate anytime from dashboard<br/>
+                  ✅ <strong>Compliance audit trail</strong> - 5-year record for CBP requirements<br/>
+                  ✅ <strong>Authorization preserved</strong> - Signatory details and legal declarations saved<br/>
+                  ✅ <strong>Multi-device access</strong> - Re-download certificate from any device<br/>
+                  ✅ <strong>Legal backup</strong> - Secure encrypted storage for business records
                 </div>
               </div>
 
@@ -1414,11 +1414,11 @@ export default function EditableCertificatePreview({
                   <strong style={{ fontSize: '16px' }}>DON'T SAVE (Browser only, temporary)</strong>
                 </div>
                 <div style={{ fontSize: '14px', color: '#4b5563', paddingLeft: '28px' }}>
-                  ⚠️ <strong>Browser storage only</strong> - Lost on logout or browser clear<br/>
-                  ⚠️ <strong>Alerts deleted</strong> - Must set up alerts again on next visit<br/>
-                  ⚠️ <strong>No service pre-fill</strong> - Re-enter all data for service requests<br/>
-                  ⚠️ <strong>Certificate not archived</strong> - Must regenerate analysis for new certificate<br/>
-                  ⚠️ <strong>Component data lost</strong> - AI enrichment (HS codes, rates) not preserved
+                  ⚠️ <strong>No certificate archive</strong> - Lost when browser closes or cache clears<br/>
+                  ⚠️ <strong>No audit trail</strong> - No record for CBP compliance requirements<br/>
+                  ⚠️ <strong>No re-download</strong> - Must regenerate certificate from scratch if lost<br/>
+                  ⚠️ <strong>Authorization not saved</strong> - Signatory data temporary only<br/>
+                  ⚠️ <strong>Legal risk</strong> - No backup for customs or compliance review
                 </div>
               </div>
             </div>
