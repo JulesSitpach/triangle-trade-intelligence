@@ -460,8 +460,7 @@ export default function EditableCertificatePreview({
         company_name: previewData?.professional_certificate?.exporter?.name || '',
         business_type: previewData?.professional_certificate?.company?.business_type,
         industry_sector: previewData?.professional_certificate?.company?.industry_sector,
-        trade_volume: previewData?.professional_certificate?.company?.trade_volume,
-        annual_trade_volume: previewData?.professional_certificate?.company?.trade_volume
+        trade_volume: previewData?.professional_certificate?.company?.trade_volume
       },
       product: {
         hs_code: previewData?.professional_certificate?.product?.hs_code,

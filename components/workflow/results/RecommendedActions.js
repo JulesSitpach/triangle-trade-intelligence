@@ -128,7 +128,7 @@ export default function RecommendedActions({ results }) {
           workflow_intelligence: {
             components: results.usmca?.component_breakdown || [],
             north_american_content: results.usmca?.north_american_content || 0,
-            annual_trade_volume: tradeVolume ? parseFloat(tradeVolume) : 0,
+            trade_volume: tradeVolume ? parseFloat(tradeVolume) : 0,
             // ✅ Add critical context for holistic AI analysis
             usmca_qualified: results.usmca?.qualified || false,
             preference_criterion: results.usmca?.preference_criterion || null,

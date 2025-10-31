@@ -540,8 +540,7 @@ export default function WorkflowResults({
         company_name: results.company?.name || results.company?.company_name,
         business_type: results.company?.business_type,
         industry_sector: results.company?.industry_sector,
-        trade_volume: results.company?.trade_volume,
-        annual_trade_volume: results.company?.trade_volume
+        trade_volume: results.company?.trade_volume
       },
       product: {
         hs_code: results.product?.hs_code,
@@ -762,7 +761,7 @@ export default function WorkflowResults({
       }
       if (!results.company?.trade_volume && results.company?.trade_volume !== 0) {
         alert('⚠️ Missing trade volume. Please provide your annual trade volume.');
-        throw new Error('annual_trade_volume required for executive summary');
+        throw new Error('trade_volume required for executive summary');
       }
       if (results.usmca?.qualified === undefined || results.usmca?.qualified === null) {
         alert('⚠️ USMCA qualification status missing. Please restart the analysis.');
@@ -780,14 +779,14 @@ export default function WorkflowResults({
           subscription_tier: userSubscriptionTier,
           industry_sector: results.company.industry_sector,
           destination_country: results.company.destination_country,
-          annual_trade_volume: results.company.trade_volume  // ✅ FIX: AI needs this for ROI calculations
+          trade_volume: results.company.trade_volume  // ✅ FIX: AI needs this for ROI calculations
         },
         workflow_intelligence: {
           product_description: results.product?.description || null,  // ✅ Specific product context
           components: components,
           north_american_content: results.usmca.north_american_content,
           threshold_applied: results.usmca?.threshold_applied || null,  // ✅ Required RVC threshold
-          annual_trade_volume: results.company.trade_volume,
+          trade_volume: results.company.trade_volume,
           usmca_qualified: results.usmca.qualified,
           preference_criterion: results.usmca?.preference_criterion || null,
           current_annual_savings: results.savings?.annual_savings || null,  // ✅ Current USMCA savings

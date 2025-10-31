@@ -122,7 +122,7 @@ export default async function handler(req, res) {
       // ✅ Calculate once, reuse for both annual_cost_impact and strategic_options
       const section301Impact = await calculateSection301Impact(
         workflow_intelligence.components,
-        user_profile.annual_trade_volume || 0
+        user_profile.trade_volume || 0
       );
 
       applicablePolicies.push({
@@ -253,7 +253,7 @@ function generateMexicoNearshoringOptions(userProfile, workflow, section301Impac
     const metrics = MEXICO_SOURCING_CONFIG.calculateMetrics(
       userProfile.industry_sector || 'electronics',
       workflow.product_complexity || 'medium',
-      userProfile.annual_trade_volume || 0
+      userProfile.trade_volume || 0
     );
 
     return [
@@ -387,7 +387,7 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
   const chineseComponents = components.filter(c => c.origin_country === 'China' || c.origin_country === 'CN');
   const totalChineseValue = chineseComponents.reduce((sum, c) => sum + (c.value_percentage || 0), 0);
 
-  const tradeVolume = profile.annual_trade_volume || workflow.annual_trade_volume || 0;
+  const tradeVolume = profile.trade_volume || workflow.trade_volume || 0;
   const section301Burden = section301Policy?.annual_cost_impact?.annualCost || 'not calculated';
   const section301Rate = section301Policy?.annual_cost_impact?.ratePercent || 'varies';
 
@@ -691,14 +691,14 @@ async function generateFinancialScenarios(workflow, policies, profile) {
     const mexicoMetrics = MEXICO_SOURCING_CONFIG.calculateMetrics?.(
       profile.industry_sector || 'electronics',
       workflow.product_complexity || 'medium',
-      profile.annual_trade_volume || 0
+      profile.trade_volume || 0
     ) || {
       mexico_cost_premium_percent: 2.0,
-      annual_cost_increase: Math.round((profile.annual_trade_volume || 0) * 0.02),
+      annual_cost_increase: Math.round((profile.trade_volume || 0) * 0.02),
       payback_months: 3
     };
 
-    const nearshoreAnnualCost = Math.round(mexicoMetrics.annual_cost_increase || (profile.annual_trade_volume || 0) * 0.02);
+    const nearshoreAnnualCost = Math.round(mexicoMetrics.annual_cost_increase || (profile.trade_volume || 0) * 0.02);
     const nearshorePaybackMonths = mexicoMetrics.payback_months || 3;
 
     scenarios.scenarios.push({
@@ -737,7 +737,7 @@ async function generateFinancialScenarios(workflow, policies, profile) {
         scenario: 'If Threshold Increases to 70% (Proposed for 2026)',
         qualification_status: newBuffer < 0 ? '❌ WOULD NOT QUALIFY' : '⚠️ MINIMUM BUFFER',
         buffer: `${newBuffer}% margin`,
-        estimated_cost_if_disqualified: `$${(workflow.annual_trade_volume * (workflow.mfn_rate_avg || 0.03)).toLocaleString()}/year`,
+        estimated_cost_if_disqualified: `$${(workflow.trade_volume * (workflow.mfn_rate_avg || 0.03)).toLocaleString()}/year`,
         mitigation: 'Nearshore high-value components to Mexico suppliers now'
       });
     }

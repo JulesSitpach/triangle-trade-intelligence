@@ -127,7 +127,7 @@ export default function CrisisCalculatorResults({
         company: {
           name: formData.company_name,
           business_type: formData.business_type,
-          annual_trade_volume: tradeVolume
+          trade_volume: tradeVolume
         },
         product: {
           hs_code: formData.hs_code  // ✅ No fallback - already validated
@@ -144,7 +144,7 @@ export default function CrisisCalculatorResults({
       localStorage.setItem('usmca_company_data', JSON.stringify({
         name: formData.company_name,
         business_type: formData.business_type,
-        annual_trade_volume: tradeVolume,
+        trade_volume: tradeVolume,
         hs_code: formData.hs_code,  // ✅ Include actual HS code
         supplier_country: formData.supplier_country || formData.origin_country  // ✅ Include actual origin
       }));
@@ -226,7 +226,7 @@ export default function CrisisCalculatorResults({
   const userProfile = {
     company_name: formData.company_name,
     email: formData.email,
-    annual_trade_volume: formData.trade_volume,  // Pass raw value, component should handle parsing
+    trade_volume: formData.trade_volume,  // Pass raw value, component should handle parsing
     business_type: formData.business_type,
     hs_code: formData.hs_code,  // ✅ No fallback - already validated
     supplier_country: formData.supplier_country || formData.origin_country

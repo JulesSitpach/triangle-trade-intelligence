@@ -67,7 +67,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         exporter_contact_person: workflowData.company.contact_person || '',  // ✅ FIX (Oct 30): Added contact person
         exporter_phone: workflowData.company.contact_phone || '',
         exporter_email: workflowData.company.contact_email || '',
-        exporter_country: workflowData.company.company_country || workflowData.company.country || ''
+        exporter_country: workflowData.company.company_country || ''
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -397,7 +397,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   handleFieldChange('exporter_contact_person', workflowData?.company?.contact_person || '');  // ✅ FIX (Oct 30): Added contact person
                   handleFieldChange('exporter_phone', workflowData?.company?.contact_phone || '');
                   handleFieldChange('exporter_email', workflowData?.company?.contact_email || '');
-                  handleFieldChange('exporter_country', workflowData?.company?.company_country || workflowData?.company?.country || '');
+                  handleFieldChange('exporter_country', workflowData?.company?.company_country || '');
                 } else {
                   // Clear fields if unchecked
                   handleFieldChange('exporter_name', '');

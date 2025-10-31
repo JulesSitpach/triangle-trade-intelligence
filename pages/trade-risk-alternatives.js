@@ -171,7 +171,7 @@ export default function TradeRiskAlternatives() {
               businessType: alert.business_type || 'Not specified',
               hsCode: alert.hs_code || 'Not classified',
               productDescription: alert.product_description || 'Product',
-              tradeVolume: alert.annual_trade_volume || 0,
+              tradeVolume: alert.trade_volume || 0,
               supplierCountry: primarySupplier,
               qualificationStatus: alert.qualification_status || 'NEEDS_REVIEW',
               savings: 0,
@@ -293,7 +293,7 @@ export default function TradeRiskAlternatives() {
 
     if (userData) {
       // Parse trade volume - handle string with commas like "12,000,000"
-      const rawTradeVolume = userData.company?.annual_trade_volume || userData.company?.trade_volume || 0;
+      const rawTradeVolume = userData.company?.trade_volume || 0;
       const parsedTradeVolume = typeof rawTradeVolume === 'string'
         ? parseFloat(rawTradeVolume.replace(/,/g, ''))
         : rawTradeVolume;
@@ -305,7 +305,7 @@ export default function TradeRiskAlternatives() {
       const profile = {
         userId: user?.id,  // Include userId for workflow intelligence lookup
         companyName: userData.company?.company_name || userData.company?.name,
-        companyCountry: userData.company?.company_country || userData.company?.country || 'US',
+        companyCountry: userData.company?.company_country || 'US',
         destinationCountry: userData.company?.destination_country || userData.destination_country || 'US',
         businessType: userData.company?.business_type,
         industry_sector: userData.company?.industry_sector,
@@ -1483,23 +1483,41 @@ export default function TradeRiskAlternatives() {
           )}
 
           {alertsGenerated && !alertImpactAnalysis && (
-            <div className="hero-buttons">
-              <button
-                onClick={generateAlertImpactAnalysis}
-                className="btn-primary"
-              >
-                📊 Generate Strategic Analysis
-              </button>
-              <button
-                onClick={() => {
-                  setAlertsGenerated(false);
-                  setRealPolicyAlerts([]);
-                  setConsolidatedAlerts([]);
-                }}
-                className="btn-secondary"
-              >
-                🔄 Run Analysis Again
-              </button>
+            <div>
+              {/* Check if workflow intelligence is available */}
+              {!workflowIntelligence ? (
+                <div className="alert alert-warning" style={{ marginBottom: '1rem' }}>
+                  <div className="alert-content">
+                    <div className="alert-title">⚠️ Complete USMCA Workflow First</div>
+                    <div className="text-body">
+                      Strategic Analysis requires your USMCA qualification data. Please complete the USMCA workflow first to generate your strategic intelligence report.
+                      <br /><br />
+                      <a href="/usmca-workflow" className="btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>
+                        🚀 Start USMCA Workflow
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="hero-buttons">
+                  <button
+                    onClick={generateAlertImpactAnalysis}
+                    className="btn-primary"
+                  >
+                    📊 Generate Strategic Analysis
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAlertsGenerated(false);
+                      setRealPolicyAlerts([]);
+                      setConsolidatedAlerts([]);
+                    }}
+                    className="btn-secondary"
+                  >
+                    🔄 Run Analysis Again
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

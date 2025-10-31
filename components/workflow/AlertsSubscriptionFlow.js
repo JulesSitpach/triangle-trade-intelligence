@@ -39,7 +39,7 @@ export default function AlertsSubscriptionFlow({
   });
 
   // Calculate protection value messaging
-  const tradeVolume = userProfile?.annual_trade_volume || 1000000;
+  const tradeVolume = userProfile?.trade_volume || 1000000;
   const dailyCost = 99 / 30.4; // Monthly cost divided by average days per month
   const protectionRatio = (dailyCost / tradeVolume * 365) * 100;
 

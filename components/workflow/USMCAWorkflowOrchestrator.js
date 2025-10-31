@@ -240,7 +240,6 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         tax_id: formData.tax_id,
         contact_phone: formData.contact_phone,
         contact_email: formData.contact_email,
-        annual_trade_volume: parseTradeVolume(formData.trade_volume) || 1000000, // ✅ Use centralized utility (fallback to $1M for alerts)
         trade_volume: formData.trade_volume,
         supplier_country: formData.supplier_country || 'CN',
         manufacturing_location: formData.manufacturing_location

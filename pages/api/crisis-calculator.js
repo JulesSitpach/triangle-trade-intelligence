@@ -261,7 +261,7 @@ export default protectedApiHandler({
         crisis_analysis: {
           product: hsCode,
           origin_country: originCountry,
-          annual_trade_volume: tradeVolume,
+          trade_volume: tradeVolume,
 
           tariff_impacts: {
             section_301: {
