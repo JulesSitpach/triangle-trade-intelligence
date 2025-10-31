@@ -29,6 +29,11 @@ export default function ComponentOriginsStepEnhanced({
   const lastPushedRef = useRef(null);
   // ✅ FIX #3: Ensure all component fields are always defined to prevent React controlled/uncontrolled warning
   const normalizeComponent = (component) => {
+    // ✅ FIX: Auto-lock components that have HS codes (indicates prior lookup, counts toward tier limit)
+    // This handles restoration from previous sessions where lock tracking wasn't implemented
+    const hasHSCode = component?.hs_code && component.hs_code.length >= 6;
+    const shouldBeLocked = component?.is_locked ?? (hasHSCode ? true : false);
+
     return {
       description: component?.description ?? '',
       origin_country: component?.origin_country ?? '',
@@ -40,7 +45,7 @@ export default function ComponentOriginsStepEnhanced({
       mfn_rate: component?.mfn_rate ?? null,
       usmca_rate: component?.usmca_rate ?? null,
       is_usmca_member: component?.is_usmca_member ?? false,
-      is_locked: component?.is_locked ?? false // Track if component used an HS lookup
+      is_locked: shouldBeLocked // Track if component used an HS lookup (auto-lock if has HS code)
     };
   };
 
@@ -62,8 +67,10 @@ export default function ComponentOriginsStepEnhanced({
   // Track total components used (including deleted locked ones) - prevents gaming HS lookup
   const [usedComponentsCount, setUsedComponentsCount] = useState(() => {
     if (formData.component_origins && formData.component_origins.length > 0) {
-      // Count how many components have is_locked: true
-      return formData.component_origins.filter(c => c.is_locked).length;
+      // ✅ FIX: Count components that are locked OR have HS codes (prior lookups count toward limit)
+      return formData.component_origins.filter(c =>
+        c.is_locked || (c.hs_code && c.hs_code.length >= 6)
+      ).length;
     }
     return 0;
   });
