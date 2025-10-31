@@ -429,6 +429,9 @@ export function useWorkflowState() {
           product: workflowResult.product,
           usmca: workflowResult.usmca,
           savings: workflowResult.savings,  // ✅ FIX: Include savings for metric boxes
+          detailed_analysis: workflowResult.detailed_analysis,  // ✅ FIX: Include for executive summary
+          recommendations: workflowResult.recommendations,  // ✅ FIX: Include AI recommendations
+          certificate: workflowResult.certificate,  // ✅ FIX: Include certificate data
           trust: workflowResult.trust,
           // CRITICAL FIX: Use ENRICHED components from API, not original formData
           component_origins: workflowResult.component_origins || workflowResult.components || formData.component_origins,
