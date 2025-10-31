@@ -461,16 +461,14 @@ export default protectedApiHandler({
     const TIER_COMPONENT_LIMITS = {
       'Trial': 3,
       'trial': 3,
-      'Free': 3,
-      'free': 3,
+      'Free': 3,        // Legacy - same as Trial
+      'free': 3,        // Legacy - same as Trial
       'Starter': 10,
       'starter': 10,
       'Professional': 15,
       'professional': 15,
       'Premium': 20,
-      'premium': 20,
-      'Enterprise': 50,
-      'enterprise': 50
+      'premium': 20
     };
 
     const maxComponents = TIER_COMPONENT_LIMITS[subscriptionTier] || 3;

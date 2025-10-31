@@ -61,7 +61,7 @@ The Triangle Intelligence Platform enforces **two separate limits** per subscrip
 - **Example:** Run 1 analysis with 3 components (Microprocessor, Power Supply, Housing)
 - **After limit:** Must upgrade to Starter to continue
 
-### Starter User ($199/month)
+### Starter User ($99/month)
 - **Workflows:** 10 per month
 - **Components:** 10 per workflow
 - **Example:**
@@ -71,24 +71,18 @@ The Triangle Intelligence Platform enforces **two separate limits** per subscrip
   - **Total:** 10 workflows with up to 10 components each
 - **After limit:** Wait for monthly reset OR upgrade to Professional
 
-### Professional User ($499/month)
+### Professional User ($299/month)
 - **Workflows:** 100 per month
 - **Components:** 15 per workflow
 - **Example:** Run 100 complete analyses per month, each with up to 15 components
 - **Use case:** Medium-sized importers with multiple product lines
 
-### Premium User ($999/month)
+### Premium User ($599/month)
 - **Workflows:** Unlimited
 - **Components:** 20 per workflow
 - **Example:** Run unlimited analyses, each with up to 20 components
 - **Benefit:** No monthly workflow cap + highest component limit
 - **Use case:** Large importers or customs brokers
-
-### Enterprise User (Custom Pricing)
-- **Workflows:** Unlimited
-- **Components:** 50 per workflow
-- **Example:** Complex manufacturing BOMs with 50+ components
-- **Use case:** Automotive, aerospace, complex electronics manufacturers
 
 ---
 
@@ -137,8 +131,7 @@ const TIER_COMPONENT_LIMITS = {
   'Trial': 3,
   'Starter': 10,
   'Professional': 15,
-  'Premium': 20,
-  'Enterprise': 50
+  'Premium': 20
 };
 
 const maxComponents = TIER_COMPONENT_LIMITS[subscriptionTier] || 3;
@@ -175,7 +168,6 @@ if (usedComponentCount > maxComponents) {
 | Trial (1) | Starter | +9/month | +7 per workflow |
 | Starter (10) | Professional | +90/month | +5 per workflow |
 | Professional (100) | Premium | Unlimited | +5 per workflow |
-| Premium (Unlimited) | Enterprise | Same | +30 per workflow |
 
 ---
 

@@ -9,8 +9,8 @@ export const SUBSCRIPTION_TIERS = {
   FREE_TRIAL: 'Trial',
   STARTER: 'Starter',
   PROFESSIONAL: 'Professional',
-  PREMIUM: 'Premium',
-  ENTERPRISE: 'Enterprise'
+  PREMIUM: 'Premium'
+  // REMOVED: Enterprise tier (not available on pricing page)
 };
 
 export const TIER_LIMITS = {
@@ -106,8 +106,8 @@ export const TIER_LIMITS = {
 
   [SUBSCRIPTION_TIERS.PREMIUM]: {
     // USMCA Analysis
-    components_per_analysis: 20, // Premium gets 20 components (not unlimited)
-    analyses_per_month: 100, // Same as Professional (volume discount on price)
+    components_per_analysis: 20, // Premium gets 20 components
+    analyses_per_month: 999999, // ✅ FIXED: Unlimited workflows (matches usage-tracking-service.js)
     certificate_download: true,
     certificate_preview: true,
     preview_watermarked: false,
@@ -134,41 +134,8 @@ export const TIER_LIMITS = {
     tier_label: 'Premium',
     tier_color: '#f59e0b',
     monthly_price: 599
-  },
-
-  [SUBSCRIPTION_TIERS.ENTERPRISE]: {
-    // USMCA Analysis
-    components_per_analysis: null, // Unlimited
-    analyses_per_month: null, // Unlimited
-    certificate_download: true,
-    certificate_preview: true,
-    preview_watermarked: false,
-
-    // Crisis Alerts
-    view_crisis_alerts: true,
-    email_notifications: true,
-    email_severity_filter: ['low', 'medium', 'high', 'critical'],
-    alert_history_days: null, // Unlimited
-    alert_detail_access: true,
-
-    // Professional Services
-    service_discounts: 0.30, // 30% off
-    priority_support: true,
-    support_response_hours: 12,
-    quarterly_strategy_calls: true,
-    dedicated_account_manager: true,
-
-    // Features
-    trade_health_check: true,
-    supplier_discovery: true,
-    custom_intelligence_reports: true,
-    api_access: true,
-
-    // Branding
-    tier_label: 'Enterprise',
-    tier_color: '#dc2626',
-    monthly_price: 'Custom'
   }
+  // REMOVED: Enterprise tier (not available on pricing page)
 };
 
 /**
@@ -310,7 +277,7 @@ export function getTierComparison() {
       price: '$299/mo',
       features: [
         '100 analyses per month',
-        '25 components per analysis',
+        '15 components per analysis',  // ✅ FIXED: Was 25, actual is 15
         'Full certificate download',
         'All email alerts',
         '15% service discounts',
@@ -323,8 +290,10 @@ export function getTierComparison() {
       name: 'Premium',
       price: '$599/mo',
       features: [
-        'Everything in Professional',
-        'Unlimited components',
+        'Unlimited analyses per month',  // ✅ FIXED: Clarified unlimited workflows
+        '20 components per analysis',     // ✅ FIXED: Was "unlimited", actual is 20
+        'Full certificate download',
+        'All email alerts',
         '25% service discounts',
         'Quarterly strategy calls',
         'Priority support (24hr)',
