@@ -8,10 +8,14 @@
     "SKIP_TYPE_CHECK": "true"
   },
   "crons": [
-    {
-      "path": "/api/cron/rss-polling",
-      "schedule": "0 */2 * * *"
-    },
+    // ⚠️ DISABLED (Oct 31, 2025): RSS polling was making 12 AI calls/day
+    // This was causing unexpected OpenRouter costs (~$7.20/month)
+    // and triggering rate limits during manual testing
+    // Re-enable when you want automated tariff policy monitoring
+    // {
+    //   "path": "/api/cron/rss-polling",
+    //   "schedule": "0 */2 * * *"
+    // },
     {
       "path": "/api/cron/flag-stale-policy-rates",
       "schedule": "0 0 * * *"
