@@ -25,6 +25,7 @@ import TRADE_RISK_CONFIG, {
 // Import alert impact analysis service
 import AlertImpactAnalysisService from '../lib/services/alert-impact-analysis-service';
 import { getCountryConfig } from '../lib/usmca/usmca-2026-config';
+import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
 
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
@@ -252,43 +253,39 @@ export default function TradeRiskAlternatives() {
 
   const loadLocalStorageData = async () => {
     // Fetch user subscription tier
+    // Get authenticated user ID for database lookup
+    let userId = null;
     try {
       const authResponse = await fetch('/api/auth/me', { credentials: 'include' });
       if (authResponse.ok) {
         const authData = await authResponse.json();
+        userId = authData.user?.id;
         setUserTier(authData.user?.subscription_tier || 'Trial');
       }
     } catch (error) {
       console.error('Failed to fetch user tier:', error);
     }
 
-    // Load user data from completed workflow
-    const workflowData = localStorage.getItem('usmca_workflow_data');
-    const companyData = localStorage.getItem('usmca_company_data');
-    const resultsData = localStorage.getItem('usmca_workflow_results');
+    // 🔄 UNIFIED DATA ACCESS: Get workflow data (database-first, localStorage fallback)
+    const userData = await getWorkflowData(userId);
 
-    // Clear any old test data
-    const hasOldTestData = (workflowData && workflowData.includes('Tropical Harvest')) ||
-                          (companyData && companyData.includes('Tropical Harvest')) ||
-                          (resultsData && resultsData.includes('Tropical Harvest'));
-
-    if (hasOldTestData) {
-      console.log('Found old test data, clearing all localStorage...');
-      localStorage.removeItem('usmca_workflow_data');
-      localStorage.removeItem('usmca_company_data');
-      localStorage.removeItem('usmca_workflow_results');
+    if (!userData) {
+      console.log('[TradeRiskAlternatives] No workflow data found (checked DB + localStorage)');
       setIsLoading(false);
       return;
     }
 
-    let userData = null;
+    console.log(`[TradeRiskAlternatives] Loaded workflow data from ${userData.source}`);
 
-    if (workflowData) {
-      userData = JSON.parse(workflowData);
-    } else if (resultsData) {
-      userData = JSON.parse(resultsData);
-    } else if (companyData) {
-      userData = { company: JSON.parse(companyData) };
+    // Clear old test data if found
+    if (userData.company?.name?.includes('Tropical Harvest')) {
+      console.log('Found old test data, clearing...');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('usmca_workflow_results');
+        localStorage.removeItem('triangleUserData');
+      }
+      setIsLoading(false);
+      return;
     }
 
     if (userData) {

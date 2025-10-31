@@ -11,6 +11,7 @@ import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
+import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
 
 export default function USMCACertificateCompletion() {
   const router = useRouter();
@@ -55,15 +56,28 @@ export default function USMCACertificateCompletion() {
   }, []);
 
   useEffect(() => {
-    // Load workflow data from localStorage
-    try {
-      const storedData = localStorage.getItem('usmca_workflow_results');
-      const storedAuth = localStorage.getItem('usmca_authorization_data');
+    // 🔄 UNIFIED DATA ACCESS: Load workflow data (database-first, localStorage fallback)
+    const loadData = async () => {
+      try {
+        // Get user ID for database lookup
+        let userId = null;
+        try {
+          const authResponse = await fetch('/api/auth/me', { credentials: 'include' });
+          if (authResponse.ok) {
+            const authData = await authResponse.json();
+            userId = authData.user?.id;
+          }
+        } catch (error) {
+          console.log('[CertificateCompletion] Not authenticated, using localStorage only');
+        }
 
-      if (storedData) {
-        const initialData = JSON.parse(storedData);
-        console.log('✅ Loading workflow data from localStorage:', initialData);
-        setWorkflowData(initialData);
+        // Get workflow data from unified service
+        const initialData = await getWorkflowData(userId);
+        const storedAuth = typeof window !== 'undefined' ? localStorage.getItem('usmca_authorization_data') : null;
+
+        if (initialData) {
+          console.log(`✅ Loading workflow data from ${initialData.source}:`, initialData);
+          setWorkflowData(initialData);
 
         // Calculate dynamic trust score
         let calculatedTrustData = null;
@@ -154,10 +168,14 @@ export default function USMCACertificateCompletion() {
             manufacturing_location: analysisResults.manufacturing_location
           }
         }));
+        }
+      } catch (error) {
+        console.error('Error loading workflow data:', error);
       }
-    } catch (error) {
-      console.error('Error loading workflow data:', error);
-    }
+    };
+
+    // Call the async function
+    loadData();
   }, []);
 
   // ✅ NEW: Restore certificate edits from localStorage on page load
