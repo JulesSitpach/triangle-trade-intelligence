@@ -13,6 +13,7 @@
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
+import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation, validateAPIResponse } from '../../lib/schemas/component-schema.js';
@@ -328,6 +329,17 @@ function buildStrategicInsights(result, formData) {
 
 export default protectedApiHandler({
   POST: async (req, res) => {
+    // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
+    try {
+      await applyRateLimit(strictLimiter)(req, res);
+    } catch (error) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded. Please wait before making another tariff analysis request.',
+        retry_after: 60 // seconds
+      });
+    }
+
     const startTime = Date.now();
     const userId = req.user.id;
     const formData = req.body; // Move outside try block for error handler access

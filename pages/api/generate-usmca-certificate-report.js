@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { executeWithFallback } from '../../lib/utils/ai-fallback-chain.js';
 import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
+import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -8,6 +9,17 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+  // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
+  try {
+    await applyRateLimit(strictLimiter)(req, res);
+  } catch (error) {
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit exceeded. Please wait before generating another certificate report.',
+      retry_after: 60 // seconds
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

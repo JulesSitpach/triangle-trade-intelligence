@@ -6,6 +6,7 @@ import { ClassificationAgent } from '../../../lib/agents/classification-agent.js
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 import { createClient } from '@supabase/supabase-js';
+import { applyRateLimit, strictLimiter } from '../../../lib/security/rateLimiter.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -32,6 +33,17 @@ function extractShortDescription(explanation, productDescription) {
 }
 
 export default async function handler(req, res) {
+  // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
+  try {
+    await applyRateLimit(strictLimiter)(req, res);
+  } catch (error) {
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit exceeded. Please wait before requesting another classification.',
+      retry_after: 60 // seconds
+    });
+  }
+
   if (req.method !== 'POST') {
     await DevIssue.validationError('classification_api', 'http_method', req.method, { endpoint: '/api/agents/classification' });
     return res.status(405).json({ error: 'Method not allowed' });

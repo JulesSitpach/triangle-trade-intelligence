@@ -19,6 +19,7 @@
 import MEXICO_SOURCING_CONFIG from '../../config/mexico-sourcing-config.js';  // ✅ REPLACES MexicoSourcingAgent
 import { getIndustryThreshold } from '../../lib/services/industry-thresholds-service.js';
 import { BaseAgent } from '../../lib/agents/base-agent.js';
+import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 
 // Initialize agents
 const executiveAgent = new BaseAgent({
@@ -30,6 +31,17 @@ const executiveAgent = new BaseAgent({
 // ✅ Removed section301Agent - now using section_301 field from component_breakdown (already calculated in main analysis)
 
 export default async function handler(req, res) {
+  // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
+  try {
+    await applyRateLimit(strictLimiter)(req, res);
+  } catch (error) {
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit exceeded. Please wait before requesting another executive alert.',
+      retry_after: 60 // seconds
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }

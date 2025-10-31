@@ -9,11 +9,23 @@
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
 import { BaseAgent } from '../../lib/agents/base-agent';
+import { applyRateLimit, apiLimiter } from '../../lib/security/rateLimiter.js';
 
 const baseAgent = new BaseAgent();
 
 export default protectedApiHandler({
   POST: async (req, res) => {
+    // 🛡️ RATE LIMITING: 60 requests per minute for database operations
+    try {
+      await applyRateLimit(apiLimiter)(req, res);
+    } catch (error) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded. Please wait before making another request.',
+        retry_after: 60 // seconds
+      });
+    }
+
     try {
       const { action, data } = req.body;
 
