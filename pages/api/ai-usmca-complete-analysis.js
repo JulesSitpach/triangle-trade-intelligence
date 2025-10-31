@@ -318,17 +318,6 @@ function buildStrategicInsights(result, formData) {
 
 export default protectedApiHandler({
   POST: async (req, res) => {
-    // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
-    try {
-      await applyRateLimit(strictLimiter)(req, res);
-    } catch (error) {
-      return res.status(429).json({
-        success: false,
-        error: 'Rate limit exceeded. Please wait before making another tariff analysis request.',
-        retry_after: 60 // seconds
-      });
-    }
-
     const startTime = Date.now();
     const userId = req.user.id;
     const formData = req.body; // Move outside try block for error handler access
@@ -362,11 +351,27 @@ export default protectedApiHandler({
     // Get user's subscription tier from database
     const { data: userProfile } = await supabase
       .from('user_profiles')
-      .select('subscription_tier, trial_end_date, email_confirmed_at')
+      .select('subscription_tier, trial_ends_at, email_confirmed_at')
       .eq('user_id', userId)
       .single();
 
     const subscriptionTier = userProfile?.subscription_tier || 'Trial';
+
+    // 🛡️ RATE LIMITING: 10 requests per minute (only for non-Premium users)
+    // Premium users are unlimited, so skip per-minute rate limiter
+    if (subscriptionTier !== 'Premium') {
+      try {
+        await applyRateLimit(strictLimiter)(req, res);
+      } catch (error) {
+        return res.status(429).json({
+          success: false,
+          error: 'Rate limit exceeded. Please wait before making another tariff analysis request.',
+          retry_after: 60, // seconds
+          tier: subscriptionTier,
+          message: 'Premium users have no rate limits. Upgrade to Premium for unlimited analyses.'
+        });
+      }
+    }
 
     // Check 1: Atomically reserve analysis slot (prevents race conditions)
     // This increments the counter BEFORE processing, ensuring parallel requests
