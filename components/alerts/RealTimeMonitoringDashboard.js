@@ -24,23 +24,28 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
   const fetchRealTimeData = async () => {
     setIsLoading(true);
     try {
-      // NOTE: /api/trade-intelligence/real-time-alerts is deprecated
-      // Using fallback monitoring data (RSS feeds handle actual monitoring)
-      setMonitoringData({
-        lastScan: new Date().toISOString(),
-        scanDurationMs: 3500,
-        htsCodesMonitored: userProfile.componentOrigins?.length || 0,
-        dataSourcesChecked: ['USTR', 'Commerce Dept', 'CBP', 'US Census', 'UN Comtrade'],
-        alertsGenerated: 0,
-        thisMonth: {
-          totalScans: 47,
-          alertsSent: 0,
-          policiesChecked: 1247
-        }
+      // ✅ FETCH REAL RSS MONITORING STATS FROM DATABASE
+      const response = await fetch('/api/rss-monitoring-stats', {
+        credentials: 'include'
       });
-      setCensusAlerts([]);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // Set real monitoring data from database
+      setMonitoringData(data);
+      setCensusAlerts([]); // Real alerts come from crisis_alerts table
+
+      console.log('✅ Loaded real RSS monitoring stats:', data);
     } catch (error) {
-      console.error('Failed to load real-time monitoring data:', error);
+      console.error('❌ Failed to load RSS monitoring stats:', error);
+
+      // Show error state instead of fake data
+      setMonitoringData(null);
+      setCensusAlerts([]);
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +131,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
             </span>
           </div>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>
-            Monitoring USTR • Commerce Dept • CBP • {monitoringData.htsCodesMonitored} HS codes • Checked {monitoringData.thisMonth.policiesChecked.toLocaleString()} policies this month
+            Monitoring {monitoringData.dataSourcesChecked?.join(' • ') || 'RSS feeds'} • {monitoringData.htsCodesMonitored} HS codes • Checked {(monitoringData.thisMonth?.policiesChecked || 0).toLocaleString()} items this month
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -134,7 +139,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
             Last Update
           </div>
           <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#059669' }}>
-            {getTimeAgo(monitoringData.lastScan)}
+            {monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}
           </div>
         </div>
       </div>
@@ -155,27 +160,35 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         <div className="status-card">
           <div className="status-label">Last Scan</div>
           <div className="status-value" style={{ color: '#059669' }}>
-            {getTimeAgo(monitoringData.lastScan)}
+            {monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}
           </div>
-          <p className="form-help">{new Date(monitoringData.lastScan).toLocaleString()}</p>
+          <p className="form-help">
+            {monitoringData.lastScan ? new Date(monitoringData.lastScan).toLocaleString() : 'No scans yet'}
+          </p>
         </div>
 
         <div className="status-card">
           <div className="status-label">HS Codes Monitored</div>
-          <div className="status-value">{monitoringData.htsCodesMonitored}</div>
+          <div className="status-value">{monitoringData.htsCodesMonitored || 0}</div>
           <p className="form-help">Your component HS codes</p>
         </div>
 
         <div className="status-card">
           <div className="status-label">Data Sources</div>
-          <div className="status-value">{monitoringData.dataSourcesChecked.length}</div>
-          <p className="form-help">{monitoringData.dataSourcesChecked.join(', ')}</p>
+          <div className="status-value">{monitoringData.dataSourcesChecked?.length || 0}</div>
+          <p className="form-help">
+            {monitoringData.dataSourcesChecked?.length > 0
+              ? monitoringData.dataSourcesChecked.join(', ')
+              : 'Configuring sources...'}
+          </p>
         </div>
 
         <div className="status-card">
-          <div className="status-label">Alerts Generated</div>
-          <div className="status-value">{monitoringData.alertsGenerated}</div>
-          <p className="form-help">From this scan</p>
+          <div className="status-label">Alerts This Month</div>
+          <div className="status-value">{monitoringData.alertsGenerated || 0}</div>
+          <p className="form-help">
+            From {(monitoringData.thisMonth?.totalScans || 0).toLocaleString()} scans
+          </p>
         </div>
       </div>
 
