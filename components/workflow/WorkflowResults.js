@@ -840,7 +840,8 @@ export default function WorkflowResults({
         action_items: rawAlert.action_this_week || [],
         strategic_roadmap: rawAlert.strategic_roadmap || [],
         broker_insights: rawAlert.from_your_broker,
-        professional_disclaimer: rawAlert.professional_disclaimer
+        professional_disclaimer: rawAlert.professional_disclaimer,
+        save_reminder: rawAlert.save_reminder  // ✅ FIX: Extract save_reminder from AI response
       };
       console.log('✅ Flattened for display:', alertData);
 
