@@ -42,6 +42,9 @@ import {
   buildComprehensiveUSMCAPrompt
 } from '../../lib/usmca/qualification-engine.js';
 
+// ✅ Rate limit handler for OpenRouter API (Oct 31, 2025)
+import { callOpenRouterWithRetry, fallbackToAnthropic } from '../../lib/utils/openrouter-rate-limit-handler.js';
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -118,36 +121,22 @@ CRITICAL: This is for USMCA compliance certificates. Accuracy is legally require
 Return ONLY valid JSON array. No explanations.`;
 
   try {
-    // TIER 1: Try OpenRouter
+    // TIER 1: Try OpenRouter with rate limit handling
     if (!process.env.OPENROUTER_API_KEY) {
       throw new Error('OPENROUTER_API_KEY not configured');
     }
 
-    // Debug: Calling OpenRouter for missing components
+    console.log(`🔍 [HYBRID] Calling AI for ${missingComponents.length} missing components...`);
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4.5',
-        max_tokens: 2000,
-        messages: [{
-          role: 'user',
-          content: prompt
-        }],
-        temperature: 0
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`OpenRouter failed: ${response.status} - ${errorText.substring(0, 200)}`);
-    }
-
-    const aiData = await response.json();
+    const aiData = await callOpenRouterWithRetry({
+      model: 'anthropic/claude-haiku-4.5',
+      max_tokens: 2000,
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      temperature: 0
+    }, 3, 'TariffResearch');
     const content = aiData.choices?.[0]?.message?.content || '[]';
 
     // Parse JSON array from response
@@ -1309,30 +1298,11 @@ export default protectedApiHandler({
       temperature: 0 // Zero temperature for determinism
     };
 
-    const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
+    // ✅ Use rate limit handler with automatic retry on 429/529
+    const aiResult = await callOpenRouterWithRetry(requestBody, 3, 'USMCAQualification');
     const openrouterDuration = Date.now() - openrouterStartTime;
 
-    if (!aiResponse.ok) {
-      // ✅ LOG: Get error response from OpenRouter
-      const errorText = await aiResponse.text();
-      console.error('❌ [OPENROUTER-ERROR] Full response:', {
-        status: aiResponse.status,
-        statusText: aiResponse.statusText,
-        error_response: errorText.substring(0, 1000),
-        request_was: JSON.stringify(requestBody).substring(0, 500)
-      });
-      throw new Error(`OpenRouter API failed: ${aiResponse.status} ${aiResponse.statusText}`);
-    }
-
     const aiParsingStart = Date.now();
-    const aiResult = await aiResponse.json();
     const aiText = aiResult.choices?.[0]?.message?.content;
 
     if (!aiText) {
