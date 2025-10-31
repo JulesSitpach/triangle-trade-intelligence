@@ -1,12 +1,14 @@
 // UPGRADED Classification Agent API - Database-backed classification cache
 // Uses ClassificationAgent for HS code suggestions
 // SUBSCRIPTION-AWARE: Integrates subscription validation and usage tracking
+// 🔒 AUTHENTICATION REQUIRED: Prevents unauthenticated AI classification abuse
 
 import { ClassificationAgent } from '../../../lib/agents/classification-agent.js';
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 import { createClient } from '@supabase/supabase-js';
 import { applyRateLimit, strictLimiter } from '../../../lib/security/rateLimiter.js';
+import { protectedApiHandler } from '../../../lib/api/apiHandler.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -32,49 +34,29 @@ function extractShortDescription(explanation, productDescription) {
   return productDescription || 'Product classification';
 }
 
-export default async function handler(req, res) {
-  // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
-  try {
-    await applyRateLimit(strictLimiter)(req, res);
-  } catch (error) {
-    return res.status(429).json({
-      success: false,
-      error: 'Rate limit exceeded. Please wait before requesting another classification.',
-      retry_after: 60 // seconds
-    });
-  }
-
-  if (req.method !== 'POST') {
-    await DevIssue.validationError('classification_api', 'http_method', req.method, { endpoint: '/api/agents/classification' });
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const startTime = Date.now();
-
-  try {
-    const { action, productDescription, hsCode, componentOrigins, additionalContext, userId } = req.body;
-
-    // ✅ FIX: Extract userId from multiple sources
-    // Priority: 1. Request body, 2. Query params, 3. Auth header (JWT)
-    let authenticatedUserId = userId;
-
-    if (!authenticatedUserId) {
-      // Try to extract from Authorization header if present (JWT token)
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        // In production, would decode JWT; for now log that auth exists
-        authenticatedUserId = 'authenticated-via-header';
-      }
+// 🔒 PROTECTED ENDPOINT - Authentication required
+export default protectedApiHandler({
+  POST: async (req, res) => {
+    // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
+    try {
+      await applyRateLimit(strictLimiter)(req, res);
+    } catch (error) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded. Please wait before requesting another classification.',
+        retry_after: 60 // seconds
+      });
     }
 
-    if (!authenticatedUserId && req.query?.userId) {
-      authenticatedUserId = req.query.userId;
-    }
+    const startTime = Date.now();
 
-    // Add user context for subscription validation
-    req.user = { id: authenticatedUserId };
+    try {
+      const { action, productDescription, hsCode, componentOrigins, additionalContext } = req.body;
 
-    console.log(`[SUBSCRIPTION-AWARE AGENT] ${action} request for: "${productDescription}" (User: ${authenticatedUserId || 'anonymous'})`);
+      // ✅ User ID comes from protectedApiHandler authentication (req.user.id)
+      const authenticatedUserId = req.user.id;
+
+      console.log(`[SUBSCRIPTION-AWARE AGENT] ${action} request for: "${productDescription}" (User: ${authenticatedUserId})`);
 
     // Use AI-powered ClassificationAgent for HS code suggestions
     if (action === 'suggest_hs_code' && productDescription) {
@@ -347,4 +329,5 @@ export default async function handler(req, res) {
       }
     });
   }
-}
+  } // End POST handler
+}); // End protectedApiHandler

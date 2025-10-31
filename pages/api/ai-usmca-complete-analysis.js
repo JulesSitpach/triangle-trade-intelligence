@@ -18,7 +18,7 @@ import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
 import { normalizeComponent, logComponentValidation, validateAPIResponse } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
-import { checkAnalysisLimit, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
+import { reserveAnalysisSlot, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { ClassificationAgent } from '../../lib/agents/classification-agent.js';
 
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
@@ -373,34 +373,96 @@ export default protectedApiHandler({
     // Get user's subscription tier from database
     const { data: userProfile } = await supabase
       .from('user_profiles')
-      .select('subscription_tier')
+      .select('subscription_tier, trial_end_date, email_confirmed_at')
       .eq('user_id', userId)
       .single();
 
     const subscriptionTier = userProfile?.subscription_tier || 'Trial';
 
-    // Check 1: Monthly analysis limit
-    const usageStatus = await checkAnalysisLimit(userId, subscriptionTier);
+    // Check 1: Atomically reserve analysis slot (prevents race conditions)
+    // This increments the counter BEFORE processing, ensuring parallel requests
+    // cannot bypass the limit by checking simultaneously before any increment
+    const reservation = await reserveAnalysisSlot(userId, subscriptionTier);
 
-    if (!usageStatus.canProceed) {
+    if (!reservation.allowed) {
       return res.status(429).json({
         success: false,
         error: 'Monthly analysis limit reached',
+        message: 'You have reached your monthly analysis limit. Please upgrade to continue.',
         limit_info: {
           tier: subscriptionTier,
-          current_count: usageStatus.currentCount,
-          tier_limit: usageStatus.tierLimit,
-          remaining: usageStatus.remaining
+          current_count: reservation.currentCount,
+          tier_limit: reservation.tierLimit,
+          remaining: Math.max(0, reservation.tierLimit - reservation.currentCount)
         },
         upgrade_required: true,
         upgrade_url: '/pricing'
       });
     }
 
-    // Check 2: Component limit (prevent complex analyses on lower tiers)
-    // Use USED component count (including deleted locked ones) to prevent gaming
-    const usedComponentCount = formData.used_components_count || formData.component_origins?.filter(c => c.is_locked).length || 0;
+    console.log(`[USMCA-ANALYSIS] ✅ Slot reserved (ID: ${reservation.reservationId}): ${reservation.currentCount}/${reservation.tierLimit}`);
+
+    // Check 2: Trial expiration (prevent free forever usage)
+    if (subscriptionTier === 'Trial' || subscriptionTier === 'trial') {
+      if (userProfile?.trial_end_date) {
+        const trialEnd = new Date(userProfile.trial_end_date);
+        const now = new Date();
+
+        if (now > trialEnd) {
+          console.log(`🚫 Trial expired for user ${userId} (expired: ${trialEnd.toISOString()})`);
+          return res.status(403).json({
+            success: false,
+            error: 'Trial expired',
+            message: 'Your 7-day free trial has ended. Please subscribe to continue using the platform.',
+            trial_info: {
+              trial_end_date: trialEnd.toISOString(),
+              days_expired: Math.floor((now - trialEnd) / (1000 * 60 * 60 * 24))
+            },
+            upgrade_required: true,
+            upgrade_url: '/pricing'
+          });
+        }
+      }
+
+      // Check 2B: Email verification for trial users (prevent spam signups)
+      // Fetch email confirmation status from auth.users
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
+
+      if (authError) {
+        console.error(`[EMAIL-VERIFICATION] Error fetching auth user ${userId}:`, authError);
+        // Don't block on error - fail open
+      } else if (!authUser?.user?.email_confirmed_at) {
+        console.log(`🚫 Email not verified for trial user ${userId}`);
+        return res.status(403).json({
+          success: false,
+          error: 'Email verification required',
+          message: 'Please verify your email address before using trial features. Check your inbox for the confirmation link.',
+          email_verification_required: true,
+          user_email: authUser?.user?.email
+        });
+      }
+    }
+
+    // Check 3: Component limit (prevent complex analyses on lower tiers)
+    // 🔒 SERVER-SIDE VALIDATION: Don't trust client-sent used_components_count
+    // Recalculate from actual locked components to prevent DevTools manipulation
+    const actualLockedCount = formData.component_origins?.filter(c => c.is_locked).length || 0;
+    const clientSentCount = formData.used_components_count || 0;
     const currentComponentCount = formData.component_origins?.length || 0;
+
+    // Use the HIGHER of the two values (prevents client from lying about lower count)
+    const usedComponentCount = Math.max(actualLockedCount, clientSentCount);
+
+    // Log discrepancy if client tried to manipulate
+    if (clientSentCount > 0 && actualLockedCount !== clientSentCount) {
+      console.warn(`[SECURITY] used_components_count mismatch for user ${userId}: client=${clientSentCount}, actual=${actualLockedCount}`);
+      await DevIssue.securityEvent('ai_usmca_analysis', 'used_components_count_mismatch', {
+        userId,
+        clientSentCount,
+        actualLockedCount,
+        usedComponentCount
+      });
+    }
 
     const TIER_COMPONENT_LIMITS = {
       'Trial': 3,
@@ -1744,12 +1806,10 @@ export default protectedApiHandler({
     // For now: Return response immediately, skip database saves
     // Result: ~90 second performance improvement (102s → 10-15s)
 
-    // ✅ USAGE TRACKING: Increment monthly analysis count (fire-and-forget)
-    // This allows the dashboard counter to update correctly
-    // Fire-and-forget: don't block response while tracking
-    incrementAnalysisCount(userId, subscriptionTier).catch(err => {
-      console.error('[USAGE-TRACKING] Failed to increment count for user', userId, ':', err.message);
-    });
+    // ✅ USAGE TRACKING: Counter already incremented atomically at request start
+    // reserveAnalysisSlot() was called before processing (line ~385) to prevent
+    // race conditions. No need to increment again here.
+    // Old code: incrementAnalysisCount() - REMOVED (would double-count)
 
     // ✅ WORKFLOW COMPLETION: Mark workflow as completed to prevent AI regeneration (fire-and-forget)
     // This protects OpenRouter costs (~$0.02/request) and maintains analysis integrity

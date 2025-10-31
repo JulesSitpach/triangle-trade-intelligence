@@ -172,6 +172,10 @@ export default async function handler(req, res) {
         await handleInvoicePaymentFailed(event.data.object);
         break;
 
+      case 'charge.refunded':
+        await handleChargeRefunded(event.data.object);
+        break;
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -716,5 +720,98 @@ async function handleInvoicePaymentFailed(invoice) {
       }
     });
     console.error('Error in invoice.payment_failed handler:', error);
+  }
+}
+
+/**
+ * Handle charge.refunded event
+ * Revoke certificates when user receives refund to prevent abuse
+ */
+async function handleChargeRefunded(charge) {
+  console.log('Processing charge.refunded:', charge.id);
+
+  try {
+    // Get customer and user_id
+    const customer = await stripe.customers.retrieve(charge.customer);
+    const userId = customer.metadata?.user_id;
+
+    if (!userId) {
+      await logDevIssue({
+        type: 'missing_data',
+        severity: 'high',
+        component: 'stripe_webhook',
+        message: 'No user_id in customer metadata for refunded charge - cannot revoke certificates',
+        data: {
+          chargeId: charge.id,
+          customerId: charge.customer,
+          amount: charge.amount / 100,
+          currency: charge.currency
+        }
+      });
+      console.warn('No user_id in customer metadata for refunded charge');
+      return;
+    }
+
+    // Mark certificates created after charge as revoked
+    const chargeCreatedAt = new Date(charge.created * 1000);
+
+    const { data: revokedCerts, error } = await supabase
+      .from('workflow_completions')
+      .update({
+        certificate_status: 'revoked_refund',
+        download_disabled: true,
+        revoked_at: new Date().toISOString(),
+        revoked_reason: `Stripe charge ${charge.id} refunded - ${charge.amount / 100} ${charge.currency.toUpperCase()}`
+      })
+      .eq('user_id', userId)
+      .gte('created_at', chargeCreatedAt.toISOString())
+      .is('certificate_status', null) // Only revoke certificates that haven't been revoked before
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    console.log(`✅ Revoked ${revokedCerts?.length || 0} certificates for user ${userId} due to refund`);
+
+    // Log security event for tracking
+    await DevIssue.securityEvent('stripe_webhook', 'charge_refunded', {
+      userId,
+      chargeId: charge.id,
+      amount: charge.amount / 100,
+      currency: charge.currency,
+      certificatesRevoked: revokedCerts?.length || 0,
+      refundReason: charge.refunds?.data?.[0]?.reason || 'unknown'
+    });
+
+    // Update user profile to flag refund abuse if multiple refunds
+    const { data: previousRefunds } = await supabase
+      .from('webhook_events')
+      .select('event_id')
+      .eq('event_type', 'charge.refunded')
+      .like('payload', `%${userId}%`);
+
+    if (previousRefunds && previousRefunds.length >= 2) {
+      await DevIssue.securityEvent('stripe_webhook', 'multiple_refunds_detected', {
+        userId,
+        refundCount: previousRefunds.length + 1,
+        severity: 'high',
+        message: 'User has requested multiple refunds - possible abuse pattern'
+      });
+    }
+
+  } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'high',
+      component: 'stripe_webhook',
+      message: 'Failed to revoke certificates after refund - SECURITY RISK',
+      data: {
+        chargeId: charge.id,
+        error: error.message,
+        stack: error.stack
+      }
+    });
+    console.error('Error handling charge.refunded:', error);
   }
 }
