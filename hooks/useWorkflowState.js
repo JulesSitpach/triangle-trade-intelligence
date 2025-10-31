@@ -428,6 +428,7 @@ export function useWorkflowState() {
           },
           product: workflowResult.product,
           usmca: workflowResult.usmca,
+          savings: workflowResult.savings,  // ✅ FIX: Include savings for metric boxes
           trust: workflowResult.trust,
           // CRITICAL FIX: Use ENRICHED components from API, not original formData
           component_origins: workflowResult.component_origins || workflowResult.components || formData.component_origins,
