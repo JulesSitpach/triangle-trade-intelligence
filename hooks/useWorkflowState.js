@@ -347,10 +347,14 @@ export function useWorkflowState() {
       // ✅ CHECK FOR CACHED ENRICHED DATA FIRST (avoid redundant API calls)
       // If database enrichment already provided all tariff rates, use cached results
       const cachedResults = localStorage.getItem('usmca_workflow_results');
+      console.log('🔍 [CACHE CHECK] Checking for cached enriched data...');
+
       if (cachedResults) {
         try {
           const parsed = JSON.parse(cachedResults);
           const components = parsed.component_origins || parsed.components || [];
+
+          console.log(`🔍 [CACHE CHECK] Found ${components.length} cached components`);
 
           // Check if all components have complete enrichment from database
           const allEnriched = components.length > 0 && components.every(c =>
@@ -361,6 +365,16 @@ export function useWorkflowState() {
             c.usmca_rate !== null &&
             c.usmca_rate !== undefined
           );
+
+          console.log('🔍 [CACHE CHECK] All components enriched?', allEnriched);
+          if (!allEnriched && components.length > 0) {
+            console.log('🔍 [CACHE CHECK] First component check:', {
+              rate_source: components[0]?.rate_source,
+              stale: components[0]?.stale,
+              has_mfn: components[0]?.mfn_rate !== null && components[0]?.mfn_rate !== undefined,
+              has_usmca: components[0]?.usmca_rate !== null && components[0]?.usmca_rate !== undefined
+            });
+          }
 
           if (allEnriched) {
             console.log('✅ Using cached enriched data - all components have fresh database rates');
@@ -386,14 +400,17 @@ export function useWorkflowState() {
             setIsLoading(false);
             return; // Skip API call entirely
           } else {
-            console.log('⚠️ Cached data incomplete or stale - will make fresh API call');
+            console.log('⚠️ [CACHE CHECK] Cached data incomplete or stale - will make fresh API call');
           }
         } catch (e) {
-          console.log('⚠️ Failed to parse cached results - will make fresh API call');
+          console.log('⚠️ [CACHE CHECK] Failed to parse cached results - will make fresh API call:', e.message);
         }
+      } else {
+        console.log('⚠️ [CACHE CHECK] No cached data found - will make fresh API call');
       }
 
       // No cached data or incomplete - proceed with API call
+      console.log('🌐 [API CALL] Calling /api/ai-usmca-complete-analysis...');
       const workflowResult = await workflowService.processCompleteWorkflow(formData);
 
       if (workflowResult.success) {
