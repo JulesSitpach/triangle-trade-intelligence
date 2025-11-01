@@ -392,47 +392,53 @@ export default function TradeRiskAlternatives() {
         console.log('⚠️ No workflow intelligence found in localStorage - user may need to re-run workflow');
       }
 
-      // Log missing data to admin dashboard
-      const missingFields = [];
-      if (!profile.companyName) missingFields.push('company_name');
-      if (!profile.businessType) missingFields.push('business_type');
-      if (!profile.industry_sector) missingFields.push('industry_sector');
-      if (!profile.hsCode) missingFields.push('hs_code');
-      if (!profile.productDescription) missingFields.push('product_description');
-      if (!profile.supplierCountry && components.length > 0) missingFields.push('component origin_country');
-      if (!profile.qualificationStatus) missingFields.push('qualification_status');
-      if (profile.componentOrigins.length === 0) missingFields.push('component_origins array');
+      // ✅ SMART VALIDATION: Only log errors if data exists but is incomplete
+      // If userData is completely empty, that's expected (user hasn't completed workflow yet)
+      const hasAnyData = !!profile.companyName || !!profile.hsCode || components.length > 0;
 
-      if (missingFields.length > 0) {
-        console.error('🚨 DEV ISSUE: Missing workflow data in alerts page', {
-          missing_fields: missingFields,
-          userData_keys: Object.keys(userData),
-          company_keys: userData.company ? Object.keys(userData.company) : [],
-          product_keys: userData.product ? Object.keys(userData.product) : [],
-          usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
-          components_count: userData.components?.length || 0
-        });
+      if (hasAnyData) {
+        // Data exists but might be incomplete - log missing CRITICAL fields only
+        const missingCriticalFields = [];
+        if (!profile.companyName) missingCriticalFields.push('company_name');
+        if (!profile.hsCode) missingCriticalFields.push('hs_code');
+        if (profile.componentOrigins.length === 0) missingCriticalFields.push('component_origins');
 
-        // Log to admin dashboard (non-blocking)
-        fetch('/api/admin/log-dev-issue', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            issue_type: 'missing_data',
-            severity: 'high',
-            component: 'trade_alerts_page',
-            message: `Missing ${missingFields.length} required fields in alerts page data flow`,
-            context_data: {
-              missing_fields: missingFields,
-              userData_structure: {
-                company_keys: userData.company ? Object.keys(userData.company) : [],
-                product_keys: userData.product ? Object.keys(userData.product) : [],
-                usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
-                components_count: userData.components?.length || 0
+        if (missingCriticalFields.length > 0) {
+          console.warn('⚠️ INCOMPLETE WORKFLOW DATA: User started workflow but missing critical fields', {
+            missing_critical_fields: missingCriticalFields,
+            userData_keys: Object.keys(userData),
+            company_keys: userData.company ? Object.keys(userData.company) : [],
+            product_keys: userData.product ? Object.keys(userData.product) : [],
+            usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
+            components_count: userData.components?.length || 0
+          });
+
+          // Log to admin dashboard (non-blocking)
+          fetch('/api/admin/log-dev-issue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              issue_type: 'incomplete_workflow_data',
+              severity: 'warning',
+              component: 'trade_alerts_page',
+              message: `User started workflow but missing ${missingCriticalFields.length} critical fields`,
+              context_data: {
+                missing_critical_fields: missingCriticalFields,
+                userData_structure: {
+                  company_keys: userData.company ? Object.keys(userData.company) : [],
+                  product_keys: userData.product ? Object.keys(userData.product) : [],
+                  usmca_keys: userData.usmca ? Object.keys(userData.usmca) : [],
+                  components_count: userData.components?.length || 0
+                }
               }
-            }
-          })
-        }).catch(err => console.error('Failed to log dev issue:', err));
+            })
+          }).catch(err => console.error('Failed to log dev issue:', err));
+        } else {
+          console.log('✅ Complete workflow data loaded for alerts page');
+        }
+      } else {
+        // No data at all - this is expected for new users
+        console.log('ℹ️ No workflow data found - user needs to complete workflow first');
       }
 
       setUserProfile(profile);
