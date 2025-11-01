@@ -1285,7 +1285,7 @@ export default protectedApiHandler({
       .join('|');
     const cacheKey = crypto
       .createHash('sha256')
-      .update(`${componentFingerprint}|${destinationCountry}|${formData.industry_sector || 'unknown'}`)
+      .update(`${componentFingerprint}|${formData.destination_country}|${formData.industry_sector || 'unknown'}`)
       .digest('hex')
       .substring(0, 16);
 
