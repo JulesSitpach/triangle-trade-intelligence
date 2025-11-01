@@ -132,6 +132,11 @@ export default protectedApiHandler({
       // compliance_cost_savings, workflow_data (JSONB), session_id, completion_time_minutes
       const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || []);
 
+      // ✅ CRITICAL FIX: Extract qualification status and regional content to top-level columns
+      // Dashboard expects these fields in database columns, not just in JSONB
+      const qualificationStatus = workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED';
+      const regionalContent = parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0;
+
       const workflowRecord = {
         user_id: userId,
         email: req.user?.email || null,
@@ -142,18 +147,30 @@ export default protectedApiHandler({
         certificate_generated: !!workflowData.certificate_generated,
         status: 'completed',
 
+        // ✅ NEW: Add qualification and content fields to top-level columns
+        // This is what the dashboard queries for in UserDashboard.js
+        qualification_status: qualificationStatus,
+        regional_content_percentage: regionalContent,
+        required_threshold: workflowData.usmca?.threshold_applied || 60,
+        company_name: workflowData.company?.company_name || workflowData.company?.name || null,
+        company_country: workflowData.company?.company_country || 'US',
+        destination_country: workflowData.company?.destination_country || 'US',
+        business_type: workflowData.company?.business_type || null,
+        manufacturing_location: workflowData.company?.manufacturing_location || null,
+
         // Financial data in dedicated columns for easy querying
         total_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
         estimated_duty_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
+        estimated_annual_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
         compliance_cost_savings: 0,
 
         // Store ALL workflow data in JSONB column
         workflow_data: {
           ...workflowData,
           qualification_result: {
-            status: workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
+            status: qualificationStatus,
             trust_score: parseFloat(workflowData.trust?.score) || 95,
-            regional_content: parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0,
+            regional_content: regionalContent,
             required_threshold: workflowData.usmca?.threshold_applied || 60,
             component_origins: normalizedComponents,
             supplier_country: workflowData.company?.supplier_country
