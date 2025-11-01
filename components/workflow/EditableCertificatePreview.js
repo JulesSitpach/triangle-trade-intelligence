@@ -1142,7 +1142,7 @@ export default function EditableCertificatePreview({
         </div>
 
         {/* Certification Statement */}
-        <div style={{ borderBottom: '2px solid #000', padding: '10px', fontSize: '9px', lineHeight: '1.4', minHeight: '50px' }}>
+        <div style={{ padding: '10px', fontSize: '9px', lineHeight: '1.4', minHeight: '50px' }}>
           I CERTIFY THAT THE GOODS DESCRIBED IN THIS DOCUMENT QUALIFY AS ORIGINATING AND THE INFORMATION CONTAINED IN THIS DOCUMENT IS TRUE AND ACCURATE. I ASSUME RESPONSIBILITY FOR PROVING SUCH REPRESENTATIONS AND AGREE TO MAINTAIN AND PRESENT UPON REQUEST OR TO MAKE AVAILABLE DURING A VERIFICATION VISIT, DOCUMENTATION NECESSARY TO SUPPORT THIS CERTIFICATION
         </div>
 
