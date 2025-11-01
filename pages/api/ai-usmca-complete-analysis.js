@@ -707,6 +707,21 @@ export default protectedApiHandler({
                                      normalizedHsCode.substring(4, 6) + '.' +
                                      normalizedHsCode.substring(6, 8);
 
+          // ✅ SMART LOOKUP: Helper function to calculate description similarity
+          const calculateDescriptionSimilarity = (userDesc, dbDesc) => {
+            if (!userDesc || !dbDesc) return 0;
+            const user = userDesc.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+            const db = dbDesc.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+
+            // Keyword matching (common words in both descriptions)
+            const userWords = user.split(/\s+/).filter(w => w.length > 2);
+            const dbWords = db.split(/\s+/).filter(w => w.length > 2);
+            const matchingWords = userWords.filter(w => dbWords.includes(w));
+
+            // Score: percentage of user's words that appear in DB description
+            return userWords.length > 0 ? (matchingWords.length / userWords.length) : 0;
+          };
+
           // Try exact match first (try both formats)
           const { data: exactMatch } = await supabase
             .from('tariff_intelligence_master')
@@ -717,20 +732,51 @@ export default protectedApiHandler({
 
           let rateData = exactMatch;
 
-          // If exact match fails, try 6-digit prefix match (more lenient)
+          // ✅ SMART VALIDATION (Nov 1): Check if exact match description actually matches user's component
+          // Prevents wrong subcategory selection (e.g., "Static converters" vs "Power Supply Unit")
+          if (exactMatch) {
+            const similarity = calculateDescriptionSimilarity(
+              component.description,
+              exactMatch.brief_description
+            );
+
+            console.log(`🔍 [HS-MATCH] ${component.hs_code}: "${component.description}" vs DB: "${exactMatch.brief_description}" (${Math.round(similarity * 100)}% match)`);
+
+            // If similarity is low (<30%), the exact match is probably wrong subcategory
+            // Try 6-digit prefix to find general category instead
+            if (similarity < 0.3) {
+              console.log(`⚠️ [HS-MISMATCH] Description similarity too low (${Math.round(similarity * 100)}%), trying 6-digit prefix...`);
+              rateData = null; // Force prefix lookup
+            }
+          }
+
+          // If exact match fails OR description doesn't match, try 6-digit prefix match (more lenient)
           if (!rateData) {
             const sixDigitPrefix = normalizedHsCode.substring(0, 6);
-            // DEBUG: Exact match failed, trying 6-digit prefix match
+            console.log(`🔍 [PREFIX-LOOKUP] Searching for 6-digit prefix: ${sixDigitPrefix}%`);
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
               .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
               .ilike('hts8', `${sixDigitPrefix}%`)
-              .limit(1);
+              .order('hts8', { ascending: true }) // Get general category first (e.g., 8504.40.00 before 8504.40.95)
+              .limit(5); // Get multiple to find best description match
 
             if (prefixMatches && prefixMatches.length > 0) {
-              rateData = prefixMatches[0];
-              // DEBUG: Found prefix match for HS code
+              // Find best match by description similarity
+              let bestMatch = prefixMatches[0];
+              let bestSimilarity = calculateDescriptionSimilarity(component.description, bestMatch.brief_description);
+
+              for (const match of prefixMatches) {
+                const sim = calculateDescriptionSimilarity(component.description, match.brief_description);
+                if (sim > bestSimilarity) {
+                  bestMatch = match;
+                  bestSimilarity = sim;
+                }
+              }
+
+              rateData = bestMatch;
+              console.log(`✅ [PREFIX-MATCH] Found better match: ${bestMatch.hts8} "${bestMatch.brief_description}" (${Math.round(bestSimilarity * 100)}% similarity)`);
             }
           }
 
@@ -1201,7 +1247,7 @@ export default protectedApiHandler({
       .reduce((sum, c) => sum + (c.value_percentage || 0), 0);
 
     // Calculate component-level financials
-    const componentFinancials = (enrichedComponents || []).map(comp => {
+    const componentFinancials = (enrichedComponents || []).map((comp, idx) => {
       const mfn = comp.mfn_rate || 0;
       // ✅ FIX (Oct 27): ALL components in a qualified product get USMCA rates
       // Component origin (CN, US, MX) doesn't matter - if the finished product qualifies,
@@ -1221,6 +1267,18 @@ export default protectedApiHandler({
       const originCountry = (comp.origin_country || '').toUpperCase();
       const isUSMCAMember = usmcaCountries.includes(originCountry);
 
+      // ✅ DEBUG (Nov 1): Trace data types through calculation chain for ALL components
+      console.log(`\n🔍 [COMPONENT-${idx}] ${comp.description || 'Unknown'} (${originCountry})`);
+      console.log('   Trade Volume:', tradeVolume);
+      console.log('   Value %:', comp.value_percentage);
+      console.log('   Component Value:', componentValue);
+      console.log('   MFN Rate:', mfn);
+      console.log('   USMCA Rate:', usmca);
+      console.log('   MFN Cost:', mfnCost);
+      console.log('   USMCA Cost:', usmcaCost);
+      console.log('   Is USMCA Member:', isUSMCAMember);
+      console.log('   Condition (isUSMCAMember && usmca < mfn):', (isUSMCAMember && usmca < mfn));
+
       // ✅ FIX (Oct 29): Calculate FULL nearshoring potential for non-USMCA components
       // If component is from China/Asia and you nearshore to Mexico/Canada/US:
       // - Eliminate MFN rate (35%) → get 0% USMCA rate
@@ -1232,6 +1290,10 @@ export default protectedApiHandler({
       // Chinese components (CN) don't qualify for USMCA → $0 savings
       // Canadian components with 0% MFN already duty-free → $0 savings
       const savingsPerYear = (isUSMCAMember && usmca < mfn) ? (mfnCost - usmcaCost) : 0;
+
+      // ✅ DEBUG (Nov 1): Log final savings calculation for ALL components
+      console.log('   Savings Calculation (mfnCost - usmcaCost):', (mfnCost - usmcaCost));
+      console.log('   Final Annual Savings:', Math.round(savingsPerYear));
 
       return {
         hs_code: comp.hs_code,
@@ -1294,9 +1356,9 @@ export default protectedApiHandler({
     // Check for cached qualification result (valid for 24 hours)
     const { data: cachedQualification } = await supabase
       .from('workflow_sessions')
-      .select('workflow_data')
+      .select('data')
       .eq('user_id', userId)
-      .not('workflow_data', 'is', null)
+      .not('data', 'is', null)
       .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
       .order('created_at', { ascending: false })
       .limit(10);
@@ -1304,7 +1366,7 @@ export default protectedApiHandler({
     let cachedAnalysis = null;
     if (cachedQualification && cachedQualification.length > 0) {
       for (const session of cachedQualification) {
-        const workflowData = session.workflow_data;
+        const workflowData = session.data;
         if (workflowData?.cache_key === cacheKey && workflowData?.usmca && workflowData?.detailed_analysis) {
           cachedAnalysis = {
             usmca: workflowData.usmca,
@@ -1456,6 +1518,76 @@ export default protectedApiHandler({
           json_sample: sanitizedJSON?.substring(0, 100)
         });
         throw new Error(`AI response parsing failed: ${parseError.message}`);
+      }
+
+      // ✅ CACHE SAVE: Store qualification result for future requests
+      // This prevents repeated AI calls for the same component configuration
+      if (cacheKey && userId) {
+        try {
+          const cacheData = {
+            cache_key: cacheKey,
+            usmca: analysis.usmca,
+            detailed_analysis: analysis.detailed_analysis,
+            recommendations: analysis.recommendations,
+            cached_at: new Date().toISOString()
+          };
+
+          // Try to update existing session first (if workflow_session_id provided)
+          if (formData.workflow_session_id) {
+            console.log(`🔍 [CACHE-SAVE-ATTEMPT] Trying to update existing session: ${formData.workflow_session_id}`);
+
+            const { data: currentSession } = await supabase
+              .from('workflow_sessions')
+              .select('data')
+              .eq('id', formData.workflow_session_id)
+              .single();
+
+            if (currentSession) {
+              const existingData = currentSession.data || {};
+              const { error: updateError } = await supabase
+                .from('workflow_sessions')
+                .update({
+                  data: {
+                    ...existingData,
+                    ...cacheData
+                  }
+                })
+                .eq('id', formData.workflow_session_id);
+
+              if (!updateError) {
+                console.log(`💾 [CACHE-SAVED] Updated existing session with cache (key: ${cacheKey})`);
+                throw null; // Exit try block successfully
+              }
+            }
+          }
+
+          // If no session_id provided or update failed, create a new cache-only session
+          console.log(`🔍 [CACHE-SAVE-ATTEMPT] Creating new cache-only session for user: ${userId}`);
+
+          const { error: insertError } = await supabase
+            .from('workflow_sessions')
+            .insert({
+              user_id: userId,
+              session_id: `cache-${cacheKey}`,
+              data: cacheData,
+              created_at: new Date().toISOString(),
+              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hour cache
+            });
+
+          if (insertError) {
+            console.error(`❌ [CACHE-SAVE-FAILED] Insert error:`, insertError.message);
+            throw new Error(`Insert failed: ${insertError.message}`);
+          }
+
+          console.log(`💾 [CACHE-SAVED] Created new cache session (key: ${cacheKey})`);
+        } catch (cacheError) {
+          if (cacheError !== null) {
+            console.warn('⚠️ [CACHE-SAVE-FAILED] Could not save qualification cache:', cacheError.message);
+          }
+          // Non-fatal - continue with response even if cache save fails
+        }
+      } else {
+        console.warn(`⚠️ [CACHE-SKIP] Missing userId (${userId}) or cacheKey (${cacheKey})`);
       }
     } // End of else block (AI call made)
 
