@@ -1501,14 +1501,6 @@ export default function TradeRiskAlternatives() {
               )}
             </div>
           )}
-
-          {alertImpactAnalysis && (
-            <AlertImpactAnalysisDisplay
-              data={alertImpactAnalysis}
-              consolidatedAlertsCount={consolidatedAlerts.length}
-              onClose={null}
-            />
-          )}
         </div>
 
         {/* Next Steps - ALWAYS show after analysis runs (even if 0 alerts) */}
