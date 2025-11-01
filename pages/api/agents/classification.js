@@ -72,13 +72,11 @@ export default protectedApiHandler({
       const cached = cacheResults && cacheResults.length > 0 ? cacheResults[0] : null;
 
       if (cached && !cacheError) {
-        // ✅ CONFIDENCE THRESHOLD CHECK (Nov 1): Re-classify if confidence < 90%
-        const confidenceThreshold = 90;
-        if (cached.confidence < confidenceThreshold) {
-          console.log(`⚠️ [LOW-CONFIDENCE-CACHE] Cached HS ${cached.hs_code} has ${cached.confidence}% confidence < ${confidenceThreshold}% - Re-triggering AI classification for better result`);
-          // Skip cache, proceed to AI call below
-        } else {
-          console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (saved ~13 seconds)`);
+
+        // ✅ ALWAYS use cached result for exact description match (even if confidence < 90%)
+        // Rationale: Re-classifying the same text won't improve confidence unless AI model/prompt changes
+        // If user only changed percentage (not description), no need to waste $0.02 + 14s re-classifying
+          console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (HS: ${cached.hs_code}, Confidence: ${cached.confidence}%, saved ~13 seconds)`);
 
           // Transform database record to API response format
         // ✅ SAFETY: Ensure all fields are strings (database might have JSONB)
