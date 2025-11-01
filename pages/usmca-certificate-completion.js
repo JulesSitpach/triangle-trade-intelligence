@@ -264,6 +264,45 @@ export default function USMCACertificateCompletion() {
       full_company_object: workflowData?.company
     });
 
+    // ✅ P0-4 FIX: Validate required fields BEFORE API call
+    const missingFields = [];
+
+    // Check company_country (can be ISO code or full name after conversion)
+    const companyCountry = workflowData?.company?.company_country ||
+                          workflowData?.company?.country ||
+                          certificateData?.company_info?.exporter_country;
+
+    if (!companyCountry) {
+      missingFields.push('Company Country (required for Box 2 & 3)');
+      console.error('❌ Missing company country. Workflow data:', {
+        company: workflowData?.company,
+        certificate_data: certificateData?.company_info
+      });
+    }
+
+    if (!authData?.signatory_name) {
+      missingFields.push('Signatory Name (required for Box 12)');
+    }
+    if (!authData?.signatory_title) {
+      missingFields.push('Signatory Title (required for Box 12)');
+    }
+    if (!workflowData?.company?.company_name && !workflowData?.company?.name) {
+      missingFields.push('Company Name (required for Box 3)');
+    }
+
+    if (missingFields.length > 0) {
+      const errorMessage = `❌ Certificate Generation Failed\n\nMissing required fields:\n${missingFields.map(f => `• ${f}`).join('\n')}\n\nPlease go back to the Company Information step and complete all required information.`;
+
+      console.error('Certificate validation failed:', {
+        missingFields,
+        workflowData: workflowData?.company,
+        authData
+      });
+
+      alert(errorMessage);
+      return;
+    }
+
     try {
       const response = await fetch('/api/generate-certificate', {
         method: 'POST',
@@ -279,7 +318,7 @@ export default function USMCACertificateCompletion() {
             company_info: {
               exporter_name: workflowData?.company?.company_name || workflowData?.company?.name || '',
               exporter_address: workflowData?.company?.company_address || '',
-              exporter_country: workflowData?.company?.company_country || '',  // FIXED: Use company's country, not manufacturing location
+              exporter_country: companyCountry,  // FIXED: Use validated company country (ISO code or full name)
               exporter_tax_id: workflowData?.company?.tax_id || '',
               exporter_phone: workflowData?.company?.contact_phone || '',
               exporter_email: workflowData?.company?.contact_email || '',
