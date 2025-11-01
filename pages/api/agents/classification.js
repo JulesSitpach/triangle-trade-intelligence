@@ -266,9 +266,10 @@ export default protectedApiHandler({
         ? aiResult.data.explanation
         : JSON.stringify(aiResult.data.explanation || '');
 
+      // ✅ UPSERT (Nov 1): Update existing cache entry if re-classifying due to low confidence
       const { error: saveError } = await supabase
         .from('hs_code_classifications')
-        .insert({
+        .upsert({
           component_description: cacheKey,
           hs_code: primary_hs_code,
           hs_description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
@@ -276,14 +277,17 @@ export default protectedApiHandler({
           explanation: safeExplanationForDB,
           alternative_codes: finalAlternativeCodes,  // ✅ Use corrected sorted alternatives
           source: 'ai_agent',
-          verified: false
+          verified: false,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'component_description'  // Update if description already exists
         });
 
       if (saveError) {
         console.error(`⚠️ Failed to save classification to database:`, saveError.message);
         // Don't fail the request - classification still succeeded
       } else {
-        console.log(`💾 Saved classification to database for "${productDescription.substring(0, 40)}..." - next request will be instant!`);
+        console.log(`💾 Saved/updated classification to database for "${productDescription.substring(0, 40)}..." (${primary_hs_code} @ ${primaryConfidence}%) - next request will be instant!`);
       }
 
       return res.status(200).json(responseWithSubscription);
