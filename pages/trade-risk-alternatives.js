@@ -27,6 +27,19 @@ import TRADE_RISK_CONFIG, {
 import { getCountryConfig } from '../lib/usmca/usmca-2026-config';
 import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
 
+// ✅ HELPER: Convert usmca.qualified (boolean) to qualification_status (string)
+const getQualificationStatus = (usmcaData) => {
+  // Try string format first (new format)
+  if (usmcaData?.qualification_status) {
+    return usmcaData.qualification_status;
+  }
+  // Fallback: convert boolean to string (old format)
+  if (usmcaData?.qualified === true) return 'QUALIFIED';
+  if (usmcaData?.qualified === false) return 'NOT_QUALIFIED';
+  // Default
+  return 'NEEDS_REVIEW';
+};
+
 export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,7 +231,7 @@ export default function TradeRiskAlternatives() {
             productDescription: mostRecentWorkflow.product_description || workflowData.product?.description,
             tradeVolume: parsedTradeVolume,
             supplierCountry: components[0]?.origin_country || components[0]?.country,
-            qualificationStatus: mostRecentWorkflow.qualification_status || workflowData.usmca?.qualification_status,
+            qualificationStatus: mostRecentWorkflow.qualification_status || getQualificationStatus(workflowData.usmca),
             savings: mostRecentWorkflow.estimated_annual_savings || workflowData.savings?.annual_savings || 0,
             componentOrigins: components,
             regionalContent: workflowData.usmca?.regional_content || 0
@@ -351,7 +364,7 @@ export default function TradeRiskAlternatives() {
         productDescription: userData.product?.description,
         tradeVolume: parsedTradeVolume,
         supplierCountry: components[0]?.origin_country || components[0]?.country,  // Try both keys
-        qualificationStatus: userData.usmca?.qualification_status,
+        qualificationStatus: getQualificationStatus(userData.usmca),
         savings: userData.savings?.annual_savings || 0,
         componentOrigins: components,  // Fixed: use usmca.component_breakdown
         regionalContent: userData.usmca?.regional_content || 0
