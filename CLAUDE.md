@@ -1,8 +1,8 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 1, 2025 - Comprehensive Fixes Applied
-**Status:** 60% Production-Ready (all core features fixed), 30% Ready-to-Activate (email queue), 10% Not Started
-**Recent Fixes** (Nov 1): Fixed dashboard NOT QUALIFIED bug, wired email queue alerts, verified data consistency
+**Last Updated:** November 1, 2025 - Daily Digest System + 4 Fixes Completed
+**Status:** 60% Production-Ready (all core features fixed), 30% Ready-to-Activate (daily digest + payment webhooks), 10% Not Started
+**Recent Fixes** (Nov 1): Fixed dashboard NOT QUALIFIED bug, implemented daily tariff digest (user feedback: "bundle all into 1 email"), verified data consistency
 **User Responsibility:** Users verify all input accuracy. Platform provides tools only - users own correctness of submitted data.
 
 ---
@@ -69,18 +69,21 @@
 
 ### ⚠️ MOSTLY WORKING (Minor Activation Needed)
 
-1. **Email Queue System** - FULLY IMPLEMENTED, Ready to Activate
-   - RSS polling for policy changes implemented ✅
-   - Email queue table exists ✅
-   - Resend API integration configured ✅
-   - queueEmail() function writes to email_queue with retry logic ✅
-   - Tariff detector now calls queueEmail() instead of direct API ✅
-   - process-email-queue endpoint implemented and tested ✅
+1. **Daily Tariff Digest System** - FULLY IMPLEMENTED (Nov 1, 2025), Ready to Activate
+   - **Architecture**: Changed from real-time alerts to daily digest (user feedback: "bundle all into 1 email for daily consumption")
+   - RSS polling detects tariff changes ✅
+   - Tariff detector logs changes to `tariff_changes_log` table instead of sending immediate emails ✅
+   - Daily cron job bundles all 24h changes into 1 email per user at 8 AM UTC ✅
+   - Email includes: all affected changes, rate impacts, confidence levels, action steps ✅
+   - Daily digest sent audit trail in `daily_digest_sent` table ✅
    - **Status**: READY - Just needs Vercel cron scheduling
    - **To Activate**: Add cron job in Vercel project settings:
-     - Endpoint: `/api/cron/process-email-queue`
-     - Schedule: Every 5 minutes
+     - Endpoint: `/api/cron/send-daily-tariff-digest`
+     - Schedule: Every day at 08:00 UTC
      - Add `CRON_SECRET` to environment variables
+   - **Database Tables** (created Nov 1):
+     - `tariff_changes_log`: Tracks detected changes before bundling (is_processed flag for daily grouping)
+     - `daily_digest_sent`: Audit trail of sent digests (user_id, sent_at, changes_count)
 
 2. **Dashboard Display** - FULLY FIXED (Nov 1, 2025)
    - User profile display works ✅
