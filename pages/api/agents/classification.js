@@ -72,9 +72,15 @@ export default protectedApiHandler({
       const cached = cacheResults && cacheResults.length > 0 ? cacheResults[0] : null;
 
       if (cached && !cacheError) {
-        console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (saved ~13 seconds)`);
+        // ✅ CONFIDENCE THRESHOLD CHECK (Nov 1): Re-classify if confidence < 90%
+        const confidenceThreshold = 90;
+        if (cached.confidence < confidenceThreshold) {
+          console.log(`⚠️ [LOW-CONFIDENCE-CACHE] Cached HS ${cached.hs_code} has ${cached.confidence}% confidence < ${confidenceThreshold}% - Re-triggering AI classification for better result`);
+          // Skip cache, proceed to AI call below
+        } else {
+          console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (saved ~13 seconds)`);
 
-        // Transform database record to API response format
+          // Transform database record to API response format
         // ✅ SAFETY: Ensure all fields are strings (database might have JSONB)
         const safeExplanation = typeof cached.explanation === 'string' ? cached.explanation : JSON.stringify(cached.explanation || '');
 
@@ -119,7 +125,8 @@ export default protectedApiHandler({
           }
         };
 
-        return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
+          return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
+        }
       }
 
       console.log(`⏳ Database Cache MISS - Making AI call for "${productDescription.substring(0, 40)}..."`);
