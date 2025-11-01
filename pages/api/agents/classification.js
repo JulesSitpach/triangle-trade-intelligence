@@ -123,11 +123,11 @@ export default protectedApiHandler({
           }
         };
 
-          return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
-        }
+        return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
       }
 
       console.log(`⏳ Database Cache MISS - Making AI call for "${productDescription.substring(0, 40)}..."`);
+
       const agent = new ClassificationAgent();
       const aiResult = await agent.suggestHSCode(productDescription, componentOrigins, additionalContext);
 
