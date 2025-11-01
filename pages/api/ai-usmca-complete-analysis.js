@@ -1276,54 +1276,102 @@ export default protectedApiHandler({
       }
     };
 
-    // Pass enriched components with real rates and pre-calculated financials to AI prompt
-    const prompt = await buildComprehensiveUSMCAPrompt(
-      { ...formData, component_origins: enrichedComponents },
-      (enrichedComponents || []).reduce((acc, comp) => {
-        acc[comp.hs_code] = {
-          mfn_rate: comp.mfn_rate,
-          section_301: comp.section_301,
-          section_232: comp.section_232,
-          usmca_rate: comp.usmca_rate
-        };
-        return acc;
-      }, {}),
-      preCalculatedFinancials  // ✅ Pass pre-calculated data to AI prompt
-    );
+    // ✅ QUALIFICATION CACHING: Generate fingerprint of component data to avoid repeated AI calls
+    // Cache key includes: HS codes, origins, percentages, destination, industry (all factors affecting qualification)
+    const crypto = require('crypto');
+    const componentFingerprint = enrichedComponents
+      .map(c => `${c.hs_code}:${c.origin_country}:${c.value_percentage}`)
+      .sort()
+      .join('|');
+    const cacheKey = crypto
+      .createHash('sha256')
+      .update(`${componentFingerprint}|${destinationCountry}|${formData.industry_sector || 'unknown'}`)
+      .digest('hex')
+      .substring(0, 16);
 
-    // Call OpenRouter API
-    const openrouterStartTime = Date.now();
+    console.log(`🔍 [CACHE-CHECK] Qualification cache key: ${cacheKey}`);
 
-    // DEBUG: Sending request to OpenRouter (logging disabled for production)
+    // Check for cached qualification result (valid for 24 hours)
+    const { data: cachedQualification } = await supabase
+      .from('workflow_sessions')
+      .select('workflow_data')
+      .eq('user_id', userId)
+      .not('workflow_data', 'is', null)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-    const requestBody = {
-      model: 'anthropic/claude-haiku-4.5', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
-      max_tokens: 2000, // ✅ OPTIMIZED: Reduced for minimal JSON response (qualification only)
-      messages: [{
-        role: 'user',
-        content: prompt
-      }],
-      temperature: 0 // Zero temperature for determinism
-    };
-
-    // ✅ Use rate limit handler with automatic retry on 429/529
-    const aiResult = await callOpenRouterWithRetry(requestBody, 3, 'USMCAQualification');
-    const openrouterDuration = Date.now() - openrouterStartTime;
-
-    const aiParsingStart = Date.now();
-    const aiText = aiResult.choices?.[0]?.message?.content;
-
-    if (!aiText) {
-      throw new Error('AI response is empty or missing content field');
+    let cachedAnalysis = null;
+    if (cachedQualification && cachedQualification.length > 0) {
+      for (const session of cachedQualification) {
+        const workflowData = session.workflow_data;
+        if (workflowData?.cache_key === cacheKey && workflowData?.usmca && workflowData?.detailed_analysis) {
+          cachedAnalysis = {
+            usmca: workflowData.usmca,
+            detailed_analysis: workflowData.detailed_analysis,
+            recommendations: workflowData.recommendations
+          };
+          console.log(`✅ [CACHE-HIT] Found cached qualification result (key: ${cacheKey})`);
+          break;
+        }
+      }
     }
 
-    // DEBUG: Parsing AI response (logging disabled for production)
-
-    // Parse AI response (expecting JSON) - robust multi-strategy extraction
     let analysis;
-    let extractionMethod = '';  // ✅ MOVED outside try-catch so catch block can access it
-    let sanitizedJSON = null;   // ✅ MOVED outside try-catch so catch block can access it
-    try {
+    if (cachedAnalysis) {
+      // Use cached result - no AI call needed!
+      analysis = cachedAnalysis;
+      console.log(`💰 [CACHE-SAVE] Avoided AI call by using cached qualification result`);
+    } else {
+      console.log(`❌ [CACHE-MISS] No cached result found, calling AI (key: ${cacheKey})`);
+
+      // Pass enriched components with real rates and pre-calculated financials to AI prompt
+      const prompt = await buildComprehensiveUSMCAPrompt(
+        { ...formData, component_origins: enrichedComponents },
+        (enrichedComponents || []).reduce((acc, comp) => {
+          acc[comp.hs_code] = {
+            mfn_rate: comp.mfn_rate,
+            section_301: comp.section_301,
+            section_232: comp.section_232,
+            usmca_rate: comp.usmca_rate
+          };
+          return acc;
+        }, {}),
+        preCalculatedFinancials  // ✅ Pass pre-calculated data to AI prompt
+      );
+
+      // Call OpenRouter API
+      const openrouterStartTime = Date.now();
+
+      // DEBUG: Sending request to OpenRouter (logging disabled for production)
+
+      const requestBody = {
+        model: 'anthropic/claude-haiku-4.5', // ✅ HAIKU: 10x faster than Sonnet, suitable for rule-based qualification
+        max_tokens: 2000, // ✅ OPTIMIZED: Reduced for minimal JSON response (qualification only)
+        messages: [{
+          role: 'user',
+          content: prompt
+        }],
+        temperature: 0 // Zero temperature for determinism
+      };
+
+      // ✅ Use rate limit handler with automatic retry on 429/529
+      const aiResult = await callOpenRouterWithRetry(requestBody, 3, 'USMCAQualification');
+      const openrouterDuration = Date.now() - openrouterStartTime;
+
+      const aiParsingStart = Date.now();
+      const aiText = aiResult.choices?.[0]?.message?.content;
+
+      if (!aiText) {
+        throw new Error('AI response is empty or missing content field');
+      }
+
+      // DEBUG: Parsing AI response (logging disabled for production)
+
+      // Parse AI response (expecting JSON) - robust multi-strategy extraction
+      let extractionMethod = '';  // ✅ MOVED outside try-catch so catch block can access it
+      let sanitizedJSON = null;   // ✅ MOVED outside try-catch so catch block can access it
+      try {
       // ✅ AGGRESSIVE MARKDOWN STRIPPING (Before all extraction strategies)
       // Remove markdown code fences and language identifiers
       let cleanText = aiText
@@ -1399,16 +1447,17 @@ export default protectedApiHandler({
         throw new Error(`Invalid JSON structure (${extractionMethod}): does not start with { or end with }`);
       }
 
-      analysis = JSON.parse(sanitizedJSON);
-      // DEBUG: JSON parse successful
-    } catch (parseError) {
-      console.error('❌ [JSON PARSE ERROR]', {
-        error: parseError.message,
-        extraction_method: extractionMethod,
-        json_sample: sanitizedJSON?.substring(0, 100)
-      });
-      throw new Error(`AI response parsing failed: ${parseError.message}`);
-    }
+        analysis = JSON.parse(sanitizedJSON);
+        // DEBUG: JSON parse successful
+      } catch (parseError) {
+        console.error('❌ [JSON PARSE ERROR]', {
+          error: parseError.message,
+          extraction_method: extractionMethod,
+          json_sample: sanitizedJSON?.substring(0, 100)
+        });
+        throw new Error(`AI response parsing failed: ${parseError.message}`);
+      }
+    } // End of else block (AI call made)
 
     // ✅ SKIPPED: Regex-based validation was causing false positives
     // (extracting component percentages like 35%, 30%, 20% and comparing to tariff rates)
@@ -1544,6 +1593,7 @@ export default protectedApiHandler({
       processing_time_ms: Date.now() - startTime,
       timestamp: new Date().toISOString(),
       method: 'ai_powered',
+      cache_key: cacheKey,  // ✅ Save cache key for future lookups (24-hour cache)
 
       // Company information (pass through ALL fields for certificate)
       company: {
