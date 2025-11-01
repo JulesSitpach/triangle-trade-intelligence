@@ -1,7 +1,7 @@
 # RSS Feed Failure Analysis - Alert System Not Working
 
-**Date:** October 31, 2025
-**Severity:** CRITICAL
+**Date:** October 31, 2025 (Updated: November 1, 2025)
+**Severity:** CRITICAL → ✅ **RESOLVED**
 **Impact:** Users not receiving new tariff policy alerts despite system running
 
 ---
@@ -11,9 +11,10 @@
 User reported: "All week no change to alerts even though I saw changes in the news"
 
 **Root Cause Found:**
-- RSS polling cron IS running (last_check_at: Nov 1, 2025 00:31)
-- **6 out of 10 critical government feeds are FAILING** (57 consecutive failures each)
-- Only 4 news feeds are working (FT, JOC, PBS, Federal Register)
+- RSS polling cron IS running on Vercel production (last_check_at: Nov 1, 2025 00:31)
+- **6 out of 10 critical government feeds were FAILING** (57 consecutive failures each)
+- **Actual Cause:** Government agencies changed RSS feed URLs without notice (404/403/406 errors)
+- **NOT network blocking** - no "x-deny-reason: host_not_allowed" in database logs
 
 ---
 
@@ -282,3 +283,43 @@ These services monitor government sources 24/7 and provide cleaned data via API.
 - But problem existed BEFORE that - feeds were failing for weeks
 - 57 consecutive failures suggests URLs have been broken for ~2 months (57 × 2 hours = 114 hours = ~5 days assuming every-2-hour polling)
 - User is right to complain - system fundamentally not working as designed
+
+---
+
+## ✅ RESOLUTION (November 1, 2025)
+
+### What We Fixed
+1. **Investigated Database** - Checked actual error messages (404/403/406, NOT network blocking)
+2. **Researched New URLs** - Found updated RSS feed URLs from government agencies
+3. **Updated Database** - Fixed 3 broken URLs, disabled 3 deprecated feeds
+4. **Tested All Feeds** - Verified all working feeds return data
+
+### Database Updates Applied
+```sql
+-- Fixed URLs
+CBP Newsroom: https://www.cbp.gov/rss/newsroom/media-releases ✅
+USTR Press: https://ustr.gov/rss.xml ✅
+WTO News: http://www.wto.org/library/rss/latest_news_e.xml ✅ (HTTP not HTTPS)
+
+-- Disabled (feeds discontinued by agencies)
+CBP Customs Bulletin ❌
+Commerce ITA Press ❌
+USITC News Releases ❌
+```
+
+### Results After Fix
+- **Before:** 4/10 feeds working (40% success rate)
+- **After:** 7/10 feeds working (70% success rate)
+- **Disabled:** 3 feeds marked inactive (government discontinued them)
+
+### Next Automatic Test
+- **When:** Monday, November 4, 2025 at 10:00 AM (next scheduled cron run)
+- **Expected:** All 7 active feeds will successfully fetch new articles
+- **Monitor:** Supabase `rss_feed_activities` table for new entries with `status='success'`
+
+### Cost Impact
+- Weekly cron schedule: 4 calls/month = $0.08/month (down from $7.20/month)
+- RSS proxy (rss2json.com): Free tier covers all feeds
+- Database storage: Negligible (~100KB/week)
+
+**Status:** ✅ Ready for production monitoring
