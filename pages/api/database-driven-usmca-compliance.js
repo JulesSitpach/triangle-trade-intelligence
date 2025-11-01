@@ -66,7 +66,7 @@ export default protectedApiHandler({
         try {
           // Use AI to classify the product and return HS codes with tariff data
           const classificationResult = await baseAgent.runWithFallback(
-            'anthropic/claude-3.5-haiku',
+            'anthropic/claude-haiku-4.5',
             `You are a trade classification expert. Classify the product and return HS codes with tariff information.
 
 Product: ${product_description}

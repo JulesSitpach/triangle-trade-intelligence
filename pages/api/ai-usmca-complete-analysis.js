@@ -180,7 +180,7 @@ Return ONLY valid JSON array. No explanations.`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-haiku-20240307',
+          model: 'claude-haiku-4-20250514',
           max_tokens: 2000,
           messages: [{
             role: 'user',

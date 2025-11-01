@@ -406,7 +406,7 @@ Return JSON:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4.5", // Sonnet 4.5 for intelligent consolidation (user-facing)
+        model: "anthropic/claude-haiku-4.5", // Haiku 4.5 for cost-effective intelligent consolidation
         messages: [{
           role: "user",
           content: prompt

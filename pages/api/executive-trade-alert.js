@@ -24,7 +24,7 @@ import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js
 // Initialize agents
 const executiveAgent = new BaseAgent({
   name: 'ExecutiveAdvisor',
-  model: 'anthropic/claude-3.5-sonnet',  // ✅ Sonnet for consulting-grade output ($599/mo tier deserves best model)
+  model: 'anthropic/claude-haiku-4.5',  // ✅ Haiku 4.5 for cost-effective consulting-grade output
   maxTokens: 3000  // Longer responses for strategic depth
 });
 // ✅ Removed mexicoAgent - now using config lookup instead of AI calls

@@ -5,7 +5,7 @@
  * Enhanced with real-time AI agent assistance
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
@@ -23,12 +23,15 @@ export default function ComponentOriginsStepEnhanced({
   onProcessWorkflow,
   isFormValid,
   isLoading,
-  userTier = SUBSCRIPTION_TIERS.FREE_TRIAL
+  userTier = SUBSCRIPTION_TIERS.FREE_TRIAL,
+  saveWorkflowToDatabase
 }) {
   // Track if we just pushed to parent to avoid infinite restore loop
   const lastPushedRef = useRef(null);
+
   // ✅ FIX #3: Ensure all component fields are always defined to prevent React controlled/uncontrolled warning
-  const normalizeComponent = (component) => {
+  // Memoized with useCallback to prevent infinite loops in effects (no dependencies = stable reference)
+  const normalizeComponent = useCallback((component) => {
     // ✅ FIX: Auto-lock components that have HS codes (indicates prior lookup, counts toward tier limit)
     // This handles restoration from previous sessions where lock tracking wasn't implemented
     const hasHSCode = component?.hs_code && component.hs_code.length >= 6;
@@ -62,7 +65,7 @@ export default function ComponentOriginsStepEnhanced({
       rate_source: component?.rate_source ?? null,
       stale: component?.stale ?? false
     };
-  };
+  }, [formData.manufacturing_location]);
 
   const [components, setComponents] = useState(() => {
     // RESTORATION: Check if formData already has components from previous navigation
@@ -99,7 +102,6 @@ export default function ComponentOriginsStepEnhanced({
   // Update parent form data when components change
   // CRITICAL: Prevent infinite loop by tracking when we push to parent
   // ✅ FIX: Use ref to mark when we pushed, skip restoration if we just pushed
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Don't update on initial render (components will be [{}])
     if (components.length === 1 && !components[0].description) {
@@ -109,22 +111,16 @@ export default function ComponentOriginsStepEnhanced({
     // Mark that we just pushed this data
     lastPushedRef.current = JSON.stringify(components);
     updateFormData('component_origins', components);
-  }, [components]);
-  // NOTE: updateFormData intentionally excluded from dependencies
-  // - updateFormData is recreated on every render in useWorkflowState
-  // - Including it would cause this effect to run on every render (infinite loop)
-  // - We only need to depend on components changing
+  }, [components, updateFormData]);
 
   // Sync used_components_count to formData for API validation
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     updateFormData('used_components_count', usedComponentsCount);
-  }, [usedComponentsCount]);
+  }, [usedComponentsCount, updateFormData]);
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
   // ✅ FIX: Skip restoration if we just pushed the same data (prevents infinite loop)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (formData.component_origins &&
         formData.component_origins.length > 0) {
@@ -154,11 +150,43 @@ export default function ComponentOriginsStepEnhanced({
       setUsedComponentsCount(newUsedCount);
       console.log(`🔒 Restored ${newUsedCount} locked components`);
     }
-  }, [formData.component_origins]);
-  // NOTE: components intentionally excluded from dependencies
-  // - This effect only needs to re-run when formData.component_origins changes
-  // - The comparison with local components is just a guard clause, not a trigger
-  // - If components changed locally, first effect will push to formData, triggering this
+  }, [formData.component_origins, normalizeComponent, components]);
+
+  // 💾 AUTO-SAVE: Debounced auto-save to database when components change
+  // Prevents data loss if browser crashes or page is closed during Step 2 editing
+  const autoSaveTimeoutRef = useRef(null);
+  useEffect(() => {
+    // Skip initial empty render
+    if (components.length === 1 && !components[0].description) {
+      return;
+    }
+
+    // Clear previous timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (debounce: 2 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      if (saveWorkflowToDatabase && formData.company_name) {
+        try {
+          console.log('💾 Auto-saving component data (Step 2)...');
+          await saveWorkflowToDatabase();
+          console.log('✅ Component data auto-saved to database');
+        } catch (error) {
+          console.error('❌ Auto-save failed:', error);
+          // Don't show error to user - this is background save
+        }
+      }
+    }, 2000); // Wait 2 seconds after last change before saving
+
+    return () => {
+      // Cleanup timeout on unmount
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [components, saveWorkflowToDatabase, formData.company_name]);
 
   const updateComponent = (index, field, value) => {
     const newComponents = [...components];
@@ -556,6 +584,12 @@ export default function ComponentOriginsStepEnhanced({
       manufacturing_location: formData.manufacturing_location
     });
     console.log('========== END COMPONENT DATA ==========');
+
+    // 💾 NEW: Save component data to database before processing workflow
+    if (saveWorkflowToDatabase) {
+      console.log('💾 Saving component data to database before analysis...');
+      await saveWorkflowToDatabase();
+    }
 
     onProcessWorkflow();
   };

@@ -272,7 +272,7 @@ export const EXTERNAL_SERVICES = {
   // AI Services
   anthropic: {
     apiKey: getEnvValue('ANTHROPIC_API_KEY'),
-    model: getEnvValue('ANTHROPIC_MODEL', 'claude-3-haiku-20240307'),
+    model: getEnvValue('ANTHROPIC_MODEL', 'claude-haiku-4-20250514'),
     maxTokens: parseInt(getEnvValue('ANTHROPIC_MAX_TOKENS', '1000')),
     timeout: parseInt(getEnvValue('ANTHROPIC_TIMEOUT_MS', '10000'))
   }

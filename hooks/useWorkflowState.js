@@ -562,7 +562,7 @@ export function useWorkflowState() {
 
     try {
       const classificationResult = await workflowService.classifyProduct(productDescription, businessType);
-      
+
       if (classificationResult.success) {
         // Update form data with classification results
         setFormData(prev => ({
@@ -584,7 +584,7 @@ export function useWorkflowState() {
     } finally {
       setIsLoading(false);
     }
-  }, [updateFormData]);
+  }, []);
 
   // Reset workflow but keep company data
   const resetWorkflow = useCallback(() => {

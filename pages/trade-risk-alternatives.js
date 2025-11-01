@@ -344,29 +344,35 @@ export default function TradeRiskAlternatives() {
 
     if (userData) {
       // Parse trade volume - handle string with commas like "12,000,000"
-      const rawTradeVolume = userData.company?.trade_volume || 0;
+      // ✅ FIX: Handle BOTH nested (userData.company.trade_volume) and flat (userData.trade_volume) structures
+      const rawTradeVolume = userData.company?.trade_volume || userData.trade_volume || 0;
       const parsedTradeVolume = typeof rawTradeVolume === 'string'
         ? parseFloat(rawTradeVolume.replace(/,/g, ''))
         : rawTradeVolume;
 
       // NO FALLBACKS - Expose missing data as dev issue
-      // CRITICAL FIX: Components are saved under usmca.component_breakdown (not top-level "components")
-      const components = userData.usmca?.component_breakdown || userData.components || [];
+      // CRITICAL FIX: Components are saved under BOTH structures depending on source
+      // - Database: usmca.component_breakdown
+      // - localStorage (flat): component_origins
+      const components = userData.usmca?.component_breakdown || userData.component_origins || userData.components || [];
 
+      // ✅ FIX: Map BOTH nested (userData.company.*) AND flat (userData.*) data structures
+      // This handles data from database (nested) and localStorage (flat) equivalently
       const profile = {
         userId: user?.id,  // Include userId for workflow intelligence lookup
-        companyName: userData.company?.company_name || userData.company?.name,
-        companyCountry: userData.company?.company_country || 'US',
+        // Try nested structure first (database), then flat structure (localStorage)
+        companyName: userData.company?.company_name || userData.company_name || userData.company?.name,
+        companyCountry: userData.company?.company_country || userData.company_country || 'US',
         destinationCountry: userData.company?.destination_country || userData.destination_country || 'US',
-        businessType: userData.company?.business_type,
-        industry_sector: userData.company?.industry_sector,
-        hsCode: userData.product?.hs_code,
-        productDescription: userData.product?.description,
+        businessType: userData.company?.business_type || userData.business_type,
+        industry_sector: userData.company?.industry_sector || userData.industry_sector,
+        hsCode: userData.product?.hs_code || userData.hs_code,
+        productDescription: userData.product?.description || userData.product_description,
         tradeVolume: parsedTradeVolume,
         supplierCountry: components[0]?.origin_country || components[0]?.country,  // Try both keys
         qualificationStatus: getQualificationStatus(userData.usmca),
         savings: userData.savings?.annual_savings || 0,
-        componentOrigins: components,  // Fixed: use usmca.component_breakdown
+        componentOrigins: components,  // Fixed: use usmca.component_breakdown or component_origins
         regionalContent: userData.usmca?.regional_content || 0
       };
 
