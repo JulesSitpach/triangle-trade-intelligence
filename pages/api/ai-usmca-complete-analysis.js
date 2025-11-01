@@ -741,7 +741,7 @@ export default protectedApiHandler({
             );
 
             // ✅ FIX (Nov 1): Check AI confidence score - if < 90%, use 6-digit general category instead
-            const aiConfidence = component.confidence_score || 100; // Default to 100 if not provided
+            const aiConfidence = component.confidence || component.confidence_score || 100; // Default to 100 if not provided
             const confidenceThreshold = 90;
 
             console.log(`🔍 [HS-MATCH] ${component.hs_code}: "${component.description}" vs DB: "${exactMatch.brief_description}" (${Math.round(similarity * 100)}% match, ${aiConfidence}% confidence)`);
