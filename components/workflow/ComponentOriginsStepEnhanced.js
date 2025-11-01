@@ -209,7 +209,7 @@ export default function ComponentOriginsStepEnhanced({
           additionalContext: {
             // Complete product context from Step 1
             overallProduct: formData.product_description,
-            industryContext: formData.business_type, // Required field, validated above
+            industryContext: formData.industry_sector, // ✅ FIX (Nov 1): Use industry_sector (Electronics), not business_type (Manufacturer)
             businessType: formData.business_type,
             manufacturingLocation: formData.manufacturing_location,
             exportDestination: formData.export_destination,
@@ -320,7 +320,7 @@ export default function ComponentOriginsStepEnhanced({
           }],
           additionalContext: {
             overallProduct: formData.product_description,
-            industryContext: formData.business_type,
+            industryContext: formData.industry_sector, // ✅ FIX (Nov 1): Use industry_sector (Electronics), not business_type (Manufacturer)
             businessType: formData.business_type,
             manufacturingLocation: formData.manufacturing_location,
             exportDestination: formData.export_destination,
