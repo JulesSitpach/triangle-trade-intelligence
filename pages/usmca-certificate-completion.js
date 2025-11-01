@@ -11,7 +11,8 @@ import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
-import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
+// Removed: unified-workflow-data-service (over-engineered)
+// Certificate page loads from localStorage directly (user is still in active session)
 
 export default function USMCACertificateCompletion() {
   const router = useRouter();
@@ -56,24 +57,49 @@ export default function USMCACertificateCompletion() {
   }, []);
 
   useEffect(() => {
-    // 🔄 UNIFIED DATA ACCESS: Load workflow data (database-first, localStorage fallback)
-    const loadData = async () => {
+    // ✅ SIMPLIFIED: Load workflow data from localStorage (user is still in active session)
+    const loadData = () => {
       try {
-        // Get user ID for database lookup
-        let userId = null;
-        try {
-          const authResponse = await fetch('/api/auth/me', { credentials: 'include' });
-          if (authResponse.ok) {
-            const authData = await authResponse.json();
-            userId = authData.user?.id;
-          }
-        } catch (error) {
-          console.log('[CertificateCompletion] Not authenticated, using localStorage only');
+        // Load workflow results from localStorage
+        const workflowResults = localStorage.getItem('usmca_workflow_results');
+        const formData = localStorage.getItem('triangleUserData');
+        const storedAuth = localStorage.getItem('usmca_authorization_data');
+
+        if (!workflowResults && !formData) {
+          console.log('[CertificateCompletion] No workflow data found - redirecting to start');
+          router.push('/usmca-workflow');
+          return;
         }
 
-        // Get workflow data from unified service
-        const initialData = await getWorkflowData(userId);
-        const storedAuth = typeof window !== 'undefined' ? localStorage.getItem('usmca_authorization_data') : null;
+        // Parse workflow data
+        const parsedResults = workflowResults ? JSON.parse(workflowResults) : null;
+        const parsedForm = formData ? JSON.parse(formData) : null;
+
+        // Merge both sources (results take priority)
+        const initialData = {
+          company: parsedResults?.company || {
+            name: parsedForm?.company_name,
+            company_name: parsedForm?.company_name,
+            company_country: parsedForm?.company_country,
+            company_address: parsedForm?.company_address,
+            business_type: parsedForm?.business_type,
+            trade_volume: parsedForm?.trade_volume,
+            tax_id: parsedForm?.tax_id,
+            contact_person: parsedForm?.contact_person,
+            contact_phone: parsedForm?.contact_phone,
+            contact_email: parsedForm?.contact_email
+          },
+          product: parsedResults?.product || {
+            description: parsedForm?.product_description,
+            hs_code: parsedForm?.product_hs_code
+          },
+          components: parsedResults?.components || parsedForm?.component_origins || [],
+          usmca: parsedResults?.usmca || {},
+          trust: parsedResults?.trust || {},
+          savings: parsedResults?.savings || {},
+          destination_country: parsedForm?.destination_country,
+          source: 'localStorage'
+        };
 
         // ✅ DEBUG: Check what country data we have
         console.log('🔍 [Certificate] Loading workflow data - Country check:', {
@@ -182,7 +208,7 @@ export default function USMCACertificateCompletion() {
       }
     };
 
-    // Call the async function
+    // Load data from localStorage
     loadData();
   }, []);
 
