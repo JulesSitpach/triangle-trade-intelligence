@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import { getCountryFullName } from '../../config/country-classifications.js';
 
 export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onPreviewCertificate, userTier = 'Trial' }) {
   const router = useRouter();
@@ -58,6 +59,16 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   useEffect(() => {
     if (workflowData?.company && !authData.exporter_same_as_company) {
       console.log('📋 Auto-filling company data from workflow:', workflowData.company);
+
+      // ✅ FIX: Convert ISO country codes (US/CA/MX) to full names (United States/Canada/Mexico)
+      const countryCode = workflowData.company.company_country || '';
+      const fullCountryName = getCountryFullName(countryCode);
+
+      console.log('🌍 Country conversion:', {
+        iso_code: countryCode,
+        full_name: fullCountryName
+      });
+
       setAuthData(prev => ({
         ...prev,
         exporter_same_as_company: true,  // Check the box automatically
@@ -67,7 +78,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         exporter_contact_person: workflowData.company.contact_person || '',  // ✅ FIX (Oct 30): Added contact person
         exporter_phone: workflowData.company.contact_phone || '',
         exporter_email: workflowData.company.contact_email || '',
-        exporter_country: workflowData.company.company_country || ''
+        exporter_country: fullCountryName  // ✅ FIX: Use full name, not ISO code
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -390,13 +401,22 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                 handleFieldChange('exporter_same_as_company', e.target.checked);
                 // Auto-populate exporter fields from company data if checked
                 if (e.target.checked) {
+                  // ✅ FIX: Convert ISO country codes to full names before auto-filling
+                  const countryCode = workflowData?.company?.company_country || '';
+                  const fullCountryName = getCountryFullName(countryCode);
+
+                  console.log('🌍 Checkbox auto-fill - Country conversion:', {
+                    iso_code: countryCode,
+                    full_name: fullCountryName
+                  });
+
                   handleFieldChange('exporter_name', workflowData?.company?.name || '');
                   handleFieldChange('exporter_address', workflowData?.company?.company_address || workflowData?.company?.address || '');
                   handleFieldChange('exporter_tax_id', workflowData?.company?.tax_id || '');
                   handleFieldChange('exporter_contact_person', workflowData?.company?.contact_person || '');  // ✅ FIX (Oct 30): Added contact person
                   handleFieldChange('exporter_phone', workflowData?.company?.contact_phone || '');
                   handleFieldChange('exporter_email', workflowData?.company?.contact_email || '');
-                  handleFieldChange('exporter_country', workflowData?.company?.company_country || '');
+                  handleFieldChange('exporter_country', fullCountryName);  // ✅ FIX: Use full name, not ISO code
                 } else {
                   // Clear fields if unchecked
                   handleFieldChange('exporter_name', '');
@@ -818,7 +838,30 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         <button
           className="btn-primary"
           disabled={!authData.importer_name || !authData.accuracy_certification || !authData.authority_certification}
-          onClick={() => onPreviewCertificate && onPreviewCertificate(authData)}
+          onClick={() => {
+            // ✅ P1-3 FIX: Validate required authorization fields before proceeding
+            const missingFields = [];
+            if (!authData.signatory_name || authData.signatory_name.trim() === '') {
+              missingFields.push('Signatory Name');
+            }
+            if (!authData.signatory_title || authData.signatory_title.trim() === '') {
+              missingFields.push('Signatory Title');
+            }
+            if (!authData.accuracy_certification) {
+              missingFields.push('Accuracy Certification (checkbox)');
+            }
+            if (!authData.authority_certification) {
+              missingFields.push('Authority Certification (checkbox)');
+            }
+
+            if (missingFields.length > 0) {
+              alert(`❌ Authorization Incomplete\n\nPlease complete the following required fields:\n${missingFields.map(f => `• ${f}`).join('\n')}\n\nThese are required for a valid USMCA certificate.`);
+              return;
+            }
+
+            // All validations passed - proceed to certificate generation
+            onPreviewCertificate && onPreviewCertificate(authData);
+          }}
         >
           📄 Generate & Preview Certificate
         </button>
