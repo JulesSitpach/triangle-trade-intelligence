@@ -440,21 +440,26 @@ export default protectedApiHandler({
     // Check 3: Component limit (prevent complex analyses on lower tiers)
     // 🔒 SERVER-SIDE VALIDATION: Don't trust client-sent used_components_count
     // Recalculate from actual locked components to prevent DevTools manipulation
-    const actualLockedCount = formData.component_origins?.filter(c => c.is_locked).length || 0;
+    // ✅ FIX: Match client logic - count locked OR has valid HS code (handles old data migrations)
+    const actualLockedCount = formData.component_origins?.filter(c =>
+      c.is_locked || (c.hs_code && c.hs_code.length >= 6)
+    ).length || 0;
     const clientSentCount = formData.used_components_count || 0;
     const currentComponentCount = formData.component_origins?.length || 0;
 
     // Use the HIGHER of the two values (prevents client from lying about lower count)
     const usedComponentCount = Math.max(actualLockedCount, clientSentCount);
 
-    // Log discrepancy if client tried to manipulate
-    if (clientSentCount > 0 && actualLockedCount !== clientSentCount) {
-      console.warn(`[SECURITY] used_components_count mismatch for user ${userId}: client=${clientSentCount}, actual=${actualLockedCount}`);
-      await DevIssue.unexpectedBehavior('ai_usmca_analysis', 'Component count mismatch - possible manipulation attempt', {
+    // ✅ FIX: Only log if client sent LOWER count (actual manipulation attempt)
+    // Client sending higher count is harmless (old data, manual entry, etc.)
+    if (clientSentCount > 0 && clientSentCount < actualLockedCount) {
+      console.warn(`[SECURITY] Client undercount detected for user ${userId}: client=${clientSentCount}, actual=${actualLockedCount} - possible manipulation attempt`);
+      await DevIssue.unexpectedBehavior('ai_usmca_analysis', 'Component count manipulation - client sent lower count than actual', {
         userId,
         clientSentCount,
         actualLockedCount,
-        usedComponentCount
+        usedComponentCount,
+        note: 'Client attempted to underreport component usage'
       });
     }
 
