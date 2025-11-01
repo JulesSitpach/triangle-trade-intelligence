@@ -75,6 +75,14 @@ export default function USMCACertificateCompletion() {
         const initialData = await getWorkflowData(userId);
         const storedAuth = typeof window !== 'undefined' ? localStorage.getItem('usmca_authorization_data') : null;
 
+        // ✅ DEBUG: Check what country data we have
+        console.log('🔍 [Certificate] Loading workflow data - Country check:', {
+          source: initialData?.source,
+          has_initialData: !!initialData,
+          company_country: initialData?.company?.company_country,
+          company_object: initialData?.company
+        });
+
         if (initialData) {
           console.log(`✅ Loading workflow data from ${initialData.source}:`, initialData);
           setWorkflowData(initialData);
