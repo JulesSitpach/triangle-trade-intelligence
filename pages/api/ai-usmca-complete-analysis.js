@@ -1325,28 +1325,37 @@ export default protectedApiHandler({
 
     console.log(`🔍 [CACHE-CHECK] Qualification cache key: ${cacheKey}`);
 
-    // Check for cached qualification result (valid for 24 hours)
-    const { data: cachedQualification } = await supabase
-      .from('workflow_sessions')
-      .select('data')
-      .eq('user_id', userId)
-      .not('data', 'is', null)
-      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
-      .order('created_at', { ascending: false })
-      .limit(10);
+    // Check if user wants to force new analysis (skip qualification cache)
+    const forceNew = formData.force_new === true || formData.force_new === 'true';
 
     let cachedAnalysis = null;
-    if (cachedQualification && cachedQualification.length > 0) {
-      for (const session of cachedQualification) {
-        const workflowData = session.data;
-        if (workflowData?.cache_key === cacheKey && workflowData?.usmca && workflowData?.detailed_analysis) {
-          cachedAnalysis = {
-            usmca: workflowData.usmca,
-            detailed_analysis: workflowData.detailed_analysis,
-            recommendations: workflowData.recommendations
-          };
-          console.log(`✅ [CACHE-HIT] Found cached qualification result (key: ${cacheKey})`);
-          break;
+    if (forceNew) {
+      // Skip qualification cache for "+ New Analysis" button
+      // Tariff database lookup (Phase 1) already completed above - we keep that data!
+      console.log(`🆕 [FORCE-NEW] Skipping qualification cache - user wants fresh analysis`);
+    } else {
+      // Check for cached qualification result (valid for 24 hours)
+      const { data: cachedQualification } = await supabase
+        .from('workflow_sessions')
+        .select('data')
+        .eq('user_id', userId)
+        .not('data', 'is', null)
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (cachedQualification && cachedQualification.length > 0) {
+        for (const session of cachedQualification) {
+          const workflowData = session.data;
+          if (workflowData?.cache_key === cacheKey && workflowData?.usmca && workflowData?.detailed_analysis) {
+            cachedAnalysis = {
+              usmca: workflowData.usmca,
+              detailed_analysis: workflowData.detailed_analysis,
+              recommendations: workflowData.recommendations
+            };
+            console.log(`✅ [CACHE-HIT] Found cached qualification result (key: ${cacheKey})`);
+            break;
+          }
         }
       }
     }
@@ -1504,58 +1513,69 @@ export default protectedApiHandler({
             cached_at: new Date().toISOString()
           };
 
-          // Try to update existing session first (if workflow_session_id provided)
-          if (formData.workflow_session_id) {
-            console.log(`🔍 [CACHE-SAVE-ATTEMPT] Trying to update existing session: ${formData.workflow_session_id}`);
+          // Generate session ID: unique for force_new, cache-based otherwise
+          const cacheSessionId = forceNew
+            ? `session_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`
+            : `cache-${cacheKey}`;
 
-            const { data: currentSession } = await supabase
+          // UPSERT logic: Check if cache session already exists (only for cached sessions)
+          const { data: existingCache } = forceNew ? { data: null } : await supabase
+            .from('workflow_sessions')
+            .select('id, data')
+            .eq('session_id', cacheSessionId)
+            .maybeSingle();
+
+          if (existingCache && !forceNew) {
+            // Update existing cache session
+            console.log(`🔍 [CACHE-UPDATE] Updating existing cache session: ${cacheSessionId}`);
+
+            const existingData = existingCache.data || {};
+            const { error: updateError } = await supabase
               .from('workflow_sessions')
-              .select('data')
-              .eq('id', formData.workflow_session_id)
-              .single();
+              .update({
+                data: {
+                  ...existingData,
+                  ...cacheData
+                },
+                expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Refresh expiration
+              })
+              .eq('session_id', cacheSessionId);
 
-            if (currentSession) {
-              const existingData = currentSession.data || {};
-              const { error: updateError } = await supabase
-                .from('workflow_sessions')
-                .update({
-                  data: {
-                    ...existingData,
-                    ...cacheData
-                  }
-                })
-                .eq('id', formData.workflow_session_id);
+            if (updateError) {
+              throw new Error(`Update failed: ${updateError.message}`);
+            }
 
-              if (!updateError) {
-                console.log(`💾 [CACHE-SAVED] Updated existing session with cache (key: ${cacheKey})`);
-                throw null; // Exit try block successfully
-              }
+            console.log(`💾 [CACHE-SAVED] Updated existing cache session (key: ${cacheKey})`);
+          } else {
+            // Create new session (independent analysis for force_new, cache session otherwise)
+            if (forceNew) {
+              console.log(`🆕 [NEW-ANALYSIS] Creating independent analysis session: ${cacheSessionId}`);
+            } else {
+              console.log(`🔍 [CACHE-CREATE] Creating new cache session: ${cacheSessionId}`);
+            }
+
+            const { error: insertError } = await supabase
+              .from('workflow_sessions')
+              .insert({
+                user_id: userId,
+                session_id: cacheSessionId,
+                data: cacheData,
+                created_at: new Date().toISOString(),
+                expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hour cache
+              });
+
+            if (insertError) {
+              throw new Error(`Insert failed: ${insertError.message}`);
+            }
+
+            if (forceNew) {
+              console.log(`💾 [SAVED] Independent analysis saved with unique ID`);
+            } else {
+              console.log(`💾 [CACHE-SAVED] Created new cache session (key: ${cacheKey})`);
             }
           }
-
-          // If no session_id provided or update failed, create a new cache-only session
-          console.log(`🔍 [CACHE-SAVE-ATTEMPT] Creating new cache-only session for user: ${userId}`);
-
-          const { error: insertError } = await supabase
-            .from('workflow_sessions')
-            .insert({
-              user_id: userId,
-              session_id: `cache-${cacheKey}`,
-              data: cacheData,
-              created_at: new Date().toISOString(),
-              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hour cache
-            });
-
-          if (insertError) {
-            console.error(`❌ [CACHE-SAVE-FAILED] Insert error:`, insertError.message);
-            throw new Error(`Insert failed: ${insertError.message}`);
-          }
-
-          console.log(`💾 [CACHE-SAVED] Created new cache session (key: ${cacheKey})`);
         } catch (cacheError) {
-          if (cacheError !== null) {
-            console.warn('⚠️ [CACHE-SAVE-FAILED] Could not save qualification cache:', cacheError.message);
-          }
+          console.warn('⚠️ [CACHE-SAVE-FAILED] Could not save qualification cache:', cacheError.message);
           // Non-fatal - continue with response even if cache save fails
         }
       } else {

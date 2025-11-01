@@ -329,7 +329,7 @@ export default function UserDashboard({ user }) {
                 </Link>
               ) : (
                 <Link
-                  href="/usmca-workflow?reset=true"
+                  href="/usmca-workflow?reset=true&force_new=true"
                   className="btn-primary"
                 >
                   + New Analysis
