@@ -230,6 +230,9 @@ export default async function handler(req, res) {
       cbp_compliance_strategy: cbpGuidance, // NEW: Regulatory guidance
       policies_affecting_you: applicablePolicies.map(p => p.policy),
       from_your_broker: executiveAdvisory.broker_insights || 'Positioning your supply chain for trade policy resilience.',
+      // ✅ FIX: Include professional_disclaimer and save_reminder (were being stripped out)
+      professional_disclaimer: executiveAdvisory.professional_disclaimer,
+      save_reminder: executiveAdvisory.save_reminder,
       email_trigger_config: {
         should_email: true,
         trigger_level: highestSeverity(applicablePolicies),
