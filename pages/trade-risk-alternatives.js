@@ -131,7 +131,7 @@ export default function TradeRiskAlternatives() {
 
       // ✅ FIXED: Try localStorage FIRST (immediate), then database (backup)
       console.log('📊 Trying localStorage first...');
-      loadLocalStorageData();
+      await loadLocalStorageData();  // ✅ FIX: Must await async function!
 
       // Only load from database if localStorage failed
       if (!userProfile) {
