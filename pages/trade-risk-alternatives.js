@@ -278,7 +278,11 @@ export default function TradeRiskAlternatives() {
     }
 
     // 🔄 UNIFIED DATA ACCESS: Get workflow data (database-first, localStorage fallback)
-    const userData = await getWorkflowData(userId);
+    // ✅ FIX: Get actual session_id from localStorage, not userId
+    const sessionId = typeof window !== 'undefined' ? localStorage.getItem('workflow_session_id') : null;
+    console.log(`[TradeRiskAlternatives] Loading workflow with sessionId: ${sessionId}`);
+
+    const userData = await getWorkflowData(sessionId);
 
     if (!userData) {
       console.log('[TradeRiskAlternatives] No workflow data found (checked DB + localStorage)');
