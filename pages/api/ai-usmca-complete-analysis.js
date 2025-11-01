@@ -1280,12 +1280,21 @@ export default protectedApiHandler({
     const totalAnnualSavings = componentFinancials
       .reduce((sum, c) => sum + c.annual_savings, 0);
 
+    // ✅ FIX (Nov 1): Calculate weighted average MFN RATE (percentage), not total cost (dollars)
+    // Each component contributes to average based on its value percentage
+    const weightedAverageMFNRate = enrichedComponents.reduce((sum, comp) => {
+      const valueWeight = (comp.value_percentage || 0) / 100;  // Convert 35% to 0.35
+      const mfnRate = (comp.mfn_rate || 0) * 100;  // Convert 0.35 to 35%
+      return sum + (mfnRate * valueWeight);
+    }, 0);
+
     const preCalculatedFinancials = {
       trade_volume: tradeVolume,
       annual_tariff_savings: Math.round(totalAnnualSavings),
       monthly_tariff_savings: Math.round(totalAnnualSavings / 12),
       savings_percentage: tradeVolume > 0 ? Math.round((totalAnnualSavings / tradeVolume) * 10000) / 100 : 0,
       tariff_cost_without_qualification: Math.round(totalAnnualMFNCost),
+      weighted_average_mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%
       // ✅ NEW: RVC material component percentage (not just 0%)
       material_from_usmca_members: usmcaMemberValue,
       section_301_exposure: {
@@ -1770,18 +1779,19 @@ export default protectedApiHandler({
       // ✅ FIX (Oct 26): Use pre-calculated financial data from component analysis
       // The simplified prompt doesn't return detailed_analysis.savings_analysis
       // But we calculated all financial metrics correctly in preCalculatedFinancials (lines 449-462)
+      // ✅ FIX (Nov 1): mfn_rate should be PERCENTAGE (23.4%), not DOLLARS ($1,118,090)
       savings: analysis.usmca?.qualified ? {
         annual_savings: preCalculatedFinancials.annual_tariff_savings,
         monthly_savings: preCalculatedFinancials.monthly_tariff_savings,
         savings_percentage: preCalculatedFinancials.savings_percentage,
-        mfn_rate: preCalculatedFinancials.tariff_cost_without_qualification,
-        usmca_rate: 0,  // Calculated implicitly in the component costs
+        mfn_rate: preCalculatedFinancials.weighted_average_mfn_rate / 100,  // Convert 23.4% to 0.234 (decimal for consistency)
+        usmca_rate: 0,  // USMCA rate is 0% for qualifying products
         section_301_exposure: preCalculatedFinancials.section_301_exposure
       } : {
         annual_savings: 0,
         monthly_savings: 0,
         savings_percentage: 0,
-        mfn_rate: 0,
+        mfn_rate: preCalculatedFinancials.weighted_average_mfn_rate / 100,  // Show MFN rate even if not qualified
         usmca_rate: 0
       },
 
