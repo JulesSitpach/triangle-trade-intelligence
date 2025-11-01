@@ -23,10 +23,7 @@ export default function EditableCertificatePreview({
   const isTrialUser = userTier === 'trial' || userTier === 'free' || userTier === 'Free';
   const router = useRouter();
 
-  // Privacy consent modal state
-  const [showSaveConsentModal, setShowSaveConsentModal] = useState(false);
-  const [modalChoice, setModalChoice] = useState('save'); // default to 'save'
-  const [userMadeChoice, setUserMadeChoice] = useState(false);
+  // ✅ REMOVED: Privacy consent modal state (data auto-saves via API)
 
   const [editedCert, setEditedCert] = useState(() => {
     // ✅ Generate unique certificate number: USMCA-{YEAR}-{6-CHAR-ID}
@@ -327,65 +324,9 @@ export default function EditableCertificatePreview({
   };
 
   // Handle privacy consent for saving to database
-  const handleSaveConsent = async (shouldSave) => {
-    console.log('🎯 Certificate Preview: handleSaveConsent called with shouldSave:', shouldSave);
+  // ✅ REMOVED: handleSaveConsent function (data auto-saves via API)
 
-    // Close modal immediately
-    setShowSaveConsentModal(false);
-
-    // Save user's choice to localStorage (CERTIFICATE-specific key)
-    localStorage.setItem('certificate_save_consent', shouldSave ? 'save' : 'erase');
-    setUserMadeChoice(true);
-
-    if (shouldSave) {
-      console.log('✅ User chose to SAVE certificate to database');
-
-      // Now save to database
-      try {
-        // Extract product info from previewData for API matching
-        const productDescription = previewData?.professional_certificate?.product?.description ||
-                                  previewData?.professional_certificate?.product?.product_description ||
-                                  'USMCA Certificate';
-        const hsCode = previewData?.professional_certificate?.product?.hs_code || '';
-
-        console.log('📤 Sending certificate to database:', {
-          product_description: productDescription,
-          hs_code: hsCode,
-          has_certificate_data: !!editedCert
-        });
-
-        const response = await fetch('/api/workflow-session/update-certificate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            product_description: productDescription,
-            hs_code: hsCode,
-            certificate_data: editedCert,
-            professional_certificate: previewData.professional_certificate
-          })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Certificate saved successfully:', result);
-          alert('✅ Certificate saved to database successfully!\n\nYou can re-download this certificate anytime from your dashboard.');
-        } else {
-          const errorData = await response.json();
-          console.error('❌ Save failed:', errorData);
-          alert(`⚠️ Failed to save certificate: ${errorData.error || 'Unknown error'}\n\nPlease try again or contact support.`);
-        }
-      } catch (error) {
-        console.error('❌ Save error:', error);
-        alert('❌ Error saving certificate. Please check your connection and try again.');
-      }
-    } else {
-      console.log('❌ User chose NOT to save - certificate stays in browser only');
-      alert('ℹ️ Certificate NOT saved to database.\n\n⚠️ Warning: Certificate data will be lost when you close the browser or clear cache.');
-    }
-  };
-
-  // Set Up Alerts function - matches WorkflowResults.js implementation
+  // Set Up Alerts function - simplified (data auto-saves via API)
   const handleSetUpAlerts = async () => {
     console.log('🚨 ========== SETTING UP TRADE ALERTS FROM CERTIFICATE ==========');
 
@@ -394,16 +335,12 @@ export default function EditableCertificatePreview({
                        previewData?.professional_certificate?.components ||
                        [];
 
-    // Check if user has saved to database
-    const savedChoice = localStorage.getItem('save_data_consent');
-
-    // If components are empty or missing enrichment, try to recover from database/localStorage
+    // If components are empty or missing enrichment, try to recover from database
     if (rawComponents.length === 0 || !rawComponents[0]?.hs_code) {
       console.log('⚠️ Components missing or not enriched - attempting to recover...');
 
-      if (savedChoice === 'save') {
-        // User chose to save - fetch from database
-        console.log('🔄 Fetching enriched components from database...');
+      // ✅ SIMPLIFIED: Data auto-saves via API, always try database fetch
+      console.log('🔄 Fetching enriched components from database...');
         try {
           const response = await fetch('/api/dashboard-data', { credentials: 'include' });
           if (response.ok) {
@@ -425,31 +362,6 @@ export default function EditableCertificatePreview({
           alert('⚠️ Error fetching component data. Please complete the workflow again.');
           return;
         }
-      } else {
-        // Try localStorage
-        console.log('⚠️ Checking localStorage for enriched components...');
-        const localStorageData = localStorage.getItem('usmca_workflow_results');
-        if (localStorageData) {
-          try {
-            const parsed = JSON.parse(localStorageData);
-            const localComponents = parsed.component_origins || parsed.components || [];
-            if (localComponents.length > 0 && localComponents[0]?.hs_code) {
-              console.log('✅ Found enriched components in localStorage:', localComponents.length);
-              rawComponents = localComponents;
-            } else {
-              alert('⚠️ Component enrichment data is missing.\n\nTo set up alerts, you need to:\n1. Complete a new workflow analysis, OR\n2. Choose "Save to Database" to preserve enriched data');
-              return;
-            }
-          } catch (e) {
-            console.error('❌ Failed to parse localStorage:', e);
-            alert('⚠️ Unable to recover component data. Please complete the workflow again.');
-            return;
-          }
-        } else {
-          alert('⚠️ Component data not found.\n\nTo set up alerts, please:\n1. Complete the workflow analysis again, OR\n2. Choose "Save to Database" to preserve your data across sessions');
-          return;
-        }
-      }
     }
 
     // Normalize components
@@ -1241,40 +1153,7 @@ export default function EditableCertificatePreview({
         borderRadius: '8px',
         border: '2px solid #3b82f6'
       }}>
-        {/* Save to Database Button */}
-        <button
-          onClick={() => {
-            // CERTIFICATE SAVE: Check for CERTIFICATE-specific consent (separate from workflow consent)
-            const certificateConsent = localStorage.getItem('certificate_save_consent');
-            console.log('💾 Save Certificate to Database clicked - certificate consent:', certificateConsent);
-
-            if (!certificateConsent) {
-              // No certificate consent given yet - show modal
-              console.log('✅ No certificate consent found - showing modal');
-              setShowSaveConsentModal(true);
-            } else if (certificateConsent === 'save') {
-              // User already consented to save certificates - proceed directly
-              console.log('✅ User already consented to save certificates - saving directly');
-              handleSaveConsent(true);
-            } else {
-              // User previously chose not to save certificates - ask again
-              console.log('⚠️ User previously declined certificate save - showing modal again');
-              setShowSaveConsentModal(true);
-            }
-          }}
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            backgroundColor: '#8b5cf6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          💾 Save to Database
-        </button>
+        {/* ✅ REMOVED: "Save to Database" button (data auto-saves via API) */}
 
         {/* Set Up Alerts Button */}
         <button
@@ -1351,122 +1230,7 @@ export default function EditableCertificatePreview({
         )}
       </div>
 
-      {/* Privacy Consent Modal */}
-      {showSaveConsentModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '12px',
-            maxWidth: '600px',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto'
-          }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px', color: '#1f2937' }}>
-              💾 Save Certificate to Database?
-            </h2>
-            <p style={{ marginBottom: '20px', color: '#4b5563' }}>
-              <strong>Why save?</strong> Your USMCA certificate includes company details, product information, authorization signatures, and legal declarations. Saving to database enables certificate archive, re-download from any device, and audit trail for compliance.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
-              {/* SAVE Option */}
-              <div
-                onClick={() => setModalChoice('save')}
-                style={{
-                  border: modalChoice === 'save' ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  cursor: 'pointer',
-                  backgroundColor: modalChoice === 'save' ? '#eff6ff' : 'white'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <input
-                    type="radio"
-                    checked={modalChoice === 'save'}
-                    onChange={() => setModalChoice('save')}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <strong style={{ fontSize: '16px' }}>SAVE TO DATABASE (Recommended)</strong>
-                </div>
-                <div style={{ fontSize: '14px', color: '#4b5563', paddingLeft: '28px' }}>
-                  ✅ <strong>Certificate archive</strong> - Download this certificate anytime from dashboard<br/>
-                  ✅ <strong>Compliance audit trail</strong> - 5-year record for CBP requirements<br/>
-                  ✅ <strong>Authorization preserved</strong> - Signatory details and legal declarations saved<br/>
-                  ✅ <strong>Multi-device access</strong> - Re-download certificate from any device<br/>
-                  ✅ <strong>Legal backup</strong> - Secure encrypted storage for business records
-                </div>
-              </div>
-
-              {/* DON'T SAVE Option */}
-              <div
-                onClick={() => setModalChoice('dont-save')}
-                style={{
-                  border: modalChoice === 'dont-save' ? '2px solid #3b82f6' : '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  cursor: 'pointer',
-                  backgroundColor: modalChoice === 'dont-save' ? '#eff6ff' : 'white'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                  <input
-                    type="radio"
-                    checked={modalChoice === 'dont-save'}
-                    onChange={() => setModalChoice('dont-save')}
-                    style={{ marginRight: '10px' }}
-                  />
-                  <strong style={{ fontSize: '16px' }}>DON'T SAVE (Browser only, temporary)</strong>
-                </div>
-                <div style={{ fontSize: '14px', color: '#4b5563', paddingLeft: '28px' }}>
-                  ⚠️ <strong>No certificate archive</strong> - Lost when browser closes or cache clears<br/>
-                  ⚠️ <strong>No audit trail</strong> - No record for CBP compliance requirements<br/>
-                  ⚠️ <strong>No re-download</strong> - Must regenerate certificate from scratch if lost<br/>
-                  ⚠️ <strong>Authorization not saved</strong> - Signatory data temporary only<br/>
-                  ⚠️ <strong>Legal risk</strong> - No backup for customs or compliance review
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                handleSaveConsent(modalChoice === 'save');
-              }}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                fontSize: '16px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                marginBottom: '15px'
-              }}
-            >
-              {modalChoice === 'save' ? '💾 SAVE TO DATABASE' : "🔒 DON'T SAVE (TEMPORARY)"}
-            </button>
-
-            <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center' }}>
-              <strong>Privacy:</strong> Saved data is encrypted in our secure PostgreSQL database. You can delete ALL saved data anytime from Account Settings. We never share your trade data with third parties.
-            </p>
-          </div>
-        </div>
-      )}
+      {/* ✅ REMOVED: Privacy Consent Modal (data auto-saves via API) */}
     </div>
   );
 }
