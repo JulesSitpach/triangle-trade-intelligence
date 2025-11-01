@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator.js';
+import { getCountryFullName } from '../../config/country-classifications.js';
 
 export default function EditableCertificatePreview({
   previewData,
@@ -52,7 +53,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.importer?.name || '',
         certifier_address: previewData?.professional_certificate?.importer?.address || '',
-        certifier_country: previewData?.professional_certificate?.importer?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.importer?.country) || '',
         certifier_phone: previewData?.professional_certificate?.importer?.phone || '',
         certifier_email: previewData?.professional_certificate?.importer?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.importer?.tax_id || ''
@@ -61,7 +62,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.producer?.name || '',
         certifier_address: previewData?.professional_certificate?.producer?.address || '',
-        certifier_country: previewData?.professional_certificate?.producer?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.producer?.country) || '',
         certifier_phone: previewData?.professional_certificate?.producer?.phone || '',
         certifier_email: previewData?.professional_certificate?.producer?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.producer?.tax_id || ''
@@ -71,7 +72,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.exporter?.name || '',
         certifier_address: previewData?.professional_certificate?.exporter?.address || '',
-        certifier_country: previewData?.professional_certificate?.exporter?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.exporter?.country) || '',
         certifier_phone: previewData?.professional_certificate?.exporter?.phone || '',
         certifier_email: previewData?.professional_certificate?.exporter?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.exporter?.tax_id || ''
@@ -93,7 +94,7 @@ export default function EditableCertificatePreview({
       // Section 3: Exporter
       exporter_name: previewData?.professional_certificate?.exporter?.name || '',
       exporter_address: previewData?.professional_certificate?.exporter?.address || '',
-      exporter_country: previewData?.professional_certificate?.exporter?.country || '',
+      exporter_country: getCountryFullName(previewData?.professional_certificate?.exporter?.country) || '',
       exporter_phone: previewData?.professional_certificate?.exporter?.phone || '',
       exporter_email: previewData?.professional_certificate?.exporter?.email || '',
       exporter_tax_id: previewData?.professional_certificate?.exporter?.tax_id || '',
@@ -101,7 +102,7 @@ export default function EditableCertificatePreview({
       // Section 4: Producer
       producer_name: previewData?.professional_certificate?.producer?.name || '',
       producer_address: previewData?.professional_certificate?.producer?.address || '',
-      producer_country: previewData?.professional_certificate?.producer?.country || '',
+      producer_country: getCountryFullName(previewData?.professional_certificate?.producer?.country) || '',
       producer_phone: previewData?.professional_certificate?.producer?.phone || '',
       producer_email: previewData?.professional_certificate?.producer?.email || '',
       producer_tax_id: previewData?.professional_certificate?.producer?.tax_id || '',
@@ -109,7 +110,7 @@ export default function EditableCertificatePreview({
       // Section 5: Importer
       importer_name: previewData?.professional_certificate?.importer?.name || '',
       importer_address: previewData?.professional_certificate?.importer?.address || '',
-      importer_country: previewData?.professional_certificate?.importer?.country || '',
+      importer_country: getCountryFullName(previewData?.professional_certificate?.importer?.country) || '',
       importer_phone: previewData?.professional_certificate?.importer?.phone || '',
       importer_email: previewData?.professional_certificate?.importer?.email || '',
       importer_tax_id: previewData?.professional_certificate?.importer?.tax_id || '',
@@ -120,7 +121,7 @@ export default function EditableCertificatePreview({
       origin_criterion: previewData?.professional_certificate?.preference_criterion || 'B',
       is_producer: previewData?.professional_certificate?.producer_declaration?.is_producer || false,
       qualification_method: previewData?.professional_certificate?.qualification_method?.method || 'RVC',
-      country_of_origin: previewData?.professional_certificate?.country_of_origin || '',
+      country_of_origin: getCountryFullName(previewData?.professional_certificate?.country_of_origin) || '',
 
       // Components
       components: previewData?.professional_certificate?.components || [],
@@ -168,7 +169,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.importer?.name || '',
         certifier_address: previewData?.professional_certificate?.importer?.address || '',
-        certifier_country: previewData?.professional_certificate?.importer?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.importer?.country) || '',
         certifier_phone: previewData?.professional_certificate?.importer?.phone || '',
         certifier_email: previewData?.professional_certificate?.importer?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.importer?.tax_id || ''
@@ -177,7 +178,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.producer?.name || '',
         certifier_address: previewData?.professional_certificate?.producer?.address || '',
-        certifier_country: previewData?.professional_certificate?.producer?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.producer?.country) || '',
         certifier_phone: previewData?.professional_certificate?.producer?.phone || '',
         certifier_email: previewData?.professional_certificate?.producer?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.producer?.tax_id || ''
@@ -187,7 +188,7 @@ export default function EditableCertificatePreview({
       certifierInfo = {
         certifier_name: previewData?.professional_certificate?.exporter?.name || '',
         certifier_address: previewData?.professional_certificate?.exporter?.address || '',
-        certifier_country: previewData?.professional_certificate?.exporter?.country || '',
+        certifier_country: getCountryFullName(previewData?.professional_certificate?.exporter?.country) || '',
         certifier_phone: previewData?.professional_certificate?.exporter?.phone || '',
         certifier_email: previewData?.professional_certificate?.exporter?.email || '',
         certifier_tax_id: previewData?.professional_certificate?.exporter?.tax_id || ''
@@ -309,10 +310,11 @@ export default function EditableCertificatePreview({
 
   // Helper function to normalize component data
   const normalizeComponent = (component) => {
+    const originCountry = component.origin_country || component.country_of_origin || component.manufacturing_location;
     return {
       description: component.description || component.component_description || component.name,
       hs_code: component.hs_code || component.hts_code,
-      origin_country: component.origin_country || component.country_of_origin || component.manufacturing_location,
+      origin_country: getCountryFullName(originCountry),
       value_percentage: component.value_percentage || component.percentage || 0,
       // Preserve enrichment data
       mfn_rate: component.mfn_rate,

@@ -87,6 +87,73 @@ export const ADVANCED_MANUFACTURING = [
 ];
 
 /**
+ * COUNTRY CODE TO FULL NAME MAPPING
+ * For official USMCA certificates and legal documentation
+ */
+export const COUNTRY_NAMES = {
+  // USMCA Countries
+  'US': 'United States',
+  'CA': 'Canada',
+  'MX': 'Mexico',
+
+  // High-volume manufacturing countries
+  'CN': 'China',
+  'VN': 'Vietnam',
+  'IN': 'India',
+  'TH': 'Thailand',
+  'MY': 'Malaysia',
+  'ID': 'Indonesia',
+  'PH': 'Philippines',
+  'BD': 'Bangladesh',
+  'PK': 'Pakistan',
+  'TR': 'Turkey',
+  'PL': 'Poland',
+  'RO': 'Romania',
+  'CZ': 'Czech Republic',
+
+  // Nearshoring countries
+  'CO': 'Colombia',
+  'CR': 'Costa Rica',
+  'DO': 'Dominican Republic',
+  'GT': 'Guatemala',
+  'HN': 'Honduras',
+  'SV': 'El Salvador',
+  'NI': 'Nicaragua',
+  'PA': 'Panama',
+  'PE': 'Peru',
+  'CL': 'Chile',
+
+  // Advanced manufacturing
+  'DE': 'Germany',
+  'JP': 'Japan',
+  'KR': 'South Korea',
+  'TW': 'Taiwan',
+  'IL': 'Israel',
+  'CH': 'Switzerland',
+  'SE': 'Sweden',
+  'SG': 'Singapore',
+
+  // High tariff risk
+  'RU': 'Russia',
+  'BY': 'Belarus',
+  'KP': 'North Korea',
+  'IR': 'Iran',
+  'SY': 'Syria',
+  'VE': 'Venezuela'
+};
+
+/**
+ * Convert ISO country code to full name for official documents
+ * @param {string} countryCode - 2-letter ISO code (e.g., 'MX', 'US', 'CA')
+ * @returns {string} Full country name (e.g., 'Mexico', 'United States', 'Canada')
+ */
+export function getCountryFullName(countryCode) {
+  if (!countryCode) return '';
+  const code = countryCode.toUpperCase();
+  return COUNTRY_NAMES[code] || countryCode; // Return code if mapping not found
+}
+
+/**
  * Helper function to check if country is USMCA member
  */
 export function isUSMCACountry(countryCode) {
@@ -177,10 +244,12 @@ export default {
   NEARSHORING_TARGETS,
   MANUFACTURING_HUBS,
   ADVANCED_MANUFACTURING,
+  COUNTRY_NAMES,
   isUSMCACountry,
   isHighTariffRisk,
   isNearshoringTarget,
   isManufacturingHub,
   getCountryRiskProfile,
-  getAlternativeSourcingCountries
+  getAlternativeSourcingCountries,
+  getCountryFullName
 };
