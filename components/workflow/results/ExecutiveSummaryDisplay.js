@@ -225,21 +225,6 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           </p>
         )}
 
-        {/* Save Reminder */}
-        {displayData?.save_reminder && (
-          <p style={{
-            marginTop: '1.5rem',
-            padding: '1rem',
-            backgroundColor: '#fffbeb',
-            border: '1px solid #fcd34d',
-            borderRadius: '6px',
-            fontSize: '0.875rem',
-            color: '#92400e',
-            lineHeight: '1.5'
-          }}>
-            <strong>💾 Save Your Analysis:</strong> {displayData.save_reminder}
-          </p>
-        )}
       </div>
     </div>
   );

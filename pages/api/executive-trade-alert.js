@@ -500,8 +500,7 @@ Respond in JSON format:
     "Third action with measurable financial or compliance outcome"
   ],
   "broker_insights": "Professional customs broker perspective in formal business language (NO emojis)",
-  "professional_disclaimer": "IMPORTANT: This analysis provides strategic intelligence based on current tariff data and trade regulations. ${profile.company_name || 'The company'} should consult with a licensed customs broker, trade attorney, or USMCA compliance specialist to verify all calculations, timelines, and regulatory requirements before implementing any strategic changes. We recommend engaging professional advisors familiar with ${profile.industry_sector || 'your industry'} sector for implementation planning.",
-  "save_reminder": "To access this analysis again later from your dashboard, save this workflow completion. Unsaved analyses remain in your browser only and will be lost if you clear your cache or switch devices."
+  "professional_disclaimer": "IMPORTANT: This analysis provides strategic intelligence based on current tariff data and trade regulations. ${profile.company_name || 'The company'} should consult with a licensed customs broker, trade attorney, or USMCA compliance specialist to verify all calculations, timelines, and regulatory requirements before implementing any strategic changes. We recommend engaging professional advisors familiar with ${profile.industry_sector || 'your industry'} sector for implementation planning."
 }
 
 CRITICAL RULES - PROFESSIONAL FORMATTING:

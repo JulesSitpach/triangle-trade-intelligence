@@ -41,10 +41,9 @@ export default function WorkflowProgress({
     if (!mounted) return 'inactive'; // Prevent hydration mismatch
 
     // Special handling for Step 4 (Generate Certificate)
-    // Only mark active/complete when user is ACTUALLY on step 4
+    // Always show blue (active) when on step 4, never green
     if (step === 4) {
-      if (currentStep === 4 && certificateGenerated) return 'complete';  // Green checkmark when certificate generated
-      if (currentStep === 4) return 'active';  // Blue/active only when ON certificate page
+      if (currentStep === 4) return 'active';  // Blue when ON certificate page
       return 'inactive';  // Gray when on steps 1-3 (not available yet)
     }
 

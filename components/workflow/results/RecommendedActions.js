@@ -243,33 +243,6 @@ export default function RecommendedActions({ results }) {
               </div>
             </div>
           )}
-
-          {/* Save Reminder */}
-          {executiveAlert?.alert?.save_reminder && (
-            <div style={{
-              backgroundColor: '#dbeafe',
-              padding: '1rem',
-              borderRadius: '4px',
-              borderLeft: '4px solid #0284c7',
-              marginTop: '1rem'
-            }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0c4a6e', marginBottom: '0.5rem' }}>
-                Save Your Analysis
-              </div>
-              <div style={{ fontSize: '0.875rem', color: '#075985', lineHeight: '1.6', marginBottom: '0.75rem' }}>
-                {executiveAlert.alert.save_reminder}
-              </div>
-              <div style={{
-                fontSize: '0.8125rem',
-                color: '#0c4a6e',
-                lineHeight: '1.5',
-                paddingTop: '0.75rem',
-                borderTop: '1px solid #bfdbfe'
-              }}>
-                <strong>Privacy:</strong> Saved data is encrypted in our secure PostgreSQL database. You can delete ALL saved data anytime from Account Settings. We never share your trade data with third parties.
-              </div>
-            </div>
-          )}
         </div>
       )}
 

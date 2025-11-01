@@ -715,19 +715,31 @@ export function useWorkflowState() {
         localStorage.setItem('workflow_session_id', sessionId);
       }
 
+      // ✅ FIX: Strip _sync_meta before database save to prevent pollution
+      const cleanFormData = { ...formData };
+      delete cleanFormData._sync_meta;
+
+      // ✅ FIX: Also strip _sync_meta from component_origins array
+      if (cleanFormData.component_origins) {
+        cleanFormData.component_origins = cleanFormData.component_origins.map(component => {
+          const { _sync_meta, ...cleanComponent } = component;
+          return cleanComponent;
+        });
+      }
+
       const response = await fetch('/api/workflow-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId,
-          workflowData: formData,
+          workflowData: cleanFormData,  // ✅ Use cleaned data
           userId: 'current-user',
           action: 'save'
         })
       });
 
       if (response.ok) {
-        console.log('✅ Workflow saved to database');
+        console.log('✅ Workflow saved to database (sync metadata stripped)');
         return { success: true };
       } else {
         console.error('❌ Database save failed');

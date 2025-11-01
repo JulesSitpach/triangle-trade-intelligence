@@ -83,7 +83,7 @@ export default protectedApiHandler({
               country: userProfile.country,
               industry: userProfile.industry || 'Other',
               trade_volume: userProfile.trade_volume || 0,
-              subscription_tier: userProfile.subscription_tier || 'trial',
+              subscription_tier: userProfile.subscription_tier || 'Trial',
               created_at: userProfile.created_at || new Date().toISOString()
             }
           });

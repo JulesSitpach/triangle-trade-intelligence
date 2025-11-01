@@ -24,6 +24,12 @@ export default function USMCACertificateCompletion() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false); // Track whether to show preview or authorization
   const [previewEditedData, setPreviewEditedData] = useState(null); // Store edits from preview
+
+  // ✅ RESET showPreview on fresh page load (when coming from results page)
+  useEffect(() => {
+    // Always start with preview hidden when first landing on page
+    setShowPreview(false);
+  }, []); // Empty dependency = run once on mount
   const [certificateData, setCertificateData] = useState({
     company_info: {},
     product_details: {},
@@ -538,6 +544,7 @@ export default function USMCACertificateCompletion() {
               // ✅ Removed old PDF props (Oct 30): onDownloadCertificate, onEmailToImporter, generatedPDF
               previewData={previewData}
               userTier={userTier}
+              showPreview={showPreview}
             />
 
             {/* STEP 2: Editable Certificate Preview - Shows BELOW authorization form when ready */}

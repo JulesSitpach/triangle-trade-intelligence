@@ -8,8 +8,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { getCountryFullName } from '../../config/country-classifications.js';
 
-export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onPreviewCertificate, userTier = 'Trial' }) {
+export default function AuthorizationStep({ formData, updateFormData, workflowData, certificateData, onPreviewCertificate, userTier = 'Trial', showPreview = false }) {
   const router = useRouter();
+
+  // ✅ DEBUG: Log showPreview value to understand button color
+  console.log('🎨 [AuthorizationStep] showPreview value:', showPreview, 'Button will be:', showPreview ? 'GREEN (btn-success)' : 'BLUE (btn-primary)');
   // ✅ Removed previewRef - old certificate preview system removed
   const [authData, setAuthData] = useState(() => {
     // ✅ RESTORE from localStorage on mount (prevent data loss on refresh)
@@ -836,7 +839,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
         </div>
 
         <button
-          className="btn-primary"
+          className={showPreview ? "btn-success" : "btn-primary"}
           disabled={!authData.importer_name || !authData.accuracy_certification || !authData.authority_certification}
           onClick={() => {
             // ✅ P1-3 FIX: Validate required authorization fields before proceeding

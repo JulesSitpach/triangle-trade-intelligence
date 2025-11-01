@@ -45,7 +45,22 @@ export default function ComponentOriginsStepEnhanced({
       mfn_rate: component?.mfn_rate ?? null,
       usmca_rate: component?.usmca_rate ?? null,
       is_usmca_member: component?.is_usmca_member ?? false,
-      is_locked: shouldBeLocked // Track if component used an HS lookup (auto-lock if has HS code)
+      is_locked: shouldBeLocked, // Track if component used an HS lookup (auto-lock if has HS code)
+
+      // ✅ P0-3 FIX: Preserve AI classification metadata (was being lost on navigation)
+      ai_reasoning: component?.ai_reasoning ?? '',
+      classification_source: component?.classification_source ?? null,
+      confidence: component?.confidence ?? null,
+      alternative_codes: component?.alternative_codes ?? [],
+      required_documentation: component?.required_documentation ?? [],
+
+      // ✅ Additional tariff enrichment fields
+      section_301: component?.section_301 ?? null,
+      section_232: component?.section_232 ?? null,
+      total_rate: component?.total_rate ?? null,
+      annual_savings: component?.annual_savings ?? null,
+      rate_source: component?.rate_source ?? null,
+      stale: component?.stale ?? false
     };
   };
 
@@ -114,7 +129,10 @@ export default function ComponentOriginsStepEnhanced({
     if (formData.component_origins &&
         formData.component_origins.length > 0) {
 
-      const formDataString = JSON.stringify(formData.component_origins);
+      // ✅ P1-2 FIX: Normalize BEFORE comparing to prevent infinite loop
+      // If we compare un-normalized data, the stringified output will never match
+      const normalizedComponents = formData.component_origins.map(normalizeComponent);
+      const formDataString = JSON.stringify(normalizedComponents);
 
       // Skip if we just pushed this exact data (prevents loop)
       if (lastPushedRef.current === formDataString) {
@@ -127,10 +145,14 @@ export default function ComponentOriginsStepEnhanced({
       }
 
       console.log(`🔄 Syncing components from formData (navigation restore)`);
-      // ✅ CRITICAL FIX: Normalize components when restoring from formData
-      // Without normalization, fields might be missing, causing first useEffect to think they changed
-      // This triggers an infinite loop: normalize mismatch → push to formData → restore → mismatch again
-      setComponents(formData.component_origins.map(normalizeComponent));
+      setComponents(normalizedComponents);
+
+      // ✅ P1-1 FIX: Recalculate usedComponentsCount to stay in sync with restored components
+      const newUsedCount = normalizedComponents.filter(c =>
+        c.is_locked || (c.hs_code && c.hs_code.length >= 6)
+      ).length;
+      setUsedComponentsCount(newUsedCount);
+      console.log(`🔒 Restored ${newUsedCount} locked components`);
     }
   }, [formData.component_origins]);
   // NOTE: components intentionally excluded from dependencies

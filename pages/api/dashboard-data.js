@@ -106,8 +106,8 @@ export default protectedApiHandler({
 
       // Transform workflow_sessions data
       const sessionWorkflows = (sessionsRows || []).map(row => {
-        // Extract workflow_data if available
-        const workflowData = row.workflow_data || {};
+        // Extract data if available (workflow_sessions uses 'data' column, not 'workflow_data')
+        const workflowData = row.data || {};
 
         // === DATA CONTRACT VALIDATION ===
         // Validate trade_volume

@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     // Free/Trial users get generic educational alerts only (in static config)
     // Personalized filtering based on their products is premium feature
     // Starter, Professional, and Premium tiers get personalized alerts
-    const subscriptionTier = user_profile?.subscription_tier || 'trial';
+    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
     const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
     const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
 
