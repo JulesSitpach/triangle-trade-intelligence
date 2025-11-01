@@ -740,13 +740,23 @@ export default protectedApiHandler({
               exactMatch.brief_description
             );
 
-            console.log(`🔍 [HS-MATCH] ${component.hs_code}: "${component.description}" vs DB: "${exactMatch.brief_description}" (${Math.round(similarity * 100)}% match)`);
+            // ✅ FIX (Nov 1): Check AI confidence score - if < 90%, use 6-digit general category instead
+            const aiConfidence = component.confidence_score || 100; // Default to 100 if not provided
+            const confidenceThreshold = 90;
 
-            // If similarity is low (<30%), the exact match is probably wrong subcategory
-            // Try 6-digit prefix to find general category instead
-            if (similarity < 0.3) {
-              console.log(`⚠️ [HS-MISMATCH] Description similarity too low (${Math.round(similarity * 100)}%), trying 6-digit prefix...`);
-              rateData = null; // Force prefix lookup
+            console.log(`🔍 [HS-MATCH] ${component.hs_code}: "${component.description}" vs DB: "${exactMatch.brief_description}" (${Math.round(similarity * 100)}% match, ${aiConfidence}% confidence)`);
+
+            // Force fallback to 6-digit prefix if:
+            // 1. Description similarity is low (<30%), OR
+            // 2. AI confidence is below threshold (<90%)
+            if (similarity < 0.3 || aiConfidence < confidenceThreshold) {
+              if (similarity < 0.3) {
+                console.log(`⚠️ [HS-MISMATCH] Description similarity too low (${Math.round(similarity * 100)}%), trying 6-digit prefix...`);
+              }
+              if (aiConfidence < confidenceThreshold) {
+                console.log(`⚠️ [LOW-CONFIDENCE] AI confidence ${aiConfidence}% < ${confidenceThreshold}%, using 6-digit general category instead...`);
+              }
+              rateData = null; // Force prefix lookup to find general category
             }
           }
 
@@ -763,20 +773,41 @@ export default protectedApiHandler({
               .limit(5); // Get multiple to find best description match
 
             if (prefixMatches && prefixMatches.length > 0) {
-              // Find best match by description similarity
-              let bestMatch = prefixMatches[0];
-              let bestSimilarity = calculateDescriptionSimilarity(component.description, bestMatch.brief_description);
+              // ✅ FIX (Nov 1): Prefer general category codes (e.g., 8504.40.00) over specific subcategories
+              // General categories typically have the broader tariff rate, while specific subcategories may be duty-free
 
-              for (const match of prefixMatches) {
-                const sim = calculateDescriptionSimilarity(component.description, match.brief_description);
-                if (sim > bestSimilarity) {
-                  bestMatch = match;
-                  bestSimilarity = sim;
+              // Look for general category code (ending in .00 or .00.00)
+              const generalCategory = prefixMatches.find(m => {
+                const code = m.hts8.replace(/\./g, ''); // Normalize to 85044000 format
+                const lastFour = code.slice(-4); // Get last 4 digits
+                const lastTwo = code.slice(-2);  // Get last 2 digits
+                const hasNonZeroRate = (parseFloat(m.mfn_ad_val_rate) || 0) > 0;
+
+                // General category: last 4 digits are "0000" or last 2 digits are "00", AND has actual tariff rate
+                return (lastFour === '0000' || lastTwo === '00') && hasNonZeroRate;
+              });
+
+              // If we found a general category with actual tariff rate, prefer it
+              if (generalCategory) {
+                rateData = generalCategory;
+                const sim = calculateDescriptionSimilarity(component.description, generalCategory.brief_description);
+                console.log(`✅ [GENERAL-CATEGORY] Using general category: ${generalCategory.hts8} "${generalCategory.brief_description}" (${Math.round(sim * 100)}% similarity, ${generalCategory.mfn_text_rate} MFN)`);
+              } else {
+                // Otherwise, find best match by description similarity
+                let bestMatch = prefixMatches[0];
+                let bestSimilarity = calculateDescriptionSimilarity(component.description, bestMatch.brief_description);
+
+                for (const match of prefixMatches) {
+                  const sim = calculateDescriptionSimilarity(component.description, match.brief_description);
+                  if (sim > bestSimilarity) {
+                    bestMatch = match;
+                    bestSimilarity = sim;
+                  }
                 }
-              }
 
-              rateData = bestMatch;
-              console.log(`✅ [PREFIX-MATCH] Found better match: ${bestMatch.hts8} "${bestMatch.brief_description}" (${Math.round(bestSimilarity * 100)}% similarity)`);
+                rateData = bestMatch;
+                console.log(`✅ [PREFIX-MATCH] Found best match: ${bestMatch.hts8} "${bestMatch.brief_description}" (${Math.round(bestSimilarity * 100)}% similarity)`);
+              }
             }
           }
 
