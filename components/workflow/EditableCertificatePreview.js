@@ -1145,7 +1145,7 @@ export default function EditableCertificatePreview({
         </div>
 
         {/* Section 12: Authorization */}
-        <div style={{ borderBottom: '2px solid #000', padding: '8px' }}>
+        <div style={{ padding: '8px' }}>
           <div style={{ fontSize: '9px', fontWeight: 'bold', marginBottom: '8px' }}>
             THIS CERTIFICATE CONSISTS OF <input type="text" style={{ width: '30px', ...inputStyle }} /> PAGES, INCLUDING ALL ATTACHMENTS.
           </div>
