@@ -280,9 +280,24 @@ export default function TradeRiskAlternatives() {
     // 🔄 UNIFIED DATA ACCESS: Get workflow data (database-first, localStorage fallback)
     // ✅ FIX: Get actual session_id from localStorage, not userId
     const sessionId = typeof window !== 'undefined' ? localStorage.getItem('workflow_session_id') : null;
-    console.log(`[TradeRiskAlternatives] Loading workflow with sessionId: ${sessionId}`);
+    console.log(`[TradeRiskAlternatives] Looking for sessionId: ${sessionId}`);
 
-    const userData = await getWorkflowData(sessionId);
+    let userData = await getWorkflowData(sessionId);
+
+    // ✅ FALLBACK: If no session_id in localStorage, try loading from usmca_workflow_results
+    if (!userData && typeof window !== 'undefined') {
+      console.log('[TradeRiskAlternatives] No session_id found, trying usmca_workflow_results...');
+      const cachedResults = localStorage.getItem('usmca_workflow_results');
+      if (cachedResults) {
+        try {
+          userData = JSON.parse(cachedResults);
+          userData.source = 'localStorage_cache';
+          console.log('[TradeRiskAlternatives] ✅ Loaded from usmca_workflow_results cache');
+        } catch (e) {
+          console.error('[TradeRiskAlternatives] Failed to parse cached results:', e);
+        }
+      }
+    }
 
     if (!userData) {
       console.log('[TradeRiskAlternatives] No workflow data found (checked DB + localStorage)');
@@ -290,7 +305,18 @@ export default function TradeRiskAlternatives() {
       return;
     }
 
-    console.log(`[TradeRiskAlternatives] Loaded workflow data from ${userData.source}`);
+    console.log(`[TradeRiskAlternatives] Loaded workflow data from ${userData.source || 'database'}`);
+
+    // ✅ CRITICAL FIX: Normalize database row structure vs localStorage structure
+    // Database returns: { id, user_id, data: { company, components, ... } }
+    // localStorage returns: { company, components, ... }
+    if (userData.data && typeof userData.data === 'object') {
+      console.log('[TradeRiskAlternatives] Normalizing database row structure - extracting userData.data');
+      userData = {
+        ...userData.data,  // Spread the nested workflow data
+        source: 'database'
+      };
+    }
 
     // Clear old test data if found
     if (userData.company?.name?.includes('Tropical Harvest')) {
