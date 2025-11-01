@@ -226,6 +226,92 @@ export function useWorkflowState() {
     }
   }, []);
 
+  // ✅ FIX (Nov 1): Reload results from localStorage when navigating back to results page
+  // This handles cases where user navigates away (e.g., to alerts page) and comes back
+  useEffect(() => {
+    // Only check when on results step (step 3) and results is missing
+    if (currentStep === 3 && !results) {
+      const savedResults = localStorage.getItem('usmca_workflow_results');
+
+      if (savedResults) {
+        try {
+          const parsed = JSON.parse(savedResults);
+          console.log('🔄 Restoring results from localStorage (user navigated back to results page)');
+          setResults(parsed);
+
+          // Also repopulate formData to ensure consistency
+          if (parsed) {
+            setFormData(prev => ({
+              ...prev,
+              company_name: parsed.company?.name || parsed.company?.company_name || prev.company_name,
+              business_type: parsed.company?.business_type || prev.business_type,
+              industry_sector: parsed.company?.industry_sector || prev.industry_sector,
+              trade_volume: parsed.company?.trade_volume || prev.trade_volume,
+              company_address: parsed.company?.company_address || parsed.company?.address || prev.company_address,
+              tax_id: parsed.company?.tax_id || prev.tax_id,
+              contact_person: parsed.company?.contact_person || prev.contact_person,
+              contact_phone: parsed.company?.contact_phone || parsed.company?.phone || prev.contact_phone,
+              contact_email: parsed.company?.contact_email || parsed.company?.email || prev.contact_email,
+              product_description: parsed.product?.description || prev.product_description,
+              manufacturing_location: parsed.usmca?.manufacturing_location || prev.manufacturing_location,
+              classified_hs_code: parsed.product?.hs_code || prev.classified_hs_code,
+              component_origins: parsed.components || parsed.component_origins || prev.component_origins
+            }));
+          }
+        } catch (e) {
+          console.error('Error restoring results from localStorage:', e);
+        }
+      }
+    }
+  }, [currentStep, results]);
+
+  // ✅ FIX (Nov 1): Reload formData from localStorage when navigating back to Steps 1 or 2
+  // This ensures form fields are populated when users navigate back from Results or Alerts pages
+  useEffect(() => {
+    // Only reload when navigating to steps 1 or 2, and only if formData appears empty
+    if ((currentStep === 1 || currentStep === 2) && !formData.company_name) {
+      const savedFormData = localStorage.getItem('triangleUserData');
+      const savedResults = localStorage.getItem('usmca_workflow_results');
+
+      if (savedFormData || savedResults) {
+        try {
+          // Try loading from triangleUserData first (most recent form edits)
+          if (savedFormData) {
+            const parsed = JSON.parse(savedFormData);
+            console.log('🔄 Restoring formData from localStorage (user navigated back to step', currentStep, ')');
+            setFormData(parsed);
+          }
+          // If no triangleUserData, try extracting from usmca_workflow_results
+          else if (savedResults) {
+            const parsed = JSON.parse(savedResults);
+            console.log('🔄 Restoring formData from workflow results (user navigated back to step', currentStep, ')');
+
+            setFormData(prev => ({
+              ...prev,
+              company_name: parsed.company?.name || parsed.company?.company_name || prev.company_name,
+              business_type: parsed.company?.business_type || prev.business_type,
+              industry_sector: parsed.company?.industry_sector || prev.industry_sector,
+              trade_volume: parsed.company?.trade_volume || prev.trade_volume,
+              company_address: parsed.company?.company_address || parsed.company?.address || prev.company_address,
+              company_country: parsed.company?.company_country || prev.company_country,
+              destination_country: parsed.company?.destination_country || prev.destination_country,
+              tax_id: parsed.company?.tax_id || prev.tax_id,
+              contact_person: parsed.company?.contact_person || prev.contact_person,
+              contact_phone: parsed.company?.contact_phone || parsed.company?.phone || prev.contact_phone,
+              contact_email: parsed.company?.contact_email || parsed.company?.email || prev.contact_email,
+              product_description: parsed.product?.description || prev.product_description,
+              manufacturing_location: parsed.usmca?.manufacturing_location || prev.manufacturing_location,
+              classified_hs_code: parsed.product?.hs_code || prev.classified_hs_code,
+              component_origins: parsed.components || parsed.component_origins || prev.component_origins
+            }));
+          }
+        } catch (e) {
+          console.error('Error restoring formData from localStorage:', e);
+        }
+      }
+    }
+  }, [currentStep, formData.company_name]);
+
   // Load workflow data from database on mount
   useEffect(() => {
     const loadFromDatabase = async () => {
