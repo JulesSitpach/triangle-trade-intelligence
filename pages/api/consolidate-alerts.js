@@ -282,7 +282,11 @@ async function analyzeAlertGroup(group, userProfile, sharedWorkflowIntelligence 
 
     // Build alerts context (what policies are affecting these components)
     const alertsContext = alerts.map(a => {
-      return `- ${a.title}: ${a.tariff_adjustment || 'Policy change'} (${a.category})`;
+      // ✅ FIX (Nov 1): Handle both database alerts (alert_type, severity) and legacy alerts (category, tariff_adjustment)
+      const alertType = a.alert_type || a.category || 'policy_change';
+      const severity = a.severity || 'medium';
+      const description = a.description || a.tariff_adjustment || 'Policy change';
+      return `- ${a.title}: ${description} (${alertType}, severity: ${severity})`;
     }).join('\n');
 
     // ========== BUILD WORKFLOW INTELLIGENCE CONTEXT ==========
