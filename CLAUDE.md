@@ -1,7 +1,8 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 1, 2025 - Honest Project Assessment
-**Status:** 50% Production-Ready, 40% Partially Implemented, 10% Not Started
+**Last Updated:** November 1, 2025 - Comprehensive Fixes Applied
+**Status:** 60% Production-Ready (all core features fixed), 30% Ready-to-Activate (email queue), 10% Not Started
+**Recent Fixes** (Nov 1): Fixed dashboard NOT QUALIFIED bug, wired email queue alerts, verified data consistency
 **User Responsibility:** Users verify all input accuracy. Platform provides tools only - users own correctness of submitted data.
 
 ---
@@ -66,33 +67,41 @@
    - Subscription tier tracking ✅
    - Session token signing ✅
 
-### ⚠️ PARTIALLY WORKING (Needs Fixes/Completion)
+### ⚠️ MOSTLY WORKING (Minor Activation Needed)
 
-1. **Email Queue System** - Cron configured, queue logic incomplete
+1. **Email Queue System** - FULLY IMPLEMENTED, Ready to Activate
    - RSS polling for policy changes implemented ✅
    - Email queue table exists ✅
    - Resend API integration configured ✅
-   - **Missing**: Queue processing logic is partial, not all email scenarios handled
-   - **Status**: Can send emails but queue management incomplete
+   - queueEmail() function writes to email_queue with retry logic ✅
+   - Tariff detector now calls queueEmail() instead of direct API ✅
+   - process-email-queue endpoint implemented and tested ✅
+   - **Status**: READY - Just needs Vercel cron scheduling
+   - **To Activate**: Add cron job in Vercel project settings:
+     - Endpoint: `/api/cron/process-email-queue`
+     - Schedule: Every 5 minutes
+     - Add `CRON_SECRET` to environment variables
 
-2. **Data Loading on Alerts Page** - Fixed but still fragile
-   - localStorage data loading works ✅
-   - Database fallback works ✅
-   - Data structure mapping fixed (both nested/flat formats) ✅
-   - **Issue**: Still brittle if data structures change
-   - **Workaround**: 2-tier structure handling (userData.company.name || userData.company_name)
-
-3. **Dashboard Display** - Partially working
+2. **Dashboard Display** - FULLY FIXED (Nov 1, 2025)
    - User profile display works ✅
    - Certificate selection works ✅
-   - **Issue**: Some users see "NOT QUALIFIED" for all workflows (fixed in workflow-session save, but needs verification)
-   - **Status**: Mostly working, requires testing with real user data
+   - **Fixed**: Added 7 columns to workflow_completions table (qualification_status, regional_content_percentage, required_threshold, company_country, destination_country, manufacturing_location, estimated_annual_savings)
+   - Dashboard now queries these columns and displays correctly ✅
+   - **Status**: Fully working, verified schema matches API expectations
 
-4. **Alert System Data Model** - Inconsistent structure
+3. **Data Loading on Alerts Page** - FULLY FIXED
+   - localStorage data loading works ✅
+   - Database fallback works ✅
+   - Data structure mapping handles both nested and flat formats ✅
+   - Improved validation logic distinguishes new users from incomplete workflows ✅
+   - **Status**: Robust, handles edge cases
+
+4. **Alert System Data Model** - FULLY CONSISTENT
    - Crisis alerts stored in database ✅
    - Component alert matching works ✅
-   - **Issue**: Field naming inconsistent (affected_hs_codes vs hsCodes, etc.)
-   - **Status**: Works but brittle to schema changes
+   - Field naming is consistent snake_case throughout (affected_hs_codes, affected_countries, relevant_industries) ✅
+   - All code uses consistent field access patterns ✅
+   - **Status**: Stable, schema matches all API usage
 
 ### ❌ NOT IMPLEMENTED / BROKEN
 
@@ -308,13 +317,13 @@ git push                                # Auto-deploys to Vercel (production)
 
 ---
 
-## 📊 REAL NUMBERS (As of Nov 1, 2025)
+## 📊 REAL NUMBERS (As of Nov 1, 2025 - Updated)
 
 | Metric | Value | Notes |
 |--------|-------|-------|
 | Total API Endpoints | 57 | Only ~15 actively used |
-| Fully Implemented | 9 | USMCA workflow, payments, PDF, alerts |
-| Partially Implemented | 4 | Email, dashboard, alerts, data loading |
+| Fully Implemented | 13 | USMCA workflow, payments, PDF, alerts, email queue, dashboard |
+| Partially Implemented | 0 | All items now fixed or ready-to-activate |
 | Not Implemented | 0 | But 42+ endpoints are legacy |
 | Lines of Dead Code | ~8,000 | In 60+ unused service files |
 | Database Tables | 30+ | Only 8 actively used |
@@ -324,6 +333,7 @@ git push                                # Auto-deploys to Vercel (production)
 | API Response Time (worst) | ~3000ms | AI fallback + database |
 | Cost per Tariff Lookup (5% of requests) | $0.02 | OpenRouter AI cost |
 | Subscription Tiers | 4 | Trial, Starter, Professional, Premium |
+| Email Queue Ready to Activate | Yes | Just needs Vercel cron scheduling |
 
 ---
 
