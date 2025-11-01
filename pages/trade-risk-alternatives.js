@@ -1254,73 +1254,12 @@ export default function TradeRiskAlternatives() {
                         </div>
                       </div>
 
-                      {/* Expanded Content - Tariff Details + Alerts */}
+                      {/* Expanded Content - Alerts Only */}
                       {isExpanded && (
                         <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-                          {/* Tariff Details Grid */}
-                          <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gap: '1rem',
-                            marginBottom: componentAlerts.length > 0 ? '1.5rem' : 0
-                          }}>
-                            {/* Base MFN */}
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Base MFN</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 600 }}>
-                                {baseMFN > 0 ? `${baseMFN.toFixed(1)}%` : '—'}
-                              </div>
-                            </div>
-
-                            {/* Section 301 */}
-                            <div style={{ backgroundColor: section301 > 0 ? '#fef3c7' : 'transparent', padding: '0.5rem', borderRadius: '6px' }}>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Section 301</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: section301 > 0 ? '#92400e' : '#9ca3af' }}>
-                                {section301 > 0 ? `+${section301.toFixed(1)}%` : '—'}
-                              </div>
-                            </div>
-
-                            {/* Total Rate */}
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Total Rate</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 700, color: '#dc2626' }}>
-                                {totalRate > 0 ? `${totalRate.toFixed(1)}%` : '—'}
-                              </div>
-                            </div>
-
-                            {/* USMCA Rate */}
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: '#059669' }}>
-                                {usmcaRate.toFixed(1)}%
-                              </div>
-                            </div>
-
-                            {/* Net After USMCA */}
-                            <div style={{ backgroundColor: '#dcfce7', padding: '0.5rem', borderRadius: '6px' }}>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Net After USMCA</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 700, color: section301 > 0 ? '#dc2626' : '#059669' }}>
-                                {netAfterUSMCA > 0 ? `${netAfterUSMCA.toFixed(1)}%` : '0%'}
-                              </div>
-                              {section301 > 0 && (
-                                <div style={{ fontSize: '0.6875rem', color: '#92400e', marginTop: '0.125rem' }}>
-                                  ⚠️ S301 remains
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Actual Savings */}
-                            <div>
-                              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Actual Savings</div>
-                              <div style={{ fontSize: '1.125rem', fontWeight: 600, color: actualSavings > 0 ? '#059669' : '#9ca3af' }}>
-                                {actualSavings > 0 ? `${actualSavings.toFixed(1)}%` : '—'}
-                              </div>
-                            </div>
-                          </div>
-
                           {/* Component-Specific Alerts */}
                           {componentAlerts.length > 0 && (
-                            <div style={{ marginTop: '1.5rem' }}>
+                            <div>
                               <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: '0.75rem', color: '#111827' }}>
                                 🚨 Alerts for This Component ({componentAlerts.length})
                               </h4>
