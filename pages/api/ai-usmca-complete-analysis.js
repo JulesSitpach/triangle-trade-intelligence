@@ -1530,6 +1530,7 @@ export default protectedApiHandler({
             console.log(`🔍 [CACHE-UPDATE] Updating existing cache session: ${cacheSessionId}`);
 
             const existingData = existingCache.data || {};
+            // ✅ FIX (Nov 1): Update ALL required columns to prevent data contract violations
             const { error: updateError } = await supabase
               .from('workflow_sessions')
               .update({
@@ -1537,6 +1538,19 @@ export default protectedApiHandler({
                   ...existingData,
                   ...cacheData
                 },
+
+                // ✅ Update required columns for dashboard-data validation
+                company_name: formData.company_name,
+                business_type: formData.business_type,
+                trade_volume: parseTradeVolume(formData.trade_volume),
+                manufacturing_location: formData.manufacturing_location,
+                hs_code: enrichedComponents[0]?.hs_code || null,
+                product_description: enrichedComponents[0]?.description || formData.product_description || null,
+                component_origins: enrichedComponents,
+                destination_country: formData.destination_country,
+                trade_flow_type: formData.trade_flow_type || null,
+                tariff_cache_strategy: formData.tariff_cache_strategy || null,
+
                 expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Refresh expiration
               })
               .eq('session_id', cacheSessionId);
@@ -1554,12 +1568,27 @@ export default protectedApiHandler({
               console.log(`🔍 [CACHE-CREATE] Creating new cache session: ${cacheSessionId}`);
             }
 
+            // ✅ FIX (Nov 1): Populate ALL required columns to prevent data contract violations
+            // dashboard-data validation expects: trade_volume, company_name, business_type, hs_code, etc.
             const { error: insertError } = await supabase
               .from('workflow_sessions')
               .insert({
                 user_id: userId,
                 session_id: cacheSessionId,
                 data: cacheData,
+
+                // ✅ Required columns for dashboard-data validation
+                company_name: formData.company_name,
+                business_type: formData.business_type,
+                trade_volume: parseTradeVolume(formData.trade_volume), // Parse string to number
+                manufacturing_location: formData.manufacturing_location,
+                hs_code: enrichedComponents[0]?.hs_code || null, // Primary product HS code
+                product_description: enrichedComponents[0]?.description || formData.product_description || null,
+                component_origins: enrichedComponents, // Full enriched components
+                destination_country: formData.destination_country,
+                trade_flow_type: formData.trade_flow_type || null,
+                tariff_cache_strategy: formData.tariff_cache_strategy || null,
+
                 created_at: new Date().toISOString(),
                 expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hour cache
               });
