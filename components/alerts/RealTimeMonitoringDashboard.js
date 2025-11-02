@@ -25,19 +25,33 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
     setIsLoading(true);
     try {
       // ✅ FETCH REAL RSS MONITORING STATS FROM DATABASE
-      const response = await fetch('/api/rss-monitoring-stats', {
+      const statsResponse = await fetch('/api/rss-monitoring-stats', {
         credentials: 'include'
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!statsResponse.ok) {
+        throw new Error(`HTTP ${statsResponse.status}: ${statsResponse.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await statsResponse.json();
 
-      // Set real monitoring data from database
+      // ✅ FETCH ACTUAL CRISIS ALERTS FROM DATABASE
+      const alertsResponse = await fetch('/api/get-crisis-alerts', {
+        credentials: 'include'
+      });
+
+      let alerts = [];
+      if (alertsResponse.ok) {
+        const alertsData = await alertsResponse.json();
+        alerts = alertsData.alerts || [];
+        console.log('✅ Loaded real crisis alerts:', alerts);
+      } else {
+        console.warn('⚠️ Failed to load crisis alerts, will show no alerts message');
+      }
+
+      // Set real monitoring data and alerts from database
       setMonitoringData(data);
-      setCensusAlerts([]); // Real alerts come from crisis_alerts table
+      setCensusAlerts(alerts); // Real alerts from crisis_alerts table
 
       console.log('✅ Loaded real RSS monitoring stats:', data);
     } catch (error) {
@@ -192,96 +206,101 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         </div>
       </div>
 
-      {/* Real Alerts from Census Data */}
+      {/* Real Alerts from Crisis Alerts Table */}
       {censusAlerts.length > 0 ? (
         <div style={{ marginTop: '1.5rem' }}>
-          <h3 className="card-title">🚨 Recent Alerts from Government Data</h3>
+          <h3 className="card-title">🚨 Recent Policy Change Alerts</h3>
           <p className="text-body" style={{ marginBottom: '1rem' }}>
-            Alerts generated from US Census Bureau import/export data (updated monthly)
+            {censusAlerts.length} active alert{censusAlerts.length !== 1 ? 's' : ''} affecting your products
           </p>
 
-          {censusAlerts.map((alert, idx) => (
-            <div
-              key={idx}
-              style={{
-                border: `2px solid ${urgencyColors[alert.urgency]}`,
-                borderRadius: '8px',
-                padding: '1.5rem',
-                marginBottom: '1rem',
-                background: 'white'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
-                <h4 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>
-                  {alert.title}
-                </h4>
-                <span style={{
-                  background: urgencyColors[alert.urgency],
-                  color: 'white',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '12px',
+          {censusAlerts.map((alert, idx) => {
+            const severityColor = alert.severity === 'critical' ? '#dc2626' :
+                                  alert.severity === 'high' ? '#ea580c' :
+                                  alert.severity === 'medium' ? '#f59e0b' : '#10b981';
+
+            return (
+              <div
+                key={idx}
+                style={{
+                  border: `2px solid ${severityColor}`,
+                  borderRadius: '8px',
+                  padding: '1.5rem',
+                  marginBottom: '1rem',
+                  background: 'white'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>
+                    {alert.title}
+                  </h4>
+                  <span style={{
+                    background: severityColor,
+                    color: 'white',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '12px',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    textTransform: 'uppercase'
+                  }}>
+                    {alert.severity} PRIORITY
+                  </span>
+                </div>
+
+                <div style={{ color: '#374151', marginBottom: '0.75rem' }}>
+                  {alert.description}
+                </div>
+
+                {alert.relevant_industries && alert.relevant_industries.length > 0 && (
+                  <div style={{
+                    background: '#f9fafb',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>
+                      Affected Industries:
+                    </div>
+                    <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                      {alert.relevant_industries.join(', ')}
+                    </div>
+                  </div>
+                )}
+
+                {(alert.affected_hs_codes?.length > 0 || alert.affected_countries?.length > 0) && (
+                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+                    {alert.affected_hs_codes?.length > 0 && (
+                      <div><strong>HS Codes:</strong> {alert.affected_hs_codes.join(', ')}</div>
+                    )}
+                    {alert.affected_countries?.length > 0 && (
+                      <div><strong>Countries:</strong> {alert.affected_countries.join(', ')}</div>
+                    )}
+                  </div>
+                )}
+
+                <div style={{
+                  marginTop: '0.75rem',
+                  paddingTop: '0.75rem',
+                  borderTop: '1px solid #e5e7eb',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   fontSize: '0.75rem',
-                  fontWeight: 500,
-                  textTransform: 'uppercase'
+                  color: '#9ca3af'
                 }}>
-                  {alert.urgency} PRIORITY
-                </span>
-              </div>
-
-              <div style={{ color: '#374151', marginBottom: '0.75rem' }}>
-                {alert.details}
-              </div>
-
-              <div style={{
-                background: '#f9fafb',
-                padding: '0.75rem',
-                borderRadius: '6px',
-                marginBottom: '0.75rem'
-              }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>
-                  Impact Assessment:
-                </div>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  {alert.impact}
+                  <span>Type: {alert.alert_type} • Source: {alert.detection_source}</span>
+                  <span>Detected: {getTimeAgo(alert.created_at)}</span>
                 </div>
               </div>
-
-              {alert.data && (
-                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-                  {alert.data.currentValue && (
-                    <div><strong>Value:</strong> {alert.data.currentValue}</div>
-                  )}
-                  {alert.data.trendPercent && (
-                    <div><strong>Trend:</strong> {alert.data.trendPercent > 0 ? '+' : ''}{alert.data.trendPercent}%</div>
-                  )}
-                  {alert.data.period && (
-                    <div><strong>Period:</strong> {alert.data.period}</div>
-                  )}
-                </div>
-              )}
-
-              <div style={{
-                marginTop: '0.75rem',
-                paddingTop: '0.75rem',
-                borderTop: '1px solid #e5e7eb',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                fontSize: '0.75rem',
-                color: '#9ca3af'
-              }}>
-                <span>Source: {alert.source}</span>
-                <span>Detected: {getTimeAgo(alert.detectedAt)}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div style={{ marginTop: '1.5rem' }} className="alert alert-success">
           <div className="alert-content">
             <div className="alert-title">✅ No Critical Alerts</div>
             <div className="text-body">
-              Good news! Your HS codes are being monitored. No significant import volume changes or supply concentration risks detected in the latest government data.
+              Good news! Your HS codes are being monitored. No significant tariff policy changes or supply concentration risks detected in the latest government data.
               <br /><br />
               <strong>What we&apos;re watching:</strong>
               <ul style={{ marginTop: '0.5rem', marginBottom: 0 }}>
