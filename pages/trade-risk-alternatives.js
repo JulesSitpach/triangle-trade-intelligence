@@ -117,8 +117,13 @@ export default function TradeRiskAlternatives() {
   // Auto-load personalized alerts when userProfile is available
   // This populates the Component Tariff Intelligence table
   useEffect(() => {
-    if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0 && !alertsGenerated) {
-      console.log('📡 Auto-loading personalized alerts for component table...');
+    if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0) {
+      console.log('📡 Auto-loading personalized alerts for component table with profile:', {
+        companyName: userProfile.companyName,
+        componentCount: userProfile.componentOrigins?.length,
+        industry: userProfile.industry_sector,
+        origins: userProfile.componentOrigins?.map(c => c.origin_country)
+      });
       loadRealPolicyAlerts(userProfile);
     }
   }, [userProfile?.companyName, userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
