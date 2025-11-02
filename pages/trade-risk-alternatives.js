@@ -14,7 +14,7 @@ import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoring
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 import ExecutiveSummaryDisplay from '../components/workflow/results/ExecutiveSummaryDisplay';
-import AlertImpactAnalysisDisplay from '../components/alerts/AlertImpactAnalysisDisplay';
+import PersonalizedUSMCA2026Display from '../components/alerts/PersonalizedUSMCA2026Display';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -72,9 +72,9 @@ export default function TradeRiskAlternatives() {
   // Email notification preferences for each component
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
 
-  // Alert Impact Analysis state (ADDITIVE - reuses workflow analysis)
-  const [alertImpactAnalysis, setAlertImpactAnalysis] = useState(null);
-  const [isLoadingAlertImpact, setIsLoadingAlertImpact] = useState(false);
+  // Personalized USMCA 2026 Analysis state
+  const [personalizedUSMCA2026Analysis, setPersonalizedUSMCA2026Analysis] = useState(null);
+  const [isLoadingPersonalizedAnalysis, setIsLoadingPersonalizedAnalysis] = useState(false);
 
   // Executive Alert state (strategic consulting letter)
   const [executiveAlertData, setExecutiveAlertData] = useState(null);
@@ -520,30 +520,30 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
-   * Save alert impact analysis to database (with user consent)
+   * Save personalized USMCA 2026 analysis to database (with user consent)
    */
   const handleSaveAlertAnalysis = async () => {
     if (!user) {
-      alert('⚠️ Please sign in to save alert analysis to your dashboard.');
+      alert('⚠️ Please sign in to save analysis to your dashboard.');
       return;
     }
 
-    if (!alertImpactAnalysis) {
-      alert('⚠️ No alert analysis to save. Please generate the analysis first.');
+    if (!personalizedUSMCA2026Analysis) {
+      alert('⚠️ No analysis to save. Please generate the analysis first.');
       return;
     }
 
     // Check for user consent
     const savedConsent = localStorage.getItem('save_data_consent');
     if (savedConsent !== 'save') {
-      alert('⚠️ You must consent to save data before saving alert analysis. Please use the consent modal at the top of the page.');
+      alert('⚠️ You must consent to save data before saving analysis. Please use the consent modal at the top of the page.');
       return;
     }
 
     try {
-      console.log('💾 Saving alert impact analysis to database...');
+      console.log('💾 Saving personalized USMCA 2026 analysis to database...');
 
-      // Save alert impact analysis to workflow detailed_analysis
+      // Save personalized USMCA 2026 analysis to workflow detailed_analysis
       const response = await fetch('/api/workflow-session/update-executive-alert', {
         method: 'POST',
         headers: {
@@ -552,29 +552,23 @@ export default function TradeRiskAlternatives() {
         credentials: 'include',
         body: JSON.stringify({
           detailed_analysis: {
-            alert_impact_analysis: {
-              alert_impact_summary: alertImpactAnalysis.alert_impact_summary || '',
-              updated_priorities: alertImpactAnalysis.updated_priorities || [],
-              updated_timeline: alertImpactAnalysis.updated_timeline || [],
-              contingency_scenarios: alertImpactAnalysis.contingency_scenarios || [],
-              next_step_this_week: alertImpactAnalysis.next_step_this_week || ''
-            },
+            personalized_usmca_2026_analysis: personalizedUSMCA2026Analysis,
             analysis_generated_at: new Date().toISOString()
           }
         })
       });
 
       if (response.ok) {
-        console.log('✅ Alert impact analysis saved to database');
-        alert('✅ Alert analysis saved to your dashboard!\n\nYou can view it anytime from your workflow history.');
+        console.log('✅ Personalized USMCA 2026 analysis saved to database');
+        alert('✅ USMCA 2026 analysis saved to your dashboard!\n\nYou can view it anytime from your workflow history.');
       } else {
         const errorData = await response.json();
-        console.error('❌ Failed to save alert analysis:', errorData);
-        alert('⚠️ Failed to save alert analysis. Please try again or contact support.');
+        console.error('❌ Failed to save analysis:', errorData);
+        alert('⚠️ Failed to save analysis. Please try again or contact support.');
       }
     } catch (error) {
-      console.error('❌ Error saving alert analysis:', error);
-      alert('⚠️ Failed to save alert analysis. Please try again or contact support.');
+      console.error('❌ Error saving analysis:', error);
+      alert('⚠️ Failed to save analysis. Please try again or contact support.');
     }
   };
 
@@ -832,100 +826,11 @@ export default function TradeRiskAlternatives() {
    * Reuses existing workflow analysis from results page to avoid re-computation
    * Only analyzes NEW threats and how they impact existing strategic plan
    */
-  const generateAlertImpactAnalysis = async () => {
-    if (!consolidatedAlerts || consolidatedAlerts.length === 0) {
-      console.log('⏭️ No alerts to analyze');
-      return;
-    }
-
-    // ✅ FIXED (Nov 1): Don't check for workflowIntelligence from database
-    // We generate FRESH analysis on alerts page, don't rely on loading from DB
-    // The API endpoint will use userProfile + consolidatedAlerts to create analysis
-
-    setIsLoadingAlertImpact(true);
+  const generatePersonalizedUSMCA2026Analysis = async () => {
+    setIsLoadingPersonalizedAnalysis(true);
 
     try {
-      console.log('🔍 Generating additive alert impact analysis...');
-
-      // ✅ FIXED (Nov 1): Build rich context from workflow data for alert impact analysis
-      // This ensures detailed, specific analysis even without explicit executive summary generation
-      let existingAnalysis = {};
-
-      // Extract detailed_analysis from either workflowIntelligence OR rebuild from workflow data
-      if (workflowIntelligence && workflowIntelligence.detailed_analysis) {
-        // Option A: Use saved executive summary if user explicitly generated it
-        const analysis = workflowIntelligence.detailed_analysis;
-        existingAnalysis = {
-          situation_brief: analysis.situation_brief || '',
-          problem: analysis.problem || '',
-          root_cause: analysis.root_cause || '',
-          annual_impact: analysis.annual_impact || userProfile.savings || 0,
-          why_now: analysis.why_now || '',
-          current_burden: analysis.current_burden || 0,
-          potential_savings: analysis.potential_savings || userProfile.savings || 0,
-          payback_period: analysis.payback_period || '',
-          action_items: workflowIntelligence.recommendations || [],
-          strategic_roadmap: analysis.strategic_roadmap || [],
-          broker_insights: analysis.broker_insights || ''
-        };
-      } else if (userProfile && userProfile.componentOrigins && userProfile.componentOrigins.length > 0) {
-        // Option B: Build context from workflow components if no executive summary yet
-        // This ensures alert impact analysis has enough detail for "amazing" output
-        const components = userProfile.componentOrigins || [];
-        const riskCompoments = components.filter(c => c.section_301 || c.total_rate > 0.15);
-        const highestRiskComponent = riskCompoments.length > 0
-          ? riskCompoments[0]
-          : components[0];
-
-        // Calculate financial metrics from components
-        const tradeVolume = userProfile.tradeVolume || 0;
-        const section301Burden = components.reduce((sum, c) => {
-          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
-          return sum + (componentValue * (c.section_301 || 0));
-        }, 0);
-
-        const mfnCost = components.reduce((sum, c) => {
-          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
-          const mfnRate = c.mfn_rate || 0;
-          return sum + (componentValue * mfnRate);
-        }, 0);
-
-        const usmcaCost = components.reduce((sum, c) => {
-          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
-          const usmcaRate = c.usmca_rate || 0;
-          return sum + (componentValue * usmcaRate);
-        }, 0);
-
-        const annualSavings = userProfile.savings || (mfnCost - usmcaCost) || 0;
-
-        // Build context with calculated metrics
-        existingAnalysis = {
-          situation_brief: `${userProfile.companyName || 'Your company'} has ${userProfile.qualificationStatus === 'QUALIFIED' ? 'USMCA qualified' : 'non-qualified'} products with ${userProfile.regionalContent || 0}% regional content and $${(userProfile.tradeVolume || 0).toLocaleString()} annual trade volume.`,
-          problem: `Primary supply chain risk: ${highestRiskComponent?.description || 'Primary component'} from ${highestRiskComponent?.origin_country || 'key supplier'} creates ${section301Burden > 0 ? `$${Math.round(section301Burden).toLocaleString()} Section 301 exposure` : 'tariff risk'}.`,
-          root_cause: `Supply chain concentration: ${highestRiskComponent?.value_percentage || 0}% of product value sourced from ${highestRiskComponent?.origin_country || 'single country'}, creating regulatory and tariff vulnerability.`,
-          annual_impact: section301Burden || annualSavings || 0,
-          why_now: 'Tariff policy changes and USMCA 2026 renegotiation discussions create time-sensitive opportunity windows.',
-          current_burden: section301Burden || mfnCost || 0,
-          potential_savings: annualSavings || usmcaCost || 0,
-          payback_period: annualSavings > 100000 ? '3-6 months' : '6-12 months',
-          action_items: workflowIntelligence?.recommendations || [
-            `Conduct USMCA qualification audit with customs broker for ${userProfile.companyName || 'your company'}`,
-            `Evaluate nearshoring options for ${highestRiskComponent?.description || 'high-risk component'}`
-          ],
-          strategic_roadmap: workflowIntelligence?.strategic_roadmap || [],
-          broker_insights: 'Review USMCA eligibility documentation and monitor CBP enforcement guidance.'
-        };
-
-        // Debug log to help diagnose what context is being passed
-        console.log('🔍 Alert analysis context built from workflow components:', {
-          hasWorkflowIntelligence: !!workflowIntelligence,
-          hasDetailedAnalysis: !!workflowIntelligence?.detailed_analysis,
-          componentCount: components.length,
-          section301Burden: section301Burden,
-          annualSavings: annualSavings,
-          contextFieldsFilled: Object.keys(existingAnalysis).filter(k => existingAnalysis[k]).length
-        });
-      }
+      console.log('🔍 Generating personalized USMCA 2026 analysis for:', userProfile.companyName);
 
       // Build user profile for analysis
       const analysisProfile = {
@@ -933,21 +838,18 @@ export default function TradeRiskAlternatives() {
         companyName: userProfile.companyName,
         business_type: userProfile.businessType,
         industry_sector: userProfile.industry_sector,
-        destination_country: userProfile.destinationCountry || 'US',
+        destinationCountry: userProfile.destinationCountry || 'US',
         componentOrigins: userProfile.componentOrigins || [],
         regionalContent: userProfile.regionalContent || 0,
-        tradeVolume: userProfile.tradeVolume || 0,
-        trade_volume: userProfile.tradeVolume || 0 // Alias for compatibility
+        tradeVolume: userProfile.tradeVolume || 0
       };
 
-      // Call alert impact analysis API endpoint (server-side)
-      const response = await fetch('/api/alert-impact-analysis', {
+      // Call personalized USMCA 2026 analysis API endpoint
+      const response = await fetch('/api/personalized-usmca-2026-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          existingAnalysis,
-          consolidatedAlerts,
           userProfile: analysisProfile
         })
       });
@@ -959,36 +861,31 @@ export default function TradeRiskAlternatives() {
 
       const rawAnalysis = await response.json();
 
-      console.log('✅ Alert impact analysis complete (RAW):', rawAnalysis);
+      console.log('✅ Personalized USMCA 2026 analysis complete:', rawAnalysis);
 
-      // ✅ UNWRAP if response has wrapper (like {success: true, data: {...}})
+      // Unwrap response if it has wrapper
       let analysis = rawAnalysis;
       if (rawAnalysis && typeof rawAnalysis === 'object') {
         if (rawAnalysis.success && rawAnalysis.data) {
-          console.log('🔓 Unwrapping response data');
-          analysis = rawAnalysis.data;
-        } else if (rawAnalysis.data && !rawAnalysis.alert_impact_summary) {
-          // If data exists but no alert_impact_summary at top level, might be wrapped
-          console.log('🔓 Found nested data structure');
           analysis = rawAnalysis.data;
         }
       }
 
-      console.log('✅ Final alert impact analysis:', analysis);
-      setAlertImpactAnalysis(analysis);
+      console.log('✅ Final analysis:', analysis);
+      setPersonalizedUSMCA2026Analysis(analysis);
 
       // Save to localStorage for persistence
       try {
-        localStorage.setItem('alert_impact_analysis', JSON.stringify(analysis));
-        console.log('💾 Saved alert impact analysis to localStorage');
+        localStorage.setItem('personalized_usmca_2026_analysis', JSON.stringify(analysis));
+        console.log('💾 Saved personalized analysis to localStorage');
       } catch (e) {
         console.error('Failed to save to localStorage:', e);
       }
     } catch (error) {
-      console.error('❌ Alert impact analysis failed:', error);
-      setAlertImpactAnalysis(null);
+      console.error('❌ Personalized analysis failed:', error);
+      setPersonalizedUSMCA2026Analysis(null);
     } finally {
-      setIsLoadingAlertImpact(false);
+      setIsLoadingPersonalizedAnalysis(false);
     }
   };
 
@@ -1477,16 +1374,15 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Alert Impact Analysis Section - ALWAYS show after analysis runs (alert or no alert) */}
-        {alertImpactAnalysis && alertsGenerated && (
+        {/* Personalized USMCA 2026 Analysis Section - Show after generation */}
+        {personalizedUSMCA2026Analysis && alertsGenerated && (
           <div>
-            <AlertImpactAnalysisDisplay
-              data={alertImpactAnalysis}
-              consolidatedAlertsCount={consolidatedAlerts.length}
+            <PersonalizedUSMCA2026Display
+              data={personalizedUSMCA2026Analysis}
               onClose={null}
             />
 
-            {/* Save Alert Analysis to Database Button */}
+            {/* Save Analysis to Database Button */}
             <div style={{ marginTop: '2rem', textAlign: 'center' }}>
               <button
                 onClick={handleSaveAlertAnalysis}
@@ -1497,23 +1393,23 @@ export default function TradeRiskAlternatives() {
                   fontWeight: 600
                 }}
               >
-                ✅ Save Alert Analysis to Database
+                ✅ Save Analysis to Dashboard
               </button>
               <p style={{
                 marginTop: '0.75rem',
                 fontSize: '0.875rem',
                 color: '#6b7280'
               }}>
-                Save this strategic analysis to your dashboard for future reference
+                Save your personalized USMCA 2026 analysis for future reference
               </p>
             </div>
           </div>
         )}
 
-        {/* Loading indicator for alert impact analysis */}
-        {isLoadingAlertImpact && consolidatedAlerts.length > 0 && (
+        {/* Loading indicator for personalized analysis */}
+        {isLoadingPersonalizedAnalysis && alertsGenerated && (
           <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-            Analyzing Strategic Impact...
+            Analyzing your supply chain exposure to USMCA 2026 renegotiation...
           </div>
         )}
 
@@ -1534,7 +1430,7 @@ export default function TradeRiskAlternatives() {
             </button>
           )}
 
-          {alertsGenerated && !alertImpactAnalysis && (
+          {alertsGenerated && !personalizedUSMCA2026Analysis && (
             <div>
               {/* ✅ FIXED: Check for workflow data (components), NOT optional executive summary */}
               {!userProfile || !userProfile.componentOrigins || userProfile.componentOrigins.length === 0 ? (
@@ -1553,10 +1449,11 @@ export default function TradeRiskAlternatives() {
               ) : (
                 <div className="hero-buttons">
                   <button
-                    onClick={generateAlertImpactAnalysis}
+                    onClick={generatePersonalizedUSMCA2026Analysis}
                     className="btn-primary"
+                    disabled={isLoadingPersonalizedAnalysis}
                   >
-                    📊 Generate Strategic Analysis
+                    {isLoadingPersonalizedAnalysis ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
                   </button>
                   <button
                     onClick={() => {
