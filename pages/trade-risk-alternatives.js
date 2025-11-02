@@ -796,6 +796,55 @@ export default function TradeRiskAlternatives() {
         setRealPolicyAlerts(data.alerts);
         setOriginalAlertCount(data.alerts.length);
 
+        // Log alerts to database for monitoring/audit trail
+        setProgressSteps(prev => [...prev, 'Logging alerts for monitoring...']);
+        try {
+          await fetch('/api/log-dynamic-alerts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              user_id: user?.id,
+              company_name: profile.companyName,
+              dynamic_alerts: data.alerts,
+              portfolio_data: {
+                rvc: profile.regionalContent || 0,
+                total_volume: workflowData.portfolio?.total_volume || 0,
+                component_count: (profile.componentOrigins || []).length
+              }
+            })
+          });
+          console.log('✅ Alerts logged to monitoring system');
+        } catch (logError) {
+          console.warn('⚠️ Failed to log alerts:', logError);
+        }
+
+        // Generate AI summary based on user's actual alerts
+        setProgressSteps(prev => [...prev, 'Generating AI strategic summary...']);
+        try {
+          const summaryResponse = await fetch('/api/generate-ai-alert-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              workflow_data: workflowData,
+              dynamic_alerts: data.alerts,
+              user_id: user?.id
+            })
+          });
+
+          if (summaryResponse.ok) {
+            const summaryData = await summaryResponse.json();
+            if (summaryData.success) {
+              console.log('✅ AI summary generated:', summaryData.summary);
+              // Store summary in state for display
+              setPersonalizedUSMCA2026Analysis(summaryData.summary);
+            }
+          }
+        } catch (summaryError) {
+          console.warn('⚠️ Failed to generate AI summary:', summaryError);
+        }
+
         setProgressSteps(prev => [...prev, 'Analysis complete']);
         setAlertsGenerated(true);
       } else {
