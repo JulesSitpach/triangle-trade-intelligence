@@ -745,20 +745,34 @@ export default function TradeRiskAlternatives() {
 
       // STEP 1: Fetch all active crisis alerts from database
       setProgressSteps(prev => [...prev, 'Loading active policy alerts...']);
+      console.log('📡 Fetching crisis alerts from /api/get-crisis-alerts...');
+
       const alertsResponse = await fetch('/api/get-crisis-alerts', {
         method: 'GET',
         credentials: 'include'
+      });
+
+      console.log('📊 Crisis alerts fetch response:', {
+        ok: alertsResponse.ok,
+        status: alertsResponse.status,
+        statusText: alertsResponse.statusText
       });
 
       let crisisAlerts = [];
       if (alertsResponse.ok) {
         const alertsData = await alertsResponse.json();
         crisisAlerts = alertsData.alerts || [];
-        console.log(`✅ Fetched ${crisisAlerts.length} active crisis alerts from database`);
+        console.log(`✅ Fetched ${crisisAlerts.length} active crisis alerts:`, crisisAlerts.map(a => ({
+          title: a.title,
+          countries: a.affected_countries,
+          hs_codes: a.affected_hs_codes
+        })));
 
         // Store alerts in state so component table can match them
         setRealPolicyAlerts(crisisAlerts);
       } else {
+        const errorText = await alertsResponse.text();
+        console.error('❌ Crisis alerts fetch failed:', errorText);
         console.warn('⚠️ Could not fetch crisis alerts, will proceed without them');
       }
 
@@ -825,63 +839,43 @@ export default function TradeRiskAlternatives() {
     setProgressSteps([]);
 
     try {
-      // Step 1: Analyze component origins
-      setProgressSteps(prev => [...prev, 'Analyzing component origins...']);
-      console.log('Analyzing component origins for:', profile.companyName);
-      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
+      // Fetch crisis alerts directly from database
+      setProgressSteps(prev => [...prev, 'Loading active policy alerts...']);
 
-      // Step 2: Checking trade policies
-      setProgressSteps(prev => [...prev, 'Checking applicable trade policies...']);
-      console.log('Checking trade policies...');
-
-      const response = await fetch('/api/generate-personalized-alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_profile: profile
-        })
+      const response = await fetch('/api/get-crisis-alerts', {
+        method: 'GET',
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to generate personalized alerts: ${response.status}`);
+        throw new Error(`Failed to fetch crisis alerts: ${response.status}`);
       }
 
-      // Step 3: Generating personalized alerts
-      setProgressSteps(prev => [...prev, 'Generating personalized alerts...']);
       const data = await response.json();
+      const alerts = data.alerts || [];
 
-      if (data.success && data.alerts) {
-        console.log(`Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
-        console.log('📋 Alerts returned from API:', data.alerts.map(a => ({
-          title: a.title,
-          affected_hs_codes: a.affected_hs_codes,
-          affected_countries: a.affected_countries,
-          relevance_score: a.relevance_score
-        })));
+      console.log(`✅ Fetched ${alerts.length} crisis alerts:`, alerts.map(a => ({
+        title: a.title,
+        countries: a.affected_countries,
+        hs_codes: a.affected_hs_codes
+      })));
 
-        const personalizedAlerts = data.alerts;
+      setRealPolicyAlerts(alerts);
+      setOriginalAlertCount(alerts.length);
 
-        setRealPolicyAlerts(personalizedAlerts);
-        setOriginalAlertCount(personalizedAlerts.length);
-
-        // Step 4: Consolidating related alerts
-        setProgressSteps(prev => [...prev, 'Consolidating related alerts...']);
-        if (personalizedAlerts.length > 0) {
-          await consolidateAlerts(personalizedAlerts, profile);
-        }
-
-        setProgressSteps(prev => [...prev, 'Analysis complete']);
-        setAlertsGenerated(true);
+      if (alerts.length > 0) {
+        setProgressSteps(prev => [...prev, `Found ${alerts.length} policy alerts`]);
+        await consolidateAlerts(alerts, profile);
       } else {
-        console.log('No personalized alerts generated');
-        setRealPolicyAlerts([]);
-        setProgressSteps(prev => [...prev, 'No alerts found']);
-        setAlertsGenerated(true);
+        setProgressSteps(prev => [...prev, 'No active policy alerts']);
       }
+
+      setProgressSteps(prev => [...prev, 'Analysis complete']);
+      setAlertsGenerated(true);
     } catch (error) {
-      console.error('Error generating personalized alerts:', error);
+      console.error('Error loading crisis alerts:', error);
       setRealPolicyAlerts([]);
-      setProgressSteps(prev => [...prev, 'Error generating alerts']);
+      setProgressSteps(prev => [...prev, 'Error loading alerts']);
       setAlertsGenerated(true);
     } finally {
       setIsLoadingPolicyAlerts(false);
@@ -1491,7 +1485,10 @@ export default function TradeRiskAlternatives() {
               ) : (
                 <div className="hero-buttons">
                   <button
-                    onClick={() => loadPortfolioBriefing(userProfile)}
+                    onClick={() => {
+                      console.log('🔵 USMCA 2026 button clicked!', { userProfile });
+                      loadPortfolioBriefing(userProfile);
+                    }}
                     className="btn-primary"
                     disabled={isLoadingPolicyAlerts}
                   >
