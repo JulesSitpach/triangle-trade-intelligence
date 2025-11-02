@@ -539,8 +539,8 @@ export default function TradeRiskAlternatives() {
       return;
     }
 
-    if (!personalizedUSMCA2026Analysis) {
-      alert('⚠️ No analysis to save. Please generate the analysis first.');
+    if (!realPolicyAlerts || realPolicyAlerts.length === 0) {
+      alert('⚠️ No alerts to save. Please generate the analysis first.');
       return;
     }
 
@@ -552,9 +552,9 @@ export default function TradeRiskAlternatives() {
     }
 
     try {
-      console.log('💾 Saving personalized USMCA 2026 analysis to database...');
+      console.log('💾 Saving policy alerts analysis to database...');
 
-      // Save personalized USMCA 2026 analysis to workflow detailed_analysis
+      // Save real policy alerts to workflow detailed_analysis
       const response = await fetch('/api/workflow-session/update-executive-alert', {
         method: 'POST',
         headers: {
@@ -563,7 +563,7 @@ export default function TradeRiskAlternatives() {
         credentials: 'include',
         body: JSON.stringify({
           detailed_analysis: {
-            personalized_usmca_2026_analysis: personalizedUSMCA2026Analysis,
+            policy_alerts: realPolicyAlerts,
             analysis_generated_at: new Date().toISOString()
           }
         })
@@ -1459,7 +1459,7 @@ export default function TradeRiskAlternatives() {
             </button>
           )}
 
-          {alertsGenerated && !personalizedUSMCA2026Analysis && (
+          {alertsGenerated && (
             <div>
               {/* ✅ FIXED: Check for workflow data (components), NOT optional executive summary */}
               {!userProfile || !userProfile.componentOrigins || userProfile.componentOrigins.length === 0 ? (
