@@ -1,24 +1,30 @@
 /**
- * AlertImpactAnalysisDisplay - Professional strategic impact assessment display
- * Shows how new alerts impact existing strategic plan with USMCA 2026 scenarios
+ * AlertImpactAnalysisDisplay - Holistic Portfolio Intelligence Report
+ * Shows strategic portfolio assessment with 6 integrated sections:
+ * 1. Executive Summary - Big picture assessment
+ * 2. Portfolio Health Check - Current status, risk, opportunity
+ * 3. Cross-Component Analysis - How components fit together
+ * 4. Policy Environment - Trade landscape context
+ * 5. Strategic Roadmap - Action plan by timeframe
+ * 6. Opportunity Spotlight - Growth opportunities
+ * 7. What We Monitor - Retention mechanism
+ * 8. Trade Advisor Perspective - Broker insights
  */
 
 import React, { useState, useEffect } from 'react';
 
 export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCount, onClose }) {
-  // Load data IMMEDIATELY from localStorage or props
   const getInitialData = () => {
     try {
       const stored = localStorage.getItem('alert_impact_analysis');
       if (stored) {
         const parsed = JSON.parse(stored);
-        console.log('🎯 AlertImpactAnalysisDisplay INITIAL load from localStorage:', parsed);
+        console.log('🎯 AlertImpactAnalysisDisplay loading from localStorage:', parsed);
         return parsed;
       }
     } catch (e) {
       console.error('Failed to load from localStorage:', e);
     }
-    console.log('🎯 AlertImpactAnalysisDisplay using props:', data);
     return data;
   };
 
@@ -26,13 +32,10 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
 
   useEffect(() => {
     if (data && data !== displayData) {
-      console.log('🎯 AlertImpactAnalysisDisplay updating with new props:', data);
+      console.log('🎯 AlertImpactAnalysisDisplay updating with new props');
       setDisplayData(data);
-
-      // Save to localStorage when data changes
       try {
         localStorage.setItem('alert_impact_analysis', JSON.stringify(data));
-        console.log('💾 Saved alert impact analysis to localStorage');
       } catch (e) {
         console.error('Failed to save to localStorage:', e);
       }
@@ -40,11 +43,21 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
   }, [data, displayData]);
 
   if (!displayData) {
-    console.log('❌ AlertImpactAnalysisDisplay: No data available');
     return null;
   }
 
-  console.log('🎯 AlertImpactAnalysisDisplay rendering with:', displayData);
+  const renderArrayItems = (items) => {
+    if (!items) return null;
+    return (
+      <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
+        {items.map((item, idx) => (
+          <li key={idx} style={{ marginBottom: '0.5rem' }}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   return (
     <div>
@@ -62,18 +75,16 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
             fontSize: '1.5rem',
             fontWeight: 600,
             margin: '0 0 0.5rem 0',
-            color: '#111827',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            color: '#111827'
           }}>
-            Strategic Impact Assessment
+            Portfolio Intelligence Report
           </h4>
           <p style={{
             fontSize: '0.875rem',
             color: '#6b7280',
-            margin: 0,
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            margin: 0
           }}>
-            Based on {consolidatedAlertsCount || 0} active alert{consolidatedAlertsCount !== 1 ? 's' : ''} affecting your trade profile
+            Holistic assessment of your trade position and strategic opportunities
           </p>
         </div>
 
@@ -87,8 +98,7 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
               borderRadius: '6px',
               fontSize: '0.875rem',
               color: '#374151',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif'
+              cursor: 'pointer'
             }}
           >
             Close
@@ -98,250 +108,293 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
 
       {/* Main Content */}
       <div style={{
-        fontSize: '1.0625rem',
-        lineHeight: '1.75',
-        color: '#1f2937',
-        fontFamily: 'Georgia, "Times New Roman", serif'
+        fontSize: '1rem',
+        lineHeight: '1.6',
+        color: '#1f2937'
       }}>
-        {/* Alert Impact Summary */}
-        {displayData.alert_impact_summary && (
+
+        {/* Executive Summary */}
+        {displayData.executive_summary && (
           <div style={{
             marginBottom: '2rem',
             padding: '1.5rem',
-            backgroundColor: '#fef3c7',
-            border: '2px solid #f59e0b',
+            backgroundColor: '#f3f4f6',
+            border: '2px solid #6b7280',
             borderRadius: '8px'
           }}>
             <p style={{
               margin: 0,
               fontSize: '1rem',
               fontWeight: 600,
-              color: '#92400e',
+              color: '#111827',
               marginBottom: '0.75rem'
             }}>
-              ⚠️ How Alerts Change Your Strategic Priorities
+              Executive Summary
             </p>
-            <p style={{ margin: 0, fontSize: '1rem', color: '#78350f' }}>
-              {displayData.alert_impact_summary}
+            <p style={{ margin: 0, fontSize: '1rem', color: '#374151', lineHeight: '1.7' }}>
+              {displayData.executive_summary}
             </p>
           </div>
         )}
 
-        {/* Updated Priorities */}
-        {displayData.updated_priorities && displayData.updated_priorities.length > 0 && (
+        {/* Portfolio Health Check */}
+        {displayData.portfolio_health_check && (
           <div style={{ marginBottom: '2rem' }}>
             <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem' }}>
-              Revised Action Priorities:
+              Portfolio Health Check
             </p>
-            {displayData.updated_priorities.map((priority, idx) => {
-              const isUrgent = priority.includes('[URGENT]');
-              const isNew = priority.includes('[NEW]');
-              const cleanPriority = priority.replace(/\[URGENT\]|\[NEW\]/g, '').trim();
-
-              return (
-                <div key={idx} style={{
-                  padding: '1rem',
-                  marginBottom: '0.75rem',
-                  backgroundColor: isUrgent ? '#fef2f2' : '#f0f9ff',
-                  border: `2px solid ${isUrgent ? '#ef4444' : '#3b82f6'}`,
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem'
-                }}>
-                  <span style={{ fontSize: '1.5rem' }}>
-                    {isUrgent ? '🚨' : isNew ? '✨' : '📋'}
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontWeight: 600,
-                      color: isUrgent ? '#dc2626' : '#1e40af',
-                      marginBottom: '0.25rem',
-                      fontSize: '0.9375rem'
-                    }}>
-                      {isUrgent ? '[URGENT]' : isNew ? '[NEW]' : ''} Priority {idx + 1}
-                    </div>
-                    <div style={{ fontSize: '0.9375rem', color: '#374151' }}>
-                      {cleanPriority}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <div style={{
+              padding: '1.25rem',
+              backgroundColor: '#fef3c7',
+              border: '2px solid #f59e0b',
+              borderRadius: '8px'
+            }}>
+              {displayData.portfolio_health_check.current_status && (
+                <p style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9375rem', color: '#374151' }}>
+                  <strong>Current Status:</strong> {displayData.portfolio_health_check.current_status}
+                </p>
+              )}
+              {displayData.portfolio_health_check.risk_level && (
+                <p style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9375rem', color: '#374151' }}>
+                  <strong>Risk Level:</strong> {displayData.portfolio_health_check.risk_level}
+                </p>
+              )}
+              {displayData.portfolio_health_check.opportunity_value && (
+                <p style={{ margin: 0, marginBottom: '0.75rem', fontSize: '0.9375rem', color: '#374151' }}>
+                  <strong>Opportunity Value:</strong> {displayData.portfolio_health_check.opportunity_value}
+                </p>
+              )}
+              {displayData.portfolio_health_check.strategic_position && (
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  <strong>Strategic Position:</strong> {displayData.portfolio_health_check.strategic_position}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Critical Deadlines */}
-        {displayData.updated_timeline && displayData.updated_timeline.length > 0 && (
+        {/* Cross-Component Analysis */}
+        {displayData.cross_component_analysis && (
           <div style={{ marginBottom: '2rem' }}>
             <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem' }}>
-              Critical Deadlines:
+              Cross-Component Analysis
             </p>
-            {displayData.updated_timeline.map((item, idx) => (
-              <div key={idx} style={{
+            {displayData.cross_component_analysis.component_breakdown && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Component Breakdown
+                </p>
+                {renderArrayItems(displayData.cross_component_analysis.component_breakdown)}
+              </div>
+            )}
+            {displayData.cross_component_analysis.common_themes && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Common Themes
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.cross_component_analysis.common_themes}
+                </p>
+              </div>
+            )}
+            {displayData.cross_component_analysis.diversification_need && (
+              <div>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Diversification Strategy
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.cross_component_analysis.diversification_need}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Policy Environment */}
+        {displayData.policy_environment && (
+          <div style={{ marginBottom: '2rem' }}>
+            <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem' }}>
+              Trade Policy Environment
+            </p>
+            {displayData.policy_environment.active_developments && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Active Developments
+                </p>
+                {renderArrayItems(displayData.policy_environment.active_developments)}
+              </div>
+            )}
+            {displayData.policy_environment.trade_landscape && (
+              <div style={{
                 padding: '1rem',
-                marginBottom: '0.75rem',
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderLeft: '4px solid #f59e0b',
+                backgroundColor: '#e0f2fe',
+                border: '1px solid #0ea5e9',
                 borderRadius: '6px'
               }}>
-                <div style={{ fontSize: '0.9375rem', color: '#374151', fontWeight: 500 }}>
-                  📅 {item}
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.policy_environment.trade_landscape}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Strategic Roadmap */}
+        {displayData.strategic_roadmap && (
+          <div style={{ marginBottom: '2rem' }}>
+            <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem' }}>
+              Strategic Roadmap
+            </p>
+
+            {displayData.strategic_roadmap.immediate_30_days && (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#fee2e2',
+                  border: '2px solid #ef4444',
+                  borderRadius: '6px'
+                }}>
+                  <p style={{ margin: 0, marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem', color: '#dc2626' }}>
+                    Immediate (This Month)
+                  </p>
+                  {renderArrayItems(displayData.strategic_roadmap.immediate_30_days)}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* USMCA 2026 Contingency Scenarios */}
-        {displayData.contingency_scenarios && displayData.contingency_scenarios.length > 0 && (
-          <div style={{ marginBottom: '2rem' }}>
-            <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '1.125rem' }}>
-              USMCA 2026 Renegotiation Scenarios:
-            </p>
-            <p style={{ marginBottom: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-              Contingency planning for July 2026 USMCA review
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {displayData.contingency_scenarios.map((scenario, idx) => (
-                <div key={idx} style={{
-                  padding: '1.25rem',
-                  backgroundColor: '#f9fafb',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px'
+            {displayData.strategic_roadmap.next_90_days && (
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#fef3c7',
+                  border: '2px solid #f59e0b',
+                  borderRadius: '6px'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '0.75rem'
-                  }}>
-                    <div style={{ fontWeight: 600, color: '#111827', fontSize: '1rem' }}>
-                      Scenario {scenario.scenario}: {scenario.name}
-                    </div>
-                    <span style={{
-                      backgroundColor: scenario.probability >= 50 ? '#dcfce7' : '#fef3c7',
-                      color: scenario.probability >= 50 ? '#15803d' : '#b45309',
-                      padding: '0.25rem 0.625rem',
-                      borderRadius: '12px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600
-                    }}>
-                      {scenario.probability}%
-                    </span>
-                  </div>
-
-                  <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-                    {scenario.description}
+                  <p style={{ margin: 0, marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem', color: '#b45309' }}>
+                    Short-term (Next 90 Days)
                   </p>
-
-                  <p style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '0.5rem' }}>
-                    <strong>Your Action:</strong> {scenario.your_action}
-                  </p>
-
-                  <p style={{ fontSize: '0.875rem', color: '#374151', margin: 0 }}>
-                    <strong>Cost Impact:</strong> {scenario.cost_impact}
-                  </p>
+                  {renderArrayItems(displayData.strategic_roadmap.next_90_days)}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {displayData.strategic_roadmap['2026_preparation'] && (
+              <div>
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: '#dbeafe',
+                  border: '2px solid #3b82f6',
+                  borderRadius: '6px'
+                }}>
+                  <p style={{ margin: 0, marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem', color: '#1e40af' }}>
+                    2026 Preparation
+                  </p>
+                  {renderArrayItems(displayData.strategic_roadmap['2026_preparation'])}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Develop Contingency Plans - ALWAYS SHOW */}
-        <div style={{ marginBottom: '2rem' }}>
-          <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '1.125rem' }}>
-            📋 Develop Contingency Plans
-          </p>
-          <p style={{ marginBottom: '1rem', fontSize: '0.9375rem', color: '#374151' }}>
-            With the potential for disruption, scenario planning is essential for anticipating different outcomes.
-          </p>
-
-          {/* Scenario A: Minimal Changes */}
+        {/* Opportunity Spotlight */}
+        {displayData.opportunity_spotlight && (
           <div style={{
-            padding: '1.25rem',
+            marginBottom: '2rem',
+            padding: '1.5rem',
             backgroundColor: '#f0fdf4',
             border: '2px solid #10b981',
-            borderRadius: '8px',
-            marginBottom: '1rem'
-          }}>
-            <div style={{ fontWeight: 600, color: '#065f46', fontSize: '1rem', marginBottom: '0.75rem' }}>
-              Scenario A: Minimal Changes
-            </div>
-            <p style={{ fontSize: '0.9375rem', color: '#374151', margin: 0 }}>
-              If the agreement remains largely intact, your main focus will be on maintaining your current supply chain and looking for small opportunities from any improvements to border processes.
-            </p>
-          </div>
-
-          {/* Scenario B: Substantial Renegotiation */}
-          <div style={{
-            padding: '1.25rem',
-            backgroundColor: '#fef3c7',
-            border: '2px solid #f59e0b',
-            borderRadius: '8px',
-            marginBottom: '1rem'
-          }}>
-            <div style={{ fontWeight: 600, color: '#92400e', fontSize: '1rem', marginBottom: '0.75rem' }}>
-              Scenario B: Substantial Renegotiation
-            </div>
-            <p style={{ fontSize: '0.9375rem', color: '#374151', marginBottom: '0.75rem' }}>
-              If significant changes occur, particularly with the U.S. possibly negotiating bilateral deals, you should:
-            </p>
-            <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Adjust sourcing:</strong> Evaluate whether changes to rules of origin will necessitate resourcing from within North America to maintain USMCA benefits.
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Revise supply chain:</strong> Be ready to adjust supplier contracts, logistics networks, or sourcing strategies.
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Prepare for higher tariffs:</strong> If your products no longer qualify for USMCA benefits, prepare for increased costs from tariffs.
-              </li>
-              <li style={{ marginBottom: 0 }}>
-                <strong>Diversify suppliers:</strong> To mitigate risk from potential changes or disruptions in North America, consider diversifying your supply base to include countries outside the USMCA region.
-              </li>
-            </ul>
-          </div>
-
-          {/* Engage with Industry Resources */}
-          <div style={{
-            padding: '1.25rem',
-            backgroundColor: '#eff6ff',
-            border: '2px solid #3b82f6',
             borderRadius: '8px'
           }}>
-            <div style={{ fontWeight: 600, color: '#1e40af', fontSize: '1rem', marginBottom: '0.75rem' }}>
-              🤝 Engage with Industry Resources and Government Channels
-            </div>
-            <p style={{ fontSize: '0.9375rem', color: '#374151', marginBottom: '0.75rem' }}>
-              SMBs can influence the renegotiation process and receive support by utilizing available resources:
+            <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem', color: '#065f46' }}>
+              Opportunity Spotlight
             </p>
-            <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151' }}>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Participate in the public comment period:</strong> The USTR regularly opens public comment periods to receive feedback from businesses on how the USMCA is functioning. Your input can help shape future negotiations.
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Consult with government agencies:</strong> Contact agencies like the U.S. Small Business Administration (SBA), U.S. Customs and Border Protection (CBP), and the International Trade Administration (ITA) for guidance and resources.
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Engage with trade associations:</strong> Industry associations often serve as advocates for their members during trade negotiations. Joining and participating can help you stay informed and have your voice heard.
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <strong>Attend forums and events:</strong> Organizations like the Brookings Institution and law firms like Holland & Knight host events and provide analysis on the USMCA review process.
-              </li>
-              <li style={{ marginBottom: 0 }}>
-                <strong>Leverage online tools:</strong> The SBA and USTR provide online resources specifically to help SMBs understand and navigate trade agreements.
-              </li>
-            </ul>
-          </div>
-        </div>
 
-        {/* From Your Trade Advisor - Professional Broker Guidance */}
+            {displayData.opportunity_spotlight.nearshoring_potential && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <p style={{ margin: 0, marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9375rem', color: '#047857' }}>
+                  Nearshoring Potential
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.opportunity_spotlight.nearshoring_potential}
+                </p>
+              </div>
+            )}
+
+            {displayData.opportunity_spotlight.supplier_gaps && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <p style={{ margin: 0, marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9375rem', color: '#047857' }}>
+                  Supplier Opportunities
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.opportunity_spotlight.supplier_gaps}
+                </p>
+              </div>
+            )}
+
+            {displayData.opportunity_spotlight.competitive_edge && (
+              <div style={{ marginBottom: '0.75rem' }}>
+                <p style={{ margin: 0, marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9375rem', color: '#047857' }}>
+                  Competitive Advantage
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.opportunity_spotlight.competitive_edge}
+                </p>
+              </div>
+            )}
+
+            {displayData.opportunity_spotlight.hidden_opportunities && (
+              <div>
+                <p style={{ margin: 0, marginBottom: '0.25rem', fontWeight: 600, fontSize: '0.9375rem', color: '#047857' }}>
+                  Additional Opportunities
+                </p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.opportunity_spotlight.hidden_opportunities}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* What We Monitor */}
+        {displayData.what_we_monitor_for_you && (
+          <div style={{ marginBottom: '2rem' }}>
+            <p style={{ marginBottom: '1rem', fontWeight: 600, fontSize: '1.125rem' }}>
+              What We Monitor for You
+            </p>
+            {displayData.what_we_monitor_for_you.tracking_sources && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Data Sources Tracked
+                </p>
+                {renderArrayItems(displayData.what_we_monitor_for_you.tracking_sources)}
+              </div>
+            )}
+            {displayData.what_we_monitor_for_you.next_alert_triggers && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9375rem' }}>
+                  Next Alert Triggers
+                </p>
+                {renderArrayItems(displayData.what_we_monitor_for_you.next_alert_triggers)}
+              </div>
+            )}
+            {displayData.what_we_monitor_for_you.retention_message && (
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f0f9ff',
+                border: '1px solid #0284c7',
+                borderRadius: '6px'
+              }}>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151', fontStyle: 'italic' }}>
+                  {displayData.what_we_monitor_for_you.retention_message}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* From Your Trade Advisor */}
         {displayData.from_your_trade_advisor && (
           <div style={{
-            marginTop: '2rem',
             padding: '1.5rem',
             backgroundColor: '#f8f5f0',
             border: '2px solid #92400e',
@@ -355,21 +408,8 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
               color: '#92400e',
               marginBottom: '1rem'
             }}>
-              📋 From Your Trade Advisor
+              From Your Trade Advisor
             </p>
-
-            {displayData.from_your_trade_advisor.professional_advisory && (
-              <p style={{
-                margin: 0,
-                marginBottom: '1rem',
-                fontSize: '0.9375rem',
-                color: '#374151',
-                fontStyle: 'italic',
-                lineHeight: '1.6'
-              }}>
-                {displayData.from_your_trade_advisor.professional_advisory}
-              </p>
-            )}
 
             {displayData.from_your_trade_advisor.situation_assessment && (
               <div style={{ marginBottom: '1rem' }}>
@@ -383,17 +423,13 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
                 }}>
                   Situation Assessment
                 </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.9375rem',
-                  color: '#374151'
-                }}>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
                   {displayData.from_your_trade_advisor.situation_assessment}
                 </p>
               </div>
             )}
 
-            {displayData.from_your_trade_advisor.cbp_compliance_guidance && (
+            {displayData.from_your_trade_advisor.immediate_action && (
               <div style={{ marginBottom: '1rem' }}>
                 <p style={{
                   margin: 0,
@@ -403,41 +439,15 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
                   color: '#65a30d',
                   textTransform: 'uppercase'
                 }}>
-                  CBP Compliance Guidance
+                  Immediate Action
                 </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.9375rem',
-                  color: '#374151'
-                }}>
-                  {displayData.from_your_trade_advisor.cbp_compliance_guidance}
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.from_your_trade_advisor.immediate_action}
                 </p>
               </div>
             )}
 
-            {displayData.from_your_trade_advisor.audit_defensibility && (
-              <div style={{ marginBottom: '1rem' }}>
-                <p style={{
-                  margin: 0,
-                  marginBottom: '0.5rem',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: '#65a30d',
-                  textTransform: 'uppercase'
-                }}>
-                  Audit Defensibility
-                </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.9375rem',
-                  color: '#374151'
-                }}>
-                  {displayData.from_your_trade_advisor.audit_defensibility}
-                </p>
-              </div>
-            )}
-
-            {displayData.from_your_trade_advisor.supplier_validation && (
+            {displayData.from_your_trade_advisor.strategic_insight && (
               <div>
                 <p style={{
                   margin: 0,
@@ -447,55 +457,16 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
                   color: '#65a30d',
                   textTransform: 'uppercase'
                 }}>
-                  Supplier Documentation Requirements
+                  Strategic Insight
                 </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.9375rem',
-                  color: '#374151'
-                }}>
-                  {displayData.from_your_trade_advisor.supplier_validation}
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#374151' }}>
+                  {displayData.from_your_trade_advisor.strategic_insight}
                 </p>
               </div>
             )}
           </div>
         )}
 
-        {/* Next Step This Week - Prominent CTA */}
-        {displayData.next_step_this_week && (
-          <div style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            backgroundColor: '#eff6ff',
-            border: '2px solid #3b82f6',
-            borderRadius: '8px'
-          }}>
-            <p style={{
-              margin: 0,
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: '#1e40af',
-              marginBottom: '0.75rem'
-            }}>
-              🎯 Recommended Next Step (This Week)
-            </p>
-            <p style={{ margin: 0, fontSize: '1rem', color: '#1e3a8a' }}>
-              {displayData.next_step_this_week}
-            </p>
-          </div>
-        )}
-
-        {/* Professional Disclaimer */}
-        <p style={{
-          marginTop: '2rem',
-          paddingTop: '1.5rem',
-          borderTop: '1px solid #e5e7eb',
-          fontSize: '0.875rem',
-          color: '#6b7280',
-          lineHeight: '1.5'
-        }}>
-          <strong>Note:</strong> This strategic impact assessment is based on current government policy data and your specific trade profile. Policy changes occur with minimal notice. Consult with a licensed customs broker or trade attorney before making business decisions.
-        </p>
       </div>
     </div>
   );
