@@ -8,15 +8,13 @@
     "SKIP_TYPE_CHECK": "true"
   },
   "crons": [
-    // ✅ RE-ENABLED (Nov 1, 2025): RSS polling with proxy fallback for network restrictions
-    // Network blocking issue resolved with RSS proxy service (rss2json.com)
-    // Weekly schedule for cost optimization
     {
       "path": "/api/cron/rss-polling",
-      "schedule": "0 10 * * 1"
-      // → Mondays at 10 AM only
-      // → 4 calls/month = $0.08/month
-      // → Uses proxy fallback for blocked government feeds
+      "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/send-daily-tariff-digest",
+      "schedule": "0 8 * * *"
     },
     {
       "path": "/api/cron/flag-stale-policy-rates",

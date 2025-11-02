@@ -9,6 +9,7 @@
 import RSSPollingEngine from '../../../lib/services/rss-polling-engine.js';
 import usitcTariffSync from '../../../lib/services/usitc-tariff-sync.js';
 import tariffChangeDetector from '../../../lib/services/tariff-change-detector.js';
+import usmaRenegotiationTracker from '../../../lib/services/usmca-renegotiation-tracker.js';
 
 export default async function handler(req, res) {
   // Verify this is a Vercel Cron request OR GitHub Actions
@@ -78,6 +79,41 @@ export default async function handler(req, res) {
       users_alerted: detectionResult.users_alerted
     });
 
+    // 🏛️ USMCA RENEGOTIATION TRACKING
+    // Monitor for trade agreement updates and renegotiations
+    console.log('🏛️ Starting USMCA renegotiation detection...');
+    const startUSMCA = Date.now();
+    let usmaResult = { renegotiations_detected: 0, errors: [] };
+
+    try {
+      // Get recent RSS items that haven't been analyzed for USMCA content
+      const { data: recentItems } = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rss_feed_activities?limit=50&order=pub_date.desc`,
+        {
+          headers: {
+            'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+            'Content-Type': 'application/json'
+          }
+        }
+      ).then(r => r.json()).catch(e => ({ data: [] }));
+
+      if (recentItems && recentItems.length > 0) {
+        usmaResult = await usmaRenegotiationTracker.detectUSMCARenegotiations(recentItems);
+      }
+    } catch (usmaError) {
+      console.error('❌ USMCA renegotiation detection error:', usmaError.message);
+      usmaResult = {
+        renegotiations_detected: 0,
+        error: usmaError.message
+      };
+    }
+
+    const usmaTime = Date.now() - startUSMCA;
+    console.log('✅ USMCA Renegotiation Detection Completed:', {
+      executionTime: `${usmaTime}ms`,
+      renegotiations_detected: usmaResult.renegotiations_detected
+    });
+
     // Sync real-time tariff rates from USITC API
     console.log('🔄 Syncing USITC tariff rates...');
     const syncResult = await usitcTariffSync.syncUSITCTariffRates();
@@ -93,7 +129,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      message: 'Tariff updates completed successfully',
+      message: 'Tariff updates and agreement monitoring completed successfully',
       execution_time_ms: executionTime,
       rss_polling: {
         feeds_polled: rssResult.total || 0,
@@ -106,6 +142,11 @@ export default async function handler(req, res) {
         users_alerted: detectionResult.users_alerted,
         errors: detectionResult.errors || [],
         duration_ms: detectTime
+      },
+      usmca_renegotiation_detection: {
+        renegotiations_detected: usmaResult.renegotiations_detected,
+        errors: usmaResult.errors || [],
+        duration_ms: usmaTime
       },
       tariff_sync: {
         codes_updated: syncResult.updated || 0,
