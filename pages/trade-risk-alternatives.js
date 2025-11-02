@@ -847,10 +847,85 @@ export default function TradeRiskAlternatives() {
     try {
       console.log('🔍 Generating additive alert impact analysis...');
 
-      // ✅ FIXED (Nov 1): Don't load existingAnalysis from database (we don't store it anymore)
-      // Generate completely fresh analysis based on userProfile + consolidatedAlerts
-      // The API will analyze how alerts impact the user's specific products
-      const existingAnalysis = {};
+      // ✅ FIXED (Nov 1): Build rich context from workflow data for alert impact analysis
+      // This ensures detailed, specific analysis even without explicit executive summary generation
+      let existingAnalysis = {};
+
+      // Extract detailed_analysis from either workflowIntelligence OR rebuild from workflow data
+      if (workflowIntelligence && workflowIntelligence.detailed_analysis) {
+        // Option A: Use saved executive summary if user explicitly generated it
+        const analysis = workflowIntelligence.detailed_analysis;
+        existingAnalysis = {
+          situation_brief: analysis.situation_brief || '',
+          problem: analysis.problem || '',
+          root_cause: analysis.root_cause || '',
+          annual_impact: analysis.annual_impact || userProfile.savings || 0,
+          why_now: analysis.why_now || '',
+          current_burden: analysis.current_burden || 0,
+          potential_savings: analysis.potential_savings || userProfile.savings || 0,
+          payback_period: analysis.payback_period || '',
+          action_items: workflowIntelligence.recommendations || [],
+          strategic_roadmap: analysis.strategic_roadmap || [],
+          broker_insights: analysis.broker_insights || ''
+        };
+      } else if (userProfile && userProfile.componentOrigins && userProfile.componentOrigins.length > 0) {
+        // Option B: Build context from workflow components if no executive summary yet
+        // This ensures alert impact analysis has enough detail for "amazing" output
+        const components = userProfile.componentOrigins || [];
+        const riskCompoments = components.filter(c => c.section_301 || c.total_rate > 0.15);
+        const highestRiskComponent = riskCompoments.length > 0
+          ? riskCompoments[0]
+          : components[0];
+
+        // Calculate financial metrics from components
+        const tradeVolume = userProfile.tradeVolume || 0;
+        const section301Burden = components.reduce((sum, c) => {
+          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
+          return sum + (componentValue * (c.section_301 || 0));
+        }, 0);
+
+        const mfnCost = components.reduce((sum, c) => {
+          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
+          const mfnRate = c.mfn_rate || 0;
+          return sum + (componentValue * mfnRate);
+        }, 0);
+
+        const usmcaCost = components.reduce((sum, c) => {
+          const componentValue = tradeVolume * (c.value_percentage || 0) / 100;
+          const usmcaRate = c.usmca_rate || 0;
+          return sum + (componentValue * usmcaRate);
+        }, 0);
+
+        const annualSavings = userProfile.savings || (mfnCost - usmcaCost) || 0;
+
+        // Build context with calculated metrics
+        existingAnalysis = {
+          situation_brief: `${userProfile.companyName || 'Your company'} has ${userProfile.qualificationStatus === 'QUALIFIED' ? 'USMCA qualified' : 'non-qualified'} products with ${userProfile.regionalContent || 0}% regional content and $${(userProfile.tradeVolume || 0).toLocaleString()} annual trade volume.`,
+          problem: `Primary supply chain risk: ${highestRiskComponent?.description || 'Primary component'} from ${highestRiskComponent?.origin_country || 'key supplier'} creates ${section301Burden > 0 ? `$${Math.round(section301Burden).toLocaleString()} Section 301 exposure` : 'tariff risk'}.`,
+          root_cause: `Supply chain concentration: ${highestRiskComponent?.value_percentage || 0}% of product value sourced from ${highestRiskComponent?.origin_country || 'single country'}, creating regulatory and tariff vulnerability.`,
+          annual_impact: section301Burden || annualSavings || 0,
+          why_now: 'Tariff policy changes and USMCA 2026 renegotiation discussions create time-sensitive opportunity windows.',
+          current_burden: section301Burden || mfnCost || 0,
+          potential_savings: annualSavings || usmcaCost || 0,
+          payback_period: annualSavings > 100000 ? '3-6 months' : '6-12 months',
+          action_items: workflowIntelligence?.recommendations || [
+            `Conduct USMCA qualification audit with customs broker for ${userProfile.companyName || 'your company'}`,
+            `Evaluate nearshoring options for ${highestRiskComponent?.description || 'high-risk component'}`
+          ],
+          strategic_roadmap: workflowIntelligence?.strategic_roadmap || [],
+          broker_insights: 'Review USMCA eligibility documentation and monitor CBP enforcement guidance.'
+        };
+
+        // Debug log to help diagnose what context is being passed
+        console.log('🔍 Alert analysis context built from workflow components:', {
+          hasWorkflowIntelligence: !!workflowIntelligence,
+          hasDetailedAnalysis: !!workflowIntelligence?.detailed_analysis,
+          componentCount: components.length,
+          section301Burden: section301Burden,
+          annualSavings: annualSavings,
+          contextFieldsFilled: Object.keys(existingAnalysis).filter(k => existingAnalysis[k]).length
+        });
+      }
 
       // Build user profile for analysis
       const analysisProfile = {
