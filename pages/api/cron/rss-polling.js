@@ -55,28 +55,26 @@ export default async function handler(req, res) {
       total: rssResult.total
     });
 
-    // 🤖 AI-POWERED TARIFF CHANGE DETECTION
-    // This is the intelligence layer that makes real-time Trump tariff tracking work
-    console.log('🤖 Starting AI-powered tariff change detection...');
+    // 🚨 POLICY ANNOUNCEMENT DETECTION
+    // Monitor RSS feeds for trade policy announcements and auto-create alerts
+    console.log('🚨 Starting policy announcement detection...');
     const startDetect = Date.now();
-    let detectionResult = { changes_detected: 0, users_alerted: 0, errors: [] };
+    let detectionResult = { alerts_created: 0, errors: [] };
 
     try {
       detectionResult = await tariffChangeDetector.detectChangesFromRecentFeeds();
     } catch (detectError) {
-      console.error('❌ Tariff change detection error:', detectError.message);
+      console.error('❌ Policy detection error:', detectError.message);
       detectionResult = {
-        changes_detected: 0,
-        users_alerted: 0,
+        alerts_created: 0,
         error: detectError.message
       };
     }
 
     const detectTime = Date.now() - startDetect;
-    console.log('✅ Tariff Change Detection Completed:', {
+    console.log('✅ Policy Detection Completed:', {
       executionTime: `${detectTime}ms`,
-      changes_detected: detectionResult.changes_detected,
-      users_alerted: detectionResult.users_alerted
+      alerts_created: detectionResult.alerts_created
     });
 
     // 🏛️ USMCA RENEGOTIATION TRACKING
@@ -137,9 +135,8 @@ export default async function handler(req, res) {
         failed_polls: rssResult.failed || 0,
         duration_ms: rssTime
       },
-      tariff_change_detection: {
-        changes_detected: detectionResult.changes_detected,
-        users_alerted: detectionResult.users_alerted,
+      policy_detection: {
+        alerts_created: detectionResult.alerts_created,
         errors: detectionResult.errors || [],
         duration_ms: detectTime
       },

@@ -82,16 +82,45 @@ export default async function handler(req, res) {
       }`;
     }).join('\n');
 
-    // STEP 4: Build alert context for AI prompt
-    const alertContext = matchedAlerts.length > 0
-      ? `REAL POLICY ALERTS AFFECTING THIS USER (${matchedAlerts.length}):
-${matchedAlerts.map(a =>
-  `- ${a.title}
-  Announcement Date: ${a.announcement_date || a.created_at}
+    // STEP 4: Rank matched alerts by severity and component impact
+    const rankedAlerts = matchedAlerts
+      .map(alert => {
+        // Calculate impact severity based on affected components
+        const impactScore = components.reduce((score, comp) => {
+          let componentScore = 0;
+
+          // Check if alert affects this component
+          const countryMatch = alert.affected_countries?.includes((comp.origin_country || comp.country || '').toUpperCase());
+          const hsMatch = alert.affected_hs_codes?.some(code =>
+            (comp.hs_code || '').replace(/\./g, '').substring(0, 6) === code.replace(/\./g, '').substring(0, 6)
+          );
+
+          if (countryMatch || hsMatch) {
+            // Weight by component's percentage of trade volume
+            componentScore = (comp.annual_volume || 0) / totalVolume * 100;
+          }
+
+          return score + componentScore;
+        }, 0);
+
+        return {
+          ...alert,
+          impactScore,
+          severity: impactScore > 20 ? 'CRITICAL' : impactScore > 10 ? 'HIGH' : 'MEDIUM'
+        };
+      })
+      .sort((a, b) => b.impactScore - a.impactScore);
+
+    const alertContext = rankedAlerts.length > 0
+      ? `REAL POLICY ALERTS AFFECTING THIS USER (${rankedAlerts.length} matched, ranked by impact):
+
+${rankedAlerts.map((a, idx) =>
+  `[${idx + 1}] ${a.severity} - ${a.title}
+  Impact: ${a.impactScore.toFixed(1)}% of your portfolio affected
+  Details: ${a.description}
   Affected: ${(a.affected_countries || []).join(', ')} | HS Codes: ${(a.affected_hs_codes || []).join(', ')}
-  Impact: ${a.description}
   Source: ${a.detection_source || 'Federal Register / USTR / Government Announcement'}
-  Deadline: ${a.deadline || 'See source for timeline'}`
+  Announced: ${a.announcement_date || new Date(a.created_at).toLocaleDateString()}`
 ).join('\n\n')}`
       : `NO REAL POLICY ALERTS YET:
 We are monitoring 12+ government sources (USTR, Federal Register, Mexico labor ministry, Canada ISAC)
@@ -124,34 +153,62 @@ The USMCA trade agreement enters formal review in 2026. Key uncertainty areas:
 
 ${alertContext}
 
-YOUR TASK - WRITE A 4-SECTION STRATEGIC BRIEFING:
+YOUR TASK - GENERATE A STRUCTURED PORTFOLIO BRIEFING (JSON FORMAT):
 
-1. **BOTTOM LINE FOR LEADERSHIP** (2-3 sentences)
-   - What's the biggest risk/opportunity for this company right now?
-${matchedAlerts.length > 0 ? '   - Reference the real policy announcement(s) that triggered this' : '   - Base on USMCA 2026 renegotiation landscape'}
+Return a JSON object with these sections (NOT narrative text):
 
-2. **COMPONENT RISK BREAKDOWN** (For each component with risk)
-   - Which components are vulnerable and why?
-${matchedAlerts.length > 0 ? '   - If a real alert matched: cite the announcement, source, and deadline\n   - Use definitive language: "announced", "effective", "confirmed"' : '   - Use forward-looking language: "potential", "could face", "we are tracking"'}
+{
+  "briefing_type": "PORTFOLIO_INTELLIGENCE_BRIEFING",
+  "company": "${companyName}",
+  "generated_at": "${new Date().toISOString()}",
+  "situation_summary": "2-3 sentence executive summary: What's changing for this portfolio?",
+  "critical_alerts": [
+    {
+      "alert_title": "The policy name/change",
+      "severity": "CRITICAL|HIGH|MEDIUM",
+      "impact_on_portfolio": "X% of your trade volume affected",
+      "affected_components": ["Component 1", "Component 2"],
+      "announcement_date": "YYYY-MM-DD",
+      "effective_date": "YYYY-MM-DD",
+      "why_it_matters": "Specific impact on your business",
+      "action_required": "What your company should do THIS WEEK"
+    }
+  ],
+  "portfolio_at_risk": {
+    "total_volume_affected_pct": XX,
+    "vulnerable_components": ["list of at-risk components"],
+    "vulnerable_countries": ["list of at-risk sourcing countries"],
+    "vulnerable_hs_codes": ["list of affected product categories"]
+  },
+  "immediate_actions": [
+    "Action 1 (do this week)",
+    "Action 2 (do this month)",
+    "Action 3 (strategic consideration)"
+  ],
+  "timeline": {
+    "week_1": "What changes immediately",
+    "month_1": "Next 30 days milestones",
+    "q2_2026": "USMCA renegotiation window",
+    "ongoing": "What to monitor continuously"
+  },
+  "what_were_monitoring": {
+    "tracking_these_hs_codes": ${JSON.stringify(userComponentHS)},
+    "tracking_these_countries": ${JSON.stringify([...new Set(userComponentOrigins)])},
+    "monitoring_sources": "USTR, Federal Register, Mexico labor ministry, Canada ISAC",
+    "update_frequency": "Real-time alerts pushed to email (daily digest)"
+  },
+  "strategic_note": "Professional insight about their portfolio positioning for 2026 USMCA review"
+}
 
-3. **STRATEGIC CONSIDERATIONS** (3-4 bullet points)
-   - What are the trade-offs for this company?
-   - Should they diversify, nearshore, increase eligible content, or wait?
-${matchedAlerts.length > 0 ? '   - Factor in the real alerts when recommending actions' : '   - Base on their portfolio structure and 2026 renegotiation risks'}
+CRITICAL REQUIREMENTS:
+- CHERRY-PICK only the 2-3 most critical alerts (not all ${rankedAlerts.length} alerts)
+${matchedAlerts.length > 0 ? '- Use definitive language for real alerts: "announced December 3", "effective January 15"\n- Reference actual policy sources (government announcements, not speculation)' : '- Use forward-looking language: "potential", "expected", "we are tracking"\n- Base on USMCA 2026 renegotiation risks and industry trends'}
+- Reference their actual numbers: ${totalVolume.toLocaleString()} annual volume, ${rvc.toFixed(1)}% RVC, ${components.length} components
+- Format ALL output as valid JSON (no markdown, no narrative text)
+- Ensure action items are specific and timely
+- Be honest about confidence levels
 
-4. **WHAT WE'RE MONITORING** (For ongoing intelligence)
-   - What specific announcements/dates matter for THIS company?
-   - Which HS codes, countries, or sectors are you tracking?
-${matchedAlerts.length > 0 ? '   - Note: Real alert(s) detected. Now tracking implementation timelines.' : '   - Currently no active policy announcements. Monitoring continues.'}
-
----
-
-TONE: Professional trade compliance director. Data-driven. Honest about uncertainties.
-LENGTH: 800-1000 words total
-LANGUAGE:
-${matchedAlerts.length > 0 ? '- Use definitive language for real alerts: "announced December 3", "effective January 15"' : '- Use conditional language for potential risks: "could face", "expected to", "we anticipate"'}
-- Reference their actual numbers and components
-- Cite sources for any real policy announcements`;
+TONE: Professional trade compliance director. Data-driven. Consulting-grade.`;
 
     console.log('🤖 Calling AI to generate portfolio briefing...');
 
@@ -194,31 +251,53 @@ ${matchedAlerts.length > 0 ? '- Use definitive language for real alerts: "announ
       }
 
       const anthropicData = await anthropicResponse.json();
-      const briefing = anthropicData.content[0]?.text || 'Unable to generate briefing';
+      const briefingText = anthropicData.content[0]?.text || 'Unable to generate briefing';
 
+      try {
+        // Parse JSON response from AI
+        const briefingJson = JSON.parse(briefingText);
+        return res.status(200).json({
+          success: true,
+          briefing: briefingJson,
+          company: companyName,
+          portfolio_value: totalVolume,
+          rvc: rvc,
+          real_alerts_matched: matchedAlerts.length,
+          generated_at: new Date().toISOString()
+        });
+      } catch (parseError) {
+        console.error('Failed to parse Anthropic JSON response:', parseError);
+        return res.status(500).json({
+          success: false,
+          error: 'AI response was not valid JSON',
+          raw_response: briefingText.substring(0, 500)
+        });
+      }
+    }
+
+    const data = await response.json();
+    const briefingText = data.choices[0]?.message?.content || 'Unable to generate briefing';
+
+    try {
+      // Parse JSON response from AI
+      const briefingJson = JSON.parse(briefingText);
       return res.status(200).json({
         success: true,
-        briefing,
+        briefing: briefingJson,
         company: companyName,
         portfolio_value: totalVolume,
         rvc: rvc,
         real_alerts_matched: matchedAlerts.length,
         generated_at: new Date().toISOString()
       });
+    } catch (parseError) {
+      console.error('Failed to parse OpenRouter JSON response:', parseError);
+      return res.status(500).json({
+        success: false,
+        error: 'AI response was not valid JSON',
+        raw_response: briefingText.substring(0, 500)
+      });
     }
-
-    const data = await response.json();
-    const briefing = data.choices[0]?.message?.content || 'Unable to generate briefing';
-
-    return res.status(200).json({
-      success: true,
-      briefing,
-      company: companyName,
-      portfolio_value: totalVolume,
-      rvc: rvc,
-      real_alerts_matched: matchedAlerts.length,
-      generated_at: new Date().toISOString()
-    });
 
   } catch (error) {
     console.error('❌ Portfolio briefing generation failed:', error);

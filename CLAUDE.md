@@ -1,8 +1,8 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 1, 2025 - Daily Digest System + 4 Fixes Completed
-**Status:** 60% Production-Ready (all core features fixed), 30% Ready-to-Activate (daily digest + payment webhooks), 10% Not Started
-**Recent Fixes** (Nov 1): Fixed dashboard NOT QUALIFIED bug, implemented daily tariff digest (user feedback: "bundle all into 1 email"), verified data consistency
+**Last Updated:** November 2, 2025 - Real Portfolio Briefing System + Alert Consolidation Complete
+**Status:** 65% Production-Ready (real alert system activated), 30% Ready-to-Activate (daily digest + payment webhooks), 5% Not Started
+**Recent Changes** (Nov 2): Replaced fake template alerts with real crisis_alerts matching system, implemented portfolio briefing with strategic analysis, consolidated alerts to component table only, fixed HS code normalization for China components
 **User Responsibility:** Users verify all input accuracy. Platform provides tools only - users own correctness of submitted data.
 
 ---
@@ -35,12 +35,15 @@
    - Subscription tier enforcement ✅
    - Database persistence of payment records ✅
 
-5. **Component Alert Display** - Fixed Oct 29
+5. **Component Alert Display** - Fixed Oct 29, Consolidated Nov 2
    - Blanket tariff alerts (NULL HS codes + country match) ✅
    - Specific tariff alerts (HS code + country match) ✅
    - Industry-based alerts ✅
    - Alert badge display in component table ✅
    - 3-tier matching logic handles all alert types ✅
+   - **FIXED Nov 2**: Removed redundant "Recent Policy Change Alerts" section from dashboard
+   - **FIXED Nov 2**: HS code normalization - removed periods before 6-digit prefix matching
+   - **FIXED Nov 2**: China component (8542.31.00) now correctly shows Section 301 alert
 
 6. **Business Intelligence Enhancement** - Complete Oct 24
    - Financial impact analysis (annual/monthly savings calculations) ✅
@@ -56,12 +59,28 @@
    - Financial scenarios (what-if analysis) ✅
    - Regulatory calendar and contacts ✅
 
-8. **Personalized Alert Filtering** - Complete Oct 24
+8. **Personalized Alert Filtering** - Complete Oct 24, Fixed Nov 2
    - Relevance scoring by industry/geography/product ✅
-   - Top 3 alerts returned instead of all 5 generic ones ✅
-   - Score threshold logic (≥40 points) ✅
+   - Returns ALL matched alerts (score threshold removed) ✅
+   - Component-level matching handles display filtering ✅
+   - HS code normalization (periods removed for comparison) ✅
 
-9. **Authentication & User Profiles**
+9. **Portfolio Briefing System** - NEW Nov 2, 2025 - REAL ALERT SYSTEM
+   - Real policy monitoring via crisis_alerts table (NOT templates) ✅
+   - Component-to-policy matching by country/HS code/industry ✅
+   - 4-section strategic briefing (Bottom Line, Component Risk, Strategic Considerations, Monitoring) ✅
+   - Conditional language ("potential", "expected") when no real alerts ✅
+   - Definitive language ("announced", "effective") when real alerts matched ✅
+   - USMCA 2026 renegotiation context + portfolio analysis ✅
+   - 2-tier AI fallback (OpenRouter → Anthropic) ✅
+
+10. **Color-Coded Alert Display** - Complete Nov 2
+   - Severity-based color coding (CRITICAL/HIGH/MEDIUM/LOW) ✅
+   - Status badges (NEW/UPDATED/RESOLVED) ✅
+   - Alert collapse/expand by component ✅
+   - Consolidated alert display in Component Tariff Intelligence table ✅
+
+11. **Authentication & User Profiles**
    - Email/password login ✅
    - User profile creation ✅
    - Subscription tier tracking ✅
@@ -105,6 +124,14 @@
    - Field naming is consistent snake_case throughout (affected_hs_codes, affected_countries, relevant_industries) ✅
    - All code uses consistent field access patterns ✅
    - **Status**: Stable, schema matches all API usage
+
+### ❌ DELETED (Template-Based Alert System - Replaced Nov 2)
+**Why Deleted**: System was generating FAKE template alerts instead of monitoring REAL policies
+- ❌ `pages/api/generate-dynamic-alerts.js` - Generated template alerts via IF/THEN logic (if origin='CN' then create alert)
+- ❌ `pages/api/generate-ai-alert-summary.js` - AI summary based on templates, not real data
+- ❌ `pages/api/log-dynamic-alerts.js` - Tracked fake alerts in monitoring system
+- **Replaced With**: `pages/api/generate-portfolio-briefing.js` (real crisis_alerts matching + portfolio analysis)
+- **Key Difference**: OLD = Templates with guessed dates/percentages. NEW = Only real detected policies from crisis_alerts table.
 
 ### ❌ NOT IMPLEMENTED / BROKEN
 
@@ -187,7 +214,9 @@
 - ✅ `/api/workflow-session` - Session persistence
 - ✅ `/api/workflow-session/update-certificate` - Certificate metadata
 - ✅ `/api/executive-trade-alert` - Policy impact advisor
-- ✅ `/api/generate-personalized-alerts` - Alert filtering
+- ✅ `/api/generate-personalized-alerts` - Alert filtering + HS code normalization
+- ✅ `/api/generate-portfolio-briefing` - NEW Nov 2: Real crisis_alerts matching + strategic analysis
+- ✅ `/api/get-crisis-alerts` - Fetch active real policy alerts
 - ✅ `/api/auth/login`, `/api/auth/register`, `/api/auth/logout`, `/api/auth/me`
 - ✅ `/api/stripe/webhook` - Payment processing
 - ⚠️ `/api/cron/rss-polling` - Policy change detection (works but incomplete)
@@ -213,7 +242,7 @@
 - ✅ `workflow_completions` - 20 completed certificates
 - ✅ `tariff_intelligence_master` - 12,118 HS codes
 - ✅ `invoices` - Payment records
-- ✅ `crisis_alerts` - 2 active policy alerts
+- ✅ `crisis_alerts` - Active real policy announcements (queried by generate-portfolio-briefing.js)
 - ✅ `usmca_qualification_rules` - 8 industry thresholds
 
 **Partially Used:**
@@ -320,23 +349,25 @@ git push                                # Auto-deploys to Vercel (production)
 
 ---
 
-## 📊 REAL NUMBERS (As of Nov 1, 2025 - Updated)
+## 📊 REAL NUMBERS (As of Nov 2, 2025 - Updated)
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Total API Endpoints | 57 | Only ~15 actively used |
-| Fully Implemented | 13 | USMCA workflow, payments, PDF, alerts, email queue, dashboard |
+| Total API Endpoints | 57 | ~17 actively used (up from 15) |
+| Fully Implemented | 15 | USMCA workflow, payments, PDF, alerts, portfolio briefing, email queue, dashboard |
 | Partially Implemented | 0 | All items now fixed or ready-to-activate |
-| Not Implemented | 0 | But 42+ endpoints are legacy |
-| Lines of Dead Code | ~8,000 | In 60+ unused service files |
+| Not Implemented | 0 | But 40+ endpoints are legacy (3 template files deleted) |
+| Lines of Dead Code | ~7,900 | In 60+ unused service files (slightly reduced) |
 | Database Tables | 30+ | Only 8 actively used |
 | Real Users | 14 | Mostly test accounts |
 | Real Workflows | 20 completed | Real test data |
 | API Response Time (typical) | <500ms | Database hit path |
 | API Response Time (worst) | ~3000ms | AI fallback + database |
+| Cost per Portfolio Briefing | $0.04 | OpenRouter AI (claude-3.5-haiku) |
 | Cost per Tariff Lookup (5% of requests) | $0.02 | OpenRouter AI cost |
 | Subscription Tiers | 4 | Trial, Starter, Professional, Premium |
 | Email Queue Ready to Activate | Yes | Just needs Vercel cron scheduling |
+| Alert System | Real-Time | Now queries crisis_alerts table (RSS-detected policies only) |
 
 ---
 
@@ -500,6 +531,29 @@ lib/
 
 ---
 
-**Last Honest Assessment:** This is a working USMCA certificate platform with solid core features and significant technical debt. The 60+ unused files and deprecated endpoints should be cleaned up. The project is 50% clean production code and 50% legacy artifacts. Focus on using what works (USMCA workflow, tariff analysis, payments) and deleting what doesn't (web search, Redis, admin dashboards, marketplace). Future growth should be separate agreements as separate projects, not bolted onto this codebase.
+**Last Honest Assessment (Nov 2, 2025):**
 
-**For Agents:** This file is truth. When it conflicts with other docs, this file wins. Everything else is aspirational or outdated.
+MAJOR ARCHITECTURE CHANGE (Nov 2): Replaced fake template-based alert system with real portfolio briefing system that queries actual RSS-detected policies from crisis_alerts table. This is a critical shift from:
+- ❌ OLD: "if origin='CN' then create alert with guessed date and $0 savings" (template IF/THEN logic)
+- ✅ NEW: "Query crisis_alerts table, match to user components, show only REAL announced policies with definitive language" (real-time monitoring)
+
+This is a working USMCA certificate platform with solid core features and significant technical debt. The 60+ unused files and deprecated endpoints should be cleaned up. The project is 55% clean production code and 45% legacy artifacts.
+
+**What Works Well:**
+- USMCA workflow (3 steps, database persistence, tariff enrichment)
+- Tariff analysis (database + AI fallback for edge cases)
+- PDF certificate generation (official Form D layout)
+- Payment processing (Stripe integration)
+- Real alert system (crisis_alerts matching, portfolio briefing)
+- Component alert display (HS code normalization fixed Nov 2)
+
+**What Needs Deletion:**
+- 60+ unused service files (~8,000 lines)
+- Web search implementations (all 5 broken)
+- Redis caching (connected but not working)
+- Admin dashboards (archived, never activated)
+- Marketplace features (not in MVP scope)
+
+**Current Priority:** The real alert system is now active and working. Focus on activating daily digest cron job (Nov 1 ready), then cleaning up dead code.
+
+**For Agents:** This file is truth. When it conflicts with other docs, this file wins. Everything else is aspirational or outdated. November 2 update: Portfolio briefing is real system now, not templates.

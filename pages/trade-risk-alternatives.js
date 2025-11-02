@@ -14,7 +14,6 @@ import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoring
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 import ExecutiveSummaryDisplay from '../components/workflow/results/ExecutiveSummaryDisplay';
-import PersonalizedUSMCA2026Display from '../components/alerts/PersonalizedUSMCA2026Display';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -71,10 +70,6 @@ export default function TradeRiskAlternatives() {
 
   // Email notification preferences for each component
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
-
-  // Personalized USMCA 2026 Analysis state
-  const [personalizedUSMCA2026Analysis, setPersonalizedUSMCA2026Analysis] = useState(null);
-  const [isLoadingPersonalizedAnalysis, setIsLoadingPersonalizedAnalysis] = useState(false);
 
   // Executive Alert state (strategic consulting letter)
   const [executiveAlertData, setExecutiveAlertData] = useState(null);
@@ -920,75 +915,10 @@ export default function TradeRiskAlternatives() {
     }
   };
 
-  /**
-   * Generate additive alert impact analysis
-   * Reuses existing workflow analysis from results page to avoid re-computation
-   * Only analyzes NEW threats and how they impact existing strategic plan
-   */
-  const generatePersonalizedUSMCA2026Analysis = async () => {
-    setIsLoadingPersonalizedAnalysis(true);
-
-    try {
-      console.log('🔍 Generating personalized USMCA 2026 analysis for:', userProfile.companyName);
-
-      // Build user profile for analysis
-      const analysisProfile = {
-        companyCountry: userProfile.companyCountry || 'US',
-        companyName: userProfile.companyName,
-        business_type: userProfile.businessType,
-        industry_sector: userProfile.industry_sector,
-        destinationCountry: userProfile.destinationCountry || 'US',
-        componentOrigins: userProfile.componentOrigins || [],
-        regionalContent: userProfile.regionalContent || 0,
-        tradeVolume: userProfile.tradeVolume || 0
-      };
-
-      // Call personalized USMCA 2026 analysis API endpoint
-      const response = await fetch('/api/personalized-usmca-2026-analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          userProfile: analysisProfile
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate analysis');
-      }
-
-      const rawAnalysis = await response.json();
-
-      console.log('✅ Personalized USMCA 2026 analysis complete:', rawAnalysis);
-
-      // Unwrap response if it has wrapper
-      let analysis = rawAnalysis;
-      if (rawAnalysis && typeof rawAnalysis === 'object') {
-        if (rawAnalysis.success && rawAnalysis.data) {
-          analysis = rawAnalysis.data;
-        }
-      }
-
-      console.log('✅ Final analysis:', analysis);
-      setPersonalizedUSMCA2026Analysis(analysis);
-
-      // Save to localStorage for persistence
-      try {
-        localStorage.setItem('personalized_usmca_2026_analysis', JSON.stringify(analysis));
-        console.log('💾 Saved personalized analysis to localStorage');
-      } catch (e) {
-        console.error('Failed to save to localStorage:', e);
-      }
-    } catch (error) {
-      console.error('❌ Personalized analysis failed:', error);
-      setPersonalizedUSMCA2026Analysis(null);
-    } finally {
-      setIsLoadingPersonalizedAnalysis(false);
-    }
-  };
-
-  // REMOVED AUTO-TRIGGER: User must manually click button to generate analysis (saves API costs on page reload)
+  // REMOVED: generatePersonalizedUSMCA2026Analysis function
+  // This was redundant with loadPortfolioBriefing API (/api/generate-portfolio-briefing)
+  // Both endpoints generated the same analysis. Consolidated to single unified API.
+  // Button now calls loadPortfolioBriefing instead (same functionality, one endpoint)
 
   if (isLoading) {
     return (
@@ -1512,45 +1442,6 @@ export default function TradeRiskAlternatives() {
           )}
         </div>
 
-        {/* Personalized USMCA 2026 Analysis Section - Show after generation */}
-        {personalizedUSMCA2026Analysis && alertsGenerated && (
-          <div>
-            <PersonalizedUSMCA2026Display
-              data={personalizedUSMCA2026Analysis}
-              onClose={null}
-            />
-
-            {/* Save Analysis to Database Button */}
-            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-              <button
-                onClick={handleSaveAlertAnalysis}
-                className="btn-primary"
-                style={{
-                  padding: '0.875rem 2rem',
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                ✅ Save Analysis to Dashboard
-              </button>
-              <p style={{
-                marginTop: '0.75rem',
-                fontSize: '0.875rem',
-                color: '#6b7280'
-              }}>
-                Save your personalized USMCA 2026 analysis for future reference
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Loading indicator for personalized analysis */}
-        {isLoadingPersonalizedAnalysis && alertsGenerated && (
-          <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280' }}>
-            Analyzing your supply chain exposure to USMCA 2026 renegotiation...
-          </div>
-        )}
-
         {/* Strategic Analysis Section - Clean Rebuild */}
         <div className="form-section">
           <h2 className="form-section-title">📊 Strategic Analysis</h2>
@@ -1587,11 +1478,11 @@ export default function TradeRiskAlternatives() {
               ) : (
                 <div className="hero-buttons">
                   <button
-                    onClick={generatePersonalizedUSMCA2026Analysis}
+                    onClick={() => loadPortfolioBriefing(userProfile)}
                     className="btn-primary"
-                    disabled={isLoadingPersonalizedAnalysis}
+                    disabled={isLoadingPolicyAlerts}
                   >
-                    {isLoadingPersonalizedAnalysis ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
+                    {isLoadingPolicyAlerts ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
                   </button>
                   <button
                     onClick={() => {
