@@ -789,8 +789,13 @@ export default function TradeRiskAlternatives() {
         console.log(`✅ Portfolio briefing generated (${data.real_alerts_matched} real alerts matched)`);
         setProgressSteps(prev => [...prev, 'Briefing complete']);
 
-        // Store briefing for display
-        setPersonalizedUSMCA2026Analysis(data.briefing);
+        // ✅ FIXED: Don't auto-open modal on page load
+        // Users found it confusing to see analysis auto-display
+        // Store briefing silently - user must click button to view
+        // setPersonalizedUSMCA2026Analysis(data.briefing); // REMOVED - auto-open disabled
+
+        // Just load it silently for when user clicks the "Generate Analysis" button
+        console.log('📚 Portfolio briefing loaded and ready for user to view');
         setAlertsGenerated(true);
       } else {
         console.log('❌ Failed to generate briefing');
