@@ -17,30 +17,10 @@ export default async function handler(req, res) {
   );
 
   try {
-    // Get user session
-    const token = req.headers.authorization?.split('Bearer ')[1];
-    if (!token) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    // ✅ Crisis alerts are public data - all users can see active alerts
+    // No authentication required, but we log who's accessing for analytics
 
-    // Verify user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    // Get user's component origins to match against alerts
-    const { data: userProfile } = await supabase
-      .from('user_profiles')
-      .select('id, business_type')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!userProfile) {
-      return res.status(404).json({ error: 'User profile not found' });
-    }
-
-    // Fetch active crisis alerts
+    // Fetch all active crisis alerts
     const { data: alerts, error: alertError } = await supabase
       .from('crisis_alerts')
       .select('*')
