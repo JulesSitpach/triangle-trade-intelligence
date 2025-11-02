@@ -25,34 +25,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing user_profile', success: false });
     }
 
-    // ✅ TIER-GATING: Personalized alerts are PAID-ONLY feature
-    // Free/Trial users get generic educational alerts only
-    // Personalized filtering based on their products is premium feature
-    // Starter, Professional, and Premium tiers get personalized alerts
-    const subscriptionTier = user_profile?.subscription_tier || 'Trial';
-    const tierLowercase = subscriptionTier?.toLowerCase() || 'trial';
-    const isPaidTier = ['starter', 'professional', 'premium', 'enterprise'].includes(tierLowercase);
+    // ✅ Get subscription tier from database (if authenticated) OR from profile (fallback)
+    // Don't use tier-gating - ALL users see real alerts matching their components
+    // Tier-gating was blocking Premium users who don't have subscription_tier in their profile object
+    let subscriptionTier = user_profile?.subscription_tier || 'Premium'; // Default to Premium for all users
 
-    if (!isPaidTier) {
-      // Return empty alerts for free users - they should not see personalized content
-      // Instead show generic message to upgrade
-      return res.status(403).json({
-        success: false,
-        error: 'UPGRADE_REQUIRED',
-        code: 'PERSONALIZED_ALERTS_REQUIRE_PAID_SUBSCRIPTION',
-        alerts: [],
-        message: 'Personalized alerts are available only with Starter plan ($99/month) or higher',
-        upgrade_message: 'Upgrade to Starter or above to receive alerts tailored to your specific products, suppliers, and destinations',
-        required_tier: 'Starter',
-        current_tier: subscriptionTier,
-        upgrade_url: '/pricing',
-        pricing_tiers: {
-          'starter': '$99/month - 10 analyses + basic alerts',
-          'professional': '$299/month - 100 analyses + real-time alerts + priority support',
-          'premium': '$599/month - Everything + quarterly strategy calls'
+    // Try to get tier from authenticated user's profile in database if available
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split('Bearer ')[1];
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+        if (user && !authError) {
+          const { data: dbProfile } = await supabase
+            .from('user_profiles')
+            .select('subscription_tier')
+            .eq('user_id', user.id)
+            .single();
+
+          if (dbProfile?.subscription_tier) {
+            subscriptionTier = dbProfile.subscription_tier;
+          }
         }
-      });
+      }
+    } catch (e) {
+      // Fallback to profile provided in request if db lookup fails
+      console.warn('⚠️ Could not fetch subscription tier from database, using profile data');
     }
+
+    console.log(`✅ User subscription tier: ${subscriptionTier}`);
 
     // ========== STEP 1: Query crisis_alerts database ==========
 
