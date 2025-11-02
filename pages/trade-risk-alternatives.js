@@ -743,6 +743,25 @@ export default function TradeRiskAlternatives() {
       setProgressSteps(prev => [...prev, 'Analyzing your portfolio...']);
       console.log('🔄 Loading real portfolio briefing with actual data...');
 
+      // STEP 1: Fetch all active crisis alerts from database
+      setProgressSteps(prev => [...prev, 'Loading active policy alerts...']);
+      const alertsResponse = await fetch('/api/get-crisis-alerts', {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      let crisisAlerts = [];
+      if (alertsResponse.ok) {
+        const alertsData = await alertsResponse.json();
+        crisisAlerts = alertsData.alerts || [];
+        console.log(`✅ Fetched ${crisisAlerts.length} active crisis alerts from database`);
+
+        // Store alerts in state so component table can match them
+        setRealPolicyAlerts(crisisAlerts);
+      } else {
+        console.warn('⚠️ Could not fetch crisis alerts, will proceed without them');
+      }
+
       // Build workflow data structure
       const workflowData = {
         company: {
@@ -764,9 +783,9 @@ export default function TradeRiskAlternatives() {
         }
       };
 
-      setProgressSteps(prev => [...prev, 'Checking for real policy alerts...']);
+      setProgressSteps(prev => [...prev, 'Generating portfolio briefing...']);
 
-      // Call real briefing endpoint (matches real crisis_alerts, no templates)
+      // STEP 2: Call portfolio briefing endpoint
       const response = await fetch('/api/generate-portfolio-briefing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -784,12 +803,7 @@ export default function TradeRiskAlternatives() {
         console.log(`✅ Portfolio briefing generated (${data.real_alerts_matched} real alerts matched)`);
         setProgressSteps(prev => [...prev, 'Briefing complete']);
 
-        // ✅ FIXED: Don't auto-open modal on page load
-        // Users found it confusing to see analysis auto-display
-        // Store briefing silently - user must click button to view
-        // setPersonalizedUSMCA2026Analysis(data.briefing); // REMOVED - auto-open disabled
-
-        // Just load it silently for when user clicks the "Generate Analysis" button
+        // Portfolio briefing loaded - component table now has realPolicyAlerts populated
         console.log('📚 Portfolio briefing loaded and ready for user to view');
         setAlertsGenerated(true);
       } else {
