@@ -114,8 +114,11 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-load portfolio briefing when workflow data is available
-  // Analyzes user's supply chain against USMCA 2026 + matches real policy alerts
+  // ✅ DISABLED: Auto-load portfolio briefing on page load
+  // Reason: Users found it confusing to see analysis auto-generate without clicking button
+  // Strategic analysis should ONLY display when user explicitly clicks "Generate Analysis" button
+  // This saves API costs and respects user intent
+  /*
   useEffect(() => {
     if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0) {
       console.log('📡 Generating portfolio briefing based on real data:', {
@@ -128,11 +131,8 @@ export default function TradeRiskAlternatives() {
       // Load real portfolio briefing (NOT fake templates)
       loadPortfolioBriefing(userProfile);
     }
-  }, [userProfile?.companyName, userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // REMOVED: Auto-restore from localStorage
-  // Strategic analysis should ONLY display when user explicitly clicks the button
-  // Users found it confusing to see generic analysis auto-display on page load
+  }, [userProfile?.companyName, userProfile?.componentOrigins?.length]);
+  */
 
   // Clear old localStorage data on page load (one-time cleanup)
   useEffect(() => {
