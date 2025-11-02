@@ -141,22 +141,46 @@ export default protectedApiHandler({
         user_id: userId,
         email: req.user?.email || null,
         workflow_type: workflowData.workflow_type || 'usmca_compliance',
-        product_description: workflowData.product?.description || workflowData.product_description || 'USMCA Analysis',
-        hs_code: workflowData.product?.hs_code || workflowData.hs_code || '',
+        product_description:
+          workflowData.product?.description ||
+          workflowData.product_description ||
+          workflowData.classified_hs_code ? `Product with HS ${workflowData.classified_hs_code}` : 'USMCA Analysis',
+        hs_code:
+          workflowData.product?.hs_code ||
+          workflowData.hs_code ||
+          workflowData.classified_hs_code ||  // Flat from hook
+          '',
         completed_at: new Date().toISOString(),
         certificate_generated: !!workflowData.certificate_generated,
         status: 'completed',
 
         // ✅ NEW: Add qualification and content fields to top-level columns
+        // ✅ FIXED (Nov 1): Support both nested and flat data structures
         // This is what the dashboard queries for in UserDashboard.js
         qualification_status: qualificationStatus,
         regional_content_percentage: regionalContent,
         required_threshold: workflowData.usmca?.threshold_applied || 60,
-        company_name: workflowData.company?.company_name || workflowData.company?.name || null,
-        company_country: workflowData.company?.company_country || 'US',
-        destination_country: workflowData.company?.destination_country || 'US',
-        business_type: workflowData.company?.business_type || null,
-        manufacturing_location: workflowData.company?.manufacturing_location || null,
+        company_name:
+          workflowData.company?.company_name ||
+          workflowData.company?.name ||
+          workflowData.company_name ||  // Flat from hook
+          null,
+        company_country:
+          workflowData.company?.company_country ||
+          workflowData.company_country ||  // Flat from hook
+          'US',
+        destination_country:
+          workflowData.company?.destination_country ||
+          workflowData.destination_country ||  // Flat from hook
+          'US',
+        business_type:
+          workflowData.company?.business_type ||
+          workflowData.business_type ||  // Flat from hook
+          null,
+        manufacturing_location:
+          workflowData.company?.manufacturing_location ||
+          workflowData.manufacturing_location ||  // Flat from hook
+          null,
 
         // Financial data in dedicated columns for easy querying
         total_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
@@ -205,14 +229,40 @@ export default protectedApiHandler({
         data: workflowData,
 
         // ✅ FIXED (Oct 24): Extract company/product fields to dedicated columns
+        // ✅ FIXED (Nov 1): Support both nested (workflowData.company) and flat (workflowData) structures
         // Dashboard validation requires these fields to be populated in DB columns, not just JSONB
-        company_name: companyData.company_name || companyData.name || null,
-        business_type: companyData.business_type || null,
-        trade_volume: companyData.trade_volume || workflowData.trade_volume || null,
-        manufacturing_location: companyData.manufacturing_location || null,
-        hs_code: workflowData.product?.hs_code || workflowData.hs_code || null,
-        product_description: workflowData.product?.description || workflowData.product_description || null,
+        company_name:
+          companyData.company_name ||           // Nested: workflowData.company.company_name
+          companyData.name ||                   // Nested: workflowData.company.name
+          workflowData.company_name ||          // Flat: workflowData.company_name (from useWorkflowState hook)
+          null,
+        business_type:
+          companyData.business_type ||          // Nested
+          workflowData.business_type ||         // Flat
+          null,
+        trade_volume:
+          companyData.trade_volume ||
+          workflowData.trade_volume ||
+          null,
+        manufacturing_location:
+          companyData.manufacturing_location ||
+          workflowData.manufacturing_location ||
+          null,
+        hs_code:
+          workflowData.product?.hs_code ||      // Nested: workflowData.product.hs_code
+          workflowData.hs_code ||               // Flat: workflowData.hs_code (from useWorkflowState hook)
+          workflowData.classified_hs_code ||    // Alternative: workflowData.classified_hs_code
+          null,
+        product_description:
+          workflowData.product?.description ||
+          workflowData.product_description ||
+          null,
         component_origins: normalizedComponents,
+
+        // ✅ FIXED (Nov 1): Save qualification status to top-level column for alerts page
+        qualification_status:
+          workflowData.qualification_status ||
+          (workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED'),
 
         // Destination-aware tariff intelligence fields
         destination_country: companyData.destination_country || workflowData.destination_country || null,

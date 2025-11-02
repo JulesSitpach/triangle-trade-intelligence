@@ -228,49 +228,81 @@ NOTE: Complete all fields and obtain proper signatures before submission.
   };
 
   // Crisis Calculator handlers
-  const handleViewAlertsFromCrisisCalc = () => {
+  const handleViewAlertsFromCrisisCalc = async () => {
     console.log('User navigating to alerts dashboard from crisis calculator');
 
-    // Save workflow data to localStorage for trade-risk-alternatives page
-    const workflowDataForAlerts = {
-      company: {
-        name: formData.company_name,
-        business_type: formData.business_type,
-        company_address: formData.company_address,
-        tax_id: formData.tax_id,
-        contact_phone: formData.contact_phone,
-        contact_email: formData.contact_email,
-        trade_volume: formData.trade_volume,
-        supplier_country: formData.supplier_country || 'CN',
-        manufacturing_location: formData.manufacturing_location
-      },
-      product: {
-        hs_code: formData.classified_hs_code || formData.hs_code,
-        description: formData.product_description,
-        original_hs_code: formData.classified_hs_code
-      },
-      classification: {
-        hs_code: formData.classified_hs_code || formData.hs_code,
-        description: formData.product_description,
-        confidence: formData.classification_confidence || 0.95
-      },
-      certificate: {
-        qualification_result: formData.qualification_status || 'NEEDS_REVIEW',
-        savings: formData.calculated_savings || 0,
-        qualification_status: formData.qualification_status
-      },
-      usmca: {
-        qualification_status: formData.qualification_status || 'NEEDS_REVIEW',
-        north_american_content: getTotalComponentPercentage(),
-        component_breakdown: formData.component_origins
+    try {
+      // ✅ NEW (Nov 1): Save to database instead of localStorage
+      // This ensures alerts page loads complete data from database
+      let sessionId = localStorage.getItem('workflow_session_id');
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('workflow_session_id', sessionId);
       }
-    };
 
-    // Store in localStorage for trade-risk-alternatives page
-    localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowDataForAlerts));
+      // Save current formData to database + include AI analysis results for data preservation
+      // (Don't rely on loading these back - generate fresh analysis on alerts page instead)
+      const workflowDataToSave = {
+        ...formData,
+        ...(results && {
+          detailed_analysis: results.detailed_analysis,
+          recommendations: results.recommendations,
+          savings: results.savings,
+          usmca: results.usmca,
+          trust: results.trust
+        })
+      };
 
-    // Navigate to trade-risk-alternatives page
-    window.location.href = '/trade-risk-alternatives';
+      const response = await fetch('/api/workflow-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          sessionId,
+          workflowData: workflowDataToSave,
+          userId: 'current-user',
+          action: 'save'
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Workflow saved to database');
+      } else {
+        console.warn('⚠️ Failed to save to database, using localStorage fallback');
+        // Fallback: Save to localStorage if database save fails
+        const workflowDataForAlerts = {
+          company: {
+            name: formData.company_name,
+            business_type: formData.business_type,
+            company_address: formData.company_address,
+            tax_id: formData.tax_id,
+            contact_phone: formData.contact_phone,
+            contact_email: formData.contact_email,
+            trade_volume: formData.trade_volume,
+            supplier_country: formData.supplier_country || 'CN',
+            manufacturing_location: formData.manufacturing_location
+          },
+          product: {
+            hs_code: formData.classified_hs_code || formData.hs_code,
+            description: formData.product_description,
+            original_hs_code: formData.classified_hs_code
+          },
+          usmca: {
+            qualification_status: formData.qualification_status || 'NEEDS_REVIEW',
+            north_american_content: getTotalComponentPercentage(),
+            component_breakdown: formData.component_origins
+          }
+        };
+        localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowDataForAlerts));
+      }
+
+      // Navigate to alerts page (it will load from database via sessionId)
+      window.location.href = '/trade-risk-alternatives';
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      // Fallback: Navigate anyway, alerts page will handle missing data
+      window.location.href = '/trade-risk-alternatives';
+    }
   };
 
   const handleUpgradeToCertificate = () => {

@@ -370,7 +370,10 @@ export default function TradeRiskAlternatives() {
         productDescription: userData.product?.description || userData.product_description,
         tradeVolume: parsedTradeVolume,
         supplierCountry: components[0]?.origin_country || components[0]?.country,  // Try both keys
-        qualificationStatus: getQualificationStatus(userData.usmca),
+        qualificationStatus:
+          userData.qualification_status ||      // Flat: from database column
+          getQualificationStatus(userData.usmca) || // Nested: from usmca object
+          'NEEDS_REVIEW',                         // Default
         savings: userData.savings?.annual_savings || 0,
         componentOrigins: components,  // Fixed: use usmca.component_breakdown or component_origins
         regionalContent: userData.usmca?.regional_content || 0
@@ -835,20 +838,19 @@ export default function TradeRiskAlternatives() {
       return;
     }
 
-    if (!workflowIntelligence) {
-      console.warn('⚠️ No workflow intelligence available - cannot generate additive analysis');
-      return;
-    }
+    // ✅ FIXED (Nov 1): Don't check for workflowIntelligence from database
+    // We generate FRESH analysis on alerts page, don't rely on loading from DB
+    // The API endpoint will use userProfile + consolidatedAlerts to create analysis
 
     setIsLoadingAlertImpact(true);
 
     try {
       console.log('🔍 Generating additive alert impact analysis...');
 
-      // Pass FULL detailed_analysis to AI for complete strategic context
-      // This includes: situation_brief, problem, root_cause, annual_impact, why_now,
-      // current_burden, potential_savings, payback_period, strategic_roadmap, action_items, broker_insights
-      const existingAnalysis = workflowIntelligence.detailed_analysis || {};
+      // ✅ FIXED (Nov 1): Don't load existingAnalysis from database (we don't store it anymore)
+      // Generate completely fresh analysis based on userProfile + consolidatedAlerts
+      // The API will analyze how alerts impact the user's specific products
+      const existingAnalysis = {};
 
       // Build user profile for analysis
       const analysisProfile = {
