@@ -109,6 +109,14 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-load crisis alerts from database on page load
+  useEffect(() => {
+    if (userProfile?.componentOrigins && userProfile.componentOrigins.length > 0) {
+      console.log('📡 Auto-loading crisis alerts on page load...');
+      loadRealPolicyAlerts(userProfile);
+    }
+  }, [userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ✅ DISABLED: Auto-load portfolio briefing on page load
   // Reason: Users found it confusing to see analysis auto-generate without clicking button
   // Strategic analysis should ONLY display when user explicitly clicks "Generate Analysis" button
@@ -1456,15 +1464,7 @@ export default function TradeRiskAlternatives() {
             Comprehensive business intelligence including USMCA 2026 contingency planning, scenario analysis, and government resource guidance.
           </p>
 
-          {!alertsGenerated && (
-            <button
-              onClick={() => loadRealPolicyAlerts(userProfile)}
-              className="btn-primary"
-              disabled={isLoadingPolicyAlerts}
-            >
-              {isLoadingPolicyAlerts ? 'Analyzing...' : 'Generate Alert Analysis'}
-            </button>
-          )}
+          {/* Alerts load automatically on page load */}
 
           {alertsGenerated && (
             <div>
