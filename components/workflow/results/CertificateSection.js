@@ -72,11 +72,26 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         email: results.company?.email || results.company?.contact_email || ''
       };
 
+      // ✅ ADD: Producer data (use exporter as default if not explicitly provided)
+      const producerData = results.company?.producer || exporterData;
+
+      // ✅ ADD: Importer data (if available, otherwise empty)
+      const importerData = results.company?.importer || {
+        name: '',
+        country: '',
+        address: '',
+        tax_id: '',
+        phone: '',
+        email: ''
+      };
+
       const certificateData = {
         // ✅ FIX: Set certifier explicitly to match exporter for proper PDF generation
         certifier: exporterData,
         certifier_type: 'EXPORTER',
         exporter: exporterData,
+        producer: producerData,
+        importer: importerData,
         product: {
           hs_code: results.product?.hs_code || '',
           description: results.product?.description || results.product?.product_description || '',
