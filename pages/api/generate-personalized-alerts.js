@@ -177,12 +177,13 @@ export default async function handler(req, res) {
       };
     });
 
-    // ========== STEP 3: Filter to only relevant alerts (score >= 40) ==========
+    // ========== STEP 3: Return all alerts (no filtering) ==========
+    // Show ALL alerts, not just those scoring >= 40
+    // Component-level matching in the UI will handle display logic
+    // This ensures no relevant alerts are filtered out by arbitrary scoring
 
     const relevantAlerts = scoredAlerts
-      .filter(a => a.is_relevant)
-      .sort((a, b) => b.relevance_score - a.relevance_score)
-      .slice(0, 3); // Return top 3 most relevant
+      .sort((a, b) => b.relevance_score - a.relevance_score);
 
     console.log(`✅ Matched ${relevantAlerts.length} relevant alerts for user (out of ${crisisAlerts.length} total)`);
     console.log('🔍 DEBUG: Alert scoring for user', {
