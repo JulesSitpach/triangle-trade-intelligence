@@ -1107,7 +1107,9 @@ export default function TradeRiskAlternatives() {
                   // - Blanket country tariffs (NULL HS codes + origin match)
                   // - Industry-wide tariffs (industry match + origin match)
                   // - Specific tariffs (HS code + origin match)
-                  const componentAlerts = consolidatedAlerts.filter(alert => {
+                  // ✅ Use realPolicyAlerts (raw database alerts) not consolidatedAlerts (reformatted)
+                  // because consolidation changes the alert structure and loses the matching fields
+                  const componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
                     const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
                     const componentHS = comp.hs_code;
                     const componentIndustry = comp.industry || userProfile.industry_sector;
