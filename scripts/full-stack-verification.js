@@ -55,6 +55,40 @@ const FEATURE_CONFIG = {
         }
       ]
     }
+  },
+  'CrisisAlerts': {
+    component: 'pages/trade-risk-alternatives.js',
+    api: '/api/generate-portfolio-briefing',
+    requiredTables: ['crisis_alerts', 'rss_feed_activities', 'rss_feeds'],
+    requiredColumns: {
+      'crisis_alerts': [
+        'id', 'user_id', 'alert_type', 'title', 'description',
+        'severity', 'affected_hs_codes', 'affected_countries',
+        'relevant_industries', 'confidence_score', 'is_active',
+        'detection_source', 'source_url', 'created_at'
+      ],
+      'rss_feed_activities': [
+        'id', 'feed_id', 'title', 'description', 'link',
+        'crisis_score', 'crisis_keywords_detected', 'pub_date'
+      ],
+      'rss_feeds': [
+        'id', 'name', 'url', 'keywords', 'is_active', 'priority_level'
+      ]
+    },
+    testData: {
+      alert: {
+        alert_type: 'tariff_change',
+        title: 'Section 301 China Tariff Increase',
+        description: 'Tariffs on Chinese electronics increased to 100%',
+        severity: 'critical',
+        affected_hs_codes: ['8542.31'],
+        affected_countries: ['CN'],
+        relevant_industries: ['electronics', 'semiconductors'],
+        is_active: true,
+        detection_source: 'rss_feed',
+        source_url: 'https://ustr.gov/example'
+      }
+    }
   }
   // Archived features (removed Oct 23, 2025):
   // - SupplierSourcing (was at /api/supplier-sourcing-discovery)
@@ -189,6 +223,29 @@ const verifyAPIAlignment = async (feature) => {
           errors.push('Supplier Sourcing API suppliers field must be an array');
         }
       }
+
+      if (feature === 'CrisisAlerts') {
+        // Validate portfolio briefing response structure
+        if (!apiResult.bottom_line && !apiResult.executive_summary) {
+          errors.push('Crisis Alerts API missing portfolio briefing structure');
+        }
+
+        // CRITICAL: Check for schema errors in returned alerts
+        if (apiResult.alerts && Array.isArray(apiResult.alerts)) {
+          for (const alert of apiResult.alerts) {
+            // These are schema violations that would break the system
+            if (alert.severity_level !== undefined) {
+              errors.push('🚨 SCHEMA ERROR: Alert uses "severity_level" - should be "severity" (CRITICAL BUG)');
+            }
+            if (alert.source_type !== undefined) {
+              errors.push('🚨 SCHEMA ERROR: Alert uses "source_type" column which does not exist (CRITICAL BUG)');
+            }
+            if (alert.requires_action !== undefined) {
+              errors.push('🚨 SCHEMA ERROR: Alert uses "requires_action" column which does not exist (CRITICAL BUG)');
+            }
+          }
+        }
+      }
     }
 
     return { valid: errors.length === 0, errors, apiResult };
@@ -251,6 +308,37 @@ const verifyUIAlignment = async (feature) => {
       }
     }
 
+    if (feature === 'CrisisAlerts') {
+      // Check for required crisis alerts UI elements
+      const requiredElements = [
+        'portfolio briefing',
+        'alert',
+        'crisis'
+      ];
+
+      let foundRequired = false;
+      for (const element of requiredElements) {
+        if (componentCode.toLowerCase().includes(element.toLowerCase())) {
+          foundRequired = true;
+          break;
+        }
+      }
+
+      if (!foundRequired) {
+        errors.push('UI missing crisis alerts content');
+      }
+
+      // Check for proper API integration
+      if (!componentCode.includes('generate-portfolio-briefing')) {
+        errors.push('UI not properly integrated with portfolio briefing API');
+      }
+
+      // Check that UI references correct column name 'severity' not 'severity_level'
+      if (componentCode.includes('severity_level')) {
+        errors.push('🚨 SCHEMA ERROR: UI references "severity_level" - should use "severity" column');
+      }
+    }
+
     // Check for CSS compliance (no inline styles)
     if (componentCode.includes('style=') || componentCode.includes('style={{')) {
       errors.push('Component contains inline styles - CSS violation');
@@ -307,6 +395,25 @@ const verifyDataFlow = async (feature) => {
       }
     }
 
+    if (feature === 'CrisisAlerts') {
+      // Verify portfolio briefing response has required structure
+      if (!apiResult.bottom_line && !apiResult.executive_summary) {
+        errors.push('Crisis Alerts API missing portfolio briefing in response');
+      }
+
+      // CRITICAL: Verify alert schema compliance in response
+      if (apiResult.alerts && Array.isArray(apiResult.alerts)) {
+        for (const alert of apiResult.alerts) {
+          if (alert.severity_level !== undefined) {
+            errors.push('🚨 DATA FLOW ERROR: Alert response contains "severity_level" - should be "severity"');
+          }
+          if (alert.source_type !== undefined) {
+            errors.push('🚨 DATA FLOW ERROR: Alert response contains non-existent "source_type" column');
+          }
+        }
+      }
+    }
+
     // Step 3: Verify database operations (if applicable)
     // For SupplierSourcing, check if any suppliers were stored
     if (feature === 'SupplierSourcing' && apiResult.success) {
@@ -321,6 +428,38 @@ const verifyDataFlow = async (feature) => {
         // This is informational - don't fail if no suppliers found
       } catch (dbError) {
         console.warn('⚠️ Could not verify suppliers in database:', dbError.message);
+      }
+    }
+
+    // For CrisisAlerts, verify alerts table has recent data
+    if (feature === 'CrisisAlerts') {
+      try {
+        const { count } = await supabase
+          .from('crisis_alerts')
+          .select('*', { count: 'exact', head: true });
+
+        console.log(`Found ${count} crisis alerts in database`);
+        if (count > 0) {
+          // Verify recent alert uses correct schema
+          const { data: recentAlerts } = await supabase
+            .from('crisis_alerts')
+            .select('severity, severity_level, source_type')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (recentAlerts && recentAlerts.length > 0) {
+            const alert = recentAlerts[0];
+            // severity_level and source_type should be undefined if schema is correct
+            if (alert.severity_level !== undefined) {
+              errors.push('🚨 DATABASE SCHEMA ERROR: crisis_alerts table has "severity_level" column - should be "severity"');
+            }
+            if (alert.source_type !== undefined) {
+              errors.push('🚨 DATABASE SCHEMA ERROR: crisis_alerts table has non-existent "source_type" column');
+            }
+          }
+        }
+      } catch (dbError) {
+        console.warn('⚠️ Could not verify crisis alerts in database:', dbError.message);
       }
     }
 
@@ -340,20 +479,23 @@ const runFullStackVerification = async () => {
   if (!feature) {
     console.log(`
 Full-Stack Alignment Verification
-Updated Oct 23, 2025 - Removed archived service request features
+Updated Nov 2, 2025 - Added Crisis Alerts verification
 
 Usage:
   node scripts/full-stack-verification.js --feature=USMCACertificate
+  node scripts/full-stack-verification.js --feature=CrisisAlerts
 
 Available features:
   - USMCACertificate (USMCA certificate generation workflow)
+  - CrisisAlerts (Portfolio briefing + policy alerts + RSS monitoring)
 
 This verifies:
-1. Database schema supports the feature
-2. API correctly reads/writes database
+1. Database schema supports the feature (ALL required columns present)
+2. API correctly reads/writes database with right column names
 3. UI correctly displays API data
 4. Complete user journey works with real data
-5. No mock/template data anywhere in the stack
+5. SCHEMA COMPLIANCE: Catches column name mismatches before production (e.g., severity vs severity_level)
+6. No mock/template data anywhere in the stack
 
 Archived features removed in Phase 2 cleanup (Oct 23, 2025):
   - SupplierSourcing (was /api/supplier-sourcing-discovery)
@@ -367,7 +509,7 @@ Archived features removed in Phase 2 cleanup (Oct 23, 2025):
   if (!FEATURE_CONFIG[feature]) {
     console.error(`❌ Unknown feature: ${feature}`);
     console.log(`Available features: ${Object.keys(FEATURE_CONFIG).join(', ')}`);
-    console.log(`\nNote: Archived features were removed Oct 23, 2025. Only USMCACertificate is active.`);
+    console.log(`\nRun: node scripts/full-stack-verification.js --feature=CrisisAlerts`);
     process.exit(1);
   }
 
