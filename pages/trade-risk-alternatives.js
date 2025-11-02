@@ -114,17 +114,20 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-load personalized alerts when userProfile is available
-  // This populates the Component Tariff Intelligence table
+  // Auto-load dynamic alerts when workflow data is available
+  // Generates alerts based on user's actual component data, RVC, sourcing patterns
   useEffect(() => {
     if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0) {
-      console.log('📡 Auto-loading personalized alerts for component table with profile:', {
+      console.log('📡 Generating DYNAMIC alerts based on actual workflow data:', {
         companyName: userProfile.companyName,
         componentCount: userProfile.componentOrigins?.length,
+        rvc: userProfile.regionalContent,
         industry: userProfile.industry_sector,
         origins: userProfile.componentOrigins?.map(c => c.origin_country)
       });
-      loadRealPolicyAlerts(userProfile);
+
+      // Load DYNAMIC alerts (generated based on actual user data)
+      loadDynamicAlerts(userProfile);
     }
   }, [userProfile?.companyName, userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -732,6 +735,85 @@ export default function TradeRiskAlternatives() {
    * Filters by user's component origins and HS codes for relevance
    * Now called on-demand with progress tracking
    */
+
+  /**
+   * Load DYNAMIC alerts generated based on user's actual workflow data
+   * Alerts are generated on-the-fly based on component data, RVC, sourcing patterns
+   * Each user sees only alerts relevant to their specific portfolio
+   */
+  const loadDynamicAlerts = async (profile) => {
+    setIsLoadingPolicyAlerts(true);
+    setProgressSteps([]);
+
+    try {
+      setProgressSteps(prev => [...prev, 'Analyzing your portfolio...']);
+      console.log('🔄 Calling generate-dynamic-alerts with workflow data...');
+
+      // Build workflow data structure for alert generation
+      const workflowData = {
+        company: {
+          name: profile.companyName,
+          country: profile.companyCountry || 'US'
+        },
+        components: (profile.componentOrigins || []).map(comp => ({
+          component_type: comp.component_type || comp.description,
+          description: comp.description,
+          hs_code: comp.hs_code,
+          origin_country: comp.origin_country || comp.country,
+          country: comp.origin_country || comp.country,
+          annual_volume: comp.annual_volume || (profile.tradeVolume * (comp.percentage || 0) / 100),
+          percentage: comp.percentage || 0
+        })),
+        usmca: {
+          regional_content_percentage: profile.regionalContent || 0,
+          qualification_status: profile.qualificationStatus || 'UNKNOWN'
+        }
+      };
+
+      setProgressSteps(prev => [...prev, 'Generating personalized alerts...']);
+
+      const response = await fetch('/api/generate-dynamic-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workflow_data: workflowData })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Dynamic alert generation failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.alerts) {
+        console.log(`✅ Generated ${data.alerts.length} dynamic alerts for ${profile.companyName}`);
+        console.log('📋 Dynamic Alerts:', data.alerts.map(a => ({
+          title: a.title,
+          type: a.type,
+          urgency: a.urgency,
+          component: a.component
+        })));
+
+        setRealPolicyAlerts(data.alerts);
+        setOriginalAlertCount(data.alerts.length);
+
+        setProgressSteps(prev => [...prev, 'Analysis complete']);
+        setAlertsGenerated(true);
+      } else {
+        console.log('ℹ️ No dynamic alerts generated for this portfolio');
+        setRealPolicyAlerts([]);
+        setProgressSteps(prev => [...prev, 'No alerts generated']);
+        setAlertsGenerated(true);
+      }
+    } catch (error) {
+      console.error('❌ Dynamic alert generation failed:', error);
+      setRealPolicyAlerts([]);
+      setProgressSteps(prev => [...prev, 'Error generating alerts']);
+      setAlertsGenerated(true);
+    } finally {
+      setIsLoadingPolicyAlerts(false);
+    }
+  };
+
   const loadRealPolicyAlerts = async (profile) => {
     setIsLoadingPolicyAlerts(true);
     setProgressSteps([]);
