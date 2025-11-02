@@ -338,6 +338,129 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
           </div>
         </div>
 
+        {/* From Your Trade Advisor - Professional Broker Guidance */}
+        {displayData.from_your_trade_advisor && (
+          <div style={{
+            marginTop: '2rem',
+            padding: '1.5rem',
+            backgroundColor: '#f8f5f0',
+            border: '2px solid #92400e',
+            borderRadius: '8px',
+            borderLeft: '6px solid #d97706'
+          }}>
+            <p style={{
+              margin: 0,
+              fontSize: '1rem',
+              fontWeight: 600,
+              color: '#92400e',
+              marginBottom: '1rem'
+            }}>
+              📋 From Your Trade Advisor
+            </p>
+
+            {displayData.from_your_trade_advisor.professional_advisory && (
+              <p style={{
+                margin: 0,
+                marginBottom: '1rem',
+                fontSize: '0.9375rem',
+                color: '#374151',
+                fontStyle: 'italic',
+                lineHeight: '1.6'
+              }}>
+                {displayData.from_your_trade_advisor.professional_advisory}
+              </p>
+            )}
+
+            {displayData.from_your_trade_advisor.situation_assessment && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{
+                  margin: 0,
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#65a30d',
+                  textTransform: 'uppercase'
+                }}>
+                  Situation Assessment
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.9375rem',
+                  color: '#374151'
+                }}>
+                  {displayData.from_your_trade_advisor.situation_assessment}
+                </p>
+              </div>
+            )}
+
+            {displayData.from_your_trade_advisor.cbp_compliance_guidance && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{
+                  margin: 0,
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#65a30d',
+                  textTransform: 'uppercase'
+                }}>
+                  CBP Compliance Guidance
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.9375rem',
+                  color: '#374151'
+                }}>
+                  {displayData.from_your_trade_advisor.cbp_compliance_guidance}
+                </p>
+              </div>
+            )}
+
+            {displayData.from_your_trade_advisor.audit_defensibility && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{
+                  margin: 0,
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#65a30d',
+                  textTransform: 'uppercase'
+                }}>
+                  Audit Defensibility
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.9375rem',
+                  color: '#374151'
+                }}>
+                  {displayData.from_your_trade_advisor.audit_defensibility}
+                </p>
+              </div>
+            )}
+
+            {displayData.from_your_trade_advisor.supplier_validation && (
+              <div>
+                <p style={{
+                  margin: 0,
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#65a30d',
+                  textTransform: 'uppercase'
+                }}>
+                  Supplier Documentation Requirements
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.9375rem',
+                  color: '#374151'
+                }}>
+                  {displayData.from_your_trade_advisor.supplier_validation}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Next Step This Week - Prominent CTA */}
         {displayData.next_step_this_week && (
           <div style={{
