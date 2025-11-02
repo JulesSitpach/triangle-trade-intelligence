@@ -185,6 +185,18 @@ export default async function handler(req, res) {
       .slice(0, 3); // Return top 3 most relevant
 
     console.log(`✅ Matched ${relevantAlerts.length} relevant alerts for user (out of ${crisisAlerts.length} total)`);
+    console.log('🔍 DEBUG: Alert scoring for user', {
+      user_industry: user_profile.industry_sector,
+      user_origins: (user_profile.component_origins || []).map(c => c.origin_country),
+      alert_scores: scoredAlerts.map(a => ({
+        title: a.title,
+        score: a.relevance_score,
+        is_relevant: a.is_relevant,
+        reasons: a.reason_relevant,
+        affected_countries: a.affected_countries,
+        affected_hs_codes: a.affected_hs_codes
+      }))
+    });
 
     // ========== STEP 4: Return results ==========
 

@@ -1,14 +1,14 @@
 /**
  * Real-Time Monitoring Dashboard - COMPACT VERSION
  * Shows monitoring activity without wasting vertical space
- * Removed: Large data sources box, verbose email settings
+ * Removed: Large data sources box, verbose email settings, redundant alerts list
+ * Note: Alerts now display ONLY in the Component Tariff Intelligence table below
  */
 
 import React, { useState, useEffect } from 'react';
 
 export default function RealTimeMonitoringDashboard({ userProfile }) {
   const [monitoringData, setMonitoringData] = useState(null);
-  const [censusAlerts, setCensusAlerts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showEmailSettings, setShowEmailSettings] = useState(false);
 
@@ -35,23 +35,8 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
 
       const data = await statsResponse.json();
 
-      // ✅ FETCH ACTUAL CRISIS ALERTS FROM DATABASE
-      const alertsResponse = await fetch('/api/get-crisis-alerts', {
-        credentials: 'include'
-      });
-
-      let alerts = [];
-      if (alertsResponse.ok) {
-        const alertsData = await alertsResponse.json();
-        alerts = alertsData.alerts || [];
-        console.log('✅ Loaded real crisis alerts:', alerts);
-      } else {
-        console.warn('⚠️ Failed to load crisis alerts, will show no alerts message');
-      }
-
-      // Set real monitoring data and alerts from database
+      // Set real monitoring data
       setMonitoringData(data);
-      setCensusAlerts(alerts); // Real alerts from crisis_alerts table
 
       console.log('✅ Loaded real RSS monitoring stats:', data);
     } catch (error) {
@@ -206,114 +191,6 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         </div>
       </div>
 
-      {/* Real Alerts from Crisis Alerts Table */}
-      {censusAlerts.length > 0 ? (
-        <div style={{ marginTop: '1.5rem' }}>
-          <h3 className="card-title">🚨 Recent Policy Change Alerts</h3>
-          <p className="text-body" style={{ marginBottom: '1rem' }}>
-            {censusAlerts.length} active alert{censusAlerts.length !== 1 ? 's' : ''} affecting your products
-          </p>
-
-          {censusAlerts.map((alert, idx) => {
-            const severityColor = alert.severity === 'critical' ? '#dc2626' :
-                                  alert.severity === 'high' ? '#ea580c' :
-                                  alert.severity === 'medium' ? '#f59e0b' : '#10b981';
-
-            return (
-              <div
-                key={idx}
-                style={{
-                  border: `2px solid ${severityColor}`,
-                  borderRadius: '8px',
-                  padding: '1.5rem',
-                  marginBottom: '1rem',
-                  background: 'white'
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>
-                    {alert.title}
-                  </h4>
-                  <span style={{
-                    background: severityColor,
-                    color: 'white',
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '12px',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    textTransform: 'uppercase'
-                  }}>
-                    {alert.severity} PRIORITY
-                  </span>
-                </div>
-
-                <div style={{ color: '#374151', marginBottom: '0.75rem' }}>
-                  {alert.description}
-                </div>
-
-                {alert.relevant_industries && alert.relevant_industries.length > 0 && (
-                  <div style={{
-                    background: '#f9fafb',
-                    padding: '0.75rem',
-                    borderRadius: '6px',
-                    marginBottom: '0.75rem'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>
-                      Affected Industries:
-                    </div>
-                    <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                      {alert.relevant_industries.join(', ')}
-                    </div>
-                  </div>
-                )}
-
-                {(alert.affected_hs_codes?.length > 0 || alert.affected_countries?.length > 0) && (
-                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>
-                    {alert.affected_hs_codes?.length > 0 && (
-                      <div><strong>HS Codes:</strong> {alert.affected_hs_codes.join(', ')}</div>
-                    )}
-                    {alert.affected_countries?.length > 0 && (
-                      <div><strong>Countries:</strong> {alert.affected_countries.join(', ')}</div>
-                    )}
-                  </div>
-                )}
-
-                <div style={{
-                  marginTop: '0.75rem',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid #e5e7eb',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '0.75rem',
-                  color: '#9ca3af'
-                }}>
-                  <span>Type: {alert.alert_type} • Source: {alert.detection_source}</span>
-                  <span>Detected: {getTimeAgo(alert.created_at)}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div style={{ marginTop: '1.5rem' }} className="alert alert-success">
-          <div className="alert-content">
-            <div className="alert-title">✅ No Critical Alerts</div>
-            <div className="text-body">
-              Good news! Your HS codes are being monitored. No significant tariff policy changes or supply concentration risks detected in the latest government data.
-              <br /><br />
-              <strong>What we&apos;re watching:</strong>
-              <ul style={{ marginTop: '0.5rem', marginBottom: 0 }}>
-                {userProfile.componentOrigins?.map((comp, idx) => (
-                  <li key={idx}>
-                    {comp.description || comp.component_type}: {comp.origin_country || comp.country} → US
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Compact Email Settings - Collapsible */}
       <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>

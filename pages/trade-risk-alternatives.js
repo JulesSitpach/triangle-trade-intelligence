@@ -759,6 +759,12 @@ export default function TradeRiskAlternatives() {
 
       if (data.success && data.alerts) {
         console.log(`Generated ${data.alerts.length} personalized alerts for ${profile.companyName}`);
+        console.log('📋 Alerts returned from API:', data.alerts.map(a => ({
+          title: a.title,
+          affected_hs_codes: a.affected_hs_codes,
+          affected_countries: a.affected_countries,
+          relevance_score: a.relevance_score
+        })));
 
         const personalizedAlerts = data.alerts;
 
@@ -1122,9 +1128,11 @@ export default function TradeRiskAlternatives() {
                     // Check HS code match (NULL = matches all)
                     const hsMatch = alert.affected_hs_codes === null || alert.affected_hs_codes === undefined
                       ? true
-                      : alert.affected_hs_codes?.some(code =>
-                          componentHS?.startsWith(code.replace(/\./g, '').substring(0, 6))
-                        );
+                      : alert.affected_hs_codes?.some(code => {
+                          const normalizedComponentHS = componentHS?.replace(/\./g, '');
+                          const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+                          return normalizedComponentHS?.startsWith(normalizedAlertCode);
+                        });
 
                     // Check industry match (NULL = matches all)
                     const industryMatch = alert.relevant_industries === null || alert.relevant_industries === undefined
@@ -1132,6 +1140,19 @@ export default function TradeRiskAlternatives() {
                       : alert.relevant_industries?.some(industry =>
                           componentIndustry?.toLowerCase().includes(industry.toLowerCase())
                         );
+
+                    // DEBUG: Log China component matching
+                    if (componentOrigin === 'CN') {
+                      console.log(`🔍 DEBUG: ${comp.component_type || comp.description} (${componentHS}) from ${componentOrigin}:`, {
+                        alert_title: alert.title,
+                        originMatch,
+                        hsMatch,
+                        industryMatch,
+                        affected_countries: alert.affected_countries,
+                        affected_hs_codes: alert.affected_hs_codes,
+                        normalized_component_hs: componentHS?.replace(/\./g, '')
+                      });
+                    }
 
                     // TYPE 1: Blanket country tariff (NULL HS codes + origin match)
                     if ((alert.affected_hs_codes === null || alert.affected_hs_codes === undefined) && originMatch) {
@@ -1261,10 +1282,26 @@ export default function TradeRiskAlternatives() {
                                 🚨 Alerts for This Component ({componentAlerts.length})
                               </h4>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {componentAlerts.map((alert, alertIdx) => (
+                                {componentAlerts.map((alert, alertIdx) => {
+                                  // Determine severity color
+                                  const severity = alert.severity || alert.urgency || 'medium';
+                                  const severityColor =
+                                    severity === 'critical' ? '#dc2626' :
+                                    severity === 'high' ? '#ea580c' :
+                                    severity === 'medium' ? '#f59e0b' :
+                                    severity === 'low' ? '#059669' : '#6b7280';
+
+                                  const borderColor =
+                                    severity === 'critical' ? '#fecaca' :
+                                    severity === 'high' ? '#fed7aa' :
+                                    severity === 'medium' ? '#fef3c7' :
+                                    severity === 'low' ? '#dcfce7' : '#e5e7eb';
+
+                                  return (
                                   <div key={alertIdx} style={{
                                     background: 'white',
-                                    border: alert.lifecycle_status === 'RESOLVED' ? '2px solid #dcfce7' : '2px solid #fee2e2',
+                                    border: `2px solid ${borderColor}`,
+                                    borderLeft: `5px solid ${severityColor}`,
                                     borderRadius: '6px',
                                     padding: '1rem',
                                     opacity: alert.lifecycle_status === 'RESOLVED' ? 0.7 : 1
@@ -1274,31 +1311,36 @@ export default function TradeRiskAlternatives() {
                                         {alert.consolidated_title || alert.title}
                                       </div>
                                       <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
-                                        {/* ✅ LIFECYCLE STATUS BADGE */}
+                                        {/* ✅ STATUS BADGE - NEW/UPDATED/RESOLVED */}
                                         <span style={{
                                           background: alert.lifecycle_status === 'NEW' ? '#3b82f6' :
-                                                      alert.lifecycle_status === 'UPDATED' ? '#f59e0b' :
-                                                      alert.lifecycle_status === 'RESOLVED' ? '#059669' : '#6b7280',
+                                                      alert.lifecycle_status === 'UPDATED' ? '#8b5cf6' :
+                                                      alert.lifecycle_status === 'RESOLVED' ? '#059669' : '#3b82f6',
                                           color: 'white',
-                                          padding: '0.125rem 0.5rem',
-                                          borderRadius: '10px',
-                                          fontSize: '0.6875rem',
-                                          fontWeight: 600,
+                                          padding: '0.25rem 0.75rem',
+                                          borderRadius: '12px',
+                                          fontSize: '0.75rem',
+                                          fontWeight: 700,
                                           textTransform: 'uppercase'
                                         }}>
-                                          {alert.lifecycle_status || 'NEW'}
+                                          {alert.lifecycle_status === 'NEW' ? '🆕 NEW' :
+                                           alert.lifecycle_status === 'UPDATED' ? '🔄 UPDATED' :
+                                           alert.lifecycle_status === 'RESOLVED' ? '✅ RESOLVED' : '🆕 NEW'}
                                         </span>
-                                        {/* URGENCY BADGE */}
+                                        {/* SEVERITY BADGE - CRITICAL/HIGH/MEDIUM/LOW */}
                                         <span style={{
-                                          background: alert.urgency === 'CRITICAL' ? '#dc2626' : alert.urgency === 'HIGH' ? '#f59e0b' : '#6b7280',
+                                          background: severityColor,
                                           color: 'white',
-                                          padding: '0.125rem 0.5rem',
-                                          borderRadius: '10px',
-                                          fontSize: '0.6875rem',
-                                          fontWeight: 600,
+                                          padding: '0.25rem 0.75rem',
+                                          borderRadius: '12px',
+                                          fontSize: '0.75rem',
+                                          fontWeight: 700,
                                           textTransform: 'uppercase'
                                         }}>
-                                          {alert.urgency || 'MEDIUM'}
+                                          {severity === 'critical' ? '🔴 CRITICAL' :
+                                           severity === 'high' ? '🟠 HIGH' :
+                                           severity === 'medium' ? '🟡 MEDIUM' :
+                                           severity === 'low' ? '🟢 LOW' : '⚪ UNKNOWN'}
                                         </span>
                                       </div>
                                     </div>
@@ -1370,7 +1412,8 @@ export default function TradeRiskAlternatives() {
                                       </div>
                                     )}
                                   </div>
-                                ))}
+                                );
+                                })}
                               </div>
                             </div>
                           )}
