@@ -114,6 +114,15 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-load personalized alerts when userProfile is available
+  // This populates the Component Tariff Intelligence table
+  useEffect(() => {
+    if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0 && !alertsGenerated) {
+      console.log('📡 Auto-loading personalized alerts for component table...');
+      loadRealPolicyAlerts(userProfile);
+    }
+  }, [userProfile?.companyName, userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // REMOVED: Auto-restore from localStorage
   // Strategic analysis should ONLY display when user explicitly clicks the button
   // Users found it confusing to see generic analysis auto-display on page load
