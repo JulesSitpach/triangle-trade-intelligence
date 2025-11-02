@@ -114,20 +114,19 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-load dynamic alerts when workflow data is available
-  // Generates alerts based on user's actual component data, RVC, sourcing patterns
+  // Auto-load portfolio briefing when workflow data is available
+  // Analyzes user's supply chain against USMCA 2026 + matches real policy alerts
   useEffect(() => {
     if (userProfile?.companyName && userProfile?.componentOrigins?.length > 0) {
-      console.log('📡 Generating DYNAMIC alerts based on actual workflow data:', {
+      console.log('📡 Generating portfolio briefing based on real data:', {
         companyName: userProfile.companyName,
         componentCount: userProfile.componentOrigins?.length,
         rvc: userProfile.regionalContent,
-        industry: userProfile.industry_sector,
         origins: userProfile.componentOrigins?.map(c => c.origin_country)
       });
 
-      // Load DYNAMIC alerts (generated based on actual user data)
-      loadDynamicAlerts(userProfile);
+      // Load real portfolio briefing (NOT fake templates)
+      loadPortfolioBriefing(userProfile);
     }
   }, [userProfile?.companyName, userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -737,19 +736,19 @@ export default function TradeRiskAlternatives() {
    */
 
   /**
-   * Load DYNAMIC alerts generated based on user's actual workflow data
-   * Alerts are generated on-the-fly based on component data, RVC, sourcing patterns
-   * Each user sees only alerts relevant to their specific portfolio
+   * Load real portfolio briefing based on actual workflow data + real policy alerts
+   * Analyzes supply chain against USMCA 2026 renegotiation
+   * Matches to real policy announcements from crisis_alerts (not templates)
    */
-  const loadDynamicAlerts = async (profile) => {
+  const loadPortfolioBriefing = async (profile) => {
     setIsLoadingPolicyAlerts(true);
     setProgressSteps([]);
 
     try {
       setProgressSteps(prev => [...prev, 'Analyzing your portfolio...']);
-      console.log('🔄 Calling generate-dynamic-alerts with workflow data...');
+      console.log('🔄 Loading real portfolio briefing with actual data...');
 
-      // Build workflow data structure for alert generation
+      // Build workflow data structure
       const workflowData = {
         company: {
           name: profile.companyName,
@@ -770,93 +769,37 @@ export default function TradeRiskAlternatives() {
         }
       };
 
-      setProgressSteps(prev => [...prev, 'Generating personalized alerts...']);
+      setProgressSteps(prev => [...prev, 'Checking for real policy alerts...']);
 
-      const response = await fetch('/api/generate-dynamic-alerts', {
+      // Call real briefing endpoint (matches real crisis_alerts, no templates)
+      const response = await fetch('/api/generate-portfolio-briefing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workflow_data: workflowData })
+        credentials: 'include',
+        body: JSON.stringify({ workflow_data: workflowData, user_id: user?.id })
       });
 
       if (!response.ok) {
-        throw new Error(`Dynamic alert generation failed: ${response.status}`);
+        throw new Error(`Portfolio briefing failed: ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (data.success && data.alerts) {
-        console.log(`✅ Generated ${data.alerts.length} dynamic alerts for ${profile.companyName}`);
-        console.log('📋 Dynamic Alerts:', data.alerts.map(a => ({
-          title: a.title,
-          type: a.type,
-          urgency: a.urgency,
-          component: a.component
-        })));
+      if (data.success && data.briefing) {
+        console.log(`✅ Portfolio briefing generated (${data.real_alerts_matched} real alerts matched)`);
+        setProgressSteps(prev => [...prev, 'Briefing complete']);
 
-        setRealPolicyAlerts(data.alerts);
-        setOriginalAlertCount(data.alerts.length);
-
-        // Log alerts to database for monitoring/audit trail
-        setProgressSteps(prev => [...prev, 'Logging alerts for monitoring...']);
-        try {
-          await fetch('/api/log-dynamic-alerts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              user_id: user?.id,
-              company_name: profile.companyName,
-              dynamic_alerts: data.alerts,
-              portfolio_data: {
-                rvc: profile.regionalContent || 0,
-                total_volume: workflowData.portfolio?.total_volume || 0,
-                component_count: (profile.componentOrigins || []).length
-              }
-            })
-          });
-          console.log('✅ Alerts logged to monitoring system');
-        } catch (logError) {
-          console.warn('⚠️ Failed to log alerts:', logError);
-        }
-
-        // Generate AI summary based on user's actual alerts
-        setProgressSteps(prev => [...prev, 'Generating AI strategic summary...']);
-        try {
-          const summaryResponse = await fetch('/api/generate-ai-alert-summary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              workflow_data: workflowData,
-              dynamic_alerts: data.alerts,
-              user_id: user?.id
-            })
-          });
-
-          if (summaryResponse.ok) {
-            const summaryData = await summaryResponse.json();
-            if (summaryData.success) {
-              console.log('✅ AI summary generated:', summaryData.summary);
-              // Store summary in state for display
-              setPersonalizedUSMCA2026Analysis(summaryData.summary);
-            }
-          }
-        } catch (summaryError) {
-          console.warn('⚠️ Failed to generate AI summary:', summaryError);
-        }
-
-        setProgressSteps(prev => [...prev, 'Analysis complete']);
+        // Store briefing for display
+        setPersonalizedUSMCA2026Analysis(data.briefing);
         setAlertsGenerated(true);
       } else {
-        console.log('ℹ️ No dynamic alerts generated for this portfolio');
-        setRealPolicyAlerts([]);
-        setProgressSteps(prev => [...prev, 'No alerts generated']);
+        console.log('❌ Failed to generate briefing');
+        setProgressSteps(prev => [...prev, 'Briefing generation failed']);
         setAlertsGenerated(true);
       }
     } catch (error) {
-      console.error('❌ Dynamic alert generation failed:', error);
-      setRealPolicyAlerts([]);
-      setProgressSteps(prev => [...prev, 'Error generating alerts']);
+      console.error('❌ Portfolio briefing failed:', error);
+      setProgressSteps(prev => [...prev, 'Error generating briefing']);
       setAlertsGenerated(true);
     } finally {
       setIsLoadingPolicyAlerts(false);
