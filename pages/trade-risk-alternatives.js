@@ -1674,21 +1674,15 @@ export default function TradeRiskAlternatives() {
                         console.log('🔵 USMCA 2026 button clicked!', { userProfile });
                         loadPortfolioBriefing(userProfile);
                       }}
-                      className="btn-primary"
-                      disabled={isLoadingPolicyAlerts}
+                      className={portfolioBriefing ? "btn-secondary" : "btn-primary"}
+                      disabled={isLoadingPolicyAlerts || portfolioBriefing}
+                      style={portfolioBriefing ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                     >
-                      {isLoadingPolicyAlerts ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAlertsGenerated(false);
-                        setRealPolicyAlerts([]);
-                        setConsolidatedAlerts([]);
-                        setPortfolioBriefing(null);
-                      }}
-                      className="btn-secondary"
-                    >
-                      🔄 Run Analysis Again
+                      {isLoadingPolicyAlerts
+                        ? '⏳ Analyzing...'
+                        : portfolioBriefing
+                        ? '✅ Analysis Complete'
+                        : '📊 USMCA 2026 Impact Analysis'}
                     </button>
                   </div>
 
