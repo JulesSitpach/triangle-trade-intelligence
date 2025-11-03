@@ -16,11 +16,11 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Triangle Trade Intelligence | USMCA Compliance & Supply Chain Optimization</title>
-        <meta name="description" content="Professional trade services platform delivering comprehensive USMCA compliance analysis and supply chain optimization for North American manufacturers and importers." />
+        <title>Triangle Trade Intelligence | AI-Powered USMCA Compliance Platform</title>
+        <meta name="description" content="AI-powered USMCA compliance software for importers, exporters, and producers. Automated certificate generation, real-time tariff alerts, and HS code classification. $99/month." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Triangle Trade Intelligence | USMCA Compliance Platform" />
-        <meta property="og:description" content="Professional trade services delivering comprehensive USMCA compliance analysis and supply chain optimization for small manufacturers and importers." />
+        <meta property="og:title" content="Triangle Trade Intelligence | AI-Powered USMCA Compliance" />
+        <meta property="og:description" content="AI-powered USMCA compliance software with automated certificate generation and real-time tariff alerts for importers, exporters, and producers." />
 
         {/* Structured Data (JSON-LD) for SEO */}
         <script
@@ -56,11 +56,11 @@ export default function HomePage() {
                 }
               },
               "featureList": [
-                "USMCA Qualification Analysis",
-                "Certificate of Origin Generation",
-                "HS Code Classification",
-                "Mexico Supplier Sourcing",
-                "Trade Compliance Consulting"
+                "AI-Powered USMCA Qualification Analysis",
+                "Automated Certificate of Origin Generation",
+                "AI HS Code Classification",
+                "Real-Time Tariff Alerts",
+                "Supply Chain Risk Monitoring"
               ]
             })
           }}
@@ -170,74 +170,74 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Mexico Trade Bridge - Competitive Advantage Section */}
+      {/* Platform Features - What The App Does */}
       <section className="main-content" style={{background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'}}>
         <div className="container-app">
           <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
             <h2 className="section-header-title" style={{color: '#fff', fontSize: '2.5rem'}}>
-              Your Mexico Trade Bridge Advantage
+              AI-Powered USMCA Compliance Platform
             </h2>
             <p className="section-header-subtitle" style={{color: '#e0f2fe', fontSize: '1.25rem', maxWidth: '800px', margin: '0 auto'}}>
-              Canadian-owned platform with Mexico-based operations delivering North American business standards with Mexico market access and insights.
+              Automated compliance tools built for importers, exporters, and producers trading in North America.
             </p>
           </div>
 
           <div className="feature-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginTop: '3rem'}}>
-            {/* USMCA Triangle Routing */}
+            {/* AI-Powered Analysis */}
             <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
-              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🔺</div>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🤖</div>
               <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
-                USMCA Triangle Routing
+                AI Classification & Analysis
               </h3>
               <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
-                Maximize tariff savings through strategic Canada → Mexico → US/Latin America routing. Leverage USMCA&apos;s 0% preferential rates and Mexico&apos;s geographic advantages.
+                AI automatically classifies your products with correct HS codes, calculates USMCA qualification, and generates compliance reports in minutes.
               </p>
               <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
-                <li>Zero tariffs on USMCA-qualified goods</li>
-                <li>Shorter lead times vs. Asian suppliers</li>
-                <li>Same-time-zone collaboration</li>
+                <li>Automated HS code suggestions</li>
+                <li>Regional Value Content calculations</li>
+                <li>Instant qualification status</li>
               </ul>
             </div>
 
-            {/* Mexico Nearshoring */}
+            {/* Real-Time Alerts */}
             <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
-              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🇲🇽</div>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🚨</div>
               <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
-                Mexico Nearshoring Benefits
+                24/7 Policy Monitoring
               </h3>
               <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
-                Access Mexico&apos;s skilled workforce and manufacturing infrastructure with our bilingual team (Spanish/English) providing complete USMCA market coverage.
+                Platform monitors Federal Register, USTR, and government sources 24/7. Get automated alerts when tariff changes affect your products.
               </p>
               <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
-                <li>17-year enterprise logistics expertise</li>
-                <li>Fortune 500 best practices at SMB scale</li>
-                <li>Mexico supplier relationships ready</li>
+                <li>Real-time tariff change detection</li>
+                <li>Section 301/232 tracking</li>
+                <li>Daily email digest of relevant changes</li>
               </ul>
             </div>
 
-            {/* Future-Proof Strategy */}
+            {/* Automated Certificates */}
             <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
-              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🛡️</div>
+              <div style={{fontSize: '3rem', marginBottom: '1rem'}}>📜</div>
               <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
-                Future-Proof Your Supply Chain
+                Certificate Generation
               </h3>
               <p className="text-body" style={{color: '#334155', lineHeight: '1.6'}}>
-                Mexico proximity benefits remain regardless of trade agreements. Build relationships now for resilience against tariff volatility and geopolitical shifts.
+                Automatically generate USMCA Certificate of Origin (Form D) with all required fields pre-filled from your analysis data.
               </p>
               <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
-                <li>Reduce dependency on distant suppliers</li>
-                <li>3-5 day shipping vs 30-45 from Asia</li>
-                <li>Agile response to market changes</li>
+                <li>Official USMCA Form D format</li>
+                <li>Edit fields before download</li>
+                <li>PDF ready for customs submission</li>
               </ul>
             </div>
           </div>
 
-          {/* Trust Factor Banner */}
+          {/* Self-Serve Platform Banner */}
           <div className="card" style={{background: 'rgba(255, 255, 255, 0.1)', border: '2px solid rgba(255,255,255,0.3)', padding: '2rem', marginTop: '3rem', textAlign: 'center'}}>
             <p style={{color: '#e0f2fe', fontSize: '1.1rem', lineHeight: '1.8', margin: 0}}>
-              <strong style={{color: '#fff', fontSize: '1.3rem'}}>Canadian-Founded, Mexico-Based Excellence:</strong><br/>
-              15+ years high-tech experience (IBM, Cognos, Mitel, LinkedIn) combined with Mexico-based bilingual trade experts.
-              North American business standards with Mexico market access and cultural insights.
+              <strong style={{color: '#fff', fontSize: '1.3rem'}}>Self-Serve SaaS Platform:</strong><br/>
+              No consultants. No meetings. No human bottlenecks. Just AI-powered automated analysis available 24/7.
+              Built for importers, exporters, and producers who need compliance tools, not consulting services.
             </p>
           </div>
         </div>
@@ -319,9 +319,9 @@ export default function HomePage() {
 
             <div className="content-card" style={{textAlign: 'center'}}>
               <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>💡</div>
-              <h3 className="content-card-title">Mexico Alternatives</h3>
+              <h3 className="content-card-title">Strategic Recommendations</h3>
               <p className="content-card-description">
-                Recommendations for Mexico-based alternative suppliers.
+                AI-generated portfolio briefings with USMCA optimization strategies.
               </p>
             </div>
           </div>
