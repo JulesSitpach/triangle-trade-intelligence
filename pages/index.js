@@ -290,6 +290,158 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* See It In Action - Product Screenshots */}
+      <section className="main-content" style={{background: '#f9fafb'}}>
+        <div className="container-app">
+          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
+            <h2 className="section-header-title">See It In Action</h2>
+            <p className="section-header-subtitle">
+              Real screenshots from the Triangle Trade Intelligence Platform
+            </p>
+          </div>
+
+          {/* Feature Showcase Grid */}
+          <div style={{display: 'grid', gap: '3rem'}}>
+
+            {/* USMCA Analysis Results */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
+              <div>
+                <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                  Instant USMCA Qualification Results
+                </h3>
+                <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
+                  Get immediate qualification status with detailed component breakdown, tariff savings calculations, and regional value content analysis. No manual calculations required.
+                </p>
+                <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                  <li>Real-time qualification status (Qualified/Not Qualified/Needs Review)</li>
+                  <li>Component-by-component tariff rate analysis</li>
+                  <li>Annual savings projections</li>
+                  <li>MFN vs USMCA rate comparisons</li>
+                </ul>
+              </div>
+              <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)'}}>
+                <img
+                  src="/image/samples/results.png"
+                  alt="USMCA qualification results showing component breakdown and tariff savings"
+                  style={{width: '100%', height: 'auto', display: 'block'}}
+                />
+              </div>
+            </div>
+
+            {/* AI-Powered Strategic Analysis */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
+              <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', order: -1}}>
+                <img
+                  src="/image/samples/result ai.png"
+                  alt="AI-generated strategic analysis and recommendations"
+                  style={{width: '100%', height: 'auto', display: 'block'}}
+                />
+              </div>
+              <div>
+                <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                  AI-Powered Strategic Intelligence
+                </h3>
+                <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
+                  Get consulting-grade strategic analysis powered by AI. Our system analyzes your supply chain against USMCA requirements and provides actionable recommendations.
+                </p>
+                <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                  <li>Supply chain vulnerability assessment</li>
+                  <li>USMCA 2026 renegotiation impact analysis</li>
+                  <li>Sourcing optimization recommendations</li>
+                  <li>Risk mitigation strategies</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Crisis Alerts Dashboard */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
+              <div>
+                <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                  Real-Time Crisis Alerts & Policy Monitoring
+                </h3>
+                <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
+                  Platform monitors Federal Register, USTR, and government sources 24/7. Get component-specific alerts when tariff changes affect your products.
+                </p>
+                <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                  <li>Section 301/232 tariff change detection</li>
+                  <li>Component-level alert matching</li>
+                  <li>Severity-based color coding (Critical/High/Medium/Low)</li>
+                  <li>Email notifications for urgent updates</li>
+                </ul>
+              </div>
+              <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)'}}>
+                <img
+                  src="/image/samples/alerts.png"
+                  alt="Crisis alerts dashboard showing tariff changes and policy updates"
+                  style={{width: '100%', height: 'auto', display: 'block'}}
+                />
+              </div>
+            </div>
+
+            {/* USMCA Certificate Preview */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
+              <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', order: -1}}>
+                <img
+                  src="/image/samples/certificate preview.png"
+                  alt="USMCA Certificate of Origin preview with editable fields"
+                  style={{width: '100%', height: 'auto', display: 'block'}}
+                />
+              </div>
+              <div>
+                <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                  Official USMCA Certificate Generation
+                </h3>
+                <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
+                  Automatically generate USMCA Certificate of Origin (Form D) with all required fields pre-filled from your analysis. Edit any field before download.
+                </p>
+                <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                  <li>Official USMCA Form D format</li>
+                  <li>All fields auto-populated from analysis</li>
+                  <li>Edit any field before download</li>
+                  <li>PDF ready for customs submission</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Dashboard Overview */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
+              <div>
+                <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                  Comprehensive Dashboard & History
+                </h3>
+                <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
+                  Access all your USMCA analyses, certificates, and alerts from one centralized dashboard. Track qualification status and monitor your supply chain.
+                </p>
+                <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                  <li>View all past USMCA analyses</li>
+                  <li>Download certificates anytime</li>
+                  <li>Track active policy alerts</li>
+                  <li>Monitor subscription usage</li>
+                </ul>
+              </div>
+              <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)'}}>
+                <img
+                  src="/image/samples/dashboard.png"
+                  alt="User dashboard showing USMCA analyses and certificates"
+                  style={{width: '100%', height: 'auto', display: 'block'}}
+                />
+              </div>
+            </div>
+
+          </div>
+
+          {/* CTA Button */}
+          <div style={{textAlign: 'center', marginTop: '3rem'}}>
+            <Link href="/pricing" className="btn-primary" style={{fontSize: '1.2rem', padding: '1rem 2rem'}}>
+              Try It Free - Start Your First Analysis
+            </Link>
+            <p style={{marginTop: '1rem', color: '#6b7280'}}>
+              No credit card required for trial • 1 free USMCA analysis included
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Alert Monitoring Section */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
