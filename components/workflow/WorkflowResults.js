@@ -489,6 +489,20 @@ export default function WorkflowResults({
         <div className="alert-content">
           <h2 className="alert-title-success">
             {results.usmca?.qualified ? '✓ USMCA Qualified' : '✗ Not Qualified'}
+            {results.product?.hs_code && (
+              <span style={{
+                marginLeft: '1rem',
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: results.usmca?.qualified ? '#059669' : '#d97706',
+                backgroundColor: results.usmca?.qualified ? '#ecfdf5' : '#fffbeb',
+                padding: '0.375rem 0.75rem',
+                borderRadius: '0.375rem',
+                border: `1px solid ${results.usmca?.qualified ? '#10b981' : '#f59e0b'}`
+              }}>
+                HS {results.product.hs_code}
+              </span>
+            )}
           </h2>
           <p className="alert-text-success">
             {results.usmca?.qualified
