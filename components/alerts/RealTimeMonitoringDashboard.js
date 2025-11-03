@@ -130,7 +130,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
             </span>
           </div>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>
-            Monitoring {monitoringData.dataSourcesChecked?.join(' • ') || 'RSS feeds'} • {monitoringData.htsCodesMonitored} HS codes • Checked {(monitoringData.thisMonth?.policiesChecked || 0).toLocaleString()} items this month
+            Tracking {monitoringData.htsCodesMonitored || 0} HS codes across government sources for policy changes
           </p>
         </div>
         <div style={{ textAlign: 'right' }}>
