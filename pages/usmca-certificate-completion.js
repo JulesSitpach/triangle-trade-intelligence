@@ -1,5 +1,4 @@
 /**
-import workflowStorage from '../lib/services/workflow-storage-adapter.js';
  * USMCA Certificate Completion Page
  * Uses the AuthorizationStep component for certificate generation
  * Updated with dashboard-user.css styling for consistency
@@ -12,6 +11,7 @@ import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
 import WorkflowProgress from '../components/workflow/WorkflowProgress';
 import { calculateDynamicTrustScore, getFallbackTrustScore } from '../lib/utils/trust-score-calculator.js';
+import workflowStorage from '../lib/services/workflow-storage-adapter.js';
 // Removed: unified-workflow-data-service (over-engineered)
 // Certificate page loads from localStorage directly (user is still in active session)
 
