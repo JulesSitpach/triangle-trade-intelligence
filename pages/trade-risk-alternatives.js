@@ -68,6 +68,9 @@ export default function TradeRiskAlternatives() {
   // Collapsible component state (must be at component level for React hooks rules)
   const [expandedComponents, setExpandedComponents] = useState({});
 
+  // Market Intelligence email preference (AI always uses these, user controls emails)
+  const [includeMarketIntelInEmail, setIncludeMarketIntelInEmail] = useState(false);
+
   // Email notification preferences for each component
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
 
@@ -1403,6 +1406,197 @@ export default function TradeRiskAlternatives() {
                     </div>
                   );
                 })}
+
+                {/* Market Intelligence Row - Strategic context for AI (always used, user controls email) */}
+                {(() => {
+                  // Filter for market intelligence alerts (UNSPECIFIED country or general context)
+                  const marketIntelAlerts = (realPolicyAlerts || []).filter(alert =>
+                    alert.affected_countries?.includes('UNSPECIFIED') ||
+                    (!alert.affected_countries || alert.affected_countries.length === 0)
+                  );
+
+                  if (marketIntelAlerts.length === 0) return null;
+
+                  const isExpanded = expandedComponents['market_intel'] || false;
+
+                  return (
+                    <div style={{
+                      border: '1px solid #e5e7eb',
+                      borderTop: '1px solid #e5e7eb',
+                      borderRadius: '0 0 8px 8px',
+                      backgroundColor: 'white',
+                      overflow: 'hidden'
+                    }}>
+                      {/* Collapsed Header */}
+                      <div
+                        onClick={() => setExpandedComponents(prev => ({
+                          ...prev,
+                          'market_intel': !prev['market_intel']
+                        }))}
+                        style={{
+                          padding: '1rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '1rem',
+                          backgroundColor: isExpanded ? '#f0f9ff' : '#fef3c7',
+                          transition: 'background-color 0.2s',
+                          borderTop: '2px solid #f59e0b'
+                        }}
+                      >
+                        {/* Expand Icon */}
+                        <span style={{
+                          fontSize: '1.25rem',
+                          color: '#f59e0b',
+                          width: '1.25rem',
+                          textAlign: 'center'
+                        }}>
+                          {isExpanded ? '▼' : '▶'}
+                        </span>
+
+                        {/* Name */}
+                        <div style={{ flex: '2', fontWeight: 600, color: '#92400e' }}>
+                          📰 Market Intelligence & Strategic Context
+                        </div>
+
+                        {/* Origin */}
+                        <div style={{ flex: '1', textAlign: 'center', color: '#92400e', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                          Global
+                        </div>
+
+                        {/* HS Code */}
+                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#92400e' }}>
+                          —
+                        </div>
+
+                        {/* Value % */}
+                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, color: '#92400e' }}>
+                          N/A
+                        </div>
+
+                        {/* Alert Badge */}
+                        <div style={{ flex: '1', textAlign: 'center' }}>
+                          <span style={{
+                            background: '#fef3c7',
+                            color: '#92400e',
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '12px',
+                            fontSize: '0.8125rem',
+                            fontWeight: 600,
+                            border: '1px solid #f59e0b'
+                          }}>
+                            📌 {marketIntelAlerts.length} insight{marketIntelAlerts.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+
+                        {/* Email Checkbox */}
+                        <div style={{ flex: '0.75', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={includeMarketIntelInEmail}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              setIncludeMarketIntelInEmail(e.target.checked);
+                            }}
+                            title="Include market intelligence in email alerts (AI always uses these for analysis)"
+                            style={{
+                              width: '18px',
+                              height: '18px',
+                              cursor: 'pointer'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Expanded View - Market Intelligence Alerts */}
+                      {isExpanded && (
+                        <div style={{
+                          padding: '1.5rem',
+                          background: '#fffbeb',
+                          borderTop: '1px solid #fde68a'
+                        }}>
+                          <div style={{
+                            fontSize: '0.875rem',
+                            color: '#92400e',
+                            marginBottom: '1rem',
+                            padding: '0.75rem',
+                            background: '#fef3c7',
+                            borderRadius: '6px',
+                            border: '1px solid #fde68a'
+                          }}>
+                            <strong>ℹ️ About Market Intelligence:</strong> AI always uses these alerts for strategic context in your briefing. Enable email to receive updates about general trade trends (no component-specific action required).
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                            {marketIntelAlerts.map((alert, idx) => (
+                              <div key={idx} style={{
+                                padding: '1rem',
+                                background: 'white',
+                                borderRadius: '8px',
+                                border: '1px solid #e5e7eb'
+                              }}>
+                                <div style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'start',
+                                  marginBottom: '0.5rem'
+                                }}>
+                                  <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                                    {alert.title}
+                                  </div>
+                                  <span style={{
+                                    background: alert.severity === 'high' ? '#fee2e2' :
+                                              alert.severity === 'medium' ? '#fef3c7' : '#dbeafe',
+                                    color: alert.severity === 'high' ? '#dc2626' :
+                                          alert.severity === 'medium' ? '#f59e0b' : '#3b82f6',
+                                    padding: '0.125rem 0.5rem',
+                                    borderRadius: '10px',
+                                    fontSize: '0.6875rem',
+                                    fontWeight: 600,
+                                    textTransform: 'uppercase',
+                                    whiteSpace: 'nowrap'
+                                  }}>
+                                    {alert.severity}
+                                  </span>
+                                </div>
+
+                                {alert.description && (
+                                  <div style={{
+                                    fontSize: '0.8125rem',
+                                    color: '#6b7280',
+                                    marginBottom: '0.5rem',
+                                    lineHeight: '1.5'
+                                  }}>
+                                    {alert.description}
+                                  </div>
+                                )}
+
+                                <div style={{
+                                  fontSize: '0.75rem',
+                                  color: '#9ca3af',
+                                  display: 'flex',
+                                  gap: '1rem'
+                                }}>
+                                  <span>🗓 {new Date(alert.created_at).toLocaleDateString()}</span>
+                                  {alert.source_url && (
+                                    <a
+                                      href={alert.source_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ color: '#3b82f6', textDecoration: 'none' }}
+                                    >
+                                      🔗 Source
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
             </div>
