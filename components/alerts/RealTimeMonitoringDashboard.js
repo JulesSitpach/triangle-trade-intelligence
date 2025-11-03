@@ -111,7 +111,7 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
               📡 Real-Time Policy Monitoring
             </h2>
@@ -129,9 +129,6 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
               🔴 LIVE
             </span>
           </div>
-          <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0 0' }}>
-            Tracking {monitoringData.htsCodesMonitored || 0} HS codes across government sources for policy changes
-          </p>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
