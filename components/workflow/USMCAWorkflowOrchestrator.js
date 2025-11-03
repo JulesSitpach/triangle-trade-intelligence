@@ -10,6 +10,7 @@ import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 import { useWorkflowState } from '../../hooks/useWorkflowState';
 import { useTrustIndicators } from '../../hooks/useTrustIndicators';
 import { trustVerifiedCertificateFormatter } from '../../lib/utils/trust-verified-certificate-formatter';
+import workflowStorage from '../../lib/services/workflow-storage-adapter.js';
 import WorkflowProgress from './WorkflowProgress';
 import CompanyInformationStep from './CompanyInformationStep';
 import ComponentOriginsStepEnhanced from './ComponentOriginsStepEnhanced';
@@ -241,10 +242,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     try {
       // ✅ NEW (Nov 1): Save to database instead of localStorage
       // This ensures alerts page loads complete data from database
-      let sessionId = localStorage.getItem('workflow_session_id');
+      let sessionId = workflowStorage.getItem('workflow_session_id');
       if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('workflow_session_id', sessionId);
+        workflowStorage.setItem('workflow_session_id', sessionId);
       }
 
       // Save current formData to database + include AI analysis results for data preservation
@@ -300,7 +301,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             component_breakdown: formData.component_origins
           }
         };
-        localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowDataForAlerts));
+        workflowStorage.setItem('usmca_workflow_results', JSON.stringify(workflowDataForAlerts));
       }
 
       // Navigate to alerts page (it will load from database via sessionId)
@@ -329,10 +330,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         const dataConnector = new WorkflowDataConnector();
         
         // Get or create session ID
-        let sessionId = localStorage.getItem('workflow_session_id');
+        let sessionId = workflowStorage.getItem('workflow_session_id');
         if (!sessionId) {
           sessionId = dataConnector.generateSessionId();
-          localStorage.setItem('workflow_session_id', sessionId);
+          workflowStorage.setItem('workflow_session_id', sessionId);
         }
         
         // Capture Step 1: Company Data
@@ -389,7 +390,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       } catch (dbError) {
         console.error('❌ WorkflowDataConnector failed (continuing with certificate):', dbError);
         await DevIssue.apiError('workflow_orchestrator', 'workflow-data-connector', dbError, {
-          sessionId: localStorage.getItem('workflow_session_id'),
+          sessionId: workflowStorage.getItem('workflow_session_id'),
           company: formData.company_name
         });
       }
@@ -471,7 +472,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
 
   // Get workflow session ID for chatbot
   const workflowSessionId = typeof window !== 'undefined'
-    ? localStorage.getItem('workflow_session_id') || `chat_${Date.now()}`
+    ? workflowStorage.getItem('workflow_session_id') || `chat_${Date.now()}`
     : `chat_${Date.now()}`;
 
   return (

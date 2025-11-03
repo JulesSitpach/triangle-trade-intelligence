@@ -1,4 +1,5 @@
 /**
+import workflowStorage from '../lib/services/workflow-storage-adapter.js';
  * USMCA Certificate Completion Page
  * Uses the AuthorizationStep component for certificate generation
  * Updated with dashboard-user.css styling for consistency
@@ -77,9 +78,9 @@ export default function USMCACertificateCompletion() {
         }
 
         // Load workflow results from localStorage
-        const workflowResults = localStorage.getItem('usmca_workflow_results');
-        const formData = localStorage.getItem('triangleUserData');
-        const storedAuth = localStorage.getItem('usmca_authorization_data');
+        const workflowResults = workflowStorage.getItem('usmca_workflow_results');
+        const formData = workflowStorage.getItem('triangleUserData');
+        const storedAuth = workflowStorage.getItem('usmca_authorization_data');
 
         if (!workflowResults && !formData) {
           console.log('[CertificateCompletion] No workflow data found - redirecting to start');
@@ -231,7 +232,7 @@ export default function USMCACertificateCompletion() {
   // ✅ NEW: Restore certificate edits from localStorage on page load
   useEffect(() => {
     try {
-      const savedEdits = localStorage.getItem('usmca_certificate_edits');
+      const savedEdits = workflowStorage.getItem('usmca_certificate_edits');
       if (savedEdits) {
         const parsed = JSON.parse(savedEdits);
         console.log('🔄 Restoring certificate edits from localStorage:', {
@@ -459,7 +460,7 @@ export default function USMCACertificateCompletion() {
           };
 
           // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
-          localStorage.setItem('usmca_workflow_results', JSON.stringify(completionData));
+          workflowStorage.setItem('usmca_workflow_results', JSON.stringify(completionData));
 
           console.log('🎯 Certificate saved to localStorage for alerts');
         } catch (error) {
@@ -518,11 +519,11 @@ export default function USMCACertificateCompletion() {
             onStepClick={(step) => {
               if (step === 1 || step === 2) {
                 // Navigate back to workflow orchestrator at specific step
-                localStorage.setItem('workflow_current_step', step.toString());
+                workflowStorage.setItem('workflow_current_step', step.toString());
                 router.push('/usmca-workflow');
               } else if (step === 3) {
                 // Navigate back to results
-                localStorage.setItem('workflow_current_step', '3');
+                workflowStorage.setItem('workflow_current_step', '3');
                 router.push('/usmca-workflow');
               }
               // step 4 = current page, do nothing
@@ -578,7 +579,7 @@ export default function USMCACertificateCompletion() {
                         product_description: workflowData?.product?.description || workflowData?.product?.product_description,
                         hs_code: workflowData?.product?.hs_code || editedCertificate?.hs_classification?.code
                       };
-                      localStorage.setItem('usmca_certificate_edits', JSON.stringify(localStorageBackup));
+                      workflowStorage.setItem('usmca_certificate_edits', JSON.stringify(localStorageBackup));
                       console.log('💾 ✅ Certificate edits saved to localStorage (backup)');
                     } catch (localStorageError) {
                       console.error('⚠️ localStorage save failed:', localStorageError);

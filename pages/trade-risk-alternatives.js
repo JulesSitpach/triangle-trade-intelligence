@@ -14,6 +14,7 @@ import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoring
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 import ExecutiveSummaryDisplay from '../components/workflow/results/ExecutiveSummaryDisplay';
+import workflowStorage from '../lib/services/workflow-storage-adapter.js';
 
 // Import configuration from centralized config file
 import TRADE_RISK_CONFIG, {
@@ -145,7 +146,7 @@ export default function TradeRiskAlternatives() {
 
   // Clear old localStorage data on page load (one-time cleanup)
   useEffect(() => {
-    localStorage.removeItem('alert_impact_analysis');
+    workflowStorage.removeItem('alert_impact_analysis');
     console.log('🧹 Cleared old alert impact analysis from localStorage');
   }, []); // Run once on mount
 
@@ -343,7 +344,7 @@ export default function TradeRiskAlternatives() {
 
     // 🔄 UNIFIED DATA ACCESS: Get workflow data (database-first, localStorage fallback)
     // ✅ FIX: Get actual session_id from localStorage, not userId
-    const sessionId = typeof window !== 'undefined' ? localStorage.getItem('workflow_session_id') : null;
+    const sessionId = typeof window !== 'undefined' ? workflowStorage.getItem('workflow_session_id') : null;
     console.log(`[TradeRiskAlternatives] Looking for sessionId: ${sessionId}`);
 
     let userData = await getWorkflowData(sessionId);
@@ -351,7 +352,7 @@ export default function TradeRiskAlternatives() {
     // ✅ FALLBACK: If no session_id in localStorage, try loading from usmca_workflow_results
     if (!userData && typeof window !== 'undefined') {
       console.log('[TradeRiskAlternatives] No session_id found, trying usmca_workflow_results...');
-      const cachedResults = localStorage.getItem('usmca_workflow_results');
+      const cachedResults = workflowStorage.getItem('usmca_workflow_results');
       if (cachedResults) {
         try {
           userData = JSON.parse(cachedResults);
@@ -386,8 +387,8 @@ export default function TradeRiskAlternatives() {
     if (userData.company?.name?.includes('Tropical Harvest')) {
       console.log('Found old test data, clearing...');
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('usmca_workflow_results');
-        localStorage.removeItem('triangleUserData');
+        workflowStorage.removeItem('usmca_workflow_results');
+        workflowStorage.removeItem('triangleUserData');
       }
       setIsLoading(false);
       return;
@@ -499,7 +500,7 @@ export default function TradeRiskAlternatives() {
 
       // Show consent modal instead of automatically saving
       // Check if user is authenticated (cookie-based auth)
-      const savedConsent = localStorage.getItem('save_data_consent');
+      const savedConsent = workflowStorage.getItem('save_data_consent');
       const isAuthenticated = !!user; // Simple check - user exists means authenticated
 
       console.log('🔐 Auth check:', {
@@ -538,7 +539,7 @@ export default function TradeRiskAlternatives() {
     console.log('✅ User chose to SAVE data for alerts and services');
 
     // Save consent choice
-    localStorage.setItem('save_data_consent', 'save');
+    workflowStorage.setItem('save_data_consent', 'save');
     setHasSaveDataConsent(true);
     setShowSaveDataConsent(false);
 
@@ -551,15 +552,15 @@ export default function TradeRiskAlternatives() {
     console.log('🔒 User chose to ERASE data / Skip alerts (privacy first)');
 
     // Save consent choice to not show modal again this session
-    localStorage.setItem('save_data_consent', 'erase');
+    workflowStorage.setItem('save_data_consent', 'erase');
     setHasSaveDataConsent(false);
     setShowSaveDataConsent(false);
     setPendingProfile(null);
 
     // Clear all workflow data from localStorage (respect privacy choice)
-    localStorage.removeItem('usmca_workflow_results');
-    localStorage.removeItem('usmca_workflow_data');
-    localStorage.removeItem('usmca_company_data');
+    workflowStorage.removeItem('usmca_workflow_results');
+    workflowStorage.removeItem('usmca_workflow_data');
+    workflowStorage.removeItem('usmca_company_data');
 
     // Show user feedback and redirect
     alert('✅ No data saved. You can set up alerts anytime from your dashboard.');
@@ -1809,7 +1810,7 @@ export default function TradeRiskAlternatives() {
                 onClick={() => {
                   if (confirm('Start a new analysis? Your current alerts will be cleared.')) {
                     // Clear alert data
-                    localStorage.removeItem('alert_impact_analysis');
+                    workflowStorage.removeItem('alert_impact_analysis');
                     setAlertImpactAnalysis(null);
                     setConsolidatedAlerts([]);
                     setRealPolicyAlerts([]);

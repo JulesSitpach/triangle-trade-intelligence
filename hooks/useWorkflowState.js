@@ -1,20 +1,21 @@
 /**
  * useWorkflowState - Custom hook for USMCA workflow state management
  * Extracted from 894-line monolithic component
- * Implements clean state management patterns
+ * Implements clean state management patterns with isolated session storage
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { workflowService } from '../lib/services/workflow-service.js';
 import { CrossTabSync } from '../lib/utils/cross-tab-sync.js';
+import workflowStorage from '../lib/services/workflow-storage-adapter.js';
 
 export function useWorkflowState() {
   // Initialize step - check localStorage for saved session
   const [currentStep, setCurrentStep] = useState(() => {
     // Check if there's a saved step from a previous session
     if (typeof window !== 'undefined') {
-      const savedStep = localStorage.getItem('workflow_current_step');
-      const savedResults = localStorage.getItem('usmca_workflow_results');
+      const savedStep = workflowStorage.getItem('workflow_current_step');
+      const savedResults = workflowStorage.getItem('usmca_workflow_results');
 
       // If we have saved results, restore to step 3 (results page)
       if (savedResults && savedStep) {
@@ -46,7 +47,7 @@ export function useWorkflowState() {
   // Load saved user data from localStorage (for initial render)
   const loadSavedData = () => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('triangleUserData');
+      const saved = workflowStorage.getItem('triangleUserData');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -142,7 +143,7 @@ export function useWorkflowState() {
   // Save current step to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined' && currentStep) {
-      localStorage.setItem('workflow_current_step', currentStep.toString());
+      workflowStorage.setItem('workflow_current_step', currentStep.toString());
     }
   }, [currentStep]);
 
@@ -191,7 +192,7 @@ export function useWorkflowState() {
   // Load saved results from localStorage (client-side only)
   // Note: currentStep is now restored in the useState initializer
   useEffect(() => {
-    const savedResults = localStorage.getItem('usmca_workflow_results');
+    const savedResults = workflowStorage.getItem('usmca_workflow_results');
 
     if (savedResults) {
       try {
@@ -231,7 +232,7 @@ export function useWorkflowState() {
   useEffect(() => {
     // Only check when on results step (step 3) and results is missing
     if (currentStep === 3 && !results) {
-      const savedResults = localStorage.getItem('usmca_workflow_results');
+      const savedResults = workflowStorage.getItem('usmca_workflow_results');
 
       if (savedResults) {
         try {
@@ -274,8 +275,8 @@ export function useWorkflowState() {
 
     // Only reload when navigating to steps 1 or 2, and only if formData appears empty, and NOT resetting
     if ((currentStep === 1 || currentStep === 2) && !formData.company_name && !isResetting) {
-      const savedFormData = localStorage.getItem('triangleUserData');
-      const savedResults = localStorage.getItem('usmca_workflow_results');
+      const savedFormData = workflowStorage.getItem('triangleUserData');
+      const savedResults = workflowStorage.getItem('usmca_workflow_results');
 
       if (savedFormData || savedResults) {
         try {
@@ -328,7 +329,7 @@ export function useWorkflowState() {
         return;
       }
 
-      const sessionId = localStorage.getItem('workflow_session_id');
+      const sessionId = workflowStorage.getItem('workflow_session_id');
       if (sessionId) {
         try {
           const response = await fetch(`/api/workflow-session?sessionId=${sessionId}`);
@@ -367,7 +368,7 @@ export function useWorkflowState() {
   // 🔄 BROADCASTS changes to other tabs via cross-tab sync
   useEffect(() => {
     if (typeof window !== 'undefined' && formData.company_name) {
-      localStorage.setItem('triangleUserData', JSON.stringify(formData));
+      workflowStorage.setItem('triangleUserData', JSON.stringify(formData));
 
       // Broadcast change to other tabs
       if (syncRef.current) {
@@ -445,7 +446,7 @@ export function useWorkflowState() {
     try {
       // ✅ CHECK FOR CACHED ENRICHED DATA FIRST (avoid redundant API calls)
       // If database enrichment already provided all tariff rates, use cached results
-      const cachedResults = localStorage.getItem('usmca_workflow_results');
+      const cachedResults = workflowStorage.getItem('usmca_workflow_results');
       console.log('🔍 [CACHE CHECK] Checking for cached enriched data...');
 
       if (cachedResults) {
@@ -538,7 +539,7 @@ export function useWorkflowState() {
           timestamp: Date.now()
         };
 
-        localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
+        workflowStorage.setItem('usmca_workflow_results', JSON.stringify(workflowData));
 
         // 🔄 Broadcast workflow results to other tabs
         if (syncRef.current) {
@@ -555,10 +556,10 @@ export function useWorkflowState() {
         // ✅ FIX: Save completed workflow to database (workflow_completions table)
         // This ensures qualification status and regional content are saved for dashboard display
         try {
-          let sessionId = localStorage.getItem('workflow_session_id');
+          let sessionId = workflowStorage.getItem('workflow_session_id');
           if (!sessionId) {
             sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            localStorage.setItem('workflow_session_id', sessionId);
+            workflowStorage.setItem('workflow_session_id', sessionId);
           }
 
           const completeWorkflowData = {
@@ -639,14 +640,10 @@ export function useWorkflowState() {
     setResults(null);
     setError(null);
 
-    // Clear saved step and results from localStorage
-    // ✅ ALSO clear triangleUserData to prevent old component data from pre-filling
+    // ✅ NEW: Start fresh session (automatically clears ALL old data)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('workflow_current_step');
-      localStorage.removeItem('usmca_workflow_results');
-      localStorage.removeItem('usmca_authorization_data'); // ✅ Clear old certificate authorization cache
-      localStorage.removeItem('triangleUserData'); // ✅ Clear ALL old workflow data (including components)
-      localStorage.removeItem('workflow_session_id'); // ✅ Clear database session ID to prevent auto-loading old workflow
+      workflowStorage.startNewSession();
+      console.log('🆕 Started new workflow session - all old data cleared automatically');
     }
 
     // ✅ COMPLETE FORM RESET - NO HARDCODED DEFAULTS
@@ -697,7 +694,7 @@ export function useWorkflowState() {
 
     // Save step to localStorage
     if (typeof window !== 'undefined') {
-      localStorage.setItem('workflow_current_step', step.toString());
+      workflowStorage.setItem('workflow_current_step', step.toString());
     }
   }, [formData]);
 
@@ -723,7 +720,7 @@ export function useWorkflowState() {
         // ✅ Clear old certificate cache when moving from Step 1 → Step 2
         // This ensures fresh company info takes priority over cached authorization
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('usmca_authorization_data');
+          workflowStorage.removeItem('usmca_authorization_data');
         }
       }
     }
@@ -872,10 +869,10 @@ export function useWorkflowState() {
   // Manual save function - called when user clicks "Next"
   const saveWorkflowToDatabase = useCallback(async () => {
     try {
-      let sessionId = localStorage.getItem('workflow_session_id');
+      let sessionId = workflowStorage.getItem('workflow_session_id');
       if (!sessionId) {
         sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('workflow_session_id', sessionId);
+        workflowStorage.setItem('workflow_session_id', sessionId);
       }
 
       // ✅ FIX: Strip _sync_meta before database save to prevent pollution
