@@ -238,6 +238,20 @@ export default function TradeRiskAlternatives() {
           const workflowData = mostRecentWorkflow.workflow_data || {};
           const rawComponents = mostRecentWorkflow.component_origins || [];
 
+          // ✅ DEBUG: Check what tariff data is in rawComponents
+          console.log('🔍 RAW COMPONENTS FROM DATABASE:', {
+            count: rawComponents.length,
+            firstComponent: rawComponents[0] ? {
+              description: rawComponents[0].description,
+              mfn_rate: rawComponents[0].mfn_rate,
+              section_301: rawComponents[0].section_301,
+              total_rate: rawComponents[0].total_rate,
+              usmca_rate: rawComponents[0].usmca_rate,
+              annual_savings: rawComponents[0].annual_savings,
+              allKeys: Object.keys(rawComponents[0])
+            } : 'No components'
+          });
+
           // ✅ NORMALIZE: Map value_percentage → percentage for consistent access
           const components = rawComponents.map(comp => ({
             ...comp,

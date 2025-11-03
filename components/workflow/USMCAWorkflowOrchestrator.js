@@ -90,6 +90,13 @@ export default function USMCAWorkflowOrchestrator() {
         .then(res => res.json())
         .then(data => {
           const workflow = data.workflows?.find(w => w.id === workflowId);
+          console.log('🔍 WORKFLOW FROM API:', {
+            has_workflow_data: !!workflow?.workflow_data,
+            workflow_data_keys: workflow?.workflow_data ? Object.keys(workflow.workflow_data) : [],
+            company_in_workflow_data: workflow?.workflow_data?.company,
+            has_industry_sector: !!workflow?.workflow_data?.company?.industry_sector,
+            industry_sector_value: workflow?.workflow_data?.company?.industry_sector
+          });
           if (workflow && loadSavedWorkflow) {
             loadSavedWorkflow(workflow);
           }

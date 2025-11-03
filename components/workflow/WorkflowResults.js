@@ -337,12 +337,24 @@ export default function WorkflowResults({
       // No cached data - generate fresh executive summary via API
       console.log('🎯 No cached data found - generating fresh Executive Summary for:', results.company?.name);
 
+      // ✅ DEBUG: Log the complete results object structure
+      console.log('📊 RESULTS OBJECT DEBUG:', {
+        has_company: !!results.company,
+        company_keys: results.company ? Object.keys(results.company) : [],
+        company_data: results.company,
+        has_industry_sector: !!results.company?.industry_sector,
+        industry_sector_value: results.company?.industry_sector,
+        has_destination_country: !!results.company?.destination_country,
+        destination_country_value: results.company?.destination_country
+      });
+
       // Validate all required fields for executive summary
       if (!userSubscriptionTier) {
         alert('⚠️ Unable to load subscription tier. Please refresh the page and try again.');
         throw new Error('subscription_tier missing - failed to load user tier');
       }
       if (!results.company?.industry_sector) {
+        console.error('❌ MISSING industry_sector - Full results object:', JSON.stringify(results, null, 2));
         alert('⚠️ Missing required field: industry_sector. Please complete your company profile.');
         throw new Error('industry_sector required for executive summary');
       }
@@ -793,6 +805,12 @@ export default function WorkflowResults({
                 onClick={() => {
                   // ✅ SIMPLIFIED: Data auto-saves via API, just proceed to certificate
                   localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+
+                  // ✅ Clear old triangleUserData to prevent old company info from leaking into certificate
+                  // The certificate page will use results.company data only
+                  localStorage.removeItem('triangleUserData');
+                  localStorage.removeItem('usmca_authorization_data'); // Also clear any old authorization data
+
                   sessionStorage.setItem('certificate_generated', 'true');
                   setCertificateGenerated(true);
                   console.log('✅ Proceeding to certificate generation...');

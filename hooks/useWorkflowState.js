@@ -268,8 +268,12 @@ export function useWorkflowState() {
   // ✅ FIX (Nov 1): Reload formData from localStorage when navigating back to Steps 1 or 2
   // This ensures form fields are populated when users navigate back from Results or Alerts pages
   useEffect(() => {
-    // Only reload when navigating to steps 1 or 2, and only if formData appears empty
-    if ((currentStep === 1 || currentStep === 2) && !formData.company_name) {
+    // ⚠️ Don't reload if user just clicked "+ New Analysis" (reset=true in URL)
+    const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const isResetting = urlParams.get('reset') === 'true';
+
+    // Only reload when navigating to steps 1 or 2, and only if formData appears empty, and NOT resetting
+    if ((currentStep === 1 || currentStep === 2) && !formData.company_name && !isResetting) {
       const savedFormData = localStorage.getItem('triangleUserData');
       const savedResults = localStorage.getItem('usmca_workflow_results');
 
@@ -315,6 +319,15 @@ export function useWorkflowState() {
   // Load workflow data from database on mount
   useEffect(() => {
     const loadFromDatabase = async () => {
+      // ⚠️ Don't load from database if user just clicked "+ New Analysis"
+      const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+      const isResetting = urlParams.get('reset') === 'true';
+
+      if (isResetting) {
+        console.log('🔄 Skipping database load - user clicked "+ New Analysis"');
+        return;
+      }
+
       const sessionId = localStorage.getItem('workflow_session_id');
       if (sessionId) {
         try {
@@ -627,11 +640,13 @@ export function useWorkflowState() {
     setError(null);
 
     // Clear saved step and results from localStorage
-    // Keep triangleUserData to preserve company info for convenience (auto-populate on next workflow)
+    // ✅ ALSO clear triangleUserData to prevent old component data from pre-filling
     if (typeof window !== 'undefined') {
       localStorage.removeItem('workflow_current_step');
       localStorage.removeItem('usmca_workflow_results');
-      // NOTE: triangleUserData is NOT cleared - allows auto-population of company info in new workflows
+      localStorage.removeItem('usmca_authorization_data'); // ✅ Clear old certificate authorization cache
+      localStorage.removeItem('triangleUserData'); // ✅ Clear ALL old workflow data (including components)
+      localStorage.removeItem('workflow_session_id'); // ✅ Clear database session ID to prevent auto-loading old workflow
     }
 
     // ✅ COMPLETE FORM RESET - NO HARDCODED DEFAULTS
@@ -705,9 +720,14 @@ export function useWorkflowState() {
       // For default navigation, clear the workflow path to enable normal step progression
       if (currentStep === 1) {
         setWorkflowPath(null);
+        // ✅ Clear old certificate cache when moving from Step 1 → Step 2
+        // This ensures fresh company info takes priority over cached authorization
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('usmca_authorization_data');
+        }
       }
     }
-    
+
     setCurrentStep(prev => Math.min(prev + 1, 5));
     setError(null);
   }, [currentStep]);
@@ -770,11 +790,23 @@ export function useWorkflowState() {
     const loadedResults = {
       success: true,
       company: {
-        name: workflow.company_name,
-        company_name: workflow.company_name,
-        business_type: workflow.business_type,
-        trade_volume: workflow.trade_volume,
-        ...workflowData.company
+        name: workflow.company_name || workflowData.company?.name,
+        company_name: workflow.company_name || workflowData.company?.company_name,
+        business_type: workflow.business_type || workflowData.company?.business_type,
+        trade_volume: workflow.trade_volume || workflowData.company?.trade_volume,
+        // ✅ FIX: Include all required fields for Business Impact Summary
+        // Note: industry_sector is NOT in workflow_completions table, only in workflow_data.company
+        industry_sector: workflowData.company?.industry_sector,  // JSONB only
+        destination_country: workflow.destination_country || workflowData.company?.destination_country,  // Table column exists
+        supplier_country: workflow.supplier_country || workflowData.company?.supplier_country,  // Table column exists
+        contact_person: workflowData.company?.contact_person,
+        contact_email: workflowData.company?.contact_email,
+        contact_phone: workflowData.company?.contact_phone,
+        country: workflow.company_country || workflowData.company?.country || workflowData.company?.company_country,
+        address: workflowData.company?.address || workflowData.company?.company_address,
+        tax_id: workflowData.company?.tax_id,
+        certifier_type: workflowData.company?.certifier_type,
+        ...workflowData.company  // Spread any additional fields last
       },
       product: {
         hs_code: workflow.hs_code,
@@ -818,6 +850,17 @@ export function useWorkflowState() {
       classified_hs_code: workflow.hs_code || workflowData.product?.hs_code || '',
       component_origins: workflow.component_origins || workflowData.components || []
     }));
+
+    // ✅ DEBUG: Log the loaded company data to verify all fields are present
+    console.log('📊 LOADED COMPANY DATA:', {
+      has_industry_sector: !!loadedResults.company.industry_sector,
+      industry_sector: loadedResults.company.industry_sector,
+      has_destination_country: !!loadedResults.company.destination_country,
+      destination_country: loadedResults.company.destination_country,
+      has_supplier_country: !!loadedResults.company.supplier_country,
+      supplier_country: loadedResults.company.supplier_country,
+      full_company: loadedResults.company
+    });
 
     // Set results and jump to results page
     setResults(loadedResults);

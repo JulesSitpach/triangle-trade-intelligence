@@ -66,6 +66,16 @@ export default function USMCACertificateCompletion() {
     // ✅ SIMPLIFIED: Load workflow data from localStorage (user is still in active session)
     const loadData = () => {
       try {
+        // ⚠️ Don't load old data if user just clicked "+ New Analysis"
+        const urlParams = new URLSearchParams(window.location.search);
+        const isResetting = urlParams.get('reset') === 'true';
+
+        if (isResetting) {
+          console.log('🔄 Certificate page: User clicked "+ New Analysis" - redirecting to start');
+          router.push('/usmca-workflow');
+          return;
+        }
+
         // Load workflow results from localStorage
         const workflowResults = localStorage.getItem('usmca_workflow_results');
         const formData = localStorage.getItem('triangleUserData');

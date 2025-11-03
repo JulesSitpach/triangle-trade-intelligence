@@ -135,11 +135,6 @@ export default function ComponentOriginsStepEnhanced({
         return;
       }
 
-      // Skip if components are already the same
-      if (formDataString === JSON.stringify(components)) {
-        return;
-      }
-
       console.log(`🔄 Syncing components from formData (navigation restore)`);
       setComponents(normalizedComponents);
 
@@ -150,7 +145,7 @@ export default function ComponentOriginsStepEnhanced({
       setUsedComponentsCount(newUsedCount);
       console.log(`🔒 Restored ${newUsedCount} locked components`);
     }
-  }, [formData.component_origins, normalizeComponent, components]);
+  }, [formData.component_origins]); // ✅ Only watch formData.component_origins, not components (would cause loop)
 
   // 💾 AUTO-SAVE: Debounced auto-save to database when components change
   // Prevents data loss if browser crashes or page is closed during Step 2 editing

@@ -125,7 +125,9 @@ export default function Pricing() {
       period: '7 days',
       description: 'Try the platform risk-free for 7 days - no credit card required',
       features: [
-        '1 USMCA analysis (max 3 components)',
+        '1 USMCA workflow analysis',
+        '3 components per analysis',
+        '3 portfolio briefings',
         'Certificate preview (watermarked)',
         'View crisis alerts dashboard',
         'AI HS code suggestions',
@@ -141,13 +143,15 @@ export default function Pricing() {
       monthlyPrice: 99,
       annualPrice: 950,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Essential USMCA compliance tools for Small & Medium importers, exporters, and producers',
+      description: 'For small importers & exporters (10-20 products)',
       features: [
-        '10 USMCA analyses per month',
-        'Basic trade alerts',
-        'Certificate generation',
-        'AI HS code suggestions',
-        '10 components per analysis'
+        '15 USMCA workflow analyses per month',
+        '10 components per analysis',
+        '50 portfolio briefings per month',
+        'Unlimited certificate downloads',
+        'Real-time crisis alerts',
+        'AI HS code classification',
+        'Email notifications'
       ],
       cta: 'Subscribe to Starter',
       popular: false,
@@ -159,13 +163,15 @@ export default function Pricing() {
       monthlyPrice: 299,
       annualPrice: 2850,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: '100 analyses/month with AI-powered risk assessment',
+      description: 'For medium manufacturers (50-100 products)',
       features: [
-        '100 USMCA analyses per month',
-        'Real-time crisis alerts with AI impact scoring',
-        'Detailed AI-powered compliance guidance',
+        '100 USMCA workflow analyses per month',
         '15 components per analysis',
-        'Portfolio briefing reports'
+        '200 portfolio briefings per month',
+        'Unlimited certificate downloads',
+        'Real-time crisis alerts with AI impact scoring',
+        'Detailed compliance guidance',
+        'Priority support'
       ],
       cta: 'Subscribe to Professional',
       popular: true,
@@ -177,13 +183,16 @@ export default function Pricing() {
       monthlyPrice: 599,
       annualPrice: 5750,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Maximum analysis capacity with advanced AI features',
+      description: 'For large enterprises (200+ products)',
       features: [
-        '500 USMCA analyses per month',
+        '500 USMCA workflow analyses per month',
+        '20 components per analysis',
+        '1,000 portfolio briefings per month',
+        'Unlimited certificate downloads',
         'Real-time crisis alerts with AI impact scoring',
         'Advanced portfolio briefing reports',
         'Priority AI analysis queue',
-        '20 components per analysis (vs 15 in Professional)'
+        'Dedicated account support'
       ],
       cta: 'Subscribe to Premium',
       popular: false,
