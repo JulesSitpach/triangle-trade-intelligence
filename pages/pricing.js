@@ -457,50 +457,52 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Sample Alert - Real Scenario */}
+      {/* Sample Alert - Real Screenshots */}
       <section className="main-content">
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">🚨 What You Get: Trade Risk Alerts</h2>
             <p className="section-header-subtitle">
-              Real-time monitoring with AI-powered recommendations
+              Real-time monitoring with AI-powered strategic analysis
             </p>
           </div>
 
-          <div className="content-card" style={{maxWidth: '900px', margin: '0 auto'}}>
-            <div style={{borderLeft: '4px solid #dc2626', padding: '16px', backgroundColor: '#fef2f2', borderRadius: '4px'}}>
-              <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
-                <span style={{fontSize: '1.5rem', marginRight: '12px'}}>⚠️</span>
-                <div>
-                  <h3 style={{fontSize: '1.1rem', fontWeight: 'bold', color: '#dc2626', margin: 0}}>CRITICAL SUPPLY CHAIN RISK</h3>
-                  <p style={{fontSize: '0.85rem', color: '#6b7280', margin: 0}}>Alert ID: RISK-2025-001 • Detected: January 13, 2025</p>
-                </div>
-              </div>
-
-              <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#134169', marginBottom: '8px'}}>
-                China Electronics Tariffs Increase to 60% on Mobile Phone Components
-              </h4>
-
-              <p style={{fontSize: '0.9rem', marginBottom: '12px'}}>
-                New Section 301 tariffs on Chinese electronics components (HS 8517.12, 8517.70) affect companies importing mobile phone parts. Products with significant Chinese component sourcing face major cost increases.
-              </p>
-
-              <div style={{backgroundColor: '#fff', padding: '12px', borderRadius: '4px', marginBottom: '12px', border: '1px solid #e5e7eb'}}>
-                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169', marginBottom: '8px'}}>Impact on Your Business:</p>
-                <p style={{fontSize: '0.85rem'}}>• Companies with 100% Mexico sourcing (like RTW Logistics): ✓ No impact</p>
-                <p style={{fontSize: '0.85rem'}}>• Companies with Chinese components: ⚠️ 60% tariff increase on affected parts</p>
-                <p style={{fontSize: '0.85rem'}}>• Estimated industry-wide impact: $2.8B in additional costs</p>
-              </div>
-
-              <div style={{backgroundColor: '#dcfce7', padding: '12px', borderRadius: '4px', marginBottom: '12px'}}>
-                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#16a34a', marginBottom: '8px'}}>AI-Recommended Actions:</p>
-                <p style={{fontSize: '0.85rem'}}>✓ If sourcing from China: Transition to Mexico suppliers to avoid tariffs</p>
-                <p style={{fontSize: '0.85rem'}}>✓ Maintain USMCA qualification to preserve duty-free status</p>
-                <p style={{fontSize: '0.85rem'}}>✓ Timeline: Act within 90 days before enforcement</p>
-              </div>
+          <div style={{maxWidth: '1100px', margin: '0 auto'}}>
+            {/* Alert Dashboard Screenshot */}
+            <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', marginBottom: '2rem'}}>
+              <img
+                src="/image/samples/alerts.png"
+                alt="Crisis alerts dashboard showing component-level policy changes"
+                style={{width: '100%', height: 'auto', display: 'block'}}
+              />
             </div>
-            <p style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '16px', textAlign: 'center', fontStyle: 'italic'}}>
-              Professional & Premium subscribers get real-time alerts with AI analysis
+
+            {/* AI-Powered Alert Analysis Screenshot */}
+            <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', marginBottom: '1.5rem'}}>
+              <img
+                src="/image/samples/alerts ai.png"
+                alt="AI-generated strategic briefing with portfolio risk analysis"
+                style={{width: '100%', height: 'auto', display: 'block'}}
+              />
+            </div>
+
+            {/* Alert Features */}
+            <div className="content-card" style={{padding: '2rem'}}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                Alert System Features
+              </h3>
+              <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                <li><strong>Component-level matching</strong> - Alerts show exactly which components are affected by tariff changes</li>
+                <li><strong>Severity-based color coding</strong> - Critical (red), High (orange), Medium (yellow), Low (blue)</li>
+                <li><strong>AI-powered strategic briefing</strong> - Portfolio-level risk analysis with USMCA 2026 renegotiation context</li>
+                <li><strong>Real-time monitoring</strong> - Platform watches Federal Register, USTR, and government sources 24/7</li>
+                <li><strong>Email notifications</strong> - Daily digest of relevant policy changes affecting your products</li>
+                <li><strong>Actionable recommendations</strong> - AI suggests sourcing alternatives and compliance strategies</li>
+              </ul>
+            </div>
+
+            <p style={{fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem', textAlign: 'center', fontStyle: 'italic'}}>
+              Professional & Premium subscribers get unlimited alerts with AI-powered portfolio briefings
             </p>
           </div>
         </div>
