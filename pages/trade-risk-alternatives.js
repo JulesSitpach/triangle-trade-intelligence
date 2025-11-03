@@ -166,16 +166,11 @@ export default function TradeRiskAlternatives() {
         hasUser: !!user
       });
 
-      // ✅ FIXED: Try localStorage FIRST (immediate), then database (backup)
-      console.log('📊 Trying localStorage first...');
-      await loadLocalStorageData();  // ✅ FIX: Must await async function!
-
-      // Only load from database if localStorage failed
-      if (!userProfile) {
-        console.log('📊 localStorage empty, loading from database...');
-        const response = await fetch('/api/dashboard-data', {
-          credentials: 'include'
-        });
+      // ✅ FIXED: Try DATABASE FIRST (source of truth), then localStorage (fallback)
+      console.log('📊 Loading from database (source of truth)...');
+      const response = await fetch('/api/dashboard-data', {
+        credentials: 'include'
+      });
 
       if (response.ok) {
         const dashboardData = await response.json();
@@ -294,12 +289,14 @@ export default function TradeRiskAlternatives() {
           setIsLoading(false);
           return;
         } else {
-          console.warn('⚠️ No workflows found in database');
+          console.warn('⚠️ No workflows found in database - trying localStorage fallback...');
+          await loadLocalStorageData();
         }
       } else {
         console.error('❌ Dashboard data fetch failed:', response.status, response.statusText);
+        console.log('🔄 Falling back to localStorage due to API error');
+        await loadLocalStorageData();
       }
-    }  // Close if (!userProfile) block
     } catch (error) {
       console.error('Error loading trade profile:', error);
       // Fallback to localStorage (current session)
