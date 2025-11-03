@@ -13,6 +13,7 @@ import PolicyTimeline from './PolicyTimeline';
 import ExecutiveSummaryDisplay from './results/ExecutiveSummaryDisplay';
 import { normalizeComponent, logComponentValidation } from '../../lib/schemas/component-schema.js';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
+import workflowStorage from '../../lib/services/workflow-storage-adapter.js';
 
 export default function WorkflowResults({
   results,
@@ -231,7 +232,7 @@ export default function WorkflowResults({
     };
 
     // Save to localStorage for alerts page
-    localStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
+    workflowStorage.setItem('usmca_workflow_results', JSON.stringify(alertData));
     // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
     console.log('✅ Alert data prepared and saved to localStorage:', {
@@ -263,7 +264,7 @@ export default function WorkflowResults({
       // Check 1: Try localStorage first (most recent, from fresh workflow or RecommendedActions)
       let workflowResults = {};
       try {
-        const storedData = localStorage.getItem('usmca_workflow_results');
+        const storedData = workflowStorage.getItem('usmca_workflow_results');
         if (storedData) {
           workflowResults = JSON.parse(storedData);
         }
@@ -281,7 +282,7 @@ export default function WorkflowResults({
 
       console.log('🔍 Executive alert data check (DETAILED):', {
         localStorage_keys: Object.keys(localStorage),
-        localStorage_has_usmca_workflow_results: !!localStorage.getItem('usmca_workflow_results'),
+        localStorage_has_usmca_workflow_results: !!workflowStorage.getItem('usmca_workflow_results'),
         workflowResults_keys: Object.keys(workflowResults),
         workflowResults_has_detailed_analysis: !!workflowResults.detailed_analysis,
         detailed_analysis_keys: Object.keys(detailed_analysis),
@@ -461,9 +462,9 @@ export default function WorkflowResults({
       console.log('✅ Flattened for display:', alertData);
 
       // Save alert to localStorage for persistence (data is already in correct format)
-      const savedWorkflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+      const savedWorkflowResults = JSON.parse(workflowStorage.getItem('usmca_workflow_results') || '{}');
       savedWorkflowResults.detailed_analysis = alertData;
-      localStorage.setItem('usmca_workflow_results', JSON.stringify(savedWorkflowResults));
+      workflowStorage.setItem('usmca_workflow_results', JSON.stringify(savedWorkflowResults));
       console.log('✅ Saved executive alert to localStorage');
 
       // Display the executive summary (data is already in correct format)
@@ -804,12 +805,12 @@ export default function WorkflowResults({
               <button
                 onClick={() => {
                   // ✅ SIMPLIFIED: Data auto-saves via API, just proceed to certificate
-                  localStorage.setItem('usmca_workflow_results', JSON.stringify(results));
+                  workflowStorage.setItem('usmca_workflow_results', JSON.stringify(results));
 
                   // ✅ Clear old triangleUserData to prevent old company info from leaking into certificate
                   // The certificate page will use results.company data only
-                  localStorage.removeItem('triangleUserData');
-                  localStorage.removeItem('usmca_authorization_data'); // Also clear any old authorization data
+                  workflowStorage.removeItem('triangleUserData');
+                  workflowStorage.removeItem('usmca_authorization_data'); // Also clear any old authorization data
 
                   sessionStorage.setItem('certificate_generated', 'true');
                   setCertificateGenerated(true);
@@ -838,8 +839,8 @@ export default function WorkflowResults({
 
                 if (confirm(message)) {
                   // Clear localStorage for fresh start
-                  localStorage.removeItem('workflow_current_step');
-                  localStorage.removeItem('usmca_workflow_results');
+                  workflowStorage.removeItem('workflow_current_step');
+                  workflowStorage.removeItem('usmca_workflow_results');
                   sessionStorage.removeItem('certificate_generated');
                   // Trigger reset and go to step 1
                   onReset && onReset();
