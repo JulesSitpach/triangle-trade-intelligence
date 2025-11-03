@@ -71,6 +71,9 @@ export default function TradeRiskAlternatives() {
   // Market Intelligence email preference (AI always uses these, user controls emails)
   const [includeMarketIntelInEmail, setIncludeMarketIntelInEmail] = useState(false);
 
+  // Portfolio Briefing state (AI-generated strategic analysis)
+  const [portfolioBriefing, setPortfolioBriefing] = useState(null);
+
   // Email notification preferences for each component
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
 
@@ -819,12 +822,15 @@ export default function TradeRiskAlternatives() {
         console.log(`✅ Portfolio briefing generated (${data.real_alerts_matched} real alerts matched)`);
         setProgressSteps(prev => [...prev, 'Briefing complete']);
 
-        // Portfolio briefing loaded - component table now has realPolicyAlerts populated
+        // Save the AI-generated briefing to state for display
+        setPortfolioBriefing(data.briefing);
+
         console.log('📚 Portfolio briefing loaded and ready for user to view');
         setAlertsGenerated(true);
       } else {
         console.log('❌ Failed to generate briefing');
         setProgressSteps(prev => [...prev, 'Briefing generation failed']);
+        setPortfolioBriefing(null);
         setAlertsGenerated(true);
       }
     } catch (error) {
@@ -1671,28 +1677,131 @@ export default function TradeRiskAlternatives() {
                   </div>
                 </div>
               ) : (
-                <div className="hero-buttons">
-                  <button
-                    onClick={() => {
-                      console.log('🔵 USMCA 2026 button clicked!', { userProfile });
-                      loadPortfolioBriefing(userProfile);
-                    }}
-                    className="btn-primary"
-                    disabled={isLoadingPolicyAlerts}
-                  >
-                    {isLoadingPolicyAlerts ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAlertsGenerated(false);
-                      setRealPolicyAlerts([]);
-                      setConsolidatedAlerts([]);
-                    }}
-                    className="btn-secondary"
-                  >
-                    🔄 Run Analysis Again
-                  </button>
-                </div>
+                <>
+                  <div className="hero-buttons">
+                    <button
+                      onClick={() => {
+                        console.log('🔵 USMCA 2026 button clicked!', { userProfile });
+                        loadPortfolioBriefing(userProfile);
+                      }}
+                      className="btn-primary"
+                      disabled={isLoadingPolicyAlerts}
+                    >
+                      {isLoadingPolicyAlerts ? '⏳ Analyzing...' : '📊 USMCA 2026 Impact Analysis'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAlertsGenerated(false);
+                        setRealPolicyAlerts([]);
+                        setConsolidatedAlerts([]);
+                        setPortfolioBriefing(null);
+                      }}
+                      className="btn-secondary"
+                    >
+                      🔄 Run Analysis Again
+                    </button>
+                  </div>
+
+                  {/* Display Portfolio Briefing */}
+                  {portfolioBriefing && (
+                    <div style={{
+                      marginTop: '2rem',
+                      padding: '2rem',
+                      background: 'white',
+                      borderRadius: '12px',
+                      border: '2px solid #3b82f6',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}>
+                      <h3 style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#111827',
+                        marginBottom: '1.5rem',
+                        borderBottom: '2px solid #e5e7eb',
+                        paddingBottom: '0.75rem'
+                      }}>
+                        📊 Your USMCA 2026 Strategic Briefing
+                      </h3>
+
+                      {/* Display briefing sections */}
+                      {portfolioBriefing.situation_summary && (
+                        <div style={{ marginBottom: '2rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginBottom: '0.75rem' }}>
+                            Executive Summary
+                          </h4>
+                          <p style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.6' }}>
+                            {portfolioBriefing.situation_summary}
+                          </p>
+                        </div>
+                      )}
+
+                      {portfolioBriefing.critical_alerts && portfolioBriefing.critical_alerts.length > 0 && (
+                        <div style={{ marginBottom: '2rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#dc2626', marginBottom: '0.75rem' }}>
+                            🚨 Critical Alerts
+                          </h4>
+                          {portfolioBriefing.critical_alerts.map((alert, idx) => (
+                            <div key={idx} style={{
+                              marginBottom: '1rem',
+                              padding: '1rem',
+                              background: '#fef2f2',
+                              borderLeft: '4px solid #dc2626',
+                              borderRadius: '6px'
+                            }}>
+                              <div style={{ fontWeight: 600, color: '#111827', marginBottom: '0.5rem' }}>
+                                {alert.alert_title}
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                                {alert.why_it_matters}
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 600 }}>
+                                → {alert.action_required}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {portfolioBriefing.portfolio_at_risk && (
+                        <div style={{ marginBottom: '2rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#f59e0b', marginBottom: '0.75rem' }}>
+                            ⚠️ Portfolio Risk Assessment
+                          </h4>
+                          <div style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.6' }}>
+                            <strong>{portfolioBriefing.portfolio_at_risk.total_volume_affected_pct}%</strong> of your trade volume is affected
+                          </div>
+                        </div>
+                      )}
+
+                      {portfolioBriefing.immediate_actions && portfolioBriefing.immediate_actions.length > 0 && (
+                        <div style={{ marginBottom: '2rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#059669', marginBottom: '0.75rem' }}>
+                            ✅ Immediate Actions
+                          </h4>
+                          <ul style={{ paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151', lineHeight: '1.8' }}>
+                            {portfolioBriefing.immediate_actions.map((action, idx) => (
+                              <li key={idx}>{action}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {portfolioBriefing.strategic_note && (
+                        <div style={{
+                          marginTop: '2rem',
+                          padding: '1rem',
+                          background: '#f0f9ff',
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          color: '#1e40af',
+                          fontStyle: 'italic'
+                        }}>
+                          💡 <strong>Strategic Note:</strong> {portfolioBriefing.strategic_note}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
