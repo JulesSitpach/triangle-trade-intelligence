@@ -554,57 +554,10 @@ export default function TradeRiskAlternatives() {
   };
 
   /**
-   * Save personalized USMCA 2026 analysis to database (with user consent)
+   * REMOVED: handleSaveAlertAnalysis function
+   * Portfolio briefing now auto-saves after generation (no manual button needed)
+   * See loadPortfolioBriefing() line 847-866 for auto-save implementation
    */
-  const handleSaveAlertAnalysis = async () => {
-    if (!user) {
-      alert('⚠️ Please sign in to save analysis to your dashboard.');
-      return;
-    }
-
-    if (!realPolicyAlerts || realPolicyAlerts.length === 0) {
-      alert('⚠️ No alerts to save. Please generate the analysis first.');
-      return;
-    }
-
-    // Check for user consent
-    const savedConsent = localStorage.getItem('save_data_consent');
-    if (savedConsent !== 'save') {
-      alert('⚠️ You must consent to save data before saving analysis. Please use the consent modal at the top of the page.');
-      return;
-    }
-
-    try {
-      console.log('💾 Saving policy alerts analysis to database...');
-
-      // Save real policy alerts to workflow detailed_analysis
-      const response = await fetch('/api/workflow-session/update-executive-alert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          detailed_analysis: {
-            policy_alerts: realPolicyAlerts,
-            analysis_generated_at: new Date().toISOString()
-          }
-        })
-      });
-
-      if (response.ok) {
-        console.log('✅ Personalized USMCA 2026 analysis saved to database');
-        alert('✅ USMCA 2026 analysis saved to your dashboard!\n\nYou can view it anytime from your workflow history.');
-      } else {
-        const errorData = await response.json();
-        console.error('❌ Failed to save analysis:', errorData);
-        alert('⚠️ Failed to save analysis. Please try again or contact support.');
-      }
-    } catch (error) {
-      console.error('❌ Error saving analysis:', error);
-      alert('⚠️ Failed to save analysis. Please try again or contact support.');
-    }
-  };
 
   /**
    * Load saved alerts from database (fast, no AI calls)
@@ -843,6 +796,27 @@ export default function TradeRiskAlternatives() {
 
         // Save the AI-generated briefing to state for display
         setPortfolioBriefing(data.briefing);
+
+        // ✅ AUTO-SAVE: Save portfolio briefing to database automatically
+        // No manual button needed - user already consented by completing workflow
+        try {
+          await fetch('/api/workflow-session/update-executive-alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              detailed_analysis: {
+                portfolio_briefing: data.briefing,
+                policy_alerts: data.matched_alerts || [],
+                generated_at: new Date().toISOString()
+              }
+            })
+          });
+          console.log('✅ Portfolio briefing auto-saved to database');
+        } catch (saveError) {
+          console.error('⚠️ Auto-save failed (non-critical):', saveError);
+          // Don't block UI - briefing still displays from state
+        }
 
         console.log('📚 Portfolio briefing loaded and ready for user to view');
         setAlertsGenerated(true);
@@ -1789,18 +1763,10 @@ export default function TradeRiskAlternatives() {
           <div className="form-section">
             <h2 className="form-section-title">Next Steps</h2>
             <p className="text-body" style={{ marginBottom: '1rem' }}>
-              Analysis complete. Save to enable alerts and cross-device access. Or proceed without saving (data stays in browser only).
+              ✅ Analysis complete and automatically saved to your dashboard. Access from any device or download as PDF.
             </p>
 
             <div className="hero-buttons">
-              {/* Save Alert Analysis to Database */}
-              <button
-                onClick={handleSaveAlertAnalysis}
-                className="btn-primary"
-              >
-                💾 Save Alert to Database
-              </button>
-
               {/* Download PDF of Strategic Analysis */}
               <button
                 onClick={() => {
