@@ -62,6 +62,19 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
         return;
       }
 
+      // ✅ READ CERTIFIER TYPE FROM LOCALSTORAGE (saved by AuthorizationStep)
+      let certifierType = 'EXPORTER'; // Default fallback
+      try {
+        const authData = localStorage.getItem('usmca_authorization_data');
+        if (authData) {
+          const parsed = JSON.parse(authData);
+          certifierType = parsed.certifier_type || 'EXPORTER';
+          console.log('✅ Read certifier_type from localStorage:', certifierType);
+        }
+      } catch (e) {
+        console.warn('⚠️ Failed to read certifier_type from localStorage, using default EXPORTER');
+      }
+
       // Auto-generate certificate from workflow results
       const exporterData = {
         name: results.company?.name || results.company?.company_name || '',
@@ -88,7 +101,7 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
       const certificateData = {
         // ✅ FIX: Set certifier explicitly to match exporter for proper PDF generation
         certifier: exporterData,
-        certifier_type: 'EXPORTER',
+        certifier_type: certifierType, // ✅ FIXED: Was hardcoded 'EXPORTER', now reads from localStorage
         exporter: exporterData,
         producer: producerData,
         importer: importerData,
