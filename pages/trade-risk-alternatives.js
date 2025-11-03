@@ -1410,10 +1410,52 @@ export default function TradeRiskAlternatives() {
                 {/* Market Intelligence Row - Strategic context for AI (always used, user controls email) */}
                 {(() => {
                   // Filter for market intelligence alerts (UNSPECIFIED country or general context)
-                  const marketIntelAlerts = (realPolicyAlerts || []).filter(alert =>
-                    alert.affected_countries?.includes('UNSPECIFIED') ||
-                    (!alert.affected_countries || alert.affected_countries.length === 0)
-                  );
+                  // BUT only include if relevant to user's business (country mentions, industry, trade keywords)
+                  const userCountries = [...new Set(
+                    userProfile.componentOrigins.map(c => (c.origin_country || c.country)?.toUpperCase())
+                  )].filter(Boolean);
+
+                  const userIndustry = userProfile.industry_sector?.toLowerCase() || '';
+
+                  const marketIntelAlerts = (realPolicyAlerts || []).filter(alert => {
+                    // Must be general/UNSPECIFIED
+                    const isGeneral = alert.affected_countries?.includes('UNSPECIFIED') ||
+                                     (!alert.affected_countries || alert.affected_countries.length === 0);
+
+                    if (!isGeneral) return false;
+
+                    // Filter for relevance to user's business
+                    const title = alert.title?.toLowerCase() || '';
+                    const description = alert.description?.toLowerCase() || '';
+                    const text = `${title} ${description}`;
+
+                    // RELEVANT: Mentions user's sourcing countries
+                    const mentionsUserCountry = userCountries.some(country => {
+                      const countryNames = {
+                        'CN': ['china', 'chinese', 'beijing'],
+                        'MX': ['mexico', 'mexican'],
+                        'CA': ['canada', 'canadian'],
+                        'US': ['united states', 'u.s.', 'usa', 'american']
+                      };
+                      return (countryNames[country] || []).some(name => text.includes(name));
+                    });
+
+                    // RELEVANT: Trade/supply chain keywords
+                    const tradeKeywords = [
+                      'tariff', 'trade', 'import', 'export', 'supply chain',
+                      'manufacturing', 'freight', 'shipping', 'customs',
+                      'usmca', 'nafta', 'trade war', 'sourcing', 'logistics'
+                    ];
+                    const hasTradeKeywords = tradeKeywords.some(kw => text.includes(kw));
+
+                    // RELEVANT: Industry match
+                    const industryMatch = userIndustry && alert.relevant_industries?.some(ind =>
+                      ind.toLowerCase().includes(userIndustry) || userIndustry.includes(ind.toLowerCase())
+                    );
+
+                    // Include if any relevance criteria met
+                    return mentionsUserCountry || hasTradeKeywords || industryMatch;
+                  });
 
                   if (marketIntelAlerts.length === 0) return null;
 
