@@ -1032,22 +1032,53 @@ async function sendComponentAlertEmails(newAlert) {
 9. **Two-tier alert system** - Component-specific alerts + Market Intelligence (both in same table)
 10. **AI always uses all alerts** - Market Intelligence included in briefings regardless of email preference
 
-### Data Quality Rules
-1. **Stage 1 scoring must filter garbage**:
-   - Postal products → Score 0
-   - Disaster declarations → Score 0
-   - Healthcare programs → Score 0
-   - Patent procedures → Score 0
-   - Committee meetings → Score 0
+### Data Quality Rules - Dual-Layer Defense
 
-2. **Keywords are mandatory**:
-   - No trade keywords → No alert
-   - Must contain: tariff, trade, USMCA, import, export, etc.
+**LAYER 1: Database Entry Filter** (tariff-change-detector.js)
+- **When**: RSS polling → AI scoring → Database insertion
+- **Purpose**: Prevent garbage alerts from entering database
+- **Enforcement**: AI prompt with strict keyword requirements
 
-3. **HS Code normalization**:
-   - Remove periods before matching
-   - Match on first 6 digits only
-   - Handle both formats: "8542.31.00" and "854231"
+```javascript
+// Stage 1: AI Scoring Prompt (lines 116-167)
+KEYWORD-DRIVEN SCORING (STRICT):
+✅ Score 5+ ONLY if article explicitly contains trade keywords:
+   - "tariff", "duty", "customs", "trade", "import", "export"
+   - "USMCA", "Section 301", "Section 232"
+   - "Mexico" + ("manufacturing" OR "labor" OR "nearshoring")
+
+❌ AUTOMATIC REJECTIONS (Score 0):
+   If title/description contains: postal, disaster, healthcare,
+   TRICARE, Medicare, patent, housing, committee, railroad
+```
+
+**LAYER 2: UI Display Filter** (trade-risk-alternatives.js)
+- **When**: User loads dashboard → Market Intelligence display
+- **Purpose**: Safety net for any alerts that bypass Stage 1
+- **Enforcement**: Client-side relevance filtering
+
+```javascript
+// Stage 2: UI Relevance Filter (lines 1420-1458)
+Market Intelligence shown ONLY if:
+1. Mentions user's sourcing countries (China, Mexico, Canada, etc.)
+2. Contains trade keywords (tariff, freight, supply chain, etc.)
+3. Matches user's industry sector
+
+Examples:
+✅ "China trade war" → Shows (country + trade keyword)
+❌ "Postal rate changes" → Hidden (no relevance)
+❌ "Railroad regulations" → Hidden (no relevance)
+```
+
+**Why Both Layers?**
+- Layer 1 = **Prevention** (keep database clean)
+- Layer 2 = **Protection** (hide any that slip through)
+- Together = **Production-grade reliability** for CEO testing
+
+**HS Code normalization**:
+- Remove periods before matching
+- Match on first 6 digits only
+- Handle both formats: "8542.31.00" and "854231"
 
 ### Performance Requirements
 - RSS polling: < 60 seconds for all feeds
