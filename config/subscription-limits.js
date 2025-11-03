@@ -89,10 +89,9 @@ export const TIER_LIMITS = {
     alert_history_days: 90,
     alert_detail_access: true,
 
-    // Professional Services
-    service_discounts: 0.15, // 15% off
-    priority_support: true,
-    support_response_hours: 48,
+    // AI Features
+    portfolio_briefing: true,
+    advanced_ai_scoring: true,
 
     // Features
     trade_health_check: true,
@@ -119,16 +118,14 @@ export const TIER_LIMITS = {
     alert_history_days: 365,
     alert_detail_access: true,
 
-    // Professional Services
-    service_discounts: 0.25, // 25% off
-    priority_support: true,
-    support_response_hours: 24,
-    quarterly_strategy_calls: true,
+    // AI Features
+    portfolio_briefing: true,
+    advanced_ai_scoring: true,
+    priority_ai_queue: true, // Faster AI response times
 
     // Features
     trade_health_check: true,
     supplier_discovery: true,
-    custom_intelligence_reports: true,
 
     // Branding
     tier_label: 'Premium',
@@ -277,11 +274,11 @@ export function getTierComparison() {
       price: '$299/mo',
       features: [
         '100 analyses per month',
-        '15 components per analysis',  // ✅ FIXED: Was 25, actual is 15
+        '15 components per analysis',
         'Full certificate download',
         'All email alerts',
-        '15% service discounts',
-        'Priority support (48hr)'
+        'Portfolio briefing reports',
+        'Advanced AI scoring'
       ],
       popular: true
     },
@@ -290,14 +287,14 @@ export function getTierComparison() {
       name: 'Premium',
       price: '$599/mo',
       features: [
-        '500 analyses per month',         // ✅ FIXED: Was unlimited, now capped at 500
-        '20 components per analysis',     // ✅ FIXED: Was "unlimited", actual is 20
+        '500 analyses per month',
+        '20 components per analysis',
         'Full certificate download',
         'All email alerts',
-        '25% service discounts',
-        'Quarterly strategy calls',
-        'Priority support (24hr)',
-        'Custom intelligence reports'
+        'Portfolio briefing reports',
+        'Advanced AI scoring',
+        'Priority AI queue (faster response)',
+        '1-year alert history'
       ],
       popular: false
     }

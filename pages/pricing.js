@@ -145,9 +145,9 @@ export default function Pricing() {
       features: [
         '10 USMCA analyses per month',
         'Basic trade alerts',
-        'Email support',
         'Certificate generation',
-        'AI HS code suggestions'
+        'AI HS code suggestions',
+        '10 components per analysis'
       ],
       cta: 'Subscribe to Starter',
       popular: false,
@@ -163,8 +163,9 @@ export default function Pricing() {
       features: [
         '100 USMCA analyses per month',
         'Real-time crisis alerts with AI impact scoring',
-        'Priority support (48hr response)',
-        'Detailed AI-powered compliance guidance'
+        'Detailed AI-powered compliance guidance',
+        '15 components per analysis',
+        'Portfolio briefing reports'
       ],
       cta: 'Subscribe to Professional',
       popular: true,
@@ -176,12 +177,13 @@ export default function Pricing() {
       monthlyPrice: 599,
       annualPrice: 5750,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Everything plus quarterly strategy calls with our team',
+      description: 'Maximum analysis capacity with advanced AI features',
       features: [
-        'Everything in Professional',
-        'Quarterly strategy calls with our expert team',
-        'Dedicated email support',
-        'Custom trade intelligence reports'
+        '500 USMCA analyses per month',
+        'Real-time crisis alerts with AI impact scoring',
+        'Advanced portfolio briefing reports',
+        'Priority AI analysis queue',
+        '20 components per analysis (vs 15 in Professional)'
       ],
       cta: 'Subscribe to Premium',
       popular: false,
@@ -265,7 +267,7 @@ export default function Pricing() {
           </h2>
 
           <p className="hero-description-text">
-            Affordable USMCA compliance for Small & Medium businesses who can't afford full-time trade compliance teams. Plans start at $99/month with expert trade consulting support.
+            Affordable USMCA compliance for Small & Medium businesses who can't afford full-time trade compliance teams. Plans start at $99/month with AI-powered automated analysis.
           </p>
           
           <div className="hero-button-group">
@@ -542,7 +544,7 @@ export default function Pricing() {
               <div className="content-card-icon">∞</div>
               <h3 className="content-card-title">High-Volume USMCA Checks</h3>
               <p className="content-card-description">
-                Professional tier: 100 analyses/month. Premium tier: Unlimited analyses.
+                Professional tier: 100 analyses/month. Premium tier: 500 analyses/month.
                 Check multiple products, scenarios, and suppliers. Instant AI-powered HS code suggestions
                 and qualification calculations. No hidden per-analysis fees.
               </p>
@@ -593,58 +595,58 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">What's included in my subscription?</h3>
               <p className="content-card-description">
-                <strong>Starter ($99/mo):</strong> 10 USMCA analyses, basic alerts. <strong>Professional ($299/mo):</strong> 100 analyses, real-time crisis alerts, priority support. <strong>Premium ($599/mo):</strong> Unlimited analyses, premium alerts, strategy calls, custom reports.
+                <strong>Starter ($99/mo):</strong> 10 USMCA analyses, basic alerts. <strong>Professional ($299/mo):</strong> 100 analyses, real-time crisis alerts, portfolio briefing. <strong>Premium ($599/mo):</strong> 500 analyses, advanced AI features, 20 components per analysis.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Honest Strategy */}
+      {/* Growth Path */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">The Honest Strategy</h2>
+            <h2 className="section-header-title">Your Growth Path</h2>
             <p className="section-header-subtitle">
-              Low-risk start, pay as you grow, expert help prevents disasters
+              Start small, scale as your cross-border trade volume grows
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
               <div className="content-card-icon">1</div>
-              <h3 className="content-card-title">Month 1: Start with Starter</h3>
-              <p className="content-card-description">$99/month for 10 analyses - learn the basics and test USMCA qualification</p>
+              <h3 className="content-card-title">Week 1: Free Trial</h3>
+              <p className="content-card-description">7 days free - Test with 1 USMCA analysis (3 components), see how AI classifies your products</p>
             </div>
 
             <div className="content-card">
               <div className="content-card-icon">2</div>
-              <h3 className="content-card-title">Month 2-3: Upgrade to Professional</h3>
-              <p className="content-card-description">$299/month for 100 analyses/month + 15% service discount when you need expert help</p>
+              <h3 className="content-card-title">Month 1-2: Starter Plan</h3>
+              <p className="content-card-description">$99/month - 10 analyses to test different products and suppliers, build your compliance knowledge base</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">H</div>
-              <h3 className="content-card-title">Start with Health Check</h3>
-              <p className="content-card-description">$99 (no discounts) - Expert team assesses your trade opportunities</p>
+              <div className="content-card-icon">3</div>
+              <h3 className="content-card-title">Month 3+: Professional</h3>
+              <p className="content-card-description">$299/month - 100 analyses/month, real-time crisis alerts, portfolio briefing reports for growing trade volume</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">U</div>
-              <h3 className="content-card-title">Need USMCA Help?</h3>
-              <p className="content-card-description">$175 base / $149 Professional / $131 Premium - Compliance-led qualification roadmap</p>
+              <div className="content-card-icon">4</div>
+              <h3 className="content-card-title">High Volume: Premium</h3>
+              <p className="content-card-description">$599/month - 500 analyses/month, advanced AI features, 20 components per analysis for complex supply chains</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">S</div>
-              <h3 className="content-card-title">Supply Chain Issues?</h3>
-              <p className="content-card-description">$450 base / $383 Professional / $338 Premium - Sourcing specialist finds alternative Mexico suppliers</p>
+              <div className="content-card-icon">A</div>
+              <h3 className="content-card-title">All Plans Include</h3>
+              <p className="content-card-description">AI HS code classification, tariff calculations, USMCA qualification checks, certificate generation, crisis alerts</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">P</div>
-              <h3 className="content-card-title">Upgrade to Premium</h3>
-              <p className="content-card-description">$599/month - 25% service discount + quarterly strategy calls with our expert team</p>
+              <div className="content-card-icon">∞</div>
+              <h3 className="content-card-title">No Hidden Fees</h3>
+              <p className="content-card-description">Flat monthly pricing, no per-analysis charges, no setup fees, cancel anytime (subject to commitment period)</p>
             </div>
           </div>
         </div>
@@ -658,7 +660,7 @@ export default function Pricing() {
               Ready to Get Started?
             </h2>
             <p className="section-header-subtitle">
-              Subscribe to access professional USMCA compliance tools and expert trade consulting support
+              Subscribe to access professional USMCA compliance tools and AI-powered trade analysis
             </p>
             <div className="hero-button-group">
               <Link
