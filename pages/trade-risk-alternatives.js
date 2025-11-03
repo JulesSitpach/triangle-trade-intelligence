@@ -235,7 +235,15 @@ export default function TradeRiskAlternatives() {
 
           // Extract workflow data
           const workflowData = mostRecentWorkflow.workflow_data || {};
-          const components = mostRecentWorkflow.component_origins || [];
+          const rawComponents = mostRecentWorkflow.component_origins || [];
+
+          // ✅ NORMALIZE: Map value_percentage → percentage for consistent access
+          const components = rawComponents.map(comp => ({
+            ...comp,
+            percentage: comp.value_percentage || comp.percentage || 0,
+            component_type: comp.description || comp.component_type,
+            annual_volume: comp.annual_volume || 0
+          }));
 
           // ✅ FIX: Fallback to JSONB workflow_data when top-level columns are NULL
           // Parse trade_volume (comes as string from database)
@@ -264,7 +272,9 @@ export default function TradeRiskAlternatives() {
           console.log('✅ Loaded user profile from database:', {
             companyName: profile.companyName,
             tradeVolume: profile.tradeVolume,
-            hasTradeVolume: !!profile.tradeVolume
+            hasTradeVolume: !!profile.tradeVolume,
+            componentCount: components.length,
+            componentPercentages: components.map(c => `${c.component_type}: ${c.percentage}%`)
           });
 
           // Extract rich workflow intelligence if available
@@ -781,7 +791,7 @@ export default function TradeRiskAlternatives() {
         console.warn('⚠️ Could not fetch crisis alerts, will proceed without them');
       }
 
-      // Build workflow data structure
+      // Build workflow data structure - components already normalized with percentage field
       const workflowData = {
         company: {
           name: profile.companyName,
@@ -789,27 +799,36 @@ export default function TradeRiskAlternatives() {
         },
         components: (profile.componentOrigins || []).map(comp => ({
           component_type: comp.component_type || comp.description,
-          description: comp.description,
+          description: comp.description || comp.component_type,
           hs_code: comp.hs_code,
           origin_country: comp.origin_country || comp.country,
           country: comp.origin_country || comp.country,
-          annual_volume: comp.annual_volume || (profile.tradeVolume * (comp.percentage || 0) / 100),
-          percentage: comp.percentage || 0
-        })),
-        usmca: {
-          regional_content_percentage: profile.regionalContent || 0,
-          qualification_status: profile.qualificationStatus || 'UNKNOWN'
-        }
+          annual_volume: comp.annual_volume || 0,
+          percentage: comp.percentage || 0  // Already normalized from value_percentage
+        }))
       };
+
+      console.log('📤 Sending to API:', {
+        company: workflowData.company.name,
+        componentCount: workflowData.components.length,
+        components: workflowData.components.map(c => ({
+          name: c.component_type,
+          origin: c.origin_country,
+          percentage: c.percentage
+        }))
+      });
 
       setProgressSteps(prev => [...prev, 'Generating portfolio briefing...']);
 
-      // STEP 2: Call portfolio briefing endpoint
+      // STEP 2: Call portfolio briefing API with component data
       const response = await fetch('/api/generate-portfolio-briefing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ workflow_data: workflowData, user_id: user?.id })
+        body: JSON.stringify({
+          workflow_data: workflowData,
+          user_id: user?.id
+        })
       });
 
       if (!response.ok) {
@@ -1723,82 +1742,40 @@ export default function TradeRiskAlternatives() {
                         📊 Your USMCA 2026 Strategic Briefing
                       </h3>
 
-                      {/* Display briefing sections */}
-                      {portfolioBriefing.situation_summary && (
-                        <div style={{ marginBottom: '2rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginBottom: '0.75rem' }}>
-                            Executive Summary
+                      {/* Render structured JSON briefing */}
+                      <div style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.7' }}>
+                        {/* Business Overview */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1rem', marginBottom: '0.75rem' }}>
+                            What This Means for Your Business
                           </h4>
-                          <p style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.6' }}>
-                            {portfolioBriefing.situation_summary}
-                          </p>
+                          <p style={{ margin: 0 }}>{portfolioBriefing.business_overview}</p>
                         </div>
-                      )}
 
-                      {portfolioBriefing.critical_alerts && portfolioBriefing.critical_alerts.length > 0 && (
-                        <div style={{ marginBottom: '2rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#dc2626', marginBottom: '0.75rem' }}>
-                            🚨 Critical Alerts
+                        {/* Component Analysis */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                            Component Risk Breakdown
                           </h4>
-                          {portfolioBriefing.critical_alerts.map((alert, idx) => (
-                            <div key={idx} style={{
-                              marginBottom: '1rem',
-                              padding: '1rem',
-                              background: '#fef2f2',
-                              borderLeft: '4px solid #dc2626',
-                              borderRadius: '6px'
-                            }}>
-                              <div style={{ fontWeight: 600, color: '#111827', marginBottom: '0.5rem' }}>
-                                {alert.alert_title}
-                              </div>
-                              <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
-                                {alert.why_it_matters}
-                              </div>
-                              <div style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 600 }}>
-                                → {alert.action_required}
-                              </div>
-                            </div>
-                          ))}
+                          <p style={{ margin: 0 }}>{portfolioBriefing.component_analysis}</p>
                         </div>
-                      )}
 
-                      {portfolioBriefing.portfolio_at_risk && (
-                        <div style={{ marginBottom: '2rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#f59e0b', marginBottom: '0.75rem' }}>
-                            ⚠️ Portfolio Risk Assessment
+                        {/* Strategic Trade-offs */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                            Strategic Considerations
                           </h4>
-                          <div style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.6' }}>
-                            <strong>{portfolioBriefing.portfolio_at_risk.total_volume_affected_pct}%</strong> of your trade volume is affected
-                          </div>
+                          <p style={{ margin: 0 }}>{portfolioBriefing.strategic_trade_offs}</p>
                         </div>
-                      )}
 
-                      {portfolioBriefing.immediate_actions && portfolioBriefing.immediate_actions.length > 0 && (
-                        <div style={{ marginBottom: '2rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#059669', marginBottom: '0.75rem' }}>
-                            ✅ Immediate Actions
+                        {/* Monitoring Plan */}
+                        <div>
+                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                            What We're Monitoring for You
                           </h4>
-                          <ul style={{ paddingLeft: '1.5rem', fontSize: '0.9375rem', color: '#374151', lineHeight: '1.8' }}>
-                            {portfolioBriefing.immediate_actions.map((action, idx) => (
-                              <li key={idx}>{action}</li>
-                            ))}
-                          </ul>
+                          <p style={{ margin: 0 }}>{portfolioBriefing.monitoring_plan}</p>
                         </div>
-                      )}
-
-                      {portfolioBriefing.strategic_note && (
-                        <div style={{
-                          marginTop: '2rem',
-                          padding: '1rem',
-                          background: '#f0f9ff',
-                          borderRadius: '8px',
-                          fontSize: '0.875rem',
-                          color: '#1e40af',
-                          fontStyle: 'italic'
-                        }}>
-                          💡 <strong>Strategic Note:</strong> {portfolioBriefing.strategic_note}
-                        </div>
-                      )}
+                      </div>
                     </div>
                   )}
                 </>

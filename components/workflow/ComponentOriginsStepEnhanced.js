@@ -977,21 +977,52 @@ export default function ComponentOriginsStepEnhanced({
             )}
           </div>
         </div>
+      </div>
 
-        {/* Total Percentage Display */}
-        <div className={getTotalPercentage() === 100 ? 'percentage-summary success' : 'percentage-summary warning'}>
-          <div className="percentage-display">
-            <span className="percentage-label">Total Value Percentage:</span>
-            <span className="percentage-value">
-              {getTotalPercentage().toFixed(1)}%
-            </span>
-          </div>
-          {getTotalPercentage() !== 100 && (
-            <p className="form-help">
-              Components must total exactly 100% of product value
-            </p>
-          )}
+      {/* Total Percentage Display - PROMINENT & SEPARATE */}
+      <div style={{
+        margin: '2rem 0',
+        padding: '1.5rem',
+        background: getTotalPercentage() === 100 ? '#f0fdf4' : '#fef2f2',
+        border: `4px solid ${getTotalPercentage() === 100 ? '#16a34a' : '#dc2626'}`,
+        borderRadius: '12px',
+        textAlign: 'center',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{
+          fontSize: '1.25rem',
+          fontWeight: 600,
+          color: '#374151',
+          marginBottom: '0.75rem'
+        }}>
+          Total Value Percentage: <span style={{
+            fontSize: '2rem',
+            fontWeight: 700,
+            color: getTotalPercentage() === 100 ? '#16a34a' : '#dc2626'
+          }}>
+            {getTotalPercentage().toFixed(1)}%
+          </span>
         </div>
+        {getTotalPercentage() !== 100 && (
+          <p style={{
+            margin: 0,
+            fontSize: '1rem',
+            color: '#dc2626',
+            fontWeight: 600
+          }}>
+            ⚠️ Components must total exactly 100% of product value
+          </p>
+        )}
+        {getTotalPercentage() === 100 && (
+          <p style={{
+            margin: 0,
+            fontSize: '1rem',
+            color: '#16a34a',
+            fontWeight: 600
+          }}>
+            ✓ Components total 100% - Ready to continue
+          </p>
+        )}
       </div>
 
       {/* Validation Results */}
