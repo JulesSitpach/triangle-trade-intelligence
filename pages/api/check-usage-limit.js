@@ -41,12 +41,12 @@ const TIER_LIMITS = {
     display_name: 'Professional ($299/month)'
   },
   'premium': {
-    analyses_per_month: 100,
+    analyses_per_month: 500,  // ✅ FIXED: Was 100, now 500 to match other configs
     max_components: 20,
-    display_name: 'Premium ($499/month)'
+    display_name: 'Premium ($599/month)'  // ✅ FIXED: Was $499, actual price is $599
   },
   'enterprise': {
-    analyses_per_month: 9999, // Unlimited
+    analyses_per_month: 9999, // Unlimited (not available to new users)
     max_components: 50,
     display_name: 'Enterprise'
   }

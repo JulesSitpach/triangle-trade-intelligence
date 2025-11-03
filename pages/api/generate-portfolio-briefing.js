@@ -8,11 +8,19 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { BaseAgent } from '../../lib/agents/base-agent.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// ✅ Use BaseAgent with claude-haiku-4.5 (consistent across project)
+const portfolioAgent = new BaseAgent({
+  name: 'PortfolioBriefing',
+  model: 'anthropic/claude-haiku-4.5',
+  maxTokens: 3000
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -26,11 +34,73 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing workflow_data' });
     }
 
+    // ✅ SUBSCRIPTION TIER ENFORCEMENT (per spec lines 327-349)
+    if (user_id) {
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('subscription_tier, analyses_this_month, analyses_reset_date')
+        .eq('user_id', user_id)
+        .single();
+
+      if (profileError) {
+        console.warn('⚠️ Could not fetch user profile for tier check:', profileError.message);
+      } else if (userProfile) {
+        // Define tier limits (per specification)
+        const TIER_LIMITS = {
+          'Trial': 0,
+          'Starter': 2,
+          'Professional': 5,
+          'Premium': 500  // ✅ FIXED: Was Infinity, now 500 to prevent AI cost abuse
+        };
+
+        const userTier = userProfile.subscription_tier || 'Trial';
+        const currentUsage = userProfile.analyses_this_month || 0;
+        const monthlyLimit = TIER_LIMITS[userTier] || 0;
+
+        // Check if user has exceeded their limit
+        if (currentUsage >= monthlyLimit) {
+          console.log(`🚫 User ${user_id} (${userTier}) exceeded monthly limit: ${currentUsage}/${monthlyLimit}`);
+          return res.status(403).json({
+            success: false,
+            error: 'Monthly analysis limit reached',
+            tier: userTier,
+            limit: monthlyLimit,
+            current_usage: currentUsage,
+            message: `You've used ${currentUsage} of ${monthlyLimit === Infinity ? 'unlimited' : monthlyLimit} analyses this month. Upgrade to ${userTier === 'Trial' ? 'Starter' : userTier === 'Starter' ? 'Professional' : 'Premium'} for more analyses.`,
+            upgrade_required: true
+          });
+        }
+
+        // Increment usage counter
+        const { error: updateError } = await supabase
+          .from('user_profiles')
+          .update({
+            analyses_this_month: currentUsage + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user_id);
+
+        if (updateError) {
+          console.error('⚠️ Failed to increment analyses counter:', updateError.message);
+        } else {
+          console.log(`✅ User ${user_id} (${userTier}): ${currentUsage + 1}/${monthlyLimit} analyses used`);
+        }
+      }
+    }
+
     const companyName = workflow_data.company?.name || 'Your Company';
     const components = workflow_data.components || [];
-    const rvc = workflow_data.usmca?.regional_content_percentage || 0;
-    const qualificationStatus = workflow_data.usmca?.qualification_status;
+
+    console.log('📊 Components received by API:', components.map(c => ({
+      type: c.component_type || c.description,
+      annual_volume: c.annual_volume,
+      percentage: c.percentage,
+      origin: c.origin_country || c.country
+    })));
+
     const totalVolume = components.reduce((sum, c) => sum + (c.annual_volume || 0), 0);
+
+    console.log(`💰 Total volume calculated: $${totalVolume}`);
 
     // STEP 1: Get REAL policy alerts (if any exist in crisis_alerts)
     const { data: realAlerts, error: alertError } = await supabase
@@ -129,175 +199,101 @@ and countries: ${[...new Set(userComponentOrigins)].join(', ')}
 
 Use forward-looking language: "potential", "expected", "could face", "we are tracking for"`;
 
-    // STEP 5: Build the AI prompt
-    const aiPrompt = `You are a Trade Compliance Director at a global supply chain consultancy.
+    // STEP 5: Build the AI prompt - Strategic advisor tone
+    const aiPrompt = `ROLE:
+You are a Trade Compliance Director analyzing ${companyName}'s supply chain for USMCA 2026 renegotiation exposure. Write a strategic briefing for the operations team.
 
-You are analyzing ${companyName}'s supply chain positioning ahead of the USMCA 2026 renegotiation review.
+TONE:
+- Professional peer-to-peer (not teaching basics)
+- Evidence-based (cite their specific numbers)
+- Strategic advisor (implications, not instructions)
+- Assumes they understand trade terms (RVC, HS codes, rules of origin)
 
-COMPANY PROFILE:
-- Annual Import Volume: $${totalVolume.toLocaleString()}
-- Current USMCA RVC: ${rvc.toFixed(1)}%
-- USMCA Status: ${qualificationStatus || 'UNKNOWN'}
-- Component Count: ${components.length}
-- Origin Countries: ${[...new Set(userComponentOrigins)].join(', ')}
+${companyName}'s COMPONENT PORTFOLIO:
+${components.map(c => {
+  const percentage = c.percentage || (totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0);
+  return `- ${c.component_type || c.description} from ${c.origin_country || c.country} (${percentage}% of costs)
+  HS Code: ${c.hs_code || 'Not classified'}
+  ${c.annual_volume > 0 ? `Annual Value: $${c.annual_volume.toLocaleString()}` : ''}`;
+}).join('\n')}
 
-COMPONENT PORTFOLIO:
-${componentSummary}
+${matchedAlerts.length > 0 ? `ACTIVE POLICY ALERTS (${matchedAlerts.length} affecting your supply chain):
+${rankedAlerts.map((a, idx) =>
+  `[${idx + 1}] ${a.title}
+  Impact: Affects ${a.impactScore.toFixed(0)}% of your trade volume
+  Countries: ${(a.affected_countries || []).join(', ')}
+  HS Codes: ${(a.affected_hs_codes || []).join(', ') || 'General policy (all HS codes)'}
+  ${a.description}`
+).join('\n\n')}` : `MONITORING STATUS:
+No active policy changes detected. Tracking USTR, Federal Register, and Mexico labor ministry for announcements affecting:
+- Your HS Codes: ${userComponentHS.join(', ')}
+- Your Source Countries: ${[...new Set(userComponentOrigins)].join(', ')}`}
 
-USMCA 2026 RENEGOTIATION CONTEXT:
-The USMCA trade agreement enters formal review in 2026. Key uncertainty areas:
-- Rules of Origin requirements could increase (RVC thresholds may go up)
-- Labor provisions could expand (all three countries pressuring)
-- Sector-specific rules under review (automotive, textiles, agriculture)
-- Key dates: Q1 2026 (negotiation proposals), July 1, 2026 (formal review begins)
+You are writing a strategic briefing for a business owner preparing for USMCA 2026 renegotiation. Write in narrative prose - tell the story of their supply chain position.
 
-${alertContext}
-
-YOUR TASK - GENERATE A STRUCTURED PORTFOLIO BRIEFING (JSON FORMAT):
-
-Return a JSON object with these sections (NOT narrative text):
+Return a JSON object with these EXACT fields:
 
 {
-  "briefing_type": "PORTFOLIO_INTELLIGENCE_BRIEFING",
-  "company": "${companyName}",
-  "generated_at": "${new Date().toISOString()}",
-  "situation_summary": "2-3 sentence executive summary: What's changing for this portfolio?",
-  "critical_alerts": [
-    {
-      "alert_title": "The policy name/change",
-      "severity": "CRITICAL|HIGH|MEDIUM",
-      "impact_on_portfolio": "X% of your trade volume affected",
-      "affected_components": ["Component 1", "Component 2"],
-      "announcement_date": "YYYY-MM-DD",
-      "effective_date": "YYYY-MM-DD",
-      "why_it_matters": "Specific impact on your business",
-      "action_required": "What your company should do THIS WEEK"
-    }
-  ],
-  "portfolio_at_risk": {
-    "total_volume_affected_pct": XX,
-    "vulnerable_components": ["list of at-risk components"],
-    "vulnerable_countries": ["list of at-risk sourcing countries"],
-    "vulnerable_hs_codes": ["list of affected product categories"]
-  },
-  "immediate_actions": [
-    "Action 1 (do this week)",
-    "Action 2 (do this month)",
-    "Action 3 (strategic consideration)"
-  ],
-  "timeline": {
-    "week_1": "What changes immediately",
-    "month_1": "Next 30 days milestones",
-    "q2_2026": "USMCA renegotiation window",
-    "ongoing": "What to monitor continuously"
-  },
-  "what_were_monitoring": {
-    "tracking_these_hs_codes": ${JSON.stringify(userComponentHS)},
-    "tracking_these_countries": ${JSON.stringify([...new Set(userComponentOrigins)])},
-    "monitoring_sources": "USTR, Federal Register, Mexico labor ministry, Canada ISAC",
-    "update_frequency": "Real-time alerts pushed to email (daily digest)"
-  },
-  "strategic_note": "Professional insight about their portfolio positioning for 2026 USMCA review"
+  "business_overview": "Write 3-4 sentences painting their supply chain picture. State percentages by country, give context on what 2026 means for them. Example: 'Your electronics assembly relies on a three-country supply chain: 55% from Mexico (power supplies, housing, connectors), 35% from China (microprocessors), and 10% from Canada (PCBs). This creates an interesting position heading into the USMCA 2026 renegotiation. Your Mexico concentration gives you a strong USMCA foundation, but your Chinese microprocessor sourcing sits in the crosshairs of cumulation rule discussions.'",
+
+  "component_analysis": "Write 2-3 flowing paragraphs analyzing their components as a narrative (NOT listing components one by one). Group components by strategic significance. ${matchedAlerts.length > 0 ? 'Weave alert context naturally into the narrative (e.g., \"Two recent alerts signal this pressure: [titles]\"). Don\'t just say \"Alert detected.\"' : 'Focus on 2026 renegotiation context and what rule changes would mean.'} Example: 'The microprocessor component presents your most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50% of costs—anchor your USMCA qualification. They're well-positioned for any agreement strengthening, though they do concentrate your supply chain in a single country.'",
+
+  "strategic_trade_offs": "Write 2-3 paragraphs presenting genuine strategic choices with no obvious answer. Frame as 'choosing between futures.' Example: 'You're essentially choosing between two futures. Continue with Chinese microprocessors and accept 2026 rule uncertainty, or begin qualifying alternative suppliers—knowing that transition takes 12-18 months and increases component costs. There's no obviously correct answer because the actual 2026 rules haven't been proposed yet. Your Mexico concentration (55%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce this risk, but your current suppliers have established quality and logistics. The timing matters—qualification of alternative suppliers requires substantial lead time.'",
+
+  "monitoring_plan": "Write 2-3 paragraphs describing what you're tracking and WHY it matters to them. Connect monitoring to their specific components. Example: 'We're tracking the USMCA Joint Commission meeting schedule and any published negotiating texts, particularly proposals affecting cumulation rules for electronics components. For your microprocessor sourcing, we're watching USTR statements on non-party content thresholds. On the Mexico side, we're monitoring the Diario Oficial for labor ministry updates affecting your power supply and housing suppliers. The next major intelligence point comes when the Joint Commission publishes 2026 renegotiation proposals, expected Q1 2026. That's when uncertainty around cumulation rules begins resolving into actual policy language.'"
 }
 
-CRITICAL REQUIREMENTS:
-- CHERRY-PICK only the 2-3 most critical alerts (not all ${rankedAlerts.length} alerts)
-${matchedAlerts.length > 0 ? '- Use definitive language for real alerts: "announced December 3", "effective January 15"\n- Reference actual policy sources (government announcements, not speculation)' : '- Use forward-looking language: "potential", "expected", "we are tracking"\n- Base on USMCA 2026 renegotiation risks and industry trends'}
-- Reference their actual numbers: ${totalVolume.toLocaleString()} annual volume, ${rvc.toFixed(1)}% RVC, ${components.length} components
-- Format ALL output as valid JSON (no markdown, no narrative text)
-- Ensure action items are specific and timely
-- Be honest about confidence levels
+CRITICAL RULES:
+1. WRITE NARRATIVE PROSE - Tell a story, don't list facts
+2. NEVER INVENT NUMBERS - Use ONLY percentages from component data above. If you say "60% from Mexico" but their data shows 30% + 20% + 5% = 55%, YOU FAILED.
+3. CALCULATE ACCURATELY - Add up component percentages by country to get country concentration. Show your math.
+4. WEAVE ALERTS NATURALLY - Don't say "Alert detected:" 5 times, work them into the narrative
+5. READABLE LANGUAGE - "works beautifully today" not "current cumulation methodology allows"
+6. REAL TRADE-OFFS - Present genuine strategic choices with no obvious answer
+7. NO POLITICAL REFERENCES - Don't mention "Trump administration" or specific politicians. Say "US-Canada trade tensions" or "policy discussions"
+8. MONITORING WITH MILESTONES - Structure monitoring around Q1 2026 proposals, Mid-2026 findings, Q3-Q4 implementation
+9. BE SPECIFIC - Use their HS codes and percentages, explain context
 
-TONE: Professional trade compliance director. Data-driven. Consulting-grade.`;
+IF YOU MAKE UP A STATISTIC NOT IN THE DATA, YOU HAVE FAILED.
+
+Return valid JSON only:`;
 
     console.log('🤖 Calling AI to generate portfolio briefing...');
+    console.log('📋 Prompt length:', aiPrompt.length, 'characters');
+    console.log('📊 Components in prompt:', components.length);
 
-    // STEP 6: Call AI (with 2-tier fallback)
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://triangle-trade-intelligence.vercel.app',
-        'X-Title': 'Triangle Trade Intelligence'
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku',
-        messages: [{ role: 'user', content: aiPrompt }],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
+    // STEP 6: Call AI using BaseAgent (with automatic 2-tier fallback)
+    const aiResponse = await portfolioAgent.execute(aiPrompt, {
+      temperature: 0.7,
+      format: 'json'  // ✅ Structured JSON prevents hallucinations
     });
 
-    if (!response.ok) {
-      console.warn('⚠️ OpenRouter failed, trying Anthropic direct...');
+    console.log('✅ AI response received');
 
-      const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
-          max_tokens: 2000,
-          messages: [{ role: 'user', content: aiPrompt }]
-        })
-      });
+    // Parse JSON response
+    let briefingData = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
 
-      if (!anthropicResponse.ok) {
-        throw new Error('Both OpenRouter and Anthropic failed');
-      }
-
-      const anthropicData = await anthropicResponse.json();
-      const briefingText = anthropicData.content[0]?.text || 'Unable to generate briefing';
-
-      try {
-        // Parse JSON response from AI
-        const briefingJson = JSON.parse(briefingText);
-        return res.status(200).json({
-          success: true,
-          briefing: briefingJson,
-          company: companyName,
-          portfolio_value: totalVolume,
-          rvc: rvc,
-          real_alerts_matched: matchedAlerts.length,
-          generated_at: new Date().toISOString()
-        });
-      } catch (parseError) {
-        console.error('Failed to parse Anthropic JSON response:', parseError);
-        return res.status(500).json({
-          success: false,
-          error: 'AI response was not valid JSON',
-          raw_response: briefingText.substring(0, 500)
-        });
-      }
+    // ✅ UNWRAP if AI returned {success: true, data: {...}} wrapper
+    if (briefingData.success && briefingData.data) {
+      briefingData = briefingData.data;
     }
 
-    const data = await response.json();
-    const briefingText = data.choices[0]?.message?.content || 'Unable to generate briefing';
+    console.log('📊 Portfolio briefing generated:', {
+      has_business_overview: !!briefingData.business_overview,
+      has_component_analysis: !!briefingData.component_analysis,
+      has_strategic_trade_offs: !!briefingData.strategic_trade_offs,
+      has_monitoring_plan: !!briefingData.monitoring_plan
+    });
 
-    try {
-      // Parse JSON response from AI
-      const briefingJson = JSON.parse(briefingText);
-      return res.status(200).json({
-        success: true,
-        briefing: briefingJson,
-        company: companyName,
-        portfolio_value: totalVolume,
-        rvc: rvc,
-        real_alerts_matched: matchedAlerts.length,
-        generated_at: new Date().toISOString()
-      });
-    } catch (parseError) {
-      console.error('Failed to parse OpenRouter JSON response:', parseError);
-      return res.status(500).json({
-        success: false,
-        error: 'AI response was not valid JSON',
-        raw_response: briefingText.substring(0, 500)
-      });
-    }
+    // Return structured briefing
+    return res.status(200).json({
+      success: true,
+      briefing: briefingData,  // ✅ Structured JSON object
+      company: companyName,
+      portfolio_value: totalVolume,
+      real_alerts_matched: matchedAlerts.length,
+      generated_at: new Date().toISOString()
+    });
 
   } catch (error) {
     console.error('❌ Portfolio briefing generation failed:', error);

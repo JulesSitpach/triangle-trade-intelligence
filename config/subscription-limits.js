@@ -107,7 +107,7 @@ export const TIER_LIMITS = {
   [SUBSCRIPTION_TIERS.PREMIUM]: {
     // USMCA Analysis
     components_per_analysis: 20, // Premium gets 20 components
-    analyses_per_month: 999999, // ✅ FIXED: Unlimited workflows (matches usage-tracking-service.js)
+    analyses_per_month: 500, // ✅ FIXED: 500 analyses/month to prevent AI cost abuse
     certificate_download: true,
     certificate_preview: true,
     preview_watermarked: false,
@@ -290,7 +290,7 @@ export function getTierComparison() {
       name: 'Premium',
       price: '$599/mo',
       features: [
-        'Unlimited analyses per month',  // ✅ FIXED: Clarified unlimited workflows
+        '500 analyses per month',         // ✅ FIXED: Was unlimited, now capped at 500
         '20 components per analysis',     // ✅ FIXED: Was "unlimited", actual is 20
         'Full certificate download',
         'All email alerts',
