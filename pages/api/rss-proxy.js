@@ -42,17 +42,35 @@ export default async function handler(req, res) {
     }
 
     // Convert RSS2JSON format to standard RSS parser format
-    const items = proxyData.items.map(item => ({
-      title: item.title,
-      link: item.link,
-      pubDate: item.pubDate,
-      content: item.content || item.description || '',
-      description: item.description || item.content || '',
-      contentSnippet: item.description?.substring(0, 200) || '',
-      guid: item.guid || item.link,
-      categories: item.categories || [],
-      author: item.author || ''
-    }));
+    // ✅ VALIDATE: Filter out items where content extraction failed
+    const items = proxyData.items
+      .map(item => {
+        // Check if ANY content field exists
+        const hasContent = item.content || item.description || item.title;
+        const hasLink = item.link;
+
+        if (!hasContent || !hasLink) {
+          console.warn(`⚠️ Skipping item with missing content/link:`, {
+            title: item.title?.substring(0, 50),
+            hasContent: !!hasContent,
+            hasLink: !!hasLink
+          });
+          return null; // Mark for filtering
+        }
+
+        return {
+          title: item.title,
+          link: item.link,
+          pubDate: item.pubDate,
+          content: item.content || item.description || '',
+          description: item.description || item.content || '',
+          contentSnippet: item.description?.substring(0, 200) || '',
+          guid: item.guid || item.link,
+          categories: item.categories || [],
+          author: item.author || ''
+        };
+      })
+      .filter(item => item !== null); // Remove failed items
 
     return res.status(200).json({
       success: true,

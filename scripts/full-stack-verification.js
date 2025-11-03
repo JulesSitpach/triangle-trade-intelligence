@@ -75,20 +75,7 @@ const FEATURE_CONFIG = {
         'id', 'name', 'url', 'keywords', 'is_active', 'priority_level'
       ]
     },
-    testData: {
-      alert: {
-        alert_type: 'tariff_change',
-        title: 'Section 301 China Tariff Increase',
-        description: 'Tariffs on Chinese electronics increased to 100%',
-        severity: 'critical',
-        affected_hs_codes: ['8542.31'],
-        affected_countries: ['CN'],
-        relevant_industries: ['electronics', 'semiconductors'],
-        is_active: true,
-        detection_source: 'rss_feed',
-        source_url: 'https://ustr.gov/example'
-      }
-    }
+    testData: {} // REMOVED: Use real crisis_alerts from database only
   }
   // Archived features (removed Oct 23, 2025):
   // - SupplierSourcing (was at /api/supplier-sourcing-discovery)
