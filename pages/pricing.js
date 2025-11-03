@@ -416,64 +416,42 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Sample Certificate - Real Data */}
+      {/* Sample Certificate - Real Screenshot */}
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">📜 What You Get: USMCA Certificate of Origin</h2>
             <p className="section-header-subtitle">
-              Auto-generated from your compliance analysis - example from RTW Logistics
+              Official USMCA Form D auto-generated from your analysis with all fields pre-filled
             </p>
           </div>
 
-          <div className="content-card" style={{maxWidth: '900px', margin: '0 auto', padding: '32px', backgroundColor: '#fff'}}>
-            <div style={{border: '2px solid #134169', padding: '24px', borderRadius: '8px'}}>
-              <div style={{textAlign: 'center', marginBottom: '24px'}}>
-                <h3 style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#134169'}}>USMCA CERTIFICATE OF ORIGIN</h3>
-                <p style={{fontSize: '0.9rem', color: '#6b7280'}}>Certificate #2025-001-USMCA</p>
-              </div>
-
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px'}}>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Exporter Name:</p>
-                  <p style={{fontSize: '0.9rem'}}>RTW LOGISTICS SA DE CV</p>
-                </div>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Product Description:</p>
-                  <p style={{fontSize: '0.9rem'}}>Mobile Smart Phone</p>
-                </div>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>HS Code:</p>
-                  <p style={{fontSize: '0.9rem'}}>8517.12.00</p>
-                </div>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Business Type:</p>
-                  <p style={{fontSize: '0.9rem'}}>Electronics & Technology</p>
-                </div>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Manufacturing Location:</p>
-                  <p style={{fontSize: '0.9rem'}}>Mexico</p>
-                </div>
-                <div>
-                  <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169'}}>Qualification Status:</p>
-                  <p style={{fontSize: '0.9rem', color: '#16a34a', fontWeight: '600'}}>✓ QUALIFIED (100% USMCA Content)</p>
-                </div>
-              </div>
-
-              <div style={{backgroundColor: '#dcfce7', padding: '12px', borderRadius: '4px', marginBottom: '12px'}}>
-                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#16a34a', marginBottom: '8px'}}>Regional Value Content Calculation:</p>
-                <p style={{fontSize: '0.85rem'}}>✓ 100% Mexico (Complete manufacturing and assembly)</p>
-                <p style={{fontSize: '0.85rem'}}>✓ Required threshold: 65% (exceeded by 35 points)</p>
-                <p style={{fontSize: '0.85rem'}}>✓ Annual trade volume: $600,000</p>
-              </div>
-
-              <div style={{backgroundColor: '#f3f4f6', padding: '12px', borderRadius: '4px'}}>
-                <p style={{fontSize: '0.85rem', fontWeight: '600', color: '#134169', marginBottom: '4px'}}>Certification:</p>
-                <p style={{fontSize: '0.85rem', fontStyle: 'italic'}}>This product qualifies as originating under the USMCA agreement and is eligible for preferential tariff treatment.</p>
-              </div>
+          <div style={{maxWidth: '900px', margin: '0 auto'}}>
+            {/* Real Certificate Screenshot */}
+            <div style={{borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', marginBottom: '1.5rem'}}>
+              <img
+                src="/image/samples/certificate preview.png"
+                alt="USMCA Certificate of Origin preview with all required fields auto-populated"
+                style={{width: '100%', height: 'auto', display: 'block'}}
+              />
             </div>
-            <p style={{fontSize: '0.85rem', color: '#6b7280', marginTop: '16px', textAlign: 'center', fontStyle: 'italic'}}>
-              Professional & Premium subscribers get unlimited certificate generation
+
+            {/* Certificate Features */}
+            <div className="content-card" style={{padding: '2rem'}}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
+                Certificate Features
+              </h3>
+              <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
+                <li><strong>Official USMCA Form D format</strong> - Matches government template exactly</li>
+                <li><strong>All fields pre-populated</strong> - Company info, product details, HS codes from your analysis</li>
+                <li><strong>Edit before download</strong> - Change any field to match your customs requirements</li>
+                <li><strong>PDF ready for submission</strong> - Download and attach to your shipments</li>
+                <li><strong>Preference criterion included</strong> - Automatically calculates correct criterion (A, B, C, or D)</li>
+              </ul>
+            </div>
+
+            <p style={{fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem', textAlign: 'center', fontStyle: 'italic'}}>
+              Professional & Premium subscribers get unlimited certificate generation • Trial includes certificate preview
             </p>
           </div>
         </div>
