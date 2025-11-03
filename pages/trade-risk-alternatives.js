@@ -43,6 +43,7 @@ export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userTier, setUserTier] = useState('Trial'); // Track subscription tier
+  const [usageStats, setUsageStats] = useState({ used: 0, limit: 10, remaining: 10 }); // Track monthly usage
 
   // Real policy alerts state
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
@@ -181,8 +182,13 @@ export default function TradeRiskAlternatives() {
           tier: dashboardData.user_profile?.subscription_tier
         });
 
-        // Extract user subscription tier
+        // Extract user subscription tier and usage stats
         setUserTier(dashboardData.user_profile?.subscription_tier || 'Trial');
+
+        // Set usage stats for monthly limit tracking
+        if (dashboardData.usage_stats) {
+          setUsageStats(dashboardData.usage_stats);
+        }
 
         // If analysis_id provided, load that specific alert
         if (analysisId) {
@@ -1674,16 +1680,25 @@ export default function TradeRiskAlternatives() {
                         console.log('🔵 USMCA 2026 button clicked!', { userProfile });
                         loadPortfolioBriefing(userProfile);
                       }}
-                      className={portfolioBriefing ? "btn-secondary" : "btn-primary"}
-                      disabled={isLoadingPolicyAlerts || portfolioBriefing}
-                      style={portfolioBriefing ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                      className={usageStats.limit_reached ? "btn-secondary" : "btn-primary"}
+                      disabled={isLoadingPolicyAlerts || usageStats.limit_reached}
+                      style={usageStats.limit_reached ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                     >
                       {isLoadingPolicyAlerts
                         ? '⏳ Analyzing...'
+                        : usageStats.limit_reached
+                        ? `🔒 Monthly Limit Reached (${usageStats.used}/${usageStats.limit})`
                         : portfolioBriefing
-                        ? '✅ Analysis Complete'
-                        : '📊 USMCA 2026 Impact Analysis'}
+                        ? `📊 Re-analyze (${usageStats.used}/${usageStats.limit === null ? '∞' : usageStats.limit} used)`
+                        : `📊 USMCA 2026 Impact Analysis (${usageStats.used}/${usageStats.limit === null ? '∞' : usageStats.limit} used)`}
                     </button>
+
+                    {/* Show upgrade CTA when limit reached */}
+                    {usageStats.limit_reached && (
+                      <a href="/pricing" className="btn-primary" style={{ textDecoration: 'none' }}>
+                        ⬆️ Upgrade for More Analyses
+                      </a>
+                    )}
                   </div>
 
                   {/* Display Portfolio Briefing */}
