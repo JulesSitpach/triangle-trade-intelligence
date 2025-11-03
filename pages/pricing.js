@@ -141,7 +141,7 @@ export default function Pricing() {
       monthlyPrice: 99,
       annualPrice: 950,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'Essential USMCA compliance tools for Small & Medium importers',
+      description: 'Essential USMCA compliance tools for Small & Medium importers, exporters, and producers',
       features: [
         '10 USMCA analyses per month',
         'Basic trade alerts',
@@ -194,8 +194,8 @@ export default function Pricing() {
   return (
     <>
       <Head>
-        <title>USMCA Compliance Platform Pricing | Affordable Plans for Small & Medium Importers</title>
-        <meta name="description" content="Affordable USMCA compliance for Small & Medium importers. Plans starting at $99/month with expert trade consulting support. Save $10k-20k/year in time." />
+        <title>USMCA Compliance Platform Pricing | Affordable Plans for Importers, Exporters & Producers</title>
+        <meta name="description" content="Affordable USMCA compliance for importers, exporters, and producers. Plans starting at $99/month with AI-powered automated analysis. Save $10k-20k/year in time." />
         <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, Small & Medium business trade platform, trade consulting services" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -263,7 +263,7 @@ export default function Pricing() {
             Professional Trade Compliance
           </h1>
           <h2 className="hero-sub-title">
-            For <span className="hero-yellow-highlight">Small & Medium Importers</span>
+            For <span className="hero-yellow-highlight">Importers, Exporters & Producers</span>
           </h2>
 
           <p className="hero-description-text">
@@ -552,11 +552,11 @@ export default function Pricing() {
 
             <div className="content-card">
               <div className="content-card-icon">$</div>
-              <h3 className="content-card-title">ROI for Small & Medium Importers</h3>
+              <h3 className="content-card-title">ROI for Importers, Exporters & Producers</h3>
               <p className="content-card-description">
                 DIY USMCA compliance costs $50-100/hr of your time. Hiring a customs
                 broker full-time: $60k+/year. Our platform: $299-599/month with
-                expert support when you need it. Save $10k-50k per year.
+                AI-powered automation. Save $10k-50k per year.
               </p>
             </div>
           </div>
