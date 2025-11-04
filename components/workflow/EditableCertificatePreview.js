@@ -6,9 +6,9 @@
  * Layout matches: USMCA-Certificate-Of-Origin-Form-Template-Updated-10-21-2021.pdf
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator.js';
+import { captureElementAsImage, generateCertificatePDFFromImage } from '../../lib/utils/usmca-certificate-pdf-generator-image.js';
 import { getCountryFullName } from '../../config/country-classifications.js';
 
 export default function EditableCertificatePreview({
@@ -22,6 +22,9 @@ export default function EditableCertificatePreview({
   // Starter, Professional, and Premium users can edit and download
   const isTrialUser = userTier === 'trial' || userTier === 'free' || userTier === 'Free';
   const router = useRouter();
+
+  // ✅ Ref to capture certificate preview as image
+  const certificateRef = useRef(null);
 
   // ✅ REMOVED: Privacy consent modal state (data auto-saves via API)
 
@@ -599,74 +602,18 @@ export default function EditableCertificatePreview({
       console.log('💾 Saving ALL edits to database before PDF generation...');
       onSave(updatedData);
 
-      // ✅ STEP 2: Prepare certificate data for PDF generator
-      const certificateData = {
-        certificate_number: editedCert.certificate_number,
-        certifier: {
-          type: editedCert.certifier_type,
-          name: editedCert.certifier_name,
-          address: editedCert.certifier_address,
-          country: editedCert.certifier_country,
-          phone: editedCert.certifier_phone,
-          email: editedCert.certifier_email,
-          tax_id: editedCert.certifier_tax_id
-        },
-        exporter: {
-          name: editedCert.exporter_name,
-          address: editedCert.exporter_address,
-          country: editedCert.exporter_country,
-          phone: editedCert.exporter_phone,
-          email: editedCert.exporter_email,
-          tax_id: editedCert.exporter_tax_id
-        },
-        producer: {
-          name: editedCert.producer_name,
-          address: editedCert.producer_address,
-          country: editedCert.producer_country,
-          phone: editedCert.producer_phone,
-          email: editedCert.producer_email,
-          tax_id: editedCert.producer_tax_id,
-          same_as_exporter: editedCert.producer_same_as_exporter
-        },
-        importer: {
-          name: editedCert.importer_name,
-          address: editedCert.importer_address,
-          country: editedCert.importer_country,
-          phone: editedCert.importer_phone,
-          email: editedCert.importer_email,
-          tax_id: editedCert.importer_tax_id
-        },
-        product: {
-          description: editedCert.product_description,
-          hs_code: editedCert.hs_code
-        },
-        preference_criterion: editedCert.origin_criterion,
-        producer_declaration: {
-          is_producer: editedCert.is_producer
-        },
-        qualification_method: {
-          method: editedCert.qualification_method
-        },
-        country_of_origin: editedCert.country_of_origin,
-        blanket_period: {
-          start_date: editedCert.blanket_from,
-          end_date: editedCert.blanket_to,
-          from: editedCert.blanket_from,  // Keep for backward compatibility
-          to: editedCert.blanket_to       // Keep for backward compatibility
-        },
-        authorization: {
-          signatory_name: editedCert.signatory_name,
-          signatory_title: editedCert.signatory_title,
-          signature_date: editedCert.signature_date,
-          phone: editedCert.signatory_phone,
-          email: editedCert.signatory_email
-        }
-      };
+      // ✅ STEP 2: Capture certificate preview as image (WYSIWYG approach)
+      console.log('📸 Capturing certificate preview as image...');
+      if (!certificateRef.current) {
+        throw new Error('Certificate preview element not found');
+      }
 
-      console.log('📄 Generating PDF with working jsPDF generator (professional polish applied)...');
+      const imageDataUrl = await captureElementAsImage(certificateRef.current);
+      console.log('✅ Certificate captured as image');
 
-      // ✅ STEP 3: Generate PDF using working jsPDF generator with professional polish
-      const blob = await generateUSMCACertificatePDF(certificateData, {
+      // ✅ STEP 3: Generate PDF from captured image
+      console.log('📄 Generating PDF from captured image...');
+      const blob = await generateCertificatePDFFromImage(imageDataUrl, {
         watermark: isTrialUser,
         userTier: userTier
       });
@@ -765,7 +712,7 @@ export default function EditableCertificatePreview({
       )}
 
       {/* Official USMCA Certificate Form - Exact Layout from US Template */}
-      <div id="certificate-preview-for-pdf" style={{
+      <div ref={certificateRef} id="certificate-preview-for-pdf" style={{
         border: '3px solid #000',
         backgroundColor: '#fff',
         fontFamily: 'Arial, sans-serif',
