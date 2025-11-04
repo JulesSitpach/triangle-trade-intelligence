@@ -65,6 +65,7 @@ export default function USMCAQualification({ results }) {
     });
   }
   const [expandedComponents, setExpandedComponents] = useState({});
+  const [showTariffExplanation, setShowTariffExplanation] = useState(false);
 
   if (!results?.usmca) return null;
 

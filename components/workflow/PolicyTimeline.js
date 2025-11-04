@@ -26,153 +26,139 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     try {
       setLoading(true);
 
-      // Build component lookup map with all details
-      const componentMap = components
-        .filter(c => c.hs_code)
-        .map(c => ({
-          hs_code: c.hs_code,
-          hs_prefix: c.hs_code.replace(/\./g, '').substring(0, 4),
-          origin_country: c.origin_country || 'Unknown',
-          industry: c.industry || c.product_classification?.industry || 'Unknown',
-          description: c.description || ''
-        }));
+      // Build component volatility analysis using VolatilityManager logic
+      const volatileComponents = components
+        .filter(c => c.hs_code && c.origin_country)
+        .map(c => {
+          const origin = normalizeCountry(c.origin_country);
+          const dest = normalizeCountry(destination);
 
-      console.log('🔍 [POLICYTIMELINE] Starting policy threat check:', {
-        components_count: components.length,
-        component_details: componentMap.map(c => ({
+          // Check if this is a volatile combination
+          const volatilityTier = getVolatilityTier(c.hs_code, origin, dest);
+
+          return {
+            hs_code: c.hs_code,
+            origin_country: origin,
+            destination: dest,
+            volatility: volatilityTier,
+            description: c.description || c.component_type || 'Component'
+          };
+        })
+        .filter(c => c.volatility.tier <= 2); // Only Tier 1 (super volatile) and Tier 2 (volatile)
+
+      console.log('🔍 [POLICYTIMELINE] Volatile components detected:', {
+        total_components: components.length,
+        volatile_count: volatileComponents.length,
+        volatile_details: volatileComponents.map(c => ({
           hs_code: c.hs_code,
           origin: c.origin_country,
-          industry: c.industry
-        })),
-        destination
+          tier: c.volatility.tier,
+          reason: c.volatility.reason
+        }))
       });
 
-      if (componentMap.length === 0) {
-        console.log('⚠️  [POLICYTIMELINE] No HS codes found in components - skipping threat check');
+      if (volatileComponents.length === 0) {
+        console.log('✅ [POLICYTIMELINE] No volatile components - all stable');
         setThreats([]);
         setLoading(false);
         return;
       }
 
-      // Query ALL trump_policy_events with affected_countries and affected_industries
-      const { data: allPolicyEvents, error: eventsError } = await supabase
-        .from('trump_policy_events')
-        .select(
-          'id, event_date, policy_title, affected_hs_codes, affected_countries, affected_industries, impact_severity, implementation_timeline, implementation_probability'
-        )
-        .order('event_date', { ascending: false });
+      // Get affected countries from volatile components
+      const affectedCountries = [...new Set(volatileComponents.map(c => c.origin_country))];
 
-      if (eventsError) throw eventsError;
+      console.log('🌍 [POLICYTIMELINE] Checking crisis_alerts for countries:', affectedCountries);
 
-      // Filter events that match origin country AND HS code AND industry
-      const matchingEvents = allPolicyEvents?.filter(event => {
-        if (!event.affected_hs_codes || event.affected_hs_codes.length === 0) {
-          return false;
-        }
+      // Query crisis_alerts table (REAL RSS-detected policies)
+      const { data: crisisAlerts, error: alertsError } = await supabase
+        .from('crisis_alerts')
+        .select('id, title, alert_type, severity, affected_countries, impact_percentage, detection_source, created_at, description, source_url')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-        // Check if ANY component matches this policy on all three criteria
-        return componentMap.some(comp => {
-          // 1. Check if component's origin country is in affected_countries
-          const countryMatches = event.affected_countries &&
-            event.affected_countries.some(country =>
-              country.toLowerCase() === comp.origin_country.toLowerCase()
-            );
+      if (alertsError) throw alertsError;
 
-          // 2. Check if component's HS code matches affected_hs_codes
-          const hsMatches = event.affected_hs_codes.some(eventCode =>
-            eventCode.startsWith(comp.hs_prefix)
-          );
-
-          // 3. Check if component's industry matches affected_industries
-          const industryMatches = !event.affected_industries ||
-            event.affected_industries.length === 0 ||
-            event.affected_industries.some(industry =>
-              industry.toLowerCase() === comp.industry.toLowerCase()
-            );
-
-          return countryMatches && hsMatches && industryMatches;
-        });
-      }) || [];
-
-      // Query tariff_policy_updates (no affected_industries column in this table)
-      const { data: allPolicyUpdates, error: updatesError } = await supabase
-        .from('tariff_policy_updates')
-        .select(
-          'id, title, affected_hs_codes, affected_countries, status, effective_date, adjustment_percentage, policy_type'
-        )
-        .eq('is_active', true);
-
-      if (updatesError) throw updatesError;
-
-      // Filter updates that match origin country AND HS code
-      const matchingUpdates = allPolicyUpdates?.filter(update => {
-        if (!update.affected_hs_codes || update.affected_hs_codes.length === 0) {
-          return false;
-        }
-
-        // Check if ANY component matches this policy on both criteria
-        return componentMap.some(comp => {
-          // 1. Check if component's origin country is in affected_countries
-          const countryMatches = update.affected_countries &&
-            update.affected_countries.some(country =>
-              country.toLowerCase() === comp.origin_country.toLowerCase()
-            );
-
-          // 2. Check if component's HS code matches affected_hs_codes
-          const hsMatches = update.affected_hs_codes.some(updateCode =>
-            updateCode.startsWith(comp.hs_prefix)
-          );
-
-          return countryMatches && hsMatches;
-        });
-      }) || [];
-
-      // Merge and deduplicate threats
-      const mergedThreats = [];
-      const seenTitles = new Set();
-
-      // Add events first (announcements)
-      matchingEvents?.forEach(event => {
-        if (!seenTitles.has(event.policy_title)) {
-          mergedThreats.push({
-            id: event.id,
-            title: event.policy_title,
-            date: event.event_date,
-            type: 'announcement',
-            severity: event.impact_severity,
-            timeline: event.implementation_timeline,
-            probability: event.implementation_probability,
-            source: 'trump_policy_events'
-          });
-          seenTitles.add(event.policy_title);
-        }
+      console.log('📡 [POLICYTIMELINE] Crisis alerts fetched:', {
+        total_alerts: crisisAlerts?.length || 0,
+        sample: crisisAlerts?.slice(0, 3).map(a => ({ title: a.title, countries: a.affected_countries }))
       });
 
-      // Add updates (confirmation/implementation)
-      matchingUpdates?.forEach(update => {
-        if (!seenTitles.has(update.title)) {
-          mergedThreats.push({
-            id: update.id,
-            title: update.title,
-            date: update.effective_date,
-            type: update.status,
-            severity: update.policy_type,
-            percentage: update.adjustment_percentage,
-            source: 'tariff_policy_updates'
+      // Filter alerts to show:
+      // 1. Alerts matching affected countries
+      // 2. Alerts with no countries specified (global/US trade policy)
+      // 3. Alerts mentioning "tariff", "trade", "China", etc. in title
+      const relevantAlerts = crisisAlerts?.filter(alert => {
+        // Match 1: Country-specific alerts
+        if (alert.affected_countries && alert.affected_countries.length > 0) {
+          const hasMatchingCountry = alert.affected_countries.some(country =>
+            affectedCountries.includes(normalizeCountry(country))
+          );
+          if (hasMatchingCountry) return true;
+        }
+
+        // Match 2: Global trade policy alerts (no specific country)
+        if (!alert.affected_countries || alert.affected_countries.length === 0) {
+          const tradeKeywords = ['tariff', 'trade', 'import', 'duty', 'section 301', 'section 232', 'usmca', 'customs'];
+          const titleLower = (alert.title || '').toLowerCase();
+          const hasTradeKeyword = tradeKeywords.some(keyword => titleLower.includes(keyword));
+
+          // Also include if mentions China and we have Chinese components
+          const mentionsChina = titleLower.includes('china') && affectedCountries.includes('CN');
+
+          return hasTradeKeyword || mentionsChina;
+        }
+
+        return false;
+      }) || [];
+
+      console.log('✅ [POLICYTIMELINE] Relevant alerts filtered:', {
+        relevant_count: relevantAlerts.length,
+        alerts: relevantAlerts.map(a => ({ title: a.title, severity: a.severity, countries: a.affected_countries }))
+      });
+
+      // Map to threat format
+      const mappedThreats = relevantAlerts.map(alert => ({
+        id: alert.id,
+        title: alert.title,
+        date: alert.created_at,
+        type: mapAlertTypeToStatus(alert.alert_type),
+        severity: alert.severity,
+        percentage: alert.impact_percentage,
+        description: alert.description,
+        source_url: alert.source_url,
+        detection_source: alert.detection_source,
+        source: 'crisis_alerts'
+      }));
+
+      // Add volatility warnings as synthetic "threats"
+      volatileComponents.forEach((comp, index) => {
+        if (comp.volatility.tier === 1) { // Super volatile only
+          mappedThreats.push({
+            id: `volatility-${index}`,
+            title: `${comp.description} (${comp.origin_country} → ${comp.destination})`,
+            date: new Date().toISOString(),
+            type: 'volatility_warning',
+            severity: 'high',
+            percentage: null,
+            description: comp.volatility.reason,
+            policies: comp.volatility.policies,
+            warning: comp.volatility.warning,
+            source: 'volatility_manager'
           });
-          seenTitles.add(update.title);
         }
       });
 
       // Sort by date (newest first)
-      mergedThreats.sort((a, b) => new Date(b.date) - new Date(a.date));
+      mappedThreats.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      console.log('✅ [POLICYTIMELINE] Final merged threats:', {
-        total_threats: mergedThreats.length,
-        threats: mergedThreats
+      console.log('✅ [POLICYTIMELINE] Final threats with volatility warnings:', {
+        total_threats: mappedThreats.length,
+        crisis_alerts: relevantAlerts.length,
+        volatility_warnings: mappedThreats.filter(t => t.source === 'volatility_manager').length
       });
 
-      setThreats(mergedThreats);
+      setThreats(mappedThreats);
     } catch (error) {
       console.error('❌ [POLICYTIMELINE] Error fetching policy threats:', error);
       setThreats([]);
@@ -181,30 +167,142 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     }
   };
 
+  // VolatilityManager logic (inline to avoid import issues in browser)
+  const getVolatilityTier = (hsCode, origin, dest) => {
+    const hsChapter = hsCode ? hsCode.replace(/\./g, '').substring(0, 2) : null;
+    const hs4 = hsCode ? hsCode.replace(/\./g, '').substring(0, 4) : null;
+
+    // TIER 1: Super Volatile (24h cache, bypass database)
+
+    // 1. China → USA: Semiconductor/Electronics (HS 85)
+    if (origin === 'CN' && dest === 'US' && hsChapter === '85') {
+      return {
+        tier: 1,
+        volatility: 'super_volatile',
+        reason: 'China semiconductors/electronics to USA - Section 301 + CHIPS Act restrictions (rates change monthly)',
+        policies: ['Section 301 (volatile)', 'CHIPS Act', 'Reciprocal Tariffs', 'IEEPA'],
+        warning: '⚠️ VOLATILE RATE: This tariff rate changes frequently. Using fresh AI research.'
+      };
+    }
+
+    // 2. China → USA: Strategic goods
+    const strategicHS = ['8541', '8542', '8507', '8504', '8703', '8708', '8544'];
+    if (origin === 'CN' && dest === 'US' && strategicHS.includes(hs4)) {
+      return {
+        tier: 1,
+        volatility: 'super_volatile',
+        reason: 'China strategic goods to USA - Multiple overlapping tariffs (Section 301 + reciprocal + IEEPA)',
+        policies: ['Section 301', 'Reciprocal Tariffs', 'IEEPA', 'Strategic Trade Controls'],
+        warning: '⚠️ VOLATILE RATE: This tariff rate changes frequently.'
+      };
+    }
+
+    // 3. Any → USA: Steel/Aluminum
+    const metalChapters = ['72', '73', '76'];
+    if (dest === 'US' && metalChapters.includes(hsChapter)) {
+      return {
+        tier: 1,
+        volatility: 'super_volatile',
+        reason: 'Steel/aluminum to USA - Section 232 rates and exemptions change by country/product',
+        policies: ['Section 232', 'Country-specific exemptions', 'Reciprocal adjustments'],
+        warning: '⚠️ VOLATILE RATE: Section 232 rates change frequently.'
+      };
+    }
+
+    // 4. China → USA: Any product
+    if (origin === 'CN' && dest === 'US') {
+      return {
+        tier: 1,
+        volatility: 'super_volatile',
+        reason: 'China to USA - Active trade policy environment with frequent tariff changes',
+        policies: ['Section 301 (baseline)', 'Reciprocal Tariffs', 'IEEPA emergency powers'],
+        warning: '⚠️ VOLATILE RATE: China tariffs change frequently.'
+      };
+    }
+
+    // TIER 2: Volatile (7-day cache)
+
+    // China → Canada/Mexico
+    if (origin === 'CN' && (dest === 'CA' || dest === 'MX')) {
+      return {
+        tier: 2,
+        volatility: 'volatile',
+        reason: 'China to USMCA countries - Circumvention monitoring, rates may change',
+        policies: ['Circumvention rules', 'Origin verification', 'Transshipment enforcement'],
+        warning: '⚠️ Policy-sensitive rate. Verifying current tariff.'
+      };
+    }
+
+    // Vietnam/Thailand/India/Indonesia/Malaysia → USA
+    const emergingOrigins = ['VN', 'TH', 'IN', 'ID', 'MY'];
+    if (emergingOrigins.includes(origin) && dest === 'US') {
+      return {
+        tier: 2,
+        volatility: 'volatile',
+        reason: 'Emerging Asia to USA - Potential reciprocal tariff targets',
+        policies: ['Base MFN', 'Possible reciprocal tariffs', 'Trade monitoring'],
+        warning: '⚠️ Policy-sensitive rate.'
+      };
+    }
+
+    // TIER 3: Stable (90-day cache)
+    return {
+      tier: 3,
+      volatility: 'stable',
+      reason: 'Standard tariff rates (stable)',
+      policies: ['Standard MFN', 'USMCA']
+    };
+  };
+
+  const normalizeCountry = (country) => {
+    if (!country) return null;
+    const COUNTRY_MAP = {
+      'China': 'CN', 'United States': 'US', 'USA': 'US', 'US': 'US',
+      'Mexico': 'MX', 'MX': 'MX', 'Canada': 'CA', 'CA': 'CA',
+      'Vietnam': 'VN', 'VN': 'VN', 'Thailand': 'TH', 'TH': 'TH',
+      'India': 'IN', 'IN': 'IN', 'Indonesia': 'ID', 'ID': 'ID',
+      'Malaysia': 'MY', 'MY': 'MY'
+    };
+    return COUNTRY_MAP[country] || country.toUpperCase().substring(0, 2);
+  };
+
+  const mapAlertTypeToStatus = (alertType) => {
+    const typeMap = {
+      'tariff_change': 'implemented',
+      'tariff_announcement': 'announced',
+      'policy_update': 'confirmed',
+      'trade_dispute': 'announcement'
+    };
+    return typeMap[alertType] || 'announced';
+  };
+
   if (loading) {
     return (
       <div className="policy-threats-card">
         <div className="threats-header">
           <h3 className="threats-title">⚠️ Policy Threats</h3>
         </div>
-        <div className="loading">Loading policy alerts...</div>
+        <div className="loading">Checking for policy alerts...</div>
       </div>
     );
   }
 
   if (threats.length === 0) {
-    console.log('⚠️  [POLICYTIMELINE] No threats found - component will not display');
+    console.log('✅ [POLICYTIMELINE] No threats found - component will not display');
     return null;
   }
 
   const getStatusBadge = (type) => {
     switch (type) {
       case 'announcement':
+      case 'announced':
         return <span className="badge badge-warning">Announced</span>;
       case 'confirmed':
         return <span className="badge badge-danger">Confirmed</span>;
       case 'implemented':
-        return <span className="badge badge-error">Implemented</span>;
+        return <span className="badge badge-error">Active</span>;
+      case 'volatility_warning':
+        return <span className="badge badge-volatile">Volatile Rate</span>;
       default:
         return <span className="badge badge-default">{type}</span>;
     }
@@ -212,8 +310,9 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
   const getSeverityIcon = (severity) => {
     if (!severity) return '📍';
-    if (severity.toLowerCase().includes('high')) return '🔴';
-    if (severity.toLowerCase().includes('medium')) return '🟠';
+    const severityLower = severity.toLowerCase();
+    if (severityLower.includes('high') || severityLower.includes('critical')) return '🔴';
+    if (severityLower.includes('medium')) return '🟠';
     return '🟡';
   };
 
@@ -221,7 +320,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     <div className="policy-threats-card">
       <div className="threats-header">
         <h3 className="threats-title">⚠️ Tariff Policy Threats ({threats.length})</h3>
-        <p className="threats-subtitle">Active policies affecting your products</p>
+        <p className="threats-subtitle">Active policies affecting your volatile components</p>
       </div>
 
       <div className="threats-list">
@@ -242,7 +341,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
                 <div className="threat-meta">
                   {new Date(threat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                   {threat.severity && ` • ${threat.severity}`}
-                  {threat.probability && ` • ${Math.round(threat.probability * 100)}% likely`}
+                  {threat.detection_source && ` • ${threat.detection_source}`}
                 </div>
               </div>
 
@@ -251,12 +350,31 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
 
             {expandedId === threat.id && (
               <div className="threat-details">
-                {threat.timeline && <div className="detail-item"><strong>Implementation:</strong> {threat.timeline}</div>}
+                {threat.description && <div className="detail-item">{threat.description}</div>}
                 {threat.percentage && <div className="detail-item"><strong>Rate Change:</strong> +{threat.percentage}%</div>}
+                {threat.policies && (
+                  <div className="detail-item">
+                    <strong>Applicable Policies:</strong> {threat.policies.join(', ')}
+                  </div>
+                )}
+                {threat.source_url && (
+                  <div className="detail-item">
+                    <a href={threat.source_url} target="_blank" rel="noopener noreferrer" className="source-link">
+                      View Source →
+                    </a>
+                  </div>
+                )}
 
-                {threat.type === 'announcement' && <div className="detail-alert info">💡 Not yet confirmed. Monitor for updates.</div>}
-                {threat.type === 'confirmed' && <div className="detail-alert warning">⚠️ Confirmed and pending implementation.</div>}
-                {threat.type === 'implemented' && <div className="detail-alert error">🚨 Policy is now active. Review impact.</div>}
+                {threat.type === 'volatility_warning' && (
+                  <div className="detail-alert warning">
+                    ⚠️ {threat.warning || 'This component uses volatile tariff rates that change frequently. Verify current rates before shipment.'}
+                  </div>
+                )}
+                {threat.type === 'announced' && threat.source === 'crisis_alerts' && (
+                  <div className="detail-alert info">💡 Detected via RSS monitoring. Monitor for implementation updates.</div>
+                )}
+                {threat.type === 'confirmed' && <div className="detail-alert warning">⚠️ Confirmed policy change. Review impact on your supply chain.</div>}
+                {threat.type === 'implemented' && <div className="detail-alert error">🚨 Policy is now active. Verify current tariff rates.</div>}
               </div>
             )}
           </div>
@@ -389,6 +507,16 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
           font-weight: 600;
         }
 
+        .source-link {
+          color: #2563eb;
+          text-decoration: none;
+          font-weight: 500;
+        }
+
+        .source-link:hover {
+          text-decoration: underline;
+        }
+
         .detail-alert {
           margin-top: 0.6rem;
           padding: 0.5rem;
@@ -440,6 +568,11 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         .badge-error {
           background: #fca5a5;
           color: #7f1d1d;
+        }
+
+        .badge-volatile {
+          background: #fde68a;
+          color: #92400e;
         }
 
         .badge-default {

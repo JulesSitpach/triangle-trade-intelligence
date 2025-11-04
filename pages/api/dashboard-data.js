@@ -31,9 +31,16 @@ const supabase = createClient(
 
 const SUBSCRIPTION_LIMITS = {
   'Trial': 1,           // 1 analysis total (7-day trial)
-  'Starter': 10,        // 10 analyses per month
+  'Starter': 15,        // 15 analyses per month (matches pricing.js)
   'Professional': 100,  // 100 analyses per month
-  'Premium': null       // Unlimited
+  'Premium': 500        // 500 analyses per month (changed Oct 2025 from unlimited to prevent AI cost abuse)
+};
+
+const BRIEFING_LIMITS = {
+  'Trial': 3,           // 3 briefings total (7-day trial)
+  'Starter': 50,        // 50 briefings per month (matches pricing.js)
+  'Professional': 200,  // 200 briefings per month (matches pricing.js)
+  'Premium': 1000       // 1,000 briefings per month (matches pricing.js)
 };
 
 export default protectedApiHandler({
@@ -52,7 +59,7 @@ export default protectedApiHandler({
 
       const { data: usageRecord, error: usageError } = await supabase
         .from('monthly_usage_tracking')
-        .select('analysis_count')
+        .select('analysis_count, briefing_count')
         .eq('user_id', userId)
         .eq('month_year', month_year)
         .single();
@@ -62,6 +69,7 @@ export default protectedApiHandler({
       }
 
       const monthlyUsed = usageRecord?.analysis_count || 0;
+      const monthlyBriefingsUsed = usageRecord?.briefing_count || 0;
 
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -73,12 +81,15 @@ export default protectedApiHandler({
         userId,
         email: profile?.email,
         tier: profile?.subscription_tier,
-        tierLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier],
+        analysisLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier],
+        briefingLimit: BRIEFING_LIMITS[profile?.subscription_tier],
         source: 'monthly_usage_tracking',
         billingPeriod: month_year,
-        permanentCount: monthlyUsed
+        analysisCount: monthlyUsed,
+        briefingCount: monthlyBriefingsUsed
       });
 
+      // === WORKFLOW ANALYSIS LIMITS ===
       const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined
         ? SUBSCRIPTION_LIMITS[profile?.subscription_tier]
         : 10; // Default to Starter limit
@@ -90,6 +101,18 @@ export default protectedApiHandler({
       const percentage = isUnlimited ? 0 : Math.round((used / limit) * 100);
       const remaining = isUnlimited ? null : Math.max(0, limit - used);
       const limitReached = isUnlimited ? false : used >= limit;
+
+      // === PORTFOLIO BRIEFING LIMITS ===
+      const briefingLimit = BRIEFING_LIMITS[profile?.subscription_tier] !== undefined
+        ? BRIEFING_LIMITS[profile?.subscription_tier]
+        : 50; // Default to Starter limit
+
+      const briefingUsed = monthlyBriefingsUsed || 0;
+
+      const isBriefingUnlimited = briefingLimit === null;
+      const briefingPercentage = isBriefingUnlimited ? 0 : Math.round((briefingUsed / briefingLimit) * 100);
+      const briefingRemaining = isBriefingUnlimited ? null : Math.max(0, briefingLimit - briefingUsed);
+      const briefingLimitReached = isBriefingUnlimited ? false : briefingUsed >= briefingLimit;
 
       // Get workflows from BOTH tables (sessions = in-progress, completions = with certificates)
       const { data: sessionsRows } = await supabase
@@ -565,6 +588,14 @@ export default protectedApiHandler({
           remaining: remaining,
           limit_reached: limitReached,
           is_unlimited: isUnlimited
+        },
+        briefing_usage_stats: {
+          used: briefingUsed,
+          limit: briefingLimit,
+          percentage: briefingPercentage,
+          remaining: briefingRemaining,
+          limit_reached: briefingLimitReached,
+          is_unlimited: isBriefingUnlimited
         },
         user_profile: profile || {},
 

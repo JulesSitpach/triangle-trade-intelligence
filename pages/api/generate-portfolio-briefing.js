@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { BaseAgent } from '../../lib/agents/base-agent.js';
+import { VolatilityManager } from '../../lib/tariff/volatility-manager.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -139,7 +140,8 @@ export default async function handler(req, res) {
 
     console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} real alerts matched`);
 
-    // STEP 3: Build portfolio analysis for AI prompt
+    // STEP 3: Build portfolio analysis for AI prompt (with volatility detection)
+    const destination = workflow_data.company?.destination_country || 'US';
     const componentSummary = components.map(c => {
       const percentage = totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0;
       const matchingAlert = matchedAlerts.find(a =>
@@ -147,9 +149,18 @@ export default async function handler(req, res) {
         a.affected_hs_codes?.some(code => (c.hs_code || '').replace(/\./g, '').includes(code.replace(/\./g, '').substring(0, 6)))
       );
 
+      // ✅ NEW: Check tariff rate volatility for this component
+      const volatilityTier = VolatilityManager.getVolatilityTier(
+        c.hs_code,
+        c.origin_country || c.country,
+        destination
+      );
+
+      const volatilityFlag = volatilityTier.tier <= 2 ? ` [${volatilityTier.volatility.toUpperCase()}: ${volatilityTier.reason}]` : '';
+
       return `- ${c.component_type || c.description} (${c.origin_country || c.country}, HS ${c.hs_code}, $${(c.annual_volume || 0).toLocaleString()}, ${percentage}% of costs)${
         matchingAlert ? ` [REAL ALERT: ${matchingAlert.title}]` : ''
-      }`;
+      }${volatilityFlag}`;
     }).join('\n');
 
     // STEP 4: Rank matched alerts by severity and component impact
@@ -199,6 +210,18 @@ and countries: ${[...new Set(userComponentOrigins)].join(', ')}
 
 Use forward-looking language: "potential", "expected", "could face", "we are tracking for"`;
 
+    // Detect volatile components for monitoring emphasis
+    const volatileComponents = components.map(c => {
+      const volatilityTier = VolatilityManager.getVolatilityTier(
+        c.hs_code,
+        c.origin_country || c.country,
+        destination
+      );
+      return { ...c, volatility: volatilityTier };
+    }).filter(c => c.volatility.tier <= 2); // Only Tier 1 (super volatile) and Tier 2 (volatile)
+
+    const hasVolatileComponents = volatileComponents.length > 0;
+
     // STEP 5: Build the AI prompt - Strategic advisor tone
     const aiPrompt = `ROLE:
 You are a Trade Compliance Director analyzing ${companyName}'s supply chain for USMCA 2026 renegotiation exposure. Write a strategic briefing for the operations team.
@@ -212,10 +235,22 @@ TONE:
 ${companyName}'s COMPONENT PORTFOLIO:
 ${components.map(c => {
   const percentage = c.percentage || (totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0);
+  const volatilityTier = VolatilityManager.getVolatilityTier(c.hs_code, c.origin_country || c.country, destination);
+  const volatilityNote = volatilityTier.tier <= 2 ? `\n  ⚠️ VOLATILE TARIFF: ${volatilityTier.reason}` : '';
   return `- ${c.component_type || c.description} from ${c.origin_country || c.country} (${percentage}% of costs)
   HS Code: ${c.hs_code || 'Not classified'}
-  ${c.annual_volume > 0 ? `Annual Value: $${c.annual_volume.toLocaleString()}` : ''}`;
+  ${c.annual_volume > 0 ? `Annual Value: $${c.annual_volume.toLocaleString()}` : ''}${volatilityNote}`;
 }).join('\n')}
+
+${hasVolatileComponents ? `\n⚠️ TARIFF RATE VOLATILITY WARNING:
+${volatileComponents.length} components have VOLATILE tariff rates (change frequently with policy announcements):
+${volatileComponents.map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n')}
+
+These rates are subject to:
+${[...new Set(volatileComponents.flatMap(c => c.volatility.policies))].map(p => `- ${p}`).join('\n')}
+
+IMPORTANT: Database tariff rates for these components may be STALE. Platform forces fresh AI research for volatile combinations.
+` : ''}
 
 ${matchedAlerts.length > 0 ? `ACTIVE POLICY ALERTS (${matchedAlerts.length} affecting your supply chain):
 ${rankedAlerts.map((a, idx) =>
@@ -240,8 +275,23 @@ Return a JSON object with these EXACT fields:
 
   "strategic_trade_offs": "Write 2-3 paragraphs presenting genuine strategic choices with no obvious answer. Frame as 'choosing between futures.' Example: 'You're essentially choosing between two futures. Continue with Chinese microprocessors and accept 2026 rule uncertainty, or begin qualifying alternative suppliers—knowing that transition takes 12-18 months and increases component costs. There's no obviously correct answer because the actual 2026 rules haven't been proposed yet. Your Mexico concentration (55%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce this risk, but your current suppliers have established quality and logistics. The timing matters—qualification of alternative suppliers requires substantial lead time.'",
 
-  "monitoring_plan": "Write 2-3 paragraphs describing what you're tracking and WHY it matters to them. Connect monitoring to their specific components. Example: 'We're tracking the USMCA Joint Commission meeting schedule and any published negotiating texts, particularly proposals affecting cumulation rules for electronics components. For your microprocessor sourcing, we're watching USTR statements on non-party content thresholds. On the Mexico side, we're monitoring the Diario Oficial for labor ministry updates affecting your power supply and housing suppliers. The next major intelligence point comes when the Joint Commission publishes 2026 renegotiation proposals, expected Q1 2026. That's when uncertainty around cumulation rules begins resolving into actual policy language.'"
+  "monitoring_plan": "Write 2-3 paragraphs describing what you're tracking and WHY it matters to them. Connect monitoring to their specific components.${hasVolatileComponents ? ' CRITICAL: Emphasize that volatile components require MORE FREQUENT monitoring (daily for Tier 1, weekly for Tier 2) because tariff rates change with executive proclamations. Explain which components need daily checks vs quarterly checks.' : ''} Example: 'We're tracking the USMCA Joint Commission meeting schedule and any published negotiating texts, particularly proposals affecting cumulation rules for electronics components. For your microprocessor sourcing, we're watching USTR statements on non-party content thresholds. On the Mexico side, we're monitoring the Diario Oficial for labor ministry updates affecting your power supply and housing suppliers. The next major intelligence point comes when the Joint Commission publishes 2026 renegotiation proposals, expected Q1 2026. That's when uncertainty around cumulation rules begins resolving into actual policy language.'"
 }
+
+${hasVolatileComponents ? `\nMONITORING FREQUENCY GUIDANCE:
+Your portfolio contains ${volatileComponents.length} components with volatile tariff rates requiring enhanced monitoring:
+
+DAILY CHECKS (Super Volatile - Tier 1):
+${volatileComponents.filter(c => c.volatility.tier === 1).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.policies.join(', ')}`).join('\n') || 'None'}
+
+WEEKLY CHECKS (Volatile - Tier 2):
+${volatileComponents.filter(c => c.volatility.tier === 2).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.policies.join(', ')}`).join('\n') || 'None'}
+
+QUARTERLY CHECKS (Stable - Tier 3):
+All other components with standard MFN or USMCA rates
+
+WEAVE THIS INTO YOUR MONITORING PLAN - explain why some components need daily checks while others are quarterly.
+` : ''}
 
 CRITICAL RULES:
 1. WRITE NARRATIVE PROSE - Tell a story, don't list facts
