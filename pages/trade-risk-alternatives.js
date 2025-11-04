@@ -26,6 +26,7 @@ import TRADE_RISK_CONFIG, {
 // AlertImpactAnalysisService moved to server-side API endpoint: /api/alert-impact-analysis
 import { getCountryConfig } from '../lib/usmca/usmca-2026-config';
 import { getWorkflowData } from '../lib/services/unified-workflow-data-service';
+import { VolatilityManager } from '../lib/tariff/volatility-manager';
 
 // ✅ HELPER: Convert usmca.qualified (boolean) to qualification_status (string)
 const getQualificationStatus = (usmcaData) => {
@@ -44,7 +45,8 @@ export default function TradeRiskAlternatives() {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userTier, setUserTier] = useState('Trial'); // Track subscription tier
-  const [usageStats, setUsageStats] = useState({ used: 0, limit: 10, remaining: 10 }); // Track monthly usage
+  const [usageStats, setUsageStats] = useState({ used: 0, limit: 10, remaining: 10 }); // Track monthly workflow analysis usage
+  const [briefingUsageStats, setBriefingUsageStats] = useState({ used: 0, limit: 50, remaining: 50 }); // Track monthly portfolio briefing usage
 
   // Real policy alerts state
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
@@ -189,6 +191,9 @@ export default function TradeRiskAlternatives() {
         // Set usage stats for monthly limit tracking
         if (dashboardData.usage_stats) {
           setUsageStats(dashboardData.usage_stats);
+        }
+        if (dashboardData.briefing_usage_stats) {
+          setBriefingUsageStats(dashboardData.briefing_usage_stats);
         }
 
         // If analysis_id provided, load that specific alert
@@ -1109,6 +1114,22 @@ export default function TradeRiskAlternatives() {
                   const netAfterUSMCA = totalRate - (baseMFN - usmcaRate);
                   const actualSavings = baseMFN - usmcaRate;
 
+                  // ✅ NEW: Check component volatility tier
+                  const componentVolatility = VolatilityManager.getVolatilityTier(
+                    comp.hs_code,
+                    comp.origin_country || comp.country,
+                    userProfile.destinationCountry || 'US'
+                  );
+
+                  console.log(`🔍 Component volatility check: ${comp.component_type}`, {
+                    hs_code: comp.hs_code,
+                    origin: comp.origin_country || comp.country,
+                    destination: userProfile.destinationCountry,
+                    tier: componentVolatility.tier,
+                    volatility: componentVolatility.volatility,
+                    reason: componentVolatility.reason
+                  });
+
                   // Filter alerts for this specific component
                   // BROADER MATCHING: Every component gets tagged with ALL applicable alerts
                   // - Blanket country tariffs (NULL HS codes + origin match)
@@ -1116,7 +1137,7 @@ export default function TradeRiskAlternatives() {
                   // - Specific tariffs (HS code + origin match)
                   // ✅ Use realPolicyAlerts (raw database alerts) not consolidatedAlerts (reformatted)
                   // because consolidation changes the alert structure and loses the matching fields
-                  const componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
+                  let componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
                     const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
                     const componentHS = comp.hs_code;
                     const componentIndustry = comp.industry || userProfile.industry_sector;
@@ -1169,6 +1190,26 @@ export default function TradeRiskAlternatives() {
                     return false;
                   });
 
+                  // ✅ NEW: Add volatility context to each alert and sort by priority
+                  componentAlerts = componentAlerts
+                    .map(alert => ({
+                      ...alert,
+                      component_volatility_tier: componentVolatility.tier,
+                      component_volatility_warning: componentVolatility.warning,
+                      component_policies_applicable: componentVolatility.policies
+                    }))
+                    .sort((a, b) => {
+                      // Priority 1: Component volatility tier (Tier 1 = super volatile, show first)
+                      if (a.component_volatility_tier !== b.component_volatility_tier) {
+                        return a.component_volatility_tier - b.component_volatility_tier;
+                      }
+                      // Priority 2: Alert severity (CRITICAL > HIGH > MEDIUM > LOW)
+                      const severityOrder = { critical: 1, high: 2, medium: 3, low: 4 };
+                      const aSeverity = severityOrder[(a.severity || '').toLowerCase()] || 99;
+                      const bSeverity = severityOrder[(b.severity || '').toLowerCase()] || 99;
+                      return aSeverity - bSeverity;
+                    });
+
                   const isExpanded = expandedComponents[idx] || false;
                   const hasAlerts = componentAlerts.length > 0;
                   const emailEnabled = componentEmailNotifications[idx] || false;
@@ -1208,8 +1249,45 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Component Name */}
-                        <div style={{ flex: '2', fontWeight: 600, color: '#111827' }}>
-                          {comp.component_type || comp.description || `Component ${idx + 1}`}
+                        <div style={{ flex: '2', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span>{comp.component_type || comp.description || `Component ${idx + 1}`}</span>
+                          {/* Volatility Badge */}
+                          {comp.volatility_tier === 1 && (
+                            <span
+                              title={`Super Volatile: ${comp.volatility_reason || 'Rates change daily'}`}
+                              style={{
+                                background: '#fef3c7',
+                                color: '#92400e',
+                                padding: '0.125rem 0.5rem',
+                                borderRadius: '8px',
+                                fontSize: '0.625rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                border: '1px solid #fbbf24',
+                                cursor: 'help'
+                              }}
+                            >
+                              🔴 Volatile
+                            </span>
+                          )}
+                          {comp.volatility_tier === 2 && (
+                            <span
+                              title={`Volatile: ${comp.volatility_reason || 'Rates change weekly'}`}
+                              style={{
+                                background: '#dbeafe',
+                                color: '#1e40af',
+                                padding: '0.125rem 0.5rem',
+                                borderRadius: '8px',
+                                fontSize: '0.625rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                border: '1px solid #93c5fd',
+                                cursor: 'help'
+                              }}
+                            >
+                              🟡 Volatile
+                            </span>
+                          )}
                         </div>
 
                         {/* Origin Country */}
@@ -1276,6 +1354,71 @@ export default function TradeRiskAlternatives() {
                       {/* Expanded Content - Alerts Only */}
                       {isExpanded && (
                         <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+                          {/* ✅ NEW: Volatility Warning Banner */}
+                          {componentVolatility.tier <= 2 && componentVolatility.warning && (
+                            <div style={{
+                              padding: '1rem',
+                              marginBottom: '1rem',
+                              background: componentVolatility.tier === 1 ? '#fef3c7' : '#dbeafe',
+                              border: `2px solid ${componentVolatility.tier === 1 ? '#f59e0b' : '#3b82f6'}`,
+                              borderRadius: '8px',
+                              fontSize: '0.875rem'
+                            }}>
+                              <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: componentVolatility.tier === 1 ? '#92400e' : '#1e3a8a' }}>
+                                {componentVolatility.tier === 1 ? '🔴 Super Volatile Rate' : '🟡 Volatile Rate'}
+                              </div>
+                              <div style={{ color: componentVolatility.tier === 1 ? '#92400e' : '#1e40af', marginBottom: '0.5rem' }}>
+                                {componentVolatility.reason}
+                              </div>
+                              {componentVolatility.policies && (
+                                <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                                  <strong>Applicable Policies:</strong> {componentVolatility.policies.join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ✅ NEW: Rate Freshness Indicator */}
+                          {comp.volatility_tier && (
+                            <div style={{
+                              padding: '0.75rem 1rem',
+                              marginBottom: '1rem',
+                              background: '#f0fdf4',
+                              border: '1px solid #bbf7d0',
+                              borderRadius: '6px',
+                              fontSize: '0.8125rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              <span style={{ fontSize: '1rem' }}>🔄</span>
+                              <div style={{ flex: 1, color: '#166534' }}>
+                                {section301 > 0 && (
+                                  <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                                    Section 301 Rate: {(section301 * 100).toFixed(1)}%
+                                  </div>
+                                )}
+                                {comp.last_verified || comp.verified_date ? (
+                                  <div>
+                                    Verified {comp.verified_date || new Date(comp.last_verified).toISOString().split('T')[0]}
+                                    {comp.verified_time && ` at ${comp.verified_time}`}
+                                    {comp.cache_age_days !== undefined && comp.cache_age_days > 0 && (
+                                      <span style={{ fontStyle: 'italic', marginLeft: '0.5rem' }}>
+                                        ({comp.cache_age_days} day{comp.cache_age_days !== 1 ? 's' : ''} ago)
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div>Verified today</div>
+                                )}
+                                <div style={{ fontSize: '0.75rem', color: '#15803d', marginTop: '0.25rem' }}>
+                                  ⚠️ This rate is refreshed {comp.volatility_refresh_frequency || 'regularly'}
+                                  {comp.volatility_tier === 1 && ' (daily for super-volatile components)'}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Component-Specific Alerts */}
                           {componentAlerts.length > 0 && (
                             <div>
@@ -1695,23 +1838,23 @@ export default function TradeRiskAlternatives() {
                         console.log('🔵 USMCA 2026 button clicked!', { userProfile });
                         loadPortfolioBriefing(userProfile);
                       }}
-                      className={usageStats.limit_reached ? "btn-secondary" : "btn-primary"}
-                      disabled={isLoadingPolicyAlerts || usageStats.limit_reached}
-                      style={usageStats.limit_reached ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
+                      className={briefingUsageStats.limit_reached ? "btn-secondary" : "btn-primary"}
+                      disabled={isLoadingPolicyAlerts || briefingUsageStats.limit_reached}
+                      style={briefingUsageStats.limit_reached ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                     >
                       {isLoadingPolicyAlerts
                         ? '⏳ Analyzing...'
-                        : usageStats.limit_reached
-                        ? `🔒 Monthly Limit Reached (${usageStats.used}/${usageStats.limit})`
+                        : briefingUsageStats.limit_reached
+                        ? `🔒 Monthly Limit Reached (${briefingUsageStats.used}/${briefingUsageStats.limit})`
                         : portfolioBriefing
-                        ? `📊 Re-analyze (${usageStats.used}/${usageStats.limit === null ? '∞' : usageStats.limit} used)`
-                        : `📊 USMCA 2026 Impact Analysis (${usageStats.used}/${usageStats.limit === null ? '∞' : usageStats.limit} used)`}
+                        ? `📊 Re-analyze (${briefingUsageStats.used}/${briefingUsageStats.limit === null ? '∞' : briefingUsageStats.limit} used)`
+                        : `📊 USMCA 2026 Impact Analysis (${briefingUsageStats.used}/${briefingUsageStats.limit === null ? '∞' : briefingUsageStats.limit} used)`}
                     </button>
 
                     {/* Show upgrade CTA when limit reached */}
-                    {usageStats.limit_reached && (
+                    {briefingUsageStats.limit_reached && (
                       <a href="/pricing" className="btn-primary" style={{ textDecoration: 'none' }}>
-                        ⬆️ Upgrade for More Analyses
+                        ⬆️ Upgrade for More Briefings
                       </a>
                     )}
                   </div>

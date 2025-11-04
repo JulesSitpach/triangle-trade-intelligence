@@ -20,6 +20,7 @@ import { normalizeComponent, logComponentValidation, validateAPIResponse } from 
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { reserveAnalysisSlot, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { ClassificationAgent } from '../../lib/agents/classification-agent.js';
+import { VolatilityManager } from '../../lib/tariff/volatility-manager.js';
 
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
@@ -692,6 +693,56 @@ export default protectedApiHandler({
           continue;
         }
 
+        // ✅ VOLATILITY CHECK: Check if this component has volatile tariff rates
+        console.log('🔍 [VOLATILITY-CHECK] Checking tariff volatility for:', {
+          hs_code: component.hs_code,
+          origin: baseComponent.origin_country,
+          destination: destinationCountry
+        });
+
+        const volatilityTier = VolatilityManager.getVolatilityTier(
+          component.hs_code,
+          baseComponent.origin_country,
+          destinationCountry
+        );
+
+        console.log('⚠️ [VOLATILITY-RESULT] Tier determined:', {
+          hs_code: component.hs_code,
+          tier: volatilityTier.tier,
+          volatility: volatilityTier.volatility,
+          bypassDatabase: volatilityTier.bypassDatabase,
+          reason: volatilityTier.reason
+        });
+
+        // ✅ CRITICAL: If super-volatile (Tier 1), skip database and mark for AI research
+        if (volatilityTier.bypassDatabase) {
+          console.log('🚨 [SUPER-VOLATILE] Skipping database, marking component for AI research:', {
+            component: component.description,
+            reason: volatilityTier.reason,
+            policies: volatilityTier.policies
+          });
+
+          // Mark component as needing fresh AI research (database rates are stale)
+          enriched.push({
+            ...baseComponent,
+            mfn_rate: 0,
+            base_mfn_rate: 0,
+            section_301: 0,
+            section_232: 0,
+            usmca_rate: 0,
+            rate_source: 'volatile_requires_ai',
+            stale: true,  // Force AI research
+            volatility_tier: volatilityTier.tier,
+            volatility_warning: volatilityTier.warning,
+            volatility_reason: volatilityTier.reason,
+            volatility_policies: volatilityTier.policies,
+            volatility_refresh_frequency: volatilityTier.tier === 1 ? 'daily' : 'weekly',
+            data_source: 'volatility_bypass',
+            last_verified: null  // Not yet verified (will be set after AI call)
+          });
+          continue;  // Skip database lookup
+        }
+
         try {
           // Query tariff_intelligence_master (12k+ USITC rates) for this HS code
           // Normalize HS code: remove dots, pad to 8 digits
@@ -817,41 +868,31 @@ export default protectedApiHandler({
           // Rate type codes: "A" = ad valorem, "S" = specific, "C" = compound, NULL = free
 
           const getMFNRate = () => {
-            // ✅ CRITICAL FIX (Oct 28, 2025): China uses Column 2 rate, not MFN!
-            // - MFN rate (Most Favored Nation): For WTO countries (US, CA, MX, EU, etc.)
-            // - Column 2 rate: For non-WTO countries (China, Russia, Cuba, etc.)
-            // - Section 301: Additional policy tariff on top of base rate
+            // ✅ CORRECT APPROACH (Nov 3, 2025): Use base MFN rate for ALL WTO countries
+            // China has had Normal Trade Relations (NTR) since 2000 and WTO membership since 2001
+            // Column 2 rates ONLY apply to: North Korea, Cuba (non-NTR countries)
+            //
+            // For China → USA tariffs, the calculation is:
+            //   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)
+            //
+            // Section 301, Reciprocal, and IEEPA tariffs are added separately via getSection301Rate()
 
             const textRate = rateData?.mfn_text_rate;
             const mfnAdValRate = rateData?.mfn_ad_val_rate;
-            const column2AdValRate = rateData?.column_2_ad_val_rate;
-
-            // Check if origin is China or other non-WTO country
-            const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
 
             // ✅ DEBUG: Log database values for first component
             if (!component._debugLogged) {
               console.log('\n═══════════════════════════════════════════════════════════════');
-              console.log('🔍 [DATABASE ENRICHMENT] getMFNRate() - Raw database values:');
+              console.log('🔍 [DATABASE ENRICHMENT] getMFNRate() - Using WTO base rates:');
               console.log(`   HS Code: ${component.hs_code}`);
               console.log(`   Origin: ${component.origin_country}`);
-              console.log(`   Is Chinese Origin: ${isChineseOrigin}`);
               console.log(`   mfn_text_rate: "${textRate}"`);
               console.log(`   mfn_ad_val_rate: "${mfnAdValRate}" (parsed: ${parseFloat(mfnAdValRate)})`);
-              console.log(`   column_2_ad_val_rate: "${column2AdValRate}" (parsed: ${parseFloat(column2AdValRate)})`);
+              console.log(`   NOTE: Policy tariffs (Section 301, etc.) added separately`);
               component._debugLogged = true;
             }
 
-            // ✅ FIX: Use Column 2 rate for Chinese components
-            if (isChineseOrigin && column2AdValRate) {
-              const column2Rate = parseFloat(column2AdValRate);
-              if (!isNaN(column2Rate) && column2Rate > 0) {
-                console.log(`   → Using Column 2 rate for China: ${column2Rate}`);
-                return column2Rate;  // Return Column 2 rate (e.g., 0.35 = 35%)
-              }
-            }
-
-            // For all other countries, use MFN rate
+            // For all WTO countries (including China), use MFN rate
             if (textRate === 'Free') {
               return 0;
             }
@@ -919,6 +960,18 @@ export default protectedApiHandler({
           // This is the base tariff rate BEFORE Section 301/232 policy adjustments
           const baseMfnRate = mfnRate;
 
+          // ✅ Add volatility metadata for UI display
+          const componentVolatility = VolatilityManager.getVolatilityTier(
+            component.hs_code,
+            baseComponent.origin_country,
+            destinationCountry
+          );
+
+          const now = new Date();
+          const cacheAge = policyRates.verified_date ?
+            Math.floor((now - new Date(policyRates.verified_date)) / (1000 * 60 * 60 * 24)) :
+            0;
+
           const standardFields = {
             mfn_rate: mfnRate,
             base_mfn_rate: baseMfnRate,
@@ -929,7 +982,14 @@ export default protectedApiHandler({
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
             stale: false,  // All rates now from database - no AI enrichment needed
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
-            last_updated: new Date().toISOString()
+            last_updated: new Date().toISOString(),
+            // Volatility metadata for UI freshness indicators
+            volatility_tier: componentVolatility.tier,
+            volatility_reason: componentVolatility.reason,
+            volatility_refresh_frequency: componentVolatility.tier === 1 ? 'daily' :
+                                          componentVolatility.tier === 2 ? 'weekly' : 'quarterly',
+            last_verified: policyRates.verified_date || new Date().toISOString().split('T')[0],
+            cache_age_days: cacheAge
           };
 
           // ✅ DEBUG: Log final enriched rates for first component
@@ -1022,6 +1082,11 @@ export default protectedApiHandler({
           const aiResult = aiRates.find(air => air.hs_code === comp.hs_code);
           if (aiResult && (comp.stale === true || comp.rate_source === 'no_data')) {
             console.log(`✅ [HYBRID] AI found rates for ${comp.hs_code}: MFN=${aiResult.mfn_rate}, Section 301=${aiResult.section_301}`);
+
+            const now = new Date();
+            const verifiedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const verifiedTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // e.g., "02:30 PM"
+
             return {
               ...comp,
               mfn_rate: aiResult.mfn_rate,
@@ -1031,7 +1096,10 @@ export default protectedApiHandler({
               usmca_rate: aiResult.usmca_rate,
               rate_source: 'ai_research_2025',
               data_source: 'ai_research_2025',  // ✅ FIX: Also set data_source so validation passes
-              stale: false
+              stale: false,
+              last_verified: now.toISOString(),  // Full ISO timestamp for calculations
+              verified_date: verifiedDate,        // Human-readable date
+              verified_time: verifiedTime         // Human-readable time
             };
           }
           return comp;
