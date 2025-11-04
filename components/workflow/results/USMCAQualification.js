@@ -373,7 +373,31 @@ export default function USMCAQualification({ results }) {
                               {isExpanded ? '▼' : '▶'}
                             </button>
                           )}
-                          <span style={{ wordWrap: 'break-word', whiteSpace: 'normal', overflow: 'visible' }}>{component.description || ('Component ' + (index + 1))}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <span style={{ wordWrap: 'break-word', whiteSpace: 'normal', overflow: 'visible' }}>
+                              {component.description || ('Component ' + (index + 1))}
+                            </span>
+                            {/* ✅ NEW: Volatility Badge */}
+                            {component.volatility_tier && component.volatility_tier <= 2 && (
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  padding: '0.125rem 0.5rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '600',
+                                  borderRadius: '9999px',
+                                  backgroundColor: component.volatility_tier === 1 ? '#fef3c7' : '#dbeafe',
+                                  color: component.volatility_tier === 1 ? '#92400e' : '#1e40af',
+                                  border: `1px solid ${component.volatility_tier === 1 ? '#f59e0b' : '#3b82f6'}`,
+                                  cursor: 'help'
+                                }}
+                                title={component.volatility_reason || 'Volatile tariff rate - subject to frequent policy changes'}
+                              >
+                                {component.volatility_tier === 1 ? '🔴' : '🟡'} Volatile
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
@@ -533,6 +557,47 @@ export default function USMCAQualification({ results }) {
                                     </div>
                                   </div>
                                 )}
+                              </div>
+                            )}
+
+                            {/* ✅ Rate Freshness Indicator */}
+                            {component.volatility_tier && (
+                              <div style={{
+                                marginBottom: '0.75rem',
+                                padding: '0.75rem 1rem',
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                borderRadius: '6px',
+                                fontSize: '0.8125rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                              }}>
+                                <span style={{ fontSize: '1rem' }}>🔄</span>
+                                <div style={{ flex: 1, color: '#166534' }}>
+                                  {section301 > 0 && (
+                                    <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                                      Section 301 Rate: {(section301 * 100).toFixed(1)}%
+                                    </div>
+                                  )}
+                                  {component.last_verified || component.verified_date ? (
+                                    <div>
+                                      Verified {component.verified_date || new Date(component.last_verified).toISOString().split('T')[0]}
+                                      {component.verified_time && ` at ${component.verified_time}`}
+                                      {component.cache_age_days !== undefined && component.cache_age_days > 0 && (
+                                        <span style={{ fontStyle: 'italic', marginLeft: '0.5rem' }}>
+                                          ({component.cache_age_days} day{component.cache_age_days !== 1 ? 's' : ''} ago)
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div>Verified today</div>
+                                  )}
+                                  <div style={{ fontSize: '0.75rem', color: '#15803d', marginTop: '0.25rem' }}>
+                                    ⚠️ This rate is refreshed {component.volatility_refresh_frequency || 'regularly'}
+                                    {component.volatility_tier === 1 && ' (daily for super-volatile components)'}
+                                  </div>
+                                </div>
                               </div>
                             )}
 

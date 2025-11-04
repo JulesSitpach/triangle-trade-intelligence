@@ -20,6 +20,33 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing certificate data' });
     }
 
+    // 🔍 DEBUG: Log what tax IDs we received
+    console.log('🔍 [generate-certificate] Received company_info tax IDs:', {
+      exporter_tax_id: certificateData.company_info?.exporter_tax_id,
+      producer_tax_id: certificateData.company_info?.producer_tax_id,
+      importer_tax_id: certificateData.company_info?.importer_tax_id
+    });
+
+    // ⚠️ VALIDATION: Warn if critical USMCA data is missing
+    const missingData = [];
+    if (!certificateData.supply_chain?.qualified) {
+      missingData.push('qualified status');
+    }
+    if (!certificateData.supply_chain?.regional_value_content && certificateData.supply_chain?.regional_value_content !== 0) {
+      missingData.push('regional_value_content');
+    }
+    if (!certificateData.supply_chain?.threshold_applied) {
+      missingData.push('threshold_applied');
+    }
+    if (!certificateData.supply_chain?.trust_score && certificateData.supply_chain?.trust_score !== 0) {
+      missingData.push('trust_score');
+    }
+
+    if (missingData.length > 0) {
+      console.warn('⚠️ [generate-certificate] Missing critical USMCA data:', missingData);
+      console.warn('Certificate will use pessimistic defaults (qualified=false, RVC=0, trust=0)');
+    }
+
     // Validate required fields
     if (!certificateData.company_info?.exporter_name) {
       return res.status(400).json({ error: 'Missing exporter name' });
@@ -119,15 +146,16 @@ export default async function handler(req, res) {
       })),
 
       // USMCA analysis (for backend processing)
+      // ✅ FIX (Nov 4): Removed some optimistic defaults to fail loudly when critical data is missing
       usmca_analysis: {
-        qualified: certificateData.supply_chain?.qualified || false,
-        regional_value_content: certificateData.supply_chain?.regional_value_content || 0,
-        rule: certificateData.supply_chain?.rule || 'Regional Value Content',
-        threshold_applied: certificateData.supply_chain?.threshold_applied || 60,
-        preference_criterion: certificateData.supply_chain?.preference_criterion || 'B',
-        method_of_qualification: certificateData.supply_chain?.method_of_qualification || 'TV',
+        qualified: certificateData.supply_chain?.qualified ?? false,  // Explicit false if missing
+        regional_value_content: certificateData.supply_chain?.regional_value_content ?? 0,  // 0 if missing
+        rule: certificateData.supply_chain?.rule || 'Regional Value Content',  // Acceptable default
+        threshold_applied: certificateData.supply_chain?.threshold_applied,  // ⚠️ No default - could be undefined
+        preference_criterion: certificateData.supply_chain?.preference_criterion || 'B',  // Acceptable default
+        method_of_qualification: certificateData.supply_chain?.method_of_qualification || 'TV',  // Acceptable default
         component_origins: certificateData.supply_chain?.component_origins || [],
-        verification_status: certificateData.supply_chain?.verification_status || 'VERIFIED'
+        verification_status: certificateData.supply_chain?.verification_status || 'VERIFIED'  // Acceptable default
       },
 
       // Authorization
@@ -142,12 +170,14 @@ export default async function handler(req, res) {
       },
 
       // Trust verification
+      // ✅ FIX (Nov 4): Removed optimistic trust score default
       trust_verification: {
-        trust_score: certificateData.supply_chain?.trust_score || 0.85,
-        overall_trust_score: certificateData.supply_chain?.trust_score || 0.85,
+        trust_score: certificateData.supply_chain?.trust_score ?? 0,  // 0 if missing, not 0.85
+        overall_trust_score: certificateData.supply_chain?.trust_score ?? 0,  // 0 if missing, not 0.85
         verification_timestamp: new Date().toISOString(),
         data_source: 'AI Classification + User Input',
-        confidence_level: 'High'
+        confidence_level: certificateData.supply_chain?.trust_score >= 0.8 ? 'High' :
+                         certificateData.supply_chain?.trust_score >= 0.6 ? 'Medium' : 'Low'
       },
 
       // Blanket period

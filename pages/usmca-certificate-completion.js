@@ -367,31 +367,32 @@ export default function USMCACertificateCompletion() {
             // authData.certifier_type is set when user selects IMPORTER/EXPORTER/PRODUCER in AuthorizationStep
             certifier_type: authData?.certifier_type || 'EXPORTER',
             company_info: {
-              exporter_name: workflowData?.company?.company_name || workflowData?.company?.name || '',
-              exporter_address: workflowData?.company?.company_address || '',
-              exporter_country: companyCountry,  // FIXED: Use validated company country (ISO code or full name)
-              exporter_tax_id: workflowData?.company?.tax_id || '',
-              exporter_phone: workflowData?.company?.contact_phone || '',
-              exporter_email: workflowData?.company?.contact_email || '',
-              // ✅ FIX (Oct 27): Add producer information (Field 4 of USMCA form)
-              // Default to exporter info if "Same as Exporter" is checked or producer fields not provided
+              exporter_name: authData?.exporter_name || workflowData?.company?.company_name || workflowData?.company?.name || '',
+              exporter_address: authData?.exporter_address || workflowData?.company?.company_address || '',
+              exporter_country: authData?.exporter_country || companyCountry,  // FIXED: Prefer authData, fallback to validated company country
+              // ✅ FIX (Nov 4): Prefer authData.exporter_tax_id if available (user may have corrected it in AuthorizationStep)
+              exporter_tax_id: authData?.exporter_tax_id || workflowData?.company?.tax_id || '',
+              exporter_phone: authData?.exporter_phone || workflowData?.company?.contact_phone || '',
+              exporter_email: authData?.exporter_email || workflowData?.company?.contact_email || '',
+              // ✅ FIX (Nov 4): Use authData.exporter_* fields when producer_same_as_exporter is true
+              // This ensures producer gets the correct data even if workflowData.company is incomplete
               producer_name: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.company_name || workflowData?.company?.name || '')
+                ? (authData?.exporter_name || workflowData?.company?.company_name || workflowData?.company?.name || '')
                 : (authData.producer_name || ''),
               producer_address: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.company_address || '')
+                ? (authData?.exporter_address || workflowData?.company?.company_address || '')
                 : (authData.producer_address || ''),
               producer_country: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.company_country || '')
+                ? (authData?.exporter_country || workflowData?.company?.company_country || '')
                 : (authData.producer_country || ''),
               producer_tax_id: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.tax_id || '')
+                ? (authData?.exporter_tax_id || workflowData?.company?.tax_id || '')
                 : (authData.producer_tax_id || ''),
               producer_phone: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.contact_phone || '')
+                ? (authData?.exporter_phone || workflowData?.company?.contact_phone || '')
                 : (authData.producer_phone || ''),
               producer_email: authData?.producer_same_as_exporter
-                ? (workflowData?.company?.contact_email || '')
+                ? (authData?.exporter_email || workflowData?.company?.contact_email || '')
                 : (authData.producer_email || ''),
               importer_name: authData.importer_name || '',
               importer_address: authData.importer_address || '',
@@ -433,6 +434,14 @@ export default function USMCACertificateCompletion() {
         })
       });
 
+      // 🔍 DEBUG: Log what authorization data we're sending
+      console.log('🔍 [Certificate] Authorization data being sent to API:', {
+        signatory_name: authData.signatory_name,
+        signatory_title: authData.signatory_title,
+        signatory_email: authData.signatory_email,
+        signatory_phone: authData.signatory_phone
+      });
+
       const result = await response.json();
 
       if (result.success) {
@@ -453,9 +462,10 @@ export default function USMCACertificateCompletion() {
               overall_trust_score: cert.trust_verification?.overall_trust_score || null
             },
             usmca: {
-              qualified: cert.usmca_analysis?.qualified || true,
-              regional_content: cert.usmca_analysis?.regional_content || 100,
-              north_american_content: cert.usmca_analysis?.regional_content || 100
+              // ✅ FIX (Nov 4): Removed optimistic defaults - fail loudly if data is missing
+              qualified: cert.usmca_analysis?.qualified ?? false,  // Use false instead of true
+              regional_content: cert.usmca_analysis?.regional_content ?? 0,  // Use 0 instead of 100
+              north_american_content: cert.usmca_analysis?.regional_content ?? 0  // Use 0 instead of 100
             }
           };
 

@@ -176,9 +176,9 @@ export default async function handler(req, res) {
       || 'international trade';
 
     // Generate comprehensive USMCA optimization assessment report using OpenRouter
-    const reportPrompt = `You are formatting a professional USMCA Optimization Assessment Report for the Triangle Trade Intelligence team (Business Development Specialist - Mexico Trade Expert & Trade Compliance Expert - Licensed Specialist with 17 years of ${industryContext} experience).
+    const reportPrompt = `You are formatting a professional USMCA Optimization Assessment Report for the Triangle Trade Intelligence platform.
 
-CRITICAL INSTRUCTION: The team has already provided their professional assessment. Your job is to format it into a professional report. Use their EXACT words for all sections marked "TEAM'S" or "CRISTINA'S". DO NOT add to, modify, or paraphrase their professional input. This is consulting and guidance - your role is formatting only.
+CRITICAL INSTRUCTION: Your job is to format a professional report based on the data provided. Be specific, actionable, and professional. This is consulting and guidance.
 
 CLIENT BUSINESS PROFILE:
 Company: ${subscriberData.company_name || serviceRequest.client_company}
@@ -221,7 +221,7 @@ ${Array.isArray(subscriberData.vulnerability_factors) && subscriberData.vulnerab
   : '- High China sourcing creates tariff exposure\n- Limited USMCA-compliant supplier options\n- Trade agreement uncertainty'}
 
 YOUR TASK:
-Write a professional USMCA Certificate Report that demonstrates your 17 years of ${industryContext} logistics expertise. Be SPECIFIC and ACTIONABLE for THIS specific ${subscriberData.business_type || 'business'}.
+Write a professional USMCA Certificate Report with expertise in ${industryContext}. Be SPECIFIC and ACTIONABLE for THIS specific ${subscriberData.business_type || 'business'}.
 
 REQUIRED SECTIONS:
 
@@ -274,13 +274,33 @@ ${currentStatus === 'QUALIFIED'
 ## 4. ACTION PLAN (NEXT 90 DAYS)
 Based on the financial analysis above and the team's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year
 
-TONE: Professional but direct. Use actual numbers from their data. Be specific about which components to shift from China to Mexico. Show the team's combined expertise (17 years enterprise logistics + 7 years SMB operations) through concrete recommendations with dollar amounts and timelines, not generic platitudes.
+TONE: Professional but direct. Use actual numbers from their data. Be specific about which components to shift from China to Mexico. Provide concrete recommendations with dollar amounts and timelines, not generic platitudes.
 
 FORBIDDEN PHRASES:
 - "comprehensive strategy" without specific component names and Mexico suppliers
 - "company with undisclosed details" (use their actual company name: ${subscriberData.company_name})
 - "cannot be determined" when trade volume is $${tradeVolume.toLocaleString()}
 - Generic compliance like "obtain certifications" (specify: Mexico supplier USMCA origin certificates)
+
+CRITICAL: Include this user responsibility disclaimer at the END of your report:
+
+---
+## USER RESPONSIBILITY & LEGAL DISCLAIMER
+
+Triangle Trade Intelligence is a self-service platform (like TurboTax for trade compliance). We provide tools, analysis, and guidance—but YOU own the accuracy of all information.
+
+**Before implementing any recommendations, you must:**
+- ✓ Verify all data points against your business records
+- ✓ Confirm all component origins with your suppliers
+- ✓ Validate all financial calculations independently
+- ✓ Consult with licensed customs brokers for official USMCA certificates
+- ✓ Engage trade attorneys for compliance decisions with legal implications
+
+**What we provide:** Software tools, AI-powered analysis, strategic guidance
+**What we DON'T provide:** Legal advice, customs brokerage, official certifications, liability for your decisions
+
+All data you submit and all actions you take based on this report are YOUR responsibility. This is guidance, not official certification.
+---
 
 Format as a formal business report with clear headers, bullet points for key findings, and bold text for critical dollar amounts and percentages.`;
 
@@ -340,6 +360,11 @@ Format as a formal business report with clear headers, bullet points for key fin
     .content { padding: 20px; }
     .section { margin-bottom: 30px; }
     .credentials { background: #f0f8ff; padding: 15px; border-left: 4px solid #134169; margin: 20px 0; }
+    .user-responsibility { background: #fff3cd; border: 2px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 5px; }
+    .user-responsibility h2 { color: #856404; margin-top: 0; font-size: 1.2em; }
+    .user-responsibility ul { margin: 10px 0; padding-left: 20px; }
+    .user-responsibility li { margin: 8px 0; color: #856404; }
+    .user-responsibility .disclaimer { font-weight: bold; color: #d32f2f; margin-top: 15px; }
     .report-content { white-space: pre-wrap; background: #f9f9f9; padding: 20px; border-radius: 5px; }
   </style>
 </head>
@@ -350,10 +375,24 @@ Format as a formal business report with clear headers, bullet points for key fin
   </div>
 
   <div class="content">
+    <div class="user-responsibility">
+      <h2>⚠️ USER RESPONSIBILITY NOTICE</h2>
+      <p><strong>Triangle Trade Intelligence is a self-service platform like TurboTax for trade compliance.</strong> We provide tools, analysis, and guidance—but YOU own the accuracy of all information.</p>
+
+      <p><strong>Before using this report, you must confirm:</strong></p>
+      <ul>
+        <li>✓ <strong>I accept responsibility for accuracy:</strong> All information in this report is my responsibility. I have verified every data point.</li>
+        <li>✓ <strong>All information matches my business records:</strong> I confirm this report accurately represents my product and origin details.</li>
+        <li>✓ <strong>I will verify all recommendations:</strong> Any strategic actions recommended require my independent validation with licensed customs brokers or trade attorneys.</li>
+      </ul>
+
+      <p class="disclaimer">⚠️ LEGAL DISCLAIMER: Triangle Trade Intelligence provides software tools and AI-powered analysis ONLY. We do NOT provide legal advice, customs brokerage services, or official certifications. All data you submit and all decisions you make are YOUR responsibility. Consult licensed professionals for official USMCA certificates and customs compliance.</p>
+    </div>
+
     <div class="credentials">
       <strong>Service Type:</strong> USMCA Optimization Assessment<br>
       <strong>Service Date:</strong> ${new Date().toLocaleDateString()}<br>
-      <strong>Note:</strong> For official USMCA certificates, we partner with trade compliance experts
+      <strong>Note:</strong> For official USMCA certificates, consult licensed trade compliance experts
     </div>
 
     <div class="section">
@@ -370,16 +409,30 @@ Format as a formal business report with clear headers, bullet points for key fin
     </div>
 
     <div class="section">
-      <p><em>This report has been prepared by our trade consulting team with 17+ years of combined enterprise logistics and SMB trade experience. This is professional guidance and assessment. For official USMCA certificates and formal compliance documents, we partner with trade compliance experts. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
+      <p><em>This report has been prepared by the Triangle Trade Intelligence Platform. This is professional guidance and assessment. For official USMCA certificates and formal compliance documents, consult with licensed trade compliance experts. For questions or clarifications, please contact Triangle Trade Intelligence Platform.</em></p>
     </div>
   </div>
 </body>
 </html>
     `;
 
+    // ✅ DYNAMIC EMAIL ROUTING: Send to actual subscriber, not hardcoded address
+    const subscriberEmail = subscriberData.contact_email
+      || subscriberData.email
+      || serviceRequest.contact_email
+      || serviceRequest.requester_email;
+
+    if (!subscriberEmail) {
+      console.error('[USMCA CERT REPORT] No subscriber email found in:', {
+        subscriberData: Object.keys(subscriberData),
+        serviceRequest: Object.keys(serviceRequest)
+      });
+      throw new Error('Subscriber email address not found. Cannot send report.');
+    }
+
     const mailOptions = {
       from: 'Triangle Trade Intelligence <triangleintel@gmail.com>',
-      to: 'triangleintel@gmail.com',
+      to: subscriberEmail, // ✅ Dynamic: actual subscriber email
       subject: emailSubject,
       html: emailBody
     };
@@ -414,7 +467,7 @@ Format as a formal business report with clear headers, bullet points for key fin
           report_generated: true,
           report_content: reportContent,
           email_sent: true,
-          email_to: 'triangleintel@gmail.com',
+          email_to: subscriberEmail, // ✅ Dynamic: actual recipient
           completed_at: new Date().toISOString(),
           // ✅ AI SOURCE TRACKING
           ai_source: aiResult.source,
@@ -430,9 +483,10 @@ Format as a formal business report with clear headers, bullet points for key fin
 
     return res.status(200).json({
       success: true,
-      message: 'USMCA Certificate report generated and sent to triangleintel@gmail.com',
+      message: `USMCA Certificate report generated and sent to ${subscriberEmail}`, // ✅ Dynamic message
       report_content: reportContent,
       email_subject: emailSubject,
+      email_sent_to: subscriberEmail, // ✅ Include actual recipient in response
       // ✅ TRANSPARENT SOURCE LABELING
       source: aiResult.source,
       label: aiResult.label,

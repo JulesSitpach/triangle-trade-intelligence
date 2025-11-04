@@ -468,10 +468,10 @@ Respond in JSON format:
   "situation_brief": "1-sentence executive summary addressing ${profile.company_name || 'the company'} specifically",
   "problem": "What specific tariff/policy risk affects ${profile.company_name || 'this company'}'s margins (use actual numbers from context)",
   "root_cause": "Why ${profile.company_name || 'this company'} is exposed (reference their specific sourcing decisions and supplier countries)",
-  "annual_impact": "Dollar impact on ${profile.company_name || 'this company'} (use trade_volume if available, otherwise state 'Cannot calculate without trade volume - request immediately')",
+  "annual_impact": "Dollar impact on ${profile.company_name || 'this company'} - ONLY state the Section 301 burden they currently pay (e.g., $743,750/year). DO NOT add USMCA savings to this number.",
   "why_now": "Why ${profile.contact_person || 'they'} should care NOW (specific policy timeline or risk event)",
-  "current_burden": "Current annual cost in dollars (calculate from Section 301 exposure if trade_volume available)",
-  "potential_savings": "What they could save with nearshoring (specific dollar amount or % if possible)",
+  "current_burden": "Current Section 301 tariff cost in dollars (e.g., $743,750/year on Chinese components). This is what they already pay TODAY - do not add USMCA savings to this number.",
+  "potential_savings": "What they could save by nearshoring to eliminate Section 301 exposure (e.g., $743,750/year if all Chinese components moved to Mexico)",
   "payback_period": "Realistic timeline to recover nearshoring investment costs (based on their trade volume)",
   "confidence": 85,
   "strategic_roadmap": [
@@ -512,11 +512,32 @@ CRITICAL RULES - PROFESSIONAL FORMATTING:
 - USE actual numbers from context (trade volume, Section 301 rates, component percentages, current savings)
 - Reference their current USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) to show what they're protecting
 - If trade_volume is missing/zero, FLAG THIS PROMINENTLY in annual_impact and current_burden
+
+⚠️ CRITICAL TARIFF MATH RULE:
+- DO NOT add Section 301 burden + USMCA savings together!
+- Section 301 burden ($${section301Burden}) = what they CURRENTLY pay on Chinese components
+- USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) = what they CURRENTLY save by being qualified
+- These are SEPARATE numbers - do NOT create a "$826,625 total exposure" by adding them
+- Correct framing: "Current burden: $743,750/year. If USMCA disqualified, total tariff cost increases to ~$1.2M (you lose $82,875 savings + MFN rates apply)"
+- Incorrect framing: "Total exposure: $826,625 ($743,750 + $82,875)" - this is NOT how tariffs work!
+
+⚠️ CURRENT DATE CONTEXT:
+- Today is November 2025
+- When discussing future policy changes, use "2025-2026" NOT "2024-2025"
+- Presidential transitions occur in January 2025, so we're in the NEW administration period
+- USMCA is up for review in 2026 (not 2024)
 - Be specific: "Contact Foxconn Mexico for PCB quotes" not "Review Mexico suppliers"
 - Calculate ROI: If saving $50K/year and nearshoring costs $20K, payback is 4-5 months
 - Write as if you're their personal trade advisor who knows their business intimately
 - Use professional consulting language (like McKinsey, Deloitte reports)
 - Format numbers properly: $2,800,000 not "$2.8M", 3 months not "3-month payback"
+
+⚠️ COST PREMIUM REALISM:
+- DO NOT assume Mexico cost parity is guaranteed
+- Correct framing: "Phase 1 will validate whether Mexico suppliers can deliver 2-3% cost parity. If premium exceeds 4%, payback extends to 8+ months and strategy requires re-evaluation."
+- Incorrect framing: "assuming ${profile.contact_person || 'the decision maker'} can negotiate within 2-3%" - sounds like a given
+- Be realistic about supplier qualification risks, quality validation timelines, and volume commitment requirements
+- If cost premium data is unavailable, state "Phase 1 will establish actual cost premium - initial supplier quotes required before finalizing ROI"
 
 ⚠️ CRITICAL: AVOID REPETITION - Each field should add NEW information:
 - Do NOT repeat the same dollar amount ($1,785,000) in multiple fields
