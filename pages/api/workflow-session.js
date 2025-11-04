@@ -144,7 +144,11 @@ export default protectedApiHandler({
         product_description:
           workflowData.product?.description ||
           workflowData.product_description ||
-          workflowData.classified_hs_code ? `Product with HS ${workflowData.classified_hs_code}` : 'USMCA Analysis',
+          (workflowData.classified_hs_code
+            ? `Product with HS ${workflowData.classified_hs_code}`
+            : (workflowData.product?.hs_code
+                ? `Product with HS ${workflowData.product.hs_code}`
+                : 'USMCA Analysis')),
         hs_code:
           workflowData.product?.hs_code ||
           workflowData.hs_code ||

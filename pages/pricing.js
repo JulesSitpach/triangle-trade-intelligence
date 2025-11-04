@@ -123,14 +123,14 @@ export default function Pricing() {
       monthlyPrice: 0,
       annualPrice: 0,
       period: '7 days',
-      description: 'Try the platform risk-free for 7 days - no credit card required',
+      description: 'Test the platform - no credit card required',
       features: [
-        '1 USMCA workflow analysis',
-        '3 components per analysis',
-        '3 portfolio briefings',
+        '1 workflow analysis',
+        '1 executive summary',
+        '3 components per workflow',
         'Certificate preview (watermarked)',
         'View crisis alerts dashboard',
-        'AI HS code suggestions',
+        'AI HS code classification',
         'No credit card required'
       ],
       cta: 'Start Free Trial',
@@ -143,15 +143,16 @@ export default function Pricing() {
       monthlyPrice: 99,
       annualPrice: 950,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'For small importers & exporters (10-20 products)',
+      description: 'For small businesses (10-20 products)',
       features: [
-        '15 USMCA workflow analyses per month',
-        '10 components per analysis',
-        '50 portfolio briefings per month',
+        '15 workflow analyses/month',
+        '15 executive summaries/month',
+        '30 portfolio briefings/month',
+        '10 components per workflow',
         'Unlimited certificate downloads',
         'Real-time crisis alerts',
         'AI HS code classification',
-        'Email notifications'
+        'Email alert notifications'
       ],
       cta: 'Subscribe to Starter',
       popular: false,
@@ -163,15 +164,16 @@ export default function Pricing() {
       monthlyPrice: 299,
       annualPrice: 2850,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'For medium manufacturers (50-100 products)',
+      description: 'For medium businesses (50-100 products)',
       features: [
-        '100 USMCA workflow analyses per month',
-        '15 components per analysis',
-        '200 portfolio briefings per month',
+        '100 workflow analyses/month',
+        '100 executive summaries/month',
+        '150 portfolio briefings/month',
+        '15 components per workflow',
         'Unlimited certificate downloads',
-        'Real-time crisis alerts with AI impact scoring',
-        'Detailed compliance guidance',
-        'Priority support'
+        'Real-time crisis alerts',
+        'AI HS code classification',
+        'Email alert notifications'
       ],
       cta: 'Subscribe to Professional',
       popular: true,
@@ -183,16 +185,16 @@ export default function Pricing() {
       monthlyPrice: 599,
       annualPrice: 5750,
       period: billingPeriod === 'monthly' ? 'per month' : 'per year',
-      description: 'For large enterprises (200+ products)',
+      description: 'For large businesses (200+ products)',
       features: [
-        '500 USMCA workflow analyses per month',
-        '20 components per analysis',
-        '1,000 portfolio briefings per month',
+        '500 workflow analyses/month',
+        '500 executive summaries/month',
+        '750 portfolio briefings/month',
+        '20 components per workflow',
         'Unlimited certificate downloads',
-        'Real-time crisis alerts with AI impact scoring',
-        'Advanced portfolio briefing reports',
-        'Priority AI analysis queue',
-        'Dedicated account support'
+        'Real-time crisis alerts',
+        'AI HS code classification',
+        'Email alert notifications'
       ],
       cta: 'Subscribe to Premium',
       popular: false,
@@ -275,7 +277,7 @@ export default function Pricing() {
           </h2>
 
           <p className="hero-description-text">
-            Affordable USMCA compliance for Small & Medium businesses who can't afford full-time trade compliance teams. Plans start at $99/month with AI-powered automated analysis.
+            Self-serve USMCA compliance platform for businesses. Generate certificates, monitor tariff policy changes, and calculate savings. Plans start at $99/month with AI-powered analysis.
           </p>
           
           <div className="hero-button-group">
@@ -297,10 +299,10 @@ export default function Pricing() {
 
           {/* Trial Benefits */}
           <div className="hero-trial-benefits">
-            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
-            <div className="trial-benefit-item">✓ 3 components analyzed</div>
+            <div className="trial-benefit-item">✓ 1 workflow analysis</div>
+            <div className="trial-benefit-item">✓ 1 executive summary</div>
+            <div className="trial-benefit-item">✓ 3 components</div>
             <div className="trial-benefit-item">✓ Certificate preview</div>
-            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>
@@ -316,9 +318,9 @@ export default function Pricing() {
       <section className="main-content" id="pricing">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">App Subscription Plans</h2>
+            <h2 className="section-header-title">Subscription Plans</h2>
             <p className="section-header-subtitle">
-              AI-powered tools: USMCA qualification checks, HS code suggestions, AI-generated certificates, and trade policy alerts
+              USMCA qualification analysis, HS code classification, certificate generation, and real-time policy alerts
             </p>
 
             {/* Billing Period Toggle */}
@@ -511,40 +513,34 @@ export default function Pricing() {
       <section className="main-content gradient-subtle">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">What Professional & Premium Subscribers Get</h2>
+            <h2 className="section-header-title">What's Included</h2>
             <p className="section-header-subtitle">
-              AI-powered compliance tools that save you time and money
+              Self-serve platform with AI-powered analysis tools
             </p>
           </div>
 
           <div className="grid-3-cols">
             <div className="content-card">
-              <div className="content-card-icon">A</div>
-              <h3 className="content-card-title">AI Supply Chain Analysis</h3>
+              <div className="content-card-icon">📊</div>
+              <h3 className="content-card-title">Workflow Analysis</h3>
               <p className="content-card-description">
-                AI analyzes your component origins to identify geopolitical risks,
-                tariff exposure, and supply chain vulnerabilities. Get specific,
-                actionable recommendations based on your actual supply chain.
+                Analyze products for USMCA qualification. Input components, origin countries, and manufacturing locations. AI calculates regional value content (RVC) and determines eligibility.
               </p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">∞</div>
-              <h3 className="content-card-title">High-Volume USMCA Checks</h3>
+              <div className="content-card-icon">📈</div>
+              <h3 className="content-card-title">Executive Summary</h3>
               <p className="content-card-description">
-                Professional tier: 100 analyses/month. Premium tier: 500 analyses/month.
-                Check multiple products, scenarios, and suppliers. Instant AI-powered HS code suggestions
-                and qualification calculations. No hidden per-analysis fees.
+                Strategic analysis shown on results page. AI provides Section 301 exposure analysis, Mexico nearshoring ROI calculations, and supply chain vulnerability assessment for your specific products.
               </p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">$</div>
-              <h3 className="content-card-title">ROI for Importers, Exporters & Producers</h3>
+              <div className="content-card-icon">📋</div>
+              <h3 className="content-card-title">Portfolio Briefing</h3>
               <p className="content-card-description">
-                DIY USMCA compliance costs $50-100/hr of your time. Hiring a customs
-                broker full-time: $60k+/year. Our platform: $299-599/month with
-                AI-powered automation. Save $10k-50k per year.
+                Strategic analysis on alerts page. When new policies emerge, AI analyzes how they affect your entire product portfolio with USMCA 2026 renegotiation context and policy impact scenarios.
               </p>
             </div>
           </div>
@@ -562,28 +558,28 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">How do I get started?</h3>
               <p className="content-card-description">
-                Sign up for free (no credit card required), run your first USMCA analysis, get AI-powered HS code suggestions, generate certificate templates, and see your potential tariff savings. Upgrade anytime to unlock unlimited analyses and real-time trade alerts.
+                Sign up for free trial (no credit card), run 1 workflow analysis with 3 components, generate certificate preview, and view crisis alerts. Upgrade to paid plan for unlimited certificates and higher limits.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">What can I do with Triangle?</h3>
+              <h3 className="content-card-title">What can I do?</h3>
               <p className="content-card-description">
-                Analyze USMCA qualification for your products, get AI-powered HS code suggestions, generate certificate templates, monitor supply chain risks with real-time trade alerts, and calculate potential tariff savings using Mexico-based suppliers.
+                Run USMCA qualification checks, get AI HS code classification, generate certificates (Form D), monitor tariff policy changes, and calculate potential savings. All self-serve - you input data, we calculate compliance.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">Do I need licensing or certifications?</h3>
+              <h3 className="content-card-title">Who is responsible for accuracy?</h3>
               <p className="content-card-description">
-                Triangle provides AI-powered analysis and recommendations. For official USMCA certificates and customs filings, you'll need to work with a licensed customs broker - we help you prepare the analysis they need.
+                You are. This is a self-serve platform - you verify all input data and calculations. For official customs submissions, consult a licensed customs broker. Platform provides tools only, you own accuracy.
               </p>
             </div>
 
             <div className="content-card">
-              <h3 className="content-card-title">What's included in my subscription?</h3>
+              <h3 className="content-card-title">What are the three usage types?</h3>
               <p className="content-card-description">
-                <strong>Starter ($99/mo):</strong> 10 USMCA analyses, basic alerts. <strong>Professional ($299/mo):</strong> 100 analyses, real-time crisis alerts, portfolio briefing. <strong>Premium ($599/mo):</strong> 500 analyses, advanced AI features, 20 components per analysis.
+                <strong>Workflow Analysis:</strong> Product qualification check. <strong>Executive Summary:</strong> Strategic analysis on results page. <strong>Portfolio Briefing:</strong> Policy impact analysis on alerts page when new tariff changes emerge.
               </p>
             </div>
           </div>
@@ -603,38 +599,38 @@ export default function Pricing() {
           <div className="grid-3-cols">
             <div className="content-card">
               <div className="content-card-icon">1</div>
-              <h3 className="content-card-title">Week 1: Free Trial</h3>
-              <p className="content-card-description">7 days free - Test with 1 USMCA analysis (3 components), see how AI classifies your products</p>
+              <h3 className="content-card-title">Free Trial</h3>
+              <p className="content-card-description">Test platform: 1 workflow + 1 executive summary. 3 components. Certificate preview (watermarked). No credit card required.</p>
             </div>
 
             <div className="content-card">
               <div className="content-card-icon">2</div>
-              <h3 className="content-card-title">Month 1-2: Starter Plan</h3>
-              <p className="content-card-description">$99/month - 10 analyses to test different products and suppliers, build your compliance knowledge base</p>
+              <h3 className="content-card-title">Starter - $99/month</h3>
+              <p className="content-card-description">15 workflows + 15 executive summaries + 30 portfolio briefings per month. Unlimited certificates. Real-time alerts. No commitment.</p>
             </div>
 
             <div className="content-card">
               <div className="content-card-icon">3</div>
-              <h3 className="content-card-title">Month 3+: Professional</h3>
-              <p className="content-card-description">$299/month - 100 analyses/month, real-time crisis alerts, portfolio briefing reports for growing trade volume</p>
+              <h3 className="content-card-title">Professional - $299/month</h3>
+              <p className="content-card-description">100 workflows + 100 executive summaries + 150 portfolio briefings per month. Priority support. 30-day commitment.</p>
             </div>
 
             <div className="content-card">
               <div className="content-card-icon">4</div>
-              <h3 className="content-card-title">High Volume: Premium</h3>
-              <p className="content-card-description">$599/month - 500 analyses/month, advanced AI features, 20 components per analysis for complex supply chains</p>
+              <h3 className="content-card-title">Premium - $599/month</h3>
+              <p className="content-card-description">500 workflows + 500 executive summaries + 750 portfolio briefings per month. 20 components per workflow. 60-day commitment.</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">A</div>
+              <div className="content-card-icon">📊</div>
               <h3 className="content-card-title">All Plans Include</h3>
-              <p className="content-card-description">AI HS code classification, tariff calculations, USMCA qualification checks, certificate generation, crisis alerts</p>
+              <p className="content-card-description">AI HS code classification, RVC calculations, USMCA qualification checks, certificate generation (Form D), real-time policy alerts, email notifications</p>
             </div>
 
             <div className="content-card">
-              <div className="content-card-icon">∞</div>
-              <h3 className="content-card-title">No Hidden Fees</h3>
-              <p className="content-card-description">Flat monthly pricing, no per-analysis charges, no setup fees, cancel anytime (subject to commitment period)</p>
+              <div className="content-card-icon">✓</div>
+              <h3 className="content-card-title">Flat Pricing</h3>
+              <p className="content-card-description">No per-analysis fees, no setup charges, no hidden costs. Cancel anytime (subject to commitment periods). All prices shown are final.</p>
             </div>
           </div>
         </div>
@@ -648,7 +644,7 @@ export default function Pricing() {
               Ready to Get Started?
             </h2>
             <p className="section-header-subtitle">
-              Subscribe to access professional USMCA compliance tools and AI-powered trade analysis
+              Self-serve USMCA platform - You input data, we calculate compliance
             </p>
             <div className="hero-button-group">
               <Link

@@ -111,22 +111,22 @@ export default function Signup() {
       <div className="main-content">
         <div className="container-app">
           <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
-            {/* Logo */}
-            <div className="section-header">
-              <Link href="/">
+            {/* Logo & Header */}
+            <div style={{textAlign: 'center', marginBottom: '2rem'}}>
+              <Link href="/" style={{display: 'inline-block', marginBottom: '1.5rem'}}>
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 className="section-title">
-                {plan === 'starter' && 'Sign up for Starter Plan'}
-                {plan === 'professional' && 'Sign up for Professional Plan'}
-                {plan === 'premium' && 'Sign up for Premium Plan'}
+              <h1 style={{fontSize: '1.75rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#111'}}>
+                {plan === 'starter' && 'Create Your Account'}
+                {plan === 'professional' && 'Create Your Account'}
+                {plan === 'premium' && 'Create Your Account'}
                 {(!plan || plan === 'trial') && 'Start Your Free Trial'}
               </h1>
-              <p className="text-body">
-                {plan === 'starter' && 'Create account to subscribe to Starter ($99/month)'}
-                {plan === 'professional' && 'Create account to subscribe to Professional ($299/month)'}
-                {plan === 'premium' && 'Create account to subscribe to Premium ($599/month)'}
-                {(!plan || plan === 'trial') && 'Try Triangle Trade Intelligence free - no credit card required'}
+              <p style={{fontSize: '0.9375rem', color: '#666', margin: '0'}}>
+                {plan === 'starter' && 'Subscribe to Starter plan after signup'}
+                {plan === 'professional' && 'Subscribe to Professional plan after signup'}
+                {plan === 'premium' && 'Subscribe to Premium plan after signup'}
+                {(!plan || plan === 'trial') && 'No credit card required'}
               </p>
             </div>
 
@@ -261,70 +261,15 @@ export default function Signup() {
               </button>
             </form>
 
-            {/* Plan Benefits Section */}
-            {(!plan || plan === 'trial') ? (
-              <div className="content-card">
-                <h3 className="card-title">Your Free Trial Includes:</h3>
-                <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
-                <div className="trial-benefit-item">✓ 3 components analyzed</div>
-                <div className="trial-benefit-item">✓ Certificate preview (watermarked)</div>
-                <div className="trial-benefit-item">✓ Access to crisis alerts dashboard</div>
-                <div className="trial-benefit-item">✓ Can purchase services at full price</div>
-
-                <div className="status-success">
-                  <p className="text-body">
-                    <strong>After Trial:</strong> Subscribe for unlimited analyses
-                  </p>
-                  <p className="text-body">
-                    Plans from $99/month • Cancel anytime
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="content-card">
-                <h3 className="card-title">
-                  {plan === 'starter' && 'Starter Plan Includes:'}
-                  {plan === 'professional' && 'Professional Plan Includes:'}
-                  {plan === 'premium' && 'Premium Plan Includes:'}
-                </h3>
-                {plan === 'starter' && (
-                  <>
-                    <div className="trial-benefit-item">✓ 10 USMCA analyses per month</div>
-                    <div className="trial-benefit-item">✓ Basic trade alerts</div>
-                    <div className="trial-benefit-item">✓ Email support</div>
-                    <div className="trial-benefit-item">✓ Certificate generation</div>
-                    <div className="trial-benefit-item">✓ AI HS code suggestions</div>
-                  </>
-                )}
-                {plan === 'professional' && (
-                  <>
-                    <div className="trial-benefit-item">✓ 100 USMCA analyses per month</div>
-                    <div className="trial-benefit-item">✓ Real-time crisis alerts with AI impact scoring</div>
-                    <div className="trial-benefit-item">✓ 15% discount on professional services</div>
-                    <div className="trial-benefit-item">✓ Priority support (48hr response)</div>
-                    <div className="trial-benefit-item">✓ Detailed AI-powered compliance guidance</div>
-                  </>
-                )}
-                {plan === 'premium' && (
-                  <>
-                    <div className="trial-benefit-item">✓ Everything in Professional</div>
-                    <div className="trial-benefit-item">✓ Quarterly strategy calls with our expert team</div>
-                    <div className="trial-benefit-item">✓ 25% discount on professional services</div>
-                    <div className="trial-benefit-item">✓ Dedicated email support</div>
-                    <div className="trial-benefit-item">✓ Custom trade intelligence reports</div>
-                  </>
-                )}
-
-                <div className="status-success">
-                  <p className="text-body">
-                    <strong>After signup:</strong> You'll be taken to Stripe to complete payment
-                  </p>
-                  <p className="text-body">
-                    Cancel anytime • No long-term contracts
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* Simple Footer Text - No Boxes */}
+            <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee', textAlign: 'center'}}>
+              <p className="text-body" style={{fontSize: '0.875rem', color: '#666', margin: '0'}}>
+                {(!plan || plan === 'trial') && 'Free trial includes 1 analysis • No credit card required'}
+                {plan === 'starter' && 'After signup, complete payment via Stripe'}
+                {plan === 'professional' && 'After signup, complete payment via Stripe'}
+                {plan === 'premium' && 'After signup, complete payment via Stripe'}
+              </p>
+            </div>
 
             {/* Already have account */}
             <div className="element-spacing">

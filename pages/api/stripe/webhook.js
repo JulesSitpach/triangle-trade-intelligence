@@ -345,12 +345,34 @@ async function handleSubscriptionPurchase(session, userId) {
     // Get tier name for display (capitalize first letter)
     const tierName = tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Professional';
 
+    // === PREVENT MULTIPLE SUBSCRIPTIONS: Cancel any existing active subscriptions ===
+    const { data: existingSubscriptions } = await supabase
+      .from('subscriptions')
+      .select('stripe_subscription_id, tier_name')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (existingSubscriptions && existingSubscriptions.length > 0) {
+      console.log(`⚠️ Found ${existingSubscriptions.length} existing active subscription(s) for user ${userId} - canceling them first`);
+
+      for (const oldSub of existingSubscriptions) {
+        try {
+          // Cancel old subscription in Stripe immediately (not at period end)
+          await stripe.subscriptions.cancel(oldSub.stripe_subscription_id);
+          console.log(`✅ Canceled old subscription: ${oldSub.stripe_subscription_id} (${oldSub.tier_name})`);
+        } catch (cancelError) {
+          console.error(`❌ Failed to cancel old subscription ${oldSub.stripe_subscription_id}:`, cancelError);
+          // Continue anyway - webhook will handle cleanup
+        }
+      }
+    }
+
     // === CALCULATE LOCK PERIOD (Prevents subscription gaming) ===
-    // Unlimited: 60 days (requires 2-month commitment)
+    // Premium: 60 days (requires 2-month commitment)
     // Professional: 30 days (requires 1-month commitment)
     // Starter: 0 days (cancel anytime)
     const lockDays = {
-      'unlimited': 60,
+      'premium': 60,
       'professional': 30,
       'starter': 0
     }[tier?.toLowerCase()] || 0;
@@ -400,7 +422,8 @@ async function handleSubscriptionPurchase(session, userId) {
       .from('user_profiles')
       .update({
         subscription_tier: tierName,
-        status: 'active'
+        status: 'active',
+        stripe_customer_id: session.customer
       })
       .eq('user_id', userId);
 
@@ -596,11 +619,17 @@ async function handleSubscriptionUpdated(subscription) {
 
 /**
  * Handle customer.subscription.deleted event
+ * CRITICAL: Downgrade user to Trial if no other active subscriptions exist
  */
 async function handleSubscriptionDeleted(subscription) {
   console.log('Processing customer.subscription.deleted:', subscription.id);
 
   try {
+    // === STEP 1: Get user_id from customer metadata ===
+    const customer = await stripe.customers.retrieve(subscription.customer);
+    const userId = customer.metadata?.user_id;
+
+    // === STEP 2: Mark subscription as canceled in database ===
     const { error } = await supabase
       .from('subscriptions')
       .update({
@@ -612,10 +641,74 @@ async function handleSubscriptionDeleted(subscription) {
 
     if (error) {
       console.error('Error canceling subscription:', error);
-    } else {
-      console.log('Subscription canceled:', subscription.id);
+      return;
     }
+
+    console.log('✅ Subscription canceled:', subscription.id);
+
+    // === STEP 3: Check if user has any OTHER active subscriptions ===
+    if (userId) {
+      const { data: remainingActiveSubs, error: checkError } = await supabase
+        .from('subscriptions')
+        .select('id, tier_name')
+        .eq('user_id', userId)
+        .eq('status', 'active');
+
+      if (checkError) {
+        console.error('Error checking for remaining subscriptions:', checkError);
+        return;
+      }
+
+      if (!remainingActiveSubs || remainingActiveSubs.length === 0) {
+        // === NO ACTIVE SUBSCRIPTIONS LEFT: Set to canceled status (read-only access) ===
+        console.log(`⬇️ No active subscriptions remaining for user ${userId} - setting to canceled (read-only)`);
+
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .update({
+            subscription_tier: 'Trial',
+            status: 'trial_expired', // Read-only: can view past work, cannot create new
+            trial_ends_at: new Date().toISOString(), // Set to now (expired)
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+
+        if (profileError) {
+          await logDevIssue({
+            type: 'api_error',
+            severity: 'critical',
+            component: 'stripe_webhook',
+            message: 'CRITICAL: Failed to set canceled status after subscription deletion',
+            data: {
+              userId,
+              subscriptionId: subscription.id,
+              error: profileError.message
+            }
+          });
+          console.error('❌ Failed to update user status:', profileError);
+        } else {
+          console.log('✅ User set to canceled status (read-only access to past work)');
+        }
+      } else {
+        // User still has other active subscriptions - keep current tier
+        console.log(`✅ User ${userId} still has ${remainingActiveSubs.length} active subscription(s) - keeping tier: ${remainingActiveSubs[0].tier_name}`);
+      }
+    } else {
+      console.warn('⚠️ No user_id in customer metadata - cannot downgrade user');
+    }
+
   } catch (error) {
+    await logDevIssue({
+      type: 'api_error',
+      severity: 'high',
+      component: 'stripe_webhook',
+      message: 'Error in subscription.deleted handler',
+      data: {
+        subscriptionId: subscription.id,
+        error: error.message,
+        stack: error.stack
+      }
+    });
     console.error('Error in subscription.deleted handler:', error);
   }
 }

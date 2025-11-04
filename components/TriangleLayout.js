@@ -126,12 +126,35 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                     </button>
                     {userDropdownOpen && (
                       <div className="admin-dropdown-menu">
-                        <Link href="/account/settings" className="admin-dropdown-item">
-                          Account Settings
+                        <Link href="/dashboard" className="admin-dropdown-item">
+                          Dashboard
                         </Link>
-                        <Link href="/account/subscription" className="admin-dropdown-item">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const response = await fetch('/api/stripe/create-portal-session', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                credentials: 'include'
+                              });
+                              if (response.ok) {
+                                const data = await response.json();
+                                window.location.href = data.url;
+                              } else if (response.status === 404) {
+                                // No subscription yet - redirect to pricing page
+                                window.location.href = '/pricing';
+                              } else {
+                                alert('Unable to open billing portal. Please contact support.');
+                              }
+                            } catch (error) {
+                              console.error('Portal error:', error);
+                              alert('Unable to open billing portal. Please try again.');
+                            }
+                          }}
+                          className="admin-dropdown-item"
+                        >
                           Subscription/Billing
-                        </Link>
+                        </button>
                         <button onClick={logout} className="admin-dropdown-item">
                           Sign Out
                         </button>

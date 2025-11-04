@@ -84,33 +84,52 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         sample: crisisAlerts?.slice(0, 3).map(a => ({ title: a.title, countries: a.affected_countries }))
       });
 
-      // Filter alerts to show:
-      // 1. Alerts matching affected countries
-      // 2. Alerts with no countries specified (global/US trade policy)
-      // 3. Alerts mentioning "tariff", "trade", "China", etc. in title
+      // ✅ STRATEGIC FILTER: Only show alerts that help sourcing/shipping decisions
+      // Filter out: earnings reports, logistics pricing, carrier operations
+      const strategicKeywords = [
+        'tariff', 'duty', 'section 301', 'section 232', 'trade agreement',
+        'usmca', 'cbp', 'customs', 'import', 'export', 'trade policy',
+        'nearshoring', 'reshoring', 'trade war', 'investigation'
+      ];
+
+      const nonStrategicKeywords = [
+        'earnings', 'quarterly', 'profit', 'revenue', 'stock price', 'net profit',
+        'freight rate', 'diesel price', 'capacity', 'carrier', 'fleet', 'freighter',
+        'warehouse', 'automation', 'patent', 'gaming', 'postal', 'lmi'
+      ];
+
       const relevantAlerts = crisisAlerts?.filter(alert => {
-        // Match 1: Country-specific alerts
+        const titleLower = (alert.title || '').toLowerCase();
+        const descLower = (alert.description || '').toLowerCase();
+        const text = `${titleLower} ${descLower}`;
+
+        // ❌ EXCLUDE: Non-strategic keywords (earnings, logistics, carrier ops)
+        const hasNonStrategic = nonStrategicKeywords.some(kw => text.includes(kw));
+        if (hasNonStrategic) {
+          console.log(`🚫 Filtered out non-strategic: "${alert.title}"`);
+          return false;
+        }
+
+        // ✅ INCLUDE: Strategic keywords
+        const hasStrategic = strategicKeywords.some(kw => text.includes(kw));
+
+        // Match 1: Country-specific + strategic keywords
         if (alert.affected_countries && alert.affected_countries.length > 0) {
           const hasMatchingCountry = alert.affected_countries.some(country =>
             affectedCountries.includes(normalizeCountry(country))
           );
-          if (hasMatchingCountry) return true;
+          return hasMatchingCountry && hasStrategic;
         }
 
-        // Match 2: Global trade policy alerts (no specific country)
+        // Match 2: Global trade policy alerts (no specific country but strategic)
         if (!alert.affected_countries || alert.affected_countries.length === 0) {
-          const tradeKeywords = ['tariff', 'trade', 'import', 'duty', 'section 301', 'section 232', 'usmca', 'customs'];
-          const titleLower = (alert.title || '').toLowerCase();
-          const hasTradeKeyword = tradeKeywords.some(keyword => titleLower.includes(keyword));
-
-          // Also include if mentions China and we have Chinese components
-          const mentionsChina = titleLower.includes('china') && affectedCountries.includes('CN');
-
-          return hasTradeKeyword || mentionsChina;
+          return hasStrategic;
         }
 
         return false;
       }) || [];
+
+      console.log(`🤖 PolicyTimeline strategic filtering: ${relevantAlerts.length}/${crisisAlerts?.length || 0} alerts (filtered ${(crisisAlerts?.length || 0) - relevantAlerts.length} non-strategic)`);
 
       console.log('✅ [POLICYTIMELINE] Relevant alerts filtered:', {
         relevant_count: relevantAlerts.length,

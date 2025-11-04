@@ -726,42 +726,25 @@ export default function WorkflowResults({
             </p>
           </div>
 
-          {/* FREE USER: Upgrade CTA */}
+          {/* TRIAL USER: Show they get watermarked certificate */}
           {!isPaidUser && (
-            <>
-              <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
-                <div className="alert alert-info">
-                  <div className="alert-content">
-                    <div className="alert-title">🔒 Unlock Detailed Analysis</div>
-                    <div className="text-body">
-                      Upgrade to <strong>Starter ($99/month)</strong> to see:
-                      <ul style={{ marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem' }}>
-                        <li>Component-by-component breakdown</li>
-                        <li>Supply chain vulnerabilities & Section 301 exposure</li>
-                        <li>Mexico sourcing recommendations with ROI analysis</li>
-                        <li>Generate and download your USMCA certificate</li>
-                      </ul>
-                    </div>
+            <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
+              <div className="alert alert-info">
+                <div className="alert-content">
+                  <div className="alert-title">📄 Trial Certificate</div>
+                  <div className="text-body">
+                    Your certificate will include a <strong>"TRIAL VERSION"</strong> watermark.
+                    Upgrade to remove watermark and use for official customs submissions.
                   </div>
                 </div>
               </div>
-
-              <button
-                onClick={() => router.push('/pricing')}
-                className="btn-primary"
-                style={{ width: '100%', marginTop: '1rem' }}
-              >
-                💰 Upgrade to Starter - See Full Analysis
-              </button>
-            </>
+            </div>
           )}
         </div>
       </div>
 
-      {/* PAID ONLY: Full Component Analysis with Tariff Details (via USMCAQualification component) */}
-      {isPaidUser && (
-        <USMCAQualification results={results} />
-      )}
+      {/* Show full analysis to ALL users (Trial gets watermarked PDF) */}
+      <USMCAQualification results={results} />
 
       {/* PAID ONLY: Executive Summary Button + Strategic Recommendations */}
       {isPaidUser && (

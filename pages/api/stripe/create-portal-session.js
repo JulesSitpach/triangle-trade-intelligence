@@ -22,18 +22,18 @@ export default protectedApiHandler({
     try {
       console.log('🔄 Creating Stripe Customer Portal session for user:', userId);
 
-      // Get user's Stripe customer ID from subscriptions table
-      const { data: subscription, error: subError } = await supabase
-        .from('subscriptions')
+      // Get user's Stripe customer ID from user_profiles table
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
         .select('stripe_customer_id')
         .eq('user_id', userId)
         .single();
 
-      if (subError || !subscription?.stripe_customer_id) {
+      if (profileError || !profile?.stripe_customer_id) {
         console.error('❌ No Stripe customer found for user:', userId);
         await DevIssue.missingData('customer_portal', 'stripe_customer_id', {
           userId,
-          error: subError?.message
+          error: profileError?.message
         });
         return res.status(404).json({
           error: 'No active subscription found',
@@ -41,7 +41,7 @@ export default protectedApiHandler({
         });
       }
 
-      const stripeCustomerId = subscription.stripe_customer_id;
+      const stripeCustomerId = profile.stripe_customer_id;
       console.log('✅ Found Stripe customer ID:', stripeCustomerId);
 
       // Create Stripe Customer Portal session

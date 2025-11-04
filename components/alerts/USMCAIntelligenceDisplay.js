@@ -23,9 +23,7 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
     recommendations = [],
     detailed_analysis = {},
     compliance_roadmap = {},
-    risk_mitigation = {},
-    confidence_score = 0,
-    confidence_factors = {}
+    risk_mitigation = {}
   } = workflowIntelligence;
 
   const toggleSection = (section) => {
@@ -105,14 +103,14 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
 
   return (
     <div style={{ marginTop: '2rem' }}>
-      {/* Header with confidence score */}
+      {/* Header */}
       <div className="card" style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
         <div style={{ padding: '1.5rem' }}>
           <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
             🎯 Your USMCA Intelligence Report
           </h2>
           <p style={{ margin: '0.5rem 0 0 0', opacity: 0.9 }}>
-            Personalized analysis based on your workflow • Confidence: {confidence_score}%
+            Personalized analysis based on your workflow data
           </p>
         </div>
       </div>
@@ -249,39 +247,6 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
         </CollapsibleSection>
       )}
 
-      {/* Confidence Factors */}
-      {(confidence_factors.strengths?.length > 0 || confidence_factors.considerations?.length > 0) && (
-        <div className="card" style={{ marginTop: '1rem', background: '#f8fafc' }}>
-          <div style={{ padding: '1.5rem' }}>
-            <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.5rem' }}>🎯</span>
-              Analysis Confidence: {confidence_score}%
-            </h3>
-
-            {confidence_factors.strengths?.length > 0 && (
-              <div style={{ marginBottom: '1rem' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#059669' }}>✅ Strengths</h4>
-                <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem' }}>
-                  {confidence_factors.strengths.map((strength, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.25rem', color: '#064e3b' }}>{strength}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {confidence_factors.considerations?.length > 0 && (
-              <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#d97706' }}>⚡ Considerations</h4>
-                <ul style={{ margin: 0, paddingLeft: '1.5rem', fontSize: '0.875rem' }}>
-                  {confidence_factors.considerations.map((consideration, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.25rem', color: '#78350f' }}>{consideration}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -35,56 +35,65 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing workflow_data' });
     }
 
-    // ✅ SUBSCRIPTION TIER ENFORCEMENT (per spec lines 327-349)
+    // ✅ SUBSCRIPTION TIER ENFORCEMENT - Portfolio Briefing Limits
     if (user_id) {
-      const { data: userProfile, error: profileError } = await supabase
+      const { data: userProfile, error: profileError} = await supabase
         .from('user_profiles')
-        .select('subscription_tier, analyses_this_month, analyses_reset_date')
+        .select('subscription_tier')
         .eq('user_id', user_id)
         .single();
 
       if (profileError) {
         console.warn('⚠️ Could not fetch user profile for tier check:', profileError.message);
       } else if (userProfile) {
-        // Define tier limits (per specification)
-        const TIER_LIMITS = {
-          'Trial': 0,
-          'Starter': 2,
-          'Professional': 5,
-          'Premium': 500  // ✅ FIXED: Was Infinity, now 500 to prevent AI cost abuse
+        // Portfolio Briefing limits (realistic usage - retention driver)
+        const BRIEFING_LIMITS = {
+          'Trial': 0,           // 0 portfolio briefings (retention driver - paid feature only)
+          'Starter': 30,        // 30 briefings per month (2x workflows - weekly alert checks)
+          'Professional': 150,  // 150 briefings per month (1.5x workflows - checks every few days)
+          'Premium': 750        // 750 briefings per month (1.5x workflows - daily checks + headroom)
         };
 
         const userTier = userProfile.subscription_tier || 'Trial';
-        const currentUsage = userProfile.analyses_this_month || 0;
-        const monthlyLimit = TIER_LIMITS[userTier] || 0;
+        const monthlyLimit = BRIEFING_LIMITS[userTier] || 0;
+
+        // Get current month's usage from monthly_usage_tracking
+        const now = new Date();
+        const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        const { data: usageRecord } = await supabase
+          .from('monthly_usage_tracking')
+          .select('briefing_count')
+          .eq('user_id', user_id)
+          .eq('month_year', month_year)
+          .single();
+
+        const currentUsage = usageRecord?.briefing_count || 0;
 
         // Check if user has exceeded their limit
         if (currentUsage >= monthlyLimit) {
-          console.log(`🚫 User ${user_id} (${userTier}) exceeded monthly limit: ${currentUsage}/${monthlyLimit}`);
+          console.log(`🚫 User ${user_id} (${userTier}) exceeded briefing limit: ${currentUsage}/${monthlyLimit}`);
           return res.status(403).json({
             success: false,
-            error: 'Monthly analysis limit reached',
+            error: 'Monthly briefing limit reached',
             tier: userTier,
             limit: monthlyLimit,
             current_usage: currentUsage,
-            message: `You've used ${currentUsage} of ${monthlyLimit === Infinity ? 'unlimited' : monthlyLimit} analyses this month. Upgrade to ${userTier === 'Trial' ? 'Starter' : userTier === 'Starter' ? 'Professional' : 'Premium'} for more analyses.`,
+            message: `You've used ${currentUsage} of ${monthlyLimit} portfolio briefings this month. Upgrade to ${userTier === 'Trial' ? 'Starter ($99/mo)' : userTier === 'Starter' ? 'Professional ($299/mo)' : 'Premium ($599/mo)'} for more briefings.`,
             upgrade_required: true
           });
         }
 
-        // Increment usage counter
-        const { error: updateError } = await supabase
-          .from('user_profiles')
-          .update({
-            analyses_this_month: currentUsage + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user_id);
+        // Increment briefing counter in monthly_usage_tracking
+        const { error: updateError } = await supabase.rpc('increment_briefing_count', {
+          p_user_id: user_id,
+          p_month_year: month_year
+        });
 
         if (updateError) {
-          console.error('⚠️ Failed to increment analyses counter:', updateError.message);
+          console.error('⚠️ Failed to increment briefing counter:', updateError.message);
         } else {
-          console.log(`✅ User ${user_id} (${userTier}): ${currentUsage + 1}/${monthlyLimit} analyses used`);
+          console.log(`✅ User ${user_id} (${userTier}): ${currentUsage + 1}/${monthlyLimit} briefings used`);
         }
       }
     }
@@ -192,17 +201,101 @@ export default async function handler(req, res) {
       })
       .sort((a, b) => b.impactScore - a.impactScore);
 
-    const alertContext = rankedAlerts.length > 0
-      ? `REAL POLICY ALERTS AFFECTING THIS USER (${rankedAlerts.length} matched, ranked by impact):
+    // STEP 4.5: AI Strategic Filtering - "Helps user decide whether to ship/change sourcing"
+    let strategicAlerts = rankedAlerts;
 
-${rankedAlerts.map((a, idx) =>
-  `[${idx + 1}] ${a.severity} - ${a.title}
-  Impact: ${a.impactScore.toFixed(1)}% of your portfolio affected
+    if (rankedAlerts.length > 0) {
+      console.log(`🤖 AI filtering ${rankedAlerts.length} alerts for strategic relevance...`);
+
+      const filterPrompt = `You are a trade intelligence analyst. Review these policy alerts and SELECT ONLY those that help business owners decide:
+- Should I ship this product this week/month?
+- Should I change sourcing countries?
+- Should I qualify new suppliers?
+- Should I lock in pricing now or wait?
+- Should I delay shipments or accelerate orders?
+
+COMPANY: ${companyName}
+COMPONENTS: ${components.map(c => `${c.component_type} from ${c.origin_country || c.country}`).join(', ')}
+DESTINATION: ${destination}
+
+INCLUDE ONLY:
+✅ Tariff rate changes (Section 301, Section 232, MFN adjustments)
+✅ Trade agreement developments (USMCA 2026, new trade deals)
+✅ Legislative/executive actions affecting duties
+✅ CBP rulings or customs guidance changes
+✅ Nearshoring incentives or sourcing shifts
+✅ Trade negotiations signaling policy direction
+
+EXCLUDE:
+❌ Earnings reports (company profits, quarterly results)
+❌ Logistics pricing (freight rates, diesel prices, shipping costs)
+❌ Airline/carrier operations (fleet purchases, terminal expansions)
+❌ General business news (warehouse automation, technology trends)
+❌ Non-trade topics (gaming, immigration, patents, postal)
+
+ALERTS TO REVIEW:
+${rankedAlerts.map((a, idx) => `
+[${idx + 1}] ${a.severity} - ${a.title}
+Impact: ${a.impactScore.toFixed(1)}% of portfolio
+Description: ${a.description}
+Countries: ${(a.affected_countries || []).join(', ')}
+`).join('\n')}
+
+TASK: Return ONLY the alert numbers (e.g., "1, 3, 7") that help sourcing/shipping decisions. Be strict - when in doubt, exclude.
+
+Response format: Just numbers separated by commas (e.g., "1, 3, 5") or "NONE" if no alerts qualify.`;
+
+      try {
+        const filterResponse = await portfolioAgent.execute(filterPrompt);
+        const selectedText = (filterResponse.text || '').trim().toUpperCase();
+
+        if (selectedText && selectedText !== 'NONE') {
+          const selectedIndices = selectedText
+            .split(',')
+            .map(s => parseInt(s.trim()))
+            .filter(n => !isNaN(n) && n > 0 && n <= rankedAlerts.length);
+
+          if (selectedIndices.length > 0) {
+            strategicAlerts = selectedIndices.map(idx => rankedAlerts[idx - 1]);
+            console.log(`✅ AI filtered: ${strategicAlerts.length}/${rankedAlerts.length} strategic alerts`);
+          } else {
+            console.log('⚠️ AI returned no valid indices, using all ranked alerts');
+          }
+        } else {
+          console.log('🤖 AI found no strategic alerts, using forward-looking language only');
+          strategicAlerts = [];
+        }
+      } catch (filterError) {
+        console.error('❌ AI strategic filtering failed, using all ranked alerts:', filterError);
+        // Fallback: use all ranked alerts
+      }
+    }
+
+    const alertContext = strategicAlerts.length > 0
+      ? `STRATEGIC POLICY ALERTS (${strategicAlerts.length} of ${rankedAlerts.length} total alerts affect business decisions):
+
+${strategicAlerts.map((a, idx) => {
+  // Find which components this alert affects
+  const affectedComps = components.filter(comp => {
+    const countryMatch = a.affected_countries?.includes((comp.origin_country || comp.country || '').toUpperCase());
+    const hsMatch = a.affected_hs_codes?.some(code =>
+      (comp.hs_code || '').replace(/\./g, '').substring(0, 6) === code.replace(/\./g, '').substring(0, 6)
+    );
+    return countryMatch || hsMatch;
+  });
+  const affectedNames = affectedComps.map(c => c.component_type || c.description).join(', ');
+
+  return `[${idx + 1}] ${a.severity} - ${a.title}
+  WHY RELEVANT: Affects sourcing decisions for ${affectedNames || 'your supply chain'}
+  Impact: ${a.impactScore.toFixed(1)}% of portfolio value
   Details: ${a.description}
-  Affected: ${(a.affected_countries || []).join(', ')} | HS Codes: ${(a.affected_hs_codes || []).join(', ')}
+  Countries: ${(a.affected_countries || []).join(', ')} | HS Codes: ${(a.affected_hs_codes || []).join(', ') || 'Policy-level (all products)'}
   Source: ${a.detection_source || 'Federal Register / USTR / Government Announcement'}
-  Announced: ${a.announcement_date || new Date(a.created_at).toLocaleDateString()}`
-).join('\n\n')}`
+  Announced: ${a.announcement_date || new Date(a.created_at).toLocaleDateString()}`;
+}).join('\n\n')}`
+      : rankedAlerts.length > 0
+      ? `ALERTS REVIEWED BUT FILTERED OUT (${rankedAlerts.length} operational/earnings reports, not strategic):
+Use forward-looking language: "potential", "expected", "could face", "we are monitoring for"`
       : `NO REAL POLICY ALERTS YET:
 We are monitoring 12+ government sources (USTR, Federal Register, Mexico labor ministry, Canada ISAC)
 for announcements affecting HS codes: ${userComponentHS.join(', ')}
@@ -342,7 +435,9 @@ Return valid JSON only:`;
       company: companyName,
       portfolio_value: totalVolume,
       real_alerts_matched: matchedAlerts.length,
-      generated_at: new Date().toISOString()
+      strategic_alerts: strategicAlerts, // ✅ Return AI-filtered alerts for reuse in USMCA 2026 section
+      generated_at: new Date().toISOString(),
+      legal_notice: "⚠️ DISCLAIMER: This analysis is for informational purposes only and does not constitute legal, financial, tax, or compliance advice. All data is provided 'as-is' without warranties. You must independently verify all tariff rates, policy impacts, and regulatory requirements with licensed professionals before making business decisions. Actual results may vary significantly. This platform expressly disclaims all liability for losses, damages, or penalties arising from reliance on this information. You assume sole responsibility for all sourcing and compliance decisions."
     });
 
   } catch (error) {

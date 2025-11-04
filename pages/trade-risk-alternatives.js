@@ -52,6 +52,9 @@ export default function TradeRiskAlternatives() {
   const [realPolicyAlerts, setRealPolicyAlerts] = useState([]);
   const [isLoadingPolicyAlerts, setIsLoadingPolicyAlerts] = useState(false);
 
+  // Strategic alerts filtered by AI for USMCA 2026 section
+  const [strategicAlerts, setStrategicAlerts] = useState([]);
+
   // Consolidated alerts state (intelligent alert grouping)
   const [consolidatedAlerts, setConsolidatedAlerts] = useState([]);
   const [isConsolidating, setIsConsolidating] = useState(false);
@@ -820,6 +823,13 @@ export default function TradeRiskAlternatives() {
         // Save the AI-generated briefing to state for display
         setPortfolioBriefing(data.briefing);
 
+        // ✅ NEW: Save strategic alerts from briefing for USMCA 2026 section
+        // This avoids making a separate AI filtering call (saves $0.01/page load)
+        if (data.strategic_alerts) {
+          setStrategicAlerts(data.strategic_alerts);
+          console.log(`🤖 Using ${data.strategic_alerts.length} strategic alerts from briefing (no separate AI call needed)`);
+        }
+
         // ✅ AUTO-SAVE: Save portfolio briefing to database automatically
         // No manual button needed - user already consented by completing workflow
         try {
@@ -889,9 +899,9 @@ export default function TradeRiskAlternatives() {
 
       if (alerts.length > 0) {
         setProgressSteps(prev => [...prev, `Found ${alerts.length} policy alerts`]);
-        // ✅ DISABLED AUTO-CONSOLIDATION: Don't generate broker summaries automatically
-        // User found this annoying - only consolidate when they explicitly click button
-        // await consolidateAlerts(alerts, profile);
+        // ✅ NOTE: Strategic filtering happens in portfolio briefing API
+        // The briefing will return strategic_alerts that we can use for USMCA 2026 section
+        // No need for separate AI filtering call here (saves $0.01 per page load)
       } else {
         setProgressSteps(prev => [...prev, 'No active policy alerts']);
       }
@@ -1131,60 +1141,81 @@ export default function TradeRiskAlternatives() {
                   });
 
                   // Filter alerts for this specific component
-                  // BROADER MATCHING: Every component gets tagged with ALL applicable alerts
-                  // - Blanket country tariffs (NULL HS codes + origin match)
-                  // - Industry-wide tariffs (industry match + origin match)
-                  // - Specific tariffs (HS code + origin match)
-                  // ✅ Use realPolicyAlerts (raw database alerts) not consolidatedAlerts (reformatted)
-                  // because consolidation changes the alert structure and loses the matching fields
+                  // STRICT MATCHING: Only show alerts with specific targeting (not generic news)
+                  // Alert must have at least ONE of:
+                  //   - Specific HS codes that match component
+                  //   - Specific industry + country that match component
+                  // Generic news (empty HS codes + empty industries) goes to Market Intelligence section only
                   let componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
                     const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
                     const componentHS = comp.hs_code;
                     const componentIndustry = comp.industry || userProfile.industry_sector;
 
-                    // Check origin match
-                    const originMatch = alert.affected_countries?.some(country =>
-                      componentOrigin === country.toUpperCase()
-                    );
+                    // ✅ STRICT FILTER: Alert must have specific targeting
+                    const hasHSCodes = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
+                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
 
-                    // Check HS code match (NULL or EMPTY ARRAY = matches all)
-                    const isBlanketHS = !alert.affected_hs_codes ||
-                                       alert.affected_hs_codes.length === 0;
+                    // Check origin match first
+                    const originMatch = hasCountries && alert.affected_countries.some(country => {
+                      const normalizedCountry = country.toUpperCase();
+                      // Skip UNSPECIFIED - that's generic news
+                      if (normalizedCountry === 'UNSPECIFIED') return false;
+                      return componentOrigin === normalizedCountry;
+                    });
 
-                    const hsMatch = isBlanketHS
-                      ? true
-                      : alert.affected_hs_codes?.some(code => {
-                          const normalizedComponentHS = componentHS?.replace(/\./g, '');
-                          const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
-                          return normalizedComponentHS?.startsWith(normalizedAlertCode);
-                        });
-
-                    // Check industry match (NULL or EMPTY ARRAY = matches all)
-                    const isBlanketIndustry = !alert.relevant_industries ||
-                                             alert.relevant_industries.length === 0;
-
-                    const industryMatch = isBlanketIndustry
-                      ? true
-                      : alert.relevant_industries?.some(industry =>
-                          componentIndustry?.toLowerCase().includes(industry.toLowerCase())
-                        );
-
-                    // TYPE 1: Blanket country tariff (EMPTY/NULL HS codes + origin match)
-                    if (isBlanketHS && originMatch) {
-                      console.log(`✅ BLANKET ALERT MATCH: ${alert.title} affects ${comp.component_type || comp.description} from ${componentOrigin}`);
-                      return true;
+                    // Skip if no origin match (not relevant to this component's country)
+                    if (!originMatch) {
+                      return false;
                     }
 
-                    // TYPE 2: Industry tariff (industry match + origin match)
-                    if (industryMatch && originMatch && !isBlanketIndustry) {
-                      console.log(`✅ INDUSTRY ALERT MATCH: ${alert.title} affects ${comp.component_type || comp.description}`);
-                      return true;
+                    // TYPE 1: Country-specific policy alert (like Section 301 on China)
+                    // Show if alert has specific country BUT no HS codes yet (investigation phase)
+                    if (originMatch && !hasHSCodes && !hasIndustries) {
+                      // Only if alert title indicates it's a real policy (not earnings/news)
+                      const title = alert.title?.toLowerCase() || '';
+                      const isPolicyAlert =
+                        title.includes('section 301') ||
+                        title.includes('section 232') ||
+                        title.includes('tariff') ||
+                        title.includes('duty') ||
+                        title.includes('investigation') ||
+                        title.includes('trade action');
+
+                      if (isPolicyAlert) {
+                        console.log(`✅ COUNTRY POLICY MATCH: ${alert.title} affects ${comp.component_type || comp.description} from ${componentOrigin}`);
+                        return true;
+                      }
+
+                      // Otherwise skip (generic news like earnings reports)
+                      return false;
                     }
 
-                    // TYPE 3: Specific tariff (HS + origin match)
-                    if (hsMatch && originMatch && !isBlanketHS) {
-                      console.log(`✅ HS CODE ALERT MATCH: ${alert.title} affects ${comp.component_type || comp.description}`);
-                      return true;
+                    // TYPE 2: Specific HS code match (most precise)
+                    if (hasHSCodes && componentHS) {
+                      const hsMatch = alert.affected_hs_codes.some(code => {
+                        const normalizedComponentHS = componentHS.replace(/\./g, '');
+                        const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+                        return normalizedComponentHS.startsWith(normalizedAlertCode);
+                      });
+
+                      if (hsMatch) {
+                        console.log(`✅ HS CODE MATCH: ${alert.title} affects ${comp.component_type || comp.description} (HS ${componentHS})`);
+                        return true;
+                      }
+                    }
+
+                    // TYPE 3: Industry + country match (broader but still specific)
+                    if (hasIndustries && componentIndustry) {
+                      const industryMatch = alert.relevant_industries.some(industry =>
+                        componentIndustry.toLowerCase().includes(industry.toLowerCase()) ||
+                        industry.toLowerCase().includes(componentIndustry.toLowerCase())
+                      );
+
+                      if (industryMatch) {
+                        console.log(`✅ INDUSTRY MATCH: ${alert.title} affects ${comp.component_type || comp.description} (${componentIndustry})`);
+                        return true;
+                      }
                     }
 
                     return false;
@@ -1567,58 +1598,21 @@ export default function TradeRiskAlternatives() {
                   );
                 })}
 
-                {/* Market Intelligence Row - Strategic context for AI (always used, user controls email) */}
+                {/* USMCA 2026 Renegotiation & Market Intelligence Row */}
                 {(() => {
-                  // Filter for market intelligence alerts (UNSPECIFIED country or general context)
-                  // BUT only include if relevant to user's business (country mentions, industry, trade keywords)
+                  // Focus on USMCA 2026 renegotiation alerts that affect ALL users
+                  // Plus general trade intelligence relevant to user's supply chain
                   const userCountries = [...new Set(
                     userProfile.componentOrigins.map(c => (c.origin_country || c.country)?.toUpperCase())
                   )].filter(Boolean);
 
                   const userIndustry = userProfile.industry_sector?.toLowerCase() || '';
 
-                  const marketIntelAlerts = (realPolicyAlerts || []).filter(alert => {
-                    // Must be general/UNSPECIFIED
-                    const isGeneral = alert.affected_countries?.includes('UNSPECIFIED') ||
-                                     (!alert.affected_countries || alert.affected_countries.length === 0);
+                  // ✅ AI-FILTERED: Use strategicAlerts (filtered by AI in loadRealPolicyAlerts)
+                  // This removes earnings reports, logistics pricing, and irrelevant news
+                  const marketIntelAlerts = strategicAlerts || [];
 
-                    if (!isGeneral) return false;
-
-                    // Filter for relevance to user's business
-                    const title = alert.title?.toLowerCase() || '';
-                    const description = alert.description?.toLowerCase() || '';
-                    const text = `${title} ${description}`;
-
-                    // RELEVANT: Mentions user's sourcing countries
-                    const mentionsUserCountry = userCountries.some(country => {
-                      const countryNames = {
-                        'CN': ['china', 'chinese', 'beijing'],
-                        'MX': ['mexico', 'mexican'],
-                        'CA': ['canada', 'canadian'],
-                        'US': ['united states', 'u.s.', 'usa', 'american']
-                      };
-                      return (countryNames[country] || []).some(name => text.includes(name));
-                    });
-
-                    // RELEVANT: Trade/supply chain keywords
-                    const tradeKeywords = [
-                      'tariff', 'trade', 'import', 'export', 'supply chain',
-                      'manufacturing', 'freight', 'shipping', 'customs',
-                      'usmca', 'nafta', 'trade war', 'sourcing', 'logistics'
-                    ];
-                    const hasTradeKeywords = tradeKeywords.some(kw => text.includes(kw));
-
-                    // RELEVANT: Industry match
-                    const industryMatch = userIndustry && alert.relevant_industries?.some(ind =>
-                      ind.toLowerCase().includes(userIndustry) || userIndustry.includes(ind.toLowerCase())
-                    );
-
-                    // Include if any relevance criteria met
-                    return mentionsUserCountry || hasTradeKeywords || industryMatch;
-                  });
-
-                  if (marketIntelAlerts.length === 0) return null;
-
+                  // ✅ ALWAYS SHOW this section (even with 0 alerts) so users can opt into USMCA 2026 monitoring
                   const isExpanded = expandedComponents['market_intel'] || false;
 
                   return (
@@ -1658,12 +1652,12 @@ export default function TradeRiskAlternatives() {
 
                         {/* Name */}
                         <div style={{ flex: '2', fontWeight: 600, color: '#92400e' }}>
-                          📰 Market Intelligence & Strategic Context
+                          🇺🇸🇨🇦🇲🇽 USMCA 2026 Renegotiation & Market Intelligence
                         </div>
 
                         {/* Origin */}
                         <div style={{ flex: '1', textAlign: 'center', color: '#92400e', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                          Global
+                          All Users
                         </div>
 
                         {/* HS Code */}
@@ -1726,73 +1720,108 @@ export default function TradeRiskAlternatives() {
                             borderRadius: '6px',
                             border: '1px solid #fde68a'
                           }}>
-                            <strong>ℹ️ About Market Intelligence:</strong> AI always uses these alerts for strategic context in your briefing. Enable email to receive updates about general trade trends (no component-specific action required).
+                            <strong>📅 USMCA 2026 Renegotiation:</strong> The USMCA agreement is up for review in 2026, affecting ALL North American supply chains. This section tracks trade policy shifts, negotiation updates, and strategic preparation guidance. Enable email to stay informed about developments that could impact your business.
                           </div>
 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                            {marketIntelAlerts.map((alert, idx) => (
-                              <div key={idx} style={{
-                                padding: '1rem',
-                                background: 'white',
-                                borderRadius: '8px',
-                                border: '1px solid #e5e7eb'
-                              }}>
-                                <div style={{
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  alignItems: 'start',
-                                  marginBottom: '0.5rem'
-                                }}>
-                                  <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
-                                    {alert.title}
-                                  </div>
-                                  <span style={{
-                                    background: alert.severity === 'high' ? '#fee2e2' :
-                                              alert.severity === 'medium' ? '#fef3c7' : '#dbeafe',
-                                    color: alert.severity === 'high' ? '#dc2626' :
-                                          alert.severity === 'medium' ? '#f59e0b' : '#3b82f6',
-                                    padding: '0.125rem 0.5rem',
-                                    borderRadius: '10px',
-                                    fontSize: '0.6875rem',
-                                    fontWeight: 600,
-                                    textTransform: 'uppercase',
-                                    whiteSpace: 'nowrap'
-                                  }}>
-                                    {alert.severity}
-                                  </span>
-                                </div>
+                            {marketIntelAlerts.map((alert, idx) => {
+                              // ✅ Generate portfolio-specific context for this alert
+                              const alertText = `${alert.title} ${alert.description}`.toLowerCase();
+                              const affectedComponents = userProfile.componentOrigins.filter(comp => {
+                                const origin = (comp.origin_country || comp.country)?.toUpperCase();
+                                const countryNames = {
+                                  'CN': ['china', 'chinese', 'beijing'],
+                                  'MX': ['mexico', 'mexican'],
+                                  'CA': ['canada', 'canadian'],
+                                  'US': ['united states', 'u.s.', 'usa', 'american']
+                                };
+                                return (countryNames[origin] || []).some(name => alertText.includes(name));
+                              });
 
-                                {alert.description && (
-                                  <div style={{
-                                    fontSize: '0.8125rem',
-                                    color: '#6b7280',
-                                    marginBottom: '0.5rem',
-                                    lineHeight: '1.5'
-                                  }}>
-                                    {alert.description}
-                                  </div>
-                                )}
+                              const portfolioContext = affectedComponents.length > 0
+                                ? `Affects your ${affectedComponents.map(c => c.component_type || c.description).join(', ')} sourcing`
+                                : 'General supply chain intelligence';
 
-                                <div style={{
-                                  fontSize: '0.75rem',
-                                  color: '#9ca3af',
-                                  display: 'flex',
-                                  gap: '1rem'
+                              return (
+                                <div key={idx} style={{
+                                  padding: '1rem',
+                                  background: 'white',
+                                  borderRadius: '8px',
+                                  border: '1px solid #e5e7eb'
                                 }}>
-                                  <span>🗓 {new Date(alert.created_at).toLocaleDateString()}</span>
-                                  {alert.source_url && (
-                                    <a
-                                      href={alert.source_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{ color: '#3b82f6', textDecoration: 'none' }}
-                                    >
-                                      🔗 Source
-                                    </a>
+                                  {/* Portfolio Context Badge */}
+                                  {affectedComponents.length > 0 && (
+                                    <div style={{
+                                      display: 'inline-block',
+                                      background: '#eff6ff',
+                                      color: '#1e40af',
+                                      padding: '0.25rem 0.5rem',
+                                      borderRadius: '6px',
+                                      fontSize: '0.75rem',
+                                      fontWeight: 600,
+                                      marginBottom: '0.5rem'
+                                    }}>
+                                      🎯 {portfolioContext}
+                                    </div>
                                   )}
+
+                                  <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'start',
+                                    marginBottom: '0.5rem'
+                                  }}>
+                                    <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                                      {alert.title}
+                                    </div>
+                                    <span style={{
+                                      background: alert.severity === 'high' ? '#fee2e2' :
+                                                alert.severity === 'medium' ? '#fef3c7' : '#dbeafe',
+                                      color: alert.severity === 'high' ? '#dc2626' :
+                                            alert.severity === 'medium' ? '#f59e0b' : '#3b82f6',
+                                      padding: '0.125rem 0.5rem',
+                                      borderRadius: '10px',
+                                      fontSize: '0.6875rem',
+                                      fontWeight: 600,
+                                      textTransform: 'uppercase',
+                                      whiteSpace: 'nowrap'
+                                    }}>
+                                      {alert.severity}
+                                    </span>
+                                  </div>
+
+                                  {alert.description && (
+                                    <div style={{
+                                      fontSize: '0.8125rem',
+                                      color: '#6b7280',
+                                      marginBottom: '0.5rem',
+                                      lineHeight: '1.5'
+                                    }}>
+                                      {alert.description}
+                                    </div>
+                                  )}
+
+                                  <div style={{
+                                    fontSize: '0.75rem',
+                                    color: '#9ca3af',
+                                    display: 'flex',
+                                    gap: '1rem'
+                                  }}>
+                                    <span>🗓 {new Date(alert.created_at).toLocaleDateString()}</span>
+                                    {alert.source_url && (
+                                      <a
+                                        href={alert.source_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: '#3b82f6', textDecoration: 'none' }}
+                                      >
+                                        🔗 Source
+                                      </a>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}

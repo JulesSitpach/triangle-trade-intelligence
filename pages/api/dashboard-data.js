@@ -30,17 +30,38 @@ const supabase = createClient(
 );
 
 const SUBSCRIPTION_LIMITS = {
-  'Trial': 1,           // 1 analysis total (7-day trial)
-  'Starter': 15,        // 15 analyses per month (matches pricing.js)
-  'Professional': 100,  // 100 analyses per month
-  'Premium': 500        // 500 analyses per month (changed Oct 2025 from unlimited to prevent AI cost abuse)
+  'Trial': 1,           // 1 workflow analysis total (7-day trial)
+  'Starter': 15,        // 15 workflow analyses per month
+  'Professional': 100,  // 100 workflow analyses per month
+  'Premium': 500        // 500 workflow analyses per month
+};
+
+const EXECUTIVE_SUMMARY_LIMITS = {
+  'Trial': 1,           // 1 executive summary (matches workflows - shown on results page)
+  'Starter': 15,        // 15 executive summaries per month (matches workflows)
+  'Professional': 100,  // 100 executive summaries per month (matches workflows)
+  'Premium': 500        // 500 executive summaries per month (matches workflows)
 };
 
 const BRIEFING_LIMITS = {
-  'Trial': 3,           // 3 briefings total (7-day trial)
-  'Starter': 50,        // 50 briefings per month (matches pricing.js)
-  'Professional': 200,  // 200 briefings per month (matches pricing.js)
-  'Premium': 1000       // 1,000 briefings per month (matches pricing.js)
+  'Trial': 0,           // 0 portfolio briefings (retention driver - paid feature only)
+  'Starter': 30,        // 30 portfolio briefings per month (2x workflows - weekly alert checks)
+  'Professional': 150,  // 150 portfolio briefings per month (1.5x workflows - checks every few days)
+  'Premium': 750        // 750 portfolio briefings per month (1.5x workflows - daily checks + headroom)
+};
+
+// ✅ Helper function to calculate risk score from severity level
+const calculateRiskScore = (severity) => {
+  const severityMap = {
+    'CRITICAL': 95,
+    'HIGH': 80,
+    'high': 80,
+    'MEDIUM': 60,
+    'medium': 60,
+    'LOW': 30,
+    'low': 30
+  };
+  return severityMap[severity] || 60;
 };
 
 export default protectedApiHandler({
@@ -59,7 +80,7 @@ export default protectedApiHandler({
 
       const { data: usageRecord, error: usageError } = await supabase
         .from('monthly_usage_tracking')
-        .select('analysis_count, briefing_count')
+        .select('analysis_count, briefing_count, executive_summary_count')
         .eq('user_id', userId)
         .eq('month_year', month_year)
         .single();
@@ -70,6 +91,7 @@ export default protectedApiHandler({
 
       const monthlyUsed = usageRecord?.analysis_count || 0;
       const monthlyBriefingsUsed = usageRecord?.briefing_count || 0;
+      const monthlyExecutiveSummariesUsed = usageRecord?.executive_summary_count || 0;
 
       const { data: profile } = await supabase
         .from('user_profiles')
@@ -83,10 +105,12 @@ export default protectedApiHandler({
         tier: profile?.subscription_tier,
         analysisLimit: SUBSCRIPTION_LIMITS[profile?.subscription_tier],
         briefingLimit: BRIEFING_LIMITS[profile?.subscription_tier],
+        executiveSummaryLimit: EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier],
         source: 'monthly_usage_tracking',
         billingPeriod: month_year,
         analysisCount: monthlyUsed,
-        briefingCount: monthlyBriefingsUsed
+        briefingCount: monthlyBriefingsUsed,
+        executiveSummaryCount: monthlyExecutiveSummariesUsed
       });
 
       // === WORKFLOW ANALYSIS LIMITS ===
@@ -113,6 +137,18 @@ export default protectedApiHandler({
       const briefingPercentage = isBriefingUnlimited ? 0 : Math.round((briefingUsed / briefingLimit) * 100);
       const briefingRemaining = isBriefingUnlimited ? null : Math.max(0, briefingLimit - briefingUsed);
       const briefingLimitReached = isBriefingUnlimited ? false : briefingUsed >= briefingLimit;
+
+      // === EXECUTIVE SUMMARY LIMITS ===
+      const executiveSummaryLimit = EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier] !== undefined
+        ? EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier]
+        : 15; // Default to Starter limit
+
+      const executiveSummaryUsed = monthlyExecutiveSummariesUsed || 0;
+
+      const isExecutiveSummaryUnlimited = executiveSummaryLimit === null;
+      const executiveSummaryPercentage = isExecutiveSummaryUnlimited ? 0 : Math.round((executiveSummaryUsed / executiveSummaryLimit) * 100);
+      const executiveSummaryRemaining = isExecutiveSummaryUnlimited ? null : Math.max(0, executiveSummaryLimit - executiveSummaryUsed);
+      const executiveSummaryLimitReached = isExecutiveSummaryUnlimited ? false : executiveSummaryUsed >= executiveSummaryLimit;
 
       // Get workflows from BOTH tables (sessions = in-progress, completions = with certificates)
       const { data: sessionsRows } = await supabase
@@ -435,8 +471,36 @@ export default protectedApiHandler({
           }
         }
 
+        // ✅ AI FILTER: Remove non-strategic alerts (earnings, logistics, carrier ops)
+        // Only show alerts that help users make sourcing/shipping decisions
+        const strategicKeywords = [
+          'tariff', 'duty', 'section 301', 'section 232', 'trade agreement',
+          'usmca', 'cbp', 'customs', 'import', 'export', 'trade policy',
+          'nearshoring', 'reshoring', 'trade war', 'investigation'
+        ];
+
+        const nonStrategicKeywords = [
+          'earnings', 'quarterly', 'profit', 'revenue', 'stock price',
+          'freight rate', 'diesel price', 'capacity', 'carrier', 'fleet',
+          'warehouse', 'automation', 'patent', 'gaming', 'postal'
+        ];
+
+        const strategicAlerts = relevantAlerts.filter(alert => {
+          const text = `${alert.title} ${alert.description}`.toLowerCase();
+
+          // Must contain strategic keywords
+          const hasStrategic = strategicKeywords.some(kw => text.includes(kw));
+
+          // Must NOT contain non-strategic keywords
+          const hasNonStrategic = nonStrategicKeywords.some(kw => text.includes(kw));
+
+          return hasStrategic && !hasNonStrategic;
+        });
+
+        console.log(`🤖 Dashboard alert filtering: ${strategicAlerts.length}/${relevantAlerts.length} strategic alerts (filtered ${relevantAlerts.length - strategicAlerts.length} non-strategic)`);
+
         // Transform crisis alerts to match expected structure (with lifecycle status)
-        crisisAlerts = relevantAlerts.slice(0, 5).map(alert => {
+        crisisAlerts = strategicAlerts.slice(0, 5).map(alert => {
           // Find the most recent workflow for context
           const contextWorkflow = allWorkflows[0] || {};
 
@@ -454,11 +518,11 @@ export default protectedApiHandler({
             // Crisis alert specific data
             analyzed_at: alert.created_at,
             alert_type: 'rss_crisis',
-            severity_level: alert.severity_level,
-            // ✅ FIXED: Add field name expected by UserDashboard
-            overall_risk_level: alert.severity_level,
-            // ✅ FIXED: Add missing risk_score field
-            risk_score: alert.crisis_score || 0,
+            severity_level: alert.severity || 'MEDIUM',
+            // ✅ FIXED: Use correct field name (severity, not severity_level)
+            overall_risk_level: alert.severity || 'MEDIUM',
+            // ✅ FIXED: Calculate risk_score from severity (crisis_score field doesn't exist)
+            risk_score: calculateRiskScore(alert.severity),
             // ✅ FIXED: Add missing alert_count field
             alert_count: 1,
 
@@ -596,6 +660,14 @@ export default protectedApiHandler({
           remaining: briefingRemaining,
           limit_reached: briefingLimitReached,
           is_unlimited: isBriefingUnlimited
+        },
+        executive_summary_usage_stats: {
+          used: executiveSummaryUsed,
+          limit: executiveSummaryLimit,
+          percentage: executiveSummaryPercentage,
+          remaining: executiveSummaryRemaining,
+          limit_reached: executiveSummaryLimitReached,
+          is_unlimited: isExecutiveSummaryUnlimited
         },
         user_profile: profile || {},
 
