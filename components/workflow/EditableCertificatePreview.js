@@ -602,7 +602,11 @@ export default function EditableCertificatePreview({
       console.log('💾 Saving ALL edits to database before PDF generation...');
       onSave(updatedData);
 
-      // ✅ STEP 2: Capture certificate preview as image (WYSIWYG approach)
+      // ✅ STEP 2: Wait for DOM to update with all field values
+      console.log('⏳ Waiting for DOM to render all field values...');
+      await new Promise(resolve => setTimeout(resolve, 500)); // Give React time to update DOM
+
+      // ✅ STEP 3: Capture certificate preview as image (WYSIWYG approach)
       console.log('📸 Capturing certificate preview as image...');
       if (!certificateRef.current) {
         throw new Error('Certificate preview element not found');
