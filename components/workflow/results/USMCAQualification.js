@@ -137,8 +137,122 @@ export default function USMCAQualification({ results }) {
 
   const gapAnalysis = extractGapAnalysis();
 
+  // Check if we should show tariff explanation
+  const hasChineseComponents = results.usmca.component_breakdown?.some(c =>
+    (c.origin_country === 'CN' || c.origin_country === 'China') &&
+    (c.total_rate > 0.20 || c.section_301 > 0) // 20%+ or has Section 301
+  );
+
   return (
     <div className="card-content">
+      {/* Tariff Explanation for Chinese Components */}
+      {hasChineseComponents && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <button
+            onClick={() => setShowTariffExplanation(!showTariffExplanation)}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              backgroundColor: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#92400e',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span>💡 Understanding China Tariff Rates</span>
+            <span style={{ fontSize: '1.25rem' }}>
+              {showTariffExplanation ? '−' : '+'}
+            </span>
+          </button>
+
+          {showTariffExplanation && (
+            <div style={{
+              marginTop: '0.75rem',
+              padding: '1.25rem',
+              backgroundColor: '#fffbeb',
+              border: '1px solid #fbbf24',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              lineHeight: '1.7'
+            }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                  Base Rate: 0%
+                </strong>
+                <p style={{ margin: 0, color: '#78350f' }}>
+                  China is a WTO member (since 2001), so electronics pay the standard 0% base tariff rate, same as other countries.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                  Section 301 Tariff: +7.5% to +25%
+                </strong>
+                <p style={{ margin: 0, color: '#78350f' }}>
+                  Additional tariffs on Chinese imports, varying by product category. Most semiconductors: 25%. Rate depends on USTR list assignment.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                  Reciprocal Tariffs: +0% to +25%
+                </strong>
+                <p style={{ margin: 0, color: '#78350f' }}>
+                  New 2025 policy imposing additional tariffs on specific Chinese products. Varies by HS code and can change with 30-day notice.
+                </p>
+              </div>
+
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#fef3c7',
+                borderRadius: '4px',
+                border: '1px solid #f59e0b',
+                marginBottom: '1rem'
+              }}>
+                <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
+                  Typical Total: 25% to 50%
+                </strong>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.8125rem' }}>
+                  Rates stack: Base (0%) + Section 301 (25%) + Reciprocal (0-25%) = 25-50% total
+                </p>
+              </div>
+
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#fef3c7',
+                borderRadius: '4px',
+                border: '1px solid #dc2626',
+                marginBottom: '1rem'
+              }}>
+                <strong style={{ color: '#7f1d1d' }}>⚠️ Rates Change Frequently</strong>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#991b1b', fontSize: '0.8125rem' }}>
+                  China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements. Always verify current rates before shipment.
+                </p>
+              </div>
+
+              <div style={{
+                padding: '0.75rem',
+                backgroundColor: '#d1fae5',
+                borderRadius: '4px',
+                border: '1px solid #059669'
+              }}>
+                <strong style={{ color: '#065f46' }}>💰 USMCA Eliminates ALL Tariffs</strong>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
+                  Switching to Mexico/Canada manufacturing pays 0% - eliminates base rate, Section 301, AND reciprocal tariffs. See "Annual Savings" column for financial impact.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Component Breakdown Table */}
       {results.usmca.component_breakdown && results.usmca.component_breakdown.length > 0 && (
         <div className="element-spacing">
