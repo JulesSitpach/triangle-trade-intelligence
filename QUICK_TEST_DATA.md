@@ -28,13 +28,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Smart Home Hub
-**Description**: IoT device for home automation with touchscreen interface
-**Annual Production**: 50000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: United States
+**Complete Product Description**: IoT device for home automation with touchscreen interface, Wi-Fi 6 connectivity, voice control integration, and mobile app support
+**Manufacturing/Assembly Location**: United States
 **Substantial Manufacturing**: ☑ YES (PCB assembly, firmware integration, enclosure molding)
 
 ### Component Breakdown
@@ -44,10 +39,36 @@
 | Die-cast aluminum housing with anodized finish, powder-coated matte black, integrated mounting brackets | Mexico | 30 |
 | Capacitive touchscreen LCD display module, 7-inch diagonal, 1024x600 resolution, tempered glass surface | Canada | 25 |
 
-### Importer/Exporter/Producer
-**Importer**: TechCorp USA, 123 Main St, Los Angeles CA 90001
-**Exporter**: TechCorp Maquiladora, Zona Industrial, Tijuana BC 22000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: TechCorp Manufacturing Inc
+**Address**: 1250 Innovation Drive, Los Angeles, CA 90001
+**Country**: United States
+**Tax ID**: 94-1234567
+**Phone**: +1 (310) 555-0123
+**Email**: j.martinez@techcorpmfg.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: TechRetail Distribution USA Inc
+**Address**: 4520 Commerce Boulevard, Santa Clara, CA 95054
+**Country**: United States
+**Tax ID**: 77-9876543
+**Phone**: +1 (408) 555-2100
+**Email**: purchasing@techretail.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Jennifer Martinez
+**Signatory Title**: Export Manager
+**Signatory Email**: j.martinez@techcorpmfg.com
+**Signatory Phone**: +1 (310) 555-0123
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of TechCorp Manufacturing Inc
 
 ---
 
@@ -74,13 +95,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Electric Motor Assembly
-**Description**: High-efficiency brushless DC motor for hybrid vehicles
-**Annual Production**: 25000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: High-efficiency brushless DC motor for hybrid vehicles with integrated cooling system, regenerative braking capability, and variable speed control
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Motor winding, shaft machining, bearing assembly)
 
 ### Component Breakdown
@@ -90,10 +106,36 @@
 | Precision-machined steel rotor shaft, AISI 4140 alloy, induction-hardened surface, spline-cut ends | Mexico | 35 |
 | Neodymium-iron-boron permanent magnets, N42 grade, nickel-plated coating, arc-segment shape for motor stator | China | 25 |
 
-### Importer/Exporter/Producer
-**Importer**: AutoParts USA Inc, 456 Industrial Dr, Detroit MI 48201
-**Exporter**: AutoParts Dynamics SA, Parque Industrial, Monterrey NL 64000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: AutoParts Dynamics SA de CV
+**Address**: Parque Industrial del Norte 450, Monterrey, NL 64000
+**Country**: Mexico
+**Tax ID**: RFC-APD850615-A12
+**Phone**: +52 (81) 8555-0234
+**Email**: c.rodriguez@autopartsdynamics.mx
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: AutoParts Buyers LLC
+**Address**: 1800 Michigan Avenue, Dearborn, MI 48126
+**Country**: United States
+**Tax ID**: 38-2345678
+**Phone**: +1 (313) 555-4200
+**Email**: procurement@autopartsbuyers.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Carlos Rodriguez
+**Signatory Title**: Supply Chain Manager
+**Signatory Email**: c.rodriguez@autopartsdynamics.mx
+**Signatory Phone**: +52 (81) 8555-0234
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of AutoParts Dynamics SA de CV
 
 ---
 
@@ -120,13 +162,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Hydraulic Press System
-**Description**: 50-ton hydraulic press for metal forming operations
-**Annual Production**: 1200
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Canada
+**Complete Product Description**: 50-ton hydraulic press for metal forming operations with programmable control system, safety interlocks, and precision positioning sensors
+**Manufacturing/Assembly Location**: Canada
 **Substantial Manufacturing**: ☑ YES (Frame welding, hydraulic system assembly, electrical integration)
 
 ### Component Breakdown
@@ -137,10 +174,36 @@
 | Programmable logic controller (PLC) touchscreen panel, 10-inch HMI display, IP65 rated enclosure, 24V DC power | China | 22 |
 | Variable displacement hydraulic pump, pressure-compensated, 10 GPM flow rate, 3000 PSI max pressure, SAE mounting | Germany | 12 |
 
-### Importer/Exporter/Producer
-**Importer**: Industrial Solutions USA, 789 Factory Rd, Buffalo NY 14201
-**Exporter**: Industrial Solutions Ltd, 321 Manufacturing Ave, Toronto ON M5V 3A8, CA
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: Industrial Solutions Ltd
+**Address**: 321 Manufacturing Avenue, Toronto, ON M5V 3A8
+**Country**: Canada
+**Tax ID**: BN-123456789RT0001
+**Phone**: +1 (416) 555-0345
+**Email**: d.thompson@industrialsolutions.ca
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Industrial Supply Co
+**Address**: 2900 Factory Boulevard, Buffalo, NY 14201
+**Country**: United States
+**Tax ID**: 16-3456789
+**Phone**: +1 (716) 555-5300
+**Email**: orders@industrialsupplyco.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: David Thompson
+**Signatory Title**: Operations Manager
+**Signatory Email**: d.thompson@industrialsolutions.ca
+**Signatory Phone**: +1 (416) 555-0345
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of Industrial Solutions Ltd
 
 ---
 
@@ -167,13 +230,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Wireless Earbuds
-**Description**: Bluetooth 5.0 wireless earbuds with active noise cancellation
-**Annual Production**: 100000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Does Not Apply (Importer/Distributor Only)
+**Complete Product Description**: Bluetooth 5.0 wireless earbuds with active noise cancellation, touch controls, IPX4 water resistance, and 24-hour battery life with charging case
+**Manufacturing/Assembly Location**: Does Not Apply
 **Substantial Manufacturing**: ☐ NO
 
 ### Component Breakdown
@@ -184,10 +242,36 @@
 | Injection-molded ABS plastic charging case with magnetic lid, matte finish, USB-C port, LED indicators | Mexico | 15 |
 | Printed retail packaging box with foam insert, full-color graphics, recycled cardboard, product manual included | Canada | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: Global Tech Distributors, 555 Commerce St, San Francisco CA 94102
-**Exporter**: TechMex Assembly SA, Industrial Park, Juarez CHIH 32000, MX
-**Producer**: TechMex Assembly SA (assembly only, no substantial transformation)
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: Global Tech Distributors LLC
+**Address**: 555 Commerce Street, San Francisco, CA 94102
+**Country**: United States
+**Tax ID**: 77-8901234
+**Phone**: +1 (415) 555-0456
+**Email**: a.chen@globaltechdist.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Consumer Electronics Imports Inc
+**Address**: 3300 Distribution Way, Los Angeles, CA 90021
+**Country**: United States
+**Tax ID**: 95-4567890
+**Phone**: +1 (213) 555-6400
+**Email**: buying@consumerelectronics.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Amy Chen
+**Signatory Title**: Compliance Officer
+**Signatory Email**: a.chen@globaltechdist.com
+**Signatory Phone**: +1 (415) 555-0456
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of Global Tech Distributors LLC
 
 ---
 
@@ -214,13 +298,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Winter Jacket
-**Description**: Insulated winter jacket with waterproof shell and fleece lining
-**Annual Production**: 30000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Canada
+**Complete Product Description**: Insulated winter jacket with waterproof shell and fleece lining, adjustable hood, reinforced elbow patches, and multiple storage pockets
+**Manufacturing/Assembly Location**: Canada
 **Substantial Manufacturing**: ☑ YES (Cutting, sewing, waterproof seam sealing)
 
 ### Component Breakdown
@@ -231,10 +310,36 @@
 | YKK Zippers | Mexico | 15 |
 | Down Insulation | Canada | 15 |
 
-### Importer/Exporter/Producer
-**Importer**: NorthWest USA Retail, 888 Apparel Blvd, Seattle WA 98101
-**Exporter**: NorthWest Apparel Co, 444 Textile Dr, Vancouver BC V6B 1A1, CA
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: NorthWest Apparel Co Ltd
+**Address**: 444 Textile Drive, Vancouver, BC V6B 1A1
+**Country**: Canada
+**Tax ID**: BN-234567890RT0001
+**Phone**: +1 (604) 555-0567
+**Email**: s.williams@nwapparel.ca
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Apparel Retail Group USA
+**Address**: 1200 Fashion Boulevard, Seattle, WA 98101
+**Country**: United States
+**Tax ID**: 91-5678901
+**Phone**: +1 (206) 555-7500
+**Email**: sourcing@apparelretailgroup.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Sarah Williams
+**Signatory Title**: Supply Chain Manager
+**Signatory Email**: s.williams@nwapparel.ca
+**Signatory Phone**: +1 (604) 555-0567
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of NorthWest Apparel Co Ltd
 
 ---
 
@@ -261,13 +366,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Organic Salsa
-**Description**: All-natural salsa made from fresh tomatoes, peppers, and cilantro
-**Annual Production**: 500000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: All-natural salsa made from fresh tomatoes, peppers, and cilantro with medium heat level, chunky texture, and preservative-free formulation
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Cooking, blending, pasteurization, bottling)
 
 ### Component Breakdown
@@ -278,10 +378,36 @@
 | Glass Jars | Mexico | 18 |
 | Cilantro & Spices | Mexico | 12 |
 
-### Importer/Exporter/Producer
-**Importer**: AgriPro USA Inc, 777 Food Way, El Paso TX 79901
-**Exporter**: AgriPro Foods SA, Parque Agroindustrial, Culiacán SIN 80000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: AgriPro Foods SA de CV
+**Address**: Parque Agroindustrial 123, Culiacán, SIN 80000
+**Country**: Mexico
+**Tax ID**: RFC-APF920820-B45
+**Phone**: +52 (667) 7555-0678
+**Email**: m.hernandez@agriprofoods.mx
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Gourmet Foods Distribution LLC
+**Address**: 4100 International Boulevard, El Paso, TX 79901
+**Country**: United States
+**Tax ID**: 75-6789012
+**Phone**: +1 (915) 555-8600
+**Email**: imports@gourmetfoodsdist.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Miguel Hernandez
+**Signatory Title**: Operations Manager
+**Signatory Email**: m.hernandez@agriprofoods.mx
+**Signatory Phone**: +52 (667) 7555-0678
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of AgriPro Foods SA de CV
 
 ---
 
@@ -308,13 +434,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Portable Ultrasound Device
-**Description**: Handheld diagnostic ultrasound with wireless connectivity
-**Annual Production**: 8000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: United States
+**Complete Product Description**: Handheld diagnostic ultrasound with wireless connectivity, real-time imaging display, cloud data storage, and FDA-cleared medical device certification
+**Manufacturing/Assembly Location**: United States
 **Substantial Manufacturing**: ☑ YES (Transducer assembly, circuit board integration, FDA-compliant testing)
 
 ### Component Breakdown
@@ -325,10 +446,36 @@
 | Custom PCB Assembly | Mexico | 20 |
 | Lithium Battery Pack | China | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: MedTech USA Distribution, 999 Medical Plaza, Boston MA 02101
-**Exporter**: MedTech Manufacturing, 123 Innovation Dr, San Diego CA 92101
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: MedTech Innovations Inc
+**Address**: 999 Medical Plaza Drive, Boston, MA 02101
+**Country**: United States
+**Tax ID**: 33-4567890
+**Phone**: +1 (617) 555-0789
+**Email**: r.kim@medtechinnovations.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Medical Supply Chain Inc
+**Address**: 2500 Healthcare Drive, Chicago, IL 60601
+**Country**: United States
+**Tax ID**: 36-7890123
+**Phone**: +1 (312) 555-9700
+**Email**: procurement@medsupplychain.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Dr. Robert Kim
+**Signatory Title**: Director of Trade
+**Signatory Email**: r.kim@medtechinnovations.com
+**Signatory Phone**: +1 (617) 555-0789
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of MedTech Innovations Inc
 
 ---
 
@@ -355,13 +502,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Executive Office Desk
-**Description**: Solid wood executive desk with steel frame and cable management
-**Annual Production**: 15000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: Solid wood executive desk with steel frame and cable management, adjustable height mechanism, built-in USB charging ports, and scratch-resistant lacquer finish
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Wood cutting, surface finishing, welding, assembly)
 
 ### Component Breakdown
@@ -372,10 +514,36 @@
 | Drawer Slides & Hardware | Mexico | 20 |
 | Lacquer Finish | Canada | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: Modern Living USA, 234 Furniture Ave, High Point NC 27260
-**Exporter**: Modern Living SA, Parque Industrial, Guadalajara JAL 44100, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: Modern Living Furniture SA de CV
+**Address**: Parque Industrial Los Altos 567, Guadalajara, JAL 44100
+**Country**: Mexico
+**Tax ID**: RFC-MLF880910-C78
+**Phone**: +52 (33) 3555-0890
+**Email**: r.gomez@modernlivingmx.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Office Furniture Wholesalers
+**Address**: 800 Furniture Court, High Point, NC 27260
+**Country**: United States
+**Tax ID**: 56-8901234
+**Phone**: +1 (336) 555-1800
+**Email**: buyers@officefurniturew.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Ricardo Gomez
+**Signatory Title**: Operations Manager
+**Signatory Email**: r.gomez@modernlivingmx.com
+**Signatory Phone**: +52 (33) 3555-0890
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of Modern Living Furniture SA de CV
 
 ---
 
@@ -402,13 +570,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Industrial Adhesive
-**Description**: Two-part epoxy adhesive for structural bonding applications
-**Annual Production**: 200000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Canada
+**Complete Product Description**: Two-part epoxy adhesive for structural bonding applications with high shear strength, temperature resistance up to 200°C, and fast 30-minute cure time
+**Manufacturing/Assembly Location**: Canada
 **Substantial Manufacturing**: ☑ YES (Chemical synthesis, mixing, quality testing)
 
 ### Component Breakdown
@@ -419,10 +582,36 @@
 | Plastic Packaging Tubes | Mexico | 15 |
 | Additives & Stabilizers | Canada | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: ChemCorp USA Inc, 567 Chemical Dr, Houston TX 77001
-**Exporter**: ChemCorp Solutions Ltd, 890 Industrial Pkwy, Toronto ON M1B 3G1, CA
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: ChemCorp Solutions Ltd
+**Address**: 890 Industrial Parkway, Toronto, ON M1B 3G1
+**Country**: Canada
+**Tax ID**: BN-345678901RT0001
+**Phone**: +1 (416) 555-0901
+**Email**: p.obrien@chemcorpsolutions.ca
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Industrial Chemicals USA Inc
+**Address**: 3600 Chemical Boulevard, Houston, TX 77001
+**Country**: United States
+**Tax ID**: 74-9012345
+**Phone**: +1 (713) 555-1900
+**Email**: purchasing@industrialchemusa.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Dr. Patricia O'Brien
+**Signatory Title**: Compliance Officer
+**Signatory Email**: p.obrien@chemcorpsolutions.ca
+**Signatory Phone**: +1 (416) 555-0901
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of ChemCorp Solutions Ltd
 
 ---
 
@@ -449,13 +638,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Educational Building Blocks
-**Description**: Plastic interlocking building blocks for children ages 3+
-**Annual Production**: 750000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Does Not Apply (Importer/Distributor Only)
+**Complete Product Description**: Plastic interlocking building blocks for children ages 3+ with bright colors, rounded edges for safety, non-toxic materials, and ASTM F963 compliance
+**Manufacturing/Assembly Location**: Does Not Apply
 **Substantial Manufacturing**: ☐ NO
 
 ### Component Breakdown
@@ -466,10 +650,36 @@
 | Instruction Manual Printing | Mexico | 10 |
 | Safety Testing (in Mexico) | Mexico | 5 |
 
-### Importer/Exporter/Producer
-**Importer**: PlayTime Imports, 345 Toy Lane, New York NY 10001
-**Exporter**: PlayTime Mexico SA, Zona Franca, Tijuana BC 22000, MX
-**Producer**: Shanghai Toys Manufacturing Ltd, Shanghai, China (no USMCA processing)
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: PlayTime Imports LLC
+**Address**: 345 Toy Lane, New York, NY 10001
+**Country**: United States
+**Tax ID**: 13-5678901
+**Phone**: +1 (212) 555-1012
+**Email**: l.anderson@playtimeimports.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Kids Toy Distributors LLC
+**Address**: 1500 Retail Plaza, Los Angeles, CA 90017
+**Country**: United States
+**Tax ID**: 95-0123456
+**Phone**: +1 (213) 555-2000
+**Email**: buying@kidstoydist.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Lisa Anderson
+**Signatory Title**: Supply Chain Manager
+**Signatory Email**: l.anderson@playtimeimports.com
+**Signatory Phone**: +1 (212) 555-1012
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of PlayTime Imports LLC
 
 ---
 
@@ -496,13 +706,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Reinforced Concrete Panels
-**Description**: Pre-cast concrete panels with steel reinforcement for commercial construction
-**Annual Production**: 25000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: Pre-cast concrete panels with steel reinforcement for commercial construction, 8-inch thickness, weather-resistant finish, and seismic-rated design
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Concrete mixing, steel reinforcement, curing, finishing)
 
 ### Component Breakdown
@@ -513,10 +718,36 @@
 | Aggregate (Sand & Gravel) | Mexico | 20 |
 | Chemical Admixtures | United States | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: BuildPro USA LLC, 678 Construction Rd, Phoenix AZ 85001
-**Exporter**: BuildPro Materials SA, Parque Industrial, Querétaro QRO 76000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: BuildPro Materials SA de CV
+**Address**: Parque Industrial Querétaro 234, Querétaro, QRO 76000
+**Country**: Mexico
+**Tax ID**: RFC-BPM901125-D89
+**Phone**: +52 (442) 2555-1123
+**Email**: f.ramirez@buildpromaterials.mx
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: BuildPro Supply USA
+**Address**: 5200 Construction Avenue, Phoenix, AZ 85001
+**Country**: United States
+**Tax ID**: 86-1234567
+**Phone**: +1 (602) 555-2100
+**Email**: orders@buildprosupply.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Fernando Ramirez
+**Signatory Title**: General Manager
+**Signatory Email**: f.ramirez@buildpromaterials.mx
+**Signatory Phone**: +52 (442) 2555-1123
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of BuildPro Materials SA de CV
 
 ---
 
@@ -543,13 +774,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Carbon Fiber Hockey Stick
-**Description**: Professional-grade hockey stick with carbon fiber composite construction
-**Annual Production**: 40000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Canada
+**Complete Product Description**: Professional-grade hockey stick with carbon fiber composite construction, low kick point flex design, reinforced blade toe, and NHL player-approved specifications
+**Manufacturing/Assembly Location**: Canada
 **Substantial Manufacturing**: ☑ YES (Carbon fiber layup, resin infusion, blade molding, heat treatment)
 
 ### Component Breakdown
@@ -560,10 +786,36 @@
 | Fiberglass Blade Material | Mexico | 20 |
 | Grip Tape & Finish | Canada | 10 |
 
-### Importer/Exporter/Producer
-**Importer**: ProSport USA Inc, 901 Sports Blvd, Minneapolis MN 55401
-**Exporter**: ProSport Equipment Ltd, 234 Hockey Dr, Montreal QC H1A 1A1, CA
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: ProSport Equipment Ltd
+**Address**: 234 Hockey Drive, Montreal, QC H1A 1A1
+**Country**: Canada
+**Tax ID**: BN-456789012RT0001
+**Phone**: +1 (514) 555-1234
+**Email**: jp.dubois@prosportequip.ca
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Sports Equipment Retail Inc
+**Address**: 2800 Athletic Boulevard, Minneapolis, MN 55401
+**Country**: United States
+**Tax ID**: 41-2345678
+**Phone**: +1 (612) 555-2200
+**Email**: procurement@sportsequipretail.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Jean-Pierre Dubois
+**Signatory Title**: Export Manager
+**Signatory Email**: jp.dubois@prosportequip.ca
+**Signatory Phone**: +1 (514) 555-1234
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of ProSport Equipment Ltd
 
 ---
 
@@ -590,13 +842,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Solar Panel Module
-**Description**: 400W monocrystalline solar panel with aluminum frame and junction box
-**Annual Production**: 100000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: 400W monocrystalline solar panel with aluminum frame and junction box, 21% efficiency rating, 25-year power warranty, and IP67 weatherproof certification
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Cell lamination, frame assembly, wiring, quality testing)
 
 ### Component Breakdown
@@ -607,10 +854,36 @@
 | Aluminum Frame | Mexico | 20 |
 | Junction Box & Wiring | United States | 15 |
 
-### Importer/Exporter/Producer
-**Importer**: SolarTech USA Inc, 456 Green Energy Way, Las Vegas NV 89101
-**Exporter**: SolarTech Systems SA, Parque Solar, Hermosillo SON 83000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: SolarTech Systems SA de CV
+**Address**: Parque Solar Industrial 789, Hermosillo, SON 83000
+**Country**: Mexico
+**Tax ID**: RFC-STS870305-E01
+**Phone**: +52 (662) 3555-1345
+**Email**: e.martinez@solartechsystems.mx
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Green Energy Solutions USA
+**Address**: 7100 Renewable Drive, Las Vegas, NV 89101
+**Country**: United States
+**Tax ID**: 88-3456789
+**Phone**: +1 (702) 555-2300
+**Email**: purchasing@greenenergysol.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Elena Martinez
+**Signatory Title**: Trade Director
+**Signatory Email**: e.martinez@solartechsystems.mx
+**Signatory Phone**: +52 (662) 3555-1345
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of SolarTech Systems SA de CV
 
 ---
 
@@ -637,13 +910,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Aircraft Landing Gear Component
-**Description**: Precision-machined titanium landing gear strut for regional aircraft
-**Annual Production**: 500
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: United States
+**Complete Product Description**: Precision-machined titanium landing gear strut for regional aircraft with FAA-PMA certification, non-destructive testing validation, and mil-spec surface coating
+**Manufacturing/Assembly Location**: United States
 **Substantial Manufacturing**: ☑ YES (CNC machining, heat treatment, surface coating, NDT testing)
 
 ### Component Breakdown
@@ -654,10 +922,36 @@
 | Specialty Fasteners | United States | 12 |
 | Surface Treatment (coating) | Mexico | 8 |
 
-### Importer/Exporter/Producer
-**Importer**: AeroDynamics Distribution, 789 Aerospace Dr, Wichita KS 67201
-**Exporter**: AeroDynamics Manufacturing, 123 Aviation Way, Seattle WA 98101
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: AeroDynamics Inc
+**Address**: 123 Aviation Way, Seattle, WA 98101
+**Country**: United States
+**Tax ID**: 91-6789012
+**Phone**: +1 (206) 555-1456
+**Email**: j.mitchell@aerodynamicsinc.com
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Aerospace Components Buyers LLC
+**Address**: 9500 Flight Line Boulevard, Wichita, KS 67201
+**Country**: United States
+**Tax ID**: 48-4567890
+**Phone**: +1 (316) 555-2400
+**Email**: sourcing@aerospacebuyers.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: James Mitchell
+**Signatory Title**: Trade Director
+**Signatory Email**: j.mitchell@aerodynamicsinc.com
+**Signatory Phone**: +1 (206) 555-1456
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of AeroDynamics Inc
 
 ---
 
@@ -684,13 +978,8 @@
 **Destination Market**: United States
 
 ### Product Overview
-**Product Name**: Corrugated Cardboard Boxes
-**Description**: Custom-printed shipping boxes for e-commerce applications
-**Annual Production**: 2000000
-**Destination Country**: United States
-
-### Manufacturing/Assembly Location
-**Location**: Mexico
+**Complete Product Description**: Custom-printed shipping boxes for e-commerce applications with moisture-resistant coating, reinforced corners, easy-fold design, and full-color branding
+**Manufacturing/Assembly Location**: Mexico
 **Substantial Manufacturing**: ☑ YES (Die-cutting, folding, printing, gluing)
 
 ### Component Breakdown
@@ -701,10 +990,36 @@
 | Adhesive Glue | Canada | 12 |
 | Packaging Tape | Mexico | 8 |
 
-### Importer/Exporter/Producer
-**Importer**: PackagePro USA LLC, 567 Packaging Rd, Dallas TX 75201
-**Exporter**: PackagePro Solutions SA, Zona Industrial, Monterrey NL 64000, MX
-**Producer**: Same as exporter
+### Importer/Exporter/Producer Information
+
+#### Exporter (Auto-filled from Company Profile)
+**Company Name**: PackagePro Solutions SA de CV
+**Address**: Zona Industrial Norte 890, Monterrey, NL 64000
+**Country**: Mexico
+**Tax ID**: RFC-PPS950710-F23
+**Phone**: +52 (81) 8555-1567
+**Email**: a.lopez@packageprosolutions.mx
+
+#### Importer (Customer - Manual Entry)
+**Company Name**: Packaging Solutions USA Inc
+**Address**: 3400 Distribution Center Drive, Dallas, TX 75201
+**Country**: United States
+**Tax ID**: 75-5678901
+**Phone**: +1 (214) 555-2500
+**Email**: orders@packagingsolutionsusa.com
+
+#### Producer
+**Same as Exporter**: YES
+
+### Authorization & Signatory Information
+**Authorized Signatory Name**: Ana Lopez
+**Signatory Title**: Export Manager
+**Signatory Email**: a.lopez@packageprosolutions.mx
+**Signatory Phone**: +52 (81) 8555-1567
+
+**Certifications**:
+☑ I certify that the information provided is true and accurate
+☑ I am authorized to sign this certificate on behalf of PackagePro Solutions SA de CV
 
 ---
 
