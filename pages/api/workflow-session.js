@@ -218,6 +218,18 @@ export default protectedApiHandler({
         logError('Failed to save complete workflow', { error: error.message, sessionId });
         throw new ApiError('Database save failed', 500, { details: error.message });
       }
+
+      // ✅ STANDARD SAAS PATTERN: Increment usage counter ONLY on successful workflow completion
+      // This ensures users are only charged for completed workflows, not abandoned ones
+      try {
+        const { incrementAnalysisCount } = require('../../lib/services/usage-tracking-service.js');
+        await incrementAnalysisCount(userId, 'unknown'); // Tier will be looked up by function
+        console.log(`[WORKFLOW-SESSION] ✅ Usage counter incremented for user ${userId} after workflow completion`);
+      } catch (counterError) {
+        // Log but don't block - tracking failure shouldn't prevent workflow completion
+        console.error('[WORKFLOW-SESSION] ⚠️ Failed to increment usage counter:', counterError);
+        logError('Failed to increment usage counter', { error: counterError.message, userId, sessionId });
+      }
     } else {
       // Save in-progress workflow to workflow_sessions
       // Extract company data from workflow for dedicated columns

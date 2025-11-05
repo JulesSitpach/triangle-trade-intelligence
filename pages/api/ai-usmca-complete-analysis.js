@@ -374,34 +374,32 @@ export default protectedApiHandler({
       }
     }
 
-    // Check 1: Atomically reserve analysis slot (prevents race conditions)
-    // This increments the counter BEFORE processing, ensuring parallel requests
-    // cannot bypass the limit by checking simultaneously before any increment
-    const reservation = await reserveAnalysisSlot(userId, subscriptionTier);
+    // Check 1: Validate subscription limit WITHOUT incrementing counter
+    // ✅ STANDARD SAAS PATTERN: Check limit at START, increment counter at END (workflow completion)
+    // This prevents counting abandoned workflows (user quits before completing)
+    const { checkAnalysisLimit } = require('../../lib/services/usage-tracking-service.js');
+    const limitCheck = await checkAnalysisLimit(userId, subscriptionTier);
 
-    // ✅ ULTRA-SIMPLE LOGIC:
-    // reserveAnalysisSlot() ALREADY incremented the counter (to prevent race conditions)
-    // So currentCount is the NEW value AFTER this reservation
-    // Trial: First call → count goes 0→1, limit=1 → 1 > 1? NO → Allow ✓
-    //        Second call → count goes 1→2, limit=1 → 2 > 1? YES → Block ✓
-    // This is correct! User gets their 1 analysis, then blocked on 2nd attempt
-    if (reservation.currentCount > reservation.tierLimit) {
+    // Block if user has already reached their limit
+    // Trial: used=1, limit=1 → 1 >= 1 → Block (already used their 1 analysis)
+    // Starter: used=15, limit=15 → 15 >= 15 → Block (already used all 15 analyses)
+    if (limitCheck.limitReached) {
       return res.status(429).json({
         success: false,
         error: 'Monthly analysis limit reached',
         message: 'You have reached your monthly analysis limit. Please upgrade to continue.',
         limit_info: {
           tier: subscriptionTier,
-          current_count: reservation.currentCount - 1, // Show actual completed analyses (before this attempt)
-          tier_limit: reservation.tierLimit,
-          remaining: 0
+          current_count: limitCheck.currentCount,
+          tier_limit: limitCheck.tierLimit,
+          remaining: limitCheck.remaining
         },
         upgrade_required: true,
         upgrade_url: '/pricing'
       });
     }
 
-    console.log(`[USMCA-ANALYSIS] ✅ Slot reserved (ID: ${reservation.reservationId}): ${reservation.currentCount}/${reservation.tierLimit}`);
+    console.log(`[USMCA-ANALYSIS] ✅ Limit check passed: ${limitCheck.currentCount}/${limitCheck.tierLimit} (will increment on workflow completion)`);
 
     // Check 2: Trial expiration (prevent free forever usage)
     if (subscriptionTier === 'Trial' || subscriptionTier === 'trial') {
