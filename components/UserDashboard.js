@@ -329,9 +329,9 @@ export default function UserDashboard({ user }) {
                   🗑️ Clear All
                 </button>
               )}
-              {isTrialExpired ? (
+              {isTrialExpired || dashboardData?.usage_stats?.limit_reached ? (
                 <Link href="/pricing" className="btn-primary">
-                  🚀 Upgrade to Create Certificates
+                  🔒 Upgrade for More Analyses
                 </Link>
               ) : (
                 <Link
