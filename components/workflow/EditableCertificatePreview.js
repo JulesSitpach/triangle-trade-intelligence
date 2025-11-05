@@ -749,33 +749,8 @@ export default function EditableCertificatePreview({
         margin: '0 auto',
         // Allow page breaks for long certificates
         // pageBreakInside: 'avoid', // Removed to allow multi-page PDFs
-        // Add watermark for free trial users
-        position: 'relative',
-        ...(isTrialUser && {
-          background: 'repeating-linear-gradient(45deg, #fff, #fff 50px, rgba(239, 68, 68, 0.03) 50px, rgba(239, 68, 68, 0.03) 100px)',
-          border: '3px solid #fee2e2'
-        })
+        position: 'relative'
       }}>
-        {/* WATERMARK for free users */}
-        {isTrialUser && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%) rotate(-45deg)',
-            fontSize: '72px',
-            fontWeight: 'bold',
-            color: 'rgba(239, 68, 68, 0.08)',
-            pointerEvents: 'none',
-            zIndex: 10,
-            width: '200%',
-            textAlign: 'center',
-            fontFamily: 'Arial, sans-serif',
-            letterSpacing: '20px'
-          }}>
-            TRIAL - NOT OFFICIAL
-          </div>
-        )}
         {/* Header */}
         <div style={{
           textAlign: 'center',
