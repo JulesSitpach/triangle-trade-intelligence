@@ -18,6 +18,13 @@ module.exports = {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 
+  // API route configuration
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb', // Limit request body size to prevent DoS attacks
+    },
+  },
+
   // Security and CORS headers
   async headers() {
     return [

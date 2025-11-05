@@ -92,6 +92,7 @@ export default async function handler(req, res) {
 
   try {
     console.log('🔐 Login attempt:', email);
+    const startTime = Date.now();
 
     // Step 1: Verify password using Supabase Auth
     const { data: authData, error: authError } = await supabaseAuth.auth.signInWithPassword({
@@ -99,6 +100,29 @@ export default async function handler(req, res) {
       password: password
     });
 
+    // Step 2: Always query user profile (even if auth failed) to prevent timing attacks
+    let user = null;
+    let profileError = null;
+
+    if (!authError && authData.user) {
+      const profileResult = await supabaseAdmin
+        .from('user_profiles')
+        .select('id, email, company_name, subscription_tier, status, full_name, is_admin, role, last_login')
+        .eq('email', email.toLowerCase())
+        .single();
+      user = profileResult.data;
+      profileError = profileResult.error;
+    }
+
+    // ✅ TIMING ATTACK PREVENTION: Ensure consistent response time
+    // All failed login attempts should take the same amount of time
+    const elapsed = Date.now() - startTime;
+    const minDelay = 200; // Minimum 200ms response time
+    if (elapsed < minDelay) {
+      await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+    }
+
+    // Now check results and return appropriate error
     if (authError || !authData.user) {
       console.log('❌ Authentication failed:', email, authError?.message);
       await logDevIssue({
@@ -117,13 +141,6 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ Password verified for:', email);
-
-    // Step 2: Get user profile data
-    const { data: user, error: profileError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .single();
 
     if (profileError || !user) {
       console.log('❌ User profile not found:', email);
