@@ -56,9 +56,10 @@ export default function Pricing() {
         return
       }
 
-      // If user already has a subscription (changing plans), redirect to customer portal
+      // If user already has an ACTIVE subscription (changing plans), redirect to customer portal
+      // NOTE: Only send to portal if they have a paid tier AND an active Stripe customer ID
       if (currentTier && currentTier !== 'trial') {
-        // Redirect to Stripe Customer Portal
+        // Try to access customer portal
         const portalResponse = await fetch('/api/stripe/create-portal-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,13 +67,14 @@ export default function Pricing() {
         })
 
         if (portalResponse.ok) {
+          // Portal session succeeded - user has active Stripe subscription
           const portalData = await portalResponse.json()
           window.location.href = portalData.url
           return
         } else {
-          // Portal session failed (likely no subscription record in database)
-          const errorData = await portalResponse.json()
-          throw new Error(errorData.message || 'Unable to access subscription portal. Please contact support.')
+          // Portal session failed - user might have canceled subscription
+          // Fall through to checkout flow (don't throw error)
+          console.log('Portal access failed, proceeding to checkout for new subscription')
         }
       }
 
