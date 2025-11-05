@@ -1995,7 +1995,6 @@ export default function TradeRiskAlternatives() {
                   if (confirm('Start a new analysis? Your current alerts will be cleared.')) {
                     // Clear alert data
                     workflowStorage.removeItem('alert_impact_analysis');
-                    setAlertImpactAnalysis(null);
                     setConsolidatedAlerts([]);
                     setRealPolicyAlerts([]);
                     setAlertsGenerated(false);
