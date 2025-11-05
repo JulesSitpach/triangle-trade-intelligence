@@ -13,44 +13,12 @@
 import { protectedApiHandler } from '../../lib/api/apiHandler.js';
 import { createClient } from '@supabase/supabase-js';
 import { checkAnalysisLimit } from '../../lib/services/usage-tracking-service.js';
+import { getTierLimits } from '../../config/subscription-tier-limits.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
-
-const TIER_LIMITS = {
-  'trial': {
-    analyses_per_month: 1,
-    max_components: 3,
-    display_name: 'Free Trial'
-  },
-  'free': {
-    analyses_per_month: 1,
-    max_components: 3,
-    display_name: 'Free'
-  },
-  'starter': {
-    analyses_per_month: 15,  // ✅ FIXED (Nov 5): Was 10, now matches pricing page promise of 15
-    max_components: 10,
-    display_name: 'Starter ($99/month)'
-  },
-  'professional': {
-    analyses_per_month: 100,
-    max_components: 15,
-    display_name: 'Professional ($299/month)'
-  },
-  'premium': {
-    analyses_per_month: 500,  // ✅ FIXED: Was 100, now 500 to match other configs
-    max_components: 20,
-    display_name: 'Premium ($599/month)'  // ✅ FIXED: Was $499, actual price is $599
-  },
-  'enterprise': {
-    analyses_per_month: 9999, // Unlimited (not available to new users)
-    max_components: 50,
-    display_name: 'Enterprise'
-  }
-};
 
 export default protectedApiHandler({
   GET: async (req, res) => {
@@ -72,8 +40,10 @@ export default protectedApiHandler({
         });
       }
 
-      const subscriptionTier = (userProfile?.subscription_tier || 'trial').toLowerCase();
-      const tierLimits = TIER_LIMITS[subscriptionTier] || TIER_LIMITS.trial;
+      // ✅ Normalize tier name to match centralized config (capitalized)
+      const subscriptionTier = userProfile?.subscription_tier || 'Trial';
+      const normalizedTier = subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1).toLowerCase();
+      const tierLimits = getTierLimits(normalizedTier);
 
       // Check current usage
       const usageStatus = await checkAnalysisLimit(userId, subscriptionTier);

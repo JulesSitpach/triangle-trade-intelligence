@@ -23,32 +23,21 @@ import {
   validateTariffRatesCache,
   reportValidationErrors
 } from '../../lib/validation/data-contract-validator.ts';
+import {
+  ANALYSIS_LIMITS,
+  EXECUTIVE_SUMMARY_LIMITS,
+  PORTFOLIO_BRIEFING_LIMITS
+} from '../../config/subscription-tier-limits.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const SUBSCRIPTION_LIMITS = {
-  'Trial': 1,           // 1 workflow analysis total (7-day trial)
-  'Starter': 15,        // 15 workflow analyses per month
-  'Professional': 100,  // 100 workflow analyses per month
-  'Premium': 500        // 500 workflow analyses per month
-};
-
-const EXECUTIVE_SUMMARY_LIMITS = {
-  'Trial': 1,           // 1 executive summary (matches workflows - shown on results page)
-  'Starter': 15,        // 15 executive summaries per month (matches workflows)
-  'Professional': 100,  // 100 executive summaries per month (matches workflows)
-  'Premium': 500        // 500 executive summaries per month (matches workflows)
-};
-
-const BRIEFING_LIMITS = {
-  'Trial': 0,           // 0 portfolio briefings (retention driver - paid feature only)
-  'Starter': 30,        // 30 portfolio briefings per month (2x workflows - weekly alert checks)
-  'Professional': 150,  // 150 portfolio briefings per month (1.5x workflows - checks every few days)
-  'Premium': 750        // 750 portfolio briefings per month (1.5x workflows - daily checks + headroom)
-};
+// ✅ All limits now imported from centralized config (config/subscription-tier-limits.js)
+// Legacy constants renamed to match centralized config names:
+const SUBSCRIPTION_LIMITS = ANALYSIS_LIMITS;
+const BRIEFING_LIMITS = PORTFOLIO_BRIEFING_LIMITS;
 
 // ✅ Helper function to calculate risk score from severity level
 const calculateRiskScore = (severity) => {

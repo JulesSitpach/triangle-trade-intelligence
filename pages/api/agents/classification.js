@@ -9,6 +9,7 @@ import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 import { createClient } from '@supabase/supabase-js';
 import { applyRateLimit, strictLimiter } from '../../../lib/security/rateLimiter.js';
 import { protectedApiHandler } from '../../../lib/api/apiHandler.js';
+import { ANALYSIS_LIMITS } from '../../../config/subscription-tier-limits.js';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -110,9 +111,8 @@ export default protectedApiHandler({
       const tier = userProfile?.subscription_tier || 'Trial';
       const used = userProfile?.analyses_this_month || 0;
 
-      // Tier limits (capitalized)
-      const limits = { 'Trial': 1, 'Starter': 15, 'Professional': 100, 'Premium': 500 };
-      const limit = limits[tier] || 1;
+      // ✅ Centralized tier limits (from config/subscription-tier-limits.js)
+      const limit = ANALYSIS_LIMITS[tier] || ANALYSIS_LIMITS['Trial'];
 
       // Block AI classification if user is at or over limit
       if (used >= limit) {

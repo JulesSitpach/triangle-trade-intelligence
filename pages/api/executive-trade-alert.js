@@ -21,6 +21,7 @@ import { getIndustryThreshold } from '../../lib/services/industry-thresholds-ser
 import { BaseAgent } from '../../lib/agents/base-agent.js';
 import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 import { createClient } from '@supabase/supabase-js';
+import { EXECUTIVE_SUMMARY_LIMITS } from '../../config/subscription-tier-limits.js';
 
 // Initialize agents
 const executiveAgent = new BaseAgent({
@@ -81,15 +82,8 @@ export default async function handler(req, res) {
         const now = new Date();
         const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // Define executive summary limits per tier
-        const EXECUTIVE_SUMMARY_LIMITS = {
-          'Trial': 1,           // 1 executive summary (matches workflows)
-          'Starter': 15,        // 15 executive summaries per month
-          'Professional': 100,  // 100 executive summaries per month
-          'Premium': 500        // 500 executive summaries per month
-        };
-
-        const userLimit = EXECUTIVE_SUMMARY_LIMITS[subscriptionTier] || 1;
+        // ✅ Centralized tier limits (from config/subscription-tier-limits.js)
+        const userLimit = EXECUTIVE_SUMMARY_LIMITS[subscriptionTier] || EXECUTIVE_SUMMARY_LIMITS['Trial'];
 
         // Get current usage
         const { data: usageData, error: usageError } = await supabase
