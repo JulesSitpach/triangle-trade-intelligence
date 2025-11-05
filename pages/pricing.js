@@ -95,18 +95,13 @@ export default function Pricing() {
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
-      // Redirect to Stripe Checkout
-      const stripe = await getStripe()
-      if (!stripe) {
-        throw new Error('Stripe failed to load. Please refresh and try again.')
-      }
-
-      const { error } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId
-      })
-
-      if (error) {
-        throw new Error(error.message)
+      // Redirect to Stripe Checkout using the new method
+      // NEW: Stripe deprecated redirectToCheckout on Sept 30, 2025
+      // Use window.location.href with the checkout URL instead
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('Checkout URL not provided by server')
       }
     } catch (error) {
       console.error('Subscription error:', error)
