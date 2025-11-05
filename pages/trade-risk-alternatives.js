@@ -1370,14 +1370,20 @@ export default function TradeRiskAlternatives() {
                             checked={emailEnabled}
                             onChange={(e) => {
                               e.stopPropagation(); // Prevent row expansion when clicking checkbox
+                              if (userTier === 'Trial' || userTier === 'trial') {
+                                alert('📧 Email alerts are available on paid plans. Upgrade to Starter ($29/mo) to receive email notifications when tariff policies change.');
+                                return;
+                              }
                               toggleComponentEmailNotification(idx);
                             }}
+                            disabled={userTier === 'Trial' || userTier === 'trial'}
                             style={{
                               width: '18px',
                               height: '18px',
-                              cursor: 'pointer'
+                              cursor: userTier === 'Trial' || userTier === 'trial' ? 'not-allowed' : 'pointer',
+                              opacity: userTier === 'Trial' || userTier === 'trial' ? 0.5 : 1
                             }}
-                            title="Receive email notifications for future alerts affecting this component"
+                            title={userTier === 'Trial' || userTier === 'trial' ? '🔒 Email alerts available on paid plans - Upgrade to enable' : 'Receive email notifications for future alerts affecting this component'}
                           />
                         </div>
                       </div>
@@ -1692,13 +1698,19 @@ export default function TradeRiskAlternatives() {
                             checked={includeMarketIntelInEmail}
                             onChange={(e) => {
                               e.stopPropagation();
+                              if (userTier === 'Trial' || userTier === 'trial') {
+                                alert('📧 Email alerts are available on paid plans. Upgrade to Starter ($29/mo) to receive email notifications.');
+                                return;
+                              }
                               setIncludeMarketIntelInEmail(e.target.checked);
                             }}
-                            title="Include market intelligence in email alerts (AI always uses these for analysis)"
+                            disabled={userTier === 'Trial' || userTier === 'trial'}
+                            title={userTier === 'Trial' || userTier === 'trial' ? '🔒 Email alerts available on paid plans - Upgrade to enable' : 'Include market intelligence in email alerts (AI always uses these for analysis)'}
                             style={{
                               width: '18px',
                               height: '18px',
-                              cursor: 'pointer'
+                              cursor: userTier === 'Trial' || userTier === 'trial' ? 'not-allowed' : 'pointer',
+                              opacity: userTier === 'Trial' || userTier === 'trial' ? 0.5 : 1
                             }}
                           />
                         </div>
