@@ -379,9 +379,12 @@ export default protectedApiHandler({
     // cannot bypass the limit by checking simultaneously before any increment
     const reservation = await reserveAnalysisSlot(userId, subscriptionTier);
 
-    // ✅ FIX: Block only when count reaches 2+ (allow first workflow to complete)
-    // Trial: Allow count=1, block at count=2
-    // Starter: Allow count=1-10, block at count=11
+    // ✅ ULTRA-SIMPLE LOGIC:
+    // reserveAnalysisSlot() ALREADY incremented the counter (to prevent race conditions)
+    // So currentCount is the NEW value AFTER this reservation
+    // Trial: First call → count goes 0→1, limit=1 → 1 > 1? NO → Allow ✓
+    //        Second call → count goes 1→2, limit=1 → 2 > 1? YES → Block ✓
+    // This is correct! User gets their 1 analysis, then blocked on 2nd attempt
     if (reservation.currentCount > reservation.tierLimit) {
       return res.status(429).json({
         success: false,
@@ -389,7 +392,7 @@ export default protectedApiHandler({
         message: 'You have reached your monthly analysis limit. Please upgrade to continue.',
         limit_info: {
           tier: subscriptionTier,
-          current_count: reservation.currentCount - 1, // Show actual completed analyses
+          current_count: reservation.currentCount - 1, // Show actual completed analyses (before this attempt)
           tier_limit: reservation.tierLimit,
           remaining: 0
         },
