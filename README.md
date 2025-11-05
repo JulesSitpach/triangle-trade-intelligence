@@ -41,7 +41,8 @@ open http://localhost:3001
 - ⚠️ Clear user responsibility messaging with confirmation checkboxes
 - 🔐 Secure authentication with JWT cookies
 - 📱 Responsive design (mobile, tablet, desktop)
-- 🎯 **NEW (Nov 4-5):** 3-layer subscription limit enforcement (page/component/API blocking)
+- 🎯 **NEW (Nov 5):** Centralized subscription config - single source of truth (config/subscription-tier-limits.js)
+- 🔒 **NEW (Nov 4-5):** 3-layer subscription limit enforcement (page/component/API blocking)
 - 🚨 **NEW (Nov 2):** Real-time policy alert system using crisis_alerts database
 
 ## 🏗️ Architecture
@@ -317,28 +318,33 @@ killall node              # macOS/Linux
 - ✅ **Nov 2**: Portfolio briefing API using real RSS-detected policies
 - ✅ **Nov 2**: HS code normalization (fixed China component alert matching)
 
-### Phase 3 Complete (Nov 4-5, 2025) - Subscription Enforcement
+### Phase 3 Complete (Nov 4-5, 2025) - Subscription Enforcement + Centralized Config
 - ✅ **3-layer subscription limit enforcement**:
   1. Page-level blocking (usmca-workflow.js)
   2. Component-level blocking (ComponentOriginsStepEnhanced.js)
   3. API-level blocking (classification.js + ai-usmca-complete-analysis.js)
 - ✅ **New React hook**: useSubscriptionLimit (lib/hooks/)
 - ✅ **New middleware**: subscription-guard (lib/middleware/)
+- ✅ **Centralized config**: config/subscription-tier-limits.js (single source of truth)
+- ✅ **Migrated all 6 endpoints** to use centralized config (eliminated 5 duplicates)
 - ✅ **Tier limits**: Trial (1), Starter (15), Professional (100), Premium (500)
 - ✅ **Race condition handling**: Reservation system prevents double-counting
+- ✅ **Security fix**: HS code bypass closed (workflow session verification)
+- ✅ **Bug fixes**: Starter tier 10→15, Trial executive summaries unblocked
 
 ### Documentation Corrections (Nov 5, 2025)
 - ✅ Corrected technical debt metrics (were overstated by 10-30x)
-- ✅ Updated CLAUDE.md with Nov 4-5 subscription changes
+- ✅ Updated CLAUDE.md with Nov 5 centralized config
 - ✅ Updated README.md with current accurate information
+- ✅ Added SUBSCRIPTION_LIMITS_AUDIT.md
 
-### Recent Commits
+### Recent Commits (Nov 5, 2025)
 ```
-d6001ab - fix: Block '+ New Analysis' button when Trial limit reached
-c9009a3 - fix: Block workflow buttons when Trial limit reached (1/1 used)
-0fbae2f - fix: Remove undefined setAlertImpactAnalysis call
-01b86e8 - fix: Remove visual watermark from certificate preview
-4e4bf12 - feat: Block certificate download for Trial users
+11dbd7e - refactor: Migrate all subscription checks to centralized config
+03be5e4 - docs: Add entry points analysis from subscription work
+b0cf1e8 - feat: Implement centralized subscription enforcement (Option 2)
+7e7008b - docs: Update CLAUDE.md and README.md with Nov 5 changes
+d46fd19 - fix: Align subscription limits with pricing page + close HS code bypass
 ```
 
 ## 🔮 Roadmap
