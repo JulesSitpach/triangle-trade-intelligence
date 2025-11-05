@@ -8,9 +8,24 @@
 ## TEST 1: Electronics - Qualified (China PCB Risk)
 
 ### Company Profile
-**Company Name**: TechCorp Manufacturing
-**Industry**: Electronics & Semiconductors
-**Country**: United States
+**Company Name**: TechCorp Manufacturing Inc
+**Business Type**: Manufacturer
+**Industry Sector**: Electronics & Semiconductors
+**Tax ID / EIN**: 94-1234567
+
+### Company Location
+**Company Address**: 1250 Innovation Drive, Los Angeles, CA 90001
+**Company Country**: United States
+
+### Contact Information
+**Contact Person**: Jennifer Martinez
+**Contact Phone**: +1 (310) 555-0123
+**Contact Email**: j.martinez@techcorpmfg.com
+**Annual Trade Volume**: $15,000,000
+
+### Trade Routes
+**Primary Supplier Country**: China
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Smart Home Hub
@@ -39,9 +54,24 @@
 ## TEST 2: Automotive - High Value Qualified
 
 ### Company Profile
-**Company Name**: AutoParts Dynamics
-**Industry**: Automotive & Transportation
-**Country**: Mexico
+**Company Name**: AutoParts Dynamics SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Automotive & Transportation
+**Tax ID / EIN**: RFC-APD850615-A12
+
+### Company Location
+**Company Address**: Parque Industrial del Norte 450, Monterrey, NL 64000
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Carlos Rodriguez
+**Contact Phone**: +52 (81) 8555-0234
+**Contact Email**: c.rodriguez@autopartsdynamics.mx
+**Annual Trade Volume**: $45,000,000
+
+### Trade Routes
+**Primary Supplier Country**: Canada
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Electric Motor Assembly
@@ -71,8 +101,23 @@
 
 ### Company Profile
 **Company Name**: Industrial Solutions Ltd
-**Industry**: Industrial Machinery
-**Country**: Canada
+**Business Type**: Manufacturer
+**Industry Sector**: Industrial Machinery
+**Tax ID / EIN**: BN-123456789RT0001
+
+### Company Location
+**Company Address**: 321 Manufacturing Avenue, Toronto, ON M5V 3A8
+**Company Country**: Canada
+
+### Contact Information
+**Contact Person**: David Thompson
+**Contact Phone**: +1 (416) 555-0345
+**Contact Email**: d.thompson@industrialsolutions.ca
+**Annual Trade Volume**: $22,000,000
+
+### Trade Routes
+**Primary Supplier Country**: Germany
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Hydraulic Press System
@@ -102,9 +147,24 @@
 ## TEST 4: Electronics - Non-Qualified (High China Content)
 
 ### Company Profile
-**Company Name**: Global Tech Distributors
-**Industry**: Electronics & Semiconductors
-**Country**: United States
+**Company Name**: Global Tech Distributors LLC
+**Business Type**: Importer
+**Industry Sector**: Electronics & Semiconductors
+**Tax ID / EIN**: 77-8901234
+
+### Company Location
+**Company Address**: 555 Commerce Street, San Francisco, CA 94102
+**Company Country**: United States
+
+### Contact Information
+**Contact Person**: Amy Chen
+**Contact Phone**: +1 (415) 555-0456
+**Contact Email**: a.chen@globaltechdist.com
+**Annual Trade Volume**: $28,000,000
+
+### Trade Routes
+**Primary Supplier Country**: China
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Wireless Earbuds
@@ -134,9 +194,24 @@
 ## TEST 5: Textiles - Qualified (Yarn Forward)
 
 ### Company Profile
-**Company Name**: NorthWest Apparel Co
-**Industry**: Textiles & Apparel
-**Country**: Canada
+**Company Name**: NorthWest Apparel Co Ltd
+**Business Type**: Manufacturer
+**Industry Sector**: Textiles & Apparel
+**Tax ID / EIN**: BN-234567890RT0001
+
+### Company Location
+**Company Address**: 444 Textile Drive, Vancouver, BC V6B 1A1
+**Company Country**: Canada
+
+### Contact Information
+**Contact Person**: Sarah Williams
+**Contact Phone**: +1 (604) 555-0567
+**Contact Email**: s.williams@nwapparel.ca
+**Annual Trade Volume**: $18,000,000
+
+### Trade Routes
+**Primary Supplier Country**: Mexico
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Winter Jacket
@@ -166,9 +241,24 @@
 ## TEST 6: Food Products - Qualified
 
 ### Company Profile
-**Company Name**: AgriPro Foods
-**Industry**: Food & Agriculture
-**Country**: Mexico
+**Company Name**: AgriPro Foods SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Food & Agriculture
+**Tax ID / EIN**: RFC-APF920820-B45
+
+### Company Location
+**Company Address**: Parque Agroindustrial 123, Culiacán, SIN 80000
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Miguel Hernandez
+**Contact Phone**: +52 (667) 7555-0678
+**Contact Email**: m.hernandez@agriprofoods.mx
+**Annual Trade Volume**: $8,500,000
+
+### Trade Routes
+**Primary Supplier Country**: Mexico
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Organic Salsa
@@ -198,9 +288,24 @@
 ## TEST 7: Medical Devices - High Value
 
 ### Company Profile
-**Company Name**: MedTech Innovations
-**Industry**: Medical Devices & Pharmaceuticals
-**Country**: United States
+**Company Name**: MedTech Innovations Inc
+**Business Type**: Manufacturer
+**Industry Sector**: Medical Devices & Pharmaceuticals
+**Tax ID / EIN**: 33-4567890
+
+### Company Location
+**Company Address**: 999 Medical Plaza Drive, Boston, MA 02101
+**Company Country**: United States
+
+### Contact Information
+**Contact Person**: Dr. Robert Kim
+**Contact Phone**: +1 (617) 555-0789
+**Contact Email**: r.kim@medtechinnovations.com
+**Annual Trade Volume**: $65,000,000
+
+### Trade Routes
+**Primary Supplier Country**: Canada
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Portable Ultrasound Device
@@ -230,9 +335,24 @@
 ## TEST 8: Furniture - Qualified
 
 ### Company Profile
-**Company Name**: Modern Living Furniture
-**Industry**: Furniture & Home Goods
-**Country**: Mexico
+**Company Name**: Modern Living Furniture SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Furniture & Home Goods
+**Tax ID / EIN**: RFC-MLF880910-C78
+
+### Company Location
+**Company Address**: Parque Industrial Los Altos 567, Guadalajara, JAL 44100
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Ricardo Gomez
+**Contact Phone**: +52 (33) 3555-0890
+**Contact Email**: r.gomez@modernlivingmx.com
+**Annual Trade Volume**: $12,000,000
+
+### Trade Routes
+**Primary Supplier Country**: United States
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Executive Office Desk
@@ -262,9 +382,24 @@
 ## TEST 9: Chemicals - Qualified
 
 ### Company Profile
-**Company Name**: ChemCorp Solutions
-**Industry**: Chemicals & Materials
-**Country**: Canada
+**Company Name**: ChemCorp Solutions Ltd
+**Business Type**: Manufacturer
+**Industry Sector**: Chemicals & Materials
+**Tax ID / EIN**: BN-345678901RT0001
+
+### Company Location
+**Company Address**: 890 Industrial Parkway, Toronto, ON M1B 3G1
+**Company Country**: Canada
+
+### Contact Information
+**Contact Person**: Dr. Patricia O'Brien
+**Contact Phone**: +1 (416) 555-0901
+**Contact Email**: p.obrien@chemcorpsolutions.ca
+**Annual Trade Volume**: $32,000,000
+
+### Trade Routes
+**Primary Supplier Country**: United States
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Industrial Adhesive
@@ -294,9 +429,24 @@
 ## TEST 10: Toys - Non-Qualified
 
 ### Company Profile
-**Company Name**: PlayTime Imports
-**Industry**: Consumer Goods
-**Country**: United States
+**Company Name**: PlayTime Imports LLC
+**Business Type**: Importer
+**Industry Sector**: Consumer Goods
+**Tax ID / EIN**: 13-5678901
+
+### Company Location
+**Company Address**: 345 Toy Lane, New York, NY 10001
+**Company Country**: United States
+
+### Contact Information
+**Contact Person**: Lisa Anderson
+**Contact Phone**: +1 (212) 555-1012
+**Contact Email**: l.anderson@playtimeimports.com
+**Annual Trade Volume**: $24,000,000
+
+### Trade Routes
+**Primary Supplier Country**: China
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Educational Building Blocks
@@ -326,9 +476,24 @@
 ## TEST 11: Construction Materials - Qualified
 
 ### Company Profile
-**Company Name**: BuildPro Materials
-**Industry**: Construction & Building Materials
-**Country**: Mexico
+**Company Name**: BuildPro Materials SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Construction & Building Materials
+**Tax ID / EIN**: RFC-BPM901125-D89
+
+### Company Location
+**Company Address**: Parque Industrial Querétaro 234, Querétaro, QRO 76000
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Fernando Ramirez
+**Contact Phone**: +52 (442) 2555-1123
+**Contact Email**: f.ramirez@buildpromaterials.mx
+**Annual Trade Volume**: $38,000,000
+
+### Trade Routes
+**Primary Supplier Country**: United States
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Reinforced Concrete Panels
@@ -358,9 +523,24 @@
 ## TEST 12: Sporting Goods - Qualified
 
 ### Company Profile
-**Company Name**: ProSport Equipment
-**Industry**: Sporting Goods & Recreation
-**Country**: Canada
+**Company Name**: ProSport Equipment Ltd
+**Business Type**: Manufacturer
+**Industry Sector**: Sporting Goods & Recreation
+**Tax ID / EIN**: BN-456789012RT0001
+
+### Company Location
+**Company Address**: 234 Hockey Drive, Montreal, QC H1A 1A1
+**Company Country**: Canada
+
+### Contact Information
+**Contact Person**: Jean-Pierre Dubois
+**Contact Phone**: +1 (514) 555-1234
+**Contact Email**: jp.dubois@prosportequip.ca
+**Annual Trade Volume**: $19,000,000
+
+### Trade Routes
+**Primary Supplier Country**: United States
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Carbon Fiber Hockey Stick
@@ -390,9 +570,24 @@
 ## TEST 13: Renewable Energy - High Tech
 
 ### Company Profile
-**Company Name**: SolarTech Systems
-**Industry**: Renewable Energy
-**Country**: Mexico
+**Company Name**: SolarTech Systems SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Renewable Energy
+**Tax ID / EIN**: RFC-STS870305-E01
+
+### Company Location
+**Company Address**: Parque Solar Industrial 789, Hermosillo, SON 83000
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Elena Martinez
+**Contact Phone**: +52 (662) 3555-1345
+**Contact Email**: e.martinez@solartechsystems.mx
+**Annual Trade Volume**: $52,000,000
+
+### Trade Routes
+**Primary Supplier Country**: China
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Solar Panel Module
@@ -423,8 +618,23 @@
 
 ### Company Profile
 **Company Name**: AeroDynamics Inc
-**Industry**: Aerospace & Defense
-**Country**: United States
+**Business Type**: Manufacturer
+**Industry Sector**: Aerospace & Defense
+**Tax ID / EIN**: 91-6789012
+
+### Company Location
+**Company Address**: 123 Aviation Way, Seattle, WA 98101
+**Company Country**: United States
+
+### Contact Information
+**Contact Person**: James Mitchell
+**Contact Phone**: +1 (206) 555-1456
+**Contact Email**: j.mitchell@aerodynamicsinc.com
+**Annual Trade Volume**: $125,000,000
+
+### Trade Routes
+**Primary Supplier Country**: Canada
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Aircraft Landing Gear Component
@@ -454,9 +664,24 @@
 ## TEST 15: Packaging Materials - Simple Assembly
 
 ### Company Profile
-**Company Name**: PackagePro Solutions
-**Industry**: Packaging & Containers
-**Country**: Mexico
+**Company Name**: PackagePro Solutions SA de CV
+**Business Type**: Manufacturer
+**Industry Sector**: Packaging & Containers
+**Tax ID / EIN**: RFC-PPS950710-F23
+
+### Company Location
+**Company Address**: Zona Industrial Norte 890, Monterrey, NL 64000
+**Company Country**: Mexico
+
+### Contact Information
+**Contact Person**: Ana Lopez
+**Contact Phone**: +52 (81) 8555-1567
+**Contact Email**: a.lopez@packageprosolutions.mx
+**Annual Trade Volume**: $16,000,000
+
+### Trade Routes
+**Primary Supplier Country**: United States
+**Destination Market**: United States
 
 ### Product Overview
 **Product Name**: Corrugated Cardboard Boxes
