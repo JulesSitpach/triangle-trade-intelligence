@@ -119,10 +119,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Lithium Battery Pack | China | 40 |
-| Bluetooth Chip Module | China | 35 |
-| Plastic Housing | Mexico | 15 |
-| Packaging Materials | Canada | 10 |
+| Lithium-ion polymer battery pack, 3.7V 500mAh capacity, rechargeable, built-in protection circuit, JST connector | China | 40 |
+| Bluetooth 5.0 system-on-chip module with antenna, low-energy certified, pre-programmed firmware, FCC approved | China | 35 |
+| Injection-molded ABS plastic charging case with magnetic lid, matte finish, USB-C port, LED indicators | Mexico | 15 |
+| Printed retail packaging box with foam insert, full-color graphics, recycled cardboard, product manual included | Canada | 10 |
 
 ### Importer/Exporter/Producer
 **Importer**: Global Tech Distributors, 555 Commerce St, San Francisco CA 94102
