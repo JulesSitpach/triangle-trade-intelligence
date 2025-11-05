@@ -50,44 +50,25 @@ export default async function handler(req, res) {
   try {
     const { user_profile, workflow_intelligence, raw_alerts, user_id } = req.body;
 
-    // ✅ TIER-GATING: Alerts are PAID-ONLY feature
-    // Trial users should NOT access real-time crisis alerts
-    // Starter, Professional, Premium, and Enterprise tiers get alerts
+    // ✅ TIER-GATING: Trial users get 1 executive summary, then must upgrade
+    // ✅ FIXED (Nov 5, 2025): Previously blocked Trial users completely
+    //    Now Trial users get their promised 1 executive summary from pricing page
     const subscriptionTier = user_profile?.subscription_tier || 'Trial';
+
     // Database stores exact values: "Trial", "Starter", "Professional", "Premium", "Enterprise"
-    const isPaidTier = ['Starter', 'Professional', 'Premium', 'Enterprise'].includes(subscriptionTier);
+    const allowedTiers = ['Trial', 'Starter', 'Professional', 'Premium', 'Enterprise'];
 
     // ✅ DEBUG: Log tier information to diagnose 403 errors
     console.log('📋 [EXECUTIVE-ALERT] Tier Check:', {
       received_tier: user_profile?.subscription_tier,
       normalized_tier: subscriptionTier,
       fallback_applied: !user_profile?.subscription_tier,
-      is_paid: isPaidTier,
-      blocked_tier: 'Trial',
-      allowed_tiers: ['Starter', 'Professional', 'Premium', 'Enterprise']
+      is_allowed: allowedTiers.includes(subscriptionTier),
+      note: 'Trial users now allowed (1 summary limit enforced below)'
     });
 
-    if (!isPaidTier) {
-      return res.status(403).json({
-        success: false,
-        error: 'UPGRADE_REQUIRED',
-        code: 'ALERTS_REQUIRE_PAID_SUBSCRIPTION',
-        message: 'Real-time crisis alerts are available only with Starter plan ($99/month) or higher',
-        required_tier: 'Starter',
-        current_tier: subscriptionTier,
-        upgrade_url: '/pricing',
-        upgrade_benefits: [
-          'Real-time tariff policy alerts affecting your products',
-          'Section 301/232 tariff escalation notifications',
-          'USMCA rule change monitoring',
-          'Strategic mitigation recommendations',
-          'Full editable certificates (unwatermarked)',
-          'Starter: $99/month for 10 analyses + alerts',
-          'Professional: $299/month for 100 analyses + priority support',
-          'Premium: $599/month + quarterly strategy calls'
-        ]
-      });
-    }
+    // ❌ REMOVED: Hard-block of Trial users (they get 1 summary per pricing page promise)
+    // Trial users will now be allowed through, but hit usage limit after 1 summary
 
     // ✅ USAGE LIMIT CHECK: Verify user hasn't exceeded executive summary limit
     if (user_id) {

@@ -31,7 +31,7 @@ const TIER_LIMITS = {
     display_name: 'Free'
   },
   'starter': {
-    analyses_per_month: 10,
+    analyses_per_month: 15,  // ✅ FIXED (Nov 5): Was 10, now matches pricing page promise of 15
     max_components: 10,
     display_name: 'Starter ($99/month)'
   },

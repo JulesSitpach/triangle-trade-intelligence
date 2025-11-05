@@ -51,12 +51,83 @@ export default protectedApiHandler({
     const startTime = Date.now();
 
     try {
-      const { action, productDescription, hsCode, componentOrigins, additionalContext } = req.body;
+      const { action, productDescription, hsCode, componentOrigins, additionalContext, workflow_session_id } = req.body;
 
       // ✅ User ID comes from protectedApiHandler authentication (req.user.id)
       const authenticatedUserId = req.user.id;
 
-      console.log(`[SUBSCRIPTION-AWARE AGENT] ${action} request for: "${productDescription}" (User: ${authenticatedUserId})`);
+      // ✅ CRITICAL FIX (Nov 5, 2025): Require active workflow session
+      // This prevents users from abusing HS code search on completed workflows
+      // Attack vector: Open completed certificate → Go back to components → Search new HS codes infinitely
+      if (!workflow_session_id) {
+        console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: No workflow session ID provided`);
+        return res.status(400).json({
+          success: false,
+          error: 'Workflow session required',
+          message: 'HS code searches must be performed within an active workflow.',
+          hint: 'Start a new workflow to use AI classification features.'
+        });
+      }
+
+      // Verify workflow session exists and belongs to user
+      const { data: workflowSession, error: sessionError } = await supabase
+        .from('workflow_sessions')
+        .select('session_id, user_id, completed_at')
+        .eq('session_id', workflow_session_id)
+        .eq('user_id', authenticatedUserId)
+        .single();
+
+      if (sessionError || !workflowSession) {
+        console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: Invalid workflow session ${workflow_session_id}`);
+        return res.status(403).json({
+          success: false,
+          error: 'Invalid workflow session',
+          message: 'This workflow session does not exist or does not belong to you.'
+        });
+      }
+
+      // 🚨 CRITICAL: Block HS code searches on completed workflows
+      if (workflowSession.completed_at) {
+        console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: Workflow ${workflow_session_id} already completed at ${workflowSession.completed_at}`);
+        return res.status(403).json({
+          success: false,
+          error: 'Workflow already completed',
+          message: 'Cannot modify completed workflows. Start a new workflow to add more components.',
+          completed_at: workflowSession.completed_at,
+          action_required: 'start_new_workflow',
+          dashboard_url: '/dashboard'
+        });
+      }
+
+      // ✅ CRITICAL: Check subscription limit BEFORE allowing AI classification
+      // This prevents users from abusing AI suggestions without paying
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('subscription_tier, analyses_this_month')
+        .eq('user_id', authenticatedUserId)
+        .single();
+
+      const tier = userProfile?.subscription_tier || 'Trial';
+      const used = userProfile?.analyses_this_month || 0;
+
+      // Tier limits (capitalized)
+      const limits = { 'Trial': 1, 'Starter': 15, 'Professional': 100, 'Premium': 500 };
+      const limit = limits[tier] || 1;
+
+      // Block AI classification if user is at or over limit
+      if (used >= limit) {
+        console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: User ${authenticatedUserId} has used ${used}/${limit} analyses`);
+        return res.status(429).json({
+          success: false,
+          error: 'Monthly analysis limit reached',
+          message: `You've used ${used} of ${limit} analyses this month. Upgrade to continue using AI features.`,
+          limit_info: { tier, used, limit, remaining: 0 },
+          upgrade_required: true,
+          upgrade_url: '/pricing'
+        });
+      }
+
+      console.log(`[SUBSCRIPTION-AWARE AGENT] ${action} request for: "${productDescription}" (User: ${authenticatedUserId}, Workflow: ${workflow_session_id}, Usage: ${used}/${limit})`);
 
     // Use AI-powered ClassificationAgent for HS code suggestions
     if (action === 'suggest_hs_code' && productDescription) {

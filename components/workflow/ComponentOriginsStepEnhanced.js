@@ -217,6 +217,10 @@ export default function ComponentOriginsStepEnhanced({
     setSearchingHS(prev => ({ ...prev, [index]: true }));
 
     try {
+      // ✅ CRITICAL FIX (Nov 5): Include workflow_session_id to prevent bypass
+      // This ensures HS code searches only work on ACTIVE (not completed) workflows
+      const workflow_session_id = localStorage.getItem('workflow_session_id');
+
       // Send complete business context for accurate AI classification
       const response = await fetch('/api/agents/classification', {
         method: 'POST',
@@ -224,6 +228,7 @@ export default function ComponentOriginsStepEnhanced({
         body: JSON.stringify({
           action: 'suggest_hs_code',
           productDescription: component.description,
+          workflow_session_id,  // ✅ Required by API to verify active workflow
           componentOrigins: [{
             description: component.description,
             origin_country: component.origin_country,
@@ -329,6 +334,9 @@ export default function ComponentOriginsStepEnhanced({
     setSearchingHS({ ...searchingHS, [index]: true });
 
     try {
+      // ✅ CRITICAL FIX (Nov 5): Include workflow_session_id to prevent bypass
+      const workflow_session_id = localStorage.getItem('workflow_session_id');
+
       // Use the existing classification endpoint which handles AI + caching
       const response = await fetch('/api/agents/classification', {
         method: 'POST',
@@ -336,6 +344,7 @@ export default function ComponentOriginsStepEnhanced({
         body: JSON.stringify({
           action: 'suggest_hs_code',
           productDescription: component.description,
+          workflow_session_id,  // ✅ Required by API to verify active workflow
           componentOrigins: [{
             description: component.description,
             origin_country: component.origin_country || 'Unknown',  // ✅ Don't assume 'US' - let API validate
@@ -584,6 +593,33 @@ export default function ComponentOriginsStepEnhanced({
     if (saveWorkflowToDatabase) {
       console.log('💾 Saving component data to database before analysis...');
       await saveWorkflowToDatabase();
+    }
+
+    // ✅ CRITICAL: Check subscription limit BEFORE triggering AI analysis
+    // This is the ONLY place users trigger analysis - blocking here blocks ALL paths
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        const limitCheck = await fetch('/api/check-usage-limit', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (limitCheck.ok) {
+          const limitData = await limitCheck.json();
+          if (limitData.limitReached) {
+            // Show upgrade modal instead of proceeding
+            alert(`🔒 Monthly Analysis Limit Reached\n\nYou've used ${limitData.usage.used} of ${limitData.usage.limit} analyses this month.\n\nUpgrade to continue creating workflows.`);
+            window.location.href = '/pricing';
+            return; // Block proceeding
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[LIMIT-CHECK] Error checking subscription limit:', error);
+      // Continue anyway if check fails (don't block legitimate users due to API issues)
     }
 
     onProcessWorkflow();
