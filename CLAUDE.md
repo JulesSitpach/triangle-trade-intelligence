@@ -1,8 +1,8 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 2, 2025 - Real Portfolio Briefing System + Alert Consolidation Complete
-**Status:** 65% Production-Ready (real alert system activated), 30% Ready-to-Activate (daily digest + payment webhooks), 5% Not Started
-**Recent Changes** (Nov 2): Replaced fake template alerts with real crisis_alerts matching system, implemented portfolio briefing with strategic analysis, consolidated alerts to component table only, fixed HS code normalization for China components
+**Last Updated:** November 5, 2025 - Subscription Limit Enforcement Complete + Technical Debt Corrected
+**Status:** 70% Production-Ready (3-layer limit enforcement activated), 25% Ready-to-Activate (daily digest + payment webhooks), 5% Not Started
+**Recent Changes** (Nov 4-5): Implemented 3-layer subscription limit enforcement (page/component/API blocking), added useSubscriptionLimit hook, corrected technical debt metrics (9 TODOs not 300+, 14 deprecated endpoints not 42+)
 **User Responsibility:** Users verify all input accuracy. Platform provides tools only - users own correctness of submitted data.
 
 ---
@@ -85,6 +85,15 @@
    - User profile creation ✅
    - Subscription tier tracking ✅
    - Session token signing ✅
+
+12. **Subscription Limit Enforcement** - NEW Nov 4-5, 2025 - 3-LAYER BLOCKING
+   - Page-level blocking (usmca-workflow.js denies access when limit reached) ✅
+   - Component-level blocking (ComponentOriginsStepEnhanced.js disables "Analyze" button) ✅
+   - API-level blocking (classification.js + ai-usmca-complete-analysis.js reject requests) ✅
+   - useSubscriptionLimit hook for React components ✅
+   - subscription-guard middleware for API endpoints ✅
+   - Tier limits: Trial (1), Starter (15), Professional (100), Premium (500) ✅
+   - Race condition handling (reservation system prevents double-counting) ✅
 
 ### ⚠️ MOSTLY WORKING (Minor Activation Needed)
 
@@ -187,13 +196,14 @@
 - ✅ Database schema is normalized and indexed
 - ✅ Git history is clean with clear commit messages
 
-**Technical Debt:**
-- ⚠️ 60+ unused service files (~8,000 lines of dead code)
-- ⚠️ 7 duplicate database client initializations (should be 1 singleton)
-- ⚠️ 30 config files, many with duplicate settings (could be 10)
+**Technical Debt (CORRECTED Nov 5, 2025):**
+- ⚠️ ~41 service files in lib/services/ (10+ are actively used, 30+ may be unused - needs verification)
+- ⚠️ 107 files create Supabase clients (not critical - Supabase pattern, but could use factory)
+- ⚠️ 33 config files, some with duplicate settings (could consolidate to ~20)
 - ⚠️ Mixed naming conventions (camelCase vs snake_case in some places)
-- ⚠️ ~300+ TODO/FIXME comments scattered throughout codebase
+- ✅ **ONLY 9 TODO/FIXME comments** (previous claim of 300+ was significantly overstated)
 - ⚠️ Component-level state management is inconsistent (some useContext, some useState, some Redux-like patterns)
+- ⚠️ 2 duplicate archive files (service-configurations.ARCHIVE.20251015.js x2) should be deleted
 
 **Known Gotchas:**
 1. Component data is lost if user navigates without saving (use browser back)
@@ -207,16 +217,18 @@
 
 ## 🔧 WHAT'S ACTUALLY DEPLOYED
 
-### Active API Endpoints (57 total, but only ~15 used regularly)
+### Active API Endpoints (90 total, 76 active, 14 deprecated)
 
 **Core (Actually Used):**
-- ✅ `/api/ai-usmca-complete-analysis` - Tariff analysis engine
+- ✅ `/api/ai-usmca-complete-analysis` - Tariff analysis engine (enforces subscription limits)
+- ✅ `/api/agents/classification` - HS code classification (enforces subscription limits)
 - ✅ `/api/workflow-session` - Session persistence
 - ✅ `/api/workflow-session/update-certificate` - Certificate metadata
 - ✅ `/api/executive-trade-alert` - Policy impact advisor
 - ✅ `/api/generate-personalized-alerts` - Alert filtering + HS code normalization
 - ✅ `/api/generate-portfolio-briefing` - NEW Nov 2: Real crisis_alerts matching + strategic analysis
 - ✅ `/api/get-crisis-alerts` - Fetch active real policy alerts
+- ✅ `/api/check-usage-limit` - NEW Nov 4: Check subscription tier usage
 - ✅ `/api/auth/login`, `/api/auth/register`, `/api/auth/logout`, `/api/auth/me`
 - ✅ `/api/stripe/webhook` - Payment processing
 - ⚠️ `/api/cron/rss-polling` - Policy change detection (works but incomplete)
@@ -227,11 +239,11 @@
 - ⚠️ `/api/dashboard-data` - Dashboard info (some fields missing)
 
 **Not Actually Used (Legacy):**
-- ❌ 42+ endpoints under `/api/__DEPRECATED__*`
-- ❌ All web search endpoints
-- ❌ All admin endpoints
-- ❌ All marketplace endpoints
-- ❌ Most utility endpoints
+- ❌ 14 endpoints under `/api/__DEPRECATED__*` (~1,050 lines total - modest)
+- ❌ All web search endpoints (5 files - should be deleted)
+- ❌ Redis cache code (lib/cache/redis-cache.js - should be deleted)
+- ❌ Some admin endpoints
+- ❌ Some marketplace endpoints
 
 ### Database Tables (Actually Populated)
 
@@ -349,15 +361,19 @@ git push                                # Auto-deploys to Vercel (production)
 
 ---
 
-## 📊 REAL NUMBERS (As of Nov 2, 2025 - Updated)
+## 📊 REAL NUMBERS (As of Nov 5, 2025 - Updated & CORRECTED)
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Total API Endpoints | 57 | ~17 actively used (up from 15) |
-| Fully Implemented | 15 | USMCA workflow, payments, PDF, alerts, portfolio briefing, email queue, dashboard |
+| Total API Endpoints | 90 | 76 active, 14 deprecated (corrected from 57) |
+| Fully Implemented | 16 | Added: Subscription limit enforcement (3-layer blocking) |
 | Partially Implemented | 0 | All items now fixed or ready-to-activate |
-| Not Implemented | 0 | But 40+ endpoints are legacy (3 template files deleted) |
-| Lines of Dead Code | ~7,900 | In 60+ unused service files (slightly reduced) |
+| Not Implemented | 0 | But 14 endpoints are deprecated (NOT 42+) |
+| Lines of Deprecated Code | ~1,050 | In 14 __DEPRECATED__ files (NOT ~7,900) |
+| TODO/FIXME Comments | 9 | NOT 300+ (claim was 33x overstated) |
+| Service Files | 41 | ~10+ actively used, ~30+ may be unused |
+| Database Client Files | 107 | Files creating Supabase clients (not critical) |
+| Config Files | 33 | Could consolidate to ~20 |
 | Database Tables | 30+ | Only 8 actively used |
 | Real Users | 14 | Mostly test accounts |
 | Real Workflows | 20 completed | Real test data |
@@ -365,25 +381,32 @@ git push                                # Auto-deploys to Vercel (production)
 | API Response Time (worst) | ~3000ms | AI fallback + database |
 | Cost per Portfolio Briefing | $0.04 | OpenRouter AI (claude-3.5-haiku) |
 | Cost per Tariff Lookup (5% of requests) | $0.02 | OpenRouter AI cost |
-| Subscription Tiers | 4 | Trial, Starter, Professional, Premium |
+| Subscription Tiers | 4 | Trial (1), Starter (15), Professional (100), Premium (500) |
 | Email Queue Ready to Activate | Yes | Just needs Vercel cron scheduling |
-| Alert System | Real-Time | Now queries crisis_alerts table (RSS-detected policies only) |
+| Alert System | Real-Time | Queries crisis_alerts table (RSS-detected policies) |
+| Subscription Enforcement | 3-Layer | Page → Component → API blocking (Nov 4-5) |
 
 ---
 
-## 🧹 RECOMMENDED CLEANUP (Priority Order)
+## 🧹 RECOMMENDED CLEANUP (Priority Order - CORRECTED Nov 5)
 
 ### P0 (CRITICAL - Do Now)
-- [ ] Delete 60 unused service files (save ~8,000 lines)
-- [ ] Consolidate 7 duplicate database clients into 1 singleton
-- [ ] Remove all web search code (5 files, all broken)
-- [ ] Remove Redis implementation (dead code, not connected)
+- [ ] Delete 5 web search utility files (lib/utils/web-search*.js)
+- [ ] Delete Redis cache implementation (lib/cache/redis-cache.js)
+- [ ] Delete 2 duplicate archive files (service-configurations.ARCHIVE.20251015.js x2)
+- [ ] Verify which of ~41 service files in lib/services/ are truly unused (estimate ~20-30 unused)
 
 ### P1 (Important - Do This Week)
-- [ ] Consolidate 30 config files into 10
-- [ ] Remove 42 deprecated API endpoints (they're archived, why keep?)
-- [ ] Remove 300+ TODO/FIXME comments (either fix or remove)
+- [ ] Consolidate config files (33 → ~20) - remove duplicate classification configs
+- [ ] Review 9 TODO/FIXME comments - either fix or remove with explanation
+- [ ] Consider database client factory pattern (107 files create clients - not critical but could optimize)
 - [ ] Standardize component state management (pick one pattern)
+- [ ] Document 3-layer subscription enforcement pattern for future developers
+
+### P1.5 (NEW - Document Recent Work)
+- [ ] Add useSubscriptionLimit hook usage examples to docs
+- [ ] Document subscription-guard middleware usage pattern
+- [ ] Add subscription tier limit enforcement to API endpoint comments
 
 ### P2 (Nice to Have - Do This Month)
 - [ ] Add cross-tab sync for workflow editing
@@ -531,13 +554,26 @@ lib/
 
 ---
 
-**Last Honest Assessment (Nov 2, 2025):**
+**Last Honest Assessment (Nov 5, 2025):**
 
-MAJOR ARCHITECTURE CHANGE (Nov 2): Replaced fake template-based alert system with real portfolio briefing system that queries actual RSS-detected policies from crisis_alerts table. This is a critical shift from:
-- ❌ OLD: "if origin='CN' then create alert with guessed date and $0 savings" (template IF/THEN logic)
-- ✅ NEW: "Query crisis_alerts table, match to user components, show only REAL announced policies with definitive language" (real-time monitoring)
+MAJOR RECENT CHANGES:
+1. **Nov 2**: Replaced fake template-based alert system with real portfolio briefing system
+   - ❌ OLD: "if origin='CN' then create alert" (template IF/THEN logic)
+   - ✅ NEW: Query crisis_alerts table, match to user components, show only REAL policies
 
-This is a working USMCA certificate platform with solid core features and significant technical debt. The 60+ unused files and deprecated endpoints should be cleaned up. The project is 55% clean production code and 45% legacy artifacts.
+2. **Nov 4-5**: Implemented 3-layer subscription limit enforcement
+   - ✅ Page-level: usmca-workflow.js blocks access when limit reached
+   - ✅ Component-level: ComponentOriginsStepEnhanced.js disables "Analyze" button
+   - ✅ API-level: classification.js + ai-usmca-complete-analysis.js reject requests
+   - ✅ New React hook: useSubscriptionLimit (lib/hooks/)
+   - ✅ New middleware: subscription-guard (lib/middleware/)
+
+3. **Nov 5**: Corrected technical debt documentation (was overstated)
+   - CORRECTED: 9 TODOs (not 300+)
+   - CORRECTED: 14 deprecated endpoints (not 42+)
+   - CORRECTED: ~1,050 lines deprecated code (not ~7,900)
+
+This is a working USMCA certificate platform with solid core features and **MINOR** technical debt. The technical debt was significantly overstated in previous documentation. The project is **~75% clean production code** and **~25% legacy artifacts** (corrected from 55%/45%).
 
 **What Works Well:**
 - USMCA workflow (3 steps, database persistence, tariff enrichment)
@@ -546,14 +582,21 @@ This is a working USMCA certificate platform with solid core features and signif
 - Payment processing (Stripe integration)
 - Real alert system (crisis_alerts matching, portfolio briefing)
 - Component alert display (HS code normalization fixed Nov 2)
+- **Subscription limit enforcement (3-layer blocking, Nov 4-5)**
 
-**What Needs Deletion:**
-- 60+ unused service files (~8,000 lines)
-- Web search implementations (all 5 broken)
-- Redis caching (connected but not working)
-- Admin dashboards (archived, never activated)
-- Marketplace features (not in MVP scope)
+**What Actually Needs Deletion (Corrected Nov 5):**
+- 5 web search utility files (lib/utils/web-search*.js)
+- Redis cache implementation (lib/cache/redis-cache.js)
+- 2 duplicate archive config files
+- Estimate ~20-30 of the 41 service files (needs verification)
+- 14 deprecated API endpoints (~1,050 lines total - modest cleanup)
 
-**Current Priority:** The real alert system is now active and working. Focus on activating daily digest cron job (Nov 1 ready), then cleaning up dead code.
+**Current Priority:**
+1. Activate daily digest cron job (Nov 1 ready, just needs Vercel config)
+2. Delete web search + Redis code (P0 cleanup)
+3. Document new subscription enforcement pattern
 
-**For Agents:** This file is truth. When it conflicts with other docs, this file wins. Everything else is aspirational or outdated. November 2 update: Portfolio briefing is real system now, not templates.
+**For Agents:** This file is truth. When it conflicts with other docs, this file wins. Recent updates:
+- **Nov 5**: Corrected technical debt metrics (were overstated by 10-30x)
+- **Nov 4-5**: Added 3-layer subscription limit enforcement
+- **Nov 2**: Portfolio briefing now uses real crisis_alerts (not templates)

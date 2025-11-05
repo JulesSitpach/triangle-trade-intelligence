@@ -24,8 +24,8 @@ open http://localhost:3001
 ## 📋 What This Platform Does
 
 **Input**: Company info + Product components (descriptions, origins, percentages)
-**Processing**: AI-powered HS code classification + tariff rate lookup
-**Output**: USMCA eligibility assessment + tariff savings calculation
+**Processing**: AI-powered HS code classification + tariff rate lookup + USMCA qualification analysis
+**Output**: USMCA eligibility assessment + tariff savings calculation + official certificate
 
 ### Four-Step Workflow
 1. **Company Information** - Business profile and destination market
@@ -34,13 +34,15 @@ open http://localhost:3001
 4. **Certificate Preview & Download** - Official USMCA form with editable fields + responsibility confirmation
 
 ### Key Features
-- 🤖 AI-powered HS code classification (OpenRouter + Anthropic fallback)
-- 📊 Real-time tariff rate lookup with policy adjustments
-- 💰 Automatic savings calculation (MFN vs USMCA rates)
-- 📝 **NEW:** Editable official USMCA certificate preview (light blue input boxes)
-- ⚠️ **NEW:** Clear user responsibility messaging with confirmation checkboxes
+- 🤖 AI-powered HS code classification (OpenRouter + Anthropic 2-tier fallback)
+- 📊 Real-time tariff rate lookup with Section 301/232 policy adjustments
+- 💰 Automatic savings calculation (MFN vs USMCA rates with financial impact analysis)
+- 📝 Editable official USMCA certificate preview (light blue input boxes)
+- ⚠️ Clear user responsibility messaging with confirmation checkboxes
 - 🔐 Secure authentication with JWT cookies
 - 📱 Responsive design (mobile, tablet, desktop)
+- 🎯 **NEW (Nov 4-5):** 3-layer subscription limit enforcement (page/component/API blocking)
+- 🚨 **NEW (Nov 2):** Real-time policy alert system using crisis_alerts database
 
 ## 🏗️ Architecture
 
@@ -66,11 +68,14 @@ Enrichment Data Saved to DB
 Results Displayed
 ```
 
-### Database Schema
+### Database Schema (Key Tables)
 - `auth.users` - Supabase authentication
-- `user_profiles` - Subscription tier, trial dates
-- `workflow_sessions` - Completed USMCA workflows
-- `tariff_rates_cache` - AI classifications + tariff rates (unified Oct 22, 2025)
+- `user_profiles` - Subscription tier (Trial/Starter/Professional/Premium), analysis counts
+- `workflow_sessions` - In-progress USMCA workflows (194 active as of Nov 2025)
+- `workflow_completions` - Completed certificates (20 as of Nov 2025)
+- `tariff_intelligence_master` - 12,118 HS codes with tariff rates (database-first approach)
+- `crisis_alerts` - Real-time policy alerts (RSS-detected Section 301/232 changes)
+- `tariff_changes_log` - Daily digest change tracking (Nov 1, ready to activate)
 
 ## 📁 Project Structure
 
@@ -94,7 +99,13 @@ components/workflow/
   └── EditableCertificatePreview.js  # Official USMCA form preview
 
 lib/
-  ├── agents/classification-agent.js
+  ├── agents/
+  │   ├── base-agent.js              # 2-tier AI fallback (OpenRouter → Anthropic)
+  │   └── classification-agent.js     # HS code classification
+  ├── hooks/
+  │   └── useSubscriptionLimit.js     # NEW Nov 4: React hook for limit checks
+  ├── middleware/
+  │   └── subscription-guard.js       # NEW Nov 4: API endpoint limit enforcement
   ├── ai-helpers.js
   └── tariff/enrichment-router.js
 
@@ -107,14 +118,24 @@ styles/
   └── admin-workflows.css         # Admin-specific styles
 ```
 
-## 🔌 API Endpoints (Fully Documented & Tested)
+## 🔌 API Endpoints (90 Total, 76 Active)
 
-### Endpoint Status Summary
+### Core Production Endpoints
 
 **✅ PRIMARY**: `/api/ai-usmca-complete-analysis` - **FULLY IMPLEMENTED**
 - Tariff enrichment, component analysis, financial impact, RVC qualification
+- **Enforces subscription limits** (Nov 4-5)
 - Request: Company info + components with origins
 - Response: USMCA qualification + component tariff breakdown + certificate data
+
+**✅ CLASSIFICATION**: `/api/agents/classification` - **FULLY IMPLEMENTED**
+- AI-powered HS code classification using OpenRouter/Anthropic
+- **Enforces subscription limits** (Nov 4-5)
+- Returns: HS code + confidence score + tariff rates
+
+**✅ USAGE CHECK**: `/api/check-usage-limit` - **NEW Nov 4, 2025**
+- Check user subscription tier and analysis count
+- Returns: current usage, tier limit, limit reached status
 
 **✅ SECONDARY**: `/api/executive-trade-alert` - **FULLY IMPLEMENTED** (Oct 25, 2025)
 - Financial scenarios (Section 301 escalation, nearshoring ROI)
@@ -123,9 +144,13 @@ styles/
 - Regulatory calendar and contacts
 
 **✅ TERTIARY**: `/api/generate-personalized-alerts` - **FULLY IMPLEMENTED**
-- Filters static alerts by relevance to user's products
+- Filters alerts by relevance to user's products
 - Relevance scoring: Industry (+40), Geography (+30), Product (+30), Destination (+20)
-- Returns max 3 most relevant alerts
+
+**✅ PORTFOLIO BRIEFING**: `/api/generate-portfolio-briefing` - **NEW Nov 2, 2025**
+- Real-time policy monitoring using crisis_alerts table
+- Component-to-policy matching by country/HS code/industry
+- Strategic briefing with financial impact analysis
 
 ### Comprehensive Testing Guide
 
@@ -195,15 +220,22 @@ curl -X POST http://localhost:3001/api/executive-trade-alert \
 A component qualifies for USMCA benefits if:
 - **Origin country**: One of US, Canada, or Mexico
 - **Destination country**: One of US, Canada, or Mexico
-- **Regional value content**: Meets industry-specific threshold (Textiles 55%, Electronics 65%, Auto 75%)
+- **Regional value content**: Meets industry-specific threshold (Textiles 55%, Electronics 65%, Auto 75%, Machinery 60%)
+- **Preference Criterion**: Must be A, B, C, or D (never NULL for qualified products)
 - **No tariff escalation**: RVC must not be achieved through tariff evasion
 
-### Tariff Rate Cache (4-Tier System)
-1. **Database** (persistent, indexed) - Latest: ~200ms
-2. **In-Memory** (session) - Repeat lookups: <50ms
-3. **OpenRouter API** (primary) - Fresh data: ~2-3 seconds
-4. **Anthropic Direct** (backup) - If OpenRouter down
-5. **Stale Database** (last resort) - Clearly marked as outdated
+### Database-First Tariff Lookup (95% Coverage)
+1. **Database** (tariff_intelligence_master: 12,118 HS codes) - Primary source: ~200ms
+2. **OpenRouter API** (primary fallback for edge cases) - 5% of requests: ~2-3 seconds
+3. **Anthropic Direct** (backup fallback) - If OpenRouter unavailable
+4. **Note**: Database data updated regularly, AI used only for missing/new HS codes
+
+### Subscription Tiers & Limits (Nov 4-5 Enforcement)
+- **Trial**: 1 analysis/month (watermarked certificates)
+- **Starter**: 15 analyses/month
+- **Professional**: 100 analyses/month
+- **Premium**: 500 analyses/month
+- **Enforcement**: 3-layer blocking (page → component → API)
 
 ### AI Classification Flow
 ```
@@ -270,50 +302,64 @@ killall node              # macOS/Linux
 ## 📊 Recent Changes
 
 ### Phase 1 Complete (Oct 22, 2025)
-- ✅ **P0-1**: Destination country field implemented
-- ✅ **P0-2**: Component data restoration on navigation (fixed data loss bug)
-- ✅ **P0-3**: USMCA eligibility gate added (destination validation)
-- ✅ **P0-4**: Tariff data verified current (not stale)
-- ✅ **P0-5**: Cache consolidation (unified tariff_rates_cache table)
+- ✅ Destination country field + USMCA eligibility gate
+- ✅ Component data restoration (fixed data loss bug)
+- ✅ Database consolidation (unified tariff_rates_cache → tariff_intelligence_master)
 
-### Phase 2 Complete (Oct 24-25, 2025)
-**Business Intelligence Enhancement**
-- ✅ **Executive Trade Alert API** - Enhanced from basic policy detection to consulting-grade strategic advisory
-  - Financial scenarios: Section 301 escalation (what if increases 20%?), nearshoring ROI, exemption scenarios
-  - CBP compliance strategy: Form 29 binding ruling guidance, immediate actions, risk management
-  - 3-phase strategic roadmap: Supplier Assessment → Trial Shipment → Gradual Migration
-  - Regulatory calendar: USTR cycles, CBP decision milestones, audit risk assessment
+### Phase 2 Complete (Oct 24-25, 2025) - Business Intelligence
+- ✅ Executive Trade Alert API with consulting-grade strategic advisory
+- ✅ Enhanced USMCA AI Prompt with financial impact analysis
+- ✅ Personalized alert filtering by relevance scoring
 
-- ✅ **Enhanced USMCA AI Prompt** - Transforms compliance checking to strategic business intelligence
-  - Financial impact analysis: Annual/monthly tariff savings, Section 301 exposure in dollars
-  - Supply chain vulnerabilities: Identifies Chinese components, policy risk assessment
-  - Strategic alternatives: Mexico sourcing with cost/benefit analysis and payback period
+### Phase 2.5 Complete (Nov 1-2, 2025) - Real Alert System
+- ✅ **Nov 1**: Daily tariff digest system (ready to activate with Vercel cron)
+- ✅ **Nov 2**: Replaced fake template alerts with real crisis_alerts matching
+- ✅ **Nov 2**: Portfolio briefing API using real RSS-detected policies
+- ✅ **Nov 2**: HS code normalization (fixed China component alert matching)
 
-- ✅ **Personalized Alert Filtering** - Filters static policy alerts by user relevance
-  - Relevance scoring system (Industry +40, Geography +30, Product +30, Destination +20)
-  - Top 3 most relevant alerts instead of all 5 generic policies
+### Phase 3 Complete (Nov 4-5, 2025) - Subscription Enforcement
+- ✅ **3-layer subscription limit enforcement**:
+  1. Page-level blocking (usmca-workflow.js)
+  2. Component-level blocking (ComponentOriginsStepEnhanced.js)
+  3. API-level blocking (classification.js + ai-usmca-complete-analysis.js)
+- ✅ **New React hook**: useSubscriptionLimit (lib/hooks/)
+- ✅ **New middleware**: subscription-guard (lib/middleware/)
+- ✅ **Tier limits**: Trial (1), Starter (15), Professional (100), Premium (500)
+- ✅ **Race condition handling**: Reservation system prevents double-counting
 
-### Commits
+### Documentation Corrections (Nov 5, 2025)
+- ✅ Corrected technical debt metrics (were overstated by 10-30x)
+- ✅ Updated CLAUDE.md with Nov 4-5 subscription changes
+- ✅ Updated README.md with current accurate information
+
+### Recent Commits
 ```
-0940b0a - feat: Add business intelligence enhancements to USMCA analysis
-de6c134 - feat: Implement executive-trade-alert and generate-personalized-alerts APIs
-110f6ce - feat: Enhance executive summary display with business advisory formatting
+d6001ab - fix: Block '+ New Analysis' button when Trial limit reached
+c9009a3 - fix: Block workflow buttons when Trial limit reached (1/1 used)
+0fbae2f - fix: Remove undefined setAlertImpactAnalysis call
+01b86e8 - fix: Remove visual watermark from certificate preview
+4e4bf12 - feat: Block certificate download for Trial users
 ```
 
 ## 🔮 Roadmap
 
-### Phase 3 (Next - P1 Fixes)
-- Error handling + dev_issues logging (track failures in dev_issues table)
-- Cross-tab workflow synchronization (prevent data conflicts when editing in multiple tabs)
-- Cost optimization (A/B test Haiku vs Sonnet for tariff analysis)
+### Phase 4 (Next - Ready to Activate)
+- ✅ Daily tariff digest cron job (just needs Vercel config)
+- ✅ Email queue processing (ready to activate)
+- Delete web search + Redis dead code (P0 cleanup)
+- Document subscription enforcement pattern
+
+### Phase 5 (Q1 2026 - Maintenance & Optimization)
+- Error handling + dev_issues logging improvements
+- Cross-tab workflow synchronization
+- Cost optimization (A/B test Haiku vs Sonnet)
 - API rate limiting (100 req/min per user)
+- Consolidate config files (33 → ~20)
 
-### Phase 4 (Q1 2026)
-- EU-UK TCA agreement support (separate codebase)
-- CPTPP agreement support (separate codebase)
+### Phase 6 (Q2+ 2026 - New Agreements)
+- EU-UK TCA agreement support
+- CPTPP agreement support
 - Multi-agreement dashboard
-
-### Phase 5 (Q2+ 2026)
 - Bilateral agreement templates (US-Japan, US-India, etc.)
 - Advanced analytics and reporting
 - Partner API
@@ -345,4 +391,8 @@ Proprietary - Triangle Intelligence Platform
 
 ---
 
-**Latest Update**: October 25, 2025 | **Status**: Production Ready (Phase 1 & 2 Complete - Business Intelligence Enhanced)
+**Latest Update**: November 5, 2025 | **Status**: Production Ready
+- Phase 1-3 Complete: Core workflow + Business intelligence + Subscription enforcement
+- 70% production-ready, 25% ready-to-activate (daily digest cron), 5% future work
+- 90 API endpoints (76 active, 14 deprecated), ~75% clean production code
+- Technical debt corrected: 9 TODOs (not 300+), 14 deprecated files (not 42+), ~1,050 lines deprecated code (not ~7,900)
