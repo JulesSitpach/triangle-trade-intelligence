@@ -128,7 +128,7 @@ export default function Pricing() {
         '1 workflow analysis',
         '1 executive summary',
         '3 components per workflow',
-        'Certificate preview (watermarked)',
+        'Certificate preview only (no download)',
         'View crisis alerts dashboard',
         'AI HS code classification',
         'No credit card required'
