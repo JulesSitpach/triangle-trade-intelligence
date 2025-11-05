@@ -215,9 +215,15 @@ export default function UserDashboard({ user }) {
               )}
             </p>
             <div className="action-buttons">
-              <Link href="/usmca-workflow" className="btn-primary" style={{ marginRight: '10px' }}>
-                📊 Try USMCA Workflow
-              </Link>
+              {dashboardData?.usage_stats?.limit_reached ? (
+                <Link href="/pricing" className="btn-primary" style={{ marginRight: '10px' }}>
+                  🔒 Upgrade for More Analyses
+                </Link>
+              ) : (
+                <Link href="/usmca-workflow" className="btn-primary" style={{ marginRight: '10px' }}>
+                  📊 Try USMCA Workflow
+                </Link>
+              )}
               <Link href="/pricing" className="btn-secondary">
                 👀 View Plans
               </Link>
