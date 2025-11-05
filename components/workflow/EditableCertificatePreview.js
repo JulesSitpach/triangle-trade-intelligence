@@ -20,7 +20,8 @@ export default function EditableCertificatePreview({
   // Determine if fields should be disabled based on user tier
   // Only 'trial' or 'free' tier users have read-only access
   // Starter, Professional, and Premium users can edit and download
-  const isTrialUser = userTier === 'trial' || userTier === 'free' || userTier === 'Free';
+  const tierLower = (userTier || '').toLowerCase();
+  const isTrialUser = tierLower === 'trial' || tierLower === 'free';
   const router = useRouter();
 
   // ✅ Ref to capture certificate preview as image
