@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { captureElementAsImage, generateCertificatePDFFromImage } from '../../lib/utils/usmca-certificate-pdf-generator-image.js';
 import { getCountryFullName } from '../../config/country-classifications.js';
 
@@ -734,7 +735,7 @@ export default function EditableCertificatePreview({
             <br />
             • <strong>Premium</strong> ($599/month): Everything + quarterly strategy calls with our team
             <br /><br />
-            <a href="/pricing" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</a>
+            <Link href="/pricing" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</Link>
           </div>
         </div>
       )}
@@ -1141,7 +1142,7 @@ export default function EditableCertificatePreview({
         </button>
 
         {isTrialUser ? (
-          <a
+          <Link
             href="/pricing"
             style={{
               padding: '12px 24px',
@@ -1158,7 +1159,7 @@ export default function EditableCertificatePreview({
             title="Upgrade to Professional to download official certificates"
           >
             🔒 Upgrade to Download
-          </a>
+          </Link>
         ) : (
           <button
             onClick={handleDownloadPDF}
