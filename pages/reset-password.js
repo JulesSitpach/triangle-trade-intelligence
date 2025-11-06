@@ -24,9 +24,21 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [validToken, setValidToken] = useState(false);
 
-  // Check if we have a valid reset token
+  // Check if we have a valid reset token from URL hash
   useEffect(() => {
     const checkToken = async () => {
+      // First check if there's a hash in the URL (Supabase sends access_token in hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+
+      // If we have a recovery token in the URL, this is valid
+      if (accessToken && type === 'recovery') {
+        setValidToken(true);
+        return;
+      }
+
+      // Otherwise check for existing session
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         setValidToken(true);
