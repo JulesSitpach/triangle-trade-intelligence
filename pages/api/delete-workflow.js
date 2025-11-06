@@ -46,12 +46,14 @@ export default protectedApiHandler({
       }
 
       if (!workflowExists) {
-        await DevIssue.apiError('dashboard', 'delete-workflow', new Error('Workflow not found in any table'), {
-          workflowId,
-          userId,
-          checkedTables: ['workflow_sessions', 'workflow_completions']
+        // ✅ IDEMPOTENT DELETE: If workflow doesn't exist, that's OK (already deleted)
+        // Don't log as error - this is expected behavior for "clear all" operations
+        console.log(`Workflow ${workflowId} not found (already deleted or doesn't exist)`);
+        return res.status(200).json({
+          success: true,
+          message: `Workflow ${workflowId} deleted successfully (or didn't exist)`,
+          deleted_id: workflowId
         });
-        return res.status(404).json({ error: 'Workflow not found' });
       }
 
       // ✅ Verify user owns this workflow before deletion
@@ -76,13 +78,19 @@ export default protectedApiHandler({
         .eq('id', workflowId)
         .eq('user_id', userId);
 
+      // ✅ Only log error if BOTH deletes failed with real errors (not "record not found")
       if (deleteSessionError && deleteCompletionError) {
-        await DevIssue.apiError('dashboard', 'delete-workflow', deleteSessionError || deleteCompletionError, {
-          workflowId,
-          userId,
-          note: 'Failed to delete from both workflow_sessions and workflow_completions'
-        });
-        return res.status(500).json({ error: 'Failed to delete workflow. Please try again or contact support.' });
+        // Check if errors are just "record not found" (PGRST116 or similar)
+        const isNotFoundError = (err) => err?.code === 'PGRST116' || err?.message?.includes('not found');
+
+        if (!isNotFoundError(deleteSessionError) && !isNotFoundError(deleteCompletionError)) {
+          await DevIssue.apiError('dashboard', 'delete-workflow', deleteSessionError || deleteCompletionError, {
+            workflowId,
+            userId,
+            note: 'Failed to delete from both workflow_sessions and workflow_completions'
+          });
+          return res.status(500).json({ error: 'Failed to delete workflow. Please try again or contact support.' });
+        }
       }
 
       console.log(`✅ Deleted workflow ${workflowId} for user ${userId}`);

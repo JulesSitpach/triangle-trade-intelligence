@@ -78,12 +78,48 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
       // Auto-generate certificate from workflow results
       const exporterData = {
         name: results.company?.name || results.company?.company_name || '',
-        country: results.company?.company_country || '',
+        country: results.company?.company_country || results.company?.country || 'COUNTRY REQUIRED',
         address: results.company?.address || results.company?.company_address || '',
         tax_id: results.company?.tax_id || '',
         phone: results.company?.phone || results.company?.contact_phone || '',
         email: results.company?.email || results.company?.contact_email || ''
       };
+
+      // ✅ VALIDATION: Check if country data is missing (critical for customs compliance)
+      if (!results.company?.company_country && !results.company?.country) {
+        console.error('❌ Missing company_country - cannot generate valid certificate', {
+          company_name: results.company?.name,
+          has_company_country: !!results.company?.company_country,
+          has_fallback_country: !!results.company?.country,
+          note: 'Certificate requires country data for customs compliance - user must complete company profile'
+        });
+
+        // Log to dev_issues via API
+        try {
+          await fetch('/api/dev-issues', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              type: 'data_integrity',
+              severity: 'error',
+              component: 'certificate_generation',
+              message: 'Missing company_country for certificate',
+              data: {
+                company_name: results.company?.name,
+                has_company_country: !!results.company?.company_country,
+                has_fallback_country: !!results.company?.country
+              }
+            })
+          });
+        } catch (logError) {
+          console.warn('Failed to log dev issue:', logError);
+        }
+
+        alert('Certificate cannot be generated: Company country is required.\n\nPlease return to Step 1 and ensure your company country is selected before proceeding.');
+        setIsGenerating(false);
+        return;
+      }
 
       // ✅ ADD: Producer data (use exporter as default if not explicitly provided)
       const producerData = results.company?.producer || exporterData;
