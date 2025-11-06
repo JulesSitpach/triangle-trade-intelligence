@@ -279,7 +279,8 @@ function createDigestEmail(changes) {
   textBody += `Questions? Contact: support@triangle-trade-intelligence.com\n`;
   textBody += `---\n`;
   textBody += `Triangle Trade Intelligence\n`;
-  textBody += `Real-time tariff monitoring for USMCA compliance\n`;
+  textBody += `Daily tariff monitoring for USMCA compliance (updates detected within 24 hours)\n`;
+  textBody += `Digest generated: ${new Date().toLocaleString()}\n`;
 
   htmlBody += `<hr style="border: none; border-top: 1px solid #ecf0f1; margin: 20px 0;">`;
   htmlBody += `<h3 style="color: #2c3e50; margin-top: 20px;">📋 Next Steps</h3>`;
@@ -292,7 +293,8 @@ function createDigestEmail(changes) {
   htmlBody += `<p style="color: #7f8c8d; font-size: 12px; margin-top: 30px;">`;
   htmlBody += `Questions? Contact: <a href="mailto:support@triangle-trade-intelligence.com">support@triangle-trade-intelligence.com</a></p>`;
   htmlBody += `<hr style="border: none; border-top: 1px solid #ecf0f1; margin: 20px 0;">`;
-  htmlBody += `<p style="color: #95a5a6; font-size: 12px;">Triangle Trade Intelligence | Real-time tariff monitoring for USMCA compliance</p>`;
+  htmlBody += `<p style="color: #95a5a6; font-size: 12px;">Triangle Trade Intelligence | Daily tariff monitoring for USMCA compliance (updates detected within 24 hours)</p>`;
+  htmlBody += `<p style="color: #95a5a6; font-size: 10px;">Digest generated: ${new Date().toLocaleString()}</p>`;
   htmlBody += `</div></body></html>`;
 
   return { text: textBody, html: htmlBody };

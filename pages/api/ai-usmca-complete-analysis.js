@@ -97,11 +97,12 @@ HOW TO CALCULATE TOTAL RATE:
 ─────────────────────────────────────────────────────────────────────────────
 total_rate = base_mfn_rate + section_301 + section_232 + ieepa_reciprocal
 
-Example (Microprocessor 8542.31.00 from China to US):
-- Base MFN: 0% (ITA duty-free)
-- Section 301: 50% (current Chinese semiconductor policy)
-- IEEPA reciprocal: 10% (additional policy)
-- Total: 60% (user pays this when importing)
+IMPORTANT: Research actual current rates for each component's HS code
+- Base MFN: Look up in HTS database for specific HS code
+- Section 301: If China→US, research CURRENT USTR rate for this specific HS code (rates vary by product)
+- IEEPA reciprocal: Research CURRENT executive orders for this HS code if applicable
+- Section 232: If steel/aluminum, research CURRENT rate
+- Total: Sum all applicable rates as decimals (e.g., 0.60 for 60%)
 
 RETURN JSON ARRAY (rates as decimals, e.g., 0.60 for 60%):
 [

@@ -533,10 +533,10 @@ Respond in JSON format:
   "situation_brief": "1-sentence executive summary addressing ${profile.company_name || 'the company'} specifically",
   "problem": "What specific tariff/policy risk the data shows for ${profile.company_name || 'this company'}'s margins (use actual numbers from context)",
   "root_cause": "Analysis of why ${profile.company_name || 'this company'} has this exposure (reference their specific sourcing decisions and supplier countries)",
-  "annual_impact": "Dollar impact data for ${profile.company_name || 'this company'} - ONLY state the Section 301 burden they currently pay (e.g., $743,750/year). DO NOT add USMCA savings to this number.",
+  "annual_impact": "Dollar impact data for ${profile.company_name || 'this company'} - ONLY state the Section 301 burden they currently pay (calculated as: $${section301Burden.toLocaleString()}/year). DO NOT add USMCA savings to this number.",
   "why_now": "Timeline or risk event context relevant to ${profile.contact_person || 'them'} (informational, not directive)",
-  "current_burden": "Current Section 301 tariff cost in dollars (e.g., $743,750/year on Chinese components). This is what they already pay TODAY - do not add USMCA savings to this number.",
-  "potential_savings": "Potential savings if nearshoring implemented to eliminate Section 301 exposure (e.g., $743,750/year if all Chinese components moved to Mexico)",
+  "current_burden": "Current Section 301 tariff cost in dollars (calculated: $${section301Burden.toLocaleString()}/year on Chinese components from actual trade volume and AI-verified rates). This is what they already pay TODAY - do not add USMCA savings to this number.",
+  "potential_savings": "Potential savings if nearshoring implemented to eliminate Section 301 exposure (calculated: $${section301Burden.toLocaleString()}/year if all Chinese components moved to Mexico - this is their actual Section 301 burden that would be eliminated)",
   "payback_period": "Estimated timeline to recover nearshoring investment costs (based on their trade volume)",
   "confidence": 85,
   "strategic_roadmap": [
@@ -589,7 +589,7 @@ CRITICAL RULES - PROFESSIONAL FORMATTING:
 - Section 301 burden ($${section301Burden}) = what they CURRENTLY pay on Chinese components
 - USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) = what they CURRENTLY save by being qualified
 - These are SEPARATE numbers - do NOT create a "$826,625 total exposure" by adding them
-- Correct framing: "Current burden: $743,750/year. If USMCA disqualified, total tariff cost increases to ~$1.2M (you lose $82,875 savings + MFN rates apply)"
+- Correct framing: "Current burden: $${section301Burden.toLocaleString()}/year. If USMCA disqualified, total tariff cost increases (you lose $${workflow.current_annual_savings?.toLocaleString() || '0'} savings + MFN rates apply)"
 - Incorrect framing: "Total exposure: $826,625 ($743,750 + $82,875)" - this is NOT how tariffs work!
 
 ⚠️ CURRENT DATE CONTEXT:
