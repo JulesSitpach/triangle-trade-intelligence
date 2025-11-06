@@ -900,7 +900,8 @@ export default protectedApiHandler({
             // Column 2 rates ONLY apply to: North Korea, Cuba (non-NTR countries)
             //
             // For China → USA tariffs, the calculation is:
-            //   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)
+            //   Base MFN + Section 301 + Reciprocal + IEEPA (if active)
+            //   All policy rates vary by HS code and effective date
             //
             // Section 301, Reciprocal, and IEEPA tariffs are added separately via getSection301Rate()
 
@@ -1339,14 +1340,14 @@ export default protectedApiHandler({
 
       // ✅ FIX (Oct 29): Calculate FULL nearshoring potential for non-USMCA components
       // If component is from China/Asia and you nearshore to Mexico/Canada/US:
-      // - Eliminate MFN rate (35%) → get 0% USMCA rate
-      // - Eliminate Section 301 (60%) → no longer China-origin
-      // - Total elimination = 95% (full totalRate)
+      // - Eliminate MFN rate → get 0% USMCA rate
+      // - Eliminate Section 301 → no longer China-origin
+      // - Total elimination = full totalRate (varies by component)
       const nearshoringPotential = !isUSMCAMember ? componentValue * totalRate : 0;
 
       // ✅ FIX (Oct 28): ONLY components from USMCA members (US/CA/MX) can have USMCA savings
-      // Chinese components (CN) don't qualify for USMCA → $0 savings
-      // Canadian components with 0% MFN already duty-free → $0 savings
+      // Chinese components (CN) don't qualify for USMCA → no USMCA savings
+      // Canadian components with 0% MFN already duty-free → no additional USMCA savings
       const savingsPerYear = (isUSMCAMember && usmca < mfn) ? (mfnCost - usmcaCost) : 0;
 
       // ✅ DEBUG (Nov 1): Log final savings calculation for ALL components

@@ -307,7 +307,7 @@ export default function USMCAQualification({ results }) {
                   </Tooltip>
                 </th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
-                  <Tooltip text="Preferential duty rate for USMCA-qualified goods. Usually 0% (duty-free) when your product qualifies">
+                  <Tooltip text="Preferential duty rate for USMCA-qualified goods (often duty-free when your product qualifies)">
                     USMCA Rate
                   </Tooltip>
                 </th>
