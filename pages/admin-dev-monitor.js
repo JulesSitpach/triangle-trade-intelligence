@@ -63,6 +63,7 @@ export default function AdminDevMonitor() {
     }
 
     checkAdminAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load dashboard data

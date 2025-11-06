@@ -1060,8 +1060,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           <div className="alert-content">
             <div className="alert-title">Certification Statement</div>
             <div className="text-body">
-              "I certify that the goods described in this certificate qualify as originating goods
-              under the USMCA and that the information contained herein is true and accurate."
+              &quot;I certify that the goods described in this certificate qualify as originating goods
+              under the USMCA and that the information contained herein is true and accurate.&quot;
             </div>
           </div>
         </div>

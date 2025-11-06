@@ -1956,7 +1956,7 @@ export default function TradeRiskAlternatives() {
                         {/* Monitoring Plan */}
                         <div>
                           <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
-                            What We're Monitoring for You
+                            What We&apos;re Monitoring for You
                           </h4>
                           <p style={{ margin: 0 }}>{portfolioBriefing.monitoring_plan}</p>
                         </div>

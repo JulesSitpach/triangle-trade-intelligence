@@ -20,12 +20,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     checkAdminAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (isAdmin) {
       fetchDashboardData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   const checkAdminAccess = async () => {
@@ -646,12 +648,14 @@ function SalesTab({ data, onRefresh, chartLoaded }) {
     if (data?.prospects) {
       applyFilters();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, filters]);
 
   useEffect(() => {
     if (chartLoaded && data) {
       renderFunnelChart();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartLoaded, data]);
 
   const applyFilters = () => {
