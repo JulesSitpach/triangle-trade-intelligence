@@ -19,7 +19,7 @@ export default protectedApiHandler({
       throw new ApiError('Admin access required', 403);
     }
 
-    const { limit = 100, severity, component, resolved } = req.query;
+    const { limit = 5000, severity, component, resolved } = req.query;
 
     // Build query
     let query = supabase
