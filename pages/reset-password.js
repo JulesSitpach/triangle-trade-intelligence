@@ -40,10 +40,6 @@ export default function ResetPassword() {
       const token = hashParams.get('access_token');
       const type = hashParams.get('type');
 
-      console.log('Hash params:', window.location.hash);
-      console.log('Access token:', token);
-      console.log('Type:', type);
-
       if (token && type === 'recovery') {
         setAccessToken(token);
         setValidToken(true);
@@ -81,8 +77,6 @@ export default function ResetPassword() {
         setLoading(false);
         return;
       }
-
-      console.log('Submitting password reset with token:', accessToken);
 
       // Call server-side API to update password
       const response = await fetch('/api/auth/update-password', {
