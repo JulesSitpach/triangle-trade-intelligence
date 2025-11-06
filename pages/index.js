@@ -142,7 +142,7 @@ export default function HomePage() {
             <span className="hero-yellow-highlight">But Don&apos;t Know It</span>
           </h1>
 
-          <p className="hero-description-text" style={{fontSize: '1.5rem', marginTop: '2rem'}}>
+          <p className="hero-description-text" style={{marginTop: '2rem'}}>
             Are you paying 6-25% tariffs when you could pay <strong>0%</strong>?<br/>
             Find out if you qualify in 5 minutes. Get your certificate. Stay protected.
           </p>
