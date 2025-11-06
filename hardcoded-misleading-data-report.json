@@ -1,0 +1,1532 @@
+{
+  "summary": {
+    "filesScanned": 315,
+    "totalFindings": 189,
+    "bySeverity": {
+      "CRITICAL": 85,
+      "HIGH": 21,
+      "MEDIUM": 83
+    }
+  },
+  "findings": {
+    "CRITICAL": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 102,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Section 301: 50% (current Chinese semiconductor policy)",
+        "matched": "Section 301: 50%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 902,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "Section 301 (7.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1342,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "// - Eliminate Section 301 (60%) → no longer China-origin",
+        "matched": "Section 301 (60%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 103,
+        "category": "Reciprocal tariff rate",
+        "severity": "CRITICAL",
+        "code": "- IEEPA reciprocal: 10% (additional policy)",
+        "matched": "reciprocal: 10%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 902,
+        "category": "Reciprocal tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "Reciprocal (0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 103,
+        "category": "IEEPA tariff rate",
+        "severity": "CRITICAL",
+        "code": "- IEEPA reciprocal: 10% (additional policy)",
+        "matched": "IEEPA reciprocal: 10%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 101,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Base MFN: 0% (ITA duty-free)",
+        "matched": "MFN: 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 515,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "let mfnRate = undefined;  // undefined = not found (different from 0 = found as 0%)",
+        "matched": "mfnRate = undefined;  // undefined = not found (different from 0 = found as 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 902,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "MFN (0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1341,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "// - Eliminate MFN rate (35%) → get 0% USMCA rate",
+        "matched": "MFN rate (35%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1381,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "const mfnRate = (comp.mfn_rate || 0) * 100;  // Convert 0.35 to 35%",
+        "matched": "mfnRate = (comp.mfn_rate || 0) * 100;  // Convert 0.35 to 35%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1391,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "weighted_average_mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%",
+        "matched": "mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1925,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "// ✅ FIX (Nov 1): mfn_rate should be PERCENTAGE (23.4%), not DOLLARS ($1,118,090)",
+        "matched": "mfn_rate should be PERCENTAGE (23.4%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1930,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "mfn_rate: preCalculatedFinancials.weighted_average_mfn_rate / 100,  // Convert 23.4% to 0.234 (decimal for consistency)",
+        "matched": "mfn_rate: preCalculatedFinancials.weighted_average_mfn_rate / 100,  // Convert 23.4%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1381,
+        "category": "Rate range (should show specific value)",
+        "severity": "CRITICAL",
+        "code": "const mfnRate = (comp.mfn_rate || 0) * 100;  // Convert 0.35 to 35%",
+        "matched": "0.35 to 35%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1392,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "// ✅ NEW: RVC material component percentage (not just 0%)",
+        "matched": "RVC material component percentage (not just 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1347,
+        "category": "Hardcoded savings amount",
+        "severity": "CRITICAL",
+        "code": "// Chinese components (CN) don't qualify for USMCA → $0 savings",
+        "matched": "$0 savings"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1348,
+        "category": "Hardcoded savings amount",
+        "severity": "CRITICAL",
+        "code": "// Canadian components with 0% MFN already duty-free → $0 savings",
+        "matched": "$0 savings"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\consolidate-alerts.js",
+        "line": 480,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Prevent AI hallucinations like claiming \"100% Section 301\" when cache shows 25%",
+        "matched": "Section 301\" when cache shows 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\consolidate-alerts.js",
+        "line": 505,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "Math.abs(aiRate - cached.section_301) < 5 || // Matches Section 301 (±5%)",
+        "matched": "Section 301 (±5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\consolidate-alerts.js",
+        "line": 504,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "Math.abs(aiRate - cached.base_mfn) < 5 ||  // Matches base MFN (±5%)",
+        "matched": "mfn) < 5 ||  // Matches base MFN (±5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\consolidate-alerts.js",
+        "line": 517,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "`AI claimed tariff rates (${significantDeviations.join('%, ')}%) deviate from enriched cache by >5%`,",
+        "matched": "tariff rates (${significantDeviations.join('%, ')}%) deviate from enriched cache by >5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 781,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Scenario: Section 301 increases by 20%",
+        "matched": "Section 301 increases by 20%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 932,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "typical_penalty_range: '$50,000+ in back tariffs plus 40% penalty if documentation is insufficient (based on CBP enforcement data)'",
+        "matched": "tariffs plus 40%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 198,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%+.`,",
+        "matched": "RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 615,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "- Do NOT repeat \"65% RVC\" or \"0% buffer\" in every field",
+        "matched": "RVC\" or \"0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 186,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "// ✅ DYNAMIC: USMCA threshold concerns (uses actual industry threshold, not hardcoded 70%)",
+        "matched": "threshold concerns (uses actual industry threshold, not hardcoded 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 198,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%+.`,",
+        "matched": "thresholds to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 742,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "why: 'Proposed rules could raise thresholds to 70%+; current buffer is thin',",
+        "matched": "thresholds to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 840,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "// Scenario: Threshold increase to 70%",
+        "matched": "Threshold increase to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 844,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "scenario: 'If Threshold Increases to 70% (Proposed for 2026)',",
+        "matched": "Threshold Increases to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 592,
+        "category": "Hardcoded savings amount",
+        "severity": "CRITICAL",
+        "code": "- Correct framing: \"Current burden: $743,750/year. If USMCA disqualified, total tariff cost increases to ~$1.2M (you lose $82,875 savings + MFN rates apply)\"",
+        "matched": "$82,875 savings"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 539,
+        "category": "Hardcoded savings figure",
+        "severity": "CRITICAL",
+        "code": "\"potential_savings\": \"Potential savings if nearshoring implemented to eliminate Section 301 exposure (e.g., $743,750/year if all Chinese components moved to Mexico)\",",
+        "matched": "savings\": \"Potential savings if nearshoring implemented to eliminate Section 301 exposure (e.g., $743,750"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-usmca-certificate-report.js",
+        "line": 207,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "- Additional Savings Opportunity: $${usmcaSavings.toLocaleString()}/year if they increase RVC to 75%",
+        "matched": "RVC to 75%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-usmca-certificate-report.js",
+        "line": 275,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "Based on the financial analysis above and the team's professional assessment, create a specific 90-day action plan to increase RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%+, saving $${usmcaSavings.toLocaleString()}/year",
+        "matched": "RVC from ${mexicoPercentage + usPercentage + canadaPercentage}% to 75%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-usmca-certificate-report.js",
+        "line": 111,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "const partialThreshold = usmcaThreshold * 0.833; // 83.3% of full threshold (e.g., 62.5% for 75% threshold)",
+        "matched": "Threshold = usmcaThreshold * 0.833; // 83.3%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 146,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "Are you paying 6-25% tariffs when you could pay <strong>0%</strong>?<br/>",
+        "matched": "tariffs when you could pay <strong>0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 206,
+        "category": "Hardcoded savings claim",
+        "severity": "CRITICAL",
+        "code": "<meta name=\"description\" content=\"Affordable USMCA compliance for importers, exporters, and producers. Plans starting at $99/month with AI-powered automated analysis. Save $10k-20k/year in time.\" />",
+        "matched": "Save $10"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 277,
+        "category": "Hardcoded savings figure",
+        "severity": "CRITICAL",
+        "code": "Self-serve USMCA compliance platform for businesses. Generate certificates, monitor tariff policy changes, and calculate savings. Plans start at $99/month with AI-powered analysis.",
+        "matched": "savings. Plans start at $99"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\AlertsSubscriptionFlow.js",
+        "line": 134,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "Tariff announcements are increasing 300% month-over-month. Companies without",
+        "matched": "Tariff announcements are increasing 300%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\USMCAQualification.js",
+        "line": 310,
+        "category": "Duty rate",
+        "severity": "CRITICAL",
+        "code": "<Tooltip text=\"Preferential duty rate for USMCA-qualified goods. Usually 0% (duty-free) when your product qualifies\">",
+        "matched": "duty rate for USMCA-qualified goods. Usually 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 199,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"duty_rate_difference\": \"Estimated MFN rate difference vs primary (e.g., '+5.7%' or '-2.1%')\"",
+        "matched": "MFN rate difference vs primary (e.g., '+5.7%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 148,
+        "category": "Duty rate",
+        "severity": "CRITICAL",
+        "code": "- Flag as \"higher audit risk\" if duty rate differs by >2%",
+        "matched": "duty rate differs by >2%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 199,
+        "category": "Duty rate",
+        "severity": "CRITICAL",
+        "code": "\"duty_rate_difference\": \"Estimated MFN rate difference vs primary (e.g., '+5.7%' or '-2.1%')\"",
+        "matched": "duty_rate_difference\": \"Estimated MFN rate difference vs primary (e.g., '+5.7%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 507,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Priority 3: tariff_rates (FALLBACK - Many 0% rates, use as last resort)",
+        "matched": "tariff_rates (FALLBACK - Many 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 131,
+        "category": "Hardcoded savings amount",
+        "severity": "CRITICAL",
+        "code": "- USMCA value: $0 savings (already duty-free)",
+        "matched": "$0 savings"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+        "line": 136,
+        "category": "Hardcoded savings amount",
+        "severity": "CRITICAL",
+        "code": "- USMCA value: $96,900 savings (shows commercial value)",
+        "matched": "$96,900 savings"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 166,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "fallback_warning: '⚠️ Unable to determine Section 301 rate - assuming 0% but Chinese goods typically incur 7.5%-25%'",
+        "matched": "Section 301 rate - assuming 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 106,
+        "category": "Rate range (should show specific value)",
+        "severity": "CRITICAL",
+        "code": "- Some List 3 increased from 7.5% to 25%",
+        "matched": "7.5% to 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 107,
+        "category": "Rate range (should show specific value)",
+        "severity": "CRITICAL",
+        "code": "- Some List 4A increased from 15% to 25%",
+        "matched": "15% to 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 663,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"Section 301 List 4A: 25%\",",
+        "matched": "Section 301 List 4A: 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 662,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"Base MFN: 2.7%\",",
+        "matched": "MFN: 2.7%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\database\\supabase-client.js",
+        "line": 432,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Tariff data quality (25% of score)",
+        "matched": "Tariff data quality (25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\database\\supabase-client.js",
+        "line": 495,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Complexity and tariff value (15% of score)",
+        "matched": "tariff value (15%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\alert-impact-analysis-service.js",
+        "line": 382,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Estimate tariff impact (assuming 10% as default if not specified)",
+        "matched": "tariff impact (assuming 10%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\continuous-verification-service.js",
+        "line": 28,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "this.maxDiscrepancyThreshold = parseFloat(process.env.MAX_DISCREPANCY_THRESHOLD) || 0.05; // 5%",
+        "matched": "Threshold = parseFloat(process.env.MAX_DISCREPANCY_THRESHOLD) || 0.05; // 5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\crisis-calculator-service.js",
+        "line": 47,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// 1. Get crisis tariff rate from database - NO HARDCODED 25%",
+        "matched": "tariff rate from database - NO HARDCODED 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\crisis-config-service.js",
+        "line": 20,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "* Get crisis tariff rate - NO HARDCODED 25%",
+        "matched": "tariff rate - NO HARDCODED 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\global-trade-alert-service.js",
+        "line": 316,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "// Priority 1-3: High impact measures (tariffs >25%, Section 301)",
+        "matched": "tariffs >25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\professional-referral-system.js",
+        "line": 170,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "if (naContent < threshold + 5) { // Barely qualified (within 5%)",
+        "matched": "threshold + 5) { // Barely qualified (within 5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\rss-polling-engine.js",
+        "line": 465,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "✅ \"US increases Section 301 tariffs on Chinese semiconductors to 60%\" → Score 9",
+        "matched": "Section 301 tariffs on Chinese semiconductors to 60%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\rss-polling-engine.js",
+        "line": 465,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "✅ \"US increases Section 301 tariffs on Chinese semiconductors to 60%\" → Score 9",
+        "matched": "tariffs on Chinese semiconductors to 60%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\rss-polling-engine.js",
+        "line": 467,
+        "category": "Regional content threshold",
+        "severity": "CRITICAL",
+        "code": "✅ \"USMCA regional content threshold for automotive increased to 75%\" → Score 8",
+        "matched": "regional content threshold for automotive increased to 75%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\rss-polling-engine.js",
+        "line": 467,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "✅ \"USMCA regional content threshold for automotive increased to 75%\" → Score 8",
+        "matched": "threshold for automotive increased to 75%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 160,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Section 301 Tariffs: Apply additional duties to Chinese-origin goods entering USA. Rate varies by HS code (7.5%-25% depending on USTR list assignment). Does NOT apply to Mexico or Canada origin.",
+        "matched": "Section 301 Tariffs: Apply additional duties to Chinese-origin goods entering USA. Rate varies by HS code (7.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 168,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "IMPORTANT: Section 301 rate varies by HS code - use actual USTR list rate, not generic 25%",
+        "matched": "Section 301 rate varies by HS code - use actual USTR list rate, not generic 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 637,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "Section 301 (7.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 637,
+        "category": "Reciprocal tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "Reciprocal (0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 637,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "//   Base MFN (0% for semiconductors) + Section 301 (7.5%-25%) + Reciprocal (0%-25%) + IEEPA (if active)",
+        "matched": "MFN (0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 160,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Section 301 Tariffs: Apply additional duties to Chinese-origin goods entering USA. Rate varies by HS code (7.5%-25% depending on USTR list assignment). Does NOT apply to Mexico or Canada origin.",
+        "matched": "Tariffs: Apply additional duties to Chinese-origin goods entering USA. Rate varies by HS code (7.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 176,
+        "category": "Generic tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"section_301\": 0.0,           // Policy tariff for Chinese goods to USA (25% if CN→US, else 0)",
+        "matched": "tariff for Chinese goods to USA (25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 394,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Example: [\"Base MFN 0%\", \"Section 301 +50%\", \"IEEPA +20%\"] → mfn_rate = 70",
+        "matched": "Section 301 +50%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 431,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"policy_adjustments\": [\"Section 301 +50%\", \"IEEPA +20%\"]",
+        "matched": "Section 301 +50%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 394,
+        "category": "IEEPA tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Example: [\"Base MFN 0%\", \"Section 301 +50%\", \"IEEPA +20%\"] → mfn_rate = 70",
+        "matched": "IEEPA +20%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 431,
+        "category": "IEEPA tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"policy_adjustments\": [\"Section 301 +50%\", \"IEEPA +20%\"]",
+        "matched": "IEEPA +20%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 394,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "- Example: [\"Base MFN 0%\", \"Section 301 +50%\", \"IEEPA +20%\"] → mfn_rate = 70",
+        "matched": "MFN 0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\usmca\\qualification-engine.js",
+        "line": 133,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "\"reason\": \"One sentence result: e.g. 'Qualified with 82% RVC (threshold 65%)', or 'Not qualified - 58% vs 65% required'\"",
+        "matched": "RVC (threshold 65%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\usmca\\qualification-engine.js",
+        "line": 133,
+        "category": "Qualification threshold",
+        "severity": "CRITICAL",
+        "code": "\"reason\": \"One sentence result: e.g. 'Qualified with 82% RVC (threshold 65%)', or 'Not qualified - 58% vs 65% required'\"",
+        "matched": "threshold 65%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\usmca\\usmca-2026-config.js",
+        "line": 32,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "description: 'RVC increases to 70%, stricter China tracking',",
+        "matched": "RVC increases to 70%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\usmca\\usmca-2026-config.js",
+        "line": 38,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "description: 'RVC 75% + China component ban + bilateral deals',",
+        "matched": "RVC 75%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\usmca\\usmca-2026-config.js",
+        "line": 104,
+        "category": "RVC threshold",
+        "severity": "CRITICAL",
+        "code": "description: 'Target 75% RVC (10% buffer above minimum)',",
+        "matched": "RVC (10%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\rate-normalizer.js",
+        "line": 88,
+        "category": "Section 301 tariff rate",
+        "severity": "CRITICAL",
+        "code": "warning: `⚠️ Section 301 rate ${decimalToPercentage(normalized)}% is outside valid range (0%-50%). Check USTR list.`",
+        "matched": "Section 301 rate ${decimalToPercentage(normalized)}% is outside valid range (0%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-web-scraper.js",
+        "line": 80,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "\"mfn_rate_text\": \"2.5%\",",
+        "matched": "mfn_rate_text\": \"2.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\web-search.js",
+        "line": 147,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "return 'HTS 0804.30.0000 - Mangoes, fresh. MFN rate: 10.9%. USMCA rate: 0% (duty-free).'",
+        "matched": "MFN rate: 10.9%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\web-search.js",
+        "line": 151,
+        "category": "MFN tariff rate",
+        "severity": "CRITICAL",
+        "code": "return 'HTS 8517.62.0000 - Electronic circuits. MFN rate: 0%. USMCA rate: 0%.'",
+        "matched": "MFN rate: 0%"
+      }
+    ],
+    "HIGH": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\agents\\classification.js",
+        "line": 28,
+        "category": "Hardcoded HS code",
+        "severity": "HIGH",
+        "code": "// Extract first text in single quotes (OpenRouter format: \"HS code 8413.91.90 'Parts of pumps for liquids'\")",
+        "matched": "HS code 8413"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 668,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "\"source\": \"USITC HTS 2025 + USTR Section 301 + CBP\",",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 793,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "official_source: 'tariff_intelligence_master (HTS 2025)',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\usmca-threshold-agent.js",
+        "line": 14,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "* Created: November 6, 2025",
+        "matched": "November 6, 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\examples\\policy-update-integration-example.js",
+        "line": 27,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "8542.31 and 8542.32, effective November 15, 2025.",
+        "matched": "November 15, 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 1181,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "threshold: 0,  // $0 - ELIMINATED AUGUST 29, 2025 for ALL countries",
+        "matched": "AUGUST 29, 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 1184,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "policy_change: 'Previously $800. Eliminated for China/HK May 2, 2025; globally August 29, 2025'",
+        "matched": "May 2, 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 1201,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "policy_change: (origin !== 'US' && origin !== 'CA') ? 'General $50 threshold abolished December 30, 2024' : null",
+        "matched": "December 30, 2024"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\hts-lookup.js",
+        "line": 2,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "* HTS 2025 Database Lookup",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\hts-lookup.js",
+        "line": 16,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "* Lookup tariff rates from HTS 2025 database",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\official-usmca-template-filler.js",
+        "line": 11,
+        "category": "Hardcoded date claiming currency",
+        "severity": "HIGH",
+        "code": "* October 30, 2025 - Smart architecture (use official template, not reinvent)",
+        "matched": "October 30, 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 124,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 130,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 138,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 146,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 154,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-hts-api.js",
+        "line": 208,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "source: 'USITC HTS 2025 Database',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-web-scraper.js",
+        "line": 84,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "\"source\": \"USITC HTS 2025 Rev 1\"",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\usitc-web-scraper.js",
+        "line": 164,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "official_source: 'USITC.gov HTS 2025',",
+        "matched": "HTS 2025"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\web-search.js",
+        "line": 147,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "return 'HTS 0804.30.0000 - Mangoes, fresh. MFN rate: 10.9%. USMCA rate: 0% (duty-free).'",
+        "matched": "HTS 0804"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\utils\\web-search.js",
+        "line": 151,
+        "category": "Hardcoded HTS code",
+        "severity": "HIGH",
+        "code": "return 'HTS 8517.62.0000 - Electronic circuits. MFN rate: 0%. USMCA rate: 0%.'",
+        "matched": "HTS 8517"
+      }
+    ],
+    "MEDIUM": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 91,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "- Section 301: If China origin → US destination, research current rate for this HS code",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 113,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "\"section_232\": <Steel/aluminum? Current rate or 0>,",
+        "matched": "Current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 661,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "// This ensures AI gets CURRENT rates instead of guessing from training data",
+        "matched": "CURRENT rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 658,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "// INTEGRATE REAL-TIME TARIFF MONITORING WITH API",
+        "matched": "REAL-TIME"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1391,
+        "category": "Claims \"average\" rate",
+        "severity": "MEDIUM",
+        "code": "weighted_average_mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%",
+        "matched": "average_mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 1930,
+        "category": "Claims \"average\" rate",
+        "severity": "MEDIUM",
+        "code": "mfn_rate: preCalculatedFinancials.weighted_average_mfn_rate / 100,  // Convert 23.4% to 0.234 (decimal for consistency)",
+        "matched": "average_mfn_rate / 100,  // Convert 23.4%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\rss-polling.js",
+        "line": 115,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "// Sync real-time tariff rates from USITC API",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\send-daily-tariff-digest.js",
+        "line": 282,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "textBody += `Real-time tariff monitoring for USMCA compliance\\n`;",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\send-daily-tariff-digest.js",
+        "line": 295,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "htmlBody += `<p style=\"color: #95a5a6; font-size: 12px;\">Triangle Trade Intelligence | Real-time tariff monitoring for USMCA compliance</p>`;",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\dashboard-data.js",
+        "line": 5,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* 2. Real-time crisis alerts from RSS monitoring (matched to user's HS codes)",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\dashboard-data.js",
+        "line": 313,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "// Crisis Alerts from RSS Monitoring (real-time government announcements)",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+        "line": 932,
+        "category": "Claims \"typical\" rate",
+        "severity": "MEDIUM",
+        "code": "typical_penalty_range: '$50,000+ in back tariffs plus 40% penalty if documentation is insufficient (based on CBP enforcement data)'",
+        "matched": "typical_penalty_range: '$50,000+ in back tariffs plus 40%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-personalized-alerts.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Queries real-time crisis_alerts database and filters by user's specific products",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-portfolio-briefing.js",
+        "line": 367,
+        "category": "Claims \"most\" products pay X%",
+        "severity": "MEDIUM",
+        "code": "\"component_analysis\": \"Write 2-3 flowing paragraphs analyzing their components as a narrative (NOT listing components one by one). Group components by strategic significance. ${matchedAlerts.length > 0 ? 'Weave alert context naturally into the narrative (e.g., \\\"Two recent alerts signal this pressure: [titles]\\\"). Don\\'t just say \\\"Alert detected.\\\"' : 'Focus on 2026 renegotiation context and what rule changes would mean.'} Example: 'The microprocessor component presents your most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50% of costs—anchor your USMCA qualification. They're well-positioned for any agreement strengthening, though they do concentrate your supply chain in a single country.'\",",
+        "matched": "most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 20,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<meta name=\"description\" content=\"AI-powered USMCA compliance software for importers, exporters, and producers. Automated certificate generation, real-time tariff alerts, and HS code classification. $99/month.\" />",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 23,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<meta property=\"og:description\" content=\"AI-powered USMCA compliance software with automated certificate generation and real-time tariff alerts for importers, exporters, and producers.\" />",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 62,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "\"Real-Time Tariff Alerts\",",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 199,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "{/* Real-Time Alerts */}",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 209,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<li>Real-time tariff change detection</li>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 313,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<li>Real-time qualification status (Qualified/Not Qualified/Needs Review)</li>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 357,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Real-Time Crisis Alerts & Policy Monitoring",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\index.js",
+        "line": 455,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<h3 className=\"content-card-title\">Real-Time Tariff Alerts</h3>",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 150,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "'Real-time crisis alerts',",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 171,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "'Real-time crisis alerts',",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 192,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "'Real-time crisis alerts',",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 320,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "USMCA qualification analysis, HS code classification, certificate generation, and real-time policy alerts",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 464,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Real-time monitoring with AI-powered strategic analysis",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 496,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<li><strong>Real-time monitoring</strong> - Platform watches Federal Register, USTR, and government sources 24/7</li>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 606,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<p className=\"content-card-description\">15 workflows + 15 executive summaries + 30 portfolio briefings per month. Unlimited certificates. Real-time alerts. No commitment.</p>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\pricing.js",
+        "line": 624,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<p className=\"content-card-description\">AI HS code classification, RVC calculations, USMCA qualification checks, certificate generation (Form D), real-time policy alerts, email notifications</p>",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\signup\\referral.js",
+        "line": 96,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "alert(`✅ 30-Day Professional Trial Activated!\\n\\nYou now have full access to:\\n• Unlimited USMCA analyses\\n• Real-time trade alerts\\n• 15% discount on professional services\\n• Priority support\\n\\nYour trial expires in 30 days. We'll remind you before it ends.`);",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\signup\\referral.js",
+        "line": 160,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<li>Real-time tariff policy alerts</li>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\trade-risk-alternatives.js",
+        "line": 1014,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "{/* Real-Time Monitoring Dashboard - Shows what's being monitored */}",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\admin\\PolicyRatesTab.js",
+        "line": 246,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "<label className=\"form-label\">Current Rate (%)</label>",
+        "matched": "Current Rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\agents\\AgentSuggestionBadge.js",
+        "line": 4,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Displays real-time agent suggestions with confidence scores",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\alerts\\RealTimeMonitoringDashboard.js",
+        "line": 2,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Real-Time Monitoring Dashboard - COMPACT VERSION",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\alerts\\RealTimeMonitoringDashboard.js",
+        "line": 57,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<div className=\"alert-title\">🔄 Loading real-time monitoring data...</div>",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\alerts\\RealTimeMonitoringDashboard.js",
+        "line": 68,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<h2 className=\"form-section-title\">📡 Real-Time Monitoring Activity</h2>",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\alerts\\RealTimeMonitoringDashboard.js",
+        "line": 73,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "To start real-time monitoring with government data, complete the USMCA workflow with your components. We'll then track import volumes, policy changes, and supply chain risks specific to your HS codes.",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\alerts\\RealTimeMonitoringDashboard.js",
+        "line": 116,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "📡 Real-Time Policy Monitoring",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\shared\\DataSourceBadge.js",
+        "line": 28,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "return 'badge-success'; // Green - real-time AI",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\shared\\DynamicAIReportButton.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Fetches real-time pricing from the dynamic pricing API",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\AlertsSubscriptionFlow.js",
+        "line": 147,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<span className=\"small-text\">Real-time alerts for your specific HS codes</span>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\AlertsSubscriptionFlow.js",
+        "line": 282,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<li>• Real-time monitoring setup for your HS codes</li>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\AlertsSubscriptionFlow.js",
+        "line": 172,
+        "category": "Claims \"average\" rate",
+        "severity": "MEDIUM",
+        "code": "Industry average insurance: 1-3% of protected value",
+        "matched": "average insurance: 1-3%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\ComponentOriginsStepEnhanced.js",
+        "line": 5,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Enhanced with real-time AI agent assistance",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\CrisisCalculatorResults.js",
+        "line": 384,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Real-time tariff change alerts for your HS codes",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\EditableCertificatePreview.js",
+        "line": 734,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "• <strong>Professional</strong> ($299/month): 100 analyses + real-time alerts + priority support",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\PolicyTimeline.js",
+        "line": 389,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "⚠️ {threat.warning || 'This component uses volatile tariff rates that change frequently. Verify current rates before shipment.'}",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\ProgressDisplay.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Shows real-time progress while API request runs",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\DataSourceAttribution.js",
+        "line": 65,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "For production use, verify current rates with customs authorities.",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\RecommendedActions.js",
+        "line": 159,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "setAlertError(errorData.message || 'Real-time crisis alerts require a paid subscription');",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\TariffDataFreshness.js",
+        "line": 9,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "* if they're using current rates or cached data from before",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\TariffDataFreshness.js",
+        "line": 122,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "{freshness.status === 'fresh' && `✅ Current rates (${freshness.hoursAgo}h old)`}",
+        "matched": "Current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\TariffDataFreshness.js",
+        "line": 146,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "⚠️ For compliance, verify current rates at{' '}",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\TariffDataFreshness.js",
+        "line": 138,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "{source === 'live' && 'Real-time from USITC'}",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\USMCAQualification.js",
+        "line": 241,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "Total Current Rate: {(totalRate * 100).toFixed(1)}%",
+        "matched": "Current Rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\results\\USMCAQualification.js",
+        "line": 265,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements. Always verify current rates before shipment.",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\SupplyChainStep.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Real-time USMCA qualification calculation with visual feedback",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\WorkflowLoading.js",
+        "line": 2,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* WorkflowLoading - Enhanced loading overlay with real-time progress tracking",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\WorkflowPathSelection.js",
+        "line": 112,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "<span className=\"small-text\">Real-time tariff change alerts</span>",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\components\\workflow\\WorkflowPathSelection.js",
+        "line": 199,
+        "category": "Claims \"most\" products pay X%",
+        "severity": "MEDIUM",
+        "code": "<p className=\"text-body\">Pay just 0.48% of your protected value. Most business insurance costs 1-3% of protected assets.</p>",
+        "matched": "Most business insurance costs 1-3%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 166,
+        "category": "Claims \"typical\" rate",
+        "severity": "MEDIUM",
+        "code": "fallback_warning: '⚠️ Unable to determine Section 301 rate - assuming 0% but Chinese goods typically incur 7.5%-25%'",
+        "matched": "typically incur 7.5%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 624,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "- Current rates: 7.5%, 25%, or 100%?",
+        "matched": "Current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 6,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* - US rates: VOLATILE (Trump) → Real-time AI research",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 598,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "return `You are a US tariff rate specialist tracking Trump administration policy changes in real-time.",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\contexts\\AlertContext.js",
+        "line": 111,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "// Set up periodic refresh for real-time updates",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\hooks\\useDynamicPricing.js",
+        "line": 4,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Provides real-time pricing for AI Report buttons",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\automated-trade-research.js",
+        "line": 259,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "// Return simulated current rate",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\automated-trade-research.js",
+        "line": 2,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "// Keeps your trade database current with real-time web intelligence",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\global-trade-alert-service.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Professional trade policy monitoring for real-time tariff intelligence",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\resend-alert-service.js",
+        "line": 149,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Real-Time Government Alert${user.isVIP ? ' - VIP Priority' : ''}",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\resend-alert-service.js",
+        "line": 283,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Triangle Trade Intelligence - Real-Time USMCA Compliance & Trade Alerts<br>",
+        "matched": "Real-Time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\tariff-change-detector.js",
+        "line": 9,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* This is the INTELLIGENCE LAYER that makes real-time Trump tariff tracking work",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\tariff-change-detector.js",
+        "line": 447,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "Real-time tariff monitoring for USMCA compliance",
+        "matched": "Real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\trust\\trust-summary-service.js",
+        "line": 109,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "if (hasStaleData) disclaimers.push('Some data may not reflect latest regulatory changes - verify current rates');",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\usitc-tariff-sync.js",
+        "line": 152,
+        "category": "Claims \"latest\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "* Check USTR.gov for latest rates: https://ustr.gov/issue-areas/enforcement/section-301-investigations",
+        "matched": "latest rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\usitc-tariff-sync.js",
+        "line": 3,
+        "category": "Claims \"real-time\" data",
+        "severity": "MEDIUM",
+        "code": "* Fetches real-time tariff rates from USITC DataWeb API",
+        "matched": "real-time"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\services\\usitc-tariff-sync.js",
+        "line": 158,
+        "category": "Claims \"most\" products pay X%",
+        "severity": "MEDIUM",
+        "code": "// Electronics - mostly 25%",
+        "matched": "mostly 25%"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 665,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "stalenessWarning = `⚠️ WARNING: Tariff data is ${daysOld} days old (last updated: ${lastUpdated?.toISOString().split('T')[0]}). Consider AI verification for current rates.`;",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\hts-lookup.js",
+        "line": 119,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "* @param {Array} components - Array of components with HS codes and current rates",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 402,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "Research thoroughly and return accurate current rates.`;",
+        "matched": "current rate"
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\volatility-manager.js",
+        "line": 280,
+        "category": "Claims \"current\" without timestamp",
+        "severity": "MEDIUM",
+        "code": "? 'Use AI research for current rates'",
+        "matched": "current rate"
+      }
+    ],
+    "LOW": []
+  }
+}
