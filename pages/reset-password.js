@@ -12,7 +12,14 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true  // This is critical for password reset!
+    }
+  }
 );
 
 export default function ResetPassword() {
@@ -23,24 +30,22 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [validToken, setValidToken] = useState(false);
+  const [accessToken, setAccessToken] = useState('');
 
   // Check if we have a valid reset token from URL hash
   useEffect(() => {
     const checkToken = async () => {
-      // First check if there's a hash in the URL (Supabase sends access_token in hash)
+      // Extract and save access token IMMEDIATELY before anything else
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
+      const token = hashParams.get('access_token');
       const type = hashParams.get('type');
 
-      // If we have a recovery token in the URL, this is valid
-      if (accessToken && type === 'recovery') {
-        setValidToken(true);
-        return;
-      }
+      console.log('Hash params:', window.location.hash);
+      console.log('Access token:', token);
+      console.log('Type:', type);
 
-      // Otherwise check for existing session
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
+      if (token && type === 'recovery') {
+        setAccessToken(token);
         setValidToken(true);
       } else {
         setError('Invalid or expired reset link. Please request a new one.');
@@ -70,13 +75,29 @@ export default function ResetPassword() {
     }
 
     try {
-      // Update password using Supabase
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      // Use the saved access token from page load
+      if (!accessToken) {
+        setError('Invalid reset link. Please request a new one.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Submitting password reset with token:', accessToken);
+
+      // Call server-side API to update password
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: accessToken,
+          newPassword: password
+        })
       });
 
-      if (error) {
-        setError(error.message);
+      const data = await response.json();
+
+      if (!data.success) {
+        setError(data.error || 'Failed to reset password');
         setLoading(false);
         return;
       }
