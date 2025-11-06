@@ -4,7 +4,7 @@
  * Using professional enterprise design system
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
 import { BUSINESS_TYPES, CERTIFIER_TYPES, mapBusinessTypeToCertifierType } from '../../config/business-types.js';
 
@@ -26,6 +26,14 @@ export default function CompanyInformationStep({
   const [validationError, setValidationError] = useState(null);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Refs for auto-scrolling to sections
+  const contactInfoRef = useRef(null);
+  const tradeRoutesRef = useRef(null);
+
+  // Track which sections have been scrolled to (prevent re-scrolling)
+  const [scrolledToContact, setScrolledToContact] = useState(false);
+  const [scrolledToTrade, setScrolledToTrade] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -68,6 +76,41 @@ export default function CompanyInformationStep({
       updateFormData('tariff_cache_strategy', cacheStrategy);
     }
   }, [formData.company_country, formData.destination_country, updateFormData]);
+
+  // Auto-scroll to next section when current section is complete
+  useEffect(() => {
+    // Check if Company Information section (first 6 fields) is complete
+    const companyInfoComplete = !!(
+      formData.company_name &&
+      formData.business_type &&
+      formData.industry_sector &&
+      formData.tax_id &&
+      formData.company_address &&
+      formData.company_country
+    );
+
+    // Scroll to Contact Information when Company Info is complete
+    if (companyInfoComplete && !scrolledToContact && contactInfoRef.current) {
+      contactInfoRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setScrolledToContact(true);
+      console.log('✅ Company Information complete - scrolling to Contact Information');
+    }
+
+    // Check if Contact Information section (4 fields) is complete
+    const contactInfoComplete = !!(
+      formData.contact_person &&
+      formData.contact_phone &&
+      formData.contact_email &&
+      formData.trade_volume
+    );
+
+    // Scroll to Trade Routes when Contact Info is complete
+    if (companyInfoComplete && contactInfoComplete && !scrolledToTrade && tradeRoutesRef.current) {
+      tradeRoutesRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setScrolledToTrade(true);
+      console.log('✅ Contact Information complete - scrolling to Trade Routes');
+    }
+  }, [formData, scrolledToContact, scrolledToTrade]);
 
   // Clear validation error when user starts filling in fields
   useEffect(() => {
@@ -293,7 +336,7 @@ export default function CompanyInformationStep({
           </div>
         </div>
 
-        <h3 className="form-section-title">Contact Information</h3>
+        <h3 ref={contactInfoRef} className="form-section-title">Contact Information</h3>
         <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label required">Contact Person</label>
@@ -357,7 +400,7 @@ export default function CompanyInformationStep({
           </div>
         </div>
 
-        <h3 className="form-section-title">Trade Routes</h3>
+        <h3 ref={tradeRoutesRef} className="form-section-title">Trade Routes</h3>
         <div className="form-grid-2">
           <div className="form-group">
             <label className="form-label required">Primary Supplier Country</label>
