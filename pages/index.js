@@ -116,16 +116,6 @@ export default function HomePage() {
           loop
           playsInline
           preload="metadata"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            zIndex: 1,
-            opacity: 0.75
-          }}
           onLoadedMetadata={(e) => {
             e.target.playbackRate = 0.8; // Slow down to 50% speed
           }}
