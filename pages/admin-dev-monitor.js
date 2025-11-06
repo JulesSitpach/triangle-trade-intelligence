@@ -24,7 +24,7 @@ export default function AdminDevMonitor() {
   // Filters
   const [severityFilter, setSeverityFilter] = useState('all');
   const [componentFilter, setComponentFilter] = useState('all');
-  const [resolvedFilter, setResolvedFilter] = useState('unresolved'); // all, resolved, unresolved
+  const [resolvedFilter, setResolvedFilter] = useState('all'); // all, resolved, unresolved - changed default to 'all' to show issues
 
   // Check admin access
   useEffect(() => {
@@ -55,30 +55,43 @@ export default function AdminDevMonitor() {
     try {
       // Load dev issues
       const issuesRes = await fetch('/api/admin/dev-issues');
+      console.log('Dev issues response status:', issuesRes.status);
       if (issuesRes.ok) {
         const issuesData = await issuesRes.json();
-        setDevIssues(issuesData.issues || []);
+        console.log('Dev issues data:', issuesData);
+        console.log('Issues array:', issuesData.data?.issues);
+        console.log('Issues array length:', issuesData.data?.issues?.length);
+        setDevIssues(issuesData.data?.issues || []);
+      } else {
+        const errorText = await issuesRes.text();
+        console.error('Failed to load dev issues:', issuesRes.status, errorText);
       }
 
       // Load sales metrics
       const salesRes = await fetch('/api/admin/sales-metrics');
       if (salesRes.ok) {
         const salesData = await salesRes.json();
-        setSalesMetrics(salesData.metrics);
+        setSalesMetrics(salesData.data?.metrics);
+      } else {
+        console.error('Failed to load sales metrics:', salesRes.status);
       }
 
       // Load analytics
       const analyticsRes = await fetch('/api/admin/analytics-overview');
       if (analyticsRes.ok) {
         const analyticsData = await analyticsRes.json();
-        setAnalyticsData(analyticsData.analytics);
+        setAnalyticsData(analyticsData.data?.analytics);
+      } else {
+        console.error('Failed to load analytics:', analyticsRes.status);
       }
 
       // Load system health
       const healthRes = await fetch('/api/admin/system-health');
       if (healthRes.ok) {
         const healthData = await healthRes.json();
-        setSystemHealth(healthData.health);
+        setSystemHealth(healthData.data?.health);
+      } else {
+        console.error('Failed to load system health:', healthRes.status);
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -218,9 +231,9 @@ export default function AdminDevMonitor() {
                             className="form-input"
                             style={{ width: '150px' }}
                           >
-                            <option value="all">All</option>
-                            <option value="unresolved">Unresolved</option>
-                            <option value="resolved">Resolved</option>
+                            <option value="all">All ({devIssues.length})</option>
+                            <option value="unresolved">Unresolved ({devIssues.filter(i => !i.resolved).length})</option>
+                            <option value="resolved">Resolved ({devIssues.filter(i => i.resolved).length})</option>
                           </select>
                         </div>
 
