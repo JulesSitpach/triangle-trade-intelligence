@@ -141,11 +141,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    // Update last login
-    await supabaseAdmin
-      .from('user_profiles')
-      .update({ last_login: new Date().toISOString() })
-      .eq('id', user.id);
+    // Note: last_login tracking removed (column doesn't exist in user_profiles)
 
     // Create session data
     const sessionData = {
