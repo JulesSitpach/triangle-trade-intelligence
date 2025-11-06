@@ -26,6 +26,10 @@ export default function AdminDevMonitor() {
   const [componentFilter, setComponentFilter] = useState('all');
   const [resolvedFilter, setResolvedFilter] = useState('all'); // all, resolved, unresolved - changed default to 'all' to show issues
 
+  // Bulk selection
+  const [selectedIssues, setSelectedIssues] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+
   // Check admin access
   useEffect(() => {
     async function checkAdminAccess() {
@@ -109,6 +113,47 @@ export default function AdminDevMonitor() {
       await loadDashboardData();
     } catch (error) {
       console.error('Failed to mark issue as resolved:', error);
+    }
+  }
+
+  // Toggle individual issue selection
+  function toggleIssueSelection(issueId) {
+    const newSelected = new Set(selectedIssues);
+    if (newSelected.has(issueId)) {
+      newSelected.delete(issueId);
+    } else {
+      newSelected.add(issueId);
+    }
+    setSelectedIssues(newSelected);
+    setSelectAll(newSelected.size === filteredIssues.length);
+  }
+
+  // Toggle select all
+  function toggleSelectAll() {
+    if (selectAll) {
+      setSelectedIssues(new Set());
+      setSelectAll(false);
+    } else {
+      const allIds = new Set(filteredIssues.map(i => i.id));
+      setSelectedIssues(allIds);
+      setSelectAll(true);
+    }
+  }
+
+  // Bulk resolve selected issues
+  async function bulkResolveSelected() {
+    if (selectedIssues.size === 0) return;
+
+    try {
+      const resolvePromises = Array.from(selectedIssues).map(issueId =>
+        fetch(`/api/admin/dev-issues/${issueId}/resolve`, { method: 'POST' })
+      );
+      await Promise.all(resolvePromises);
+      setSelectedIssues(new Set());
+      setSelectAll(false);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Failed to bulk resolve issues:', error);
     }
   }
 
@@ -237,12 +282,51 @@ export default function AdminDevMonitor() {
                           </select>
                         </div>
 
-                        <div style={{ marginLeft: 'auto', alignSelf: 'flex-end' }}>
+                        <div style={{ marginLeft: 'auto', alignSelf: 'flex-end', display: 'flex', gap: '10px' }}>
+                          {selectedIssues.size > 0 && (
+                            <button
+                              onClick={bulkResolveSelected}
+                              className="btn-primary"
+                              style={{ padding: '8px 15px' }}
+                            >
+                              ✓ Resolve Selected ({selectedIssues.size})
+                            </button>
+                          )}
                           <button onClick={loadDashboardData} className="btn-secondary">
                             🔄 Refresh
                           </button>
                         </div>
                       </div>
+
+                      {/* Bulk Actions */}
+                      {filteredIssues.length > 0 && (
+                        <div style={{
+                          display: 'flex',
+                          gap: '15px',
+                          alignItems: 'center',
+                          padding: '10px',
+                          backgroundColor: '#F9FAFB',
+                          borderRadius: '6px',
+                          marginBottom: '15px'
+                        }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={selectAll}
+                              onChange={toggleSelectAll}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            <span style={{ fontWeight: 'bold' }}>
+                              Select All ({filteredIssues.length})
+                            </span>
+                          </label>
+                          {selectedIssues.size > 0 && (
+                            <span style={{ color: '#6B7280' }}>
+                              {selectedIssues.size} issue{selectedIssues.size !== 1 ? 's' : ''} selected
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       {/* Issues List */}
                       {filteredIssues.length === 0 ? (
@@ -265,7 +349,7 @@ export default function AdminDevMonitor() {
                                 padding: '15px',
                                 border: '1px solid #E5E7EB',
                                 borderRadius: '8px',
-                                backgroundColor: issue.resolved ? '#F9FAFB' : '#FFFFFF',
+                                backgroundColor: selectedIssues.has(issue.id) ? '#EFF6FF' : (issue.resolved ? '#F9FAFB' : '#FFFFFF'),
                                 borderLeft: `4px solid ${
                                   issue.severity === 'critical' ? '#DC2626' :
                                   issue.severity === 'high' ? '#EA580C' :
@@ -274,7 +358,14 @@ export default function AdminDevMonitor() {
                               }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <div style={{ flex: 1 }}>
+                                <div style={{ display: 'flex', gap: '15px', flex: 1 }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedIssues.has(issue.id)}
+                                    onChange={() => toggleIssueSelection(issue.id)}
+                                    style={{ width: '18px', height: '18px', cursor: 'pointer', marginTop: '5px' }}
+                                  />
+                                  <div style={{ flex: 1 }}>
                                   <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
                                     <span style={{
                                       padding: '2px 8px',
@@ -336,6 +427,7 @@ export default function AdminDevMonitor() {
                                       </pre>
                                     </details>
                                   )}
+                                  </div>
                                 </div>
                                 <div>
                                   {!issue.resolved && (
