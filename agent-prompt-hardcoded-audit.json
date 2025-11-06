@@ -1,0 +1,391 @@
+{
+  "summary": {
+    "filesScanned": 116,
+    "totalFindings": 37,
+    "bySeverity": {
+      "CRITICAL": 30,
+      "CRITICAL_in_prompts": 9,
+      "HIGH": 2,
+      "HIGH_in_prompts": 0,
+      "MEDIUM": 5
+    }
+  },
+  "findings": {
+    "CRITICAL": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 8,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "* - List 1: 25%",
+        "matched": "List 1: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 9,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "* - List 2: 25%",
+        "matched": "List 2: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 10,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "* - List 3: 25% or 7.5% (depending on product)",
+        "matched": "List 3: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 11,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "* - List 4A: 7.5% or 15% or 25%",
+        "matched": "List 4A: 7.5%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 98,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "- List 1: 25% (first wave, early 2018)",
+        "matched": "List 1: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 99,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "- List 2: 25% (second wave, mid-2018)",
+        "matched": "List 2: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 100,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "- List 3: 25% or 7.5% (third wave, late 2018, rates vary)",
+        "matched": "List 3: 25%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 101,
+        "category": "Hardcoded Section 301 list rate",
+        "severity": "CRITICAL",
+        "why": "Section 301 list rates change monthly - hardcoding creates stale data",
+        "code": "- List 4A: 7.5% baseline, increased to 15% or 25% (2019+)",
+        "matched": "List 4A: 7.5%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 10,
+        "category": "Hardcoded Section 301 alternative rates",
+        "severity": "CRITICAL",
+        "why": "Section 301 alternative rates hardcoded - should query policy_tariffs_cache",
+        "code": "* - List 3: 25% or 7.5% (depending on product)",
+        "matched": "List 3: 25% or 7.5%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 11,
+        "category": "Hardcoded Section 301 alternative rates",
+        "severity": "CRITICAL",
+        "why": "Section 301 alternative rates hardcoded - should query policy_tariffs_cache",
+        "code": "* - List 4A: 7.5% or 15% or 25%",
+        "matched": "List 4A: 7.5% or 15%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 100,
+        "category": "Hardcoded Section 301 alternative rates",
+        "severity": "CRITICAL",
+        "why": "Section 301 alternative rates hardcoded - should query policy_tariffs_cache",
+        "code": "- List 3: 25% or 7.5% (third wave, late 2018, rates vary)",
+        "matched": "List 3: 25% or 7.5%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 457,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "console.log('🔍 US rate cache MISS - researching current policy...');",
+        "matched": "current policy",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 624,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "- Current rates: 7.5%, 25%, or 100%?",
+        "matched": "Current rates",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 670,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "\"notes\": \"Brief explanation of current policy status\"",
+        "matched": "current policy",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+        "line": 774,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "stability = 'May not reflect current policy';",
+        "matched": "current policy",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\usmca-threshold-agent.js",
+        "line": 5,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "* Purpose: Replace static database thresholds with AI-verified current policy",
+        "matched": "current policy",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\usmca-threshold-agent.js",
+        "line": 9,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "* 1. Query AI for current threshold based on HS code",
+        "matched": "current threshold",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\usmca-threshold-agent.js",
+        "line": 66,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "// STEP 2: Cache miss or stale - query AI for current threshold",
+        "matched": "current threshold",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+        "line": 665,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "stalenessWarning = `⚠️ WARNING: Tariff data is ${daysOld} days old (last updated: ${lastUpdated?.toISOString().split('T')[0]}). Consider AI verification for current rates.`;",
+        "matched": "current rates",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\hts-lookup.js",
+        "line": 119,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "* @param {Array} components - Array of components with HS codes and current rates",
+        "matched": "current rates",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 8,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "* Tier 1: OpenRouter AI (primary, $0.02/request, current policy)",
+        "matched": "current policy",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 402,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "Research thoroughly and return accurate current rates.`;",
+        "matched": "current rates",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\volatility-manager.js",
+        "line": 280,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "? 'Use AI research for current rates'",
+        "matched": "current rates",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 91,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "- Section 301: If China origin → US destination, research current rate for this HS code",
+        "matched": "current rate",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 100,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "IMPORTANT: Research actual current rates for each component's HS code",
+        "matched": "current rates",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 104,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "- Section 232: If steel/aluminum, research CURRENT rate",
+        "matched": "CURRENT rate",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 113,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "\"section_301\": <China to US? Current policy rate or 0>,",
+        "matched": "Current policy",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 114,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "\"section_232\": <Steel/aluminum? Current rate or 0>,",
+        "matched": "Current rate",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+        "line": 662,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "// This ensures AI gets CURRENT rates instead of guessing from training data",
+        "matched": "CURRENT rates",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\__DEPRECATED__research\\live-web-tariff-lookup.js",
+        "line": 71,
+        "category": "Temporal claim without verification",
+        "severity": "CRITICAL",
+        "why": "Claims data is \"current\" but has no mechanism to verify freshness",
+        "code": "`${productDescription} import duty ${country} current rates`,",
+        "matched": "current rates",
+        "in_prompt": true
+      }
+    ],
+    "HIGH": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+        "line": 166,
+        "category": "Hardcoded fallback assumption",
+        "severity": "HIGH",
+        "why": "Default assumption in prompt - should error instead of silent fallback",
+        "code": "fallback_warning: '⚠️ Unable to determine Section 301 rate - assuming 0% but Chinese goods typically incur Section 301 tariffs (check USTR for specific HS code)'",
+        "matched": "assuming 0%",
+        "in_prompt": false
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\crisis-calculator.js",
+        "line": 239,
+        "category": "Hardcoded fallback assumption",
+        "severity": "HIGH",
+        "why": "Default assumption in prompt - should error instead of silent fallback",
+        "code": "payback_months: Math.round(section301Impact.annual_burden / (tradeVolume * 0.02)) // Assuming 2% cost increase",
+        "matched": "Assuming 2%",
+        "in_prompt": false
+      }
+    ],
+    "MEDIUM": [
+      {
+        "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+        "line": 394,
+        "category": "Example with hardcoded percentage",
+        "severity": "MEDIUM",
+        "why": "AI might learn from examples and use hardcoded values as defaults",
+        "code": "- Example: [\"Base MFN 0%\", \"Section 301 +50%\", \"IEEPA +20%\"] → mfn_rate = 70",
+        "matched": "Example: [\"Base MFN 0%",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\dashboard-data.js",
+        "line": 361,
+        "category": "Example with hardcoded percentage",
+        "severity": "MEDIUM",
+        "why": "AI might learn from examples and use hardcoded values as defaults",
+        "code": "// Example: \"All goods FROM China face 25% tariff\" (blanket tariff)",
+        "matched": "Example: \"All goods FROM China face 25%",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-portfolio-briefing.js",
+        "line": 365,
+        "category": "Example with hardcoded percentage",
+        "severity": "MEDIUM",
+        "why": "AI might learn from examples and use hardcoded values as defaults",
+        "code": "\"business_overview\": \"Write 3-4 sentences painting their supply chain picture. State percentages by country, give context on what 2026 means for them. Example: 'Your electronics assembly relies on a three-country supply chain: 55% from Mexico (power supplies, housing, connectors), 35% from China (microprocessors), and 10% from Canada (PCBs). This creates an interesting position heading into the USMCA 2026 renegotiation. Your Mexico concentration gives you a strong USMCA foundation, but your Chinese microprocessor sourcing sits in the crosshairs of cumulation rule discussions.'\",",
+        "matched": "Example: 'Your electronics assembly relies on a three-country supply chain: 55%",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-portfolio-briefing.js",
+        "line": 367,
+        "category": "Example with hardcoded percentage",
+        "severity": "MEDIUM",
+        "why": "AI might learn from examples and use hardcoded values as defaults",
+        "code": "\"component_analysis\": \"Write 2-3 flowing paragraphs analyzing their components as a narrative (NOT listing components one by one). Group components by strategic significance. ${matchedAlerts.length > 0 ? 'Weave alert context naturally into the narrative (e.g., \\\"Two recent alerts signal this pressure: [titles]\\\"). Don\\'t just say \\\"Alert detected.\\\"' : 'Focus on 2026 renegotiation context and what rule changes would mean.'} Example: 'The microprocessor component presents your most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50% of costs—anchor your USMCA qualification. They're well-positioned for any agreement strengthening, though they do concentrate your supply chain in a single country.'\",",
+        "matched": "Example: 'The microprocessor component presents your most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50%",
+        "in_prompt": true
+      },
+      {
+        "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-portfolio-briefing.js",
+        "line": 369,
+        "category": "Example with hardcoded percentage",
+        "severity": "MEDIUM",
+        "why": "AI might learn from examples and use hardcoded values as defaults",
+        "code": "\"strategic_trade_offs\": \"Write 2-3 paragraphs presenting genuine strategic choices with no obvious answer. Frame as 'choosing between futures.' Example: 'You're essentially choosing between two futures. Continue with Chinese microprocessors and accept 2026 rule uncertainty, or begin qualifying alternative suppliers—knowing that transition takes 12-18 months and increases component costs. There's no obviously correct answer because the actual 2026 rules haven't been proposed yet. Your Mexico concentration (55%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce this risk, but your current suppliers have established quality and logistics. The timing matters—qualification of alternative suppliers requires substantial lead time.'\",",
+        "matched": "Example: 'You're essentially choosing between two futures. Continue with Chinese microprocessors and accept 2026 rule uncertainty, or begin qualifying alternative suppliers—knowing that transition takes 12-18 months and increases component costs. There's no obviously correct answer because the actual 2026 rules haven't been proposed yet. Your Mexico concentration (55%",
+        "in_prompt": true
+      }
+    ]
+  }
+}
