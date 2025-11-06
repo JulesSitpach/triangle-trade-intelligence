@@ -157,6 +157,42 @@ export default function AdminDevMonitor() {
     }
   }
 
+  // Clear all resolved issues (delete from database)
+  async function clearResolvedIssues() {
+    const resolvedCount = devIssues.filter(i => i.resolved).length;
+
+    if (resolvedCount === 0) {
+      alert('No resolved issues to clear');
+      return;
+    }
+
+    const confirmed = confirm(
+      `Delete ${resolvedCount} resolved issue${resolvedCount > 1 ? 's' : ''} from the database?\n\n` +
+      `This action cannot be undone. The issues will be permanently deleted.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch('/api/admin/clear-resolved-issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`✅ Successfully deleted ${result.deleted_count} resolved issues`);
+        await loadDashboardData();
+      } else {
+        alert(`❌ Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Failed to clear resolved issues:', error);
+      alert('❌ Failed to clear resolved issues. Check console for details.');
+    }
+  }
+
   // Filter issues
   const filteredIssues = devIssues.filter(issue => {
     if (severityFilter !== 'all' && issue.severity !== severityFilter) return false;
@@ -290,6 +326,15 @@ export default function AdminDevMonitor() {
                               style={{ padding: '8px 15px' }}
                             >
                               ✓ Resolve Selected ({selectedIssues.size})
+                            </button>
+                          )}
+                          {devIssues.filter(i => i.resolved).length > 0 && (
+                            <button
+                              onClick={clearResolvedIssues}
+                              className="btn-secondary"
+                              style={{ padding: '8px 15px', backgroundColor: '#dc3545', color: 'white' }}
+                            >
+                              🧹 Clear Resolved ({devIssues.filter(i => i.resolved).length})
                             </button>
                           )}
                           <button onClick={loadDashboardData} className="btn-secondary">
