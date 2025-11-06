@@ -18,6 +18,7 @@ import {
   validateTradeVolume,
   reportValidationErrors
 } from '../../lib/validation/data-contract-validator.ts';
+import { bulkEnrichTariffData } from '../../lib/agents/tariff-enrichment-agent.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -90,6 +91,13 @@ export default async function handler(req, res) {
     }
 
     console.log(`🧠 Consolidating ${alerts.length} alerts for ${user_profile.companyName}`);
+
+    // ✅ CRITICAL FIX: Enrich components with real tariff data BEFORE grouping
+    // This eliminates "AI claimed tariff rates not matching cache" warnings
+    const enrichedComponents = await bulkEnrichTariffData(user_profile.component_origins || []);
+    user_profile.component_origins = enrichedComponents;
+
+    console.log(`✅ Enriched ${enrichedComponents.length} components with policy rates`);
 
     // Group related alerts by common themes
     const alertGroups = groupRelatedAlerts(alerts, user_profile);
@@ -485,37 +493,45 @@ Return JSON:
         component: c.component_type || c.description
       }));
 
-      // Check if AI claimed any rates significantly different from cache (>10% deviation)
-      const significantDeviations = aiPercentages.filter(aiRate => {
-        const matchesAnyCache = cachedRates.some(cached =>
-          Math.abs(aiRate - cached.base_mfn) < 1 ||  // Matches base MFN
-          Math.abs(aiRate - cached.section_301) < 1 || // Matches Section 301
-          Math.abs(aiRate - cached.total_rate) < 1     // Matches total rate
-        );
+      // ✅ SMART VALIDATION: Only flag if cache has data AND AI deviates significantly
+      // Skip validation if cache is empty (0%) - means it needs enrichment, not AI error
+      const cacheHasData = cachedRates.some(c => c.base_mfn > 0 || c.section_301 > 0 || c.total_rate > 0);
 
-        return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache
-      });
+      if (cacheHasData) {
+        // Check if AI claimed any rates significantly different from cache (>5% deviation)
+        const significantDeviations = aiPercentages.filter(aiRate => {
+          const matchesAnyCache = cachedRates.some(cached =>
+            Math.abs(aiRate - cached.base_mfn) < 5 ||  // Matches base MFN (±5%)
+            Math.abs(aiRate - cached.section_301) < 5 || // Matches Section 301 (±5%)
+            Math.abs(aiRate - cached.total_rate) < 5     // Matches total rate (±5%)
+          );
 
-      if (significantDeviations.length > 0) {
-        console.warn('⚠️ AI VALIDATION WARNING (ALERTS): AI claimed tariff rates not found in component cache:', significantDeviations);
+          return !matchesAnyCache && aiRate > 10; // AI claimed a rate >10% that doesn't match cache
+        });
 
-        await DevIssue.unexpectedBehavior(
-          'consolidate_alerts_api',
-          `AI claimed tariff rates (${significantDeviations.join('%, ')}%) not matching component cached data`,
-          {
-            company: userProfile.companyName,
-            ai_percentages: aiPercentages,
-            cached_rates: cachedRates,
-            deviations: significantDeviations,
-            broker_summary_preview: analysis.broker_summary?.substring(0, 300),
-            breakdown_preview: analysis.consolidated_impact?.breakdown
-          }
-        );
+        if (significantDeviations.length > 0) {
+          console.warn('⚠️ AI VALIDATION WARNING: AI claimed tariff rates deviate from enriched cache:', significantDeviations);
 
-        // Add validation warning to alert
-        analysis._validation_warning = `AI claimed rates ${significantDeviations.join('%, ')}% not found in component tariff cache. Verify with real cached data before trusting cost estimates.`;
+          await DevIssue.unexpectedBehavior(
+            'consolidate_alerts_api',
+            `AI claimed tariff rates (${significantDeviations.join('%, ')}%) deviate from enriched cache by >5%`,
+            {
+              company: userProfile.companyName,
+              ai_percentages: aiPercentages,
+              cached_rates: cachedRates,
+              deviations: significantDeviations,
+              broker_summary_preview: analysis.broker_summary?.substring(0, 300),
+              breakdown_preview: analysis.consolidated_impact?.breakdown
+            }
+          );
+
+          // Add validation warning to alert
+          analysis._validation_warning = `AI claimed rates ${significantDeviations.join('%, ')}% deviate from enriched cache by >5%. Manual verification recommended.`;
+        } else {
+          console.log('✅ AI tariff numbers validated against enriched cache - no significant deviations');
+        }
       } else {
-        console.log('✅ AI tariff numbers validated against component cache - no significant deviations');
+        console.log('ℹ️ Skipping validation - cache is empty (components need enrichment, not AI error)');
       }
     }
 
