@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import TriangleLayout from '../components/TriangleLayout';
 import AuthorizationStep from '../components/workflow/AuthorizationStep';
 import EditableCertificatePreview from '../components/workflow/EditableCertificatePreview';
@@ -234,6 +235,7 @@ export default function USMCACertificateCompletion() {
 
     // Load data from localStorage
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ✅ NEW: Restore certificate edits from localStorage on page load
@@ -710,9 +712,9 @@ export default function USMCACertificateCompletion() {
                   <button onClick={() => setShowUpgradeModal(false)} className="btn-secondary">
                     Close
                   </button>
-                  <a href="/pricing" className="btn-primary">
+                  <Link href="/pricing" className="btn-primary">
                     View Plans &amp; Upgrade
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

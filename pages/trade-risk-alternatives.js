@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import TriangleLayout from '../components/TriangleLayout';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import SaveDataConsentModal from '../components/shared/SaveDataConsentModal';
@@ -1871,9 +1872,9 @@ export default function TradeRiskAlternatives() {
                     <div className="text-body">
                       Strategic Analysis requires your USMCA qualification data. Please complete the USMCA workflow first to generate your strategic intelligence report.
                       <br /><br />
-                      <a href="/usmca-workflow" className="btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>
+                      <Link href="/usmca-workflow" className="btn-primary" style={{ display: 'inline-block', marginTop: '0.5rem' }}>
                         🚀 Start USMCA Workflow
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -1900,9 +1901,9 @@ export default function TradeRiskAlternatives() {
 
                     {/* Show upgrade CTA when limit reached */}
                     {briefingUsageStats.limit_reached && (
-                      <a href="/pricing" className="btn-primary" style={{ textDecoration: 'none' }}>
+                      <Link href="/pricing" className="btn-primary" style={{ textDecoration: 'none' }}>
                         ⬆️ Upgrade for More Briefings
-                      </a>
+                      </Link>
                     )}
                   </div>
 
