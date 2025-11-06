@@ -17,10 +17,10 @@ export default function HomePage() {
     <>
       <Head>
         <title>Triangle Trade Intelligence | AI-Powered USMCA Compliance Platform</title>
-        <meta name="description" content="AI-powered USMCA compliance software for importers, exporters, and producers. Automated certificate generation, real-time tariff alerts, and HS code classification. $99/month." />
+        <meta name="description" content="AI-powered USMCA compliance software for importers, exporters, and producers. Automated certificate generation, daily tariff policy monitoring, and HS code classification. $99/month." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:title" content="Triangle Trade Intelligence | AI-Powered USMCA Compliance" />
-        <meta property="og:description" content="AI-powered USMCA compliance software with automated certificate generation and real-time tariff alerts for importers, exporters, and producers." />
+        <meta property="og:description" content="AI-powered USMCA compliance software with automated certificate generation and daily tariff policy monitoring for importers, exporters, and producers." />
 
         {/* Structured Data (JSON-LD) for SEO */}
         <script
@@ -59,7 +59,7 @@ export default function HomePage() {
                 "AI-Powered USMCA Qualification Analysis",
                 "Automated Certificate of Origin Generation",
                 "AI HS Code Classification",
-                "Real-Time Tariff Alerts",
+                "Daily Tariff Policy Monitoring",
                 "Supply Chain Risk Monitoring"
               ]
             })
@@ -143,7 +143,7 @@ export default function HomePage() {
           </h1>
 
           <p className="hero-description-text" style={{marginTop: '2rem'}}>
-            Are you paying 6-25% tariffs when you could pay <strong>0%</strong>?<br/>
+            Are you paying tariffs when you could qualify for USMCA duty-free status?<br/>
             Find out if you qualify in 5 minutes. Get your certificate. Stay protected.
           </p>
           
@@ -196,7 +196,7 @@ export default function HomePage() {
               </ul>
             </div>
 
-            {/* Real-Time Alerts */}
+            {/* Daily Policy Monitoring */}
             <div className="card" style={{background: 'rgba(255, 255, 255, 0.95)', padding: '2rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
               <div style={{fontSize: '3rem', marginBottom: '1rem'}}>🚨</div>
               <h3 className="card-title" style={{color: '#1e3a8a', fontSize: '1.5rem', marginBottom: '1rem'}}>
@@ -206,7 +206,7 @@ export default function HomePage() {
                 Platform monitors Federal Register, USTR, and government sources 24/7. Get automated alerts when tariff changes affect your products.
               </p>
               <ul style={{marginTop: '1rem', paddingLeft: '1.5rem', color: '#475569'}}>
-                <li>Real-time tariff change detection</li>
+                <li>Daily tariff change monitoring (updates within 24 hours)</li>
                 <li>Section 301/232 tracking</li>
                 <li>Daily email digest of relevant changes</li>
               </ul>
@@ -310,7 +310,7 @@ export default function HomePage() {
                   Get immediate qualification status with detailed component breakdown, tariff savings calculations, and regional value content analysis. No manual calculations required.
                 </p>
                 <ul style={{paddingLeft: '1.5rem', color: '#475569', fontSize: '1rem', lineHeight: '1.8'}}>
-                  <li>Real-time qualification status (Qualified/Not Qualified/Needs Review)</li>
+                  <li>Qualification status (Qualified/Not Qualified/Needs Review)</li>
                   <li>Component-by-component tariff rate analysis</li>
                   <li>Annual savings projections</li>
                   <li>MFN vs USMCA rate comparisons</li>
@@ -354,7 +354,7 @@ export default function HomePage() {
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'center'}}>
               <div>
                 <h3 style={{fontSize: '1.75rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1rem'}}>
-                  Real-Time Crisis Alerts & Policy Monitoring
+                  Crisis Alerts & Daily Policy Monitoring
                 </h3>
                 <p style={{fontSize: '1.125rem', color: '#475569', lineHeight: '1.7', marginBottom: '1rem'}}>
                   Platform monitors Federal Register, USTR, and government sources 24/7. Get component-specific alerts when tariff changes affect your products.
@@ -452,9 +452,9 @@ export default function HomePage() {
           <div className="grid-3-cols">
             <div className="content-card" style={{textAlign: 'center'}}>
               <div className="content-card-icon" style={{fontSize: '3rem', marginBottom: '1rem'}}>🚨</div>
-              <h3 className="content-card-title">Real-Time Tariff Alerts</h3>
+              <h3 className="content-card-title">Daily Tariff Alerts</h3>
               <p className="content-card-description">
-                Know immediately when tariffs change on your products.
+                Daily digest when tariffs change on your products (updates within 24 hours).
               </p>
             </div>
 

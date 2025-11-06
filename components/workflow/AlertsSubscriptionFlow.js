@@ -131,7 +131,7 @@ export default function AlertsSubscriptionFlow({
           <div className="alert-content">
             <div className="alert-title">Crisis Escalation Warning</div>
             <div className="text-body">
-              Tariff announcements are increasing 300% month-over-month. Companies without 
+              Tariff announcements are accelerating. Companies without
               monitoring are discovering changes weeks after implementation, losing thousands in preventable costs.
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function AlertsSubscriptionFlow({
             <ul className="pricing-features">
               <li className="pricing-feature">
                 <CheckIcon className="icon-sm status-success" />
-                <span className="small-text">Real-time alerts for your specific HS codes</span>
+                <span className="small-text">Daily alert digest for your specific HS codes</span>
               </li>
               <li className="pricing-feature">
                 <CheckIcon className="icon-sm status-success" />
@@ -279,7 +279,7 @@ export default function AlertsSubscriptionFlow({
               <div className="alert-title">Your 7-Day Free Trial Includes:</div>
               <ul className="small-text element-spacing">
                 <li>• Immediate access to personalized crisis dashboard</li>
-                <li>• Real-time monitoring setup for your HS codes</li>
+                <li>• Daily monitoring setup for your HS codes</li>
                 <li>• First week of alerts and analysis</li>
                 <li>• Full platform features without restrictions</li>
               </ul>

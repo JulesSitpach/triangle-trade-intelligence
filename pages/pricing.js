@@ -147,7 +147,7 @@ export default function Pricing() {
         '30 portfolio briefings/month',
         '10 components per workflow',
         'Unlimited certificate downloads',
-        'Real-time crisis alerts',
+        'Daily crisis alert digest',
         'AI HS code classification',
         'Email alert notifications'
       ],
@@ -168,7 +168,7 @@ export default function Pricing() {
         '150 portfolio briefings/month',
         '15 components per workflow',
         'Unlimited certificate downloads',
-        'Real-time crisis alerts',
+        'Daily crisis alert digest',
         'AI HS code classification',
         'Email alert notifications'
       ],
@@ -189,7 +189,7 @@ export default function Pricing() {
         '750 portfolio briefings/month',
         '20 components per workflow',
         'Unlimited certificate downloads',
-        'Real-time crisis alerts',
+        'Daily crisis alert digest',
         'AI HS code classification',
         'Email alert notifications'
       ],
@@ -203,7 +203,7 @@ export default function Pricing() {
     <>
       <Head>
         <title>USMCA Compliance Platform Pricing | Affordable Plans for Importers, Exporters & Producers</title>
-        <meta name="description" content="Affordable USMCA compliance for importers, exporters, and producers. Plans starting at $99/month with AI-powered automated analysis. Save $10k-20k/year in time." />
+        <meta name="description" content="Affordable USMCA compliance for importers, exporters, and producers. Plans starting at $99/month with AI-powered automated analysis. Reduce compliance costs with self-serve certificate generation." />
         <meta name="keywords" content="USMCA compliance pricing, trade compliance software cost, HS code classification pricing, Small & Medium business trade platform, trade consulting services" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -274,7 +274,7 @@ export default function Pricing() {
           </h2>
 
           <p className="hero-description-text">
-            Self-serve USMCA compliance platform for businesses. Generate certificates, monitor tariff policy changes, and calculate savings. Plans start at $99/month with AI-powered analysis.
+            Self-serve USMCA compliance platform for businesses. Generate certificates, monitor tariff policy changes, and analyze qualification. Plans start at $99/month with AI-powered analysis.
           </p>
           
           <div className="hero-button-group">
@@ -317,7 +317,7 @@ export default function Pricing() {
           <div className="section-header">
             <h2 className="section-header-title">Subscription Plans</h2>
             <p className="section-header-subtitle">
-              USMCA qualification analysis, HS code classification, certificate generation, and real-time policy alerts
+              USMCA qualification analysis, HS code classification, certificate generation, and daily policy alert monitoring
             </p>
 
             {/* Billing Period Toggle */}
@@ -461,7 +461,7 @@ export default function Pricing() {
           <div className="section-header">
             <h2 className="section-header-title">🚨 What You Get: Trade Risk Alerts</h2>
             <p className="section-header-subtitle">
-              Real-time monitoring with AI-powered strategic analysis
+              Daily monitoring with AI-powered strategic analysis (updates within 24 hours)
             </p>
           </div>
 
@@ -493,7 +493,7 @@ export default function Pricing() {
                 <li><strong>Component-level matching</strong> - Alerts show exactly which components are affected by tariff changes</li>
                 <li><strong>Severity-based color coding</strong> - Critical (red), High (orange), Medium (yellow), Low (blue)</li>
                 <li><strong>AI-powered strategic briefing</strong> - Portfolio-level risk analysis with USMCA 2026 renegotiation context</li>
-                <li><strong>Real-time monitoring</strong> - Platform watches Federal Register, USTR, and government sources 24/7</li>
+                <li><strong>Daily monitoring</strong> - Platform watches Federal Register, USTR, and government sources 24/7, sends daily digest</li>
                 <li><strong>Email notifications</strong> - Daily digest of relevant policy changes affecting your products</li>
                 <li><strong>Actionable recommendations</strong> - AI suggests sourcing alternatives and compliance strategies</li>
               </ul>
@@ -603,7 +603,7 @@ export default function Pricing() {
             <div className="content-card">
               <div className="content-card-icon">2</div>
               <h3 className="content-card-title">Starter - $99/month</h3>
-              <p className="content-card-description">15 workflows + 15 executive summaries + 30 portfolio briefings per month. Unlimited certificates. Real-time alerts. No commitment.</p>
+              <p className="content-card-description">15 workflows + 15 executive summaries + 30 portfolio briefings per month. Unlimited certificates. Daily alert digest. No commitment.</p>
             </div>
 
             <div className="content-card">
@@ -621,7 +621,7 @@ export default function Pricing() {
             <div className="content-card">
               <div className="content-card-icon">📊</div>
               <h3 className="content-card-title">All Plans Include</h3>
-              <p className="content-card-description">AI HS code classification, RVC calculations, USMCA qualification checks, certificate generation (Form D), real-time policy alerts, email notifications</p>
+              <p className="content-card-description">AI HS code classification, RVC calculations, USMCA qualification checks, certificate generation (Form D), daily policy alert digest, email notifications</p>
             </div>
 
             <div className="content-card">
