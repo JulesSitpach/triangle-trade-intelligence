@@ -191,38 +191,67 @@ export default function USMCAQualification({ results }) {
                 </p>
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
-                  Section 301 Tariff: +7.5% to +25%
-                </strong>
-                <p style={{ margin: 0, color: '#78350f' }}>
-                  Additional tariffs on Chinese imports, varying by product category. Most semiconductors: 25%. Rate depends on USTR list assignment.
-                </p>
-              </div>
+              {/* ✅ DYNAMIC: Show actual AI-calculated rates instead of hardcoded ranges */}
+              {(() => {
+                // Find first China component to get actual rates
+                const chinaComponent = (results.component_origins || results.components || []).find(c =>
+                  c.origin_country === 'CN' || c.origin_country === 'China'
+                );
 
-              <div style={{ marginBottom: '1rem' }}>
-                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
-                  Reciprocal Tariffs: +0% to +25%
-                </strong>
-                <p style={{ margin: 0, color: '#78350f' }}>
-                  New 2025 policy imposing additional tariffs on specific Chinese products. Varies by HS code and can change with 30-day notice.
-                </p>
-              </div>
+                if (!chinaComponent) return null;
 
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: '#fef3c7',
-                borderRadius: '4px',
-                border: '1px solid #f59e0b',
-                marginBottom: '1rem'
-              }}>
-                <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
-                  Typical Total: 25% to 50%
-                </strong>
-                <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.8125rem' }}>
-                  Rates stack: Base (0%) + Section 301 (25%) + Reciprocal (0-25%) = 25-50% total
-                </p>
-              </div>
+                const section301 = chinaComponent.section_301 || 0;
+                const reciprocal = chinaComponent.ieepa_reciprocal || 0;
+                const baseMfn = chinaComponent.base_mfn_rate || chinaComponent.mfn_rate || 0;
+                const totalRate = chinaComponent.total_rate || (baseMfn + section301 + reciprocal);
+                const verifiedDate = chinaComponent.verified_date || chinaComponent.last_verified;
+                const expiresAt = chinaComponent.expires_at || chinaComponent.cache_expires_at;
+
+                return (
+                  <>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                        Section 301 Tariff: +{(section301 * 100).toFixed(1)}%
+                        {verifiedDate && <span style={{ color: '#78350f', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(verified {new Date(verifiedDate).toLocaleDateString()})</span>}
+                      </strong>
+                      <p style={{ margin: 0, color: '#78350f' }}>
+                        Additional tariffs on Chinese imports for your specific HS code. This rate is AI-calculated based on current USTR lists.
+                      </p>
+                    </div>
+
+                    {reciprocal > 0 && (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                          Reciprocal Tariffs: +{(reciprocal * 100).toFixed(1)}%
+                        </strong>
+                        <p style={{ margin: 0, color: '#78350f' }}>
+                          Additional tariffs on specific Chinese products. Can change with 30-day notice.
+                        </p>
+                      </div>
+                    )}
+
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#fef3c7',
+                      borderRadius: '4px',
+                      border: '1px solid #f59e0b',
+                      marginBottom: '1rem'
+                    }}>
+                      <strong style={{ color: '#92400e', fontSize: '0.9375rem' }}>
+                        Total Current Rate: {(totalRate * 100).toFixed(1)}%
+                      </strong>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.8125rem' }}>
+                        Rates stack: Base ({(baseMfn * 100).toFixed(1)}%) + Section 301 ({(section301 * 100).toFixed(1)}%) {reciprocal > 0 ? `+ Reciprocal (${(reciprocal * 100).toFixed(1)}%)` : ''} = {(totalRate * 100).toFixed(1)}% total
+                      </p>
+                      {expiresAt && new Date(expiresAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#dc2626', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                          ⚠️ Rate expires {new Date(expiresAt).toLocaleDateString()} - reverify before shipment
+                        </p>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
 
               <div style={{
                 padding: '0.75rem',
