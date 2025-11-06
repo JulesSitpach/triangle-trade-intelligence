@@ -10,6 +10,7 @@ import { serialize } from 'cookie';
 import crypto from 'crypto';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
+import { logger } from '../../../lib/utils/enhanced-production-logger.js';
 
 // Admin client for user profile lookup
 const supabaseAdmin = createClient(
@@ -54,16 +55,10 @@ export default async function handler(req, res) {
   try {
     await applyRateLimit(authLimiter)(req, res);
   } catch (error) {
-    console.log('🛡️ Rate limit exceeded for login attempt');
-    await logDevIssue({
-      type: 'api_error',
-      severity: 'medium',
+    logger.security('Rate limit exceeded for login attempt', {
       component: 'auth_api',
-      message: 'Rate limit exceeded for login',
-      data: {
-        endpoint: '/api/auth/login',
-        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
-      }
+      endpoint: '/api/auth/login',
+      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
     });
     return res.status(429).json({
       success: false,
@@ -91,7 +86,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('🔐 Login attempt:', email);
+    logger.info('Login attempt', { component: 'auth_api', email });
     const startTime = Date.now();
 
     // Step 1: Verify password using Supabase Auth
@@ -124,27 +119,20 @@ export default async function handler(req, res) {
 
     // Now check results and return appropriate error
     if (authError || !authData.user) {
-      console.log('❌ Authentication failed:', email, authError?.message);
-      await logDevIssue({
-        type: 'api_error',
-        severity: 'high',
+      logger.security('Failed login attempt - invalid credentials', {
         component: 'auth_api',
-        message: 'Failed login attempt - invalid credentials',
-        data: {
-          endpoint: '/api/auth/login',
-          email,
-          errorMessage: authError?.message,
-          attemptedAt: new Date().toISOString()
-        }
+        endpoint: '/api/auth/login',
+        email,
+        errorMessage: authError?.message
       });
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    console.log('✅ Password verified for:', email);
+    logger.info('Password verified', { component: 'auth_api', email });
 
     if (profileError || !user) {
-      console.log('❌ User profile not found:', email);
-      await DevIssue.missingData('auth_api', 'user_profile', {
+      logger.error('User profile not found after successful auth', {
+        component: 'auth_api',
         endpoint: '/api/auth/login',
         email,
         authUserId: authData.user.id,
@@ -180,7 +168,12 @@ export default async function handler(req, res) {
       path: '/'
     }));
 
-    console.log('✅ Login successful:', email, 'Admin:', sessionData.isAdmin);
+    logger.sales('Successful login', {
+      component: 'auth_api',
+      email,
+      isAdmin: sessionData.isAdmin,
+      subscription_tier: user.subscription_tier
+    });
 
     // Return user data
     return res.status(200).json({
@@ -197,10 +190,12 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('💥 Login error:', error);
-    await DevIssue.apiError('auth_api', '/api/auth/login', error, {
+    logger.error('Login error', {
+      component: 'auth_api',
+      endpoint: '/api/auth/login',
       email: req.body?.email,
-      attemptedAt: new Date().toISOString()
+      error: error.message,
+      stack: error.stack
     });
     return res.status(500).json({ success: false, error: 'Login failed' });
   }

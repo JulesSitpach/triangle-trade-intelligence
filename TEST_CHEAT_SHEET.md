@@ -580,6 +580,30 @@ Test scenarios that deliver REAL business value by validating:
    - MFN Rate: 1.8% | USMCA: 0% = Savings: 1.8%
    - Impact: Minor savings
 
+**Importer/Exporter/Producer Information**
+
+#### Exporter (Section 3 of Certificate)
+**Company Name**: TechFlow Electronics Corp (Auto-filled from Company Profile)
+**Address**: 1847 Technology Blvd, Austin TX 78759 (Auto-filled from Company Profile)
+**Country**: US (Auto-filled from Company Profile)
+**Tax ID**: 12-3456789 (Auto-filled from Company Profile)
+**Phone**: (512) 555-0147 (Auto-filled from Company Profile)
+**Email**: maria.rodriguez@techflow.com (Auto-filled from Company Profile)
+*Note: Check "Exporter is my company" checkbox to auto-fill*
+
+#### Importer (Section 5 of Certificate)
+**Company Name**: BestBuy Distribution Center Austin
+**Address**: 9800 Metric Blvd, Austin TX 78758
+**Country**: US
+**Tax ID**: 27-1564014
+**Phone**: (512) 555-8900
+**Email**: procurement@bestbuy.com
+*Note: This is YOUR CUSTOMER (the buyer)*
+
+#### Producer (Section 4 of Certificate)
+**Status**: Same as Exporter (check "Producer is same as Exporter" checkbox)
+*Note: If different, provide full details like Exporter section*
+
 **Expected Business Intelligence Output:**
 - ✅ **Qualified at 72.5% RVC** (exceeds 65% threshold)
 - **Annual USMCA savings: $4,080** (on non-301 components)
@@ -636,6 +660,30 @@ Test scenarios that deliver REAL business value by validating:
    - MFN Rate: 1.2% | USMCA: 0% = Savings: 1.2%
    - Annual savings: $2,000 × 0.012 = $24/month
 
+**Importer/Exporter/Producer Information**
+
+#### Exporter (Section 3 of Certificate)
+**Company Name**: Border Dynamics Manufacturing (Auto-filled from Company Profile)
+**Address**: 2450 Industrial Parkway, Detroit MI 48201 (Auto-filled from Company Profile)
+**Country**: US (Auto-filled from Company Profile)
+**Tax ID**: 38-2847561 (Auto-filled from Company Profile)
+**Phone**: (313) 555-0289 (Auto-filled from Company Profile)
+**Email**: supply.chain@borderdynamics.com (Auto-filled from Company Profile)
+*Note: Check "Exporter is my company" checkbox to auto-fill*
+
+#### Importer (Section 5 of Certificate)
+**Company Name**: Ford Motor Company - Assembly Division
+**Address**: 1 American Rd, Dearborn MI 48126
+**Country**: US
+**Tax ID**: 38-0549190
+**Phone**: (313) 555-3700
+**Email**: automotive.procurement@ford.com
+*Note: This is YOUR CUSTOMER (the buyer)*
+
+#### Producer (Section 4 of Certificate)
+**Status**: Same as Exporter (check "Producer is same as Exporter" checkbox)
+*Note: If different, provide full details like Exporter section*
+
 **Expected Business Intelligence Output:**
 - ✅ **Highly qualified at 87.5% RVC** (exceeds 75% threshold by 12.5%)
 - **Monthly USMCA savings: $655** (100% of components USMCA-eligible)
@@ -690,6 +738,30 @@ Test scenarios that deliver REAL business value by validating:
 
 5. **Assembly Labor & Final Assembly** - Mexico, 5%, HS: 8515.80.00
    - No tariff on labor, counts toward RVC
+
+**Importer/Exporter/Producer Information**
+
+#### Exporter (Section 3 of Certificate)
+**Company Name**: Precision Tools Ltd (Auto-filled from Company Profile)
+**Address**: 575 Manufacturing Dr, Houston TX 77002 (Auto-filled from Company Profile)
+**Country**: US (Auto-filled from Company Profile)
+**Tax ID**: 74-5821463 (Auto-filled from Company Profile)
+**Phone**: (713) 555-0192 (Auto-filled from Company Profile)
+**Email**: operations@precisiontools.com (Auto-filled from Company Profile)
+*Note: Check "Exporter is my company" checkbox to auto-fill*
+
+#### Importer (Section 5 of Certificate)
+**Company Name**: Caterpillar Inc - Equipment Division
+**Address**: 510 Lake Cook Rd, Deerfield IL 60015
+**Country**: US
+**Tax ID**: 37-0602744
+**Phone**: (309) 555-2000
+**Email**: machinery.sourcing@cat.com
+*Note: This is YOUR CUSTOMER (the buyer)*
+
+#### Producer (Section 4 of Certificate)
+**Status**: Same as Exporter (check "Producer is same as Exporter" checkbox)
+*Note: If different, provide full details like Exporter section*
 
 **Expected Business Intelligence Output:**
 - ✅ **Marginally qualified at 62.5% RVC** (EXACTLY meets threshold, zero safety margin)
@@ -798,6 +870,30 @@ Test scenarios that deliver REAL business value by validating:
 - Achieve USMCA qualification through contract manufacturing
 - Timeline: 3-4 months faster than owning facility
 - Cost: Profit-sharing model (typically 15-20% margin vs ownership)
+
+**Importer/Exporter/Producer Information**
+
+#### Exporter (Section 3 of Certificate)
+**Company Name**: Global Imports Distribution (Auto-filled from Company Profile)
+**Address**: 1250 Commerce St, Los Angeles CA 90021 (Auto-filled from Company Profile)
+**Country**: US (Auto-filled from Company Profile)
+**Tax ID**: 95-4721038 (Auto-filled from Company Profile)
+**Phone**: (213) 555-0483 (Auto-filled from Company Profile)
+**Email**: sourcing@globalimports.com (Auto-filled from Company Profile)
+*Note: Check "Exporter is my company" checkbox to auto-fill*
+
+#### Importer (Section 5 of Certificate)
+**Company Name**: Target Corporation - Electronics Division
+**Address**: 1000 Nicollet Mall, Minneapolis MN 55403
+**Country**: US
+**Tax ID**: 41-0215170
+**Phone**: (612) 555-0370
+**Email**: electronics.procurement@target.com
+*Note: This is YOUR CUSTOMER (the buyer)*
+
+#### Producer (Section 4 of Certificate)
+**Status**: Not Applicable (currently pure importer - no producer)
+*Note: Once business model pivots to Mexico assembly, this will change to manufacturing location*
 
 **Expected Platform Intelligence:**
 - 🚨 **Current model does NOT qualify** (5% RVC)
