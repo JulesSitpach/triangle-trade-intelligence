@@ -22,39 +22,68 @@ export default protectedApiHandler({
     try {
       console.log('🔄 Creating Stripe Customer Portal session for user:', userId);
 
-      // Get user's Stripe customer ID AND subscription ID from user_profiles table
+      // Get user's Stripe customer ID from user_profiles table
+      // Note: stripe_subscription_id column doesn't exist, removed from query
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
-        .select('stripe_customer_id, stripe_subscription_id, subscription_tier')
+        .select('stripe_customer_id, subscription_tier, email')
         .eq('user_id', userId)
         .single();
 
-      if (profileError || !profile?.stripe_customer_id) {
-        console.error('❌ No Stripe customer found for user:', userId);
-        await DevIssue.missingData('customer_portal', 'stripe_customer_id', {
-          userId,
-          error: profileError?.message
+      if (profileError) {
+        console.error('❌ Error fetching user profile:', profileError);
+        await DevIssue.apiError('customer_portal', 'profile lookup', profileError, {
+          userId
         });
-        return res.status(404).json({
-          error: 'No active subscription found',
-          message: 'You must have an active subscription to access the customer portal'
-        });
-      }
-
-      // 🚨 CRITICAL FIX: Check if user has an ACTIVE subscription
-      // If they only have stripe_customer_id but no stripe_subscription_id,
-      // they likely canceled their subscription and should go to checkout instead
-      if (!profile.stripe_subscription_id) {
-        console.log('❌ User has Stripe customer but no active subscription:', userId);
-        return res.status(404).json({
-          error: 'No active subscription found',
-          message: 'Your subscription has ended. Please subscribe again from the pricing page.'
+        return res.status(500).json({
+          error: 'Failed to fetch user profile',
+          message: profileError.message
         });
       }
 
-      const stripeCustomerId = profile.stripe_customer_id;
-      console.log('✅ Found Stripe customer ID:', stripeCustomerId);
-      console.log('✅ Has active subscription ID:', profile.stripe_subscription_id);
+      // ✅ FIX: Allow dev accounts (Premium tier) and users with stripe_customer_id to access portal
+      // Dev accounts can access portal to manage billing settings even without Stripe setup
+      const isDev = profile?.subscription_tier === 'Premium';
+      let stripeCustomerId = profile?.stripe_customer_id;
+
+      // If no Stripe customer ID, create one (for dev accounts or new users)
+      if (!stripeCustomerId) {
+        if (isDev) {
+          console.log('🔧 Creating Stripe customer for dev account:', userId);
+
+          const customer = await stripe.customers.create({
+            email: profile.email,
+            metadata: {
+              user_id: userId,
+              subscription_tier: profile.subscription_tier,
+              is_dev_account: 'true'
+            }
+          });
+
+          stripeCustomerId = customer.id;
+
+          // Save to database
+          await supabase
+            .from('user_profiles')
+            .update({ stripe_customer_id: stripeCustomerId })
+            .eq('user_id', userId);
+
+          console.log('✅ Created Stripe customer ID:', stripeCustomerId);
+        } else {
+          console.log('❌ No Stripe customer found for user:', userId);
+          await DevIssue.missingData('customer_portal', 'stripe_customer_id', {
+            userId,
+            tier: profile?.subscription_tier
+          });
+          return res.status(404).json({
+            error: 'No active subscription found',
+            message: 'You must have an active subscription to access the customer portal'
+          });
+        }
+      }
+
+      console.log('✅ Stripe customer ID:', stripeCustomerId);
+      console.log('✅ User tier:', profile.subscription_tier);
 
       // Create Stripe Customer Portal session
       const session = await stripe.billingPortal.sessions.create({
