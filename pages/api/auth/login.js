@@ -102,7 +102,7 @@ export default async function handler(req, res) {
     if (!authError && authData.user) {
       const profileResult = await supabaseAdmin
         .from('user_profiles')
-        .select('id, email, company_name, subscription_tier, status, full_name, is_admin, role, last_login')
+        .select('id, email, company_name, subscription_tier, status, full_name, is_admin, role')
         .eq('email', email.toLowerCase())
         .single();
       user = profileResult.data;
