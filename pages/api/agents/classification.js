@@ -71,6 +71,12 @@ export default protectedApiHandler({
       }
 
       // Verify workflow session exists and belongs to user
+      console.log('═══════════════════════════════════════════════════');
+      console.log('[CLASSIFICATION-DEBUG] Received workflow_session_id:', workflow_session_id);
+      console.log('[CLASSIFICATION-DEBUG] Type of workflow_session_id:', typeof workflow_session_id);
+      console.log('[CLASSIFICATION-DEBUG] Authenticated user_id:', authenticatedUserId);
+      console.log('[CLASSIFICATION-DEBUG] Querying workflow_sessions table...');
+
       const { data: workflowSession, error: sessionError } = await supabase
         .from('workflow_sessions')
         .select('session_id, user_id, completed_at')
@@ -78,8 +84,37 @@ export default protectedApiHandler({
         .eq('user_id', authenticatedUserId)
         .single();
 
+      console.log('[CLASSIFICATION-DEBUG] Query result:', {
+        data: workflowSession,
+        error: sessionError,
+        errorCode: sessionError?.code,
+        errorDetails: sessionError?.details
+      });
+      console.log('═══════════════════════════════════════════════════');
+
       if (sessionError || !workflowSession) {
         console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: Invalid workflow session ${workflow_session_id}`);
+        console.log(`[CLASSIFICATION-AGENT] 📋 Session error:`, sessionError);
+
+        // ✅ FIX (Nov 6): Log detailed session mismatch info to dev_issues for debugging
+        const { DevIssue } = require('@/lib/utils/logDevIssue');
+        await DevIssue.log({
+          issueType: 'invalid_workflow_session',
+          severity: 'high',
+          component: 'classification_api',
+          message: 'Invalid workflow session ID - user blocked',
+          context: {
+            workflow_session_id_received: workflow_session_id,
+            workflow_session_id_type: typeof workflow_session_id,
+            authenticated_user_id: authenticatedUserId,
+            database_query_result: workflowSession,
+            database_query_error: sessionError,
+            database_error_code: sessionError?.code,
+            database_error_details: sessionError?.details,
+            timestamp: new Date().toISOString()
+          }
+        });
+
         return res.status(403).json({
           success: false,
           error: 'Invalid workflow session',
@@ -90,6 +125,15 @@ export default protectedApiHandler({
       // 🚨 CRITICAL: Block HS code searches on completed workflows
       if (workflowSession.completed_at) {
         console.log(`[CLASSIFICATION-AGENT] 🚫 Blocked: Workflow ${workflow_session_id} already completed at ${workflowSession.completed_at}`);
+
+        // ✅ Log completed workflow abuse attempt
+        const { logAuthError } = require('@/lib/utils/error-logger');
+        await logAuthError(
+          new Error('User tried to modify completed workflow'),
+          'HS code classification on completed workflow',
+          authenticatedUserId
+        );
+
         return res.status(403).json({
           success: false,
           error: 'Workflow already completed',

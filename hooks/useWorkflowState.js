@@ -44,6 +44,14 @@ export function useWorkflowState() {
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
+  // ✅ FIX (Nov 6): Track current session ID in state so components always have the latest
+  const [currentSessionId, setCurrentSessionId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return workflowStorage.getCurrentSessionId();
+    }
+    return null;
+  });
+
   // Load saved user data from localStorage (for initial render)
   const loadSavedData = () => {
     if (typeof window !== 'undefined') {
@@ -325,7 +333,19 @@ export function useWorkflowState() {
       const isResetting = urlParams.get('reset') === 'true';
 
       if (isResetting) {
-        console.log('🔄 Skipping database load - user clicked "+ New Analysis"');
+        console.log('🔄 User clicked "+ New Analysis" - clearing all stored data');
+
+        // ✅ FIX (Nov 6): Clear localStorage to remove old session ID and data
+        workflowStorage.clear();
+
+        // Also clear any remaining localStorage keys
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('workflow_session_id');
+          localStorage.removeItem('triangleUserData');
+          localStorage.removeItem('usmca_workflow_results');
+          localStorage.removeItem('workflow_current_step');
+        }
+
         return;
       }
 
@@ -642,8 +662,10 @@ export function useWorkflowState() {
 
     // ✅ NEW: Start fresh session (automatically clears ALL old data)
     if (typeof window !== 'undefined') {
-      workflowStorage.startNewSession();
+      const newSessionId = workflowStorage.startNewSession();
+      setCurrentSessionId(newSessionId);  // ✅ FIX (Nov 6): Update state so components get new session
       console.log('🆕 Started new workflow session - all old data cleared automatically');
+      console.log('✅ New session ID:', newSessionId);
     }
 
     // ✅ COMPLETE FORM RESET - NO HARDCODED DEFAULTS
@@ -869,11 +891,25 @@ export function useWorkflowState() {
   // Manual save function - called when user clicks "Next"
   const saveWorkflowToDatabase = useCallback(async () => {
     try {
-      let sessionId = workflowStorage.getItem('workflow_session_id');
+      // ✅ FIX (Nov 6): Use currentSessionId from React state (source of truth)
+      // NEVER generate a new session ID here - that causes session ID mismatch!
+      let sessionId = currentSessionId;
+
       if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        workflowStorage.setItem('workflow_session_id', sessionId);
+        console.error('❌ [SAVE] No currentSessionId in React state - this should never happen!');
+        console.log('🔍 [SAVE] Checking localStorage as fallback...');
+        sessionId = workflowStorage.getItem('workflow_session_id');
+
+        if (!sessionId) {
+          console.error('❌ [SAVE] No session ID in localStorage either - generating new one');
+          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          workflowStorage.setItem('workflow_session_id', sessionId);
+        }
       }
+
+      console.log('💾 [SAVE] Saving workflow to database with session ID:', sessionId);
+      console.log('🔍 [SAVE] React state currentSessionId:', currentSessionId);
+      console.log('🔍 [SAVE] localStorage workflow_session_id:', workflowStorage.getItem('workflow_session_id'));
 
       // ✅ FIX: Strip _sync_meta before database save to prevent pollution
       const cleanFormData = { ...formData };
@@ -909,7 +945,7 @@ export function useWorkflowState() {
       console.error('❌ Database save error:', error);
       return { success: false, error: error.message };
     }
-  }, [formData]);
+  }, [formData, currentSessionId]);  // ✅ FIX (Nov 6): Include currentSessionId in dependency array
 
   // Beforeunload warning if user has unsaved changes
   useEffect(() => {
@@ -935,6 +971,7 @@ export function useWorkflowState() {
     dropdownOptions,
     isLoadingOptions,
     formData,
+    currentSessionId,  // ✅ FIX (Nov 6): Expose session ID so components can use it
 
     // Form actions
     updateFormData,

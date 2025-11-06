@@ -139,18 +139,31 @@ export default protectedApiHandler({
       const executiveSummaryRemaining = isExecutiveSummaryUnlimited ? null : Math.max(0, executiveSummaryLimit - executiveSummaryUsed);
       const executiveSummaryLimitReached = isExecutiveSummaryUnlimited ? false : executiveSummaryUsed >= executiveSummaryLimit;
 
-      // Get workflows from BOTH tables (sessions = in-progress, completions = with certificates)
+      // ✅ FIX (Nov 6): Only show COMPLETED + QUALIFIED workflows in "My Certificates"
+      // workflow_sessions are IN-PROGRESS only - don't show them in certificates list
+      // We'll show in-progress sessions in a separate "Draft Analyses" section if needed
       const { data: sessionsRows } = await supabase
         .from('workflow_sessions')
         .select('*')
         .eq('user_id', userId)
+        .eq('qualification_status', 'QUALIFIED')
+        .not('completed_at', 'is', null)  // Only show completed sessions
         .order('completed_at', { ascending: false });
 
-      const { data: completionsRows } = await supabase
+      // ✅ FIX (Nov 6): Only show QUALIFIED certificates in dashboard
+      // NOT_QUALIFIED analyses shouldn't appear in "My Certificates"
+      const { data: completionsRows, error: completionsError } = await supabase
         .from('workflow_completions')
         .select('*')
         .eq('user_id', userId)
+        .eq('qualification_status', 'QUALIFIED')
         .order('completed_at', { ascending: false });
+
+      // 🔍 DEBUG: Log what we got from database
+      console.log(`📊 [DASHBOARD] Found ${completionsRows?.length || 0} QUALIFIED certificates for user ${userId}`);
+      if (completionsError) {
+        console.error('❌ [DASHBOARD] Error fetching completions:', completionsError);
+      }
 
       // Transform workflow_sessions data
       const sessionWorkflows = (sessionsRows || []).map(row => {

@@ -8,6 +8,98 @@ import React, { useState, useEffect } from 'react';
 export default function ExecutiveSummaryDisplay({ data, onClose }) {
   const [displayData, setDisplayData] = useState(null);
 
+  // Download Executive Trade Advisory as PDF
+  const handleDownloadPDF = () => {
+    if (!displayData) return;
+
+    // Create PDF content as formatted text
+    let pdfContent = `EXECUTIVE TRADE ADVISORY\nStrategic Analysis for Your Supply Chain\n\n`;
+    pdfContent += `Generated: ${new Date().toLocaleDateString()}\n`;
+    pdfContent += `${'='.repeat(80)}\n\n`;
+
+    if (displayData.situation_brief) {
+      pdfContent += `${displayData.situation_brief}\n\n`;
+    }
+
+    if (displayData.problem) {
+      pdfContent += `THE PROBLEM\n${displayData.problem}\n\n`;
+    }
+
+    if (displayData.root_cause) {
+      pdfContent += `ROOT CAUSE\n${displayData.root_cause}\n\n`;
+    }
+
+    if (displayData.annual_impact) {
+      pdfContent += `ANNUAL IMPACT\n${displayData.annual_impact}\n\n`;
+    }
+
+    if (displayData.why_now) {
+      pdfContent += `WHY ACT NOW\n${displayData.why_now}\n\n`;
+    }
+
+    // Financial details
+    if (displayData.current_burden || displayData.potential_savings || displayData.payback_period) {
+      pdfContent += `FINANCIAL IMPACT\n`;
+      pdfContent += `${'-'.repeat(80)}\n`;
+      if (displayData.current_burden) {
+        pdfContent += `Current Burden: ${displayData.current_burden}\n`;
+      }
+      if (displayData.potential_savings) {
+        pdfContent += `Potential Savings: ${displayData.potential_savings}\n`;
+      }
+      if (displayData.payback_period) {
+        pdfContent += `Payback Period: ${displayData.payback_period}\n`;
+      }
+      pdfContent += `\n`;
+    }
+
+    // Recommended actions
+    if (displayData.action_items && displayData.action_items.length > 0) {
+      pdfContent += `RECOMMENDED ACTIONS\n`;
+      displayData.action_items.forEach((item, i) => {
+        pdfContent += `${i + 1}. ${item}\n`;
+      });
+      pdfContent += `\n`;
+    }
+
+    // Strategic roadmap
+    if (displayData.strategic_roadmap && displayData.strategic_roadmap.length > 0) {
+      pdfContent += `STRATEGIC ROADMAP\n`;
+      displayData.strategic_roadmap.forEach((phase, i) => {
+        pdfContent += `\n${phase.phase}\n`;
+        pdfContent += `Why: ${phase.why}\n`;
+        if (phase.actions) {
+          pdfContent += `Actions: ${phase.actions.join(', ')}\n`;
+        }
+        pdfContent += `Impact: ${phase.impact}\n`;
+      });
+      pdfContent += `\n`;
+    }
+
+    // Broker insights
+    if (displayData.broker_insights) {
+      pdfContent += `FROM YOUR TRADE ADVISOR\n${displayData.broker_insights}\n\n`;
+    }
+
+    // Disclaimer
+    if (displayData.professional_disclaimer) {
+      pdfContent += `${'='.repeat(80)}\nDISCLAIMER\n${displayData.professional_disclaimer}\n`;
+    }
+
+    // Create and download the file
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Executive_Trade_Advisory_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Executive Trade Advisory downloaded');
+  };
+
   useEffect(() => {
     // ✅ FIXED (Oct 30, 2025): Trust props first (fresh AI data), localStorage as fallback only
     // This ensures we always show the user's actual company data from the button-triggered AI call
@@ -76,21 +168,42 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           </p>
         </div>
 
-        <button
-          onClick={onClose}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#ffffff',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            fontSize: '0.875rem',
-            color: '#374151',
-            cursor: 'pointer',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-          }}
-        >
-          Close
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            onClick={handleDownloadPDF}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#3b82f6',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              color: '#ffffff',
+              cursor: 'pointer',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontWeight: 500,
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
+          >
+            📄 Download Advisory
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: '#ffffff',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              color: '#374151',
+              cursor: 'pointer',
+              fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}
+          >
+            Close
+          </button>
+        </div>
       </div>
 
       {/* Executive Letter Content */}

@@ -164,7 +164,7 @@ export default async function handler(req, res) {
       path: '/'
     }));
 
-    logger.sales('Successful login', {
+    logger.security('Successful login', {
       component: 'auth_api',
       email,
       isAdmin: sessionData.isAdmin,

@@ -56,36 +56,222 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
   // Agent orchestration removed - was causing excessive AI calls on every field change
 
-  // 🚀 AUTO-FILL COMPANY DATA ON MOUNT (so user doesn't have to manually check box)
-  // ✅ FIX (Oct 30): Removed authData.exporter_same_as_company from dependencies to prevent re-check loop
-  // This useEffect should ONLY run once on mount to auto-fill, not every time checkbox changes
+  // 🚀 AUTO-FILL EXPORTER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
+  // Only auto-check "Exporter is my company" when certifier is EXPORTER or PRODUCER
+  // For IMPORTER, the exporter is their SUPPLIER (not their company)
   useEffect(() => {
-    if (workflowData?.company && !authData.exporter_same_as_company) {
-      console.log('📋 Auto-filling company data from workflow:', workflowData.company);
+    if (workflowData?.company && authData.certifier_type) {
+      const shouldAutoFillExporter = authData.certifier_type === 'EXPORTER' || authData.certifier_type === 'PRODUCER';
 
-      // ✅ FIX: Convert ISO country codes (US/CA/MX) to full names (United States/Canada/Mexico)
-      const countryCode = workflowData.company.company_country || '';
-      const fullCountryName = getCountryFullName(countryCode);
+      console.log('📋 Certifier type changed:', authData.certifier_type, '→ Auto-fill exporter?', shouldAutoFillExporter);
 
-      console.log('🌍 Country conversion:', {
-        iso_code: countryCode,
-        full_name: fullCountryName
-      });
+      if (shouldAutoFillExporter && !authData.exporter_same_as_company) {
+        console.log('✅ Auto-filling exporter data from company (certifier is EXPORTER or PRODUCER)');
 
-      setAuthData(prev => ({
-        ...prev,
-        exporter_same_as_company: true,  // Check the box automatically
-        exporter_name: workflowData.company.name || workflowData.company.company_name || '',
-        exporter_address: workflowData.company.company_address || workflowData.company.address || '',
-        exporter_tax_id: workflowData.company.tax_id || '',
-        exporter_contact_person: workflowData.company.contact_person || '',  // ✅ FIX (Oct 30): Added contact person
-        exporter_phone: workflowData.company.contact_phone || '',
-        exporter_email: workflowData.company.contact_email || '',
-        exporter_country: fullCountryName  // ✅ FIX: Use full name, not ISO code
-      }));
+        // ✅ FIX: Convert ISO country codes (US/CA/MX) to full names (United States/Canada/Mexico)
+        const countryCode = workflowData.company.company_country || '';
+        const fullCountryName = getCountryFullName(countryCode);
+
+        console.log('🌍 useEffect auto-fill - Country conversion:', {
+          iso_code: countryCode,
+          full_name: fullCountryName
+        });
+
+        console.log('📋 useEffect auto-fill - Company data being used:', {
+          name: workflowData.company.name || workflowData.company.company_name,
+          address: workflowData.company.company_address || workflowData.company.address,
+          tax_id: workflowData.company.tax_id,
+          contact_person: workflowData.company.contact_person,
+          phone: workflowData.company.contact_phone,
+          email: workflowData.company.contact_email,
+          country: fullCountryName
+        });
+
+        setAuthData(prev => ({
+          ...prev,
+          exporter_same_as_company: true,  // Check the box automatically
+          exporter_name: workflowData.company.name || workflowData.company.company_name || '',
+          exporter_address: workflowData.company.company_address || workflowData.company.address || '',
+          exporter_tax_id: workflowData.company.tax_id || '',
+          exporter_contact_person: workflowData.company.contact_person || '',
+          exporter_phone: workflowData.company.contact_phone || '',
+          exporter_email: workflowData.company.contact_email || '',
+          exporter_country: fullCountryName
+        }));
+      } else if (!shouldAutoFillExporter && authData.exporter_same_as_company) {
+        console.log('❌ Un-checking exporter auto-fill (certifier is IMPORTER - exporter is their supplier)');
+        setAuthData(prev => ({
+          ...prev,
+          exporter_same_as_company: false  // Uncheck the box for IMPORTER
+        }));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workflowData]); // Only run when workflowData changes (on mount), NOT when checkbox changes
+  }, [authData.certifier_type, workflowData]); // Run when certifier type or workflow data changes
+
+  // 🎯 AUTO-SELECT CERTIFIER TYPE BASED ON BUSINESS TYPE (Nov 6, 2025)
+  // If business_type is "Manufacturer", auto-select "PRODUCER" certifier type
+  useEffect(() => {
+    if (workflowData?.company?.business_type && !authData.certifier_type) {
+      const businessType = workflowData.company.business_type;
+
+      console.log('🎯 Auto-selecting certifier type based on business_type:', businessType);
+
+      if (businessType === 'Manufacturer') {
+        console.log('✅ Business type is Manufacturer → Auto-selecting PRODUCER');
+        setAuthData(prev => ({
+          ...prev,
+          certifier_type: 'PRODUCER'
+        }));
+      } else if (businessType === 'Importer') {
+        console.log('✅ Business type is Importer → Auto-selecting IMPORTER');
+        setAuthData(prev => ({
+          ...prev,
+          certifier_type: 'IMPORTER'
+        }));
+      } else if (businessType === 'Exporter') {
+        console.log('✅ Business type is Exporter → Auto-selecting EXPORTER');
+        setAuthData(prev => ({
+          ...prev,
+          certifier_type: 'EXPORTER'
+        }));
+      }
+      // For other business types (Distributor, Retailer, etc.), don't auto-select
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowData?.company?.business_type]); // Only run when business_type changes
+
+  // 📝 AUTO-FILL SIGNATORY INFORMATION FROM STEP 1 CONTACT DATA (Nov 6, 2025)
+  // The person who completed the workflow is usually the person who will sign the certificate
+  useEffect(() => {
+    if (workflowData?.company && !authData.signatory_name && !authData.signatory_email) {
+      const contactPerson = workflowData.company.contact_person;
+      const contactEmail = workflowData.company.contact_email;
+      const contactPhone = workflowData.company.contact_phone;
+
+      if (contactPerson || contactEmail || contactPhone) {
+        console.log('📝 Auto-filling signatory info from Step 1 contact data:', {
+          name: contactPerson,
+          email: contactEmail,
+          phone: contactPhone
+        });
+
+        setAuthData(prev => ({
+          ...prev,
+          signatory_name: contactPerson || '',
+          signatory_email: contactEmail || '',
+          signatory_phone: contactPhone || ''
+          // Note: signatory_title remains empty (user must select their title)
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowData?.company?.contact_person, workflowData?.company?.contact_email, workflowData?.company?.contact_phone]); // Run when contact data changes
+
+  // 📥 AUTO-FILL IMPORTER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
+  // Only auto-fill "Importer is my company" when user is IMPORTER
+  // If user is EXPORTER or PRODUCER, the importer is their CUSTOMER (not their company)
+  useEffect(() => {
+    if (workflowData?.company && authData.certifier_type) {
+      const shouldAutoFillImporter = authData.certifier_type === 'IMPORTER';
+
+      console.log('📥 Certifier type changed:', authData.certifier_type, '→ Auto-fill importer?', shouldAutoFillImporter);
+
+      if (shouldAutoFillImporter && !authData.importer_same_as_company) {
+        console.log('✅ Auto-filling importer data from company (certifier is IMPORTER)');
+
+        // ✅ FIX: Convert ISO country codes (US/CA/MX) to full names (United States/Canada/Mexico)
+        const countryCode = workflowData.company.company_country || '';
+        const fullCountryName = getCountryFullName(countryCode);
+
+        console.log('🌍 useEffect auto-fill (importer) - Country conversion:', {
+          iso_code: countryCode,
+          full_name: fullCountryName
+        });
+
+        console.log('📥 useEffect auto-fill (importer) - Company data being used:', {
+          name: workflowData.company.name || workflowData.company.company_name,
+          address: workflowData.company.company_address || workflowData.company.address,
+          tax_id: workflowData.company.tax_id,
+          contact_person: workflowData.company.contact_person,
+          phone: workflowData.company.contact_phone,
+          email: workflowData.company.contact_email,
+          country: fullCountryName
+        });
+
+        setAuthData(prev => ({
+          ...prev,
+          importer_same_as_company: true,  // Check the box automatically
+          importer_name: workflowData.company.name || workflowData.company.company_name || '',
+          importer_address: workflowData.company.company_address || workflowData.company.address || '',
+          importer_tax_id: workflowData.company.tax_id || '',
+          importer_contact_person: workflowData.company.contact_person || '',
+          importer_phone: workflowData.company.contact_phone || '',
+          importer_email: workflowData.company.contact_email || '',
+          importer_country: fullCountryName
+        }));
+      } else if (!shouldAutoFillImporter && authData.importer_same_as_company) {
+        console.log('❌ Un-checking importer auto-fill (certifier is EXPORTER/PRODUCER - importer is their customer)');
+        setAuthData(prev => ({
+          ...prev,
+          importer_same_as_company: false  // Uncheck the box for EXPORTER/PRODUCER
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authData.certifier_type, workflowData]); // Run when certifier type or workflow data changes
+
+  // 🏭 AUTO-FILL PRODUCER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
+  // Auto-check "Producer is my company" when user is PRODUCER
+  // For EXPORTER, they can manually check if they also manufacture
+  // For IMPORTER, producer is a third party (not their company)
+  useEffect(() => {
+    if (workflowData?.company && authData.certifier_type) {
+      const shouldAutoFillProducer = authData.certifier_type === 'PRODUCER';
+
+      console.log('🏭 Certifier type changed:', authData.certifier_type, '→ Auto-fill producer?', shouldAutoFillProducer);
+
+      if (shouldAutoFillProducer && !authData.producer_same_as_company) {
+        console.log('✅ Auto-filling producer data from company (certifier is PRODUCER)');
+
+        // ✅ FIX: Convert ISO country codes (US/CA/MX) to full names (United States/Canada/Mexico)
+        const countryCode = workflowData.company.company_country || '';
+        const fullCountryName = getCountryFullName(countryCode);
+
+        console.log('🌍 useEffect auto-fill (producer) - Country conversion:', {
+          iso_code: countryCode,
+          full_name: fullCountryName
+        });
+
+        console.log('🏭 useEffect auto-fill (producer) - Company data being used:', {
+          name: workflowData.company.name || workflowData.company.company_name,
+          address: workflowData.company.company_address || workflowData.company.address,
+          tax_id: workflowData.company.tax_id,
+          phone: workflowData.company.contact_phone,
+          email: workflowData.company.contact_email,
+          country: fullCountryName
+        });
+
+        setAuthData(prev => ({
+          ...prev,
+          producer_same_as_company: true,  // Check the box automatically
+          producer_name: workflowData.company.name || workflowData.company.company_name || '',
+          producer_address: workflowData.company.company_address || workflowData.company.address || '',
+          producer_tax_id: workflowData.company.tax_id || '',
+          producer_phone: workflowData.company.contact_phone || '',
+          producer_email: workflowData.company.contact_email || '',
+          producer_country: fullCountryName
+        }));
+      } else if (!shouldAutoFillProducer && authData.producer_same_as_company) {
+        console.log('❌ Un-checking producer auto-fill (certifier is EXPORTER/IMPORTER - may need manual entry)');
+        setAuthData(prev => ({
+          ...prev,
+          producer_same_as_company: false  // Uncheck for non-PRODUCER certifiers
+        }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authData.certifier_type, workflowData]); // Run when certifier type or workflow data changes
 
   // 🎯 AUTO-EXPAND SECTIONS BASED ON CERTIFIER TYPE
   useEffect(() => {
@@ -413,13 +599,14 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                     full_name: fullCountryName
                   });
 
-                  handleFieldChange('exporter_name', workflowData?.company?.name || '');
+                  // ✅ CONSISTENT MAPPING (Nov 6): Use same field mapping as useEffect auto-fill
+                  handleFieldChange('exporter_name', workflowData?.company?.name || workflowData?.company?.company_name || '');
                   handleFieldChange('exporter_address', workflowData?.company?.company_address || workflowData?.company?.address || '');
                   handleFieldChange('exporter_tax_id', workflowData?.company?.tax_id || '');
-                  handleFieldChange('exporter_contact_person', workflowData?.company?.contact_person || '');  // ✅ FIX (Oct 30): Added contact person
+                  handleFieldChange('exporter_contact_person', workflowData?.company?.contact_person || '');
                   handleFieldChange('exporter_phone', workflowData?.company?.contact_phone || '');
                   handleFieldChange('exporter_email', workflowData?.company?.contact_email || '');
-                  handleFieldChange('exporter_country', fullCountryName);  // ✅ FIX: Use full name, not ISO code
+                  handleFieldChange('exporter_country', fullCountryName);
                 } else {
                   // Clear fields if unchecked
                   handleFieldChange('exporter_name', '');
@@ -545,11 +732,30 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
             <input
               type="checkbox"
-              checked={authData.importer_not_yet_available || false}
+              checked={authData.importer_same_as_company || false}
               onChange={(e) => {
-                handleFieldChange('importer_not_yet_available', e.target.checked);
-                // Clear importer fields if not yet available
+                handleFieldChange('importer_same_as_company', e.target.checked);
+                // Auto-populate importer fields from company data if checked
                 if (e.target.checked) {
+                  // ✅ FIX: Convert ISO country codes to full names before auto-filling
+                  const countryCode = workflowData?.company?.company_country || '';
+                  const fullCountryName = getCountryFullName(countryCode);
+
+                  console.log('🌍 Checkbox auto-fill (importer) - Country conversion:', {
+                    iso_code: countryCode,
+                    full_name: fullCountryName
+                  });
+
+                  // ✅ CONSISTENT MAPPING (Nov 6): Use same field mapping as useEffect auto-fill
+                  handleFieldChange('importer_name', workflowData?.company?.name || workflowData?.company?.company_name || '');
+                  handleFieldChange('importer_address', workflowData?.company?.company_address || workflowData?.company?.address || '');
+                  handleFieldChange('importer_tax_id', workflowData?.company?.tax_id || '');
+                  handleFieldChange('importer_contact_person', workflowData?.company?.contact_person || '');
+                  handleFieldChange('importer_phone', workflowData?.company?.contact_phone || '');
+                  handleFieldChange('importer_email', workflowData?.company?.contact_email || '');
+                  handleFieldChange('importer_country', fullCountryName);
+                } else {
+                  // Clear fields if unchecked
                   handleFieldChange('importer_name', '');
                   handleFieldChange('importer_address', '');
                   handleFieldChange('importer_tax_id', '');
@@ -561,14 +767,16 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               }}
             />
             <span className="checkbox-text">
-              Importer information not yet available (can be added later)
+              Importer is my company (auto-fill with company information from Step 1)
             </span>
           </label>
         </div>
 
         <CollapsibleSectionHeader
           title="Importer Details"
-          description="Information about your customer (the importing company)"
+          description={authData.certifier_type === 'IMPORTER'
+            ? "Information about your company (you are the importer)"
+            : "Information about your customer (the importing company)"}
           sectionKey="importer"
           icon="📥"
         />
@@ -672,11 +880,29 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
             <input
               type="checkbox"
-              checked={authData.producer_same_as_exporter || false}
+              checked={authData.producer_same_as_company || false}
               onChange={(e) => {
-                handleFieldChange('producer_same_as_exporter', e.target.checked);
-                // Clear producer fields if same as exporter
+                handleFieldChange('producer_same_as_company', e.target.checked);
+                // Auto-populate producer fields from company data if checked
                 if (e.target.checked) {
+                  // ✅ FIX: Convert ISO country codes to full names before auto-filling
+                  const countryCode = workflowData?.company?.company_country || '';
+                  const fullCountryName = getCountryFullName(countryCode);
+
+                  console.log('🌍 Checkbox auto-fill (producer) - Country conversion:', {
+                    iso_code: countryCode,
+                    full_name: fullCountryName
+                  });
+
+                  // ✅ CONSISTENT MAPPING (Nov 6): Use same field mapping as useEffect auto-fill
+                  handleFieldChange('producer_name', workflowData?.company?.name || workflowData?.company?.company_name || '');
+                  handleFieldChange('producer_address', workflowData?.company?.company_address || workflowData?.company?.address || '');
+                  handleFieldChange('producer_tax_id', workflowData?.company?.tax_id || '');
+                  handleFieldChange('producer_phone', workflowData?.company?.contact_phone || '');
+                  handleFieldChange('producer_email', workflowData?.company?.contact_email || '');
+                  handleFieldChange('producer_country', fullCountryName);
+                } else {
+                  // Clear fields if unchecked
                   handleFieldChange('producer_name', '');
                   handleFieldChange('producer_address', '');
                   handleFieldChange('producer_tax_id', '');
@@ -687,22 +913,24 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               }}
             />
             <span className="checkbox-text">
-              Producer is the same as Exporter (check this if your company manufactures the goods)
+              Producer is my company (auto-fill with company information from Step 1)
             </span>
           </label>
         </div>
 
         <CollapsibleSectionHeader
           title="Producer Details"
-          description="Information about the company that manufactures/produces the goods"
+          description={authData.certifier_type === 'PRODUCER'
+            ? "Information about your company (you are the producer/manufacturer)"
+            : "Information about the company that manufactures/produces the goods"}
           sectionKey="producer"
           icon="🏭"
         />
 
         {expandedSections.producer && (
           <>
-            {/* Only show producer fields if NOT same as exporter */}
-            {!authData.producer_same_as_exporter && (
+            {/* Only show producer fields if NOT same as company */}
+            {!authData.producer_same_as_company && (
               <div className="form-grid-2">
                 <div className="form-group">
                   <label className="form-label required">Producer Company Name</label>
@@ -780,11 +1008,11 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
               </div>
             )}
 
-            {authData.producer_same_as_exporter && (
+            {authData.producer_same_as_company && (
               <div className="alert alert-info">
                 <div className="alert-content">
                   <div className="text-body">
-                    ✓ Producer information will be automatically filled with your company (exporter) details.
+                    ✓ Producer information will be automatically filled with your company details.
                   </div>
                 </div>
               </div>

@@ -94,21 +94,10 @@ export default async function handler(req, res) {
     const sessionCookie = cookies.triangle_session;
 
     // EXPECTED BEHAVIOR: Unauthenticated users don't have session cookies
-    // Only log if we have OTHER cookies but not triangle_session (indicates session loss)
+    // ✅ FIX (Nov 6): Don't log missing triangle_session as error
+    // Having __stripe_mid or other cookies without triangle_session is NORMAL for non-logged-in users
     if (!sessionCookie) {
-      const hasOtherCookies = Object.keys(cookies).length > 0;
-
-      // Only log as DevIssue if user HAD cookies but lost triangle_session
-      // This indicates potential session corruption, not normal unauthenticated access
-      if (hasOtherCookies) {
-        await DevIssue.missingData('auth_api', 'triangle_session cookie', {
-          endpoint: '/api/auth/me',
-          otherCookiesPresent: Object.keys(cookies).join(', '),
-          suspectedIssue: 'Session cookie lost but other cookies present'
-        });
-      }
-
-      // Return 401 without logging for normal unauthenticated access
+      // Return 401 - this is normal unauthenticated access
       return res.status(401).json({
         success: false,
         authenticated: false,

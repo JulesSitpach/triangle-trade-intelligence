@@ -152,9 +152,16 @@ export default function USMCACertificateCompletion() {
           qualification_status: initialData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
           origin_criterion: initialData.usmca?.preference_criterion,
           hs_code: initialData.product?.hs_code || '',
-          manufacturing_location: initialData.usmca?.manufacturing_location || '',
+          manufacturing_location: initialData.usmca?.manufacturing_location || parsedForm?.manufacturing_location || '',
           component_breakdown: initialData.components || [],
-          calculated_at: new Date().toISOString()
+          calculated_at: new Date().toISOString(),
+
+          // ✅ FIX (Nov 6): Add missing certificate fields 7-11 for EditableCertificatePreview
+          // These fields are required for official USMCA Certificate of Origin (Form D)
+          preference_criterion: initialData.usmca?.preference_criterion || 'B',  // Field 8: Origin Criterion (A/B/C/D)
+          is_producer: parsedForm?.business_type === 'Manufacturer',  // Field 9: Producer (YES/NO)
+          qualification_method: initialData.usmca?.qualification_method || 'RVC',  // Field 10: Method (RVC/TV/PE)
+          country_of_origin: parsedForm?.manufacturing_location || parsedForm?.company_country || ''  // Field 11: Country of Origin
         };
 
         // ✅ Restore authorization data from localStorage (if exists)
@@ -402,10 +409,10 @@ export default function USMCACertificateCompletion() {
               importer_email: authData.importer_email || ''
             },
             product_details: {
-              hs_code: workflowData?.product?.hs_code || '',
+              hs_code: workflowData?.product?.hs_code || certificateData?.analysis_results?.hs_code || '',
               product_description: workflowData?.product?.description || '',
               commercial_description: workflowData?.product?.description || '',
-              manufacturing_location: workflowData?.usmca?.manufacturing_location || '',
+              manufacturing_location: workflowData?.usmca?.manufacturing_location || certificateData?.analysis_results?.manufacturing_location || '',
               tariff_classification_verified: true,
               verification_source: 'Database-verified'
             },
@@ -417,8 +424,11 @@ export default function USMCACertificateCompletion() {
               qualified: certificateData.analysis_results.qualification_status === 'QUALIFIED',
               rule: workflowData?.usmca?.rule,
               threshold_applied: workflowData?.usmca?.threshold_applied,
-              preference_criterion: certificateData.analysis_results.origin_criterion,
-              method_of_qualification: workflowData?.method_of_qualification || 'TV',
+              // ✅ FIX (Nov 6): Use new explicit certificate fields from analysisResults
+              preference_criterion: certificateData.analysis_results.preference_criterion || certificateData.analysis_results.origin_criterion || 'B',
+              method_of_qualification: certificateData.analysis_results.qualification_method || 'RVC',
+              is_producer: certificateData.analysis_results.is_producer || false,
+              country_of_origin: certificateData.analysis_results.country_of_origin || '',
               trust_score: certificateData.analysis_results.trust_score,
               verification_status: workflowData?.usmca?.verification_status
             },
@@ -465,14 +475,20 @@ export default function USMCACertificateCompletion() {
               // ✅ FIX (Nov 4): Removed optimistic defaults - fail loudly if data is missing
               qualified: cert.usmca_analysis?.qualified ?? false,  // Use false instead of true
               regional_content: cert.usmca_analysis?.regional_content ?? 0,  // Use 0 instead of 100
-              north_american_content: cert.usmca_analysis?.regional_content ?? 0  // Use 0 instead of 100
+              north_american_content: cert.usmca_analysis?.regional_content ?? 0,  // Use 0 instead of 100
+
+              // ✅ FIX (Nov 6): Persist certificate fields 7-11 to localStorage
+              preference_criterion: cert.preference_criterion || certificateData.analysis_results.preference_criterion || 'B',
+              qualification_method: cert.qualification_method?.method || certificateData.analysis_results.qualification_method || 'RVC',
+              manufacturing_location: cert.country_of_origin || certificateData.analysis_results.country_of_origin || '',
+              is_producer: cert.producer_declaration?.is_producer ?? certificateData.analysis_results.is_producer ?? false
             }
           };
 
           // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
           workflowStorage.setItem('usmca_workflow_results', JSON.stringify(completionData));
 
-          console.log('🎯 Certificate saved to localStorage for alerts');
+          console.log('🎯 Certificate saved to localStorage for alerts (with fields 7-11)');
         } catch (error) {
           console.error('Failed to save completion data:', error);
         }

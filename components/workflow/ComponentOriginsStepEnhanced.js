@@ -11,6 +11,7 @@ import AgentSuggestionBadge from '../agents/AgentSuggestionBadge';
 import { canAddComponent, getComponentLimitMessage, getUpgradeMessage, SUBSCRIPTION_TIERS } from '../../config/subscription-limits';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
+import workflowStorage from '../../lib/services/workflow-storage-adapter';
 // Direct API call - no intermediate helper files
 
 export default function ComponentOriginsStepEnhanced({
@@ -24,7 +25,8 @@ export default function ComponentOriginsStepEnhanced({
   isFormValid,
   isLoading,
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL,
-  saveWorkflowToDatabase
+  saveWorkflowToDatabase,
+  currentSessionId  // ✅ FIX (Nov 6): Receive session ID from parent hook
 }) {
   // Track if we just pushed to parent to avoid infinite restore loop
   const lastPushedRef = useRef(null);
@@ -217,9 +219,29 @@ export default function ComponentOriginsStepEnhanced({
     setSearchingHS(prev => ({ ...prev, [index]: true }));
 
     try {
-      // ✅ CRITICAL FIX (Nov 5): Include workflow_session_id to prevent bypass
-      // This ensures HS code searches only work on ACTIVE (not completed) workflows
-      const workflow_session_id = localStorage.getItem('workflow_session_id');
+      // ✅ CRITICAL FIX (Nov 6): Use session ID from parent hook (passed via props)
+      // This ensures we always get the CURRENT session that React knows about
+      const workflow_session_id = currentSessionId;
+
+      // 🔍 DEBUG: Comprehensive session ID logging
+      console.log('═══════════════════════════════════════════════════');
+      console.log('🔍 [CLASSIFICATION AUTO-SUGGEST] HS CODE - Component', index + 1);
+      console.log('🔍 [CLASSIFICATION AUTO-SUGGEST] currentSessionId (from props):', currentSessionId);
+      console.log('🔍 [CLASSIFICATION AUTO-SUGGEST] workflow_session_id (to be sent):', workflow_session_id);
+      console.log('🔍 [CLASSIFICATION AUTO-SUGGEST] localStorage workflow_session_id:', localStorage.getItem('workflow_session_id'));
+      console.log('═══════════════════════════════════════════════════');
+
+      if (!workflow_session_id) {
+        console.error('❌ [CLASSIFICATION] No workflow session ID available!');
+        throw new Error('No active workflow session. Please start a new analysis.');
+      }
+
+      // ✅ FIX (Nov 6): Save session to database BEFORE classification API call
+      // Classification API requires active workflow session in database
+      console.log('💾 [CLASSIFICATION AUTO-SUGGEST] Saving workflow session to database...');
+      console.log('💾 [CLASSIFICATION AUTO-SUGGEST] Session ID being saved:', workflow_session_id);
+      await saveWorkflowToDatabase();
+      console.log('✅ [CLASSIFICATION AUTO-SUGGEST] Workflow session saved - proceeding with classification')
 
       // Send complete business context for accurate AI classification
       const response = await fetch('/api/agents/classification', {
@@ -334,8 +356,29 @@ export default function ComponentOriginsStepEnhanced({
     setSearchingHS({ ...searchingHS, [index]: true });
 
     try {
-      // ✅ CRITICAL FIX (Nov 5): Include workflow_session_id to prevent bypass
-      const workflow_session_id = localStorage.getItem('workflow_session_id');
+      // ✅ CRITICAL FIX (Nov 6): Use session ID from parent hook (passed via props)
+      // This ensures we always get the CURRENT session that React knows about
+      const workflow_session_id = currentSessionId;
+
+      // 🔍 DEBUG: Comprehensive session ID logging
+      console.log('═══════════════════════════════════════════════════');
+      console.log('🔍 [CLASSIFICATION MANUAL LOOKUP] HS CODE - Component', index + 1);
+      console.log('🔍 [CLASSIFICATION MANUAL LOOKUP] currentSessionId (from props):', currentSessionId);
+      console.log('🔍 [CLASSIFICATION MANUAL LOOKUP] workflow_session_id (to be sent):', workflow_session_id);
+      console.log('🔍 [CLASSIFICATION MANUAL LOOKUP] localStorage workflow_session_id:', localStorage.getItem('workflow_session_id'));
+      console.log('═══════════════════════════════════════════════════');
+
+      if (!workflow_session_id) {
+        console.error('❌ [CLASSIFICATION] No workflow session ID available!');
+        throw new Error('No active workflow session. Please start a new analysis.');
+      }
+
+      // ✅ FIX (Nov 6): Save session to database BEFORE classification API call
+      // Classification API requires active workflow session in database
+      console.log('💾 [CLASSIFICATION MANUAL LOOKUP] Saving workflow session to database...');
+      console.log('💾 [CLASSIFICATION MANUAL LOOKUP] Session ID being saved:', workflow_session_id);
+      await saveWorkflowToDatabase();
+      console.log('✅ [CLASSIFICATION MANUAL LOOKUP] Workflow session saved - proceeding with classification');
 
       // Use the existing classification endpoint which handles AI + caching
       const response = await fetch('/api/agents/classification', {
@@ -540,27 +583,48 @@ export default function ComponentOriginsStepEnhanced({
   const handleValidateAndProceed = async () => {
     if (!isValid()) return;
 
-    // Basic workflow validation (not certificate validation)
-    const workflowValidation = {
-      hasCompanyInfo: !!formData.company_name && !!formData.business_type,
-      hasComponents: components.length > 0 && components.every(c => c.description && c.origin_country),
-      totalIs100: getTotalPercentage() === 100
-    };
+    // ✅ FIX (Nov 6): Check ALL required fields including HS codes
+    const errors = [];
 
-    const workflowValid = workflowValidation.hasCompanyInfo &&
-                         workflowValidation.hasComponents &&
-                         workflowValidation.totalIs100;
+    // Check company info
+    if (!formData.company_name || !formData.business_type) {
+      errors.push({ message: 'Company information incomplete (company name and business type required)' });
+    }
 
-    if (!workflowValid) {
+    // Check each component for ALL required fields
+    components.forEach((component, index) => {
+      const missing = [];
+      if (!component.description || component.description.length < 10) {
+        missing.push('description (min 10 characters)');
+      }
+      if (!component.origin_country) {
+        missing.push('origin country');
+      }
+      if (!component.value_percentage || component.value_percentage <= 0) {
+        missing.push('value percentage');
+      }
+      if (!component.hs_code) {
+        missing.push('HS code (click "Get AI HS Code Suggestion" or enter manually)');
+      }
+
+      if (missing.length > 0) {
+        errors.push({
+          message: `Component ${index + 1}: Missing ${missing.join(', ')}`
+        });
+      }
+    });
+
+    // Check total percentage
+    if (getTotalPercentage() !== 100) {
+      errors.push({ message: `Components must total 100% (currently ${getTotalPercentage()}%)` });
+    }
+
+    if (errors.length > 0) {
       setValidationResult({
         success: true,
         data: {
           valid: false,
-          errors: [
-            !workflowValidation.hasCompanyInfo && { message: 'Company information incomplete' },
-            !workflowValidation.hasComponents && { message: 'Component information incomplete' },
-            !workflowValidation.totalIs100 && { message: 'Components must total 100%' }
-          ].filter(Boolean)
+          errors: errors
         }
       });
       return;

@@ -5,12 +5,74 @@
 
 ---
 
+## 🤖 CERTIFICATE PAGE AUTO-FILL GUIDE (Nov 6, 2025)
+
+**What gets auto-filled depends on your Business Type from Step 1:**
+
+### **MANUFACTURER** → Auto-selects **PRODUCER** certifier type
+✅ **Auto-Filled Sections:**
+- Certificate Authorization: Name, Email, Phone (from Contact Info)
+- Exporter Section: ✅ CHECKED + all company fields filled
+- Producer Section: ✅ CHECKED + all company fields filled
+
+❌ **Empty Sections (you enter customer info):**
+- Importer Section: ❌ UNCHECKED + empty fields
+
+**Example**: TechCorp Manufacturing Inc (TEST 1) sees:
+- Certifier: PRODUCER
+- Exporter = TechCorp ✅
+- Importer = Empty (enter customer: TechRetail)
+- Producer = TechCorp ✅
+
+---
+
+### **IMPORTER** → Auto-selects **IMPORTER** certifier type
+✅ **Auto-Filled Sections:**
+- Certificate Authorization: Name, Email, Phone (from Contact Info)
+- Importer Section: ✅ CHECKED + all company fields filled
+
+❌ **Empty Sections (you enter supplier/manufacturer info):**
+- Exporter Section: ❌ UNCHECKED + empty fields (enter your supplier)
+- Producer Section: ❌ UNCHECKED + empty fields (enter manufacturer)
+
+**Example**: Global Tech Distributors LLC (TEST 4) sees:
+- Certifier: IMPORTER
+- Exporter = Empty (enter supplier info)
+- Importer = Global Tech ✅
+- Producer = Empty (enter manufacturer info)
+
+---
+
+### **EXPORTER** → Auto-selects **EXPORTER** certifier type
+✅ **Auto-Filled Sections:**
+- Certificate Authorization: Name, Email, Phone (from Contact Info)
+- Exporter Section: ✅ CHECKED + all company fields filled
+
+❌ **Empty Sections (you enter customer info):**
+- Importer Section: ❌ UNCHECKED + empty fields (enter customer)
+- Producer Section: ❌ UNCHECKED + empty fields (can check box if you also manufacture)
+
+**Example**: If you were an exporter (not in tests below):
+- Certifier: EXPORTER
+- Exporter = Your Company ✅
+- Importer = Empty (enter customer)
+- Producer = Empty (check box if you manufacture too)
+
+---
+
+### **OTHER BUSINESS TYPES** (Distributor, Retailer, etc.)
+- No auto-selection of certifier type (you must choose manually)
+- No auto-fill of Exporter/Importer/Producer sections
+- You manually select your role and enter all party details
+
+---
+
 ## TEST 1: Electronics - Qualified (China PCB Risk)
 
 ### Company Profile
 **Company Name**: TechCorp Manufacturing Inc
 **Business Type**: Manufacturer
-**Industry Sector**: Electronics & Semiconductors
+**Industry Sector**: Electronics
 **Tax ID / EIN**: 94-1234567
 
 ### Company Location
@@ -77,7 +139,7 @@
 ### Company Profile
 **Company Name**: AutoParts Dynamics SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Automotive & Transportation
+**Industry Sector**: Automotive
 **Tax ID / EIN**: RFC-APD850615-A12
 
 ### Company Location
@@ -144,7 +206,7 @@
 ### Company Profile
 **Company Name**: Industrial Solutions Ltd
 **Business Type**: Manufacturer
-**Industry Sector**: Industrial Machinery
+**Industry Sector**: Machinery
 **Tax ID / EIN**: BN-123456789RT0001
 
 ### Company Location
@@ -212,7 +274,7 @@
 ### Company Profile
 **Company Name**: Global Tech Distributors LLC
 **Business Type**: Importer
-**Industry Sector**: Electronics & Semiconductors
+**Industry Sector**: Electronics
 **Tax ID / EIN**: 77-8901234
 
 ### Company Location
@@ -280,7 +342,7 @@
 ### Company Profile
 **Company Name**: NorthWest Apparel Co Ltd
 **Business Type**: Manufacturer
-**Industry Sector**: Textiles & Apparel
+**Industry Sector**: Textiles
 **Tax ID / EIN**: BN-234567890RT0001
 
 ### Company Location
@@ -348,7 +410,7 @@
 ### Company Profile
 **Company Name**: AgriPro Foods SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Food & Agriculture
+**Industry Sector**: Agriculture
 **Tax ID / EIN**: RFC-APF920820-B45
 
 ### Company Location
@@ -416,7 +478,7 @@
 ### Company Profile
 **Company Name**: MedTech Innovations Inc
 **Business Type**: Manufacturer
-**Industry Sector**: Medical Devices & Pharmaceuticals
+**Industry Sector**: Other
 **Tax ID / EIN**: 33-4567890
 
 ### Company Location
@@ -484,7 +546,7 @@
 ### Company Profile
 **Company Name**: Modern Living Furniture SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Furniture & Home Goods
+**Industry Sector**: Other
 **Tax ID / EIN**: RFC-MLF880910-C78
 
 ### Company Location
@@ -552,7 +614,7 @@
 ### Company Profile
 **Company Name**: ChemCorp Solutions Ltd
 **Business Type**: Manufacturer
-**Industry Sector**: Chemicals & Materials
+**Industry Sector**: Chemicals
 **Tax ID / EIN**: BN-345678901RT0001
 
 ### Company Location
@@ -620,7 +682,7 @@
 ### Company Profile
 **Company Name**: PlayTime Imports LLC
 **Business Type**: Importer
-**Industry Sector**: Consumer Goods
+**Industry Sector**: Other
 **Tax ID / EIN**: 13-5678901
 
 ### Company Location
@@ -688,7 +750,7 @@
 ### Company Profile
 **Company Name**: BuildPro Materials SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Construction & Building Materials
+**Industry Sector**: Other
 **Tax ID / EIN**: RFC-BPM901125-D89
 
 ### Company Location
@@ -756,7 +818,7 @@
 ### Company Profile
 **Company Name**: ProSport Equipment Ltd
 **Business Type**: Manufacturer
-**Industry Sector**: Sporting Goods & Recreation
+**Industry Sector**: Other
 **Tax ID / EIN**: BN-456789012RT0001
 
 ### Company Location
@@ -824,7 +886,7 @@
 ### Company Profile
 **Company Name**: SolarTech Systems SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Renewable Energy
+**Industry Sector**: Other
 **Tax ID / EIN**: RFC-STS870305-E01
 
 ### Company Location
@@ -892,7 +954,7 @@
 ### Company Profile
 **Company Name**: AeroDynamics Inc
 **Business Type**: Manufacturer
-**Industry Sector**: Aerospace & Defense
+**Industry Sector**: Other
 **Tax ID / EIN**: 91-6789012
 
 ### Company Location
@@ -960,7 +1022,7 @@
 ### Company Profile
 **Company Name**: PackagePro Solutions SA de CV
 **Business Type**: Manufacturer
-**Industry Sector**: Packaging & Containers
+**Industry Sector**: Other
 **Tax ID / EIN**: RFC-PPS950710-F23
 
 ### Company Location

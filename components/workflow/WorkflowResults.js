@@ -706,12 +706,14 @@ export default function WorkflowResults({
           {/* Plain text explanation of what this means */}
           <div style={{lineHeight: '1.8', color: '#374151', fontSize: '0.95rem'}}>
             <p>
-              <strong>Your qualification means:</strong> You meet USMCA requirements and can pay preferential tariff rates instead of standard tariffs.
+              <strong>Your qualification means:</strong> {results.usmca?.qualified
+                ? 'You meet USMCA requirements and can pay preferential tariff rates instead of standard tariffs.'
+                : 'You do NOT meet USMCA requirements. You must pay standard (MFN) tariff rates instead of preferential rates.'}
             </p>
 
             <p>
               <strong>Your Regional Value Content: {(results.usmca?.north_american_content || 0).toFixed(1)}%</strong><br/>
-              Your product is {(results.usmca?.north_american_content || 0).toFixed(1)}% made in the US, Canada, or Mexico. You need at least {results.usmca?.threshold_applied || 60}%, so you have a {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}% safety buffer.
+              Your product is {(results.usmca?.north_american_content || 0).toFixed(1)}% made in the US, Canada, or Mexico. You need at least {results.usmca?.threshold_applied || 60}%, so you have a {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}% {results.usmca?.qualified ? 'safety buffer' : 'gap to close'}.
             </p>
 
             {results.savings && (results.savings.annual_savings || 0) > 0 && (

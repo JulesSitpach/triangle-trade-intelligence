@@ -1152,7 +1152,13 @@ export default function TradeRiskAlternatives() {
                     const componentIndustry = comp.industry || userProfile.industry_sector;
 
                     // ✅ STRICT FILTER: Alert must have specific targeting
-                    const hasHSCodes = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+                    // ✅ FIX (Nov 6): Filter out invalid HS codes (years, partial codes < 6 digits)
+                    const validHSCodes = (alert.affected_hs_codes || []).filter(code => {
+                      const normalized = String(code).replace(/\./g, '');
+                      // Valid HS codes are 6-10 digits, not years (2024, 2025) or short codes (8217)
+                      return normalized.length >= 6 && !/^20\d{2}$/.test(normalized);
+                    });
+                    const hasHSCodes = validHSCodes.length > 0;
                     const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
                     const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
 
@@ -1193,9 +1199,9 @@ export default function TradeRiskAlternatives() {
 
                     // TYPE 2: Specific HS code match (most precise)
                     if (hasHSCodes && componentHS) {
-                      const hsMatch = alert.affected_hs_codes.some(code => {
+                      const hsMatch = validHSCodes.some(code => {
                         const normalizedComponentHS = componentHS.replace(/\./g, '');
-                        const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+                        const normalizedAlertCode = String(code).replace(/\./g, '').substring(0, 6);
                         return normalizedComponentHS.startsWith(normalizedAlertCode);
                       });
 

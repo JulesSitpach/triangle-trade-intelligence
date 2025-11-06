@@ -812,7 +812,28 @@ export default protectedApiHandler({
               .single();
 
             if (cachedRate) {
-              console.log(`✅ [CACHE HIT] Found cached AI rate for ${component.hs_code}`);
+              // ✅ NEW (Nov 6, 2025): Check if cache is stale (expired)
+              const isExpired = cachedRate.expires_at && new Date(cachedRate.expires_at) < new Date();
+
+              if (isExpired) {
+                console.log(`⚠️ [CACHE STALE] Cache expired for ${component.hs_code} (expired: ${cachedRate.expires_at})`);
+                // Mark as stale - force AI refresh
+                enriched.push({
+                  ...baseComponent,
+                  mfn_rate: 0,
+                  base_mfn_rate: 0,
+                  section_301: 0,
+                  section_232: 0,
+                  usmca_rate: 0,
+                  rate_source: 'cache_expired',
+                  stale: true,  // Force AI research due to expiration
+                  data_source: 'expired_cache',
+                  cache_expired_at: cachedRate.expires_at
+                });
+                continue;  // Let Phase 3 refresh this with AI
+              }
+
+              console.log(`✅ [CACHE HIT] Found fresh cached AI rate for ${component.hs_code} (expires: ${cachedRate.expires_at})`);
               // Use cached rate instead of making AI call
               enriched.push({
                 ...baseComponent,
@@ -823,7 +844,8 @@ export default protectedApiHandler({
                 usmca_rate: parseFloat(cachedRate.usmca_rate) || 0,
                 rate_source: 'tariff_rates_cache',
                 stale: false,  // Cache hit - no AI call needed
-                data_source: 'tariff_rates_cache'
+                data_source: 'tariff_rates_cache',
+                cache_expires_at: cachedRate.expires_at
               });
               continue;  // Skip to next component, no AI call needed
             }
@@ -2073,7 +2095,7 @@ export default protectedApiHandler({
         .update({
           completed_at: new Date().toISOString()
         })
-        .eq('id', formData.workflow_session_id)
+        .eq('session_id', formData.workflow_session_id)  // ✅ FIX (Nov 6): Use session_id column, not id (UUID)
         .then(({ error }) => {
           if (error) {
             console.error('[WORKFLOW-COMPLETION] Failed to mark workflow as completed:', error.message);

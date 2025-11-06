@@ -23,7 +23,8 @@ export default function UserDashboard({ user }) {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/dashboard-data`);
+      // ✅ FIX (Nov 6): Add cache-busting timestamp to force fresh data
+      const response = await fetch(`/api/dashboard-data?t=${Date.now()}`);
       const data = await response.json();
 
       if (response.ok) {

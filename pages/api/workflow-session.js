@@ -81,6 +81,14 @@ export default protectedApiHandler({
     const { sessionId, workflowData, action } = req.body;
     const userId = req.user?.id; // Get user ID from authenticated session (optional for dev testing)
 
+    console.log('═══════════════════════════════════════════════════');
+    console.log('[WORKFLOW-SESSION-DEBUG] POST request received');
+    console.log('[WORKFLOW-SESSION-DEBUG] sessionId:', sessionId);
+    console.log('[WORKFLOW-SESSION-DEBUG] Type of sessionId:', typeof sessionId);
+    console.log('[WORKFLOW-SESSION-DEBUG] userId:', userId);
+    console.log('[WORKFLOW-SESSION-DEBUG] action:', action);
+    console.log('═══════════════════════════════════════════════════');
+
     // Validate required fields
     validateRequiredFields({ sessionId, workflowData }, ['sessionId', 'workflowData']);
 

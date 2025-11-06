@@ -57,7 +57,8 @@ export default function USMCAWorkflowOrchestrator() {
     getTotalComponentPercentage,
     clearError,
     loadSavedWorkflow,
-    saveWorkflowToDatabase
+    saveWorkflowToDatabase,
+    currentSessionId  // ✅ FIX (Nov 6): Get session ID from hook state to pass to child components
   } = useWorkflowState();
 
   const { trustIndicators } = useTrustIndicators();
@@ -528,6 +529,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             isLoading={isLoading}
             userTier={userTier}
             saveWorkflowToDatabase={saveWorkflowToDatabase}
+            currentSessionId={currentSessionId}  // ✅ FIX (Nov 6): Pass session ID so component reacts to new sessions
           />
         )}
 

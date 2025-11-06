@@ -7,7 +7,10 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 import TriangleLayout from '../components/TriangleLayout';
+import SalesTabContent from '../components/admin/SalesTabContent';
+import AnalyticsTabContent from '../components/admin/AnalyticsTabContent';
 
 export default function AdminDevMonitor() {
   const router = useRouter();
@@ -17,9 +20,18 @@ export default function AdminDevMonitor() {
 
   // Data states
   const [devIssues, setDevIssues] = useState([]);
-  const [salesMetrics, setSalesMetrics] = useState(null);
+  const [salesData, setSalesData] = useState(null); // Full sales dashboard data
   const [analyticsData, setAnalyticsData] = useState(null);
   const [systemHealth, setSystemHealth] = useState(null);
+
+  // Sales dashboard states
+  const [showProspectForm, setShowProspectForm] = useState(false);
+  const [chartLoaded, setChartLoaded] = useState(false);
+  const [salesFilters, setSalesFilters] = useState({
+    stage: 'all',
+    country: 'all',
+    industry: 'all'
+  });
 
   // Filters
   const [severityFilter, setSeverityFilter] = useState('all');
@@ -71,13 +83,13 @@ export default function AdminDevMonitor() {
         console.error('Failed to load dev issues:', issuesRes.status, errorText);
       }
 
-      // Load sales metrics
-      const salesRes = await fetch('/api/admin/sales-metrics');
+      // Load full sales dashboard data
+      const salesRes = await fetch('/api/admin/sales-data');
       if (salesRes.ok) {
-        const salesData = await salesRes.json();
-        setSalesMetrics(salesData.data?.metrics);
+        const salesDataResponse = await salesRes.json();
+        setSalesData(salesDataResponse.data);
       } else {
-        console.error('Failed to load sales metrics:', salesRes.status);
+        console.error('Failed to load sales data:', salesRes.status);
       }
 
       // Load analytics
@@ -497,168 +509,283 @@ export default function AdminDevMonitor() {
                   )}
 
                   {/* SALES TAB */}
-                  {activeTab === 'sales' && (
-                    <div>
-                      {salesMetrics ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
-                          <div style={{
-                            padding: '20px',
-                            backgroundColor: '#F0FDF4',
-                            border: '1px solid #BBF7D0',
-                            borderRadius: '8px'
-                          }}>
-                            <h3 style={{ fontSize: '16px', color: '#16A34A', marginBottom: '10px' }}>💰 Total Revenue</h3>
-                            <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#15803D' }}>
-                              ${(salesMetrics.total_revenue / 100).toFixed(2)}
-                            </p>
-                          </div>
-
-                          <div style={{
-                            padding: '20px',
-                            backgroundColor: '#EFF6FF',
-                            border: '1px solid #BFDBFE',
-                            borderRadius: '8px'
-                          }}>
-                            <h3 style={{ fontSize: '16px', color: '#2563EB', marginBottom: '10px' }}>👥 Active Subscriptions</h3>
-                            <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#1E40AF' }}>
-                              {salesMetrics.active_subscriptions}
-                            </p>
-                          </div>
-
-                          <div style={{
-                            padding: '20px',
-                            backgroundColor: '#FEF3C7',
-                            border: '1px solid #FDE68A',
-                            borderRadius: '8px'
-                          }}>
-                            <h3 style={{ fontSize: '16px', color: '#D97706', marginBottom: '10px' }}>📈 MRR</h3>
-                            <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#B45309' }}>
-                              ${(salesMetrics.mrr / 100).toFixed(2)}
-                            </p>
-                          </div>
-
-                          <div style={{
-                            padding: '20px',
-                            backgroundColor: '#F5F3FF',
-                            border: '1px solid #DDD6FE',
-                            borderRadius: '8px'
-                          }}>
-                            <h3 style={{ fontSize: '16px', color: '#7C3AED', marginBottom: '10px' }}>📊 Conversion Rate</h3>
-                            <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#6D28D9' }}>
-                              {(salesMetrics.conversion_rate * 100).toFixed(1)}%
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p>No sales data available</p>
-                      )}
-                    </div>
-                  )}
+                  {activeTab === 'sales' && <SalesTabContent />}
 
                   {/* ANALYTICS TAB */}
-                  {activeTab === 'analytics' && (
-                    <div>
-                      {analyticsData ? (
-                        <div>
-                          <h3 className="content-card-title">User Activity (Last 30 Days)</h3>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
-                            <div style={{ padding: '15px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-                              <p style={{ fontSize: '14px', color: '#6B7280' }}>Total Analyses</p>
-                              <p style={{ fontSize: '28px', fontWeight: 'bold' }}>{analyticsData.total_analyses}</p>
-                            </div>
-                            <div style={{ padding: '15px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-                              <p style={{ fontSize: '14px', color: '#6B7280' }}>Active Users</p>
-                              <p style={{ fontSize: '28px', fontWeight: 'bold' }}>{analyticsData.active_users}</p>
-                            </div>
-                            <div style={{ padding: '15px', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-                              <p style={{ fontSize: '14px', color: '#6B7280' }}>Avg. Analysis Time</p>
-                              <p style={{ fontSize: '28px', fontWeight: 'bold' }}>{analyticsData.avg_completion_time}min</p>
-                            </div>
-                          </div>
-
-                          <h3 className="content-card-title">Tier Distribution</h3>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
-                            {Object.entries(analyticsData.tier_distribution || {}).map(([tier, count]) => (
-                              <div key={tier} style={{
-                                padding: '12px',
-                                backgroundColor: '#F9FAFB',
-                                border: '1px solid #E5E7EB',
-                                borderRadius: '6px',
-                                textAlign: 'center'
-                              }}>
-                                <p style={{ fontWeight: 'bold', fontSize: '20px' }}>{count}</p>
-                                <p style={{ fontSize: '14px', color: '#6B7280' }}>{tier}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <p>No analytics data available</p>
-                      )}
-                    </div>
-                  )}
+                  {activeTab === 'analytics' && <AnalyticsTabContent />}
 
                   {/* SYSTEM HEALTH TAB */}
                   {activeTab === 'system' && (
                     <div>
                       {systemHealth ? (
                         <div>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                          <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '20px' }}>
+                            Operational health dashboard - actionable metrics for troubleshooting
+                          </p>
+
+                          {/* CRITICAL TIER */}
+                          <h3 className="content-card-title">Critical Status</h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px', marginBottom: '30px' }}>
                             <div style={{
                               padding: '20px',
                               backgroundColor: systemHealth.database_healthy ? '#F0FDF4' : '#FEE2E2',
-                              border: `1px solid ${systemHealth.database_healthy ? '#BBF7D0' : '#FECACA'}`,
+                              border: `2px solid ${systemHealth.database_healthy ? '#BBF7D0' : '#FECACA'}`,
                               borderRadius: '8px'
                             }}>
-                              <h3 style={{ fontSize: '16px', marginBottom: '10px' }}>
-                                {systemHealth.database_healthy ? '✅' : '❌'} Database
-                              </h3>
-                              <p style={{ fontSize: '14px', color: '#6B7280' }}>
-                                {systemHealth.database_healthy ? 'Healthy' : 'Issues Detected'}
+                              <h3 style={{ fontSize: '14px', marginBottom: '5px', color: '#6B7280' }}>Database</h3>
+                              <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                                {systemHealth.database_healthy ? '✅ Healthy' : '❌ Down'}
                               </p>
                             </div>
 
                             <div style={{
                               padding: '20px',
                               backgroundColor: systemHealth.ai_healthy ? '#F0FDF4' : '#FEE2E2',
-                              border: `1px solid ${systemHealth.ai_healthy ? '#BBF7D0' : '#FECACA'}`,
+                              border: `2px solid ${systemHealth.ai_healthy ? '#BBF7D0' : '#FECACA'}`,
                               borderRadius: '8px'
                             }}>
-                              <h3 style={{ fontSize: '16px', marginBottom: '10px' }}>
-                                {systemHealth.ai_healthy ? '✅' : '❌'} AI Services
-                              </h3>
-                              <p style={{ fontSize: '14px', color: '#6B7280' }}>
-                                {systemHealth.ai_healthy ? 'Online' : 'Degraded'}
+                              <h3 style={{ fontSize: '14px', marginBottom: '5px', color: '#6B7280' }}>AI Services</h3>
+                              <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                                {systemHealth.ai_healthy ? '✅ Online' : '❌ Degraded'}
                               </p>
                             </div>
 
                             <div style={{
                               padding: '20px',
                               backgroundColor: '#EFF6FF',
-                              border: '1px solid #BFDBFE',
+                              border: '2px solid #BFDBFE',
                               borderRadius: '8px'
                             }}>
-                              <h3 style={{ fontSize: '16px', marginBottom: '10px' }}>⚡ Avg Response Time</h3>
-                              <p style={{ fontSize: '24px', fontWeight: 'bold' }}>
+                              <h3 style={{ fontSize: '14px', marginBottom: '5px', color: '#6B7280' }}>Avg Response Time</h3>
+                              <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#1E40AF' }}>
                                 {systemHealth.avg_response_time}ms
+                              </p>
+                            </div>
+
+                            <div style={{
+                              padding: '20px',
+                              backgroundColor: systemHealth.error_rate > 5 ? '#FEE2E2' : '#F0FDF4',
+                              border: `2px solid ${systemHealth.error_rate > 5 ? '#FECACA' : '#BBF7D0'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h3 style={{ fontSize: '14px', marginBottom: '5px', color: '#6B7280' }}>Error Rate (24h)</h3>
+                              <p style={{ fontSize: '24px', fontWeight: 'bold', color: systemHealth.error_rate > 5 ? '#DC2626' : '#16A34A' }}>
+                                {systemHealth.error_rate.toFixed(1)}%
                               </p>
                             </div>
                           </div>
 
-                          <h3 className="content-card-title">Recent Error Rate</h3>
+                          {/* OPERATIONAL ALERTS */}
+                          <h3 className="content-card-title">Operational Alerts</h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                            {/* OpenRouter Quota */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: systemHealth.openrouter_quota?.healthy ? 'white' : '#FEF3C7',
+                              border: `1px solid ${systemHealth.openrouter_quota?.healthy ? '#E5E7EB' : '#FDE68A'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>OpenRouter API Quota</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: systemHealth.openrouter_quota?.healthy ? '#16A34A' : '#D97706' }}>
+                                {systemHealth.openrouter_quota?.estimated_percent}% used
+                              </p>
+                              <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>
+                                {systemHealth.openrouter_quota?.estimated_usage} calls / 1000 limit
+                              </p>
+                              {systemHealth.openrouter_quota?.warning && (
+                                <p style={{ fontSize: '12px', color: '#D97706', marginTop: '5px', fontWeight: 'bold' }}>
+                                  ⚠️ {systemHealth.openrouter_quota.warning}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Certificate Generation */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: systemHealth.certificate_generation?.healthy ? 'white' : '#FEE2E2',
+                              border: `1px solid ${systemHealth.certificate_generation?.healthy ? '#E5E7EB' : '#FECACA'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Certificate Generation</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: systemHealth.certificate_generation?.healthy ? '#16A34A' : '#DC2626' }}>
+                                {systemHealth.certificate_generation?.failures_last_hour} failures
+                              </p>
+                              <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>
+                                Last hour
+                              </p>
+                            </div>
+
+                            {/* Authentication */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: systemHealth.authentication?.healthy ? 'white' : '#FEE2E2',
+                              border: `1px solid ${systemHealth.authentication?.healthy ? '#E5E7EB' : '#FECACA'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Authentication</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: systemHealth.authentication?.healthy ? '#16A34A' : '#DC2626' }}>
+                                {systemHealth.authentication?.failures_last_24h} failures
+                              </p>
+                              <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>
+                                Last 24 hours
+                              </p>
+                            </div>
+
+                            {/* AI Classifications */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: systemHealth.ai_classifications?.healthy ? 'white' : '#FEF3C7',
+                              border: `1px solid ${systemHealth.ai_classifications?.healthy ? '#E5E7EB' : '#FDE68A'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>AI Classifications</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: systemHealth.ai_classifications?.healthy ? '#16A34A' : '#D97706' }}>
+                                {systemHealth.ai_classifications?.failed_last_24h} failures
+                              </p>
+                              <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>
+                                Last 24 hours
+                              </p>
+                            </div>
+
+                            {/* Workflow Sessions */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: 'white',
+                              border: '1px solid #E5E7EB',
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Workflow Sessions</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#3B82F6' }}>
+                                {systemHealth.workflow_sessions?.active_last_hour} active
+                              </p>
+                              <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '5px' }}>
+                                {systemHealth.workflow_sessions?.timed_out} timed out
+                              </p>
+                            </div>
+
+                            {/* Tariff Data Freshness */}
+                            <div style={{
+                              padding: '15px',
+                              backgroundColor: systemHealth.tariff_data_freshness?.stale ? '#FEF3C7' : 'white',
+                              border: `1px solid ${systemHealth.tariff_data_freshness?.stale ? '#FDE68A' : '#E5E7EB'}`,
+                              borderRadius: '8px'
+                            }}>
+                              <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Tariff Data Freshness</h4>
+                              <p style={{ fontSize: '20px', fontWeight: 'bold', color: systemHealth.tariff_data_freshness?.stale ? '#D97706' : '#16A34A' }}>
+                                {systemHealth.tariff_data_freshness?.age_hours ? `${systemHealth.tariff_data_freshness.age_hours}h old` : 'N/A'}
+                              </p>
+                              {systemHealth.tariff_data_freshness?.warning && (
+                                <p style={{ fontSize: '12px', color: '#D97706', marginTop: '5px', fontWeight: 'bold' }}>
+                                  ⚠️ {systemHealth.tariff_data_freshness.warning}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Cache Performance */}
+                          <h3 className="content-card-title">Cache Performance (Cost Indicator)</h3>
                           <div style={{
                             padding: '20px',
-                            backgroundColor: '#F9FAFB',
+                            backgroundColor: 'white',
                             border: '1px solid #E5E7EB',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            marginBottom: '30px'
                           }}>
-                            <p style={{ fontSize: '32px', fontWeight: 'bold', color: systemHealth.error_rate > 5 ? '#DC2626' : '#16A34A' }}>
-                              {systemHealth.error_rate.toFixed(2)}%
-                            </p>
-                            <p style={{ fontSize: '14px', color: '#6B7280' }}>
-                              {systemHealth.error_rate > 5 ? 'Above normal threshold' : 'Within acceptable range'}
-                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+                              <div>
+                                <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '5px' }}>Cache Hit Rate</p>
+                                <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#16A34A' }}>
+                                  {systemHealth.cache_performance?.hit_rate}%
+                                </p>
+                              </div>
+                              <div>
+                                <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '5px' }}>AI Lookups (24h)</p>
+                                <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#3B82F6' }}>
+                                  {systemHealth.cache_performance?.ai_lookups}
+                                </p>
+                              </div>
+                              <div>
+                                <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '5px' }}>Cost Indicator</p>
+                                <p style={{
+                                  fontSize: '28px',
+                                  fontWeight: 'bold',
+                                  color: systemHealth.cache_performance?.cost_indicator === 'HIGH' ? '#DC2626' :
+                                         systemHealth.cache_performance?.cost_indicator === 'MEDIUM' ? '#F59E0B' : '#16A34A'
+                                }}>
+                                  {systemHealth.cache_performance?.cost_indicator}
+                                </p>
+                              </div>
+                            </div>
                           </div>
+
+                          {/* Top Errors */}
+                          {systemHealth.top_errors && systemHealth.top_errors.length > 0 && (
+                            <>
+                              <h3 className="content-card-title">Top Errors (Last 24h)</h3>
+                              <div style={{ overflowX: 'auto', marginBottom: '30px' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                                  <thead>
+                                    <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '2px solid #E5E7EB' }}>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Endpoint</th>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Error</th>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Severity</th>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Count</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {systemHealth.top_errors.map((error, idx) => (
+                                      <tr key={idx} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                                        <td style={{ padding: '12px', fontWeight: 'bold' }}>{error.endpoint}</td>
+                                        <td style={{ padding: '12px', maxWidth: '300px' }}>{error.error}</td>
+                                        <td style={{ padding: '12px' }}>
+                                          <span style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
+                                            backgroundColor: error.severity === 'critical' ? '#FEE2E2' : '#FEF3C7',
+                                            color: error.severity === 'critical' ? '#DC2626' : '#D97706'
+                                          }}>
+                                            {error.severity.toUpperCase()}
+                                          </span>
+                                        </td>
+                                        <td style={{ padding: '12px', fontWeight: 'bold' }}>×{error.count}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </>
+                          )}
+
+                          {/* Slowest Endpoints */}
+                          {systemHealth.slowest_endpoints && systemHealth.slowest_endpoints.length > 0 && (
+                            <>
+                              <h3 className="content-card-title">Slowest Endpoints (Last 24h)</h3>
+                              <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                                  <thead>
+                                    <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '2px solid #E5E7EB' }}>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Type</th>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>HS Code</th>
+                                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: '600' }}>Response Time</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {systemHealth.slowest_endpoints.map((endpoint, idx) => (
+                                      <tr key={idx} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                                        <td style={{ padding: '12px' }}>{endpoint.type}</td>
+                                        <td style={{ padding: '12px', fontWeight: 'bold' }}>{endpoint.hs_code || 'N/A'}</td>
+                                        <td style={{ padding: '12px', color: endpoint.response_time_seconds > 10 ? '#DC2626' : '#6B7280' }}>
+                                          {endpoint.response_time_seconds}s
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </>
+                          )}
                         </div>
                       ) : (
                         <p>No system health data available</p>
