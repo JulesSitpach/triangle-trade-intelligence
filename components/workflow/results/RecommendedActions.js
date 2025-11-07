@@ -24,6 +24,23 @@ export default function RecommendedActions({ results }) {
   const [alertError, setAlertError] = useState(null);
   const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
 
+  // ✅ FIX (Nov 7): Clear cached executive alert if company name changed
+  useEffect(() => {
+    const workflowResults = JSON.parse(localStorage.getItem('usmca_workflow_results') || '{}');
+    const cachedCompanyName = workflowResults?.detailed_analysis?.company_name || workflowResults?.company?.name;
+    const currentCompanyName = results?.company?.name;
+
+    if (cachedCompanyName && currentCompanyName && cachedCompanyName !== currentCompanyName) {
+      console.log(`🔄 Company changed (${cachedCompanyName} → ${currentCompanyName}), clearing cached executive alert`);
+      setExecutiveAlert(null);
+      // Clear from localStorage too
+      if (workflowResults.detailed_analysis) {
+        delete workflowResults.detailed_analysis;
+        localStorage.setItem('usmca_workflow_results', JSON.stringify(workflowResults));
+      }
+    }
+  }, [results?.company?.name]);
+
   // Fetch user's subscription tier first
   useEffect(() => {
     const fetchUserSubscriptionTier = async () => {
@@ -44,6 +61,19 @@ export default function RecommendedActions({ results }) {
 
     fetchUserSubscriptionTier();
   }, []);
+
+  // ✅ FIX (Nov 7): Load saved executive summary from database when viewing from dashboard
+  // This prevents users from wasting their 1-per-workflow summary limit
+  useEffect(() => {
+    if (results?.detailed_analysis && !executiveAlert) {
+      console.log('📂 Loading saved executive summary from workflow data');
+      setExecutiveAlert({
+        alert: results.detailed_analysis,
+        strategic_roadmap: results.detailed_analysis.strategic_roadmap || [],
+        cbp_compliance_strategy: results.detailed_analysis.cbp_compliance_strategy
+      });
+    }
+  }, [results?.detailed_analysis, executiveAlert]);
 
   // ❌ DISABLED (Oct 30, 2025): Auto-trigger removed to prevent unwanted AI costs (~$0.02 per page load)
   // User must click "📊 Generate Business Impact Summary" button to trigger AI call

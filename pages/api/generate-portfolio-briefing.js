@@ -357,19 +357,63 @@ No active policy changes detected. Tracking USTR, Federal Register, and Mexico l
 - Your HS Codes: ${userComponentHS.join(', ')}
 - Your Source Countries: ${[...new Set(userComponentOrigins)].join(', ')}`}
 
-You are writing a strategic briefing for a business owner preparing for USMCA 2026 renegotiation. Write in narrative prose - tell the story of their supply chain position.
+You are writing a strategic briefing for a business owner preparing for USMCA 2026 renegotiation. Write as an expressive trade intelligence analyst - tell the STORY of their supply chain position with personality and insight.
 
-Return a JSON object with these EXACT fields:
+${alertContext}
 
-{
-  "business_overview": "Write 3-4 sentences painting their supply chain picture. State percentages by country, give context on what 2026 means for them. Example: 'Your electronics assembly relies on a three-country supply chain: 55% from Mexico (power supplies, housing, connectors), 35% from China (microprocessors), and 10% from Canada (PCBs). This creates an interesting position heading into the USMCA 2026 renegotiation. Your Mexico concentration gives you a strong USMCA foundation, but your Chinese microprocessor sourcing sits in the crosshairs of cumulation rule discussions.'",
+Write your analysis in MARKDOWN format with these sections (you can add more if needed):
 
-  "component_analysis": "Write 2-3 flowing paragraphs analyzing their components as a narrative (NOT listing components one by one). Group components by strategic significance. ${matchedAlerts.length > 0 ? 'Weave alert context naturally into the narrative (e.g., \"Two recent alerts signal this pressure: [titles]\"). Don\'t just say \"Alert detected.\"' : 'Focus on 2026 renegotiation context and what rule changes would mean.'} Example: 'The microprocessor component presents your most significant strategic uncertainty. Chinese semiconductor sourcing works beautifully today under current cumulation rules, but 2026 renegotiation will likely revisit whether non-USMCA content can flow through North American assembly. Your Mexico-sourced components—power supplies and housing representing 50% of costs—anchor your USMCA qualification. They're well-positioned for any agreement strengthening, though they do concentrate your supply chain in a single country.'",
+# Executive Advisory: ${companyName}
 
-  "strategic_trade_offs": "Write 2-3 paragraphs presenting genuine strategic choices with no obvious answer. Frame as 'choosing between futures.' Example: 'You're essentially choosing between two futures. Continue with Chinese microprocessors and accept 2026 rule uncertainty, or begin qualifying alternative suppliers—knowing that transition takes 12-18 months and increases component costs. There's no obviously correct answer because the actual 2026 rules haven't been proposed yet. Your Mexico concentration (55%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce this risk, but your current suppliers have established quality and logistics. The timing matters—qualification of alternative suppliers requires substantial lead time.'",
+## Active Alerts Affecting Your Supply Chain
+${strategicAlerts.length > 0 ? `List the ${strategicAlerts.length} strategic alerts as bullets with emoji severity indicators (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Each alert should be one compelling line that makes the business owner understand WHY it matters to them.
 
-  "monitoring_plan": "Write 2-3 paragraphs describing what you're tracking and WHY it matters to them. Connect monitoring to their specific components.${hasVolatileComponents ? ' CRITICAL: Emphasize that volatile components require MORE FREQUENT monitoring (daily for Tier 1, weekly for Tier 2) because tariff rates change with executive proclamations. Explain which components need daily checks vs quarterly checks.' : ''} Example: 'We're tracking the USMCA Joint Commission meeting schedule and any published negotiating texts, particularly proposals affecting cumulation rules for electronics components. For your microprocessor sourcing, we're watching USTR statements on non-party content thresholds. On the Mexico side, we're monitoring the Diario Oficial for labor ministry updates affecting your power supply and housing suppliers. The next major intelligence point comes when the Joint Commission publishes 2026 renegotiation proposals, expected Q1 2026. That's when uncertainty around cumulation rules begins resolving into actual policy language.'"
-}
+Example:
+- 🔴 US-China Trade Truce (Nov 5) creates 90-day rate reduction window - your Chinese PLC sourcing could save $400K if you ship before Feb 15
+- 🟠 Section 301 rates historically spike Q1 2026 - pattern suggests locking pricing NOW before March announcements
+- 🟡 Mexico Section 232 exemptions under review - your steel frame sourcing (32% of costs) at risk if exemption expires June 2026` : `Write 2-3 bullets about what you're MONITORING (even with no active alerts), framed as opportunities/risks:
+
+Example:
+- 🔵 USMCA 2026 renegotiation hearing scheduled Q1 - cumulation rules affecting your Chinese components will be debated
+- 🟢 Mexico nearshoring momentum - your existing Mexican suppliers (55% of costs) position you ahead of competitors scrambling to relocate`}
+
+## Your Situation
+Write 2-3 **flowing narrative paragraphs** painting their supply chain picture. State exact percentages by country (CALCULATE from component data - don't guess!). Give context on what 2026 means for THEM specifically. ${matchedAlerts.length > 0 ? 'Weave matched alerts naturally into this narrative - don\'t just list them, CONNECT them to the user\'s components.' : 'Focus on 2026 renegotiation context and what rule changes would mean for their specific components.'}
+
+Example style:
+"Your hydraulic press manufacturing sits at an interesting intersection of three supply chains. Mexican steel framing and welding (32% of product costs) gives you solid USMCA footing, but your Chinese PLC touchscreen control system (22% of costs) creates Section 301 exposure worth $1.2M annually. The German hydraulic pump (18%) rounds out a geographically diversified supply base - smart for resilience, but complex for rules of origin.
+
+Two recent policy developments put this configuration under pressure: [weave alerts here naturally]. What worked brilliantly in 2024 may need rethinking as 2026 approaches."
+
+## Critical Decision Gates
+Write 2-3 paragraphs presenting genuine strategic CHOICES with no obvious answer. Frame as "choosing between futures." Present trade-offs, not recommendations. Make the business owner THINK.
+
+Example:
+"You're essentially choosing between two futures. Path A: Continue with Chinese PLC sourcing, accept $1.2M annual Section 301 burden, and wait for 2026 rule clarity. This works if cumulation rules stay favorable OR if Chinese suppliers remain price-competitive despite tariffs. Path B: Begin qualifying Mexican PLC alternatives now - 12-18 month transition, potentially higher component costs, but eliminates Section 301 exposure and strengthens USMCA qualification.
+
+There's no obviously correct answer because Q1 2026 negotiating proposals haven't been published yet. Your Mexican steel concentration (32%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce risk, but your current suppliers have proven quality and established logistics."
+
+## What We're Monitoring
+Write 2-3 paragraphs describing what you're tracking and WHY it matters to their specific components. Structure around calendar milestones (Q1 2026 proposals, Mid-2026 findings, etc.).
+
+${hasVolatileComponents ? `CRITICAL: This portfolio contains ${volatileComponents.length} components with VOLATILE tariff rates. Explain which components need daily/weekly checks vs quarterly checks and WHY:
+
+DAILY MONITORING REQUIRED:
+${volatileComponents.filter(c => c.volatility.tier === 1).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n') || 'None'}
+
+WEEKLY MONITORING REQUIRED:
+${volatileComponents.filter(c => c.volatility.tier === 2).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n') || 'None'}
+
+Weave this into your monitoring narrative - explain that some rates change with executive proclamations (weekly checks) while others are stable (quarterly sufficient).` : ''}
+
+Example:
+"We're tracking three intelligence streams for you. First, the USMCA Joint Commission meeting schedule - Q1 2026 is when cumulation rule proposals get published. That's the signal for whether your Chinese PLC strategy needs revision. Second, USTR Section 301 review cycles - historically these spike in March/April, so we're watching for February announcements. Third, Mexico's Diario Oficial for labor compliance updates affecting your steel suppliers.
+
+The next major decision point: Q1 2026 when we see actual negotiating text. That's when 'potential' becomes 'proposed' and strategic uncertainty starts resolving into policy language you can plan around."
+
+---
+
+**Return ONLY the markdown above. Do NOT wrap in JSON. Do NOT add code fences. Just pure markdown text.**
 
 ${hasVolatileComponents ? `\nMONITORING FREQUENCY GUIDANCE:
 Your portfolio contains ${volatileComponents.length} components with volatile tariff rates requiring enhanced monitoring:
