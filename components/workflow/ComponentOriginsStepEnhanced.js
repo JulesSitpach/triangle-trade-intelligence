@@ -727,9 +727,6 @@ export default function ComponentOriginsStepEnhanced({
         <h2 className="form-section-title">
           Step 2: Product & Component Analysis
         </h2>
-        <p className="form-section-description">
-          Describe your product, manufacturing location, and break it down into components with their origins and HS codes
-        </p>
       </div>
 
       {/* Product Overview Section */}
