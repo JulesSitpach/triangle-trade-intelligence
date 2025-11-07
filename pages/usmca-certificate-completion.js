@@ -28,9 +28,15 @@ export default function USMCACertificateCompletion() {
   const [previewEditedData, setPreviewEditedData] = useState(null); // Store edits from preview
 
   // ✅ RESET showPreview on fresh page load (when coming from results page)
+  // Note: Don't reset if we're loading from dashboard with workflow_id
   useEffect(() => {
-    // Always start with preview hidden when first landing on page
-    setShowPreview(false);
+    const urlParams = new URLSearchParams(window.location.search);
+    const workflowId = urlParams.get('workflow_id');
+
+    // Only reset preview if NOT loading from dashboard
+    if (!workflowId) {
+      setShowPreview(false);
+    }
   }, []); // Empty dependency = run once on mount
   const [certificateData, setCertificateData] = useState({
     company_info: {},
@@ -106,8 +112,24 @@ export default function USMCACertificateCompletion() {
 
             setWorkflowData(initialData);
 
-            // Auto-populate certificate data with saved authorization
-            if (dbData.authorization) {
+            // ✅ FIX (Nov 7): Auto-populate certificate data and show preview if authorization exists
+            if (dbData.authorization && dbData.authorization.signatory_name) {
+              console.log('✅ Authorization data found, auto-generating certificate preview');
+
+              // Auto-populate certificate data
+              setCertificateData(prev => ({
+                ...prev,
+                authorization: dbData.authorization
+              }));
+
+              // Auto-generate certificate preview (call generateAndDownloadCertificate in preview mode)
+              // Use setTimeout to ensure state is updated first
+              setTimeout(async () => {
+                await handlePreviewCertificate(dbData.authorization);
+              }, 100);
+            } else if (dbData.authorization) {
+              console.log('⚠️ Authorization data exists but incomplete (missing signatory_name) - showing form');
+              // Still populate what we have so user can edit
               setCertificateData(prev => ({
                 ...prev,
                 authorization: dbData.authorization
