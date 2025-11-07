@@ -98,8 +98,12 @@ export default function ComponentOriginsStepEnhanced({
   const [searchingHS, setSearchingHS] = useState({});
   const [agentSuggestions, setAgentSuggestions] = useState({});
   const [validationResult, setValidationResult] = useState(null);
+
+  // ✅ Ref for Component Breakdown section (smooth scroll after Product Overview completion)
+  const componentBreakdownRef = useRef(null);
   const [isValidating, setIsValidating] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [hasScrolledToComponents, setHasScrolledToComponents] = useState(false);
 
   // Update parent form data when components change
   // CRITICAL: Prevent infinite loop by tracking when we push to parent
@@ -119,6 +123,24 @@ export default function ComponentOriginsStepEnhanced({
   useEffect(() => {
     updateFormData('used_components_count', usedComponentsCount);
   }, [usedComponentsCount, updateFormData]);
+
+  // ✅ AUTO-SCROLL: Scroll to Component Breakdown when Product Overview is complete
+  useEffect(() => {
+    const isProductOverviewComplete =
+      formData.product_description?.trim() &&
+      formData.manufacturing_location?.trim();
+
+    if (isProductOverviewComplete && !hasScrolledToComponents && componentBreakdownRef.current) {
+      // Delay scroll slightly to allow field validation to complete
+      setTimeout(() => {
+        componentBreakdownRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+        setHasScrolledToComponents(true);
+      }, 300);
+    }
+  }, [formData.product_description, formData.manufacturing_location, hasScrolledToComponents]);
 
   // Restore components when navigating back and formData changes
   // This handles browser back button and in-app navigation
@@ -805,7 +827,7 @@ export default function ComponentOriginsStepEnhanced({
       </div>
 
       {/* Component Breakdown Section */}
-      <div className="element-spacing">
+      <div ref={componentBreakdownRef} className="element-spacing">
         <h2 className="form-section-title">Component Breakdown</h2>
         <p className="text-body">
           Break down your product into its major components. Each component should represent a significant portion of the product&apos;s value.
