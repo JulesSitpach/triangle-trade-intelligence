@@ -55,8 +55,9 @@ export default function PersonalizedPolicyAlert({ alert, userProfile }) {
   return (
     <div
       className={`alert alert-${
-        alert.severity === 'CRITICAL' ? 'error' :
-        alert.severity === 'HIGH' ? 'warning' :
+        // ✅ FIX (Nov 7): Database stores lowercase severity values
+        (alert.severity || '').toLowerCase() === 'critical' ? 'error' :
+        (alert.severity || '').toLowerCase() === 'high' ? 'warning' :
         'info'
       }`}
     >

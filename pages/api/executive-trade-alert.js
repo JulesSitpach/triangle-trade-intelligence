@@ -27,7 +27,7 @@ import { EXECUTIVE_SUMMARY_LIMITS } from '../../config/subscription-tier-limits.
 const executiveAgent = new BaseAgent({
   name: 'ExecutiveAdvisor',
   model: 'anthropic/claude-haiku-4.5',  // ✅ Haiku 4.5 for cost-effective consulting-grade output
-  maxTokens: 3000  // Longer responses for strategic depth
+  maxTokens: 8000  // ✅ FIXED Nov 7: Increased from 3000 to handle full strategic briefings (~14K chars)
 });
 // ✅ Removed mexicoAgent - now using config lookup instead of AI calls
 // ✅ Removed section301Agent - now using section_301 field from component_breakdown (already calculated in main analysis)
@@ -144,12 +144,36 @@ export default async function handler(req, res) {
       });
     }
 
-    // ========== STEP 1: Identify Which Policies Affect User's Products ==========
+    // ========== STEP 1: Fetch Active Crisis Alerts ==========
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-    // Get their HS codes
+    const { data: crisisAlerts, error: alertsError } = await supabase
+      .from('crisis_alerts')
+      .select('*')
+      .eq('status', 'active')
+      .order('severity', { ascending: false });
+
+    if (alertsError) {
+      console.error('❌ Failed to fetch crisis alerts:', alertsError);
+    }
+
+    console.log(`📋 Fetched ${crisisAlerts?.length || 0} active crisis alerts`);
+
+    // ========== STEP 2: Match Alerts to User's Components ==========
+
+    // Get their HS codes and origins
     const userHSCodes = (workflow_intelligence.components || [])
       .map(c => c.hs_code)
       .filter(Boolean);
+
+    const componentOrigins = [...new Set(
+      (workflow_intelligence.components || [])
+        .map(c => c.origin_country)
+        .filter(Boolean)
+    )];
 
     // ✅ No fallbacks - fields validated above
     const userIndustry = user_profile.industry_sector;
@@ -157,7 +181,41 @@ export default async function handler(req, res) {
     const hasChineseComponents = (workflow_intelligence.components || [])
       .some(c => c.origin_country === 'China' || c.origin_country === 'CN');
 
-    // Map of policies and which industries/origins they affect
+    // Match crisis alerts to user's components
+    const matchedAlerts = (crisisAlerts || []).filter(alert => {
+      // Blanket alerts (NULL HS codes = applies to all)
+      const isBlanketAlert = !alert.affected_hs_codes || alert.affected_hs_codes.length === 0;
+
+      // Country match
+      const affectsCountry = alert.affected_countries?.some(country =>
+        componentOrigins.includes(country)
+      );
+
+      // HS code match (6-digit prefix matching)
+      const affectsHSCode = alert.affected_hs_codes?.some(alertHS => {
+        const prefix = alertHS.replace(/\./g, '').substring(0, 6);
+        return userHSCodes.some(userHS =>
+          userHS.replace(/\./g, '').substring(0, 6) === prefix
+        );
+      });
+
+      // Industry match
+      const affectsIndustry = alert.relevant_industries?.includes(userIndustry);
+
+      return (isBlanketAlert && affectsCountry) || affectsHSCode || affectsIndustry;
+    });
+
+    console.log(`🎯 Matched ${matchedAlerts.length} crisis alerts to user's components`);
+
+    // Sort by severity and take top 3 most critical
+    const topAlerts = matchedAlerts
+      .sort((a, b) => {
+        const severityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+        return (severityOrder[a.severity] || 99) - (severityOrder[b.severity] || 99);
+      })
+      .slice(0, 3);
+
+    // ========== STEP 3: Build Applicable Policies (IMMEDIATE certification issues) ==========
     const applicablePolicies = [];
 
     // Section 301: China + US destination
@@ -213,13 +271,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // ========== STEP 2: Generate ONE Executive Advisory ==========
+    // ========== STEP 4: Generate ONE Executive Advisory ==========
 
-    const headline = generateHeadline(applicablePolicies, userIndustry);
+    const headline = generateHeadline(applicablePolicies, userIndustry, matchedAlerts.length);
     const executiveAdvisory = await generateExecutiveAdvisoryAI(
       applicablePolicies,
       workflow_intelligence,
-      user_profile
+      user_profile,
+      topAlerts  // ✅ NEW: Pass top 3 matched alerts to AI
     );
 
     // ========== STEP 3: Generate Financial Scenarios ==========
@@ -256,10 +315,22 @@ export default async function handler(req, res) {
         confidence: executiveAdvisory.confidence,
         ...financialScenarios // Add scenario analysis
       },
+      // ✅ NEW (Nov 7): Consolidated 90-day timeline with critical decision points
+      timeline_90_days: executiveAdvisory.timeline_90_days,
+      critical_decision_points: executiveAdvisory.critical_decision_points || [],
+      // ⚠️ DEPRECATED: Old 3-phase roadmap (keeping for backward compatibility)
       strategic_roadmap: executiveAdvisory.strategic_roadmap || [],
       action_this_week: executiveAdvisory.action_items || [],
       cbp_compliance_strategy: cbpGuidance, // NEW: Regulatory guidance
       policies_affecting_you: applicablePolicies.map(p => p.policy),
+      // ✅ NEW (Nov 7): Show matched crisis alerts count
+      active_policy_threats: matchedAlerts.length,
+      matched_alerts: topAlerts.map(a => ({
+        title: a.title,
+        severity: a.severity,
+        effective_date: a.effective_date,
+        description: a.description
+      })),
       from_your_broker: executiveAdvisory.broker_insights || 'Positioning your supply chain for trade policy resilience.',
       // ✅ FIX: Include professional_disclaimer and save_reminder (were being stripped out)
       professional_disclaimer: executiveAdvisory.professional_disclaimer,
@@ -431,9 +502,15 @@ async function calculateRiskImpact(workflow, userProfile, industryThreshold) {
   return 'Moderate (adequate buffer exists)';
 }
 
-function generateHeadline(policies, industry) {
-  if (policies.some(p => p.severity === 'CRITICAL')) {
-    return `⚠️ Critical Trade Policy Exposure in Your ${industry} Supply Chain`;
+function generateHeadline(policies, industry, alertCount = 0) {
+  // ✅ FIX (Nov 7): Database stores lowercase severity values
+  if (policies.some(p => (p.severity || '').toLowerCase() === 'critical')) {
+    return alertCount > 0
+      ? `⚠️ Critical: ${alertCount} Active Policy Threats + USMCA Risk`
+      : `⚠️ Critical Trade Policy Exposure in Your ${industry} Supply Chain`;
+  }
+  if (alertCount > 0) {
+    return `⚠️ ${alertCount} Active Tariff Threats Affecting Your Components`;
   }
   if (policies.length > 0) {
     return `📊 Your Supply Chain is Affected by ${policies.length} Active Tariff Policies`;
@@ -442,8 +519,9 @@ function generateHeadline(policies, industry) {
 }
 
 function highestSeverity(policies) {
-  if (policies.some(p => p.severity === 'CRITICAL')) return 'CRITICAL';
-  if (policies.some(p => p.severity === 'HIGH')) return 'HIGH';
+  // ✅ FIX (Nov 7): Database stores lowercase severity values
+  if (policies.some(p => (p.severity || '').toLowerCase() === 'critical')) return 'CRITICAL';
+  if (policies.some(p => (p.severity || '').toLowerCase() === 'high')) return 'HIGH';
   return 'MEDIUM';
 }
 
@@ -452,7 +530,7 @@ function highestSeverity(policies) {
  * Uses Claude 3.5 Sonnet for consulting-grade strategic intelligence
  * NO MORE HARDCODED TEMPLATES
  */
-async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
+async function generateExecutiveAdvisoryAI(policies, workflow, profile, matchedAlerts = []) {
   const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
   const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
 
@@ -470,159 +548,93 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile) {
     `  - ${c.description || c.hs_code}: ${c.value_percentage}% of product, Origin: ${c.origin_country}, MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}%, Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}%, USMCA: ${((c.usmca_rate || 0) * 100).toFixed(1)}%`
   ).join('\n');
 
-  // ✅ CONSULTING-GRADE AI PROMPT ($599/mo Premium tier quality)
-  const prompt = `You are a senior trade compliance strategist advising ${profile.contact_person || 'the CEO'} at ${profile.company_name || 'the company'} on tariff policy risks.
+  // ✅ Build active policy threats (matched crisis alerts)
+  const alertSummary = matchedAlerts.length > 0
+    ? matchedAlerts.map(alert =>
+        `  - [${alert.severity}] ${alert.title} (effective ${alert.effective_date}): ${alert.description}`
+      ).join('\n')
+    : 'No active policy alerts';
 
-**CLIENT PROFILE:**
-- Company: ${profile.company_name || 'Client company'}
-- Contact: ${profile.contact_person || 'Decision maker'}
-- Business Type: ${profile.business_type || 'Manufacturer'}
-- Industry: ${profile.industry_sector || 'Manufacturing'}
-- Location: ${profile.company_country || 'Not specified'}
-- Primary Supplier Country: ${profile.supplier_country || 'Multiple'}
+  // ✅ CONCISE EXECUTIVE ADVISORY PROMPT (Nov 7: Simplified + added crisis alerts)
+  const prompt = `You are a trade compliance strategist analyzing tariff risk for ${profile.company_name || 'this company'}.
 
-**PRODUCT & TRADE:**
-- Product: ${workflow.product_description || 'Manufacturing product'}
-- Shipping To: ${profile.destination_country || 'US'}
-- Annual Trade Volume: ${tradeVolume > 0 ? `$${tradeVolume.toLocaleString()}` : 'Not provided (CRITICAL: ask for this)'}
+**KEY DATA:**
+- Company: ${profile.company_name || 'Client'} | Industry: ${profile.industry_sector || 'Manufacturing'} | Destination: ${profile.destination_country || 'US'}
+- Product: ${workflow.product_description || 'Manufacturing product'} | Trade Volume: ${tradeVolume > 0 ? `$${tradeVolume.toLocaleString()}` : 'Unknown'}
+- USMCA Qualified: ${workflow.usmca_qualified ? 'YES' : 'NO'} | RVC: ${workflow.north_american_content || 0}% (threshold: ${workflow.threshold_applied || 65}%)
+- Current USMCA Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year
 
-**CURRENT USMCA STATUS:**
-- Qualified: ${workflow.usmca_qualified ? 'YES' : 'NO'}
-- North American Content: ${workflow.north_american_content || 0}%
-- Required Threshold: ${workflow.threshold_applied || 65}%
-- Safety Margin: ${((workflow.north_american_content || 0) - (workflow.threshold_applied || 65)).toFixed(1)}%
-- Preference Criterion: ${workflow.preference_criterion || 'Not specified'}
-- Current Annual Savings from USMCA: ${workflow.current_annual_savings > 0 ? `$${workflow.current_annual_savings.toLocaleString()}` : 'Not calculated'}
-- Monthly Savings: ${workflow.monthly_savings > 0 ? `$${workflow.monthly_savings.toLocaleString()}` : 'Not calculated'}
-
-**COMPLETE COMPONENT BREAKDOWN (all tariff rates already calculated):**
+**COMPONENTS:**
 ${componentDetails}
 
-${workflow.strategic_insights ? `**STRATEGIC CONTEXT FROM ANALYSIS:**
-${workflow.strategic_insights}
-` : ''}
+${chineseComponents.length > 0 ? `**SECTION 301 EXPOSURE:**
+- Chinese Components: ${chineseComponents.length} items (${totalChineseValue}% of value)
+- Section 301 Rate: ${section301Rate}
+- Annual Burden: ${section301Burden}` : ''}
 
-**SUPPLY CHAIN EXPOSURE:**
-${chineseComponents.length > 0 ? `
-- Chinese Components: ${chineseComponents.length} components (${totalChineseValue}% of product value)
-- Section 301 Tariff Rate: ${section301Rate}
-- Current Annual Burden: ${section301Burden}
-- Components affected: ${chineseComponents.map(c => c.description || c.hs_code).join(', ')}
-` : '- No Chinese components identified'}
+**⚠️ ACTIVE POLICY THREATS (${matchedAlerts.length}):**
+${alertSummary}
 
-${rvcPolicy ? `
-**RVC RISK:**
-- Current RVC: ${workflow.north_american_content}%
-- Required Threshold: ${rvcPolicy.impact}
-- Buffer: ${workflow.north_american_content - (workflow.threshold_applied || 65)}%
-` : ''}
+**TASK:** Generate concise CEO-level intelligence focusing on IMMEDIATE certification issues${matchedAlerts.length > 0 ? ` and the ${matchedAlerts.length} active policy threats listed above` : ''}. Be BRIEF and SPECIFIC.
 
-**YOUR TASK:**
-Generate a personalized CEO-level strategic intelligence briefing for ${profile.company_name || 'this client'}. Write as if you're presenting data analysis, NOT giving instructions.
+⚠️ CRITICAL: Think like a trade advisor, NOT a process manager.
+- BEFORE suggesting nearshoring, identify USMCA qualification blockers for their specific HS codes
+- Check: Do their components have Product-Specific Rules (PSRs) that Mexican sourcing won't fix?
+- Consider: Will Mexican assembly actually qualify if core components (batteries, chipsets, modules) remain non-originating?
+- Warn about blockers using their ACTUAL HS codes: "Components under HS [their actual code] may fail origin testing even if assembled in Mexico"
+- If you identify blockers, state them FIRST before suggesting roadmap
+- Speak to the CEO directly about real risks, not just process steps
+- Reference their specific component HS codes when discussing qualification risks
 
-⚠️ CRITICAL LEGAL POSTURE: This is a SaaS intelligence tool (like TurboTax), NOT a consulting firm.
-- We provide DATA and INTERPRETATION, not recommendations
-- Users make their own decisions based on the intelligence
-- Avoid directive language ("should", "must", "contact X now")
-- Use informational framing ("data shows", "may help validate", "typically involves")
-
-This is a Premium client paying $599/month - give them consulting-grade intelligence with professional disclaimers.
-
-Respond in JSON format:
+**JSON OUTPUT (keep all text concise):**
 {
-  "situation_brief": "1-sentence executive summary addressing ${profile.company_name || 'the company'} specifically",
-  "problem": "What specific tariff/policy risk the data shows for ${profile.company_name || 'this company'}'s margins (use actual numbers from context)",
-  "root_cause": "Analysis of why ${profile.company_name || 'this company'} has this exposure (reference their specific sourcing decisions and supplier countries)",
-  "annual_impact": "Dollar impact data for ${profile.company_name || 'this company'} - ONLY state the Section 301 burden they currently pay (calculated as: $${section301Burden.toLocaleString()}/year). DO NOT add USMCA savings to this number.",
-  "why_now": "Timeline or risk event context relevant to ${profile.contact_person || 'them'} (informational, not directive)",
-  "current_burden": "Current Section 301 tariff cost in dollars (calculated: $${section301Burden.toLocaleString()}/year on Chinese components from actual trade volume and AI-verified rates). This is what they already pay TODAY - do not add USMCA savings to this number.",
-  "potential_savings": "Potential savings if nearshoring implemented to eliminate Section 301 exposure (calculated: $${section301Burden.toLocaleString()}/year if all Chinese components moved to Mexico - this is their actual Section 301 burden that would be eliminated)",
-  "payback_period": "Estimated timeline to recover nearshoring investment costs (based on their trade volume)",
+  "situation_brief": "1 sentence: Key risk for ${profile.company_name}${matchedAlerts.length > 0 ? ' including active policy threats' : ''}",
+  "problem": "2 sentences: Specific tariff issue + dollar impact${matchedAlerts.length > 0 ? ' + mention most critical alert' : ''}",
+  "root_cause": "1 sentence: Why they have this exposure",
+  "annual_impact": "$${section301Burden} Section 301 burden${matchedAlerts.length > 0 ? ' + note if alerts increase this' : ''}",
+  "why_now": "1 sentence: Timeline/urgency${matchedAlerts.length > 0 ? ' (reference alert effective dates if imminent)' : ''}",
+  "current_burden": "$${section301Burden}/year on Chinese components",
+  "potential_savings": "$${section301Burden}/year if nearshored to Mexico",
+  "payback_period": "X months (be specific based on trade volume)",
   "confidence": 85,
-  "strategic_roadmap": [
+  "timeline_90_days": "90-Day Action Timeline: Week 1-2 (Assessment), Week 3-4 (Trial), Week 5-12 (Migration) - Total estimated savings: $X/year",
+  "critical_decision_points": [
     {
-      "phase": "Phase 1: Assessment (Weeks 1-2)",
-      "why": "What this phase typically validates for ${profile.company_name || 'this company'} (NO emojis)",
-      "actions": ["Typical validation step 1 (informational: 'companies typically...', 'may help validate...')", "Typical validation step 2 with measurable outcome"],
-      "impact": "Expected data outcome in dollars or percentages for ${profile.company_name || 'this company'}"
+      "milestone": "Week 2: Go/No-Go Decision",
+      "decision": "What needs to be decided (specific)",
+      "data_needed": "What validates the decision",
+      "financial_impact": "Cost if delayed or wrong choice"
     },
     {
-      "phase": "Phase 2: Trial Production (Weeks 3-4)",
-      "why": "What this phase helps establish (NO emojis, NO directive language)",
-      "actions": ["Validation activity (informational: 'this phase typically involves...', 'companies use this to...')", "Measurable deliverable"],
-      "impact": "Quantifiable result"
+      "milestone": "Week 4: Supplier Selection",
+      "decision": "Key choice to make",
+      "data_needed": "Required validation",
+      "financial_impact": "Impact on ROI"
     },
     {
-      "phase": "Phase 3: Full Migration (Weeks 5-8)",
-      "why": "What this phase accomplishes (NO emojis, NO directive language)",
-      "actions": ["Typical implementation step (informational)", "Risk mitigation consideration"],
-      "impact": "Final outcome with numbers"
+      "milestone": "Week 12: Full Migration Complete",
+      "decision": "Final commit or rollback",
+      "data_needed": "Success metrics",
+      "financial_impact": "Annual savings achieved"
     }
   ],
   "action_items": [
-    "Data point 1 for ${profile.company_name || 'this company'} to consider (informational: 'contacting X may help validate...', 'data suggests reviewing...' - NO directive 'should contact' language)",
-    "Data point 2 with validation opportunity and timeline",
-    "Data point 3 with measurable financial or compliance context"
+    "Specific next step 1 (informational tone, <15 words)",
+    "Specific next step 2 (<15 words)",
+    "Specific next step 3 (<15 words)"
   ],
-  "broker_insights": "Professional trade intelligence perspective in formal business language (NO emojis, NO directive language like 'you should')",
-  "professional_disclaimer": "⚠️ LEGAL DISCLAIMER: This analysis is for informational purposes only and does not constitute legal, financial, tax, or compliance advice. All data is provided 'as-is' without warranties of any kind. ${profile.company_name || 'Users'} must independently verify all calculations, tariff rates, timelines, and regulatory requirements with licensed professionals (customs broker, trade attorney, or USMCA compliance specialist) before making any business decisions. Savings estimates are projections based on current data and assumptions—actual results may vary significantly due to supplier negotiations, regulatory changes, market conditions, currency fluctuations, or other factors. This platform is a research tool only. We expressly disclaim all liability for any losses, damages, or penalties arising from reliance on this information. By using this analysis, you acknowledge that you are solely responsible for all sourcing, compliance, and business decisions. Consult qualified professionals familiar with ${profile.industry_sector || 'your industry'} before taking action.",
-  "save_reminder": "⚠️ NOT ADVICE: This analysis is saved for your reference only. Do not make sourcing changes without consulting licensed customs/trade professionals. You assume all risk and liability for decisions based on this data."
+  "broker_insights": "1-2 sentences: Professional perspective on ${profile.company_name}'s situation${matchedAlerts.length > 0 ? ' and policy threats' : ''}",
+  "professional_disclaimer": "This analysis is for informational purposes only. ${profile.company_name} must verify all data with licensed customs brokers or trade attorneys before making decisions. Not legal or compliance advice.",
+  "save_reminder": "Analysis saved for reference only. Consult professionals before acting on this data."
 }
 
-CRITICAL RULES - PROFESSIONAL FORMATTING:
-- NO EMOJIS - Use professional business language only
-- NO DIRECTIVE LANGUAGE - Use informational framing ("data shows", "may help", "typically involves") instead of commands ("should", "must", "contact X")
-- ADDRESS ${profile.company_name || 'the company'} BY NAME throughout the advisory
-- Reference ${profile.contact_person || 'the decision maker'} in context only (not as instruction recipient)
-- Mention their specific supplier country (${profile.supplier_country || 'current suppliers'}) and industry (${profile.industry_sector || 'their industry'}) as data context
-- NO generic templates ("Review alternatives", "Monitor changes")
-- USE actual numbers from context (trade volume, Section 301 rates, component percentages, current savings)
-- Reference their current USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) to show what the data indicates they're protecting
-- If trade_volume is missing/zero, FLAG THIS PROMINENTLY in annual_impact and current_burden
-- EXAMPLE TRANSFORMATIONS:
-  ❌ "Maria should contact Qualcomm Mexico" → ✅ "Contacting Qualcomm Mexico may help validate cost assumptions"
-  ❌ "This phase eliminates uncertainty" → ✅ "This phase is designed to help validate cost assumptions"
-  ❌ "Your broker should prepare analysis" → ✅ "A customs broker typically prepares an origin analysis to satisfy CBP requirements"
-
-⚠️ CRITICAL TARIFF MATH RULE:
-- DO NOT add Section 301 burden + USMCA savings together!
-- Section 301 burden ($${section301Burden}) = what they CURRENTLY pay on Chinese components
-- USMCA savings ($${workflow.current_annual_savings?.toLocaleString() || '0'}) = what they CURRENTLY save by being qualified
-- These are SEPARATE numbers - do NOT create a "$826,625 total exposure" by adding them
-- Correct framing: "Current burden: $${section301Burden.toLocaleString()}/year. If USMCA disqualified, total tariff cost increases (you lose $${workflow.current_annual_savings?.toLocaleString() || '0'} savings + MFN rates apply)"
-- Incorrect framing: "Total exposure: $826,625 ($743,750 + $82,875)" - this is NOT how tariffs work!
-
-⚠️ CURRENT DATE CONTEXT:
-- Today is November 2025
-- When discussing future policy changes, use "2025-2026" NOT "2024-2025"
-- Presidential transitions occur in January 2025, so we're in the NEW administration period
-- USMCA is up for review in 2026 (not 2024)
-- Be specific: "Contact Foxconn Mexico for PCB quotes" not "Review Mexico suppliers"
-- Calculate ROI: If saving $50K/year and nearshoring costs $20K, payback is 4-5 months
-- Write as if you're their personal trade advisor who knows their business intimately
-- Use professional consulting language (like McKinsey, Deloitte reports)
-- Format numbers properly: $2,800,000 not "$2.8M", 3 months not "3-month payback"
-
-⚠️ COST PREMIUM REALISM:
-- DO NOT assume Mexico cost parity is guaranteed
-- Correct framing: "Phase 1 will validate whether Mexico suppliers can deliver 2-3% cost parity. If premium exceeds 4%, payback extends to 8+ months and strategy requires re-evaluation."
-- Incorrect framing: "assuming ${profile.contact_person || 'the decision maker'} can negotiate within 2-3%" - sounds like a given
-- Be realistic about supplier qualification risks, quality validation timelines, and volume commitment requirements
-- If cost premium data is unavailable, state "Phase 1 will establish actual cost premium - initial supplier quotes required before finalizing ROI"
-
-⚠️ CRITICAL: AVOID REPETITION - Each field should add NEW information:
-- Do NOT repeat the same dollar amount ($1,785,000) in multiple fields
-- Do NOT repeat "65% RVC" or "0% buffer" in every field
-- Do NOT repeat "Chinese microprocessor" or "Section 301" in every sentence
-- VARY how you present information:
-  * situation_brief: High-level risk summary
-  * problem: Specific compliance/tariff issue (mention RVC/buffer ONCE)
-  * root_cause: Sourcing decision explanation (mention supplier country ONCE)
-  * annual_impact: Total financial exposure (state dollar amount ONCE)
-  * current_burden: Breakdown/calculation (can reference same number differently)
-  * potential_savings: Future state outcome (focus on benefit, not cost repeat)
-- Each strategic_roadmap phase should focus on DIFFERENT aspects (qualification, trial, migration)
-- Each action_item should be DISTINCT (no duplicate supplier contacts)`;
+**RULES:**
+1. NO EMOJIS, NO flowery language
+2. Use informational tone: "data shows", "may help validate" (NOT "you should", "must contact")
+3. Be SPECIFIC: Name actual suppliers if known, calculate actual ROI
+4. CONCISE: situation_brief max 20 words, actions max 10 words each
+5. Don't repeat same dollar amounts - vary presentation
+6. Section 301 burden = what they pay NOW. Don't add USMCA savings to this.`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');
