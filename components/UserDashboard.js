@@ -58,15 +58,15 @@ export default function UserDashboard({ user }) {
     }
   };
 
-  const handleDownloadWorkflow = async (workflow) => {
+  const handleDownloadCertificate = async (workflow) => {
     try {
-      console.log('📄 Downloading workflow...');
+      console.log('📄 Downloading certificate...');
 
-      // If no stored workflow data, generate it from workflow data
-      let workflowData = workflow.workflow_data;
+      // If no stored certificate data, generate it from workflow data
+      let certificateData = workflow.certificate_data;
 
-      if (!workflowData) {
-        console.log('⚠️ No stored workflow - generating from workflow data...');
+      if (!certificateData) {
+        console.log('⚠️ No stored certificate - generating from workflow data...');
         const workflowData = workflow.workflow_data || {};
 
         // Track missing fields for dev issue logging
@@ -89,7 +89,7 @@ export default function UserDashboard({ user }) {
           });
 
           // Log using DevIssue helper
-          await DevIssue.missingData('dashboard_workflow_generator', 'workflow_workflow_fields', {
+          await DevIssue.missingData('dashboard_certificate_generator', 'certificate_workflow_fields', {
             workflow_id: workflow.id,
             missing_fields: missingFields,
             workflow_structure: {
@@ -100,8 +100,8 @@ export default function UserDashboard({ user }) {
           });
         }
 
-        workflowData = {
-          workflow_number: `USMCA-${Date.now()}`,
+        certificateData = {
+          certificate_number: `USMCA-${Date.now()}`,
           exporter: {
             name: workflow.company_name || workflowData.company?.name || 'Company',
             address: workflowData.company?.company_address || workflowData.company?.address || '',
@@ -134,16 +134,16 @@ export default function UserDashboard({ user }) {
       }
 
       // Import the PDF generator
-      const { generateUSMCAWorkflowPDF } = await import('../lib/utils/usmca-workflow-pdf-generator.js');
+      const { generateUSMCACertificatePDF } = await import('../lib/utils/usmca-certificate-pdf-generator.js');
 
       // Generate PDF from workflow data
-      const pdfBlob = await generateUSMCAWorkflowPDF(workflowData);
+      const pdfBlob = await generateUSMCACertificatePDF(certificateData);
 
       // Create download link
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `USMCA_Workflow_${workflowData.workflow_number || Date.now()}.pdf`;
+      link.download = `USMCA_Certificate_${certificateData.certificate_number || Date.now()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -421,19 +421,19 @@ export default function UserDashboard({ user }) {
                             View Results
                           </button>
                           <button
-                            onClick={() => !isTrialExpired && handleDownloadWorkflow(selectedWorkflow)}
+                            onClick={() => router.push(`/usmca-certificate-completion?workflow_id=${selectedWorkflow.id}`)}
                             className="btn-primary"
                             disabled={isTrialExpired}
                             style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                            title={isTrialExpired ? 'Upgrade to download workflows' : ''}
+                            title={isTrialExpired ? 'Upgrade to preview certificates' : ''}
                           >
-                            Download Workflow {isTrialExpired && '(Upgrade Required)'}
+                            📄 Preview Certificate {isTrialExpired && '(Upgrade Required)'}
                           </button>
                           <button
-                            onClick={() => router.push(`/usmca-workflow-completion?load=${selectedWorkflow.id}`)}
+                            onClick={() => router.push(`/trade-risk-alternatives?workflow_id=${selectedWorkflow.id}`)}
                             className="btn-secondary"
                           >
-                            📄 Preview Workflow
+                            ⚠️ View Alerts
                           </button>
                         </>
                       )}

@@ -65,17 +65,59 @@ export default function USMCACertificateCompletion() {
   }, []);
 
   useEffect(() => {
-    // ✅ SIMPLIFIED: Load workflow data from localStorage (user is still in active session)
-    const loadData = () => {
+    // ✅ Load workflow data from database (if workflow_id in URL) OR localStorage
+    const loadData = async () => {
       try {
         // ⚠️ Don't load old data if user just clicked "+ New Analysis"
         const urlParams = new URLSearchParams(window.location.search);
         const isResetting = urlParams.get('reset') === 'true';
+        const workflowId = urlParams.get('workflow_id');
 
         if (isResetting) {
           console.log('🔄 Certificate page: User clicked "+ New Analysis" - redirecting to start');
           router.push('/usmca-workflow');
           return;
+        }
+
+        // ✅ FIX (Nov 7): If workflow_id in URL, fetch from database
+        if (workflowId) {
+          console.log('📂 Loading workflow from database:', workflowId);
+          const response = await fetch(`/api/workflow/${workflowId}`, {
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const { workflow } = await response.json();
+            console.log('✅ Workflow loaded from database:', workflow);
+
+            // Use workflow_data from database
+            const dbData = workflow.workflow_data || {};
+            const initialData = {
+              company: dbData.company || {},
+              product: dbData.product || {},
+              components: dbData.components || workflow.component_origins || [],
+              usmca: dbData.usmca || {},
+              trust: dbData.trust || {},
+              savings: dbData.savings || {},
+              destination_country: workflow.destination_country,
+              authorization: dbData.authorization || {}, // ✅ Load saved authorization
+              source: 'database'
+            };
+
+            setWorkflowData(initialData);
+
+            // Auto-populate certificate data with saved authorization
+            if (dbData.authorization) {
+              setCertificateData(prev => ({
+                ...prev,
+                authorization: dbData.authorization
+              }));
+            }
+
+            return; // Skip localStorage loading
+          } else {
+            console.warn('⚠️ Failed to load workflow from database, falling back to localStorage');
+          }
         }
 
         // Load workflow results from localStorage
