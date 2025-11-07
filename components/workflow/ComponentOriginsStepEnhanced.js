@@ -723,12 +723,6 @@ export default function ComponentOriginsStepEnhanced({
 
   return (
     <div className="dashboard-container">
-      <div className="form-section">
-        <h2 className="form-section-title">
-          Step 2: Product & Component Analysis
-        </h2>
-      </div>
-
       {/* Product Overview Section */}
       <div className="form-section">
         <h3 className="form-section-title">Product Overview</h3>
