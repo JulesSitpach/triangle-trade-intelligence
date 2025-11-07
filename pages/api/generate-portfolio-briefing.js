@@ -430,20 +430,17 @@ All other components with standard MFN or USMCA rates
 WEAVE THIS INTO YOUR MONITORING PLAN - explain why some components need daily checks while others are quarterly.
 ` : ''}
 
-CRITICAL RULES:
-1. WRITE NARRATIVE PROSE - Tell a story, don't list facts
-2. NEVER INVENT NUMBERS - Use ONLY percentages from component data above. If you say "60% from Mexico" but their data shows 30% + 20% + 5% = 55%, YOU FAILED.
-3. CALCULATE ACCURATELY - Add up component percentages by country to get country concentration. Show your math.
-4. WEAVE ALERTS NATURALLY - Don't say "Alert detected:" 5 times, work them into the narrative
-5. READABLE LANGUAGE - "works beautifully today" not "current cumulation methodology allows"
-6. REAL TRADE-OFFS - Present genuine strategic choices with no obvious answer
-7. NO POLITICAL REFERENCES - Don't mention "Trump administration" or specific politicians. Say "US-Canada trade tensions" or "policy discussions"
-8. MONITORING WITH MILESTONES - Structure monitoring around Q1 2026 proposals, Mid-2026 findings, Q3-Q4 implementation
-9. BE SPECIFIC - Use their HS codes and percentages, explain context
+CRITICAL WRITING RULES:
+1. WRITE NARRATIVE PROSE - Tell a story with personality, don't list dry facts
+2. NEVER INVENT NUMBERS - Use ONLY percentages from component data above. Calculate country totals accurately.
+3. WEAVE ALERTS NATURALLY - Work them into the narrative, don't just list them
+4. READABLE LANGUAGE - "works beautifully today" not "current cumulation methodology allows"
+5. REAL TRADE-OFFS - Present genuine strategic choices with no obvious answer
+6. NO POLITICAL REFERENCES - Say "policy developments" not politician names
+7. BE SPECIFIC - Use their HS codes, exact percentages, explain context
+8. CALENDAR MILESTONES - Structure around Q1 2026, Mid-2026, Q3-Q4 deadlines
 
-IF YOU MAKE UP A STATISTIC NOT IN THE DATA, YOU HAVE FAILED.
-
-Return valid JSON only:`;
+IF YOU INVENT A STATISTIC NOT IN THE DATA ABOVE, YOU HAVE FAILED.`;
 
     console.log('🤖 Calling AI to generate portfolio briefing...');
     console.log('📋 Prompt length:', aiPrompt.length, 'characters');
@@ -451,31 +448,28 @@ Return valid JSON only:`;
 
     // STEP 6: Call AI using BaseAgent (with automatic 2-tier fallback)
     const aiResponse = await portfolioAgent.execute(aiPrompt, {
-      temperature: 0.7,
-      format: 'json'  // ✅ Structured JSON prevents hallucinations
+      temperature: 0.8  // ✅ Higher temp for expressive narrative writing
     });
 
     console.log('✅ AI response received');
 
-    // Parse JSON response
-    let briefingData = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
-
-    // ✅ UNWRAP if AI returned {success: true, data: {...}} wrapper
-    if (briefingData.success && briefingData.data) {
-      briefingData = briefingData.data;
-    }
+    // ✅ Extract markdown text (AI returns raw text, not JSON)
+    const markdownBriefing = typeof aiResponse === 'string'
+      ? aiResponse
+      : aiResponse.text || aiResponse.content || '';
 
     console.log('📊 Portfolio briefing generated:', {
-      has_business_overview: !!briefingData.business_overview,
-      has_component_analysis: !!briefingData.component_analysis,
-      has_strategic_trade_offs: !!briefingData.strategic_trade_offs,
-      has_monitoring_plan: !!briefingData.monitoring_plan
+      markdown_length: markdownBriefing.length,
+      has_alerts_section: markdownBriefing.includes('## Active Alerts'),
+      has_situation_section: markdownBriefing.includes('## Your Situation'),
+      has_decision_gates: markdownBriefing.includes('## Critical Decision Gates'),
+      has_monitoring_section: markdownBriefing.includes('## What We\'re Monitoring')
     });
 
-    // Return structured briefing
+    // Return markdown briefing
     return res.status(200).json({
       success: true,
-      briefing: briefingData,  // ✅ Structured JSON object
+      briefing: markdownBriefing,  // ✅ Raw markdown text for display
       company: companyName,
       portfolio_value: totalVolume,
       real_alerts_matched: matchedAlerts.length,

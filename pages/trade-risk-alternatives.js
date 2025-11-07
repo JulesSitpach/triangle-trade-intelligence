@@ -2010,51 +2010,51 @@ export default function TradeRiskAlternatives() {
                       border: '2px solid #3b82f6',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}>
-                      <h3 style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: '#111827',
-                        marginBottom: '1.5rem',
-                        borderBottom: '2px solid #e5e7eb',
-                        paddingBottom: '0.75rem'
-                      }}>
-                        📊 Your USMCA 2026 Strategic Briefing
-                      </h3>
-
-                      {/* Render structured JSON briefing */}
-                      <div style={{ fontSize: '0.9375rem', color: '#374151', lineHeight: '1.7' }}>
-                        {/* Business Overview */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1rem', marginBottom: '0.75rem' }}>
-                            What This Means for Your Business
-                          </h4>
-                          <p style={{ margin: 0 }}>{portfolioBriefing.business_overview}</p>
-                        </div>
-
-                        {/* Component Analysis */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
-                            Component Risk Breakdown
-                          </h4>
-                          <p style={{ margin: 0 }}>{portfolioBriefing.component_analysis}</p>
-                        </div>
-
-                        {/* Strategic Trade-offs */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
-                            Strategic Considerations
-                          </h4>
-                          <p style={{ margin: 0 }}>{portfolioBriefing.strategic_trade_offs}</p>
-                        </div>
-
-                        {/* Monitoring Plan */}
-                        <div>
-                          <h4 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#3b82f6', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
-                            What We&apos;re Monitoring for You
-                          </h4>
-                          <p style={{ margin: 0 }}>{portfolioBriefing.monitoring_plan}</p>
-                        </div>
-                      </div>
+                      {/* ✅ FIX (Nov 7): Render markdown briefing with expressive narrative formatting */}
+                      <div
+                        style={{
+                          fontSize: '0.9375rem',
+                          color: '#374151',
+                          lineHeight: '1.7'
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: typeof portfolioBriefing === 'string'
+                            ? portfolioBriefing
+                              // Convert markdown to basic HTML
+                              .replace(/^# (.*?)$/gm, '<h1 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.75rem;">$1</h1>')
+                              .replace(/^## (.*?)$/gm, '<h2 style="font-size: 1.25rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">$1</h2>')
+                              .replace(/^### (.*?)$/gm, '<h3 style="font-size: 1.125rem; font-weight: 600; color: #6b7280; margin-top: 1rem; margin-bottom: 0.5rem;">$1</h3>')
+                              .replace(/^- (.*?)$/gm, '<li style="margin-left: 1.5rem; margin-bottom: 0.5rem;">$1</li>')
+                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\n\n/g, '</p><p style="margin-top: 1rem; margin-bottom: 1rem;">')
+                              .replace(/^(?!<[hl]|<li)/gm, '<p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">')
+                              .replace(/\n/g, '<br/>')
+                            : `<div style="margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1rem; margin-bottom: 0.75rem;">
+                                  What This Means for Your Business
+                                </h4>
+                                <p style="margin: 0">${portfolioBriefing.business_overview || ''}</p>
+                              </div>
+                              <div style="margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
+                                  Component Risk Breakdown
+                                </h4>
+                                <p style="margin: 0">${portfolioBriefing.component_analysis || ''}</p>
+                              </div>
+                              <div style="margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
+                                  Strategic Considerations
+                                </h4>
+                                <p style="margin: 0">${portfolioBriefing.strategic_trade_offs || ''}</p>
+                              </div>
+                              <div>
+                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
+                                  What We're Monitoring for You
+                                </h4>
+                                <p style="margin: 0">${portfolioBriefing.monitoring_plan || ''}</p>
+                              </div>`
+                        }}
+                      />
                     </div>
                   )}
                 </>
