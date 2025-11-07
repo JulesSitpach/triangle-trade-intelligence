@@ -203,6 +203,25 @@ const confidence = daysOld > 25 ? 'low' : (daysOld > 14 ? 'medium' : 'high');
 - AI cost: ~$0.02/fetch × 10 = $0.20/day = $6/month
 - **Total infrastructure cost: <$10/month**
 
+### Production Deployment Requirements
+
+**CRITICAL - Cache Population Issue:**
+- ✅ Emergency fallback system is **FULLY WORKING** (all 4 tiers tested)
+- ❌ Scheduled sync jobs **NEVER POPULATED THE CACHE**
+- Database has only 6 Section 301 rows (should have 1000+)
+- Root cause: `CRON_SECRET` environment variable not set in Vercel production
+
+**To Activate:**
+1. Set `CRON_SECRET` in Vercel production environment variables
+2. Verify cron job auth: Check Vercel logs for 401 errors on `/api/cron/sync-section301-from-federal-register`
+3. Manual trigger test: `POST https://triangle-trade-intelligence.vercel.app/api/cron/sync-section301-from-federal-register` with `Authorization: Bearer <CRON_SECRET>` header
+4. Verify cache population: `SELECT COUNT(*) FROM policy_tariffs_cache WHERE section_301 IS NOT NULL` should return 500+ rows after first sync
+
+**Current State:**
+- Tier 1 (fresh cache): 0% of requests (cache empty)
+- Tier 3 (emergency fetch): 100% of requests (working but slow)
+- Expected after sync deployment: Tier 1 (95%), Tier 3 (5%)
+
 ### Next Steps (Optional Enhancements)
 
 1. ⏳ Monitor `is_emergency_fetch` flag to identify frequently missed HS codes
