@@ -303,6 +303,15 @@ export default function WorkflowResults({
         return;
       }
 
+      // ✅ FIX (Nov 7): Check if detailed_analysis exists in results prop (from database)
+      if (results?.detailed_analysis && results.detailed_analysis.situation_brief) {
+        console.log('✅ Loaded executive summary from results prop:', results.detailed_analysis);
+        setExecutiveSummary(results.detailed_analysis);
+        setShowSummary(true);
+        setLoadingSummary(false);
+        return;
+      }
+
       // Check 2: Try loading from database (if coming from dashboard)
       const urlParams = new URLSearchParams(window.location.search);
       const sessionId = urlParams.get('session') || urlParams.get('sessionId');
@@ -757,17 +766,33 @@ export default function WorkflowResults({
             </div>
 
             <div className="element-spacing">
-              <button
-                onClick={() => generateExecutiveSummary()}
-                className="btn-primary"
-                style={{ width: '100%', marginBottom: '1.5rem' }}
-                disabled={loadingSummary}
-              >
-                {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary'}
-              </button>
-              <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
-                Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
-              </p>
+              {!results?.detailed_analysis ? (
+                <>
+                  <button
+                    onClick={() => generateExecutiveSummary()}
+                    className="btn-primary"
+                    style={{ width: '100%', marginBottom: '1.5rem' }}
+                    disabled={loadingSummary}
+                  >
+                    {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary'}
+                  </button>
+                  <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
+                    Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
+                  </p>
+                </>
+              ) : (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  borderRadius: '4px',
+                  padding: '1rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <p style={{fontSize: '0.95rem', color: '#15803d', margin: 0}}>
+                    ✅ <strong>Executive Summary Available</strong> - Your saved analysis is displayed below
+                  </p>
+                </div>
+              )}
 
               {/* Executive Summary Display Section - Dynamic Component */}
             </div>
