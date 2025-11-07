@@ -1706,92 +1706,17 @@ export default function TradeRiskAlternatives() {
 
                 {/* USMCA 2026 Renegotiation & Market Intelligence Row */}
                 {(() => {
-                  // ✅ FIX (Nov 7): Filter alerts to ONLY show those affecting user's specific components
-                  // User feedback: "Filter alerts to only show things that affect THEIR specific components"
+                  // Focus on USMCA 2026 renegotiation alerts that affect ALL users
+                  // Plus general trade intelligence relevant to user's supply chain
                   const userCountries = [...new Set(
                     userProfile.componentOrigins.map(c => (c.origin_country || c.country)?.toUpperCase())
                   )].filter(Boolean);
 
-                  const userHSCodes = userProfile.componentOrigins
-                    .map(c => c.hs_code)
-                    .filter(Boolean);
-
                   const userIndustry = userProfile.industry_sector?.toLowerCase() || '';
 
-                  // ✅ COMPONENT-SPECIFIC FILTERING: Same logic as component alerts (lines 1243-1319)
-                  // Only show alerts that match user's component HS codes OR origin countries
-                  const marketIntelAlerts = (strategicAlerts || []).filter(alert => {
-                    // ✅ STRICT FILTER: Alert must have specific targeting
-                    const validHSCodes = (alert.affected_hs_codes || []).filter(code => {
-                      const normalized = String(code).replace(/\./g, '');
-                      // Valid HS codes are 6-10 digits, not years (2024, 2025) or short codes
-                      return normalized.length >= 6 && !/^20\d{2}$/.test(normalized);
-                    });
-                    const hasHSCodes = validHSCodes.length > 0;
-                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
-                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
-
-                    // TYPE 1: Check if any user component origin matches alert country
-                    const countryMatch = hasCountries && alert.affected_countries.some(country => {
-                      const normalizedCountry = country.toUpperCase();
-                      // Skip UNSPECIFIED - that's generic news
-                      if (normalizedCountry === 'UNSPECIFIED') return false;
-                      return userCountries.includes(normalizedCountry);
-                    });
-
-                    // TYPE 2: Check if any user component HS code matches alert HS codes
-                    const hsCodeMatch = hasHSCodes && userHSCodes.some(componentHS => {
-                      return validHSCodes.some(code => {
-                        const normalizedComponentHS = String(componentHS).replace(/\./g, '');
-                        const normalizedAlertCode = String(code).replace(/\./g, '').substring(0, 6);
-                        return normalizedComponentHS.startsWith(normalizedAlertCode);
-                      });
-                    });
-
-                    // TYPE 3: Check if industry matches (only if country also matches)
-                    const industryMatch = countryMatch && hasIndustries && alert.relevant_industries.some(industry =>
-                      userIndustry.includes(industry.toLowerCase()) ||
-                      industry.toLowerCase().includes(userIndustry)
-                    );
-
-                    // Show alert if it matches by HS code OR (country AND is a policy alert)
-                    if (hsCodeMatch) {
-                      console.log(`✅ USMCA 2026 HS CODE MATCH: ${alert.title} affects user components with HS codes`);
-                      return true;
-                    }
-
-                    if (countryMatch) {
-                      // Only show country matches if they're real policy alerts (not generic news)
-                      const title = alert.title?.toLowerCase() || '';
-                      const isPolicyAlert =
-                        title.includes('section 301') ||
-                        title.includes('section 232') ||
-                        title.includes('tariff') ||
-                        title.includes('duty') ||
-                        title.includes('investigation') ||
-                        title.includes('trade action') ||
-                        title.includes('usmca') ||
-                        title.includes('hearing');
-
-                      if (isPolicyAlert) {
-                        console.log(`✅ USMCA 2026 COUNTRY POLICY MATCH: ${alert.title} affects user components from ${alert.affected_countries.join(', ')}`);
-                        return true;
-                      }
-
-                      // Generic news gets filtered out
-                      console.log(`❌ FILTERED OUT (generic news): ${alert.title}`);
-                      return false;
-                    }
-
-                    if (industryMatch) {
-                      console.log(`✅ USMCA 2026 INDUSTRY MATCH: ${alert.title} affects ${userIndustry}`);
-                      return true;
-                    }
-
-                    // No match - filter out
-                    console.log(`❌ FILTERED OUT (no relevance): ${alert.title}`);
-                    return false;
-                  });
+                  // ✅ AI-FILTERED: Use strategicAlerts (filtered by AI in loadRealPolicyAlerts)
+                  // This removes earnings reports, logistics pricing, and irrelevant news
+                  const marketIntelAlerts = strategicAlerts || [];
 
                   // ✅ ALWAYS SHOW this section (even with 0 alerts) so users can opt into USMCA 2026 monitoring
                   const isExpanded = expandedComponents['market_intel'] || false;
