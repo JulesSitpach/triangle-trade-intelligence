@@ -163,11 +163,14 @@ export default function TradeRiskAlternatives() {
     }
 
     try{
-      // Check if loading specific alert from dashboard
+      // Check if loading specific workflow or alert from dashboard
       const urlParams = new URLSearchParams(window.location.search);
+      const workflowId = urlParams.get('workflow_id'); // ✅ NEW: Support direct workflow loading
       const analysisId = urlParams.get('analysis_id');
 
       console.log('🔍 Alert Page Load Context:', {
+        hasWorkflowId: !!workflowId,
+        workflowId: workflowId,
         hasAnalysisId: !!analysisId,
         analysisId: analysisId,
         fullURL: window.location.href,
@@ -198,6 +201,72 @@ export default function TradeRiskAlternatives() {
         }
         if (dashboardData.briefing_usage_stats) {
           setBriefingUsageStats(dashboardData.briefing_usage_stats);
+        }
+
+        // ✅ NEW: If workflow_id provided, load that specific workflow directly
+        if (workflowId) {
+          console.log('📂 Loading specific workflow from database:', workflowId);
+          const workflow = dashboardData.workflows?.find(w => w.id === workflowId);
+
+          if (workflow) {
+            console.log('✅ Found workflow data from database');
+            const workflowData = workflow.workflow_data || {};
+            const rawComponents = workflow.component_origins || [];
+
+            // Normalize components
+            const components = rawComponents.map(comp => ({
+              ...comp,
+              percentage: comp.value_percentage || comp.percentage || 0,
+              component_type: comp.description || comp.component_type,
+              annual_volume: comp.annual_volume || 0
+            }));
+
+            // Parse trade volume
+            const rawTradeVolume = workflow.trade_volume || workflowData.company?.trade_volume;
+            const parsedTradeVolume = rawTradeVolume
+              ? (typeof rawTradeVolume === 'string' ? parseFloat(rawTradeVolume.replace(/,/g, '')) : rawTradeVolume)
+              : 0;
+
+            const profile = {
+              userId: user?.id,
+              workflowId: workflow.id, // ✅ Store workflow ID for Impact Analysis
+              companyName: workflow.company_name || workflowData.company?.company_name,
+              companyCountry: workflow.company_country || workflowData.company?.company_country || 'US',
+              destinationCountry: workflow.destination_country || workflowData.company?.destination_country || 'US',
+              businessType: workflow.business_type || workflowData.company?.business_type,
+              industry_sector: workflow.industry_sector || workflowData.company?.industry_sector,
+              hsCode: workflow.hs_code || workflowData.product?.hs_code,
+              productDescription: workflow.product_description || workflowData.product?.description,
+              tradeVolume: parsedTradeVolume,
+              supplierCountry: components[0]?.origin_country || components[0]?.country,
+              qualificationStatus: workflow.qualification_status || getQualificationStatus(workflowData.usmca),
+              savings: workflow.estimated_annual_savings || workflowData.savings?.annual_savings || 0,
+              componentOrigins: components,
+              regionalContent: workflowData.usmca?.regional_content || 0,
+              impactAnalysis: workflowData.detailed_analysis?.portfolio_briefing || null // ✅ Load cached Impact Analysis from correct path
+            };
+
+            console.log('✅ Loaded workflow from database:', {
+              workflowId: workflow.id,
+              companyName: profile.companyName,
+              componentCount: components.length,
+              hasImpactAnalysis: !!profile.impactAnalysis
+            });
+
+            setUserProfile(profile);
+
+            // ✅ AUTO-DISPLAY: If Impact Analysis exists, show it immediately
+            if (profile.impactAnalysis) {
+              console.log('✅ Found cached Impact Analysis, displaying automatically');
+              setPortfolioBriefing(profile.impactAnalysis);
+              setAlertsGenerated(true);
+            }
+
+            setIsLoading(false);
+            return;
+          } else {
+            console.warn('⚠️ Workflow not found, loading most recent instead');
+          }
         }
 
         // If analysis_id provided, load that specific alert
@@ -1895,7 +1964,7 @@ export default function TradeRiskAlternatives() {
                         : briefingUsageStats.limit_reached
                         ? `🔒 Monthly Limit Reached (${briefingUsageStats.used}/${briefingUsageStats.limit})`
                         : portfolioBriefing
-                        ? `📊 Re-analyze (${briefingUsageStats.used}/${briefingUsageStats.limit === null ? '∞' : briefingUsageStats.limit} used)`
+                        ? `🔄 Regenerate Analysis (${briefingUsageStats.used}/${briefingUsageStats.limit === null ? '∞' : briefingUsageStats.limit} used)`
                         : `📊 USMCA 2026 Impact Analysis (${briefingUsageStats.used}/${briefingUsageStats.limit === null ? '∞' : briefingUsageStats.limit} used)`}
                     </button>
 
