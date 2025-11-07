@@ -15,26 +15,11 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   console.log('🎨 [AuthorizationStep] showPreview value:', showPreview, 'Button will be:', showPreview ? 'GREEN (btn-success)' : 'BLUE (btn-primary)');
   // ✅ Removed previewRef - old certificate preview system removed
   const [authData, setAuthData] = useState(() => {
-    // ✅ RESTORE from localStorage on mount (prevent data loss on refresh)
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('usmca_authorization_data');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          console.log('✅ Restored authorization data from localStorage');
-          return {
-            ...parsed,
-            ...formData // Merge with formData to get latest workflow data
-          };
-        } catch (e) {
-          console.error('Failed to restore authorization data:', e);
-        }
-      }
-    }
-
-    // Default initial state
+    // ✅ FIXED (Nov 7): Start with EMPTY state - wait for workflowData to auto-fill
+    // DO NOT initialize from formData - it may contain stale localStorage data
+    // The useEffects below will auto-fill from workflowData.company when it loads
     return {
-      // Authorized Signatory Information (NEW DATA COLLECTION)
+      // Authorized Signatory Information (will be auto-filled from Step 1)
       signatory_name: '',
       signatory_title: '',
       signatory_email: '',
@@ -43,7 +28,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       // Authorization checkboxes
       accuracy_certification: false,
       authority_certification: false,
-      ...formData
+
+      // Other fields start empty - will be auto-filled by useEffects
+      certifier_type: '',
+      exporter_same_as_company: false,
+      importer_same_as_company: false,
+      producer_same_as_exporter: false
     };
   });
 

@@ -165,6 +165,29 @@ export default function UserDashboard({ user }) {
     router.push(`/trade-risk-alternatives?analysis_id=${alertId}`);
   };
 
+  // ✅ FIX (Nov 7): Clear workflow localStorage before loading from dashboard
+  // This prevents old workflow data from mixing with database data
+  const clearWorkflowLocalStorage = () => {
+    const workflowKeys = [
+      'workflow_session_id',
+      'triangleUserData',
+      'usmca_workflow_results',
+      'workflow_current_step',
+      'usmca_authorization_data',
+      'workflow_form_data',
+      'component_origins',
+      'certificate_data',
+      'analysis_results',
+      'last_database_load_time'  // ✅ NEW: Also clear timestamp
+    ];
+
+    workflowKeys.forEach(key => {
+      localStorage.removeItem(key);
+    });
+
+    console.log('🗑️ Cleared workflow localStorage before loading from dashboard');
+  };
+
 
   if (loading) {
     return (
@@ -415,13 +438,19 @@ export default function UserDashboard({ user }) {
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <>
                           <button
-                            onClick={() => router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
+                            onClick={() => {
+                              clearWorkflowLocalStorage(); // ✅ Clear old workflow data
+                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`);
+                            }}
                             className="btn-secondary"
                           >
                             View Results
                           </button>
                           <button
-                            onClick={() => router.push(`/usmca-certificate-completion?workflow_id=${selectedWorkflow.id}`)}
+                            onClick={() => {
+                              clearWorkflowLocalStorage(); // ✅ Clear old workflow data
+                              router.push(`/usmca-certificate-completion?workflow_id=${selectedWorkflow.id}`);
+                            }}
                             className="btn-primary"
                             disabled={isTrialExpired}
                             style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
@@ -430,7 +459,10 @@ export default function UserDashboard({ user }) {
                             📄 Preview Certificate {isTrialExpired && '(Upgrade Required)'}
                           </button>
                           <button
-                            onClick={() => router.push(`/trade-risk-alternatives?workflow_id=${selectedWorkflow.id}`)}
+                            onClick={() => {
+                              clearWorkflowLocalStorage(); // ✅ Clear old workflow data
+                              router.push(`/trade-risk-alternatives?workflow_id=${selectedWorkflow.id}`);
+                            }}
                             className="btn-secondary"
                           >
                             ⚠️ View Alerts
@@ -441,7 +473,12 @@ export default function UserDashboard({ user }) {
                       {/* NOT QUALIFIED: View Analysis */}
                       {selectedWorkflow.qualification_status !== 'QUALIFIED' && (
                         <button
-                          onClick={() => !isTrialExpired && router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`)}
+                          onClick={() => {
+                            if (!isTrialExpired) {
+                              clearWorkflowLocalStorage(); // ✅ Clear old workflow data
+                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`);
+                            }
+                          }}
                           className="btn-primary"
                           disabled={isTrialExpired}
                           style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}

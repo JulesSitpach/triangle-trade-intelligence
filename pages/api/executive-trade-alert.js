@@ -136,12 +136,22 @@ export default async function handler(req, res) {
       });
     }
 
+    // ✅ FIX (Nov 7): Provide fallback for industry_sector if missing from localStorage
     if (!user_profile.industry_sector) {
-      return res.status(400).json({
-        error: 'Missing required field: industry_sector',
-        success: false,
-        details: 'Industry sector is required for USMCA threshold analysis'
-      });
+      console.warn('⚠️ industry_sector missing - using fallback based on business_type');
+      // Smart fallback based on business_type or company name
+      const businessType = user_profile.business_type || '';
+      const companyName = user_profile.company_name || '';
+
+      if (businessType.includes('Food') || companyName.toLowerCase().includes('food') || companyName.toLowerCase().includes('gourmet')) {
+        user_profile.industry_sector = 'Food & Beverage';
+      } else if (businessType.includes('Manufacturer')) {
+        user_profile.industry_sector = 'General Manufacturing';
+      } else {
+        user_profile.industry_sector = 'General Manufacturing'; // Safe default
+      }
+
+      console.log(`✅ Using inferred industry_sector: ${user_profile.industry_sector}`);
     }
 
     // ========== STEP 1: Fetch Active Crisis Alerts ==========
@@ -555,105 +565,78 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile, matchedA
       ).join('\n')
     : 'No active policy alerts';
 
-  // ✅ CONCISE EXECUTIVE ADVISORY PROMPT (Nov 7: Simplified + added crisis alerts)
-  const prompt = `You are a trade compliance strategist analyzing tariff risk for ${profile.company_name || 'this company'}.
+  // ✅ OPTIMIZED (Nov 7): Match portfolio briefing narrative style
+  const prompt = `You are a Trade Compliance Director writing a strategic briefing for ${profile.company_name}'s operations team about tariff impacts and IMMEDIATE certification issues.
 
-**KEY DATA:**
-- Company: ${profile.company_name || 'Client'} | Industry: ${profile.industry_sector || 'Manufacturing'} | Destination: ${profile.destination_country || 'US'}
-- Product: ${workflow.product_description || 'Manufacturing product'} | Trade Volume: ${tradeVolume > 0 ? `$${tradeVolume.toLocaleString()}` : 'Unknown'}
-- USMCA Qualified: ${workflow.usmca_qualified ? 'YES' : 'NO'} | RVC: ${workflow.north_american_content || 0}% (threshold: ${workflow.threshold_applied || 65}%)
-- Current USMCA Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year
+COMPONENTS (${components.length} total):
+${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) - ${c.value_percentage}% | HS: ${c.hs_code} | MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}% | Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}%`).join('\n')}
 
-**COMPONENTS:**
-${componentDetails}
+CURRENT STATUS:
+• Trade Volume: $${tradeVolume.toLocaleString()} | USMCA: ${workflow.usmca_qualified ? `✅ Qualified (RVC ${workflow.north_american_content}%)` : '❌ Not Qualified'}
+• Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year${chineseComponents.length > 0 ? `\n• Section 301 Burden: $${section301Burden} (${chineseComponents.length} Chinese components = ${totalChineseValue}% of value)` : ''}
 
-${chineseComponents.length > 0 ? `**SECTION 301 EXPOSURE:**
-- Chinese Components: ${chineseComponents.length} items (${totalChineseValue}% of value)
-- Section 301 Rate: ${section301Rate}
-- Annual Burden: ${section301Burden}` : ''}
+${matchedAlerts.length > 0 ? `ACTIVE POLICY THREATS (${matchedAlerts.length}):
+${matchedAlerts.map(a => `• [${a.severity}] ${a.title} (${a.effective_date})`).join('\n')}` : ''}
 
-**⚠️ ACTIVE POLICY THREATS (${matchedAlerts.length}):**
-${alertSummary}
+Write an expressive, narrative briefing - tell their supply chain STORY with personality and strategic insight about certification risks and immediate impacts.
 
-**TASK:** Generate concise CEO-level intelligence focusing on IMMEDIATE certification issues${matchedAlerts.length > 0 ? ` and the ${matchedAlerts.length} active policy threats listed above` : ''}. Be BRIEF and SPECIFIC.
+# Business Impact Summary: ${profile.company_name}
 
-⚠️ CRITICAL: Think like a trade advisor, NOT a process manager.
-- BEFORE suggesting nearshoring, identify USMCA qualification blockers for their specific HS codes
-- Check: Do their components have Product-Specific Rules (PSRs) that Mexican sourcing won't fix?
-- Consider: Will Mexican assembly actually qualify if core components (batteries, chipsets, modules) remain non-originating?
-- Warn about blockers using their ACTUAL HS codes: "Components under HS [their actual code] may fail origin testing even if assembled in Mexico"
-- If you identify blockers, state them FIRST before suggesting roadmap
-- Speak to the CEO directly about real risks, not just process steps
-- Reference their specific component HS codes when discussing qualification risks
+## Certification Status & Immediate Risks
+${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens $${section301Burden} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified saving $${workflow.current_annual_savings?.toLocaleString()}/year" or "⚠️ $${section301Burden} Section 301 burden on ${chineseComponents.length} Chinese components"`}
 
-**JSON OUTPUT (keep all text concise):**
-{
-  "situation_brief": "1 sentence: Key risk for ${profile.company_name}${matchedAlerts.length > 0 ? ' including active policy threats' : ''}",
-  "problem": "2 sentences: Specific tariff issue + dollar impact${matchedAlerts.length > 0 ? ' + mention most critical alert' : ''}",
-  "root_cause": "1 sentence: Why they have this exposure",
-  "annual_impact": "$${section301Burden} Section 301 burden${matchedAlerts.length > 0 ? ' + note if alerts increase this' : ''}",
-  "why_now": "1 sentence: Timeline/urgency${matchedAlerts.length > 0 ? ' (reference alert effective dates if imminent)' : ''}",
-  "current_burden": "$${section301Burden}/year on Chinese components",
-  "potential_savings": "$${section301Burden}/year if nearshored to Mexico",
-  "payback_period": "X months (be specific based on trade volume)",
-  "confidence": 85,
-  "timeline_90_days": "90-Day Action Timeline: Week 1-2 (Assessment), Week 3-4 (Trial), Week 5-12 (Migration) - Total estimated savings: $X/year",
-  "critical_decision_points": [
-    {
-      "milestone": "Week 2: Go/No-Go Decision",
-      "decision": "What needs to be decided (specific)",
-      "data_needed": "What validates the decision",
-      "financial_impact": "Cost if delayed or wrong choice"
-    },
-    {
-      "milestone": "Week 4: Supplier Selection",
-      "decision": "Key choice to make",
-      "data_needed": "Required validation",
-      "financial_impact": "Impact on ROI"
-    },
-    {
-      "milestone": "Week 12: Full Migration Complete",
-      "decision": "Final commit or rollback",
-      "data_needed": "Success metrics",
-      "financial_impact": "Annual savings achieved"
-    }
-  ],
-  "action_items": [
-    "Specific next step 1 (informational tone, <15 words)",
-    "Specific next step 2 (<15 words)",
-    "Specific next step 3 (<15 words)"
-  ],
-  "broker_insights": "1-2 sentences: Professional perspective on ${profile.company_name}'s situation${matchedAlerts.length > 0 ? ' and policy threats' : ''}",
-  "professional_disclaimer": "This analysis is for informational purposes only. ${profile.company_name} must verify all data with licensed customs brokers or trade attorneys before making decisions. Not legal or compliance advice.",
-  "save_reminder": "Analysis saved for reference only. Consult professionals before acting on this data."
-}
+## Your Certification Situation
+Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
 
-**RULES:**
-1. NO EMOJIS, NO flowery language
-2. Use informational tone: "data shows", "may help validate" (NOT "you should", "must contact")
-3. Be SPECIFIC: Name actual suppliers if known, calculate actual ROI
-4. CONCISE: situation_brief max 20 words, actions max 10 words each
-5. Don't repeat same dollar amounts - vary presentation
-6. Section 301 burden = what they pay NOW. Don't add USMCA savings to this.`;
+Example: "${profile.company_name}'s ${workflow.product_description} sits at an interesting certification crossroads. ${workflow.usmca_qualified ? `USMCA qualification delivers $${workflow.current_annual_savings?.toLocaleString()}/year savings` : 'Missing USMCA qualification leaves money on the table'}, but ${chineseComponents.length > 0 ? `${chineseComponents.length} Chinese components (${totalChineseValue}% of value) create $${section301Burden} Section 301 exposure` : 'geographic sourcing creates policy vulnerabilities'}. Current certification strategy faces pressure from recent developments."
+
+## Critical Risks & Opportunities
+Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "Path A: Accept $${section301Burden} Section 301 burden, maintain current suppliers. Path B: Nearshore to Mexico (12-18mo transition) - eliminate Section 301 but face qualification challenges for HS ${chineseComponents[0]?.hs_code}."` : 'Focus on qualification improvement vs maintaining status quo.'}
+
+## 90-Day Action Timeline
+Write 2-3 paragraphs describing action path with specific milestones:
+- **Week 1-2**: Assessment phase - what data to gather, who to contact
+- **Week 3-4**: Trial phase - initial supplier contacts or qualification testing
+- **Week 5-12**: Migration phase - full implementation with ROI tracking
+
+Structure around decision gates: "Week 2 is the go/no-go decision point. If data shows viable alternatives, Week 4 begins supplier qualification..."
+
+## What This Means For You
+Write 2-3 paragraphs of professional perspective. ${matchedAlerts.length > 0 ? 'Reference policy landscape.' : 'Focus on certification strategy.'} Use informational tone ("data shows", "may help validate" NOT "you must"). Be specific with HS codes and dollar amounts.
+
+---
+
+**Return ONLY markdown. NO JSON. NO code fences.**
+
+RULES: Narrative prose with personality. NEVER invent numbers - use ONLY component data. Readable language ("works beautifully" not "current methodology allows"). Present real trade-offs. Use their HS codes, exact percentages.`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');
     const aiResponse = await executiveAgent.execute(prompt, {
-      temperature: 0.7,  // Creative but grounded
-      format: 'json'
+      temperature: 0.8  // ✅ Higher temp for expressive narrative writing
     });
 
-    // Check if aiResponse is already an object or a string
-    let advisory = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+    // ✅ FIX (Nov 7): Extract markdown text (BaseAgent returns { success, data })
+    const markdownBriefing = typeof aiResponse === 'string'
+      ? aiResponse
+      : aiResponse.data?.raw || aiResponse.data || aiResponse.text || aiResponse.content || '';
 
-    // ✅ UNWRAP if AI returned {success: true, data: {...}} wrapper
-    if (advisory.success && advisory.data) {
-      advisory = advisory.data;
-    }
+    console.log('✅ AI-generated executive summary:', {
+      markdown_length: markdownBriefing.length,
+      has_sections: markdownBriefing.includes('##'),
+      preview: markdownBriefing.substring(0, 200)
+    });
 
-    // ✅ DEEP LOG: Use JSON.stringify to see full nested arrays (actions, etc.)
-    console.log('✅ AI-generated executive advisory:', JSON.stringify(advisory, null, 2));
-    return advisory;
+    // ✅ Return markdown with structured metadata for backward compatibility
+    return {
+      situation_brief: markdownBriefing, // Full markdown in main field
+      markdown_content: markdownBriefing, // Also store in dedicated field
+      problem: `Section 301 burden: $${section301Burden}`,
+      annual_impact: `$${section301Burden}`,
+      current_burden: `$${section301Burden}/year`,
+      potential_savings: `$${section301Burden}/year`,
+      confidence: 85
+    };
 
   } catch (error) {
     console.error('❌ AI call failed for executive advisory:', error);

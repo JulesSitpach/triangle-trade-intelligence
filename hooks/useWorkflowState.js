@@ -275,11 +275,22 @@ export function useWorkflowState() {
   }, [currentStep, results]);
 
   // ✅ FIX (Nov 1): Reload formData from localStorage when navigating back to Steps 1 or 2
+  // ✅ FIX (Nov 7): Don't reload if we just loaded from database (view_results in URL history)
   // This ensures form fields are populated when users navigate back from Results or Alerts pages
   useEffect(() => {
     // ⚠️ Don't reload if user just clicked "+ New Analysis" (reset=true in URL)
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const isResetting = urlParams.get('reset') === 'true';
+
+    // ✅ NEW: Check if we recently loaded from dashboard (within last 2 seconds)
+    // This prevents localStorage from overwriting database-loaded data
+    const lastDatabaseLoad = workflowStorage.getItem('last_database_load_time');
+    const recentlyLoadedFromDatabase = lastDatabaseLoad && (Date.now() - parseInt(lastDatabaseLoad, 10)) < 2000;
+
+    if (recentlyLoadedFromDatabase) {
+      console.log('⚠️ Skipping localStorage restore - recently loaded from database');
+      return;
+    }
 
     // Only reload when navigating to steps 1 or 2, and only if formData appears empty, and NOT resetting
     if ((currentStep === 1 || currentStep === 2) && !formData.company_name && !isResetting) {
@@ -588,7 +599,13 @@ export function useWorkflowState() {
             steps_completed: 5,
             workflow_type: 'usmca_compliance',
             completion_time_seconds: 180,
-            certificate_generated: false
+            certificate_generated: false,
+            // ✅ FIX (Nov 7): Extract company fields to FLAT top-level for workflow-session.js
+            // workflow-session.js expects: company_name, company_country, destination_country at top level
+            // NOT just nested in company object
+            company_name: workflowData.company?.company_name || workflowData.company?.name || formData.company_name,
+            company_country: workflowData.company?.company_country || formData.company_country,
+            destination_country: workflowData.destination_country || formData.destination_country
           };
 
           await fetch('/api/workflow-session', {
@@ -803,29 +820,39 @@ export function useWorkflowState() {
   const loadSavedWorkflow = useCallback((workflow) => {
     console.log('📥 Loading saved workflow:', workflow);
 
+    // ✅ FIX (Nov 7): Mark that we just loaded from database
+    // This prevents localStorage restore from overwriting database data
+    workflowStorage.setItem('last_database_load_time', Date.now().toString());
+
+    // ✅ FIX (Nov 7): IMMEDIATELY clear old localStorage data before loading database data
+    // This prevents any race conditions where old data might persist
+    workflowStorage.removeItem('triangleUserData');
+    workflowStorage.removeItem('usmca_authorization_data');
+    console.log('🗑️ Cleared old localStorage data before loading from database');
+
     // Convert workflow data to results format
     const workflowData = workflow.workflow_data || {};
 
+    // ✅ FIX (Nov 7): Handle both nested (workflow_data.company) and flat (workflow_sessions.data) structures
     const loadedResults = {
       success: true,
       company: {
-        name: workflow.company_name || workflowData.company?.name,
-        company_name: workflow.company_name || workflowData.company?.company_name,
-        business_type: workflow.business_type || workflowData.company?.business_type,
-        trade_volume: workflow.trade_volume || workflowData.company?.trade_volume,
-        // ✅ FIX: Include all required fields for Business Impact Summary
-        // Note: industry_sector is NOT in workflow_completions table, only in workflow_data.company
-        industry_sector: workflow.industry_sector || workflowData.company?.industry_sector || 'General Manufacturing',  // ✅ FIX (Nov 7): Fallback to prevent validation error
-        destination_country: workflow.destination_country || workflowData.company?.destination_country,  // Table column exists
-        supplier_country: workflow.supplier_country || workflowData.company?.supplier_country,  // Table column exists
-        contact_person: workflowData.company?.contact_person,
-        contact_email: workflowData.company?.contact_email,
-        contact_phone: workflowData.company?.contact_phone,
-        country: workflow.company_country || workflowData.company?.country || workflowData.company?.company_country,
-        address: workflowData.company?.address || workflowData.company?.company_address,
-        tax_id: workflowData.company?.tax_id,
-        certifier_type: workflowData.company?.certifier_type,
-        ...workflowData.company  // Spread any additional fields last
+        name: workflow.company_name || workflowData.company?.name || workflowData.company_name,
+        company_name: workflow.company_name || workflowData.company?.company_name || workflowData.company_name,
+        business_type: workflow.business_type || workflowData.company?.business_type || workflowData.business_type,
+        trade_volume: workflow.trade_volume || workflowData.company?.trade_volume || workflowData.trade_volume,
+        // ✅ CRITICAL: industry_sector can be at workflowData.industry_sector (flat) OR workflowData.company.industry_sector (nested)
+        industry_sector: workflow.industry_sector || workflowData.industry_sector || workflowData.company?.industry_sector || 'General Manufacturing',
+        destination_country: workflow.destination_country || workflowData.destination_country || workflowData.company?.destination_country,
+        supplier_country: workflow.supplier_country || workflowData.supplier_country || workflowData.company?.supplier_country,
+        contact_person: workflowData.contact_person || workflowData.company?.contact_person,
+        contact_email: workflowData.contact_email || workflowData.company?.contact_email,
+        contact_phone: workflowData.contact_phone || workflowData.company?.contact_phone,
+        country: workflow.company_country || workflowData.company_country || workflowData.company?.country || workflowData.company?.company_country,
+        address: workflowData.company_address || workflowData.company?.address || workflowData.company?.company_address,
+        tax_id: workflowData.tax_id || workflowData.company?.tax_id,
+        certifier_type: workflowData.certifier_type || workflowData.company?.certifier_type,
+        ...workflowData.company  // Spread nested company object last (if exists)
       },
       product: {
         hs_code: workflow.hs_code,
@@ -852,24 +879,52 @@ export function useWorkflowState() {
       workflow_data: workflowData // ✅ ADDED: Include full workflow_data for any additional fields
     };
 
-    // ✅ Populate formData from loaded workflow - NO HARDCODED DEFAULTS
-    // This ensures when users click back to Step 1 or 2, the form fields are populated
-    setFormData(prev => ({
-      ...prev,
+    // ✅ FIX (Nov 7): COMPLETELY REPLACE formData (don't merge with old data)
+    // This ensures when users click back to Step 1 or 2, the form fields are populated with DATABASE data only
+    setFormData({
+      // Company Information
       company_name: workflow.company_name || workflowData.company?.name || '',
+      company_country: workflow.company_country || workflowData.company?.company_country || workflowData.company?.country || '',
       business_type: workflow.business_type || workflowData.company?.business_type || '',
       industry_sector: workflow.industry_sector || workflowData.company?.industry_sector || '',
+      supplier_country: workflow.supplier_country || workflowData.company?.supplier_country || '',
       trade_volume: workflow.trade_volume || workflowData.company?.trade_volume || '',
+      destination_country: workflow.destination_country || workflowData.company?.destination_country || '',
+
+      // Enhanced Company Details for Certificate Completion
       company_address: workflowData.company?.company_address || workflowData.company?.address || '',
       tax_id: workflowData.company?.tax_id || '',
       contact_person: workflowData.company?.contact_person || '',
-      contact_phone: workflowData.company?.contact_phone || workflowData.company?.phone || '',
       contact_email: workflowData.company?.contact_email || workflowData.company?.email || '',
+      contact_phone: workflowData.company?.contact_phone || workflowData.company?.phone || '',
+
+      // Product Information
       product_description: workflow.product_description || workflowData.product?.description || '',
-      manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || '',  // ✅ No fallback to 'MX'
+      manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || '',
+      substantial_transformation: workflowData.substantial_transformation || false,
+
+      // HS Code Classification Results
       classified_hs_code: workflow.hs_code || workflowData.product?.hs_code || '',
+      hs_code_confidence: workflowData.classification_confidence || 0,
+      hs_code_description: workflowData.classification_description || '',
+      classification_method: workflowData.classification_method || '',
+
+      // USMCA Certificate Fields
+      origin_criterion: workflowData.origin_criterion || '',
+      method_of_qualification: workflowData.method_of_qualification || '',
+
+      // Producer Details
+      producer_name: workflowData.producer?.name || '',
+      producer_address: workflowData.producer?.address || '',
+      producer_tax_id: workflowData.producer?.tax_id || '',
+      producer_phone: workflowData.producer?.phone || '',
+      producer_email: workflowData.producer?.email || '',
+      producer_country: workflowData.producer?.country || '',
+      producer_same_as_exporter: workflowData.producer_same_as_exporter || false,
+
+      // Component Origins
       component_origins: workflow.component_origins || workflowData.components || []
-    }));
+    });
 
     // ✅ DEBUG: Log the loaded company data to verify all fields are present
     console.log('📊 LOADED COMPANY DATA:', {
