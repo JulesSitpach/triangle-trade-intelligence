@@ -165,43 +165,49 @@ export default function USMCACertificateCompletion() {
           country_of_origin: parsedForm?.manufacturing_location || parsedForm?.company_country || ''  // Field 11: Country of Origin
         };
 
-        // ✅ Restore authorization data from localStorage (if exists)
+        // ✅ FIX (Nov 7): Restore authorization data from database OR localStorage
+        // Priority: database (parsedResults.authorization) > localStorage (storedAuth)
         let restoredAuthData = {};
-        if (storedAuth) {
+        const dbAuthData = parsedResults?.authorization;
+        const localAuthData = storedAuth ? JSON.parse(storedAuth) : null;
+
+        // Use database data first, fallback to localStorage
+        const authDataSource = dbAuthData || localAuthData;
+
+        if (authDataSource) {
           try {
-            const authData = JSON.parse(storedAuth);
-            console.log('✅ Restoring authorization data:', authData);
+            console.log('✅ [CERTIFICATE-COMPLETION] Restoring authorization from:', dbAuthData ? 'database' : 'localStorage');
             restoredAuthData = {
               authorization: {
-                signatory_name: authData.signatory_name || '',
-                signatory_title: authData.signatory_title || '',
-                signatory_email: authData.signatory_email || '',
-                signatory_phone: authData.signatory_phone || '',
-                certifier_type: authData.certifier_type || 'EXPORTER'
+                signatory_name: authDataSource.signatory_name || '',
+                signatory_title: authDataSource.signatory_title || '',
+                signatory_email: authDataSource.signatory_email || '',
+                signatory_phone: authDataSource.signatory_phone || '',
+                certifier_type: authDataSource.certifier_type || 'EXPORTER'
               },
-              exporter_same_as_company: authData.exporter_same_as_company,
-              producer_same_as_exporter: authData.producer_same_as_exporter,
+              exporter_same_as_company: authDataSource.exporter_same_as_company,
+              producer_same_as_exporter: authDataSource.producer_same_as_exporter,
               // Exporter details
-              exporter_name: authData.exporter_name || '',
-              exporter_address: authData.exporter_address || '',
-              exporter_country: authData.exporter_country || '',
-              exporter_tax_id: authData.exporter_tax_id || '',
-              exporter_phone: authData.exporter_phone || '',
-              exporter_email: authData.exporter_email || '',
+              exporter_name: authDataSource.exporter_name || '',
+              exporter_address: authDataSource.exporter_address || '',
+              exporter_country: authDataSource.exporter_country || '',
+              exporter_tax_id: authDataSource.exporter_tax_id || '',
+              exporter_phone: authDataSource.exporter_phone || '',
+              exporter_email: authDataSource.exporter_email || '',
               // Importer details
-              importer_name: authData.importer_name || '',
-              importer_address: authData.importer_address || '',
-              importer_country: authData.importer_country || '',
-              importer_tax_id: authData.importer_tax_id || '',
-              importer_phone: authData.importer_phone || '',
-              importer_email: authData.importer_email || '',
+              importer_name: authDataSource.importer_name || '',
+              importer_address: authDataSource.importer_address || '',
+              importer_country: authDataSource.importer_country || '',
+              importer_tax_id: authDataSource.importer_tax_id || '',
+              importer_phone: authDataSource.importer_phone || '',
+              importer_email: authDataSource.importer_email || '',
               // Producer details
-              producer_name: authData.producer_name || '',
-              producer_address: authData.producer_address || '',
-              producer_country: authData.producer_country || '',
-              producer_tax_id: authData.producer_tax_id || '',
-              producer_phone: authData.producer_phone || '',
-              producer_email: authData.producer_email || ''
+              producer_name: authDataSource.producer_name || '',
+              producer_address: authDataSource.producer_address || '',
+              producer_country: authDataSource.producer_country || '',
+              producer_tax_id: authDataSource.producer_tax_id || '',
+              producer_phone: authDataSource.producer_phone || '',
+              producer_email: authDataSource.producer_email || ''
             };
           } catch (e) {
             console.error('Failed to restore authorization data:', e);
@@ -279,6 +285,26 @@ export default function USMCACertificateCompletion() {
       ...prev,
       authorization: authData
     }));
+
+    // ✅ FIX (Nov 7): Save authorization data to database for dashboard reload
+    try {
+      const response = await fetch('/api/workflow-session/update-authorization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          authorization_data: authData
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ [CERTIFICATE-COMPLETION] Authorization data saved to database');
+      } else {
+        console.warn('⚠️ [CERTIFICATE-COMPLETION] Failed to save authorization (will use localStorage)');
+      }
+    } catch (error) {
+      console.error('❌ [CERTIFICATE-COMPLETION] Error saving authorization:', error);
+    }
 
     // Generate certificate and show editable preview (pass authData to avoid async state issues)
     await generateAndDownloadCertificate(authData);

@@ -848,6 +848,7 @@ export function useWorkflowState() {
       component_origins: workflow.component_origins || workflowData.components || [],
       components: workflow.component_origins || workflowData.components || [],
       detailed_analysis: workflowData.detailed_analysis || null, // ✅ ADDED: Load executive summary + alert analysis from database
+      authorization: workflowData.authorization || null, // ✅ FIX (Nov 7): Load saved authorization data from database
       workflow_data: workflowData // ✅ ADDED: Include full workflow_data for any additional fields
     };
 
