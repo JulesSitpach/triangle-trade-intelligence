@@ -921,6 +921,23 @@ export default function TradeRiskAlternatives() {
           // Don't block UI - briefing still displays from state
         }
 
+        // ✅ FIX (Nov 7): Refresh usage stats after briefing generation
+        // This updates the counter display from (0/30 used) to (1/30 used)
+        try {
+          const dashboardResponse = await fetch('/api/dashboard-data', {
+            credentials: 'include'
+          });
+          if (dashboardResponse.ok) {
+            const dashboardData = await dashboardResponse.json();
+            if (dashboardData.briefing_usage_stats) {
+              setBriefingUsageStats(dashboardData.briefing_usage_stats);
+              console.log('✅ Usage stats refreshed:', dashboardData.briefing_usage_stats);
+            }
+          }
+        } catch (statsError) {
+          console.error('⚠️ Failed to refresh usage stats (non-critical):', statsError);
+        }
+
         console.log('📚 Portfolio briefing loaded and ready for user to view');
         setAlertsGenerated(true);
       } else {
