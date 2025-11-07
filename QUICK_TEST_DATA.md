@@ -435,10 +435,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Organic Tomatoes | Mexico | 50 |
-| Jalapeño Peppers | Mexico | 20 |
-| Glass Jars | Mexico | 18 |
-| Cilantro & Spices | Mexico | 12 |
+| Organic Roma tomatoes (vine-ripened, hand-picked, USDA Organic certified, fire-roasted and peeled, 28% solids) | Mexico | 50 |
+| Fresh jalapeño peppers (medium heat 2,500-8,000 SHU, hand-chopped, seeds removed, fire-roasted for flavor) | Mexico | 20 |
+| Clear glass Mason jars (16oz capacity, 70mm twist-off lids, tempered glass, recycled content, tamper-evident seals) | Mexico | 18 |
+| Fresh cilantro and spice blend (chopped cilantro leaves, sea salt, garlic powder, cumin, lime juice concentrate) | Mexico | 12 |
 
 ### Importer/Exporter/Producer Information
 
