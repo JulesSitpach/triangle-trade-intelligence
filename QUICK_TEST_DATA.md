@@ -367,10 +367,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Polyester Shell Fabric (woven in Mexico from US yarn) | Mexico | 40 |
-| Fleece Lining (made in Canada) | Canada | 30 |
-| YKK Zippers | Mexico | 15 |
-| Down Insulation | Canada | 15 |
+| 100% polyester ripstop shell fabric (300D weave, DWR waterproof coating, woven in Mexico from US Cordura yarn) | Mexico | 40 |
+| Polar fleece liner fabric (240gsm anti-pill polyester, brushed both sides, moisture-wicking treatment, sewn panels) | Canada | 30 |
+| YKK #5 vislon waterproof zippers (2-way front closure, storm flap, corrosion-resistant YKK Aquaguard coating) | Mexico | 15 |
+| 650-fill power white duck down insulation (RDS-certified, 90/10 down/feather ratio, baffle-box construction) | Canada | 15 |
 
 ### Importer/Exporter/Producer Information
 
@@ -503,10 +503,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Ultrasound Transducer | United States | 45 |
-| Display Screen (medical grade) | Canada | 25 |
-| Custom PCB Assembly | Mexico | 20 |
-| Lithium Battery Pack | China | 10 |
+| Piezoelectric ultrasound transducer array (64-element phased array, FDA-approved ceramic crystal, titanium housing) | United States | 45 |
+| 7-inch medical-grade OLED touchscreen display with anti-glare coating, IP65 waterproof rating, 1920x1200 resolution | Canada | 25 |
+| Custom medical PCB assembly with ARM Cortex processor, 4GB RAM, DICOM-compliant imaging chipset, EMI shielding | Mexico | 20 |
+| Medical-grade lithium-ion battery pack (7.4V 5200mAh, UN38.3 certified, integrated BMS protection circuit) | China | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -639,10 +639,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Epoxy Resin Base | Canada | 45 |
-| Hardener Compound | United States | 30 |
-| Plastic Packaging Tubes | Mexico | 15 |
-| Additives & Stabilizers | Canada | 10 |
+| Bisphenol-A epoxy resin base (low-viscosity liquid, 850-1050 cPs, 190 EEW, clear Grade A industrial adhesive) | Canada | 45 |
+| Cycloaliphatic amine hardener compound (medium reactivity, 2:1 mix ratio, pot life 45 minutes, Shore D hardness 85) | United States | 30 |
+| Dual-compartment plastic dispensing tubes (50ml cartridges, PP/HDPE coextruded, static mixer nozzles, tamper-evident caps) | Mexico | 15 |
+| Thixotropic addives and UV stabilizer package (fumed silica anti-sag agent, benzophenone UV absorber, amine antioxidant) | Canada | 10 |
 
 ### Importer/Exporter/Producer Information
 
