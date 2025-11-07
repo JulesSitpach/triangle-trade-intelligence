@@ -774,10 +774,10 @@ export default function WorkflowResults({
                     style={{ width: '100%', marginBottom: '1.5rem' }}
                     disabled={loadingSummary}
                   >
-                    {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary'}
+                    {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary (1 per workflow included)'}
                   </button>
                   <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
-                    Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities.
+                    Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities. Each workflow includes one complimentary executive summary.
                   </p>
                 </>
               ) : (
