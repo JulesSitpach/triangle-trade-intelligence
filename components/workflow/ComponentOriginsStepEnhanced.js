@@ -768,6 +768,27 @@ export default function ComponentOriginsStepEnhanced({
 
           </div>
 
+          {/* Substantial Transformation Checkbox - Always visible, user ignores if not applicable */}
+          <div className="form-group">
+            <div style={{ padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
+                <input
+                  type="checkbox"
+                  checked={formData.substantial_transformation || false}
+                  onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
+                  style={{ marginTop: '0.125rem', marginRight: '0.5rem', flexShrink: 0 }}
+                />
+                <span style={{ color: '#0c4a6e', lineHeight: '1.5' }}>
+                  <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
+                  <br />
+                  <span style={{ fontSize: '0.8125rem', color: '#075985', fontStyle: 'italic' }}>
+                    Check this if your manufacturing process in US/Canada/Mexico creates significant value beyond basic assembly (welding, forming, heat treatment, etc.). Leave unchecked if you only import/distribute or manufacture elsewhere.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
+
           {/* Manufacturing Location */}
           <div className="form-group">
             <label className="form-label required">
@@ -795,27 +816,6 @@ export default function ComponentOriginsStepEnhanced({
             <div className="form-help">
               Where is the final product assembled/manufactured? (Select &quot;Does Not Apply&quot; if you import/distribute only)
             </div>
-
-            {/* Substantial Transformation Checkbox - Only show for USMCA countries */}
-            {formData.manufacturing_location && ['US', 'MX', 'CA', 'United States', 'Mexico', 'Canada'].includes(formData.manufacturing_location) && (
-              <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
-                <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
-                  <input
-                    type="checkbox"
-                    checked={formData.substantial_transformation || false}
-                    onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
-                    style={{ marginTop: '0.125rem', marginRight: '0.5rem', flexShrink: 0 }}
-                  />
-                  <span style={{ color: '#0c4a6e', lineHeight: '1.5' }}>
-                    <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
-                    <br />
-                    <span style={{ fontSize: '0.8125rem', color: '#075985', fontStyle: 'italic' }}>
-                      Check this if your manufacturing process creates significant value beyond basic assembly (welding, forming, heat treatment, etc.)
-                    </span>
-                  </span>
-                </label>
-              </div>
-            )}
           </div>
 
           {/* REMOVED: origin_criterion and method_of_qualification dropdowns
