@@ -766,7 +766,14 @@ export default function WorkflowResults({
             </div>
 
             <div className="element-spacing">
-              {!results?.detailed_analysis ? (
+              {/* ✅ DEBUG: Log what we're checking */}
+              {console.log('🔍 Executive Summary Check:', {
+                has_detailed_analysis: !!results?.detailed_analysis,
+                has_situation_brief: !!results?.detailed_analysis?.situation_brief,
+                detailed_analysis_keys: results?.detailed_analysis ? Object.keys(results.detailed_analysis) : 'none',
+                will_show_button: !results?.detailed_analysis?.situation_brief
+              })}
+              {!results?.detailed_analysis?.situation_brief ? (
                 <>
                   <button
                     onClick={() => generateExecutiveSummary()}
@@ -781,17 +788,34 @@ export default function WorkflowResults({
                   </p>
                 </>
               ) : (
-                <div style={{
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #86efac',
-                  borderRadius: '4px',
-                  padding: '1rem',
-                  marginBottom: '1.5rem'
-                }}>
-                  <p style={{fontSize: '0.95rem', color: '#15803d', margin: 0}}>
-                    ✅ <strong>Executive Summary Available</strong> - Your saved analysis is displayed below
-                  </p>
-                </div>
+                <>
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #86efac',
+                    borderRadius: '4px',
+                    padding: '1rem',
+                    marginBottom: '1rem'
+                  }}>
+                    <p style={{fontSize: '0.95rem', color: '#15803d', margin: 0}}>
+                      ✅ <strong>Executive Summary Available</strong> - Your saved analysis is displayed below
+                    </p>
+                  </div>
+                  {/* Show summary if not already visible */}
+                  {!showSummary && (
+                    <button
+                      onClick={() => {
+                        if (results.detailed_analysis && results.detailed_analysis.situation_brief) {
+                          setExecutiveSummary(results.detailed_analysis);
+                          setShowSummary(true);
+                        }
+                      }}
+                      className="btn-secondary"
+                      style={{ width: '100%', marginBottom: '1rem' }}
+                    >
+                      📋 Show Executive Summary
+                    </button>
+                  )}
+                </>
               )}
 
               {/* Executive Summary Display Section - Dynamic Component */}
