@@ -1,0 +1,1446 @@
+{
+  "summary": {
+    "total_agents": 71,
+    "query_cache": 13,
+    "use_ai_research": 9,
+    "use_hardcoded": 0,
+    "need_remediation": 9
+  },
+  "agents": [
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\classification-agent.js",
+      "fileName": "classification-agent.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 229,
+          "code": "const result = await this.execute(prompt, {"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\mexico-sourcing-agent.js",
+      "fileName": "mexico-sourcing-agent.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 48,
+          "code": "const result = await this.execute(prompt, { temperature: 0 });"
+        },
+        {
+          "line": 194,
+          "code": "const result = await this.execute(prompt, { temperature: 0 });"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\section301-agent.js",
+      "fileName": "section301-agent.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 68,
+          "code": "return this.getDatabaseCache(hs_code);"
+        },
+        {
+          "line": 78,
+          "code": "async getDatabaseCache(hsCode) {"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-enrichment-agent.js",
+      "fileName": "tariff-enrichment-agent.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "reciprocal",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 147,
+          "code": ".from('tariff_intelligence_master')"
+        },
+        {
+          "line": 179,
+          "code": ".from('tariff_intelligence_master')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\tariff-research-agent.js",
+      "fileName": "tariff-research-agent.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 169,
+          "code": ".from('tariff_intelligence_master')"
+        },
+        {
+          "line": 273,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\agents\\usmca-threshold-agent.js",
+      "fileName": "usmca-threshold-agent.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 168,
+          "code": "const result = await this.execute(prompt);"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\enrichment-router.js",
+      "fileName": "enrichment-router.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 609,
+          "code": ".from('tariff_intelligence_master')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\hts-lookup.js",
+      "fileName": "hts-lookup.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 29,
+          "code": ".from('tariff_intelligence_master')  // Updated to consolidated master table"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\tariff-calculator.js",
+      "fileName": "tariff-calculator.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "reciprocal",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\tariff\\volatility-manager.js",
+      "fileName": "volatility-manager.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "reciprocal",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\ai-confidence-scoring-service.js",
+      "fileName": "ai-confidence-scoring-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\alert-impact-analysis-service.js",
+      "fileName": "alert-impact-analysis-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\alert-push-service.js",
+      "fileName": "alert-push-service.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\automated-trade-research.js",
+      "fileName": "automated-trade-research.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate",
+        "reciprocal"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\certificate-error-recovery-service.js",
+      "fileName": "certificate-error-recovery-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\crisis-alert-service.js",
+      "fileName": "crisis-alert-service.js",
+      "handledPolicies": [
+        "section_301",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\crisis-calculator-service.js",
+      "fileName": "crisis-calculator-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\dynamic-pricing-service.js",
+      "fileName": "dynamic-pricing-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\expert-endorsement-system.js",
+      "fileName": "expert-endorsement-system.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\federal-register-section301-sync.js",
+      "fileName": "federal-register-section301-sync.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": true,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 233,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [
+        {
+          "line": 209,
+          "code": "const result = await agent.execute(prompt, { temperature: 0 });"
+        },
+        {
+          "line": 209,
+          "code": "const result = await agent.execute(prompt, { temperature: 0 });"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\global-trade-alert-service.js",
+      "fileName": "global-trade-alert-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\industry-thresholds-service.js",
+      "fileName": "industry-thresholds-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\mfn-base-rates-sync.js",
+      "fileName": "mfn-base-rates-sync.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 42,
+          "code": ".from('tariff_intelligence_master')"
+        },
+        {
+          "line": 168,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\pdf-report-generator.js",
+      "fileName": "pdf-report-generator.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\product-context-service.js",
+      "fileName": "product-context-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\professional-referral-system.js",
+      "fileName": "professional-referral-system.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\resend-alert-service.js",
+      "fileName": "resend-alert-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\rss-polling-engine.js",
+      "fileName": "rss-polling-engine.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "reciprocal",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\section232-sync.js",
+      "fileName": "section232-sync.js",
+      "handledPolicies": [
+        "section_232"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": true,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 248,
+          "code": ".from('policy_tariffs_cache')"
+        },
+        {
+          "line": 281,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [
+        {
+          "line": 212,
+          "code": "const result = await agent.execute(prompt, { temperature: 0 });"
+        },
+        {
+          "line": 212,
+          "code": "const result = await agent.execute(prompt, { temperature: 0 });"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\tariff-change-detector.js",
+      "fileName": "tariff-change-detector.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 170,
+          "code": "const result = await this.agent.execute(prompt, { temperature: 0.3 });"
+        },
+        {
+          "line": 170,
+          "code": "const result = await this.agent.execute(prompt, { temperature: 0.3 });"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\trust\\trust-calculation-service.js",
+      "fileName": "trust-calculation-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\trust\\trust-common-service.js",
+      "fileName": "trust-common-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\trust\\trust-summary-service.js",
+      "fileName": "trust-summary-service.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\usitc-tariff-sync.js",
+      "fileName": "usitc-tariff-sync.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 199,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\usmca-renegotiation-tracker.js",
+      "fileName": "usmca-renegotiation-tracker.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 148,
+          "code": "const result = await this.agent.execute(prompt, { temperature: 0.2 });"
+        },
+        {
+          "line": 148,
+          "code": "const result = await this.agent.execute(prompt, { temperature: 0.2 });"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\workflow-data-capture-service.js",
+      "fileName": "workflow-data-capture-service.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\workflow-data-connector.js",
+      "fileName": "workflow-data-connector.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\workflow-service.js",
+      "fileName": "workflow-service.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\lib\\services\\workflow-session-manager.js",
+      "fileName": "workflow-session-manager.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\admin\\analytics-overview.js",
+      "fileName": "analytics-overview.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\admin\\policy-rates\\bulk-update.js",
+      "fileName": "bulk-update.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 33,
+          "code": ".from('policy_tariffs_cache')"
+        },
+        {
+          "line": 70,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\admin\\policy-rates\\update.js",
+      "fileName": "update.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 53,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\admin\\prospects.js",
+      "fileName": "prospects.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\agents\\classification.js",
+      "fileName": "classification.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\ai-usmca-complete-analysis.js",
+      "fileName": "ai-usmca-complete-analysis.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate",
+        "reciprocal",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 768,
+          "code": ".from('tariff_intelligence_master')"
+        },
+        {
+          "line": 789,
+          "code": ".from('tariff_intelligence_master')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\consolidate-alerts.js",
+      "fileName": "consolidate-alerts.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\contact-form.js",
+      "fileName": "contact-form.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\crisis-calculator.js",
+      "fileName": "crisis-calculator.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\flag-stale-policy-rates.js",
+      "fileName": "flag-stale-policy-rates.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "ieepa"
+      ],
+      "status": "GOOD",
+      "severity": "NONE",
+      "queriesCache": true,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [
+        {
+          "line": 22,
+          "code": ".from('policy_tariffs_cache')"
+        },
+        {
+          "line": 50,
+          "code": ".from('policy_tariffs_cache')"
+        }
+      ],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\rss-polling.js",
+      "fileName": "rss-polling.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\send-daily-tariff-digest.js",
+      "fileName": "send-daily-tariff-digest.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\sync-mfn-rates.js",
+      "fileName": "sync-mfn-rates.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\sync-section232.js",
+      "fileName": "sync-section232.js",
+      "handledPolicies": [
+        "section_232"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\cron\\sync-section301-from-federal-register.js",
+      "fileName": "sync-section301-from-federal-register.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\dashboard-data.js",
+      "fileName": "dashboard-data.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\database-driven-usmca-compliance.js",
+      "fileName": "database-driven-usmca-compliance.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\executive-trade-alert.js",
+      "fileName": "executive-trade-alert.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 629,
+          "code": "const aiResponse = await executiveAgent.execute(prompt, {"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\filter-strategic-alerts.js",
+      "fileName": "filter-strategic-alerts.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "BAD",
+      "severity": "HIGH",
+      "queriesCache": false,
+      "usesAIResearch": true,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [
+        {
+          "line": 95,
+          "code": "const aiResponse = await strategicFilterAgent.execute(prompt);"
+        }
+      ],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-personalized-alerts.js",
+      "fileName": "generate-personalized-alerts.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-portfolio-briefing.js",
+      "fileName": "generate-portfolio-briefing.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\generate-usmca-certificate-report.js",
+      "fileName": "generate-usmca-certificate-report.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\get-crisis-alerts.js",
+      "fileName": "get-crisis-alerts.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\process-rss-backlog.js",
+      "fileName": "process-rss-backlog.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\test-daily-digest.js",
+      "fileName": "test-daily-digest.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\user-business-intelligence.js",
+      "fileName": "user-business-intelligence.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\workflow-complete.js",
+      "fileName": "workflow-complete.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\workflow-session.js",
+      "fileName": "workflow-session.js",
+      "handledPolicies": [
+        "section_301",
+        "section_232",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\__DEPRECATED__crisis-alerts.js",
+      "fileName": "__DEPRECATED__crisis-alerts.js",
+      "handledPolicies": [
+        "section_301",
+        "ieepa"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\__DEPRECATED__research\\live-web-tariff-lookup.js",
+      "fileName": "live-web-tariff-lookup.js",
+      "handledPolicies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\__DEPRECATED__research\\weekly-tariff-verification.js",
+      "fileName": "weekly-tariff-verification.js",
+      "handledPolicies": [
+        "mfn_rate"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    },
+    {
+      "file": "D:\\bacjup\\triangle-simple\\pages\\api\\__DEPRECATED__tariff-data-freshness.js",
+      "fileName": "__DEPRECATED__tariff-data-freshness.js",
+      "handledPolicies": [
+        "section_301"
+      ],
+      "status": "UNKNOWN",
+      "severity": "UNKNOWN",
+      "queriesCache": false,
+      "usesAIResearch": false,
+      "usesHardcoded": false,
+      "cacheSamples": [],
+      "aiSamples": [],
+      "hardcodedSamples": []
+    }
+  ],
+  "volatile_policies": {
+    "section_301": {
+      "name": "Section 301 (China tariffs)",
+      "cache_table": "policy_tariffs_cache",
+      "cache_column": "section_301",
+      "sync_job": "federal-register-section301-sync.js",
+      "ttl_days": 30
+    },
+    "section_232": {
+      "name": "Section 232 (steel/aluminum)",
+      "cache_table": "policy_tariffs_cache",
+      "cache_column": "section_232_steel / section_232_aluminum",
+      "sync_job": "section232-sync.js",
+      "ttl_days": 30
+    },
+    "mfn_rate": {
+      "name": "MFN Base Rates",
+      "cache_table": "policy_tariffs_cache",
+      "cache_column": "mfn_rate",
+      "sync_job": "mfn-base-rates-sync.js",
+      "ttl_days": 365
+    },
+    "reciprocal": {
+      "name": "Reciprocal Tariffs",
+      "cache_table": "policy_tariffs_cache",
+      "cache_column": "reciprocal_rate",
+      "sync_job": "NOT IMPLEMENTED",
+      "ttl_days": 30
+    },
+    "ieepa": {
+      "name": "IEEPA Emergency Tariffs",
+      "cache_table": "policy_tariffs_cache",
+      "cache_column": "ieepa_rate",
+      "sync_job": "NOT IMPLEMENTED",
+      "ttl_days": 30
+    }
+  },
+  "remediation_priority": [
+    {
+      "priority": 1,
+      "severity": "HIGH",
+      "file": "classification-agent.js",
+      "policies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 2,
+      "severity": "HIGH",
+      "file": "mexico-sourcing-agent.js",
+      "policies": [
+        "section_301"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 3,
+      "severity": "HIGH",
+      "file": "usmca-threshold-agent.js",
+      "policies": [
+        "section_301"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 4,
+      "severity": "HIGH",
+      "file": "federal-register-section301-sync.js",
+      "policies": [
+        "section_301"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 5,
+      "severity": "HIGH",
+      "file": "section232-sync.js",
+      "policies": [
+        "section_232"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 6,
+      "severity": "HIGH",
+      "file": "tariff-change-detector.js",
+      "policies": [
+        "section_301",
+        "section_232"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 7,
+      "severity": "HIGH",
+      "file": "usmca-renegotiation-tracker.js",
+      "policies": [
+        "section_301"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 8,
+      "severity": "HIGH",
+      "file": "executive-trade-alert.js",
+      "policies": [
+        "section_301",
+        "mfn_rate"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    },
+    {
+      "priority": 9,
+      "severity": "HIGH",
+      "file": "filter-strategic-alerts.js",
+      "policies": [
+        "section_301"
+      ],
+      "issues": {
+        "hardcoded": false,
+        "ai_research": true
+      }
+    }
+  ]
+}

@@ -195,7 +195,7 @@ export default async function handler(req, res) {
         affects_user: true,
         impact: 'Low RVC buffer could cause disqualification with threshold changes',
         annual_cost_impact: await calculateRiskImpact(workflow_intelligence, user_profile, industryThreshold),
-        description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds to 70%+.`,
+        description: `Your current RVC (${workflow_intelligence.north_american_content}%) exceeds the requirement but has limited buffer. Proposed rule changes could raise thresholds significantly.`,
         strategic_options: [
           {
             option: 'Increase USMCA content',
@@ -739,7 +739,7 @@ function generateExecutiveAdvisory_HARDCODED_OLD(policies, workflow, profile) {
     advisory.situation_brief = 'Your USMCA qualification has limited buffer against potential rule changes';
     advisory.strategic_roadmap.push({
       phase: 'Build RVC Buffer',
-      why: 'Proposed rules could raise thresholds to 70%+; current buffer is thin',
+      why: 'Proposed rules could raise thresholds significantly; current buffer is thin',
       actions: [
         'Prioritize transitioning highest-cost components to USMCA sources',
         'Evaluate Mexico nearshoring for maximum RVC impact',
@@ -837,11 +837,12 @@ async function generateFinancialScenarios(workflow, policies, profile) {
       description: `Qualification is safe but has limited margin against threshold increases`
     });
 
-    // Scenario: Threshold increase to 70%
-    if (currentRVC < 70) {
-      const newBuffer = currentRVC - 70;
+    // Scenario: Threshold increase (2026 renegotiation)
+    const proposedThreshold = 70; // Example threshold for scenario planning
+    if (currentRVC < proposedThreshold) {
+      const newBuffer = currentRVC - proposedThreshold;
       scenarios.scenarios.push({
-        scenario: 'If Threshold Increases to 70% (Proposed for 2026)',
+        scenario: `If Threshold Increases to ${proposedThreshold}% (Scenario for 2026 Renegotiation)`,
         qualification_status: newBuffer < 0 ? '❌ WOULD NOT QUALIFY' : '⚠️ MINIMUM BUFFER',
         buffer: `${newBuffer}% margin`,
         estimated_cost_if_disqualified: `$${(workflow.trade_volume * (workflow.mfn_rate_avg || 0.03)).toLocaleString()}/year`,
@@ -929,7 +930,7 @@ function generateCBPGuidance(workflow, policies, profile) {
           'Shipment-level USMCA declarations'
         ],
         cbp_audit_context: 'CBP typically audits 1 in 500 USMCA entries. When selected, companies must provide documentation within 30 days or may face back tariffs',
-        typical_penalty_range: '$50,000+ in back tariffs plus 40% penalty if documentation is insufficient (based on CBP enforcement data)'
+        typical_penalty_range: '$50,000+ in back tariffs plus penalties up to 40% of merchandise value if documentation is insufficient (19 USC 1592 - negligence/gross negligence)'
       }
     ],
 

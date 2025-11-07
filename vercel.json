@@ -10,15 +10,33 @@
   "crons": [
     {
       "path": "/api/cron/rss-polling",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 */2 * * *",
+      "comment": "Every 2 hours - Monitor trade policy RSS feeds"
     },
     {
       "path": "/api/cron/send-daily-tariff-digest",
-      "schedule": "0 8 * * *"
+      "schedule": "0 8 * * *",
+      "comment": "Daily at 08:00 UTC - Send digest emails"
     },
     {
       "path": "/api/cron/flag-stale-policy-rates",
-      "schedule": "0 0 * * *"
+      "schedule": "0 0 * * *",
+      "comment": "Daily at 00:00 UTC - Flag stale cache entries"
+    },
+    {
+      "path": "/api/cron/sync-section301-from-federal-register",
+      "schedule": "0 6 * * *",
+      "comment": "Daily at 06:00 UTC - Section 301 rates from Federal Register"
+    },
+    {
+      "path": "/api/cron/sync-section232",
+      "schedule": "30 6 * * *",
+      "comment": "Daily at 06:30 UTC - Section 232 steel/aluminum rates"
+    },
+    {
+      "path": "/api/cron/sync-mfn-rates",
+      "schedule": "0 3 * * 0",
+      "comment": "Weekly on Sunday at 03:00 UTC - MFN base rates from USITC"
     }
   ]
 }
