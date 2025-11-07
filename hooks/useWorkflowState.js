@@ -815,7 +815,7 @@ export function useWorkflowState() {
         trade_volume: workflow.trade_volume || workflowData.company?.trade_volume,
         // ✅ FIX: Include all required fields for Business Impact Summary
         // Note: industry_sector is NOT in workflow_completions table, only in workflow_data.company
-        industry_sector: workflowData.company?.industry_sector,  // JSONB only
+        industry_sector: workflow.industry_sector || workflowData.company?.industry_sector || 'General Manufacturing',  // ✅ FIX (Nov 7): Fallback to prevent validation error
         destination_country: workflow.destination_country || workflowData.company?.destination_country,  // Table column exists
         supplier_country: workflow.supplier_country || workflowData.company?.supplier_country,  // Table column exists
         contact_person: workflowData.company?.contact_person,
