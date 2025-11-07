@@ -58,15 +58,15 @@ export default function UserDashboard({ user }) {
     }
   };
 
-  const handleDownloadCertificate = async (workflow) => {
+  const handleDownloadWorkflow = async (workflow) => {
     try {
-      console.log('📄 Downloading certificate...');
+      console.log('📄 Downloading workflow...');
 
-      // If no stored certificate data, generate it from workflow data
-      let certificateData = workflow.certificate_data;
+      // If no stored workflow data, generate it from workflow data
+      let workflowData = workflow.workflow_data;
 
-      if (!certificateData) {
-        console.log('⚠️ No stored certificate - generating from workflow data...');
+      if (!workflowData) {
+        console.log('⚠️ No stored workflow - generating from workflow data...');
         const workflowData = workflow.workflow_data || {};
 
         // Track missing fields for dev issue logging
@@ -82,14 +82,14 @@ export default function UserDashboard({ user }) {
         if (!workflow.manufacturing_location) missingFields.push('manufacturing_location');
 
         if (missingFields.length > 0) {
-          console.error('🚨 DEV ISSUE: Missing workflow data in dashboard certificate generation', {
+          console.error('🚨 DEV ISSUE: Missing workflow data in dashboard workflow generation', {
             workflow_id: workflow.id,
             missing_fields: missingFields,
             workflow_has_workflow_data: !!workflow.workflow_data
           });
 
           // Log using DevIssue helper
-          await DevIssue.missingData('dashboard_certificate_generator', 'certificate_workflow_fields', {
+          await DevIssue.missingData('dashboard_workflow_generator', 'workflow_workflow_fields', {
             workflow_id: workflow.id,
             missing_fields: missingFields,
             workflow_structure: {
@@ -100,8 +100,8 @@ export default function UserDashboard({ user }) {
           });
         }
 
-        certificateData = {
-          certificate_number: `USMCA-${Date.now()}`,
+        workflowData = {
+          workflow_number: `USMCA-${Date.now()}`,
           exporter: {
             name: workflow.company_name || workflowData.company?.name || 'Company',
             address: workflowData.company?.company_address || workflowData.company?.address || '',
@@ -134,29 +134,29 @@ export default function UserDashboard({ user }) {
       }
 
       // Import the PDF generator
-      const { generateUSMCACertificatePDF } = await import('../lib/utils/usmca-certificate-pdf-generator.js');
+      const { generateUSMCAWorkflowPDF } = await import('../lib/utils/usmca-workflow-pdf-generator.js');
 
-      // Generate PDF from certificate data
-      const pdfBlob = await generateUSMCACertificatePDF(certificateData);
+      // Generate PDF from workflow data
+      const pdfBlob = await generateUSMCAWorkflowPDF(workflowData);
 
       // Create download link
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `USMCA_Certificate_${certificateData.certificate_number || Date.now()}.pdf`;
+      link.download = `USMCA_Workflow_${workflowData.workflow_number || Date.now()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      console.log('✅ Certificate downloaded successfully');
+      console.log('✅ Workflow downloaded successfully');
     } catch (error) {
-      console.error('❌ Error downloading certificate:', error);
-      await DevIssue.apiError('user_dashboard', 'certificate-download', error, {
+      console.error('❌ Error downloading workflow:', error);
+      await DevIssue.apiError('user_dashboard', 'workflow-download', error, {
         workflowId: workflow.id,
         productDescription: workflow.product_description
       });
-      alert('Failed to download certificate. Please try again.');
+      alert('Failed to download workflow. Please try again.');
     }
   };
 
@@ -210,7 +210,7 @@ export default function UserDashboard({ user }) {
             </h2>
             <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
               {daysRemaining <= 2 ? (
-                <>Your trial ends soon! Upgrade now to keep unlimited access to USMCA analyses, alerts, and certificate downloads.</>
+                <>Your trial ends soon! Upgrade now to keep unlimited access to USMCA analyses, alerts, and workflow downloads.</>
               ) : (
                 <>You have {daysRemaining} days to explore Triangle Trade Intelligence. Try the USMCA workflow and see your potential tariff savings!</>
               )}
@@ -243,7 +243,7 @@ export default function UserDashboard({ user }) {
               {user?.trial_ends_at && ` on ${new Date(user.trial_ends_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`}
             </h2>
             <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
-              Your trial period has ended. Upgrade now to continue creating USMCA analyses, viewing alerts, and downloading certificates.
+              Your trial period has ended. Upgrade now to continue creating USMCA analyses, viewing alerts, and downloading workflows.
             </p>
             <div className="action-buttons">
               <Link href="/pricing" className="btn-primary" style={{ fontSize: '18px', padding: '12px 30px' }}>
@@ -288,15 +288,15 @@ export default function UserDashboard({ user }) {
         <div className="form-section">
           <div className="dashboard-actions">
             <div className="dashboard-actions-left">
-              <h2 className="form-section-title">My Certificates</h2>
+              <h2 className="form-section-title">My Workflows</h2>
             </div>
             <div className="dashboard-actions-right">
               {!isTrialExpired && workflows.length > 0 && (
                 <button
                   onClick={async () => {
-                    if (confirm(`Delete ALL certificates?\n\nThis will permanently remove ${workflows.length} certificate${workflows.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
+                    if (confirm(`Delete ALL workflows?\n\nThis will permanently remove ${workflows.length} workflow${workflows.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
                       try {
-                        console.log(`🗑️ Deleting ${workflows.length} certificates...`);
+                        console.log(`🗑️ Deleting ${workflows.length} workflows...`);
 
                         const deletePromises = workflows.map(async (w) => {
                           const response = await fetch(`/api/delete-workflow?id=${w.id}`, {
@@ -314,14 +314,14 @@ export default function UserDashboard({ user }) {
                         });
 
                         await Promise.all(deletePromises);
-                        console.log(`✅ All ${workflows.length} certificates deleted successfully`);
-                        alert(`✅ All ${workflows.length} certificates deleted`);
+                        console.log(`✅ All ${workflows.length} workflows deleted successfully`);
+                        alert(`✅ All ${workflows.length} workflows deleted`);
 
                         // Force hard reload without cache
                         window.location.reload(true);
                       } catch (error) {
                         console.error('Bulk delete error:', error);
-                        alert(`❌ Error deleting certificates: ${error.message}`);
+                        alert(`❌ Error deleting workflows: ${error.message}`);
                       }
                     }
                   }}
@@ -360,11 +360,11 @@ export default function UserDashboard({ user }) {
               </div>
             </div>
           ) : workflows.length === 0 ? (
-            <p className="text-body">No certificates yet. Run your first USMCA analysis to generate a certificate.</p>
+            <p className="text-body">No workflows yet. Run your first USMCA analysis to generate a workflow.</p>
           ) : (
             <>
               <div className="form-group">
-                <label className="form-label">Select certificate:</label>
+                <label className="form-label">Select workflow:</label>
                 <select
                   className="form-select"
                     value={selectedWorkflow?.id || ''}
@@ -411,7 +411,7 @@ export default function UserDashboard({ user }) {
                     </div>
 
                     <div className="action-buttons">
-                      {/* QUALIFIED: Download Certificate + View Results */}
+                      {/* QUALIFIED: Download Workflow + View Results */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <>
                           <button
@@ -421,13 +421,19 @@ export default function UserDashboard({ user }) {
                             View Results
                           </button>
                           <button
-                            onClick={() => !isTrialExpired && handleDownloadCertificate(selectedWorkflow)}
+                            onClick={() => !isTrialExpired && handleDownloadWorkflow(selectedWorkflow)}
                             className="btn-primary"
                             disabled={isTrialExpired}
                             style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                            title={isTrialExpired ? 'Upgrade to download certificates' : ''}
+                            title={isTrialExpired ? 'Upgrade to download workflows' : ''}
                           >
-                            Download Certificate {isTrialExpired && '(Upgrade Required)'}
+                            Download Workflow {isTrialExpired && '(Upgrade Required)'}
+                          </button>
+                          <button
+                            onClick={() => router.push(`/usmca-workflow-completion?load=${selectedWorkflow.id}`)}
+                            className="btn-secondary"
+                          >
+                            📄 Preview Workflow
                           </button>
                         </>
                       )}
@@ -444,17 +450,17 @@ export default function UserDashboard({ user }) {
                         </button>
                       )}
 
-                      {/* Delete Certificate Button */}
+                      {/* Delete Workflow Button */}
                       <button
                         onClick={async () => {
                           // Check if we have a valid ID
                           if (!selectedWorkflow.id) {
-                            alert('❌ Cannot delete: This certificate has no ID. It may be corrupted.');
+                            alert('❌ Cannot delete: This workflow has no ID. It may be corrupted.');
                             console.error('❌ Invalid workflow - no ID:', selectedWorkflow);
                             return;
                           }
 
-                          if (confirm(`Delete this certificate?\n\n"${selectedWorkflow.product_description}"\n\nThis will permanently remove it from your account.`)) {
+                          if (confirm(`Delete this workflow?\n\n"${selectedWorkflow.product_description}"\n\nThis will permanently remove it from your account.`)) {
                             try {
                               console.log(`🗑️ Deleting workflow:`, {
                                 id: selectedWorkflow.id,
@@ -471,18 +477,18 @@ export default function UserDashboard({ user }) {
                               if (response.ok) {
                                 const result = await response.json();
                                 console.log(`✅ Workflow deleted:`, result);
-                                alert('✅ Certificate deleted successfully');
+                                alert('✅ Workflow deleted successfully');
 
                                 // Force hard reload without cache
                                 window.location.reload(true);
                               } else {
                                 const error = await response.json();
                                 console.error('❌ Delete failed:', error);
-                                alert(`❌ Failed to delete certificate:\n${error.error || 'Unknown error'}\n\nCheck console for details.`);
+                                alert(`❌ Failed to delete workflow:\n${error.error || 'Unknown error'}\n\nCheck console for details.`);
                               }
                             } catch (error) {
                               console.error('❌ Delete error:', error);
-                              alert(`❌ Error deleting certificate:\n${error.message}\n\nCheck console for details.`);
+                              alert(`❌ Error deleting workflow:\n${error.message}\n\nCheck console for details.`);
                             }
                           }
                         }}
@@ -497,177 +503,6 @@ export default function UserDashboard({ user }) {
             )}
         </div>
 
-        {/* TRADE ALERTS */}
-        <div className="form-section">
-          <div className="dashboard-actions">
-            <div className="dashboard-actions-left">
-              <h2 className="form-section-title">Trade Alerts</h2>
-            </div>
-            <div className="dashboard-actions-right">
-              {isTrialExpired ? (
-                <Link href="/pricing" className="btn-primary">
-                  🚀 Upgrade to View Alerts
-                </Link>
-              ) : alerts.length > 0 && (
-                <button
-                  onClick={async () => {
-                    if (confirm(`Delete ALL alerts?\n\nThis will permanently remove ${alerts.length} alert${alerts.length > 1 ? 's' : ''} from your account.\n\nThis action cannot be undone.`)) {
-                      try {
-                        console.log(`🗑️ Deleting ${alerts.length} alerts...`);
-
-                        const deletePromises = alerts.map(async (a) => {
-                          const response = await fetch(`/api/delete-alert?id=${a.id}`, {
-                            method: 'DELETE',
-                            credentials: 'include'
-                          });
-
-                          if (!response.ok) {
-                            const error = await response.json();
-                            throw new Error(`Failed to delete alert ${a.id}: ${error.error || 'Unknown error'}`);
-                          }
-
-                          console.log(`✅ Deleted alert: ${a.id}`);
-                          return response.json();
-                        });
-
-                        await Promise.all(deletePromises);
-                        console.log(`✅ All ${alerts.length} alerts deleted successfully`);
-                        alert(`✅ All ${alerts.length} alerts deleted`);
-
-                        // Force hard reload without cache
-                        window.location.reload(true);
-                      } catch (error) {
-                        console.error('Bulk delete error:', error);
-                        alert(`❌ Error deleting alerts: ${error.message}`);
-                      }
-                    }
-                  }}
-                  className="btn-delete-small"
-                >
-                  🗑️ Clear All Alerts
-                </button>
-              )}
-            </div>
-          </div>
-
-          {isTrialExpired ? (
-            <div style={{ padding: '30px', textAlign: 'center', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-              <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
-                🔒 <strong>Alerts disabled - Trial expired</strong>
-              </p>
-              <p className="text-body">
-                Upgrade to view and manage trade alerts for supply chain risk monitoring.
-              </p>
-              <div className="action-buttons" style={{ marginTop: '20px' }}>
-                <Link href="/pricing" className="btn-primary">
-                  View Pricing Plans
-                </Link>
-              </div>
-            </div>
-          ) : alerts.length === 0 ? (
-            <p className="text-body">No alerts yet. Run a vulnerability analysis to monitor supply chain risks.</p>
-          ) : (
-            <>
-              <div className="form-group">
-                <label className="form-label">Select alert:</label>
-                <select
-                  className="form-select"
-                    value={selectedAlert?.id || ''}
-                    onChange={(e) => {
-                      const alert = alerts.find(a => a.id === e.target.value);
-                      setSelectedAlert(alert);
-                    }}
-                  >
-                    {alerts.map(a => (
-                      <option key={a.id} value={a.id}>
-                        {a.product_description || a.company_name} - {a.overall_risk_level} - {new Date(a.analyzed_at).toLocaleDateString()}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedAlert && (
-                  <>
-                    <div className={`service-request-card ${
-                      selectedAlert.overall_risk_level === 'HIGH' ? 'border-left-red' :
-                      selectedAlert.overall_risk_level === 'MODERATE' ? 'border-left-amber' : 'border-left-green'
-                    }`}>
-                      <div className="text-bold">{selectedAlert.product_description || selectedAlert.company_name}</div>
-                      <div className="text-body">
-                        Risk Level: <strong className={
-                          selectedAlert.overall_risk_level === 'HIGH' ? 'text-red' :
-                          selectedAlert.overall_risk_level === 'MODERATE' ? 'text-amber' : 'text-green'
-                        }>
-                          {selectedAlert.overall_risk_level}
-                        </strong>
-                      </div>
-                      <div className="text-body">
-                        Impact: Risk Score {selectedAlert.risk_score}/100 • {selectedAlert.alert_count} alerts detected
-                      </div>
-                      {selectedAlert.primary_vulnerabilities && selectedAlert.primary_vulnerabilities.length > 0 && (
-                        <div className="text-body">
-                          <strong>Key Risks:</strong>
-                          <ul className="list-simple">
-                            {selectedAlert.primary_vulnerabilities.slice(0, 3).map((v, i) => (
-                              <li key={i}>{v.description}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {selectedAlert.recommendations?.immediate_actions && selectedAlert.recommendations.immediate_actions.length > 0 && (
-                        <div className="text-body">
-                          <strong>Recommended Actions:</strong>
-                          <ul className="list-simple">
-                            {selectedAlert.recommendations.immediate_actions.slice(0, 3).map((action, i) => (
-                              <li key={i}>{action}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="action-buttons">
-                      <button
-                        onClick={() => !isTrialExpired && handleViewAlert(selectedAlert.id)}
-                        className="btn-primary"
-                        disabled={isTrialExpired}
-                        style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                      >
-                        View Full Alert {isTrialExpired && '(Upgrade Required)'}
-                      </button>
-
-                      {/* Delete Alert Button */}
-                      <button
-                        onClick={async () => {
-                          if (confirm(`Delete this alert?\n\n"${selectedAlert.product_description || selectedAlert.company_name}"\n\nThis will permanently remove it from your account.`)) {
-                            try {
-                              const response = await fetch(`/api/delete-alert?id=${selectedAlert.id}`, {
-                                method: 'DELETE',
-                                credentials: 'include'
-                              });
-
-                              if (response.ok) {
-                                alert('✅ Alert deleted successfully');
-                                window.location.reload(); // Refresh to update the list
-                              } else {
-                                alert('❌ Failed to delete alert');
-                              }
-                            } catch (error) {
-                              console.error('Delete error:', error);
-                              alert('❌ Error deleting alert');
-                            }
-                          }
-                        }}
-                        className="btn-delete"
-                      >
-                        🗑️ Delete
-                      </button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-        </div>
 
       </div>
     </TriangleLayout>
