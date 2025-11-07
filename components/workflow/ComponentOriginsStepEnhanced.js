@@ -873,9 +873,18 @@ export default function ComponentOriginsStepEnhanced({
                   disabled={component.is_locked}
                   style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                 />
-                {component.is_locked && (
+                {component.is_locked ? (
                   <div className="form-help" style={{ color: '#f59e0b', fontWeight: 500 }}>
                     🔒 Component locked after HS lookup (counts toward your tier limit)
+                  </div>
+                ) : (
+                  <div className="form-help">
+                    <strong>Be specific:</strong> Include materials, specs, and processing.
+                    <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#6b7280' }}>
+                      ✅ "100% polyester ripstop fabric (300D, DWR waterproof coating, woven from US yarn)"<br />
+                      ✅ "Piezoelectric ultrasound transducer (64-element phased array, titanium housing)"<br />
+                      ❌ "Fabric" or "Electronics part" (too vague for accurate HS code classification)
+                    </div>
                   </div>
                 )}
               </div>
