@@ -967,11 +967,18 @@ export default function TradeRiskAlternatives() {
       setRealPolicyAlerts(alerts);
       setOriginalAlertCount(alerts.length);
 
+      // ✅ FIX (Nov 7): Populate strategic alerts for USMCA 2026 section
+      // Filter for high-priority policy alerts (critical/high severity)
+      const highPriorityAlerts = alerts.filter(alert => {
+        const severity = (alert.severity || '').toLowerCase();
+        return severity === 'critical' || severity === 'high';
+      });
+
+      console.log(`📊 Setting ${highPriorityAlerts.length} strategic alerts for USMCA 2026 section`);
+      setStrategicAlerts(highPriorityAlerts);
+
       if (alerts.length > 0) {
         setProgressSteps(prev => [...prev, `Found ${alerts.length} policy alerts`]);
-        // ✅ NOTE: Strategic filtering happens in portfolio briefing API
-        // The briefing will return strategic_alerts that we can use for USMCA 2026 section
-        // No need for separate AI filtering call here (saves $0.01 per page load)
       } else {
         setProgressSteps(prev => [...prev, 'No active policy alerts']);
       }
