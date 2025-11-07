@@ -2,6 +2,12 @@
 /* MINIMAL PRE-SIGNIN CSS - Maximum 400 lines */
 /* Created: September 2025 - Consolidated from 1,403 line bloated file */
 
+/* ================== 0. GLOBAL BEHAVIOR ================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
 /* ================== 1. CSS CUSTOM PROPERTIES ================== */
 
 :root {

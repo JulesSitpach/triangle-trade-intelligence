@@ -124,8 +124,8 @@ export default function ComponentOriginsStepEnhanced({
     updateFormData('used_components_count', usedComponentsCount);
   }, [usedComponentsCount, updateFormData]);
 
-  // ✅ AUTO-SCROLL: Scroll to Component Breakdown when Product Overview is complete
-  useEffect(() => {
+  // ✅ AUTO-SCROLL: Function to scroll to Component Breakdown
+  const scrollToComponentBreakdown = useCallback(() => {
     const isProductOverviewComplete =
       formData.product_description?.trim() &&
       formData.manufacturing_location?.trim();
@@ -776,6 +776,7 @@ export default function ComponentOriginsStepEnhanced({
             <select
               value={formData.manufacturing_location || ''}
               onChange={(e) => updateFormData('manufacturing_location', e.target.value)}
+              onBlur={scrollToComponentBreakdown}
               className={`form-select ${formData.manufacturing_location ? 'has-value' : ''}`}
               required
             >
