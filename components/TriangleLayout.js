@@ -129,32 +129,9 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                         <Link href="/dashboard" className="admin-dropdown-item">
                           Dashboard
                         </Link>
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch('/api/stripe/create-portal-session', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                credentials: 'include'
-                              });
-                              if (response.ok) {
-                                const data = await response.json();
-                                window.location.href = data.url;
-                              } else if (response.status === 404) {
-                                // No subscription yet - redirect to pricing page
-                                window.location.href = '/pricing';
-                              } else {
-                                alert('Unable to open billing portal. Please contact support.');
-                              }
-                            } catch (error) {
-                              console.error('Portal error:', error);
-                              alert('Unable to open billing portal. Please try again.');
-                            }
-                          }}
-                          className="admin-dropdown-item"
-                        >
+                        <Link href="/subscription" className="admin-dropdown-item">
                           Subscription/Billing
-                        </button>
+                        </Link>
                         <button onClick={logout} className="admin-dropdown-item">
                           Sign Out
                         </button>
