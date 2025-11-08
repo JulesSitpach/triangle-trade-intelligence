@@ -260,7 +260,12 @@ export default function EditableCertificatePreview({
       product_description: previewData?.professional_certificate?.product?.description || '',
       hs_code: previewData?.professional_certificate?.hs_classification?.code || '',
       origin_criterion: previewData?.professional_certificate?.preference_criterion || 'B',
-      is_producer: previewData?.professional_certificate?.producer_declaration?.is_producer || false,
+
+      // ✅ FIX (Nov 8): Box 9 "PRODUCER (YES/NO)" should be YES if product is QUALIFIED
+      // Check ACTUAL certificate structure from generate-certificate.js API (line 150-151)
+      is_producer: previewData?.professional_certificate?.usmca_analysis?.qualified === true ||
+                   previewData?.professional_certificate?.producer_declaration?.is_producer === true,
+
       qualification_method: previewData?.professional_certificate?.qualification_method?.method || 'RVC',
       country_of_origin: previewData?.professional_certificate?.country_of_origin || '',
       components: previewData?.professional_certificate?.components || [],
@@ -541,7 +546,33 @@ export default function EditableCertificatePreview({
   };
 
   const handleDownloadPDF = async () => {
-    // First validate
+    // ✅ VALIDATION: Check required fields before generating PDF
+    const missingFields = [];
+
+    // Certifier information (Box 2)
+    if (!editedCert.certifier_name?.trim()) missingFields.push('Certifier Name');
+    if (!editedCert.certifier_address?.trim()) missingFields.push('Certifier Address');
+    if (!editedCert.certifier_country?.trim()) missingFields.push('Certifier Country');
+    if (!editedCert.certifier_phone?.trim()) missingFields.push('Certifier Phone');
+    if (!editedCert.certifier_email?.trim()) missingFields.push('Certifier Email');
+    if (!editedCert.tax_id?.trim()) missingFields.push('Tax ID');
+
+    // Product information (Box 3-8)
+    if (!editedCert.product_description?.trim()) missingFields.push('Product Description');
+    if (!editedCert.hs_code?.trim()) missingFields.push('HS Code');
+
+    // Authorization signature (Box 12)
+    if (!editedCert.authorized_signature_name?.trim()) missingFields.push('Authorized Signature Name');
+    if (!editedCert.authorized_signature_title?.trim()) missingFields.push('Authorized Signature Title');
+    if (!editedCert.authorized_signature_company?.trim()) missingFields.push('Company Name (Box 12)');
+
+    // Show error if fields are missing
+    if (missingFields.length > 0) {
+      alert(`❌ Missing Required Fields:\n\n${missingFields.map(f => `• ${f}`).join('\n')}\n\nPlease fill in all required fields before downloading the certificate.`);
+      return;
+    }
+
+    // Checkbox validation
     if (!editedCert.user_accepts_responsibility) {
       alert('❌ You must confirm that you accept responsibility for the accuracy of this certificate');
       return;

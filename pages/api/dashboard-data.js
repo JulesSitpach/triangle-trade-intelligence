@@ -549,7 +549,8 @@ export default protectedApiHandler({
             primary_vulnerabilities: [
               {
                 title: alert.title,
-                severity: alert.severity_level,
+                // ✅ SCHEMA COMPATIBILITY (Nov 8): Support both old (severity) and new (severity_level)
+                severity: alert.severity_level || alert.severity,
                 description: alert.description,
                 impact: alert.business_impact
               }
@@ -558,7 +559,8 @@ export default protectedApiHandler({
             alerts: [
               {
                 title: alert.title,
-                severity: alert.severity_level,
+                // ✅ SCHEMA COMPATIBILITY (Nov 8): Support both old (severity) and new (severity_level)
+                severity: alert.severity_level || alert.severity,
                 description: alert.description,
                 potential_impact: alert.business_impact,
                 recommended_action: alert.recommended_actions,

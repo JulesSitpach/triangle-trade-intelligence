@@ -82,8 +82,12 @@ export default function TradeRiskAlternatives() {
   // Portfolio Briefing state (AI-generated strategic analysis)
   const [portfolioBriefing, setPortfolioBriefing] = useState(null);
 
-  // Email notification preferences for each component
+  // Email notification preferences for each component (default: all checked)
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
+
+  // Alert selection mode: AI auto-select vs manual selection
+  const [allowAISelectAlerts, setAllowAISelectAlerts] = useState(true); // Default: AI picks alerts
+  const [selectedAlertIds, setSelectedAlertIds] = useState([]); // Manual selection (max 3)
 
   // Executive Alert state (strategic consulting letter)
   const [executiveAlertData, setExecutiveAlertData] = useState(null);
@@ -870,13 +874,17 @@ export default function TradeRiskAlternatives() {
       setProgressSteps(prev => [...prev, 'Generating portfolio briefing...']);
 
       // STEP 2: Call portfolio briefing API with component data
+      // ✅ NEW (Nov 8): Include alert selection mode and selected IDs
       const response = await fetch('/api/generate-portfolio-briefing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           workflow_data: workflowData,
-          user_id: user?.id
+          user_id: user?.id,
+          // Alert selection mode: AI auto-select vs manual override
+          allow_ai_select_alerts: allowAISelectAlerts,
+          selected_alert_ids: !allowAISelectAlerts ? selectedAlertIds : null
         })
       });
 
@@ -1155,6 +1163,106 @@ export default function TradeRiskAlternatives() {
                   Click any component with alerts to see tariff details and policy impacts:
                 </p>
 
+                {/* ✅ NEW (Nov 8): Alert Selection for Portfolio Briefing - Positioned above table for easy access */}
+                <div style={{
+                  padding: '1rem',
+                  background: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  borderRadius: '8px',
+                  marginTop: '1rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    cursor: 'pointer',
+                    fontSize: '0.9375rem',
+                    fontWeight: 500
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={allowAISelectAlerts}
+                      onChange={(e) => {
+                        setAllowAISelectAlerts(e.target.checked);
+                        if (e.target.checked) {
+                          setSelectedAlertIds([]); // Clear manual selection when switching to AI mode
+                        }
+                      }}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>🤖 Allow AI to choose the most relevant alerts, or select up to 3 of your own</span>
+                  </label>
+
+                  {/* Manual Alert Selection Summary - ONLY show when AI checkbox is unchecked */}
+                  {!allowAISelectAlerts && (
+                    <div style={{
+                      marginTop: '1rem',
+                      padding: '1rem',
+                      background: 'white',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px'
+                    }}>
+                      <div style={{ marginBottom: '0.5rem', fontWeight: 600, color: '#111827', fontSize: '0.875rem' }}>
+                        📋 Select up to 3 alerts from components below
+                      </div>
+                      <p style={{ fontSize: '0.8125rem', color: '#6b7280', margin: '0 0 0.75rem 0' }}>
+                        Expand any component and check the alerts you want to focus on. Your selections will appear here.
+                      </p>
+                      {selectedAlertIds.length === 0 ? (
+                        <div style={{
+                          padding: '1rem',
+                          background: '#f9fafb',
+                          border: '1px dashed #d1d5db',
+                          borderRadius: '4px',
+                          textAlign: 'center',
+                          color: '#6b7280',
+                          fontSize: '0.8125rem'
+                        }}>
+                          No alerts selected. AI will auto-select if you don't choose any.
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#059669', marginBottom: '0.25rem' }}>
+                            ✅ {selectedAlertIds.length} alert{selectedAlertIds.length !== 1 ? 's' : ''} selected {selectedAlertIds.length >= 3 ? '(maximum reached)' : `(${3 - selectedAlertIds.length} more available)`}
+                          </div>
+                          {selectedAlertIds.map(alertId => {
+                            const alert = realPolicyAlerts.find(a => a.id === alertId);
+                            return alert ? (
+                              <div key={alertId} style={{
+                                padding: '0.75rem',
+                                background: '#f0fdf4',
+                                border: '1px solid #86efac',
+                                borderRadius: '4px',
+                                fontSize: '0.8125rem'
+                              }}>
+                                <div style={{ fontWeight: 600, color: '#111827', marginBottom: '0.25rem' }}>
+                                  {alert.title}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                                  {alert.severity_level && (
+                                    <span style={{
+                                      background: alert.severity_level === 'critical' ? '#fee2e2' : alert.severity_level === 'high' ? '#fef3c7' : '#dbeafe',
+                                      color: alert.severity_level === 'critical' ? '#dc2626' : alert.severity_level === 'high' ? '#f59e0b' : '#3b82f6',
+                                      padding: '0.125rem 0.5rem',
+                                      borderRadius: '4px',
+                                      marginRight: '0.5rem',
+                                      fontSize: '0.6875rem'
+                                    }}>
+                                      {alert.severity_level.toUpperCase()}
+                                    </span>
+                                  )}
+                                  {alert.affected_countries?.join(', ')}
+                                </div>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* DEBUG: Alert Matching Status */}
                 {(() => {
                   console.log('🔍 COMPONENT TABLE DEBUG:', {
@@ -1234,78 +1342,68 @@ export default function TradeRiskAlternatives() {
                     reason: componentVolatility.reason
                   });
 
-                  // Filter alerts for this specific component
-                  // STRICT MATCHING: Only show alerts with specific targeting (not generic news)
-                  // Alert must have at least ONE of:
-                  //   - Specific HS codes that match component
-                  //   - Specific industry + country that match component
-                  // Generic news (empty HS codes + empty industries) goes to Market Intelligence section only
+                  // ✅ ALERTS DASHBOARD CRITERIA (Nov 7): Broader strategic planning view
+                  // Show ALL alerts matching: Country OR Industry OR Policy Type (≤180 days)
+                  // Exclude: Operational alerts (logistics, earnings, etc.)
                   let componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
                     const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
                     const componentHS = comp.hs_code;
                     const componentIndustry = comp.industry || userProfile.industry_sector;
+                    const userDestination = (userProfile.destinationCountry || 'US').toUpperCase();
 
-                    // ✅ STRICT FILTER: Alert must have specific targeting
-                    // ✅ FIX (Nov 6): Filter out invalid HS codes (years, partial codes < 6 digits)
-                    const validHSCodes = (alert.affected_hs_codes || []).filter(code => {
-                      const normalized = String(code).replace(/\./g, '');
-                      // Valid HS codes are 6-10 digits, not years (2024, 2025) or short codes (8217)
-                      return normalized.length >= 6 && !/^20\d{2}$/.test(normalized);
-                    });
-                    const hasHSCodes = validHSCodes.length > 0;
-                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
-                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
-
-                    // Check origin match first
-                    const originMatch = hasCountries && alert.affected_countries.some(country => {
-                      const normalizedCountry = country.toUpperCase();
-                      // Skip UNSPECIFIED - that's generic news
-                      if (normalizedCountry === 'UNSPECIFIED') return false;
-                      return componentOrigin === normalizedCountry;
+                    console.log(`🔍 Checking alert "${alert.title?.substring(0, 50)}..." against component ${componentHS}:`, {
+                      componentOrigin,
+                      componentHS,
+                      userDestination,
+                      alert_countries: alert.affected_countries,
+                      alert_hs_codes: alert.affected_hs_codes
                     });
 
-                    // Skip if no origin match (not relevant to this component's country)
-                    if (!originMatch) {
-                      return false;
-                    }
+                    // ✅ CRITERION 1: Check days until impact (≤180 days)
+                    if (alert.effective_date) {
+                      const effectiveDate = new Date(alert.effective_date);
+                      const today = new Date();
+                      const daysUntilImpact = Math.ceil((effectiveDate - today) / (1000 * 60 * 60 * 24));
 
-                    // TYPE 1: Country-specific policy alert (like Section 301 on China)
-                    // Show if alert has specific country BUT no HS codes yet (investigation phase)
-                    if (originMatch && !hasHSCodes && !hasIndustries) {
-                      // Only if alert title indicates it's a real policy (not earnings/news)
-                      const title = alert.title?.toLowerCase() || '';
-                      const isPolicyAlert =
-                        title.includes('section 301') ||
-                        title.includes('section 232') ||
-                        title.includes('tariff') ||
-                        title.includes('duty') ||
-                        title.includes('investigation') ||
-                        title.includes('trade action');
-
-                      if (isPolicyAlert) {
-                        console.log(`✅ COUNTRY POLICY MATCH: ${alert.title} affects ${comp.component_type || comp.description} from ${componentOrigin}`);
-                        return true;
+                      if (daysUntilImpact > 180) {
+                        console.log(`⏭️ Skipping (>180 days): "${alert.title}" (${daysUntilImpact} days until impact)`);
+                        return false;
                       }
+                    }
 
-                      // Otherwise skip (generic news like earnings reports)
+                    // ❌ EXCLUDE: Operational alerts (logistics, earnings, non-policy)
+                    const title = alert.title?.toLowerCase() || '';
+                    const description = alert.description?.toLowerCase() || '';
+                    const text = `${title} ${description}`;
+
+                    const operationalKeywords = [
+                      'earnings', 'quarterly', 'profit', 'revenue', 'stock price',
+                      'freight rate', 'diesel price', 'capacity', 'carrier', 'fleet',
+                      'warehouse', 'automation', 'patent', 'gaming', 'postal'
+                    ];
+
+                    const isOperational = operationalKeywords.some(kw => text.includes(kw));
+                    if (isOperational) {
+                      console.log(`🚫 Excluded operational: "${alert.title}"`);
                       return false;
                     }
 
-                    // TYPE 2: Specific HS code match (most precise)
-                    if (hasHSCodes && componentHS) {
-                      const hsMatch = validHSCodes.some(code => {
-                        const normalizedComponentHS = componentHS.replace(/\./g, '');
-                        const normalizedAlertCode = String(code).replace(/\./g, '').substring(0, 6);
-                        return normalizedComponentHS.startsWith(normalizedAlertCode);
+                    // ✅ MATCH 1: Country match (origin OR destination)
+                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
+                    if (hasCountries) {
+                      const countryMatch = alert.affected_countries.some(country => {
+                        const normalized = country.toUpperCase();
+                        return normalized === componentOrigin || normalized === userDestination;
                       });
 
-                      if (hsMatch) {
-                        console.log(`✅ HS CODE MATCH: ${alert.title} affects ${comp.component_type || comp.description} (HS ${componentHS})`);
+                      if (countryMatch) {
+                        console.log(`✅ COUNTRY MATCH (Dashboard): ${alert.title} affects ${componentOrigin} or ${userDestination}`);
                         return true;
                       }
                     }
 
-                    // TYPE 3: Industry + country match (broader but still specific)
+                    // ✅ MATCH 2: Industry match
+                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
                     if (hasIndustries && componentIndustry) {
                       const industryMatch = alert.relevant_industries.some(industry =>
                         componentIndustry.toLowerCase().includes(industry.toLowerCase()) ||
@@ -1313,7 +1411,39 @@ export default function TradeRiskAlternatives() {
                       );
 
                       if (industryMatch) {
-                        console.log(`✅ INDUSTRY MATCH: ${alert.title} affects ${comp.component_type || comp.description} (${componentIndustry})`);
+                        console.log(`✅ INDUSTRY MATCH (Dashboard): ${alert.title} affects ${componentIndustry}`);
+                        return true;
+                      }
+                    }
+
+                    // ✅ MATCH 3: Policy type relevant to supply chain
+                    if (alert.policy_type) {
+                      const relevantPolicyTypes = ['USMCA', 'Section 301', 'Section 232', 'Trade Agreement', 'Tariff'];
+                      const isPolicyRelevant = relevantPolicyTypes.some(type =>
+                        alert.policy_type.toLowerCase().includes(type.toLowerCase())
+                      );
+
+                      if (isPolicyRelevant) {
+                        console.log(`✅ POLICY TYPE MATCH (Dashboard): ${alert.title} (${alert.policy_type})`);
+                        return true;
+                      }
+                    }
+
+                    // ✅ MATCH 4: HS code match (still useful for precision)
+                    const validHSCodes = (alert.affected_hs_codes || []).filter(code => {
+                      const normalized = String(code).replace(/\./g, '');
+                      return normalized.length >= 6 && !/^20\d{2}$/.test(normalized);
+                    });
+
+                    if (validHSCodes.length > 0 && componentHS) {
+                      const hsMatch = validHSCodes.some(code => {
+                        const normalizedComponentHS = componentHS.replace(/\./g, '');
+                        const normalizedAlertCode = String(code).replace(/\./g, '').substring(0, 6);
+                        return normalizedComponentHS.startsWith(normalizedAlertCode);
+                      });
+
+                      if (hsMatch) {
+                        console.log(`✅ HS CODE MATCH (Dashboard): ${alert.title} affects HS ${componentHS}`);
                         return true;
                       }
                     }
@@ -1464,10 +1594,11 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Email Notification Checkbox - Show for ALL components (alerts might come in future) */}
+                        {/* ✅ FIX (Nov 8): Default to CHECKED for better user retention */}
                         <div style={{ flex: '0.75', textAlign: 'center' }}>
                           <input
                             type="checkbox"
-                            checked={emailEnabled}
+                            checked={emailEnabled ?? true}
                             onChange={(e) => {
                               e.stopPropagation(); // Prevent row expansion when clicking checkbox
                               if (userTier === 'Trial' || userTier === 'trial') {
@@ -1588,6 +1719,40 @@ export default function TradeRiskAlternatives() {
                                     opacity: alert.lifecycle_status === 'RESOLVED' ? 0.7 : 1
                                   }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                                      {/* ✅ NEW (Nov 8): Alert selection checkbox for Portfolio Briefing */}
+                                      {!allowAISelectAlerts && (
+                                        <div style={{ marginRight: '0.75rem', paddingTop: '0.125rem' }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedAlertIds.includes(alert.id)}
+                                            onChange={(e) => {
+                                              e.stopPropagation();
+                                              if (e.target.checked) {
+                                                if (selectedAlertIds.length < 3) {
+                                                  setSelectedAlertIds([...selectedAlertIds, alert.id]);
+                                                } else {
+                                                  alert('⚠️ Maximum 3 alerts can be selected. Uncheck an alert above to select this one.');
+                                                }
+                                              } else {
+                                                setSelectedAlertIds(selectedAlertIds.filter(id => id !== alert.id));
+                                              }
+                                            }}
+                                            disabled={selectedAlertIds.length >= 3 && !selectedAlertIds.includes(alert.id)}
+                                            style={{
+                                              width: '18px',
+                                              height: '18px',
+                                              cursor: selectedAlertIds.length >= 3 && !selectedAlertIds.includes(alert.id) ? 'not-allowed' : 'pointer'
+                                            }}
+                                            title={
+                                              selectedAlertIds.includes(alert.id)
+                                                ? 'Selected for Portfolio Briefing'
+                                                : selectedAlertIds.length >= 3
+                                                ? 'Maximum 3 alerts already selected'
+                                                : 'Select this alert for Portfolio Briefing (max 3)'
+                                            }
+                                          />
+                                        </div>
+                                      )}
                                       <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', flex: 1 }}>
                                         {alert.consolidated_title || alert.title}
                                       </div>
@@ -1634,47 +1799,43 @@ export default function TradeRiskAlternatives() {
                                       </div>
                                     )}
 
-                                    {/* ✅ ALERT ACTION BUTTONS (Resolve/Archive) */}
-                                    {alert.lifecycle_status !== 'RESOLVED' && alert.lifecycle_status !== 'ARCHIVED' && (
-                                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleResolveAlert(alert);
-                                          }}
+                                    {/* ✅ NEW (Nov 8): Source URL link to full article */}
+                                    {alert.source_url && (
+                                      <div style={{ marginTop: '0.75rem' }}>
+                                        <a
+                                          href={alert.source_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
                                           style={{
-                                            background: '#059669',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '0.375rem 0.75rem',
-                                            borderRadius: '6px',
-                                            fontSize: '0.75rem',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            color: '#3b82f6',
+                                            fontSize: '0.8125rem',
                                             fontWeight: 600,
-                                            cursor: 'pointer'
+                                            textDecoration: 'none',
+                                            padding: '0.5rem 0.75rem',
+                                            background: '#eff6ff',
+                                            border: '1px solid #bfdbfe',
+                                            borderRadius: '6px',
+                                            transition: 'all 0.2s'
+                                          }}
+                                          onMouseEnter={(e) => {
+                                            e.target.style.background = '#dbeafe';
+                                            e.target.style.borderColor = '#93c5fd';
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            e.target.style.background = '#eff6ff';
+                                            e.target.style.borderColor = '#bfdbfe';
                                           }}
                                         >
-                                          ✅ Mark Resolved
-                                        </button>
-                                        <button
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleArchiveAlert(alert);
-                                          }}
-                                          style={{
-                                            background: '#6b7280',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '0.375rem 0.75rem',
-                                            borderRadius: '6px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 600,
-                                            cursor: 'pointer'
-                                          }}
-                                        >
-                                          📦 Archive
-                                        </button>
+                                          📄 Read Full Article
+                                          <span style={{ fontSize: '0.75rem' }}>↗</span>
+                                        </a>
                                       </div>
                                     )}
+
+                                    {/* ❌ REMOVED (Nov 8): Mark Resolved/Archive buttons - users don't resolve policies, they respond to them */}
 
                                     {/* Show resolution notes if resolved */}
                                     {alert.lifecycle_status === 'RESOLVED' && alert.resolution_notes && (
@@ -1883,7 +2044,41 @@ export default function TradeRiskAlternatives() {
                                     alignItems: 'start',
                                     marginBottom: '0.5rem'
                                   }}>
-                                    <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem' }}>
+                                    {/* ✅ NEW (Nov 8): Alert selection checkbox for USMCA 2026 insights */}
+                                    {!allowAISelectAlerts && (
+                                      <div style={{ marginRight: '0.75rem', paddingTop: '0.125rem' }}>
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedAlertIds.includes(alert.id)}
+                                          onChange={(e) => {
+                                            e.stopPropagation();
+                                            if (e.target.checked) {
+                                              if (selectedAlertIds.length < 3) {
+                                                setSelectedAlertIds([...selectedAlertIds, alert.id]);
+                                              } else {
+                                                alert('⚠️ Maximum 3 alerts can be selected. Uncheck an alert to select this one.');
+                                              }
+                                            } else {
+                                              setSelectedAlertIds(selectedAlertIds.filter(id => id !== alert.id));
+                                            }
+                                          }}
+                                          disabled={selectedAlertIds.length >= 3 && !selectedAlertIds.includes(alert.id)}
+                                          style={{
+                                            width: '18px',
+                                            height: '18px',
+                                            cursor: selectedAlertIds.length >= 3 && !selectedAlertIds.includes(alert.id) ? 'not-allowed' : 'pointer'
+                                          }}
+                                          title={
+                                            selectedAlertIds.includes(alert.id)
+                                              ? 'Selected for Portfolio Briefing'
+                                              : selectedAlertIds.length >= 3
+                                              ? 'Maximum 3 alerts already selected'
+                                              : 'Select this alert for Portfolio Briefing (max 3)'
+                                          }
+                                        />
+                                      </div>
+                                    )}
+                                    <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', flex: 1 }}>
                                       {alert.title}
                                     </div>
                                     <span style={{
@@ -1976,7 +2171,11 @@ export default function TradeRiskAlternatives() {
                   <div className="hero-buttons">
                     <button
                       onClick={() => {
-                        console.log('🔵 USMCA 2026 button clicked!', { userProfile });
+                        console.log('🔵 USMCA 2026 button clicked!', {
+                          userProfile,
+                          allowAISelectAlerts,
+                          selectedAlertIds: !allowAISelectAlerts ? selectedAlertIds : 'AI_AUTO_SELECT'
+                        });
                         loadPortfolioBriefing(userProfile);
                       }}
                       className={briefingUsageStats.limit_reached ? "btn-secondary" : "btn-primary"}

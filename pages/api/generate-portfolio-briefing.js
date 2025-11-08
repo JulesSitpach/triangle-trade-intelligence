@@ -29,11 +29,22 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { workflow_data, user_id } = req.body;
+    const { workflow_data, user_id, allow_ai_select_alerts, selected_alert_ids } = req.body;
 
     if (!workflow_data) {
       return res.status(400).json({ error: 'Missing workflow_data' });
     }
+
+    // ✅ NEW (Nov 8): Alert selection mode
+    // If user unchecks AI but doesn't select any alerts, fall back to AI auto-select
+    const isManualAlertSelection = allow_ai_select_alerts === false && selected_alert_ids && selected_alert_ids.length > 0;
+    const useAIAutoSelect = allow_ai_select_alerts !== false || !selected_alert_ids || selected_alert_ids.length === 0;
+    console.log('🎯 Alert selection mode:', {
+      allow_ai_select_alerts,
+      manual_mode: isManualAlertSelection,
+      selected_count: selected_alert_ids?.length || 0,
+      final_mode: useAIAutoSelect ? 'AI_AUTO_SELECT' : 'MANUAL_SELECTION'
+    });
 
     // ✅ SUBSCRIPTION TIER ENFORCEMENT - Portfolio Briefing Limits
     if (user_id) {
@@ -123,7 +134,7 @@ export default async function handler(req, res) {
       console.error('⚠️ Failed to fetch real alerts:', alertError);
     }
 
-    // STEP 2: Match real alerts to user's components
+    // STEP 2: Match real alerts to user's components OR use manually selected alerts
     const userComponentOrigins = (components).map(c =>
       (c.origin_country || c.country || '').toUpperCase()
     );
@@ -132,22 +143,32 @@ export default async function handler(req, res) {
       (c.hs_code || '').replace(/\./g, '')
     );
 
-    const matchedAlerts = (realAlerts || []).filter(alert => {
-      const countryMatch = alert.affected_countries?.some(country =>
-        userComponentOrigins.includes(country.toUpperCase())
+    let matchedAlerts;
+
+    if (isManualAlertSelection) {
+      // ✅ MANUAL MODE: Use only user-selected alerts
+      matchedAlerts = (realAlerts || []).filter(alert =>
+        selected_alert_ids.includes(alert.id)
       );
-
-      const hsMatch = alert.affected_hs_codes?.some(code => {
-        const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
-        return userComponentHS.some(compHS =>
-          compHS.startsWith(normalizedAlertCode)
+      console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} alerts manually selected by user`);
+    } else {
+      // ✅ AI AUTO-SELECT MODE: Match alerts to components automatically
+      matchedAlerts = (realAlerts || []).filter(alert => {
+        const countryMatch = alert.affected_countries?.some(country =>
+          userComponentOrigins.includes(country.toUpperCase())
         );
+
+        const hsMatch = alert.affected_hs_codes?.some(code => {
+          const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+          return userComponentHS.some(compHS =>
+            compHS.startsWith(normalizedAlertCode)
+          );
+        });
+
+        return countryMatch || hsMatch;
       });
-
-      return countryMatch || hsMatch;
-    });
-
-    console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} real alerts matched`);
+      console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} alerts auto-matched by AI`);
+    }
 
     // STEP 3: Build portfolio analysis for AI prompt (with volatility detection)
     const destination = workflow_data.company?.destination_country || 'US';
@@ -271,11 +292,11 @@ Response format: Just numbers separated by commas (e.g., "1, 3, 5") or "NONE" if
       }
     }
 
+    // ✅ FIX (Nov 7): Build alert context with component matching (NO DUPLICATION)
     const alertContext = strategicAlerts.length > 0
-      ? `STRATEGIC POLICY ALERTS (${strategicAlerts.length} of ${rankedAlerts.length} total alerts affect business decisions):
+      ? `STRATEGIC POLICY ALERTS (${strategicAlerts.length} alerts):
 
 ${strategicAlerts.map((a, idx) => {
-  // Find which components this alert affects
   const affectedComps = components.filter(comp => {
     const countryMatch = a.affected_countries?.includes((comp.origin_country || comp.country || '').toUpperCase());
     const hsMatch = a.affected_hs_codes?.some(code =>
@@ -285,23 +306,11 @@ ${strategicAlerts.map((a, idx) => {
   });
   const affectedNames = affectedComps.map(c => c.component_type || c.description).join(', ');
 
-  return `[${idx + 1}] ${a.severity} - ${a.title}
-  WHY RELEVANT: Affects sourcing decisions for ${affectedNames || 'your supply chain'}
-  Impact: ${a.impactScore.toFixed(1)}% of portfolio value
-  Details: ${a.description}
-  Countries: ${(a.affected_countries || []).join(', ')} | HS Codes: ${(a.affected_hs_codes || []).join(', ') || 'Policy-level (all products)'}
-  Source: ${a.detection_source || 'Federal Register / USTR / Government Announcement'}
-  Announced: ${a.announcement_date || new Date(a.created_at).toLocaleDateString()}`;
+  return `[${idx + 1}] ${a.severity.toUpperCase()} - ${a.title}
+  Affects: ${affectedNames || 'supply chain'} (${a.impactScore.toFixed(1)}% of portfolio)
+  ${a.description}`;
 }).join('\n\n')}`
-      : rankedAlerts.length > 0
-      ? `ALERTS REVIEWED BUT FILTERED OUT (${rankedAlerts.length} operational/earnings reports, not strategic):
-Use forward-looking language: "potential", "expected", "could face", "we are monitoring for"`
-      : `NO REAL POLICY ALERTS YET:
-We are monitoring 12+ government sources (USTR, Federal Register, Mexico labor ministry, Canada ISAC)
-for announcements affecting HS codes: ${userComponentHS.join(', ')}
-and countries: ${[...new Set(userComponentOrigins)].join(', ')}
-
-Use forward-looking language: "potential", "expected", "could face", "we are tracking for"`;
+      : `NO ACTIVE ALERTS - Use forward-looking language: "potential", "expected", "monitoring for"`;
 
     // Detect volatile components for monitoring emphasis
     const volatileComponents = components.map(c => {
@@ -315,132 +324,49 @@ Use forward-looking language: "potential", "expected", "could face", "we are tra
 
     const hasVolatileComponents = volatileComponents.length > 0;
 
-    // STEP 5: Build the AI prompt - Strategic advisor tone
-    const aiPrompt = `ROLE:
-You are a Trade Compliance Director analyzing ${companyName}'s supply chain for USMCA 2026 renegotiation exposure. Write a strategic briefing for the operations team.
+    // ✅ OPTIMIZED (Nov 7): Streamlined prompt - removed redundancy, kept narrative quality
+    const aiPrompt = `You are a Trade Compliance Director writing a strategic briefing for ${companyName}'s operations team about USMCA 2026 renegotiation exposure.
 
-TONE:
-- Professional peer-to-peer (not teaching basics)
-- Evidence-based (cite their specific numbers)
-- Strategic advisor (implications, not instructions)
-- Assumes they understand trade terms (RVC, HS codes, rules of origin)
-
-${companyName}'s COMPONENT PORTFOLIO:
+COMPONENTS (${components.length} total):
 ${components.map(c => {
-  const percentage = c.percentage || (totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0);
-  const volatilityTier = VolatilityManager.getVolatilityTier(c.hs_code, c.origin_country || c.country, destination);
-  const volatilityNote = volatilityTier.tier <= 2 ? `\n  ⚠️ VOLATILE TARIFF: ${volatilityTier.reason}` : '';
-  return `- ${c.component_type || c.description} from ${c.origin_country || c.country} (${percentage}% of costs)
-  HS Code: ${c.hs_code || 'Not classified'}
-  ${c.annual_volume > 0 ? `Annual Value: $${c.annual_volume.toLocaleString()}` : ''}${volatilityNote}`;
+  const pct = c.percentage || (totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0);
+  const vol = VolatilityManager.getVolatilityTier(c.hs_code, c.origin_country || c.country, destination);
+  return `• ${c.component_type || c.description} (${c.origin_country || c.country}) - ${pct}% | HS: ${c.hs_code}${vol.tier <= 2 ? ` ⚠️ ${vol.reason}` : ''}`;
 }).join('\n')}
 
-${hasVolatileComponents ? `\n⚠️ TARIFF RATE VOLATILITY WARNING:
-${volatileComponents.length} components have VOLATILE tariff rates (change frequently with policy announcements):
-${volatileComponents.map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n')}
-
-These rates are subject to:
-${[...new Set(volatileComponents.flatMap(c => c.volatility.policies))].map(p => `- ${p}`).join('\n')}
-
-IMPORTANT: Database tariff rates for these components may be STALE. Platform forces fresh AI research for volatile combinations.
-` : ''}
-
-${matchedAlerts.length > 0 ? `ACTIVE POLICY ALERTS (${matchedAlerts.length} affecting your supply chain):
-${rankedAlerts.map((a, idx) =>
-  `[${idx + 1}] ${a.title}
-  Impact: Affects ${a.impactScore.toFixed(0)}% of your trade volume
-  Countries: ${(a.affected_countries || []).join(', ')}
-  HS Codes: ${(a.affected_hs_codes || []).join(', ') || 'General policy (all HS codes)'}
-  ${a.description}`
-).join('\n\n')}` : `MONITORING STATUS:
-No active policy changes detected. Tracking USTR, Federal Register, and Mexico labor ministry for announcements affecting:
-- Your HS Codes: ${userComponentHS.join(', ')}
-- Your Source Countries: ${[...new Set(userComponentOrigins)].join(', ')}`}
-
-You are writing a strategic briefing for a business owner preparing for USMCA 2026 renegotiation. Write as an expressive trade intelligence analyst - tell the STORY of their supply chain position with personality and insight.
-
 ${alertContext}
+
+Write an expressive, narrative briefing - tell their supply chain STORY with personality and strategic insight.
 
 Write your analysis in MARKDOWN format with these sections (you can add more if needed):
 
 # Executive Advisory: ${companyName}
 
 ## Active Alerts Affecting Your Supply Chain
-${strategicAlerts.length > 0 ? `List the ${strategicAlerts.length} strategic alerts as bullets with emoji severity indicators (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Each alert should be one compelling line that makes the business owner understand WHY it matters to them.
-
-Example:
-- 🔴 US-China Trade Truce (Nov 5) creates 90-day rate reduction window - your Chinese PLC sourcing could save $400K if you ship before Feb 15
-- 🟠 Section 301 rates historically spike Q1 2026 - pattern suggests locking pricing NOW before March announcements
-- 🟡 Mexico Section 232 exemptions under review - your steel frame sourcing (32% of costs) at risk if exemption expires June 2026` : `Write 2-3 bullets about what you're MONITORING (even with no active alerts), framed as opportunities/risks:
-
-Example:
-- 🔵 USMCA 2026 renegotiation hearing scheduled Q1 - cumulation rules affecting your Chinese components will be debated
-- 🟢 Mexico nearshoring momentum - your existing Mexican suppliers (55% of costs) position you ahead of competitors scrambling to relocate`}
+${strategicAlerts.length > 0
+  ? `List ${strategicAlerts.length} alerts as bullets with emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Make each line compelling - show WHY it matters to them. Example: "🔴 US-China truce creates 90-day window - your Chinese PLC sourcing saves $400K if you ship before Feb 15"`
+  : `Write 2-3 monitoring bullets framed as opportunities/risks. Example: "🔵 USMCA 2026 hearing Q1 - cumulation rules affecting your Chinese components will be debated"`}
 
 ## Your Situation
-Write 2-3 **flowing narrative paragraphs** painting their supply chain picture. State exact percentages by country (CALCULATE from component data - don't guess!). Give context on what 2026 means for THEM specifically. ${matchedAlerts.length > 0 ? 'Weave matched alerts naturally into this narrative - don\'t just list them, CONNECT them to the user\'s components.' : 'Focus on 2026 renegotiation context and what rule changes would mean for their specific components.'}
+Write 2-3 **narrative paragraphs** painting their supply chain story. Use exact percentages by country (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave alerts naturally into narrative.' : 'Focus on 2026 context for their components.'}
 
-Example style:
-"Your hydraulic press manufacturing sits at an interesting intersection of three supply chains. Mexican steel framing and welding (32% of product costs) gives you solid USMCA footing, but your Chinese PLC touchscreen control system (22% of costs) creates Section 301 exposure worth $1.2M annually. The German hydraulic pump (18%) rounds out a geographically diversified supply base - smart for resilience, but complex for rules of origin.
-
-Two recent policy developments put this configuration under pressure: [weave alerts here naturally]. What worked brilliantly in 2024 may need rethinking as 2026 approaches."
+Example: "Your hydraulic press sits at the intersection of three supply chains. Mexican steel (32%) gives solid USMCA footing, but Chinese PLC (22%) creates $1.2M Section 301 exposure. German hydraulics (18%) diversify risk but complicate origin rules. What worked in 2024 may need rethinking as 2026 approaches."
 
 ## Critical Decision Gates
-Write 2-3 paragraphs presenting genuine strategic CHOICES with no obvious answer. Frame as "choosing between futures." Present trade-offs, not recommendations. Make the business owner THINK.
+Present 2-3 strategic CHOICES with no obvious answer. Frame as "choosing between futures" - show trade-offs, not recommendations. Make them THINK.
 
-Example:
-"You're essentially choosing between two futures. Path A: Continue with Chinese PLC sourcing, accept $1.2M annual Section 301 burden, and wait for 2026 rule clarity. This works if cumulation rules stay favorable OR if Chinese suppliers remain price-competitive despite tariffs. Path B: Begin qualifying Mexican PLC alternatives now - 12-18 month transition, potentially higher component costs, but eliminates Section 301 exposure and strengthens USMCA qualification.
-
-There's no obviously correct answer because Q1 2026 negotiating proposals haven't been published yet. Your Mexican steel concentration (32%) provides USMCA strength but creates single-country exposure. Geographic diversification would reduce risk, but your current suppliers have proven quality and established logistics."
+Example: "Path A: Keep Chinese PLC, accept $1.2M burden, wait for 2026 clarity. Path B: Qualify Mexican alternatives now (12-18mo transition, higher costs) but eliminate Section 301 and strengthen USMCA. No obvious answer until Q1 2026 proposals publish."
 
 ## What We're Monitoring
-Write 2-3 paragraphs describing what you're tracking and WHY it matters to their specific components. Structure around calendar milestones (Q1 2026 proposals, Mid-2026 findings, etc.).
+Describe 2-3 intelligence streams and WHY they matter. Structure around Q1/Mid/Q3-Q4 2026 milestones.${hasVolatileComponents ? ` CRITICAL: ${volatileComponents.length} components need enhanced monitoring - explain daily vs weekly vs quarterly frequency and why.` : ''}
 
-${hasVolatileComponents ? `CRITICAL: This portfolio contains ${volatileComponents.length} components with VOLATILE tariff rates. Explain which components need daily/weekly checks vs quarterly checks and WHY:
-
-DAILY MONITORING REQUIRED:
-${volatileComponents.filter(c => c.volatility.tier === 1).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n') || 'None'}
-
-WEEKLY MONITORING REQUIRED:
-${volatileComponents.filter(c => c.volatility.tier === 2).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.reason}`).join('\n') || 'None'}
-
-Weave this into your monitoring narrative - explain that some rates change with executive proclamations (weekly checks) while others are stable (quarterly sufficient).` : ''}
-
-Example:
-"We're tracking three intelligence streams for you. First, the USMCA Joint Commission meeting schedule - Q1 2026 is when cumulation rule proposals get published. That's the signal for whether your Chinese PLC strategy needs revision. Second, USTR Section 301 review cycles - historically these spike in March/April, so we're watching for February announcements. Third, Mexico's Diario Oficial for labor compliance updates affecting your steel suppliers.
-
-The next major decision point: Q1 2026 when we see actual negotiating text. That's when 'potential' becomes 'proposed' and strategic uncertainty starts resolving into policy language you can plan around."
+Example: "Three streams: (1) USMCA Joint Commission schedule - Q1 2026 cumulation proposals signal Chinese PLC strategy. (2) USTR Section 301 cycles - historically spike March/April. (3) Mexico Diario Oficial for labor compliance. Next major gate: Q1 2026 negotiating text."
 
 ---
 
-**Return ONLY the markdown above. Do NOT wrap in JSON. Do NOT add code fences. Just pure markdown text.**
+RULES: Narrative prose with personality. NEVER invent numbers - use ONLY component data. Weave alerts naturally. Readable language ("works beautifully" not "current methodology allows"). Present real trade-offs. Avoid political names. Use their HS codes, exact percentages. Structure around Q1/Mid/Q3-Q4 2026.
 
-${hasVolatileComponents ? `\nMONITORING FREQUENCY GUIDANCE:
-Your portfolio contains ${volatileComponents.length} components with volatile tariff rates requiring enhanced monitoring:
-
-DAILY CHECKS (Super Volatile - Tier 1):
-${volatileComponents.filter(c => c.volatility.tier === 1).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.policies.join(', ')}`).join('\n') || 'None'}
-
-WEEKLY CHECKS (Volatile - Tier 2):
-${volatileComponents.filter(c => c.volatility.tier === 2).map(c => `- ${c.component_type || c.description} (${c.origin_country || c.country}): ${c.volatility.policies.join(', ')}`).join('\n') || 'None'}
-
-QUARTERLY CHECKS (Stable - Tier 3):
-All other components with standard MFN or USMCA rates
-
-WEAVE THIS INTO YOUR MONITORING PLAN - explain why some components need daily checks while others are quarterly.
-` : ''}
-
-CRITICAL WRITING RULES:
-1. WRITE NARRATIVE PROSE - Tell a story with personality, don't list dry facts
-2. NEVER INVENT NUMBERS - Use ONLY percentages from component data above. Calculate country totals accurately.
-3. WEAVE ALERTS NATURALLY - Work them into the narrative, don't just list them
-4. READABLE LANGUAGE - "works beautifully today" not "current cumulation methodology allows"
-5. REAL TRADE-OFFS - Present genuine strategic choices with no obvious answer
-6. NO POLITICAL REFERENCES - Say "policy developments" not politician names
-7. BE SPECIFIC - Use their HS codes, exact percentages, explain context
-8. CALENDAR MILESTONES - Structure around Q1 2026, Mid-2026, Q3-Q4 deadlines
-
-IF YOU INVENT A STATISTIC NOT IN THE DATA ABOVE, YOU HAVE FAILED.`;
+**Return ONLY markdown. NO JSON. NO code fences.**`;
 
     console.log('🤖 Calling AI to generate portfolio briefing...');
     console.log('📋 Prompt length:', aiPrompt.length, 'characters');
@@ -452,11 +378,19 @@ IF YOU INVENT A STATISTIC NOT IN THE DATA ABOVE, YOU HAVE FAILED.`;
     });
 
     console.log('✅ AI response received');
+    console.log('🔍 AI response structure:', {
+      type: typeof aiResponse,
+      has_data: !!aiResponse?.data,
+      has_text: !!aiResponse?.text,
+      has_content: !!aiResponse?.content,
+      keys: aiResponse ? Object.keys(aiResponse) : []
+    });
 
-    // ✅ Extract markdown text (AI returns raw text, not JSON)
+    // ✅ FIX (Nov 7): BaseAgent returns { success, data } format
+    // The 'data' field contains the parsed response (raw markdown in this case)
     const markdownBriefing = typeof aiResponse === 'string'
       ? aiResponse
-      : aiResponse.text || aiResponse.content || '';
+      : aiResponse.data?.raw || aiResponse.data || aiResponse.text || aiResponse.content || '';
 
     console.log('📊 Portfolio briefing generated:', {
       markdown_length: markdownBriefing.length,

@@ -175,73 +175,67 @@ export default protectedApiHandler({
 
     // Use AI-powered ClassificationAgent for HS code suggestions
     if (action === 'suggest_hs_code' && productDescription) {
-      // ✅ CHECK DATABASE CACHE FIRST - Avoid 13-second AI calls for repeated requests
-      const cacheKey = getCacheKey(productDescription);
-      console.log(`🔍 Checking cache for: "${cacheKey}"`);
+      // ❌ TEMPORARILY DISABLED (Nov 8, 2025): Classification cache READ until we verify 100% accuracy
+      //
+      // const cacheKey = getCacheKey(productDescription);
+      // console.log(`🔍 Checking cache for: "${cacheKey}"`);
+      //
+      // const { data: cacheResults, error: cacheError } = await supabase
+      //   .from('hs_code_classifications')
+      //   .select('*')
+      //   .eq('component_description', cacheKey);
+      //
+      // const cached = cacheResults && cacheResults.length > 0 ? cacheResults[0] : null;
+      //
+      // if (cached && !cacheError) {
+      //   console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (HS: ${cached.hs_code}, Confidence: ${cached.confidence}%, saved ~13 seconds)`);
+      //
+      //   const safeExplanation = typeof cached.explanation === 'string' ? cached.explanation : JSON.stringify(cached.explanation || '');
+      //
+      //   const cachedAlternativeCodes = (cached.alternative_codes || []).map(alt => ({
+      //     code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
+      //     confidence: Number(alt.confidence) || 0,
+      //     reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
+      //   }));
+      //
+      //   const cachedResponse = {
+      //     success: true,
+      //     classification: {
+      //       hsCode: cached.hs_code,
+      //       description: cached.hs_description,
+      //       confidence: `${cached.confidence}%`,
+      //       verification_status: cached.verified ? 'human_verified' : 'ai_generated',
+      //       usmca_qualification: 'possible'
+      //     },
+      //     enhanced_features: {
+      //       alternative_codes: cachedAlternativeCodes,
+      //       required_documentation: [],
+      //       reasoning: safeExplanation
+      //     },
+      //     agent_metadata: {
+      //       processing_time_ms: Date.now() - startTime,
+      //       agent_version: 'database_cache',
+      //       confidence_threshold_met: cached.confidence >= 75,
+      //       database_match: true,
+      //       cache_hit: true,
+      //       cached_at: cached.created_at
+      //     },
+      //     data: {
+      //       hsCode: cached.hs_code,
+      //       hs_code: cached.hs_code,
+      //       suggestion: cached.hs_code,
+      //       description: cached.hs_description,
+      //       confidence: cached.confidence,
+      //       explanation: safeExplanation,
+      //       reasoning: safeExplanation,
+      //       source: cached.verified ? 'Human Expert' : 'AI Classification Agent (Cached)'
+      //     }
+      //   };
+      //
+      //   return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
+      // }
 
-      const { data: cacheResults, error: cacheError } = await supabase
-        .from('hs_code_classifications')
-        .select('*')
-        .eq('component_description', cacheKey);  // EXACT match, not LIKE pattern
-
-      const cached = cacheResults && cacheResults.length > 0 ? cacheResults[0] : null;
-
-      if (cached && !cacheError) {
-
-        // ✅ ALWAYS use cached result for exact description match (even if confidence < 90%)
-        // Rationale: Re-classifying the same text won't improve confidence unless AI model/prompt changes
-        // If user only changed percentage (not description), no need to waste $0.02 + 14s re-classifying
-          console.log(`💰 Database Cache HIT for "${productDescription.substring(0, 40)}..." (HS: ${cached.hs_code}, Confidence: ${cached.confidence}%, saved ~13 seconds)`);
-
-          // Transform database record to API response format
-        // ✅ SAFETY: Ensure all fields are strings (database might have JSONB)
-        const safeExplanation = typeof cached.explanation === 'string' ? cached.explanation : JSON.stringify(cached.explanation || '');
-
-        // ✅ SAFETY: Normalize cached alternative_codes (old data might have unnormalized objects)
-        const cachedAlternativeCodes = (cached.alternative_codes || []).map(alt => ({
-          code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
-          confidence: Number(alt.confidence) || 0,
-          reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
-        }));
-
-        const cachedResponse = {
-          success: true,
-          classification: {
-            hsCode: cached.hs_code,
-            description: cached.hs_description,
-            confidence: `${cached.confidence}%`,
-            verification_status: cached.verified ? 'human_verified' : 'ai_generated',
-            usmca_qualification: 'possible'
-          },
-          enhanced_features: {
-            alternative_codes: cachedAlternativeCodes,
-            required_documentation: [],
-            reasoning: safeExplanation
-          },
-          agent_metadata: {
-            processing_time_ms: Date.now() - startTime,
-            agent_version: 'database_cache',
-            confidence_threshold_met: cached.confidence >= 75,
-            database_match: true,
-            cache_hit: true,
-            cached_at: cached.created_at
-          },
-          data: {
-            hsCode: cached.hs_code,
-            hs_code: cached.hs_code,  // ✅ ADD: snake_case for backward compatibility with button
-            suggestion: cached.hs_code,  // ✅ ADD: "suggestion" field for button compatibility
-            description: cached.hs_description,
-            confidence: cached.confidence,
-            explanation: safeExplanation,
-            reasoning: safeExplanation,
-            source: cached.verified ? 'Human Expert' : 'AI Classification Agent (Cached)'
-          }
-        };
-
-        return res.json(await addSubscriptionContext(req, cachedResponse, 'classification'));
-      }
-
-      console.log(`⏳ Database Cache MISS - Making AI call for "${productDescription.substring(0, 40)}..."`);
+      console.log(`⚠️ Classification cache READ disabled - making fresh AI call for "${productDescription.substring(0, 40)}..."`);
 
       const agent = new ClassificationAgent();
       const aiResult = await agent.suggestHSCode(productDescription, componentOrigins, additionalContext);
@@ -379,29 +373,41 @@ export default protectedApiHandler({
         ? aiResult.data.explanation
         : JSON.stringify(aiResult.data.explanation || '');
 
-      // ✅ UPSERT (Nov 1): Update existing cache entry if re-classifying due to low confidence
-      const { error: saveError } = await supabase
-        .from('hs_code_classifications')
-        .upsert({
-          component_description: cacheKey,
-          hs_code: primary_hs_code,
-          hs_description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
-          confidence: Math.round(primaryConfidence),
-          explanation: safeExplanationForDB,
-          alternative_codes: finalAlternativeCodes,  // ✅ Use corrected sorted alternatives
-          source: 'ai_agent',
-          verified: false,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'component_description'  // Update if description already exists
-        });
+      // ❌ TEMPORARILY DISABLED (Nov 8, 2025): Classification cache save until we verify 100% accuracy
+      //
+      // ISSUE: We're testing AI accuracy and don't want to pollute hs_code_classifications table
+      // with potentially incorrect classifications during testing phase.
+      //
+      // PLAN:
+      // 1. Disable cache save (DONE)
+      // 2. Delete all cached classifications
+      // 3. Test with fresh AI research only
+      // 4. Verify classifications are accurate
+      // 5. Re-enable cache save once AI is 100% accurate
+      //
+      // const { error: saveError } = await supabase
+      //   .from('hs_code_classifications')
+      //   .upsert({
+      //     component_description: cacheKey,
+      //     hs_code: primary_hs_code,
+      //     hs_description: aiResult.data.description || extractShortDescription(aiResult.data.explanation, productDescription),
+      //     confidence: Math.round(primaryConfidence),
+      //     explanation: safeExplanationForDB,
+      //     alternative_codes: finalAlternativeCodes,
+      //     source: 'ai_agent',
+      //     verified: false,
+      //     updated_at: new Date().toISOString()
+      //   }, {
+      //     onConflict: 'component_description'
+      //   });
+      //
+      // if (saveError) {
+      //   console.error(`⚠️ Failed to save classification to database:`, saveError.message);
+      // } else {
+      //   console.log(`💾 Saved/updated classification to database for "${productDescription.substring(0, 40)}..." (${primary_hs_code} @ ${primaryConfidence}%) - next request will be instant!`);
+      // }
 
-      if (saveError) {
-        console.error(`⚠️ Failed to save classification to database:`, saveError.message);
-        // Don't fail the request - classification still succeeded
-      } else {
-        console.log(`💾 Saved/updated classification to database for "${productDescription.substring(0, 40)}..." (${primary_hs_code} @ ${primaryConfidence}%) - next request will be instant!`);
-      }
+      console.log(`⚠️ Classification cache save DISABLED - testing AI accuracy first`);
 
       return res.status(200).json(responseWithSubscription);
     }

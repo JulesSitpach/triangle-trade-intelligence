@@ -1,7 +1,13 @@
 /**
- * GET CRISIS ALERTS
- * Fetches active crisis alerts from database
- * Used by RealTimeMonitoringDashboard to display detected tariff changes
+ * GET CRISIS ALERTS - ALERTS PAGE (Strategic View)
+ *
+ * PURPOSE: Long-term strategic planning and supply chain monitoring
+ * SCOPE: ALL active alerts (all severity levels)
+ * USE CASE: Alerts dashboard showing comprehensive risk landscape
+ *
+ * DISTINCTION from PolicyTimeline (Results Page):
+ * - PolicyTimeline: Shows ONLY critical/high alerts for SPECIFIC workflow
+ * - This endpoint: Shows ALL active alerts for strategic planning
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -17,42 +23,65 @@ export default async function handler(req, res) {
   );
 
   try {
-    // ✅ Crisis alerts are public data - all users can see active alerts
-    // No authentication required, but we log who's accessing for analytics
-
-    // Fetch all active crisis alerts
+    // ✅ STRATEGIC VIEW: Fetch ALL active crisis alerts (all severity levels)
+    // This is for the Alerts Dashboard - comprehensive supply chain monitoring
     const { data: alerts, error: alertError } = await supabase
       .from('crisis_alerts')
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(100); // More alerts for strategic planning
 
     if (alertError) {
       console.error('❌ Error fetching crisis alerts:', alertError);
       return res.status(500).json({ error: 'Failed to fetch alerts' });
     }
 
-    // Transform alerts to match expected format
-    const formattedAlerts = (alerts || []).map(alert => ({
-      id: alert.id,
-      title: alert.title,
-      description: alert.description,
-      severity: alert.severity,
+    // ✅ FIX (Nov 8): Map to ACTUAL crisis_alerts schema
+    // Schema from migrations/011_create_rss_monitoring_tables.sql
+    // ✅ SCHEMA COMPATIBILITY (Nov 8): Handle both old (severity) and new (severity_level) schemas
+    const formattedAlerts = (alerts || []).map(alert => {
+      // Normalize severity field (database has 'severity', not 'severity_level')
+      const normalizedSeverity = alert.severity_level || alert.severity;
+
+      return {
+        id: alert.id,
+        title: alert.title,
+        description: alert.description || alert.business_impact,
+
+        // ✅ SCHEMA COMPATIBILITY: Support both old and new field names
+        severity: normalizedSeverity,
+        severity_level: normalizedSeverity,
+
+      // ✅ ACTUAL SCHEMA (verified Nov 8): Database has these columns
       alert_type: alert.alert_type,
+      detection_source: alert.detection_source, // Database field name
+
+      // ✅ ACTUAL SCHEMA: These columns exist in database
       affected_hs_codes: alert.affected_hs_codes || [],
-      affected_countries: alert.affected_countries || [],
-      relevant_industries: alert.relevant_industries || [],
-      impact_percentage: alert.impact_percentage,
+      affected_countries: alert.affected_countries || [], // EXISTS in database
+      relevant_industries: alert.relevant_industries || [], // Database has 'relevant_industries' NOT 'affected_industries'
+
+      // ✅ ACTUAL SCHEMA: These exist
       source_url: alert.source_url,
       created_at: alert.created_at,
+      impact_percentage: alert.impact_percentage,
+      confidence_score: alert.confidence_score,
+
+      // ⚠️ LEGACY FIELDS (columns don't exist, provide sensible defaults for backwards compatibility)
+      affected_industries: alert.relevant_industries || [], // Map to relevant_industries for backwards compat
+      source_type: alert.detection_source, // Map detection_source for backwards compat
+      keywords_matched: [], // Column doesn't exist
+      crisis_score: 0, // Column doesn't exist
+      business_impact: alert.description, // Column doesn't exist, use description
       agreement_type: alert.agreement_type || 'tariff_change',
-      confidence_score: alert.confidence_score || 0.95,
-      detection_source: alert.detection_source || 'manual',
-      urgency: alert.severity === 'critical' ? 'high' :
-               alert.severity === 'high' ? 'high' :
-               alert.severity === 'medium' ? 'medium' : 'low'
-    }));
+
+      // Urgency derived from severity
+      urgency: normalizedSeverity === 'critical' ? 'high' :
+               normalizedSeverity === 'high' ? 'high' :
+               normalizedSeverity === 'medium' ? 'medium' : 'low'
+    };
+    });
 
     return res.status(200).json({
       success: true,

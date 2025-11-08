@@ -1,92 +1,33 @@
 /**
- * ExecutiveSummaryDisplay - Simple executive advisory for Results page
- * Focuses on the user's specific business case and actionable recommendations
+ * ExecutiveSummaryDisplay - AI-Generated Strategic Trade Advisory
+ * Displays consulting-grade narrative analysis with personality
  */
 
 import React, { useState, useEffect } from 'react';
 
 export default function ExecutiveSummaryDisplay({ data, onClose }) {
-  const [displayData, setDisplayData] = useState(null);
+  const [narrativeContent, setNarrativeContent] = useState('');
 
-  // Download Executive Trade Advisory as PDF
+  useEffect(() => {
+    // Extract AI-generated narrative from the alert structure
+    if (data?.alert) {
+      // Fresh generation: AI returns markdown in the alert object
+      const content = data.alert.situation_brief || data.alert.narrative || '';
+      console.log('📊 Executive Summary AI Content (fresh):', content);
+      setNarrativeContent(content);
+    } else if (data?.situation_brief) {
+      // Saved summary: Loaded from database
+      console.log('📊 Executive Summary AI Content (saved):', data.situation_brief);
+      setNarrativeContent(data.situation_brief);
+    } else if (typeof data === 'string') {
+      // Sometimes AI returns raw markdown string
+      setNarrativeContent(data);
+    }
+  }, [data]);
+
   const handleDownloadPDF = () => {
-    if (!displayData) return;
+    const pdfContent = `EXECUTIVE TRADE ADVISORY\nStrategic Analysis for Your Supply Chain\n\nGenerated: ${new Date().toLocaleDateString()}\n${'='.repeat(80)}\n\n${narrativeContent}\n\n${'='.repeat(80)}\nDISCLAIMER\nThis is a research tool, not professional advice. Consult licensed customs brokers or trade attorneys before making business decisions.`;
 
-    // Create PDF content as formatted text
-    let pdfContent = `EXECUTIVE TRADE ADVISORY\nStrategic Analysis for Your Supply Chain\n\n`;
-    pdfContent += `Generated: ${new Date().toLocaleDateString()}\n`;
-    pdfContent += `${'='.repeat(80)}\n\n`;
-
-    if (displayData.situation_brief) {
-      pdfContent += `${displayData.situation_brief}\n\n`;
-    }
-
-    if (displayData.problem) {
-      pdfContent += `THE PROBLEM\n${displayData.problem}\n\n`;
-    }
-
-    if (displayData.root_cause) {
-      pdfContent += `ROOT CAUSE\n${displayData.root_cause}\n\n`;
-    }
-
-    if (displayData.annual_impact) {
-      pdfContent += `ANNUAL IMPACT\n${displayData.annual_impact}\n\n`;
-    }
-
-    if (displayData.why_now) {
-      pdfContent += `WHY ACT NOW\n${displayData.why_now}\n\n`;
-    }
-
-    // Financial details
-    if (displayData.current_burden || displayData.potential_savings || displayData.payback_period) {
-      pdfContent += `FINANCIAL IMPACT\n`;
-      pdfContent += `${'-'.repeat(80)}\n`;
-      if (displayData.current_burden) {
-        pdfContent += `Current Burden: ${displayData.current_burden}\n`;
-      }
-      if (displayData.potential_savings) {
-        pdfContent += `Potential Savings: ${displayData.potential_savings}\n`;
-      }
-      if (displayData.payback_period) {
-        pdfContent += `Payback Period: ${displayData.payback_period}\n`;
-      }
-      pdfContent += `\n`;
-    }
-
-    // Recommended actions
-    if (displayData.action_items && displayData.action_items.length > 0) {
-      pdfContent += `RECOMMENDED ACTIONS\n`;
-      displayData.action_items.forEach((item, i) => {
-        pdfContent += `${i + 1}. ${item}\n`;
-      });
-      pdfContent += `\n`;
-    }
-
-    // Strategic roadmap
-    if (displayData.strategic_roadmap && displayData.strategic_roadmap.length > 0) {
-      pdfContent += `STRATEGIC ROADMAP\n`;
-      displayData.strategic_roadmap.forEach((phase, i) => {
-        pdfContent += `\n${phase.phase}\n`;
-        pdfContent += `Why: ${phase.why}\n`;
-        if (phase.actions) {
-          pdfContent += `Actions: ${phase.actions.join(', ')}\n`;
-        }
-        pdfContent += `Impact: ${phase.impact}\n`;
-      });
-      pdfContent += `\n`;
-    }
-
-    // Broker insights
-    if (displayData.broker_insights) {
-      pdfContent += `FROM YOUR TRADE ADVISOR\n${displayData.broker_insights}\n\n`;
-    }
-
-    // Disclaimer
-    if (displayData.professional_disclaimer) {
-      pdfContent += `${'='.repeat(80)}\nDISCLAIMER\n${displayData.professional_disclaimer}\n`;
-    }
-
-    // Create and download the file
     const blob = new Blob([pdfContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -96,249 +37,249 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
-    console.log('✅ Executive Trade Advisory downloaded');
   };
 
-  useEffect(() => {
-    // ✅ FIXED (Oct 30, 2025): Trust props first (fresh AI data), localStorage as fallback only
-    // This ensures we always show the user's actual company data from the button-triggered AI call
-    if (data && data.situation_brief) {
-      console.log('🎯 ExecutiveSummaryDisplay using FRESH props (from AI call):', data);
-      setDisplayData(data);
-    } else {
-      // Fallback to localStorage only if no props provided
-      try {
-        const stored = localStorage.getItem('usmca_workflow_results');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const executive = parsed.detailed_analysis;
-          console.log('🎯 ExecutiveSummaryDisplay using localStorage fallback:', executive);
-          setDisplayData(executive);
-        }
-      } catch (e) {
-        console.error('Failed to read executive summary:', e);
-      }
-    }
-  }, [data]);
+  // Parse markdown sections from AI output
+  const parseSections = (content) => {
+    if (!content) return [];
 
-  if (!displayData) {
-    console.log('❌ ExecutiveSummaryDisplay: No data available');
-    return null;
+    // Split by ## headers
+    const sections = [];
+    const lines = content.split('\n');
+    let currentSection = { title: '', content: '' };
+
+    lines.forEach(line => {
+      if (line.startsWith('## ')) {
+        if (currentSection.title) {
+          sections.push(currentSection);
+        }
+        currentSection = { title: line.replace('## ', '').trim(), content: '' };
+      } else if (line.startsWith('# ')) {
+        // Skip main title
+        return;
+      } else {
+        currentSection.content += line + '\n';
+      }
+    });
+
+    if (currentSection.title) {
+      sections.push(currentSection);
+    }
+
+    return sections;
+  };
+
+  const sections = parseSections(narrativeContent);
+
+  if (!narrativeContent && sections.length === 0) {
+    return (
+      <div className="form-section">
+        <div className="alert alert-info">
+          <p>📊 Generating your strategic trade advisory...</p>
+        </div>
+      </div>
+    );
   }
 
-  console.log('🎯 ExecutiveSummaryDisplay rendering with:', displayData);
-
   return (
-    <div style={{
-      marginTop: '1.5rem',
-      padding: '2.5rem',
-      backgroundColor: '#ffffff',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      maxWidth: '900px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    }}>
+    <div className="executive-summary-container">
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '2rem',
-        paddingBottom: '1.5rem',
-        borderBottom: '2px solid #e5e7eb'
-      }}>
+      <div className="executive-summary-header">
         <div>
-          <h4 style={{
-            fontSize: '1.5rem',
-            fontWeight: 600,
-            margin: '0 0 0.5rem 0',
-            color: '#111827',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-          }}>
-            Executive Trade Advisory
-          </h4>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            margin: 0,
-            fontFamily: 'system-ui, -apple-system, sans-serif'
-          }}>
-            Strategic analysis for your supply chain
-          </p>
+          <h2 className="form-section-title">📊 Executive Trade Advisory</h2>
+          <p className="executive-summary-subtitle">Strategic analysis for your supply chain</p>
         </div>
-
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            onClick={handleDownloadPDF}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#3b82f6',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              color: '#ffffff',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              fontWeight: 500,
-              transition: 'background-color 0.2s'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
-          >
+        <div className="executive-summary-actions">
+          <button onClick={handleDownloadPDF} className="btn-download">
             📄 Download Advisory
           </button>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#ffffff',
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              color: '#374151',
-              cursor: 'pointer',
-              fontFamily: 'system-ui, -apple-system, sans-serif'
-            }}
-          >
+          <button onClick={onClose} className="btn-close">
             Close
           </button>
         </div>
       </div>
 
-      {/* Executive Letter Content */}
-      <div style={{
-        fontSize: '1.0625rem',
-        lineHeight: '1.75',
-        color: '#1f2937',
-        fontFamily: 'Georgia, "Times New Roman", serif'
-      }}>
-        {/* Situation Brief */}
-        {displayData?.situation_brief && (
-          <p style={{marginBottom: '1.75rem'}}>
-            {displayData.situation_brief}
-          </p>
-        )}
+      {/* AI-Generated Narrative Sections */}
+      <div className="executive-summary-content">
+        {sections.map((section, index) => (
+          <div key={index} className="form-section">
+            <h3 className="form-section-title">{section.title}</h3>
+            <div className="narrative-content">
+              {section.content.split('\n\n').map((paragraph, pIndex) => {
+                // Skip empty paragraphs and dividers
+                if (!paragraph.trim() || paragraph.trim() === '---') return null;
 
-        {/* The Problem */}
-        {displayData?.problem && (
-          <p style={{marginBottom: '1.75rem'}}>
-            <strong>The Problem:</strong> {displayData.problem}
-          </p>
-        )}
+                // Handle bullet points
+                if (paragraph.trim().startsWith('•') || paragraph.trim().startsWith('-')) {
+                  const bullets = paragraph.split('\n').filter(b => b.trim());
+                  return (
+                    <ul key={pIndex} className="narrative-bullets">
+                      {bullets.map((bullet, bIndex) => (
+                        <li key={bIndex}>{bullet.replace(/^[•\-]\s*/, '').trim()}</li>
+                      ))}
+                    </ul>
+                  );
+                }
 
-        {/* Root Cause */}
-        {displayData?.root_cause && (
-          <p style={{marginBottom: '1.75rem'}}>
-            <strong>Root Cause:</strong> {displayData.root_cause}
-          </p>
-        )}
-
-        {/* Annual Impact */}
-        {displayData?.annual_impact && (
-          <p style={{marginBottom: '1.75rem'}}>
-            <strong>Annual Impact:</strong> {displayData.annual_impact}
-          </p>
-        )}
-
-        {/* Why Act Now */}
-        {displayData?.why_now && (
-          <p style={{marginBottom: '1.75rem'}}>
-            <strong>Why Act Now:</strong> {displayData.why_now}
-          </p>
-        )}
-
-        {/* Financial Details Box */}
-        {(displayData?.current_burden || displayData?.potential_savings || displayData?.payback_period) && (
-          <div style={{
-            marginTop: '2rem',
-            marginBottom: '2rem',
-            padding: '1.5rem',
-            backgroundColor: '#f0f9ff',
-            border: '2px solid #3b82f6',
-            borderRadius: '8px'
-          }}>
-            {displayData.current_burden && (
-              <p style={{marginBottom: '0.75rem', fontSize: '1rem'}}>
-                <strong>Current Burden:</strong> {displayData.current_burden}
-              </p>
-            )}
-            {displayData.potential_savings && (
-              <p style={{marginBottom: '0.75rem', fontSize: '1rem'}}>
-                <strong>Potential Savings:</strong> {displayData.potential_savings}
-              </p>
-            )}
-            {displayData.payback_period && (
-              <p style={{marginBottom: 0, fontSize: '1rem'}}>
-                <strong>Payback Period:</strong> {displayData.payback_period}
-              </p>
-            )}
+                // Regular paragraphs
+                return (
+                  <p key={pIndex} className="narrative-paragraph">
+                    {paragraph.trim()}
+                  </p>
+                );
+              })}
+            </div>
           </div>
-        )}
-
-        {/* Recommended Actions */}
-        {displayData?.action_items && displayData.action_items.length > 0 && (
-          <div style={{marginBottom: '1.75rem'}}>
-            <p style={{marginBottom: '0.75rem', fontWeight: 600}}>
-              Recommended Actions:
-            </p>
-            {displayData.action_items.map((item, i) => (
-              <p key={i} style={{marginBottom: '0.5rem', paddingLeft: '1.5rem'}}>
-                {i + 1}. {item}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {/* Strategic Roadmap */}
-        {displayData?.strategic_roadmap && displayData.strategic_roadmap.length > 0 && (
-          <div style={{marginBottom: '1.75rem'}}>
-            <p style={{marginBottom: '0.75rem', fontWeight: 600}}>
-              Strategic Roadmap:
-            </p>
-            {displayData.strategic_roadmap.map((phase, i) => (
-              <div key={i} style={{marginBottom: '1rem', paddingLeft: '1.5rem'}}>
-                <strong>{phase.phase}</strong><br/>
-                <span style={{fontSize: '0.9375rem'}}>{phase.why}</span><br/>
-                <span style={{fontSize: '0.875rem', color: '#6b7280'}}>
-                  Actions: {phase.actions?.join(', ')}
-                </span><br/>
-                <span style={{fontSize: '0.875rem', color: '#059669'}}>
-                  Impact: {phase.impact}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Broker Insights */}
-        {displayData?.broker_insights && (
-          <p style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            backgroundColor: '#f9fafb',
-            borderLeft: '4px solid #3b82f6',
-            marginBottom: '1.75rem'
-          }}>
-            <strong>From Your Trade Advisor:</strong> {displayData.broker_insights}
-          </p>
-        )}
-
-        {/* Professional Disclaimer */}
-        {displayData?.professional_disclaimer && (
-          <p style={{
-            marginTop: '2rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid #e5e7eb',
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            lineHeight: '1.5'
-          }}>
-            <strong>Disclaimer:</strong> {displayData.professional_disclaimer}
-          </p>
-        )}
-
+        ))}
       </div>
+
+      {/* Disclaimer */}
+      <div className="executive-summary-disclaimer">
+        <p>
+          <strong>⚠️ Disclaimer:</strong> This is a research tool, not professional advice.
+          All tariff calculations, savings estimates, and compliance guidance must be independently verified
+          by licensed customs brokers or trade attorneys before making business decisions.
+        </p>
+      </div>
+
+      <style jsx>{`
+        .executive-summary-container {
+          margin-top: 1.5rem;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .executive-summary-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          padding: 1.5rem 2rem;
+          border-bottom: 2px solid #e5e7eb;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 8px 8px 0 0;
+        }
+
+        .executive-summary-header h2 {
+          color: white;
+          margin: 0 0 0.5rem 0;
+        }
+
+        .executive-summary-subtitle {
+          color: rgba(255,255,255,0.9);
+          font-size: 0.875rem;
+          margin: 0;
+        }
+
+        .executive-summary-actions {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .btn-download {
+          padding: 0.5rem 1rem;
+          background: white;
+          color: #667eea;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-download:hover {
+          background: #f0f0f0;
+          transform: translateY(-1px);
+        }
+
+        .btn-close {
+          padding: 0.5rem 1rem;
+          background: rgba(255,255,255,0.2);
+          color: white;
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 6px;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-close:hover {
+          background: rgba(255,255,255,0.3);
+        }
+
+        .executive-summary-content {
+          padding: 2rem;
+        }
+
+        .form-section {
+          margin-bottom: 2rem;
+          padding: 1.5rem;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+        }
+
+        .form-section-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111827;
+          margin: 0 0 1rem 0;
+          padding-bottom: 0.5rem;
+          border-bottom: 2px solid #3b82f6;
+        }
+
+        .narrative-content {
+          font-size: 1rem;
+          line-height: 1.75;
+          color: #1f2937;
+        }
+
+        .narrative-paragraph {
+          margin-bottom: 1rem;
+          text-align: justify;
+        }
+
+        .narrative-bullets {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+        }
+
+        .narrative-bullets li {
+          margin-bottom: 0.5rem;
+          line-height: 1.6;
+        }
+
+        .executive-summary-disclaimer {
+          padding: 1.5rem 2rem;
+          background: #fef3c7;
+          border-top: 2px solid #f59e0b;
+          border-radius: 0 0 8px 8px;
+        }
+
+        .executive-summary-disclaimer p {
+          margin: 0;
+          font-size: 0.875rem;
+          color: #92400e;
+          line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+          .executive-summary-header {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .executive-summary-actions {
+            width: 100%;
+            flex-direction: column;
+          }
+
+          .btn-download, .btn-close {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }

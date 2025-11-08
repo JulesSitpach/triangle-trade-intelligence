@@ -73,7 +73,19 @@ export default protectedApiHandler({
       duration_ms: Date.now() - startTime
     });
 
-    return sendSuccess(res, data.workflow_data || data, 'Workflow session retrieved successfully');
+    // ✅ NEW (Nov 8): Merge executive_summary into returned data
+    // Executive summary is stored at top level, not in workflow_data JSONB
+    const responseData = data.workflow_data || data;
+    if (data.executive_summary) {
+      responseData.detailed_analysis = responseData.detailed_analysis || {};
+      responseData.detailed_analysis.situation_brief = data.executive_summary;
+      console.log('✅ Added executive_summary to response for reload:', {
+        has_summary: true,
+        summary_length: data.executive_summary.length
+      });
+    }
+
+    return sendSuccess(res, responseData, 'Workflow session retrieved successfully');
   },
 
   POST: async (req, res) => {
@@ -178,21 +190,31 @@ export default protectedApiHandler({
           workflowData.company_name ||  // Flat from hook
           null,
         company_country:
+          workflowData.company_country ||       // ✅ FIX (Nov 8): Top-level from workflow hook (line 609 in useWorkflowState.js)
           workflowData.company?.company_country ||
-          workflowData.company_country ||  // Flat from hook
-          'US',
+          workflowData.company?.country ||
+          null,
         destination_country:
+          workflowData.destination_country ||   // ✅ FIX (Nov 8): Top-level from workflow hook
           workflowData.company?.destination_country ||
-          workflowData.destination_country ||  // Flat from hook
-          'US',
+          (() => {
+            throw new Error('destination_country is required but missing. UI validation should prevent this. Available keys: ' + Object.keys(workflowData).join(', '));
+          })(),
         business_type:
           workflowData.company?.business_type ||
           workflowData.business_type ||  // Flat from hook
           null,
         manufacturing_location:
+          workflowData.product?.manufacturing_location ||  // ✅ FIX (Nov 8): AI response has it in product object
           workflowData.company?.manufacturing_location ||
-          workflowData.manufacturing_location ||  // Flat from hook
-          null,
+          workflowData.manufacturing_location ||
+          workflowData.usmca?.manufacturing_location ||
+          (() => {
+            throw new Error(`manufacturing_location is required but missing. Available keys: ${Object.keys(workflowData).join(', ')}`);
+          })(),
+
+        // Component origins in top-level column for database queries
+        component_origins: normalizedComponents,
 
         // Financial data in dedicated columns for easy querying
         total_savings: parseFloat(workflowData.savings?.annual_savings) || 0,
@@ -254,11 +276,17 @@ export default protectedApiHandler({
 
         // ✅ FIXED (Oct 24): Extract company/product fields to dedicated columns
         // ✅ FIXED (Nov 1): Support both nested (workflowData.company) and flat (workflowData) structures
+        // ✅ FIXED (Nov 8): Extract company_country from top-level (workflow hook puts it there)
         // Dashboard validation requires these fields to be populated in DB columns, not just JSONB
         company_name:
           companyData.company_name ||           // Nested: workflowData.company.company_name
           companyData.name ||                   // Nested: workflowData.company.name
           workflowData.company_name ||          // Flat: workflowData.company_name (from useWorkflowState hook)
+          null,
+        company_country:
+          workflowData.company_country ||       // ✅ FIX (Nov 8): Top-level from workflow hook (line 609 in useWorkflowState.js)
+          companyData.company_country ||        // Nested fallback
+          companyData.country ||                // Alternative nested
           null,
         business_type:
           companyData.business_type ||          // Nested
@@ -289,7 +317,12 @@ export default protectedApiHandler({
           (workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED'),
 
         // Destination-aware tariff intelligence fields
-        destination_country: companyData.destination_country || workflowData.destination_country || null,
+        destination_country:
+          workflowData.destination_country ||
+          companyData.destination_country ||
+          (() => {
+            throw new Error('destination_country is required but missing. UI validation should prevent this. Available keys: ' + Object.keys(workflowData).join(', '));
+          })(),
         trade_flow_type: companyData.trade_flow_type || workflowData.trade_flow_type || null,
         tariff_cache_strategy: companyData.tariff_cache_strategy || workflowData.tariff_cache_strategy || null,
 

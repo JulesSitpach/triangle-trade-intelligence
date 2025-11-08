@@ -1,5 +1,22 @@
 'use client';
 
+/**
+ * POLICY TIMELINE - WORKFLOW RESULTS PAGE (Immediate Threats)
+ *
+ * PURPOSE: Show URGENT, ACTIONABLE threats for THIS specific workflow
+ * SCOPE: ONLY critical/high severity alerts matching user's components
+ * USE CASE: Results page showing immediate risks to current product analysis
+ *
+ * DISTINCTION from Alerts Dashboard (/api/get-crisis-alerts):
+ * - Alerts Dashboard: Shows ALL active alerts for strategic planning
+ * - PolicyTimeline: Shows ONLY critical/high alerts for THIS workflow
+ *
+ * FILTERING:
+ * - Severity: CRITICAL and HIGH only (medium/low excluded)
+ * - Matching: Filters to user's specific HS codes
+ * - Focus: Immediate action required (not long-term planning)
+ */
+
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -26,147 +43,133 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     try {
       setLoading(true);
 
-      // Build component volatility analysis using VolatilityManager logic
-      const volatileComponents = components
-        .filter(c => c.hs_code && c.origin_country)
-        .map(c => {
-          const origin = normalizeCountry(c.origin_country);
-          const dest = normalizeCountry(destination);
+      // ✅ FIXED (Nov 7): NO HARDCODED FILTERING - Check ALL components for alerts
+      // Get ALL component countries and HS codes (not just "volatile" ones)
+      const allComponents = components.filter(c => c.hs_code && c.origin_country);
 
-          // Check if this is a volatile combination
-          const volatilityTier = getVolatilityTier(c.hs_code, origin, dest);
-
-          return {
-            hs_code: c.hs_code,
-            origin_country: origin,
-            destination: dest,
-            volatility: volatilityTier,
-            description: c.description || c.component_type || 'Component'
-          };
-        })
-        .filter(c => c.volatility.tier <= 2); // Only Tier 1 (super volatile) and Tier 2 (volatile)
-
-      console.log('🔍 [POLICYTIMELINE] Volatile components detected:', {
+      console.log('🔍 [POLICYTIMELINE] Checking ALL components for alerts:', {
         total_components: components.length,
-        volatile_count: volatileComponents.length,
-        volatile_details: volatileComponents.map(c => ({
+        valid_components: allComponents.length,
+        component_details: allComponents.map(c => ({
+          description: c.description || c.component_type,
           hs_code: c.hs_code,
-          origin: c.origin_country,
-          tier: c.volatility.tier,
-          reason: c.volatility.reason
+          origin: c.origin_country
         }))
       });
 
-      if (volatileComponents.length === 0) {
-        console.log('✅ [POLICYTIMELINE] No volatile components - all stable');
-        setThreats([]);
-        setLoading(false);
-        return;
-      }
-
-      // Get affected countries from volatile components
-      const affectedCountries = [...new Set(volatileComponents.map(c => c.origin_country))];
+      // Get ALL unique countries from user's components
+      const affectedCountries = [...new Set(allComponents.map(c => normalizeCountry(c.origin_country)))];
 
       console.log('🌍 [POLICYTIMELINE] Checking crisis_alerts for countries:', affectedCountries);
 
       // Query crisis_alerts table (REAL RSS-detected policies)
+      // ✅ FETCH ALL HS CODES from user components for matching
+      const allHSCodes = [...new Set(allComponents.map(c => c.hs_code).filter(Boolean))];
+
+      // ✅ SCHEMA COMPATIBILITY: Query only fields that ACTUALLY exist in database
+      // Database column names (verified Nov 8, 2025):
+      // - severity (NOT severity_level)
+      // - relevant_industries (NOT affected_industries)
+      // - detection_source (NOT source_type)
+      // - NO business_impact, keywords_matched, or crisis_score columns
       const { data: crisisAlerts, error: alertsError } = await supabase
         .from('crisis_alerts')
-        .select('id, title, alert_type, severity, affected_countries, impact_percentage, detection_source, created_at, description, source_url')
+        .select('id, title, severity, affected_hs_codes, relevant_industries, affected_countries, created_at, description, source_url, detection_source, impact_percentage')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(50);
 
       if (alertsError) throw alertsError;
 
       console.log('📡 [POLICYTIMELINE] Crisis alerts fetched:', {
         total_alerts: crisisAlerts?.length || 0,
-        sample: crisisAlerts?.slice(0, 3).map(a => ({ title: a.title, countries: a.affected_countries }))
+        user_hs_codes: allHSCodes,
+        sample_alerts: crisisAlerts?.slice(0, 3).map(a => ({
+          title: a.title,
+          severity: a.severity,
+          hs_codes: a.affected_hs_codes,
+          industries: a.relevant_industries // Database has 'relevant_industries'
+        }))
       });
 
-      // ✅ STRATEGIC FILTER: Only show alerts that help sourcing/shipping decisions
-      // Filter out: earnings reports, logistics pricing, carrier operations
-      const strategicKeywords = [
-        'tariff', 'duty', 'section 301', 'section 232', 'trade agreement',
-        'usmca', 'cbp', 'customs', 'import', 'export', 'trade policy',
-        'nearshoring', 'reshoring', 'trade war', 'investigation'
-      ];
+      // ✅ SCHEMA NORMALIZATION: Map 'severity' (database field) to 'severity_level' (code expects this)
+      const normalizedAlerts = crisisAlerts?.map(alert => ({
+        ...alert,
+        severity_level: alert.severity // Database has 'severity', code expects 'severity_level'
+      })) || [];
 
-      const nonStrategicKeywords = [
-        'earnings', 'quarterly', 'profit', 'revenue', 'stock price', 'net profit',
-        'freight rate', 'diesel price', 'capacity', 'carrier', 'fleet', 'freighter',
-        'warehouse', 'automation', 'patent', 'gaming', 'postal', 'lmi'
-      ];
+      // ✅ SEVERITY FILTER: Only show critical/high severity (filter in JS for schema compatibility)
+      const highSeverityAlerts = normalizedAlerts.filter(alert => {
+        const severity = (alert.severity_level || '').toLowerCase();
+        return severity === 'critical' || severity === 'high';
+      });
 
-      const relevantAlerts = crisisAlerts?.filter(alert => {
-        const titleLower = (alert.title || '').toLowerCase();
-        const descLower = (alert.description || '').toLowerCase();
-        const text = `${titleLower} ${descLower}`;
+      console.log('🎯 [POLICYTIMELINE] After severity filter:', {
+        before: normalizedAlerts.length,
+        after: highSeverityAlerts.length,
+        filtered_severities: highSeverityAlerts.map(a => a.severity_level)
+      });
 
-        // ❌ EXCLUDE: Non-strategic keywords (earnings, logistics, carrier ops)
-        const hasNonStrategic = nonStrategicKeywords.some(kw => text.includes(kw));
-        if (hasNonStrategic) {
-          console.log(`🚫 Filtered out non-strategic: "${alert.title}"`);
+      // ✅ IMMEDIATE THREATS ONLY: Filter to alerts affecting THIS workflow
+      // ONLY show alerts that have DIRECT relevance to user's components
+      const relevantAlerts = highSeverityAlerts?.filter(alert => {
+        // ✅ CRITERION 1: HS Code match (alert specifically affects user's components)
+        if (alert.affected_hs_codes && alert.affected_hs_codes.length > 0) {
+          const normalizedAlertHS = alert.affected_hs_codes.map(hs => (hs || '').replace(/\./g, '').substring(0, 6));
+          const normalizedUserHS = allHSCodes.map(hs => (hs || '').replace(/\./g, '').substring(0, 6));
+          const hasHSMatch = normalizedAlertHS.some(alertHS => normalizedUserHS.includes(alertHS));
+          if (hasHSMatch) {
+            console.log(`✅ [POLICYTIMELINE] HS code match: "${alert.title}" matches user HS codes`);
+            return true;
+          }
+          // Alert has specific HS codes but none match user - skip it
           return false;
         }
 
-        // ✅ INCLUDE: Strategic keywords
-        const hasStrategic = strategicKeywords.some(kw => text.includes(kw));
-
-        // Match 1: Country-specific + strategic keywords
+        // ✅ CRITERION 2: Country match (alert affects user's component origins)
+        // Only show if alert has countries AND those countries match user's components
         if (alert.affected_countries && alert.affected_countries.length > 0) {
-          const hasMatchingCountry = alert.affected_countries.some(country =>
-            affectedCountries.includes(normalizeCountry(country))
-          );
-          return hasMatchingCountry && hasStrategic;
+          const alertCountries = alert.affected_countries.map(c => normalizeCountry(c));
+          const hasCountryMatch = alertCountries.some(alertCountry => affectedCountries.includes(alertCountry));
+          if (hasCountryMatch) {
+            console.log(`✅ [POLICYTIMELINE] Country match: "${alert.title}" affects user's supply chain countries`);
+            return true;
+          }
         }
 
-        // Match 2: Global trade policy alerts (no specific country but strategic)
-        if (!alert.affected_countries || alert.affected_countries.length === 0) {
-          return hasStrategic;
-        }
-
+        // ❌ REJECT: Generic trade news with no specific HS codes or country match
+        // These are just general news articles, not actionable threats
+        console.log(`❌ [POLICYTIMELINE] Skipping generic news: "${alert.title}" (no HS codes or country match)`);
         return false;
       }) || [];
 
-      console.log(`🤖 PolicyTimeline strategic filtering: ${relevantAlerts.length}/${crisisAlerts?.length || 0} alerts (filtered ${(crisisAlerts?.length || 0) - relevantAlerts.length} non-strategic)`);
+      console.log(`🤖 PolicyTimeline alert matching: ${relevantAlerts.length}/${highSeverityAlerts.length} high/critical alerts matched user components (${crisisAlerts?.length || 0} total alerts in DB)`);
 
       console.log('✅ [POLICYTIMELINE] Relevant alerts filtered:', {
         relevant_count: relevantAlerts.length,
-        alerts: relevantAlerts.map(a => ({ title: a.title, severity: a.severity, countries: a.affected_countries }))
+        alerts: relevantAlerts.map(a => ({
+          title: a.title,
+          severity: a.severity_level, // Normalized from 'severity'
+          hs_codes: a.affected_hs_codes,
+          industries: a.relevant_industries // Database has 'relevant_industries'
+        }))
       });
 
-      // Map to threat format
+      // Map to threat format (using ACTUAL crisis_alerts database schema)
       const mappedThreats = relevantAlerts.map(alert => ({
         id: alert.id,
         title: alert.title,
         date: alert.created_at,
-        type: mapAlertTypeToStatus(alert.alert_type),
-        severity: alert.severity,
-        percentage: alert.impact_percentage,
+        type: 'announced', // All RSS alerts are announcements
+        severity: alert.severity_level, // Normalized from 'severity'
+        crisis_score: null, // Column doesn't exist in database
         description: alert.description,
         source_url: alert.source_url,
-        detection_source: alert.detection_source,
+        detection_source: alert.detection_source, // Database has 'detection_source' not 'source_type'
+        keywords: [], // Column doesn't exist (keywords_matched)
+        percentage: alert.impact_percentage,
         source: 'crisis_alerts'
       }));
-
-      // Add volatility warnings as synthetic "threats"
-      volatileComponents.forEach((comp, index) => {
-        if (comp.volatility.tier === 1) { // Super volatile only
-          mappedThreats.push({
-            id: `volatility-${index}`,
-            title: `${comp.description} (${comp.origin_country} → ${comp.destination})`,
-            date: new Date().toISOString(),
-            type: 'volatility_warning',
-            severity: 'high',
-            percentage: null,
-            description: comp.volatility.reason,
-            policies: comp.volatility.policies,
-            warning: comp.volatility.warning,
-            source: 'volatility_manager'
-          });
-        }
-      });
 
       // Sort by date (newest first)
       mappedThreats.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -306,10 +309,8 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     );
   }
 
-  if (threats.length === 0) {
-    console.log('✅ [POLICYTIMELINE] No threats found - component will not display');
-    return null;
-  }
+  // ✅ ALWAYS show the component, even with 0 threats (user wants to see empty state)
+  // Removed: if (threats.length === 0) return null;
 
   const getStatusBadge = (type) => {
     switch (type) {

@@ -32,6 +32,7 @@ const executiveAgent = new BaseAgent({
 // ✅ Removed mexicoAgent - now using config lookup instead of AI calls
 // ✅ Removed section301Agent - now using section_301 field from component_breakdown (already calculated in main analysis)
 
+
 export default async function handler(req, res) {
   // 🛡️ RATE LIMITING: 10 requests per minute for expensive AI operations
   try {
@@ -49,7 +50,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_profile, workflow_intelligence, raw_alerts, user_id } = req.body;
+    const { user_profile, workflow_intelligence, raw_alerts, user_id, workflow_completion_id } = req.body;
 
     // ✅ TIER-GATING: Trial users get 1 executive summary, then must upgrade
     // ✅ FIXED (Nov 5, 2025): Previously blocked Trial users completely
@@ -163,7 +164,7 @@ export default async function handler(req, res) {
     const { data: crisisAlerts, error: alertsError } = await supabase
       .from('crisis_alerts')
       .select('*')
-      .eq('status', 'active')
+      .eq('is_active', true)
       .order('severity', { ascending: false });
 
     if (alertsError) {
@@ -251,9 +252,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // ✅ DYNAMIC: USMCA threshold concerns (uses actual industry threshold, not hardcoded 70%)
-    // ✅ No fallback - industry_sector validated above
-    const industryThreshold = await getIndustryThreshold(user_profile.industry_sector);
+    // ✅ Get threshold from HS code (AI determines industry from HS code)
+    const hsCode = (workflow_intelligence.components || [])[0]?.hs_code;
+    const industryThreshold = await getIndustryThreshold(null, { hsCode });
     const rvcBuffer = (workflow_intelligence.north_american_content || 0) - industryThreshold.rvc;
 
     if (workflow_intelligence.north_american_content && rvcBuffer < 15) {
@@ -379,6 +380,48 @@ export default async function handler(req, res) {
       }
     }
 
+    // ✅ NEW (Nov 8): Save executive summary to database for later retrieval
+    // Users only get limited summaries per tier, so we save it to allow re-viewing
+    if (user_id && alertStructure.situation_brief) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY
+        );
+
+        // Find the most recent workflow completion for this user
+        // (this is the one they just viewed the results for)
+        const { data: latestWorkflow, error: queryError } = await supabase
+          .from('workflow_completions')
+          .select('id')
+          .eq('user_id', user_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (queryError) {
+          console.error('❌ Failed to find latest workflow for user:', queryError);
+        } else if (latestWorkflow) {
+          const { error: updateError } = await supabase
+            .from('workflow_completions')
+            .update({
+              executive_summary: alertStructure.situation_brief,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', latestWorkflow.id);
+
+          if (updateError) {
+            console.error('❌ Failed to save executive summary to database:', updateError);
+          } else {
+            console.log('✅ Executive summary saved to workflow_completions:', latestWorkflow.id);
+          }
+        }
+      } catch (saveError) {
+        console.error('❌ Error saving executive summary:', saveError);
+        // Don't fail the request if save fails
+      }
+    }
+
     return res.status(200).json({
       success: true,
       alert: alertStructure,
@@ -420,9 +463,9 @@ function generateMexicoNearshoringOptions(userProfile, workflow, section301Impac
       },
       {
         option: 'Request tariff exemption',
-        benefit: 'Potential 100% tariff elimination for specific HS codes',
-        timeline: '2-4 months for exemption application',
-        cost_impact: 'Application fee ~$1,000-5,000'
+        benefit: 'Potential tariff elimination for specific HS codes',
+        timeline: 'Varies by product category',
+        cost_impact: 'Application processing fees apply'
       }
     ];
 
@@ -434,14 +477,14 @@ function generateMexicoNearshoringOptions(userProfile, workflow, section301Impac
       {
         option: 'Nearshoring to Mexico',
         benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
-        timeline: '6-12 weeks for supplier qualification (estimate)',
-        cost_impact: '+1-3% unit cost (typically offset by tariff savings within 3-6 months)'
+        timeline: 'Supplier qualification required',
+        cost_impact: 'Unit cost increase offset by tariff savings'
       },
       {
         option: 'Request tariff exemption',
-        benefit: 'Potential 100% tariff elimination for specific HS codes',
-        timeline: '2-4 months for exemption application',
-        cost_impact: 'Application fee ~$1,000-5,000'
+        benefit: 'Potential tariff elimination for specific HS codes',
+        timeline: 'Varies by product category',
+        cost_impact: 'Application processing fees apply'
       }
     ];
   }
@@ -484,10 +527,14 @@ async function calculateSection301Impact(components, tradeVolume) {
     }
   }
 
-  // If no rates found, that's a bug in main analysis - use conservative fallback
-  const effectiveRate = rateCount > 0
-    ? averageSection301Rate / rateCount
-    : 0.20; // Conservative fallback (should never be reached)
+  // If no rates found, this indicates missing data - DO NOT use hardcoded fallback
+  // The component enrichment should have already added Section 301 rates via AI
+  if (rateCount === 0) {
+    console.error('❌ [SECTION-301] NO rates found for Chinese components - data integrity issue');
+    throw new Error('Section 301 rate data missing for Chinese components. Cannot calculate accurate tariff burden.');
+  }
+
+  const effectiveRate = averageSection301Rate / rateCount;
 
   console.log(`📊 Section 301 Analysis: ${rateCount}/${chineseComponents.length} components with rates, effective rate: ${(effectiveRate * 100).toFixed(1)}%`);
 
@@ -507,9 +554,9 @@ async function calculateRiskImpact(workflow, userProfile, industryThreshold) {
 
   // ✅ Risk is proportional to how close they are to minimum threshold
   const buffer = (workflow.north_american_content || 0) - thresholdApplied;
-  if (buffer < 5) return '$50,000+ if disqualified';
-  if (buffer < 15) return '$30,000+ if disqualified';
-  return 'Moderate (adequate buffer exists)';
+  if (buffer < 5) return 'High risk if disqualified';
+  if (buffer < 15) return 'Moderate risk if disqualified';
+  return 'Low risk (adequate buffer exists)';
 }
 
 function generateHeadline(policies, industry, alertCount = 0) {
@@ -659,94 +706,6 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
   }
 }
 
-// ❌ OLD HARDCODED FUNCTION (KEPT FOR REFERENCE - DELETE AFTER TESTING)
-function generateExecutiveAdvisory_HARDCODED_OLD(policies, workflow, profile) {
-  const section301Policy = policies.find(p => p.policy === 'Section 301 Tariffs');
-  const rvcPolicy = policies.find(p => p.policy === 'USMCA Qualification Risk');
-
-  let advisory = {
-    situation_brief: 'Trade policy exposure analysis for your products',
-    problem: 'Your supply chain is affected by tariff policies that impact your margins',
-    root_cause: 'Sourcing structure and policy landscape',
-    annual_impact: 'TBD',
-    why_now: 'Trade policy remains volatile with potential changes in 2025',
-    current_burden: 'Calculating...',
-    potential_savings: 'Subject to strategy implementation',
-    payback_period: '3-6 months typical',
-    confidence: 85,
-    strategic_roadmap: [],
-    action_items: [
-      'Review supplier alternatives in Mexico/Canada',
-      'Evaluate tariff exemption opportunities',
-      'Monitor regulatory calendar for policy changes'
-    ],
-    broker_insights: 'Companies that have nearshored to Mexico in your sector have locked in preferential treatment while insulating from policy uncertainty.'
-  };
-
-  // Add Section 301 context if applicable
-  if (section301Policy) {
-    // ✅ FIX (Oct 27): Use actual calculated rate instead of hardcoded "25%"
-    const costInfo = section301Policy.annual_cost_impact;
-    const rateDisplay = costInfo?.ratePercent || 'variable';
-    const costDisplay = costInfo?.annualCost || 'unknown';
-
-    advisory.problem = `Your Chinese-sourced components remain subject to ${rateDisplay} Section 301 tariffs, creating ongoing policy risk and cost burden of approximately ${costDisplay}.`;
-    advisory.current_burden = costDisplay;
-    advisory.potential_savings = 'Mexico nearshoring could eliminate this burden within 4-6 weeks';
-    advisory.why_now = 'Section 301 tariffs can be modified with 30-day notice. Current political environment suggests heightened risk.';
-
-    advisory.strategic_roadmap = [
-      {
-        phase: 'Phase 1: Supplier Assessment (Week 1-2)',
-        why: 'Identify Mexico suppliers with equivalent quality/cost',
-        actions: [
-          'Source 2-3 Mexico suppliers with your quality requirements',
-          'Request pricing quotes and lead times',
-          'Verify certifications and capacity'
-        ],
-        impact: 'Baseline for ROI decision'
-      },
-      {
-        phase: 'Phase 2: Trial Shipment (Week 3-4)',
-        why: 'Validate quality and lead times before full transition',
-        actions: [
-          'Order sample batch from Mexico supplier',
-          'Conduct quality testing vs current supplier',
-          'Measure actual lead times and reliability'
-        ],
-        impact: 'De-risk the transition'
-      },
-      {
-        phase: 'Phase 3: Gradual Migration (Week 5-8)',
-        why: 'Transition production without disruption',
-        actions: [
-          'Phase out China supplier while ramping Mexico production',
-          'Update USMCA documentation with new supplier origin',
-          'Lock in pricing for 12-month commitment'
-        ],
-        impact: 'Eliminate Section 301 exposure, increase RVC'
-      }
-    ];
-  }
-
-  // Add RVC context if applicable
-  if (rvcPolicy) {
-    advisory.situation_brief = 'Your USMCA qualification has limited buffer against potential rule changes';
-    advisory.strategic_roadmap.push({
-      phase: 'Build RVC Buffer',
-      why: 'Proposed rules could raise thresholds significantly; current buffer is thin',
-      actions: [
-        'Prioritize transitioning highest-cost components to USMCA sources',
-        'Evaluate Mexico nearshoring for maximum RVC impact',
-        'Document manufacturing value-added in USMCA countries'
-      ],
-      impact: 'Insulate from policy changes'
-    });
-  }
-
-  return advisory;
-}
-
 // ========== FINANCIAL SCENARIO ANALYSIS ==========
 /**
  * Generate "what-if" scenarios for tariff policy changes
@@ -870,128 +829,7 @@ function generateCBPGuidance(workflow, policies, profile) {
   return {
     title: 'CBP Compliance Intelligence for USMCA Qualification',
     urgency: highestSeverity(policies),
-    legal_disclaimer: '⚠️ This section provides regulatory intelligence for informational purposes only. Consult a licensed customs broker or trade attorney for compliance advice.',
-
-    // COMPLIANCE CONSIDERATIONS (Typical practices in the industry)
-    compliance_considerations: [
-      {
-        topic: 'Binding Ruling Request (CBP Form 29)',
-        what_it_does: 'Locks in RVC classification and preference criterion for 3 years',
-        typical_timeline: '90 days CBP processing time',
-        business_benefit: 'May help eliminate audit risk and enable penalty-free supplier transitions',
-        typical_documentation: [
-          'Current bill of materials with % by origin',
-          'Manufacturing process description',
-          'Labor and overhead allocation methodology',
-          'Supplier origin certificates',
-          'Trade volume and market context'
-        ],
-        typical_cost: '$2,000-5,000 for legal/consulting support',
-        industry_success_rate: '85%+ approval rate when well-documented (based on CBP data)'
-      },
-      {
-        topic: 'Supplier Documentation Validation',
-        what_it_does: 'Verifies suppliers have valid origin certification supporting USMCA claims',
-        typical_timeline: 'Companies typically complete this before shipments to mitigate CBP audit risk',
-        typical_verification_steps: [
-          'Confirming suppliers have valid Certificates of Origin on file',
-          'Verifying USMCA component suppliers declare preferential origin status',
-          'Validating manufacturing location matches claim (not transshipment)',
-          'Reviewing value-added activity documentation (labor, overhead, etc.)'
-        ],
-        typical_approach: 'Companies typically request written attestation from each supplier confirming USMCA origin requirements',
-        cbp_enforcement: 'CBP can retroactively deny USMCA treatment and demand back tariffs (with interest and penalties)'
-      }
-    ],
-
-    // OPERATIONAL PRACTICES (How companies typically manage USMCA compliance)
-    operational_practices: [
-      {
-        topic: 'Freight Forwarder USMCA Protocol',
-        what_it_involves: 'Ensuring all shipments include USMCA declarations and proper Certificates of Origin',
-        typical_requirement: 'Freight forwarders typically complete "USMCA Claim" box on entry documents',
-        documentation_standard: 'CBP requires 5-year retention of all CF 434 (Certificate of Origin) forms for audit purposes',
-        non_compliance_risk: 'Missing USMCA declaration typically results in automatic full tariff collection plus interest',
-        typical_setup_cost: '$500-1,000 to train forwarder and establish procedures (industry estimate)'
-      },
-      {
-        topic: 'Internal USMCA Tracking System',
-        what_it_involves: 'Documenting every product batch with RVC calculation and component origins',
-        typical_tracking_elements: [
-          'Invoice date and HS code',
-          'Component origins and percentages',
-          'RVC calculation and method (Transaction Value vs Net Cost)',
-          'Manufacturing location and labor credit',
-          'Shipment-level USMCA declarations'
-        ],
-        cbp_audit_context: 'CBP typically audits 1 in 500 USMCA entries. When selected, companies must provide documentation within 30 days or may face back tariffs',
-        typical_penalty_range: '$50,000+ in back tariffs plus penalties up to 40% of merchandise value if documentation is insufficient (19 USC 1592 - negligence/gross negligence)'
-      }
-    ],
-
-    // RISK FACTORS (Industry data and CBP enforcement patterns)
-    risk_factors: [
-      {
-        risk: 'Supplier Location Changes',
-        regulatory_context: 'If supplier moves location or sources components differently, binding rulings may be invalidated',
-        cbp_requirement: 'CBP requires notification within 30 days of any supplier change that affects RVC calculations'
-      },
-      {
-        risk: 'Threshold Changes',
-        regulatory_context: 'Section 301 rates can change with 30-day USTR notice. Significant increases may warrant exemption requests',
-        monitoring_resources: 'USTR publishes tariff change announcements at ustr.gov. CBP alerts available at cbp.gov'
-      },
-      {
-        risk: 'Audit Selection',
-        enforcement_pattern: 'Companies with high trade volume or policy-impacted products face higher audit selection rates',
-        industry_data: 'Companies with binding rulings experience approximately 90% lower audit penalty rates (based on CBP enforcement statistics)'
-      }
-    ],
-
-    // REGULATORY TIMELINE (CBP and USTR key dates)
-    regulatory_timeline: [
-      {
-        event: 'USTR Tariff Review Cycle',
-        typical_schedule: 'Q1 and Q3 each year',
-        regulatory_impact: 'Section 301 rates can be modified with 30-day public notice',
-        monitoring_resource: 'Announcements published at ustr.gov'
-      },
-      {
-        event: 'CBP Binding Ruling Decisions',
-        typical_timeline: '90 days from filing date',
-        regulatory_impact: 'Once approved, rulings are valid for 3 years unless CBP modifies underlying policy',
-        planning_context: 'Companies planning supply chain changes typically file binding ruling requests early in the process'
-      },
-      {
-        event: 'USMCA Compliance Audits',
-        frequency: 'Year-round, random selection process',
-        cbp_data: 'CBP selects approximately 0.2% of USMCA entries for audit annually',
-        audit_response_requirement: 'Companies must provide documentation within 30 days of audit notification to avoid back tariffs'
-      }
-    ],
-
-    // REGULATORY RESOURCES (Public agency contact information)
-    regulatory_resources: {
-      'CBP Binding Ruling Information': {
-        office: 'CBP Office of Trade (OT) - NAFTA/USMCA Division',
-        phone: '(877) CBP-5511',
-        email: 'USMCA@cbp.dhs.gov',
-        website: 'cbp.gov/trade',
-        purpose: 'Public information line for binding ruling process and USMCA requirements'
-      },
-      'USTR Tariff Policy Information': {
-        office: 'Office of the U.S. Trade Representative',
-        phone: '(202) 395-3000',
-        website: 'ustr.gov',
-        purpose: 'Public information on Section 301 tariffs and trade policy announcements'
-      },
-      'Professional Compliance Support': {
-        typical_providers: 'Licensed customs brokers and international trade attorneys',
-        typical_cost_range: '$1,000-3,000 for binding ruling support and documentation audit (industry estimate)',
-        risk_mitigation_context: 'Professional support may help prevent $50,000+ penalty exposure from CBP audits (based on typical enforcement data)',
-        disclaimer: 'This platform does not provide legal advice. Consult licensed professionals for compliance decisions.'
-      }
-    }
+    legal_disclaimer: '⚠️ This section provides regulatory intelligence for informational purposes only. Consult a licensed customs broker or trade attorney for compliance advice.'
   };
 }
 

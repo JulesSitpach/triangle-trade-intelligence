@@ -91,6 +91,7 @@ export function useWorkflowState() {
       product_description: '',
       manufacturing_location: '',
       substantial_transformation: false,  // ✅ FIX (Oct 30): Manufacturing transformation checkbox
+      manufacturing_process: null,  // ✅ Manufacturing process description
 
       // HS Code Classification Results
       classified_hs_code: '',
@@ -188,6 +189,7 @@ export function useWorkflowState() {
           destination_country: saved.destination_country,
           manufacturing_location: saved.manufacturing_location,
           substantial_transformation: saved.substantial_transformation,  // ✅ Debug: Check if this is being loaded
+          manufacturing_process: saved.manufacturing_process,  // ✅ Debug: Check if this is being loaded
           product_description: saved.product_description,
           component_origins_count: saved.component_origins?.length
         });
@@ -703,6 +705,7 @@ export function useWorkflowState() {
       product_description: '',
       manufacturing_location: '',  // ✅ No default - user must select
       substantial_transformation: false,  // ✅ Manufacturing transformation checkbox
+      manufacturing_process: null,  // ✅ Manufacturing process description
       classified_hs_code: '',
       hs_code_confidence: 0,
       hs_code_description: '',
@@ -902,6 +905,7 @@ export function useWorkflowState() {
       product_description: workflow.product_description || workflowData.product?.description || '',
       manufacturing_location: workflow.manufacturing_location || workflowData.usmca?.manufacturing_location || '',
       substantial_transformation: workflowData.substantial_transformation || false,
+      manufacturing_process: workflowData.manufacturing_process || null,
 
       // HS Code Classification Results
       classified_hs_code: workflow.hs_code || workflowData.product?.hs_code || '',

@@ -5,10 +5,12 @@
  * ✅ Records completed USMCA workflows with all qualification data
  * ✅ Saves component origins, tariff analysis, and certificate metadata
  * ✅ No hardcoded defaults - validates all required data present
+ * ✅ VALIDATION (Nov 7): Rejects incomplete QUALIFIED workflows to prevent dashboard breaks
  */
 
 import { protectedApiHandler } from '../../lib/api/apiHandler';
 import { createClient } from '@supabase/supabase-js';
+import { validateQualifiedWorkflow, validateWorkflowCompletionData } from '../../lib/validation/workflow-completion-validator.js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -144,6 +146,62 @@ export default protectedApiHandler({
             stale: component.stale !== undefined ? component.stale : false,
             data_source: component.data_source || 'workflow_completion'
           };
+        });
+
+        // ========================================
+        // 🛡️ DATA VALIDATION (Nov 7, 2025)
+        // ========================================
+        // CRITICAL: Validate workflow_data structure BEFORE saving
+        // If validation fails, reject the workflow and log error
+        // This prevents incomplete workflows from breaking dashboard display
+
+        const workflowDataToValidate = {
+          ...data,
+          qualification_result: {
+            ...qualification_result,
+            component_origins: normalizedComponents
+          }
+        };
+
+        // Use strict validation for QUALIFIED workflows
+        const isQualified = qualification_result?.status === 'QUALIFIED';
+        const validation = isQualified
+          ? validateQualifiedWorkflow(workflowDataToValidate, userId)
+          : validateWorkflowCompletionData(workflowDataToValidate, userId);
+
+        if (!validation.valid) {
+          console.error('❌ WORKFLOW VALIDATION FAILED - REJECTING SAVE:', {
+            userId,
+            workflowId: id,
+            status: qualification_result?.status,
+            errorCount: validation.errors.length,
+            errors: validation.errors
+          });
+
+          return res.status(400).json({
+            success: false,
+            error: 'Workflow data validation failed - incomplete or corrupted data',
+            validation_errors: validation.errors,
+            validation_warnings: validation.warnings,
+            help: 'Workflow cannot be saved because required fields are missing. Please check the AI response structure.'
+          });
+        }
+
+        // Log warnings (non-blocking)
+        if (validation.warnings.length > 0) {
+          console.warn('⚠️ WORKFLOW VALIDATION WARNINGS (saved anyway):', {
+            userId,
+            workflowId: id,
+            warningCount: validation.warnings.length,
+            warnings: validation.warnings
+          });
+        }
+
+        console.log('✅ WORKFLOW VALIDATION PASSED - Proceeding with save:', {
+          userId,
+          workflowId: id,
+          status: qualification_result?.status,
+          componentCount: normalizedComponents.length
         });
 
         try {

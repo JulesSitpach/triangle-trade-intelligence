@@ -10,7 +10,23 @@ export default function TariffSavings({ results }) {
   if (!results?.component_origins && !results?.components) return null;
 
   const components = results.component_origins || results.components || [];
-  const tradeVolume = parseFloat(results.company?.trade_volume || 0);
+
+  // ✅ FIX #5: Validator now ensures trade_volume exists
+  // If this is missing, it's a data contract violation (should never happen in production)
+  const tradeVolume = parseFloat(results.company?.trade_volume);
+  if (isNaN(tradeVolume) || tradeVolume <= 0) {
+    console.error('[TariffSavings] Invalid trade_volume:', results.company?.trade_volume);
+    return (
+      <div className="card-content">
+        <div style={{ padding: '1.5rem', backgroundColor: '#fef2f2', borderRadius: '4px', border: '1px solid #fecaca' }}>
+          <div style={{ fontSize: '0.875rem', color: '#991b1b', fontWeight: '600', marginBottom: '0.5rem' }}>⚠️ Trade Volume Data Missing</div>
+          <div style={{ fontSize: '0.8125rem', color: '#991b1b', lineHeight: '1.5' }}>
+            Trade volume is required for savings calculations. Please contact support if you see this message.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ✅ ISSUE #1 FIX: Use SINGLE authoritative source - AI's detailed_analysis.savings_analysis
   // The AI calculates savings ONLY in detailed_analysis.savings_analysis

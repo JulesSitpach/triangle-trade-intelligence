@@ -96,10 +96,33 @@ export default function USMCACertificateCompletion() {
             const { workflow } = await response.json();
             console.log('✅ Workflow loaded from database:', workflow);
 
-            // Use workflow_data from database
+            // ✅ FIXED (Nov 7): Use top-level columns as primary source, JSONB as fallback
+            // Top-level columns: company_name, company_country, destination_country
+            // JSONB workflow_data might be incomplete or missing these fields
             const dbData = workflow.workflow_data || {};
+
+            // ✅ DEBUG: Log what contact data is in the database
+            console.log('🔍 [CERTIFICATE] Contact person from database:', {
+              from_workflow_data: dbData.company?.contact_person,
+              from_workflow_data_phone: dbData.company?.contact_phone,
+              from_workflow_data_email: dbData.company?.contact_email,
+              company_name: workflow.company_name
+            });
+
             const initialData = {
-              company: dbData.company || {},
+              company: {
+                // ✅ Use top-level columns first, then JSONB fallback
+                company_name: workflow.company_name || dbData.company?.company_name || dbData.company?.name || '',
+                name: workflow.company_name || dbData.company?.company_name || dbData.company?.name || '',
+                company_country: workflow.company_country || dbData.company?.company_country || dbData.company?.country || '',
+                company_address: dbData.company?.company_address || dbData.company?.address || '',
+                business_type: dbData.company?.business_type || '',
+                trade_volume: dbData.company?.trade_volume || 0,
+                tax_id: dbData.company?.tax_id || '',
+                contact_person: dbData.company?.contact_person || '',
+                contact_phone: dbData.company?.contact_phone || '',
+                contact_email: dbData.company?.contact_email || ''
+              },
               product: dbData.product || {},
               components: dbData.components || workflow.component_origins || [],
               usmca: dbData.usmca || {},

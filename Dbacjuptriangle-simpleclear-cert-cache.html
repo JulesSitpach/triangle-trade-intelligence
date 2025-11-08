@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Certificate Cache</title>
+</head>
+<body>
+    <h1>Clearing Certificate Cache...</h1>
+    <pre id="output"></pre>
+    <script>
+        const output = document.getElementById('output');
+        const log = (msg) => {
+            output.textContent += msg + '\n';
+            console.log(msg);
+        };
+
+        // Clear all localStorage keys related to certificates
+        const keysToClear = [
+            'usmca_workflow_results',
+            'workflow_session_id',
+            'certificate_data',
+            'professional_certificate',
+            'usmca_certificate'
+        ];
+
+        keysToClear.forEach(key => {
+            if (localStorage.getItem(key)) {
+                localStorage.removeItem(key);
+                log(`✅ Cleared: ${key}`);
+            } else {
+                log(`⚠️  Not found: ${key}`);
+            }
+        });
+
+        // Show all remaining localStorage keys
+        log('\n📋 Remaining localStorage keys:');
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            log(`   - ${key}`);
+        }
+
+        log('\n✅ Cache cleared! Close this tab and reload your certificate page.');
+    </script>
+</body>
+</html>

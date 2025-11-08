@@ -25,7 +25,6 @@ import { VolatilityManager } from '../../lib/tariff/volatility-manager.js';
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
   getCacheExpiration,
-  getIndustryThresholds,
   getDeMinimisThreshold,
   parseTradeVolume,
   extractIndustryFromBusinessType,
@@ -104,20 +103,26 @@ IMPORTANT: Research actual current rates for each component's HS code
 - Section 232: If steel/aluminum, research CURRENT rate
 - Total: Sum all applicable rates as decimals (e.g., 0.60 for 60%)
 
-RETURN JSON ARRAY (rates as decimals, e.g., 0.60 for 60%):
+RETURN JSON ARRAY (rates as decimals, e.g., 0.034 for 3.4%):
 [
   {
-    "hs_code": "...",
-    "mfn_rate": 0.0,
-    "base_mfn_rate": 0.0,
-    "section_301": <China to US? Current policy rate or 0>,
-    "section_232": <Steel/aluminum? Current rate or 0>,
-    "usmca_rate": <preferential rate or same as mfn>,
-    "description": "...",
-    "justification": "<your research summary>",
+    "hs_code": "actual HS code",
+    "mfn_rate": <RESEARCHED_MFN_RATE_AS_DECIMAL>,
+    "base_mfn_rate": <SAME_AS_MFN_RATE>,
+    "section_301": <RESEARCHED_SECTION_301_RATE_OR_0>,
+    "section_232": <RESEARCHED_SECTION_232_RATE_OR_0>,
+    "usmca_rate": <RESEARCHED_PREFERENTIAL_RATE_OR_MFN>,
+    "description": "component description",
+    "justification": "YOUR RESEARCH SUMMARY - cite sources (USITC HTS, USTR Federal Register, etc.)",
     "confidence": "high|medium|low"
   }
 ]
+
+CRITICAL EXAMPLES:
+- If HTS shows "Free": mfn_rate = 0.0
+- If HTS shows "3.4%": mfn_rate = 0.034
+- If China battery with Section 301 List 4A at 7.5%: section_301 = 0.075
+- Total tariff = mfn_rate + section_301 + section_232 (sum all applicable)
 
 CRITICAL: This is for USMCA compliance certificates. Accuracy is legally required.
 Return ONLY valid JSON array. No explanations.`;
@@ -617,6 +622,8 @@ export default protectedApiHandler({
       tax_id: formData.tax_id,                            // CRITICAL for certificates
       supplier_country: formData.supplier_country,        // CRITICAL for AI analysis
       manufacturing_location: formData.manufacturing_location, // CRITICAL for AI analysis (can be "DOES_NOT_APPLY")
+      substantial_transformation: formData.substantial_transformation || false,
+      manufacturing_process: formData.manufacturing_process || null,
       component_origins: formData.component_origins
     };
 
@@ -851,20 +858,49 @@ export default protectedApiHandler({
               continue;  // Skip to next component, no AI call needed
             }
 
-            // Not in master table OR cache - need AI enrichment
-            console.log(`⏳ Database Cache MISS - Making AI call for "${component.description}"...`);
-            enriched.push({
-              ...baseComponent,
-              mfn_rate: 0,
-              base_mfn_rate: 0,
-              section_301: 0,
-              section_232: 0,
-              usmca_rate: 0,
-              rate_source: 'database_lookup_miss',
-              stale: true,  // Missing from both tables, needs AI enrichment
-              data_source: 'no_data'
-            });
-            continue;  // Skip to next component, let Phase 3 handle this
+            // Not in master table OR cache - need origin-aware fallback
+            console.log(`⏳ Database Cache MISS for "${component.description}" from ${baseComponent.origin_country}...`);
+
+            // ✅ CRITICAL FIX (Nov 8, 2025): Origin-aware NULL semantics
+            // USMCA members (US/CA/MX) → assume duty-free (mfn_rate: 0)
+            // Non-USMCA (CN/VN/DE/etc) → unknown rate (mfn_rate: null) + AI research
+            const USMCA_COUNTRIES = ['US', 'CA', 'MX'];
+            const isUSMCAMember = USMCA_COUNTRIES.includes((baseComponent.origin_country || '').toUpperCase());
+
+            if (isUSMCAMember) {
+              // USMCA member - likely duty-free, but flag for verification
+              console.log(`✅ [USMCA-DEFAULT] ${baseComponent.origin_country} is USMCA member - assuming duty-free`);
+              enriched.push({
+                ...baseComponent,
+                mfn_rate: 0,  // Reasonable default for USMCA
+                base_mfn_rate: 0,
+                section_301: 0,
+                section_232: 0,
+                usmca_rate: 0,
+                rate_source: 'default_usmca_member',
+                stale: false,  // Don't trigger AI research for USMCA
+                data_source: 'usmca_default',
+                requires_verification: true,
+                verification_reason: `HS code ${component.hs_code} not in database. USMCA members are usually duty-free, but verify with customs.`
+              });
+            } else {
+              // Non-USMCA member - rate unknown, trigger AI research
+              console.log(`🚨 [NON-USMCA] ${baseComponent.origin_country} is NOT USMCA - rate unknown, needs AI research`);
+              enriched.push({
+                ...baseComponent,
+                mfn_rate: null,  // ✅ CRITICAL: null = unknown rate!
+                base_mfn_rate: null,
+                section_301: null,
+                section_232: null,
+                usmca_rate: 0,  // Not eligible for USMCA
+                rate_source: 'unknown_non_usmca',
+                stale: true,  // ✅ Trigger AI research
+                data_source: 'no_data',
+                requires_verification: true,
+                verification_reason: `Rate unknown for ${baseComponent.origin_country} origin - AI research required`
+              });
+            }
+            continue;  // Skip to next component, let Phase 3 handle AI if needed
           }
 
           // ✅ HYBRID (Oct 30): Check policy_tariffs_cache for volatile rates
@@ -1140,66 +1176,79 @@ export default protectedApiHandler({
           try {
             console.log(`💾 [HYBRID-SAVE] Saving ${aiRates.length} AI-discovered rates (split stable/volatile)...`);
 
-            for (const aiRate of aiRates) {
-              const normalizedHS = aiRate.hs_code.replace(/\D/g, '').substring(0, 8).padEnd(8, '0');
-              const mfnTextRate = (aiRate.mfn_rate === 0 || aiRate.base_mfn_rate === 0) ? 'Free' : `${(aiRate.mfn_rate * 100).toFixed(1)}%`;
+            // ❌ TEMPORARILY DISABLED (Nov 8, 2025): AI database save until we verify 100% accuracy
+            //
+            // ISSUE: AI is returning MFN="Free" (0.0%) for components that should have 3.4%, 2.7%, etc.
+            // This pollutes tariff_intelligence_master with bad data, then database lookup returns these
+            // bad "AI-verified component" entries instead of doing fresh research.
+            //
+            // PLAN:
+            // 1. Comment out database save (DONE)
+            // 2. Delete all bad "AI-verified component" entries
+            // 3. Test with AI research only (no caching)
+            // 4. Fix AI prompt to return correct MFN rates
+            // 5. Re-enable database save once AI is 100% accurate
+            //
+            // for (const aiRate of aiRates) {
+            //   const normalizedHS = aiRate.hs_code.replace(/\D/g, '').substring(0, 8).padEnd(8, '0');
+            //   const mfnTextRate = (aiRate.mfn_rate === 0 || aiRate.base_mfn_rate === 0) ? 'Free' : `${(aiRate.mfn_rate * 100).toFixed(1)}%`;
+            //
+            //   // 1. Save STABLE rates to master table (permanent)
+            //   const { error: masterError } = await supabase
+            //     .from('tariff_intelligence_master')
+            //     .upsert({
+            //       hts8: normalizedHS,
+            //       brief_description: aiRate.description || 'AI-verified component',
+            //       mfn_text_rate: mfnTextRate,
+            //       mfn_ad_val_rate: aiRate.base_mfn_rate || aiRate.mfn_rate || 0,
+            //       usmca_ad_val_rate: aiRate.usmca_rate || 0,
+            //       // DON'T save section_301/232 here - too volatile
+            //       data_source: 'ai_verified_2025',
+            //       needs_ai_enrichment: false,
+            //       created_at: new Date().toISOString(),
+            //       updated_at: new Date().toISOString()
+            //     }, {
+            //       onConflict: 'hts8'
+            //     });
+            //
+            //   if (masterError) {
+            //     console.error(`⚠️ [HYBRID-SAVE] Failed to save stable rates ${normalizedHS}:`, masterError.message);
+            //   } else {
+            //     console.log(`✅ [HYBRID-SAVE] Saved stable rates ${normalizedHS} to master (permanent)`);
+            //   }
+            //
+            //   // 2. Save VOLATILE policy rates to cache (with expiration)
+            //   const hasVolatileRates = (aiRate.section_301 > 0) || (aiRate.section_232 > 0);
+            //   if (hasVolatileRates) {
+            //     // Section 301 (China): 7-day freshness
+            //     // Section 232 (Steel): 30-day freshness
+            //     const expirationDays = aiRate.section_301 > 0 ? 7 : 30;
+            //     const expiresAt = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000);
+            //
+            //     const { error: policyError } = await supabase
+            //       .from('policy_tariffs_cache')
+            //       .upsert({
+            //         hs_code: normalizedHS,
+            //         section_301: aiRate.section_301 || 0,
+            //         section_232: aiRate.section_232 || 0,
+            //         verified_date: new Date().toISOString().split('T')[0],
+            //         expires_at: expiresAt.toISOString(),
+            //         data_source: 'ai_verified',
+            //         last_updated_by: 'system',
+            //         update_notes: `AI discovered rate on ${new Date().toISOString()}`
+            //       }, {
+            //         onConflict: 'hs_code'
+            //       });
+            //
+            //     if (policyError) {
+            //       console.error(`⚠️ [HYBRID-SAVE] Failed to cache policy rates ${normalizedHS}:`, policyError.message);
+            //     } else {
+            //       console.log(`✅ [HYBRID-SAVE] Cached policy rates ${normalizedHS} (expires in ${expirationDays} days)`);
+            //     }
+            //   }
+            // }
 
-              // 1. Save STABLE rates to master table (permanent)
-              const { error: masterError } = await supabase
-                .from('tariff_intelligence_master')
-                .upsert({
-                  hts8: normalizedHS,
-                  brief_description: aiRate.description || 'AI-verified component',
-                  mfn_text_rate: mfnTextRate,
-                  mfn_ad_val_rate: aiRate.base_mfn_rate || aiRate.mfn_rate || 0,
-                  usmca_ad_val_rate: aiRate.usmca_rate || 0,
-                  // DON'T save section_301/232 here - too volatile
-                  data_source: 'ai_verified_2025',
-                  needs_ai_enrichment: false,
-                  created_at: new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                }, {
-                  onConflict: 'hts8'
-                });
-
-              if (masterError) {
-                console.error(`⚠️ [HYBRID-SAVE] Failed to save stable rates ${normalizedHS}:`, masterError.message);
-              } else {
-                console.log(`✅ [HYBRID-SAVE] Saved stable rates ${normalizedHS} to master (permanent)`);
-              }
-
-              // 2. Save VOLATILE policy rates to cache (with expiration)
-              const hasVolatileRates = (aiRate.section_301 > 0) || (aiRate.section_232 > 0);
-              if (hasVolatileRates) {
-                // Section 301 (China): 7-day freshness
-                // Section 232 (Steel): 30-day freshness
-                const expirationDays = aiRate.section_301 > 0 ? 7 : 30;
-                const expiresAt = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000);
-
-                const { error: policyError } = await supabase
-                  .from('policy_tariffs_cache')
-                  .upsert({
-                    hs_code: normalizedHS,
-                    section_301: aiRate.section_301 || 0,
-                    section_232: aiRate.section_232 || 0,
-                    verified_date: new Date().toISOString().split('T')[0],
-                    expires_at: expiresAt.toISOString(),
-                    data_source: 'ai_verified',
-                    last_updated_by: 'system',
-                    update_notes: `AI discovered rate on ${new Date().toISOString()}`
-                  }, {
-                    onConflict: 'hs_code'
-                  });
-
-                if (policyError) {
-                  console.error(`⚠️ [HYBRID-SAVE] Failed to cache policy rates ${normalizedHS}:`, policyError.message);
-                } else {
-                  console.log(`✅ [HYBRID-SAVE] Cached policy rates ${normalizedHS} (expires in ${expirationDays} days)`);
-                }
-              }
-            }
-
-            console.log(`💾 [HYBRID-SAVE] Database expanded: stable rates permanent, policy rates cached`);
+            console.log(`⚠️ [HYBRID-SAVE] Database save DISABLED - testing AI accuracy first`);
           } catch (saveError) {
             console.error(`⚠️ [HYBRID-SAVE] Error saving AI rates:`, saveError.message);
             // Non-fatal error - continue with request even if save fails
@@ -1307,13 +1356,18 @@ export default protectedApiHandler({
 
     // Calculate component-level financials
     const componentFinancials = (enrichedComponents || []).map((comp, idx) => {
-      const mfn = comp.mfn_rate || 0;
-      // ✅ FIX (Oct 27): ALL components in a qualified product get USMCA rates
-      // Component origin (CN, US, MX) doesn't matter - if the finished product qualifies,
-      // all components get preferential tariff treatment
-      const usmca = comp.usmca_rate || 0;
-      const section301 = comp.section_301 || 0;
-      const totalRate = (mfn + section301 + (comp.section_232 || 0));
+      // ✅ CRITICAL FIX (Nov 8, 2025): Handle null rates (unknown) vs 0 (duty-free)
+      // null means "rate unknown - needs verification"
+      // 0 means "confirmed duty-free"
+      const mfn = comp.mfn_rate !== null && comp.mfn_rate !== undefined ? comp.mfn_rate : 0;
+      const usmca = comp.usmca_rate !== null && comp.usmca_rate !== undefined ? comp.usmca_rate : 0;
+      const section301 = comp.section_301 !== null && comp.section_301 !== undefined ? comp.section_301 : 0;
+      const section232 = comp.section_232 !== null && comp.section_232 !== undefined ? comp.section_232 : 0;
+
+      const totalRate = (mfn + section301 + section232);
+
+      // Flag if component has unknown rates
+      const hasUnknownRate = comp.mfn_rate === null || comp.section_301 === null;
 
       const componentValue = (tradeVolume * (comp.value_percentage / 100));
       // ✅ FIX (Oct 28): Rates are already in decimal format (0.026 = 2.6%), NOT percentage format
@@ -1345,14 +1399,12 @@ export default protectedApiHandler({
       // - Total elimination = full totalRate (varies by component)
       const nearshoringPotential = !isUSMCAMember ? componentValue * totalRate : 0;
 
-      // ✅ FIX (Oct 28): ONLY components from USMCA members (US/CA/MX) can have USMCA savings
-      // Chinese components (CN) don't qualify for USMCA → no USMCA savings
-      // Canadian components with 0% MFN already duty-free → no additional USMCA savings
-      const savingsPerYear = (isUSMCAMember && usmca < mfn) ? (mfnCost - usmcaCost) : 0;
+      // ✅ FIX (Nov 8): Simple savings = total duties avoided if product qualifies for USMCA
+      // If product qualifies, ALL components (including China) get 0% USMCA rate
+      // Savings = (MFN + Section 301 + Section 232) - USMCA rate
+      const savingsPerYear = (mfnCost + (componentValue * (section301 + section232))) - usmcaCost;
 
-      // ✅ DEBUG (Nov 1): Log final savings calculation for ALL components
-      console.log('   Savings Calculation (mfnCost - usmcaCost):', (mfnCost - usmcaCost));
-      console.log('   Final Annual Savings:', Math.round(savingsPerYear));
+      console.log('   Savings Calculation:', Math.round(savingsPerYear));
 
       return {
         hs_code: comp.hs_code,
@@ -1774,12 +1826,18 @@ export default protectedApiHandler({
       // ✅ FIX (Oct 28): Use usmcaCountries defined at top (line 969)
       const isUSMCAMember = usmcaCountries.includes(finalOriginCountry.toUpperCase());
 
-      // ✅ CRITICAL FIX (Oct 28): Calculate total_rate from all tariff components
-      // total_rate = base_mfn_rate + section_301 + section_232
-      const baseMfnRate = component.base_mfn_rate !== undefined ? component.base_mfn_rate : component.mfn_rate || 0;
-      const section301 = component.section_301 || 0;
-      const section232 = component.section_232 || 0;
+      // ✅ CRITICAL FIX (Nov 8, 2025): Handle null rates properly
+      // null = unknown rate (needs verification)
+      // 0 = confirmed duty-free
+      const baseMfnRate = component.base_mfn_rate !== null && component.base_mfn_rate !== undefined
+        ? component.base_mfn_rate
+        : (component.mfn_rate !== null && component.mfn_rate !== undefined ? component.mfn_rate : 0);
+      const section301 = component.section_301 !== null && component.section_301 !== undefined ? component.section_301 : 0;
+      const section232 = component.section_232 !== null && component.section_232 !== undefined ? component.section_232 : 0;
       const totalRate = baseMfnRate + section301 + section232;
+
+      // ✅ NEW (Nov 8): Flag unknown rates for UI warnings
+      const hasUnknownRate = component.mfn_rate === null || component.section_301 === null;
 
       // ✅ FIX (Oct 28): Merge annual_savings from componentFinancials
       // componentFinancials[idx] corresponds to enrichedComponents[idx]
@@ -1808,7 +1866,11 @@ export default protectedApiHandler({
         // Ensure data_source is set for tracking provenance
         data_source: component.data_source || 'database_cache_current',
         // ✅ NEW (Oct 28): Include annual_savings for frontend display
-        annual_savings: financialData.annual_savings || 0
+        annual_savings: financialData.annual_savings || 0,
+        // ✅ NEW (Nov 8): Origin-aware NULL semantics - flag unknown rates for UI warnings
+        hasUnknownRate: hasUnknownRate,
+        requires_verification: component.requires_verification || false,
+        verification_reason: component.verification_reason || null
       };
     });
 
@@ -1878,6 +1940,8 @@ export default protectedApiHandler({
         classification_confidence: analysis.product?.confidence || analysis.product?.confidence_score || 0,
         classification_method: 'ai_analysis',
         manufacturing_location: formData.manufacturing_location || '',
+        substantial_transformation: formData.substantial_transformation || false,
+        manufacturing_process: formData.manufacturing_process || null,
         // Product-level tariff rates (from AI savings analysis)
         // ✅ FIX: Remove hardcoded || 0 defaults - use actual AI values
         mfn_rate: analysis.savings?.mfn_rate,

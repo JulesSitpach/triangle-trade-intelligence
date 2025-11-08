@@ -424,6 +424,7 @@ export default function ComponentOriginsStepEnhanced({
             tradeVolume: formData.trade_volume,
             companyName: formData.company_name,
             primarySupplier: formData.primary_supplier_country,
+            substantialTransformation: formData.substantial_transformation || false, // ✅ FIX (Nov 8): Critical for HS classification - transformed vs raw material
             previouslyClassifiedComponents: components.slice(0, index)
               .filter(c => c.description && c.hs_code)
               .map(c => ({
@@ -439,30 +440,32 @@ export default function ComponentOriginsStepEnhanced({
       const result = await response.json();
 
       if (result.success && result.data) {
-        // Use classification result to populate suggestions
+        // ✅ FIX (Nov 8): Capture full AI classification data including alternatives and explanation
         const suggestion = {
           hs_code: result.data.hs_code,
           description: result.data.description || component.description,
           confidence: result.data.confidence || 85,
           confidenceText: `${Math.round((result.data.confidence || 0.85) * 100)}% accuracy`,
-          reasoning: result.data.explanation || 'AI classification completed',
+          explanation: result.data.explanation || 'AI classification completed',
+          reasoning: result.data.explanation || 'AI classification completed',  // Keep for backwards compatibility
+          alternative_codes: result.data.alternative_codes || [],
+          legal_basis: result.data.legal_basis || '',
+          audit_risk: result.data.audit_risk || 'medium',
           source: 'Classification Agent'
         };
 
-        const newComponents = [...components];
-        newComponents[index].hs_code = suggestion.hs_code;
-        newComponents[index].hs_description = suggestion.description;
-        newComponents[index].hs_suggestions = [suggestion];
+        // ✅ FIX (Nov 8): Show suggestion badge instead of auto-populating
+        // This allows user to see AI explanation and alternatives before accepting
+        setAgentSuggestions({
+          ...agentSuggestions,
+          [index]: suggestion
+        });
 
-        // 🔒 LOCK COMPONENT: Once HS lookup performed, component slot is consumed
-        if (!newComponents[index].is_locked) {
-          newComponents[index].is_locked = true;
-          setUsedComponentsCount(prev => prev + 1);
-          console.log(`🔒 Component ${index + 1} locked after manual HS lookup. Used count: ${usedComponentsCount + 1}`);
-        }
-
-        setComponents(newComponents);
-        console.log(`✅ Auto-populated HS code ${suggestion.hs_code} for component ${index + 1}`);
+        console.log(`✅ AI classification complete for component ${index + 1}:`, {
+          hs_code: suggestion.hs_code,
+          confidence: suggestion.confidence,
+          alternatives: suggestion.alternative_codes?.length || 0
+        });
       } else {
         console.log(`⚠️ No HS code suggestions found for component ${index + 1}`);
         alert('No HS code suggestions found. Try a more specific product description.');
@@ -548,6 +551,32 @@ export default function ComponentOriginsStepEnhanced({
     }
   };
 
+  // Clear component data (reset to empty state but keep slot for subscription counting)
+  const clearComponent = (index) => {
+    const updatedComponents = [...components];
+    // Reset ALL fields to empty (matches normalizeComponent structure)
+    updatedComponents[index] = {
+      description: '',
+      origin_country: '',
+      value_percentage: '',
+      hs_code: '',
+      hs_suggestions: [],  // Clear AI suggestions
+      manufacturing_location: formData.manufacturing_location ?? '',
+      enrichment_error: null,
+      mfn_rate: null,
+      usmca_rate: null,
+      section_301: null,
+      section_232: null,
+      total_rate: null,
+      savings_percentage: null,
+      policy_adjustments: [],
+      confidence: '',
+      hs_description: '',
+      is_locked: false  // Unlock so user can classify again
+    };
+    setComponents(updatedComponents);
+  };
+
   const getTotalPercentage = () => {
     return components.reduce((sum, c) => sum + (parseFloat(c.value_percentage) || 0), 0);
   };
@@ -567,10 +596,20 @@ export default function ComponentOriginsStepEnhanced({
     // Calculate and save annual savings based on trade volume
     // Use the centralized parseTradeVolume utility for consistency across the app
     const tradeVolume = parseTradeVolume(formData.trade_volume);
+
+    // ✅ FIX #5: Validator ensures this is valid
+    // Add assertion for safety in development
+    if (process.env.NODE_ENV === 'development' && (tradeVolume === null || tradeVolume === 0 || isNaN(tradeVolume))) {
+      console.warn('[ComponentOrigins] Trade volume is null/0/invalid (should have been caught by validator):', {
+        formDataValue: formData.trade_volume,
+        parsedValue: tradeVolume
+      });
+    }
+
     const mfnRate = parseFloat(suggestion.mfn_rate || 0);
     const usmcaRate = parseFloat(suggestion.usmca_rate || 0);
     const tariffSavings = (mfnRate - usmcaRate) / 100; // Convert percentage to decimal
-    const annualSavings = tradeVolume * tariffSavings;
+    const annualSavings = (tradeVolume || 0) * tariffSavings;
 
     updateFormData('calculated_savings', Math.round(annualSavings));
     updateFormData('monthly_savings', Math.round(annualSavings / 12));
@@ -787,6 +826,25 @@ export default function ComponentOriginsStepEnhanced({
                 </span>
               </label>
             </div>
+
+            {/* Manufacturing Process Details - Show when substantial transformation is checked */}
+            {formData.substantial_transformation && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <label className="form-label">
+                  Describe Your Manufacturing Process
+                </label>
+                <input
+                  type="text"
+                  value={formData.manufacturing_process || ''}
+                  onChange={(e) => updateFormData('manufacturing_process', e.target.value)}
+                  placeholder="Example: Cooking, blending, pasteurization, bottling"
+                  className="form-input"
+                />
+                <div className="form-help">
+                  What processes create substantial transformation? (e.g., welding, heat treatment, chemical processing, assembly with value-add)
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Manufacturing Location */}
@@ -842,8 +900,8 @@ export default function ComponentOriginsStepEnhanced({
               <div className="dashboard-actions-left">
                 <h3 className="form-section-title">Component {index + 1}</h3>
               </div>
-              {components.length > 1 && (
-                <div className="dashboard-actions-right">
+              <div className="dashboard-actions-right">
+                {components.length > 1 ? (
                   <button
                     type="button"
                     onClick={() => removeComponent(index)}
@@ -852,8 +910,17 @@ export default function ComponentOriginsStepEnhanced({
                   >
                     Remove
                   </button>
-                </div>
-              )}
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => clearComponent(index)}
+                    className="btn-secondary"
+                    title="Clear component data"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="form-grid-2">
@@ -1007,6 +1074,9 @@ export default function ComponentOriginsStepEnhanced({
                   updateComponent(index, 'alternative_codes', suggestion.alternative_codes || []);
                   updateComponent(index, 'required_documentation', suggestion.requiredDocumentation || []);
                   updateComponent(index, 'classification_source', 'ai_agent');
+
+                  // NOTE: Component already locked when AI was called (line 339)
+                  // No need to lock again here - user accepting suggestion is free
 
                   // Clear the suggestion badge (user accepted it)
                   const newSuggestions = { ...agentSuggestions };

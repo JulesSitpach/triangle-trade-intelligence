@@ -322,8 +322,8 @@ export default function USMCAQualification({ results }) {
                   </Tooltip>
                 </th>
                 <th style={{ textAlign: 'right', padding: '0.75rem', fontWeight: '600', color: '#374151' }}>
-                  <Tooltip text="Annual tariff savings per component (Trade Volume × Value % × (MFN - USMCA Rate))">
-                    Annual Savings
+                  <Tooltip text="USMCA components: Current savings. Non-USMCA components: Potential savings if switched to Mexico/Canada/US supplier">
+                    Savings/Potential
                   </Tooltip>
                 </th>
               </tr>
@@ -377,6 +377,9 @@ export default function USMCAQualification({ results }) {
 
                 const isExpanded = expandedComponents[index];
                 const hasDetails = component.ai_reasoning || component.alternative_codes || component.ai_confidence || component.hs_description;
+
+                // Check if component is from USMCA country (US, CA, MX)
+                const isUSMCAOrigin = ['US', 'CA', 'MX'].includes(component.origin_country);
 
                 return (
                   <React.Fragment key={index}>
@@ -432,18 +435,25 @@ export default function USMCAQualification({ results }) {
 
                       {/* Column 2: Origin */}
                       <td style={{ padding: '0.75rem', color: '#1f2937', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {component.origin_country || '—'}
+                        <span title={`Component sourced from ${component.origin_country || 'Unknown'}`}>
+                          {component.origin_country || '—'}
+                        </span>
                       </td>
 
                       {/* Column 3: Value % */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        {component.value_percentage}%
+                        <span title={`${component.value_percentage}% of total product value ($${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} annually)`}>
+                          {component.value_percentage}%
+                        </span>
                       </td>
 
                       {/* Column 4: MFN Rate */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: baseMfnRate !== null ? '#1f2937' : '#9ca3af' }}>
                         {baseMfnRate !== null ? (
-                          <span style={{ fontWeight: '500', whiteSpace: 'nowrap' }}>
+                          <span
+                            style={{ fontWeight: '500', whiteSpace: 'nowrap', cursor: 'help' }}
+                            title={`Most Favored Nation base rate from US tariff schedule (HTS ${component.hs_code || 'TBD'})`}
+                          >
                             {(baseMfnRate * 100).toFixed(1)}%
                           </span>
                         ) : (
@@ -453,34 +463,76 @@ export default function USMCAQualification({ results }) {
 
                       {/* Column 5: USMCA Rate */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', color: usmcaRate !== null ? '#059669' : '#9ca3af', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A'}
+                        <span
+                          title={usmcaRate === 0 ? 'USMCA eliminates tariffs for qualified products from US/Mexico/Canada' : `USMCA preferential rate for this product`}
+                          style={{ cursor: 'help' }}
+                        >
+                          {usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A'}
+                        </span>
                       </td>
 
                       {/* Column 6: Additional Tariffs (Section 301 + Section 232) */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', whiteSpace: 'nowrap' }}>
                         {section301 > 0 || section232 > 0 ? (
-                          <span style={{ fontWeight: '600', color: '#991b1b' }}>
+                          <span
+                            style={{ fontWeight: '600', color: '#991b1b', cursor: 'help' }}
+                            title={`Policy tariffs: ${section301 > 0 ? `Section 301 ${(section301 * 100).toFixed(1)}%` : ''}${section301 > 0 && section232 > 0 ? ' + ' : ''}${section232 > 0 ? `Section 232 ${(section232 * 100).toFixed(1)}%` : ''}`}
+                          >
                             {((section301 + section232) * 100).toFixed(1)}%
                           </span>
                         ) : (
-                          <span style={{ color: '#059669' }}>0.0%</span>
+                          <span
+                            style={{ color: '#059669', cursor: 'help' }}
+                            title={component.origin_country === 'CN' ? 'No Section 301/232 tariffs apply to this HS code' : 'No additional policy tariffs for this component'}
+                          >
+                            0.0%
+                          </span>
                         )}
                       </td>
 
                       {/* Column 7: Total Rate (MFN + Additional) */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937', whiteSpace: 'nowrap' }}>
                         {totalAppliedRate !== null ? (
-                          <span>{(totalAppliedRate * 100).toFixed(1)}%</span>
+                          <span
+                            style={{ cursor: 'help' }}
+                            title={`Total: ${(baseMfnRate * 100).toFixed(1)}% MFN + ${((section301 + section232) * 100).toFixed(1)}% Additional = ${(totalAppliedRate * 100).toFixed(1)}%`}
+                          >
+                            {(totalAppliedRate * 100).toFixed(1)}%
+                          </span>
                         ) : (
                           <span style={{ color: '#9ca3af' }}>N/A</span>
                         )}
                       </td>
 
                       {/* Column 8: Annual Savings (in dollars from API) */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: component.annual_savings > 0 ? '#059669' : '#6b7280' }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>
-                          {component.annual_savings !== undefined && component.annual_savings !== null ? `$${component.annual_savings.toLocaleString()}` : '—'}
-                        </span>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: component.annual_savings > 0 ? (isUSMCAOrigin ? '#059669' : '#2563eb') : '#6b7280' }}>
+                        {component.annual_savings > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                            <span
+                              style={{ whiteSpace: 'nowrap', cursor: 'help', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '600' }}
+                              title={isUSMCAOrigin
+                                ? `Already saving: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${component.annual_savings.toLocaleString()}/year (using USMCA supplier)`
+                                : `Could save: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${component.annual_savings.toLocaleString()}/year (if switched to USMCA supplier)`}
+                            >
+                              {isUSMCAOrigin ? '✓ ' : '💡 '}${component.annual_savings.toLocaleString()}
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                              {isUSMCAOrigin ? 'Current' : 'Potential'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                            <span
+                              style={{ whiteSpace: 'nowrap', cursor: 'help', color: '#6b7280', fontWeight: '600' }}
+                              title="Component already has 0% tariff - no savings opportunity"
+                            >
+                              $0
+                            </span>
+                            <span style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                              Duty-Free
+                            </span>
+                          </div>
+                        )}
                       </td>
                     </tr>
 
@@ -507,6 +559,34 @@ export default function USMCAQualification({ results }) {
                                   <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#d97706', fontStyle: 'italic' }}>
                                     ⚠️ Consider professional validation before customs filing
                                   </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* HS Code (AI-classified) */}
+                            {component.hs_code && (
+                              <div style={{ marginBottom: '0.75rem' }}>
+                                <strong style={{ color: '#374151' }}>HS Code:</strong>{' '}
+                                <span style={{
+                                  fontFamily: 'monospace',
+                                  fontSize: '0.9375rem',
+                                  fontWeight: '600',
+                                  color: '#1f2937',
+                                  backgroundColor: '#f3f4f6',
+                                  padding: '0.25rem 0.5rem',
+                                  borderRadius: '4px'
+                                }}>
+                                  {component.hs_code}
+                                </span>
+                                {component.classification_source === 'ai_agent' && (
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: '#6b7280',
+                                    marginLeft: '0.5rem',
+                                    fontStyle: 'italic'
+                                  }}>
+                                    (AI-classified)
+                                  </span>
                                 )}
                               </div>
                             )}
