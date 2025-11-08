@@ -760,11 +760,11 @@ export default function EditableCertificatePreview({
             <br /><br />
             <strong>Our Plans:</strong>
             <br />
-            • <strong>Starter</strong> ($99/month): 10 analyses + certificate generation + basic alerts
+            • <strong>Starter</strong> ($99/month): 15 analyses + certificate generation + basic alerts
             <br />
             • <strong>Professional</strong> ($299/month): 100 analyses + real-time alerts + priority support
             <br />
-            • <strong>Premium</strong> ($599/month): Everything + quarterly strategy calls with our team
+            • <strong>Premium</strong> ($599/month): 500 analyses + everything + priority support
             <br /><br />
             <Link href="/pricing" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</Link>
           </div>

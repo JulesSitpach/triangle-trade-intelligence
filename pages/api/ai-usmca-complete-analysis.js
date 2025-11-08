@@ -2174,6 +2174,34 @@ export default protectedApiHandler({
         });
     }
 
+    // ✅ USAGE TRACKING: Increment analysis counter AFTER successful completion (Nov 8, 2025)
+    // This ensures we only count workflows that successfully reach Results page
+    // Fire-and-forget: don't block response, but log errors for monitoring
+    supabase
+      .rpc('increment_analysis_count', {
+        p_user_id: userId,
+        p_subscription_tier: subscriptionTier
+      })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('[USAGE-TRACKING] ❌ Failed to increment analysis count:', error.message);
+          // Log to dev_issues for monitoring
+          logDevIssue({
+            type: 'database_error',
+            severity: 'high',
+            component: 'usage_tracking',
+            message: 'Failed to increment analysis count after successful workflow completion',
+            data: { userId, subscriptionTier, error: error.message }
+          });
+        } else {
+          const result = data?.[0] || {};
+          console.log(`[USAGE-TRACKING] ✅ Analysis counted: ${result.current_count}/${result.tier_limit} (Tier: ${subscriptionTier})`);
+        }
+      })
+      .catch(err => {
+        console.error('[USAGE-TRACKING] ❌ Exception incrementing analysis count:', err.message);
+      });
+
     // DEBUG: Log what's being returned in component_origins
     console.log('📊 [RESPONSE-DEBUG] Tariff rates in API response:',
       (result.component_origins || []).map(c => ({

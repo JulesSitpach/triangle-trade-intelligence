@@ -79,12 +79,12 @@ BEGIN
   -- Get current month in YYYY-MM format
   v_month_year := TO_CHAR(CURRENT_DATE, 'YYYY-MM');
 
-  -- Determine tier limit
+  -- Determine tier limit (✅ FIXED Nov 8, 2025: Starter 10→15, Premium 999999→500)
   v_tier_limit := CASE p_subscription_tier
     WHEN 'Trial' THEN 1
-    WHEN 'Starter' THEN 10
+    WHEN 'Starter' THEN 15        -- ✅ FIXED: Was 10, now 15 (matches pricing page)
     WHEN 'Professional' THEN 100
-    WHEN 'Premium' THEN 999999  -- Effectively unlimited
+    WHEN 'Premium' THEN 500       -- ✅ FIXED: Was 999999, now 500 (prevents AI cost abuse)
     ELSE 1  -- Default to Trial if unknown
   END;
 
@@ -142,12 +142,12 @@ BEGIN
   -- Get current month in YYYY-MM format
   v_month_year := TO_CHAR(CURRENT_DATE, 'YYYY-MM');
 
-  -- Determine tier limit
+  -- Determine tier limit (✅ FIXED Nov 8, 2025: Starter 10→15, Premium 999999→500)
   v_tier_limit := CASE p_subscription_tier
     WHEN 'Trial' THEN 1
-    WHEN 'Starter' THEN 10
+    WHEN 'Starter' THEN 15        -- ✅ FIXED: Was 10, now 15
     WHEN 'Professional' THEN 100
-    WHEN 'Premium' THEN 999999
+    WHEN 'Premium' THEN 500       -- ✅ FIXED: Was 999999, now 500
     ELSE 1
   END;
 

@@ -298,9 +298,82 @@ export default function UserDashboard({ user }) {
               </div>
             )}
 
+            {/* RENEWAL DATE & WARNINGS */}
+            {!usageStats.is_unlimited && (() => {
+              const now = new Date();
+              const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+              const daysUntilReset = Math.ceil((nextMonth - now) / (1000 * 60 * 60 * 24));
+              const resetDate = nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+              return (
+                <div style={{ marginTop: '1rem' }}>
+                  {/* LIMIT REACHED WARNING */}
+                  {usageStats.percentage >= 100 && (
+                    <div style={{
+                      padding: '1rem',
+                      backgroundColor: '#fef2f2',
+                      border: '2px solid #dc2626',
+                      borderRadius: '0.5rem',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <p style={{ margin: 0, color: '#991b1b', fontWeight: 600, fontSize: '0.95rem' }}>
+                        🚫 <strong>Limit Reached:</strong> {usageStats.used} of {usageStats.limit} analyses used
+                      </p>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#7f1d1d', fontSize: '0.875rem' }}>
+                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/pricing" style={{ color: '#dc2626', textDecoration: 'underline' }}>Upgrade to Professional</Link>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* LOW BALANCE WARNING (90%) */}
+                  {usageStats.percentage >= 90 && usageStats.percentage < 100 && (
+                    <div style={{
+                      padding: '1rem',
+                      backgroundColor: '#fffbeb',
+                      border: '2px solid #f59e0b',
+                      borderRadius: '0.5rem',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <p style={{ margin: 0, color: '#92400e', fontWeight: 600, fontSize: '0.95rem' }}>
+                        🚨 <strong>Alert:</strong> Only {usageStats.remaining} analysis remaining!
+                      </p>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.875rem' }}>
+                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/pricing" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Upgrade Now</Link>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* APPROACHING LIMIT (80%) */}
+                  {usageStats.percentage >= 80 && usageStats.percentage < 90 && (
+                    <div style={{
+                      padding: '1rem',
+                      backgroundColor: '#fef3c7',
+                      border: '1px solid #fbbf24',
+                      borderRadius: '0.5rem',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <p style={{ margin: 0, color: '#78350f', fontWeight: 600, fontSize: '0.95rem' }}>
+                        ⚠️ <strong>Running Low:</strong> {usageStats.used} of {usageStats.limit} analyses used ({usageStats.percentage}%)
+                      </p>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.875rem' }}>
+                        Resets: {resetDate} ({daysUntilReset} days)
+                      </p>
+                    </div>
+                  )}
+
+                  {/* NORMAL STATUS - JUST SHOW RESET DATE */}
+                  {usageStats.percentage < 80 && (
+                    <p className="text-body" style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                      Resets: {resetDate} ({daysUntilReset} days remaining)
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
             {usageStats.limit_reached && !usageStats.is_unlimited && (
-              <div className="hero-buttons">
-                <Link href="/account/subscription" className="btn-primary">
+              <div className="hero-buttons" style={{ marginTop: '1rem' }}>
+                <Link href="/pricing" className="btn-primary">
                   Upgrade for More Analyses
                 </Link>
               </div>

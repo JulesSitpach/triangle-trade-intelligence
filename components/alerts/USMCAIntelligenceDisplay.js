@@ -190,30 +190,6 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
         </CollapsibleSection>
       )}
 
-      {/* Strategic Insights */}
-      {detailed_analysis.strategic_insights && (
-        <CollapsibleSection
-          title="Business Optimization Opportunities"
-          icon="📈"
-          sectionKey="strategic"
-        >
-          <div style={{
-            background: '#fefce8',
-            border: '2px solid #fde047',
-            borderRadius: '8px',
-            padding: '1rem'
-          }}>
-            <pre style={{
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'inherit',
-              margin: 0,
-              lineHeight: 1.6
-            }}>
-              {detailed_analysis.strategic_insights}
-            </pre>
-          </div>
-        </CollapsibleSection>
-      )}
 
       {/* Risk Mitigation */}
       {(risk_mitigation.audit_triggers?.length > 0 || risk_mitigation.protection_strategies?.length > 0) && (
