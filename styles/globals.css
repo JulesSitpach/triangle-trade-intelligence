@@ -678,6 +678,20 @@ a:hover {
   transform: translateY(-1px);
 }
 
+.btn-primary:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-primary:disabled:hover {
+  background: var(--gray-400);
+  box-shadow: none;
+  transform: none;
+}
+
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -699,6 +713,23 @@ a:hover {
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(19, 65, 105, 0.3);
+}
+
+.btn-secondary:disabled {
+  background-color: var(--gray-400);
+  color: white;
+  border-color: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary:disabled:hover {
+  background-color: var(--gray-400);
+  color: white;
+  border-color: var(--gray-400);
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-ai-suggestion {
