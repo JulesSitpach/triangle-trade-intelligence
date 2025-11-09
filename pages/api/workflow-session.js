@@ -252,9 +252,18 @@ export default protectedApiHandler({
       // ✅ STANDARD SAAS PATTERN: Increment usage counter ONLY on successful workflow completion
       // This ensures users are only charged for completed workflows, not abandoned ones
       try {
+        // ✅ FIX (Nov 9): Get user's subscription tier before incrementing counter
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('subscription_tier')
+          .eq('user_id', userId)
+          .single();
+
+        const subscriptionTier = profile?.subscription_tier || 'Trial';
+
         const { incrementAnalysisCount } = require('../../lib/services/usage-tracking-service.js');
-        await incrementAnalysisCount(userId, 'unknown'); // Tier will be looked up by function
-        console.log(`[WORKFLOW-SESSION] ✅ Usage counter incremented for user ${userId} after workflow completion`);
+        await incrementAnalysisCount(userId, subscriptionTier);
+        console.log(`[WORKFLOW-SESSION] ✅ Usage counter incremented for user ${userId} (${subscriptionTier}) after workflow completion`);
       } catch (counterError) {
         // Log but don't block - tracking failure shouldn't prevent workflow completion
         console.error('[WORKFLOW-SESSION] ⚠️ Failed to increment usage counter:', counterError);
