@@ -780,51 +780,46 @@ export default function WorkflowResults({
                 has_detailed_analysis: !!results?.detailed_analysis,
                 has_situation_brief: !!results?.detailed_analysis?.situation_brief,
                 detailed_analysis_keys: results?.detailed_analysis ? Object.keys(results.detailed_analysis) : 'none',
-                will_show_button: !results?.detailed_analysis?.situation_brief
+                will_disable_button: !!results?.detailed_analysis?.situation_brief
               })}
-              {!results?.detailed_analysis?.situation_brief ? (
-                <>
-                  <button
-                    onClick={() => generateExecutiveSummary()}
-                    className="btn-primary"
-                    style={{ width: '100%', marginBottom: '1.5rem' }}
-                    disabled={loadingSummary}
-                  >
-                    {loadingSummary ? '⏳ Generating Summary...' : '📊 Generate Business Impact Summary (1 per workflow included)'}
-                  </button>
-                  <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
-                    Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities. Each workflow includes one complimentary executive summary.
+
+              {/* Show banner if summary already exists */}
+              {results?.detailed_analysis?.situation_brief && (
+                <div style={{
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  borderRadius: '4px',
+                  padding: '1rem',
+                  marginBottom: '1rem'
+                }}>
+                  <p style={{fontSize: '0.95rem', color: '#15803d', margin: 0}}>
+                    ✅ <strong>Executive Summary Available</strong> - Your saved analysis is displayed below
                   </p>
-                </>
-              ) : (
-                <>
-                  <div style={{
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #86efac',
-                    borderRadius: '4px',
-                    padding: '1rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <p style={{fontSize: '0.95rem', color: '#15803d', margin: 0}}>
-                      ✅ <strong>Executive Summary Available</strong> - Your saved analysis is displayed below
-                    </p>
-                  </div>
-                  {/* Show summary if not already visible */}
-                  {!showSummary && (
-                    <button
-                      onClick={() => {
-                        if (results.detailed_analysis && results.detailed_analysis.situation_brief) {
-                          setExecutiveSummary(results.detailed_analysis);
-                          setShowSummary(true);
-                        }
-                      }}
-                      className="btn-secondary"
-                      style={{ width: '100%', marginBottom: '1rem' }}
-                    >
-                      📋 Show Executive Summary
-                    </button>
-                  )}
-                </>
+                </div>
+              )}
+
+              {/* Generate button - ALWAYS visible but disabled after generation */}
+              <button
+                onClick={() => generateExecutiveSummary()}
+                className={results?.detailed_analysis?.situation_brief ? "btn-secondary" : "btn-primary"}
+                style={{
+                  width: '100%',
+                  marginBottom: '1.5rem',
+                  opacity: results?.detailed_analysis?.situation_brief ? 0.5 : 1,
+                  cursor: results?.detailed_analysis?.situation_brief ? 'not-allowed' : 'pointer'
+                }}
+                disabled={loadingSummary || !!results?.detailed_analysis?.situation_brief}
+                title={results?.detailed_analysis?.situation_brief ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
+              >
+                {loadingSummary ? '⏳ Generating Summary...' :
+                 results?.detailed_analysis?.situation_brief ? '✓ Executive Summary Generated (1 per workflow)' :
+                 '📊 Generate Business Impact Summary (1 per workflow included)'}
+              </button>
+
+              {!results?.detailed_analysis?.situation_brief && (
+                <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
+                  Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities. Each workflow includes one complimentary executive summary.
+                </p>
               )}
 
               {/* Executive Summary Display Section - Dynamic Component */}
