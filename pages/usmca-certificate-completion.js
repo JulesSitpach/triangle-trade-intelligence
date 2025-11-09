@@ -552,7 +552,8 @@ export default function USMCACertificateCompletion() {
               // ✅ FIX (Nov 6): Use new explicit certificate fields from analysisResults
               preference_criterion: certificateData?.analysis_results?.preference_criterion || certificateData?.analysis_results?.origin_criterion || 'B',
               method_of_qualification: certificateData?.analysis_results?.qualification_method || 'RVC',
-              is_producer: certificateData?.analysis_results?.is_producer || false,
+              // ✅ FIX (Nov 9): is_producer should be based on business_type (Manufacturer = YES)
+              is_producer: dataToUse?.company?.business_type === 'Manufacturer' || certificateData?.analysis_results?.is_producer || false,
               country_of_origin: certificateData?.analysis_results?.country_of_origin || '',
               trust_score: certificateData?.analysis_results?.trust_score,
               verification_status: dataToUse?.usmca?.verification_status
