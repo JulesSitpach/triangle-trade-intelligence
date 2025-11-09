@@ -380,46 +380,50 @@ export default async function handler(req, res) {
       }
     }
 
-    // ✅ NEW (Nov 8): Save executive summary to database for later retrieval
-    // Users only get limited summaries per tier, so we save it to allow re-viewing
-    if (user_id && alertStructure.situation_brief) {
+    // ✅ FIX (Nov 9): Save executive summary to database using EXACT workflow_session_id
+    // SINGLE SOURCE OF TRUTH - no more guessing "most recent workflow"!
+    const { workflow_session_id } = req.body;
+
+    if (user_id && alertStructure.situation_brief && workflow_session_id) {
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
-        // Find the most recent workflow completion for this user
-        // (this is the one they just viewed the results for)
-        const { data: latestWorkflow, error: queryError } = await supabase
-          .from('workflow_completions')
+        // ✅ SINGLE SOURCE OF TRUTH: Find workflow by EXACT session_id
+        const { data: workflow, error: queryError } = await supabase
+          .from('workflow_sessions')
           .select('id')
+          .eq('session_id', workflow_session_id)
           .eq('user_id', user_id)
-          .order('created_at', { ascending: false })
-          .limit(1)
           .single();
 
         if (queryError) {
-          console.error('❌ Failed to find latest workflow for user:', queryError);
-        } else if (latestWorkflow) {
+          console.error('❌ Failed to find workflow by session_id:', queryError, 'session_id:', workflow_session_id);
+        } else if (workflow) {
           const { error: updateError } = await supabase
-            .from('workflow_completions')
+            .from('workflow_sessions')
             .update({
               executive_summary: alertStructure.situation_brief,
               updated_at: new Date().toISOString()
             })
-            .eq('id', latestWorkflow.id);
+            .eq('id', workflow.id);
 
           if (updateError) {
             console.error('❌ Failed to save executive summary to database:', updateError);
           } else {
-            console.log('✅ Executive summary saved to workflow_completions:', latestWorkflow.id);
+            console.log('✅ Executive summary saved to EXACT workflow (session_id:', workflow_session_id, ', workflow_id:', workflow.id, ')');
           }
+        } else {
+          console.warn('⚠️ No workflow found for session_id:', workflow_session_id, '- summary not saved to database');
         }
       } catch (saveError) {
         console.error('❌ Error saving executive summary:', saveError);
         // Don't fail the request if save fails
       }
+    } else if (!workflow_session_id) {
+      console.warn('⚠️ No workflow_session_id provided - executive summary not saved to database');
     }
 
     return res.status(200).json({

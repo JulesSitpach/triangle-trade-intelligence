@@ -637,6 +637,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         {currentStep === 3 && workflowPath !== 'crisis-calculator' && results && (
           <WorkflowResults
             results={results}
+            workflowSessionId={currentSessionId}
             onReset={resetWorkflow}
             onDownloadCertificate={handleCertificateFormatSelection}
             onDownloadSimpleCertificate={handleDownloadSimpleCertificate}
@@ -767,6 +768,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         {currentStep === 5 && results && (
           <WorkflowResults
             results={results}
+            workflowSessionId={currentSessionId}
             onReset={resetWorkflow}
             onDownloadCertificate={handleCertificateFormatSelection}
             onDownloadSimpleCertificate={handleDownloadSimpleCertificate}

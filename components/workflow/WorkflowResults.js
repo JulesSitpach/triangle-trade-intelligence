@@ -17,6 +17,7 @@ import workflowStorage from '../../lib/services/workflow-storage-adapter.js';
 
 export default function WorkflowResults({
   results,
+  workflowSessionId,
   onReset,
   onDownloadCertificate,
   trustIndicators
@@ -401,6 +402,7 @@ export default function WorkflowResults({
 
       // Prepare payload for the executive trade alert API
       const payload = {
+        workflow_session_id: workflowSessionId,  // ✅ FIX (Nov 9): SINGLE SOURCE OF TRUTH - pass session ID to save to correct workflow
         user_profile: {
           company_name: results.company?.name || null,  // ✅ FIX (Oct 30): AI needs company name for personalized output
           contact_person: results.company?.contact_person || null,  // ✅ More personal addressing
