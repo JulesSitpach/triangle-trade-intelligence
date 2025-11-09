@@ -94,6 +94,13 @@ export default protectedApiHandler({
     }
 
     try {
+      // 🔧 FIX (Nov 9, 2025): Get existing active subscriptions
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'active',
+        limit: 100
+      });
+
       // Create Stripe checkout session
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -113,6 +120,13 @@ export default protectedApiHandler({
           billing_period: billing_period,
           environment: process.env.NODE_ENV
         },
+        // 🔧 NEW (Nov 9, 2025): Automatically cancel old subscriptions when new one is created
+        // This prevents double-billing at the Stripe level (belt AND suspenders approach)
+        subscription_data: existingSubscriptions.data.length > 0 ? {
+          metadata: {
+            replaces_subscriptions: existingSubscriptions.data.map(sub => sub.id).join(',')
+          }
+        } : undefined,
         // Enable customer to update payment method
         allow_promotion_codes: true,
         billing_address_collection: 'auto'
