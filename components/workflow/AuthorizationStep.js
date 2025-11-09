@@ -46,6 +46,13 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
 
   // Agent orchestration removed - was causing excessive AI calls on every field change
 
+  // ✅ FIX (Nov 9): Use refs to prevent infinite loops in useEffects
+  const prevCertifierTypeRef = useRef();
+  const prevWorkflowDataRef = useRef();
+  const hasAutoFilledExporterRef = useRef(false);
+  const hasAutoFilledImporterRef = useRef(false);
+  const hasAutoFilledProducerRef = useRef(false);
+
   // 🚀 AUTO-FILL EXPORTER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
   // Only auto-check "Exporter is my company" when certifier is EXPORTER or PRODUCER
   // For IMPORTER, the exporter is their SUPPLIER (not their company)
@@ -54,7 +61,10 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     // Skip auto-fill if we have saved authorization data (loading from dashboard)
     const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
 
-    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
+    // Only run if certifier_type actually changed (not just re-render)
+    const certifierTypeChanged = prevCertifierTypeRef.current !== authData.certifier_type;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth && certifierTypeChanged && !hasAutoFilledExporterRef.current) {
       const shouldAutoFillExporter = authData.certifier_type === 'EXPORTER' || authData.certifier_type === 'PRODUCER';
 
       console.log('📋 Certifier type changed:', authData.certifier_type, '→ Auto-fill exporter?', shouldAutoFillExporter);
@@ -92,6 +102,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           exporter_email: workflowData.company.contact_email || '',
           exporter_country: fullCountryName
         }));
+        hasAutoFilledExporterRef.current = true;
       } else if (!shouldAutoFillExporter && authData.exporter_same_as_company) {
         console.log('❌ Un-checking exporter auto-fill (certifier is IMPORTER - exporter is their supplier)');
         setAuthData(prev => ({
@@ -99,6 +110,8 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           exporter_same_as_company: false  // Uncheck the box for IMPORTER
         }));
       }
+
+      prevCertifierTypeRef.current = authData.certifier_type;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authData.certifier_type, workflowData]); // Run when certifier type or workflow data changes
@@ -170,7 +183,10 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     // Skip auto-fill if we have saved authorization data (loading from dashboard)
     const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
 
-    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
+    // Only run if certifier_type actually changed (not just re-render)
+    const certifierTypeChanged = prevCertifierTypeRef.current !== authData.certifier_type;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth && certifierTypeChanged && !hasAutoFilledImporterRef.current) {
       const shouldAutoFillImporter = authData.certifier_type === 'IMPORTER';
 
       console.log('📥 Certifier type changed:', authData.certifier_type, '→ Auto-fill importer?', shouldAutoFillImporter);
@@ -208,6 +224,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           importer_email: workflowData.company.contact_email || '',
           importer_country: fullCountryName
         }));
+        hasAutoFilledImporterRef.current = true;
       } else if (!shouldAutoFillImporter && authData.importer_same_as_company) {
         console.log('❌ Un-checking importer auto-fill (certifier is EXPORTER/PRODUCER - importer is their customer)');
         setAuthData(prev => ({
@@ -228,7 +245,10 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     // Skip auto-fill if we have saved authorization data (loading from dashboard)
     const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
 
-    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
+    // Only run if certifier_type actually changed (not just re-render)
+    const certifierTypeChanged = prevCertifierTypeRef.current !== authData.certifier_type;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth && certifierTypeChanged && !hasAutoFilledProducerRef.current) {
       const shouldAutoFillProducer = authData.certifier_type === 'PRODUCER';
 
       console.log('🏭 Certifier type changed:', authData.certifier_type, '→ Auto-fill producer?', shouldAutoFillProducer);
@@ -264,6 +284,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           producer_email: workflowData.company.contact_email || '',
           producer_country: fullCountryName
         }));
+        hasAutoFilledProducerRef.current = true;
       } else if (!shouldAutoFillProducer && authData.producer_same_as_company) {
         console.log('❌ Un-checking producer auto-fill (certifier is EXPORTER/IMPORTER - may need manual entry)');
         setAuthData(prev => ({
@@ -331,24 +352,31 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   }, [authData.certifier_type]); // Run when certifier type changes
 
   // ✅ SAVE to localStorage whenever authData changes (prevent data loss on refresh)
+  const prevAuthDataRef = useRef();
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    // Only save if authData actually changed (deep comparison on key fields)
+    const authDataChanged = JSON.stringify(authData) !== JSON.stringify(prevAuthDataRef.current);
+
+    if (typeof window !== 'undefined' && authDataChanged) {
       localStorage.setItem('usmca_authorization_data', JSON.stringify(authData));
       console.log('💾 Saved authorization data to localStorage');
+      prevAuthDataRef.current = authData;
     }
   }, [authData]);
 
   // Update parent when authData changes - use ref to avoid infinite loop
   // Only update on initial mount and when certifications are confirmed
+  const hasUpdatedParentRef = useRef(false);
   useEffect(() => {
-    if (authData.accuracy_certification && authData.authority_certification) {
-      // Only update parent when both certifications are checked
+    if (authData.accuracy_certification && authData.authority_certification && !hasUpdatedParentRef.current) {
+      // Only update parent when both certifications are checked AND we haven't updated yet
       Object.keys(authData).forEach(key => {
         updateFormData(key, authData[key]);
       });
+      hasUpdatedParentRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authData]); // Only depend on authData, NOT updateFormData (prevents infinite loop)
+  }, [authData.accuracy_certification, authData.authority_certification]); // Only depend on certification flags
 
   // ✅ REMOVED: Old useEffects for previewData auto-check and auto-scroll
   // New system uses EditableCertificatePreview component which handles its own state
