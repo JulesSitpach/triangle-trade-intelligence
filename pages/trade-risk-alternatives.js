@@ -2273,17 +2273,196 @@ export default function TradeRiskAlternatives() {
             <div className="hero-buttons">
               {/* Download PDF of Strategic Analysis */}
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (userTier === 'Trial') {
                     alert('PDF download is available for paying subscribers. Upgrade to download your strategic analysis.');
                     window.location.href = '/pricing';
-                  } else {
-                    window.print();
+                    return;
+                  }
+
+                  if (!portfolioBriefing) {
+                    alert('Please generate the strategic analysis first.');
+                    return;
+                  }
+
+                  try {
+                    const { jsPDF } = await import('jspdf');
+
+                    const doc = new jsPDF({
+                      orientation: 'portrait',
+                      unit: 'mm',
+                      format: 'letter'
+                    });
+
+                    // Page dimensions
+                    const PAGE = {
+                      width: 216,
+                      height: 279,
+                      margin: 15
+                    };
+
+                    const contentWidth = PAGE.width - (PAGE.margin * 2);
+                    let y = PAGE.margin;
+
+                    // Helper function to parse markdown sections
+                    const parseSections = (content) => {
+                      if (!content) return [];
+                      const sections = [];
+                      const lines = content.split('\n');
+                      let currentSection = { title: '', content: '' };
+
+                      lines.forEach(line => {
+                        if (line.startsWith('## ')) {
+                          if (currentSection.title) sections.push(currentSection);
+                          currentSection = { title: line.replace('## ', '').trim(), content: '' };
+                        } else if (line.startsWith('# ')) {
+                          return; // Skip main title
+                        } else {
+                          currentSection.content += line + '\n';
+                        }
+                      });
+
+                      if (currentSection.title) sections.push(currentSection);
+                      return sections;
+                    };
+
+                    // Helper function to add text with wrapping
+                    const addText = (text, fontSize = 10, isBold = false) => {
+                      doc.setFontSize(fontSize);
+                      doc.setFont(undefined, isBold ? 'bold' : 'normal');
+                      const lines = doc.splitTextToSize(text, contentWidth);
+
+                      lines.forEach(line => {
+                        if (y > PAGE.height - PAGE.margin) {
+                          doc.addPage();
+                          y = PAGE.margin;
+                        }
+                        doc.text(line, PAGE.margin, y);
+                        y += fontSize * 0.5;
+                      });
+                      y += 2;
+                    };
+
+                    // Header
+                    doc.setFillColor(59, 130, 246); // Blue color
+                    doc.rect(0, 0, PAGE.width, 35, 'F');
+
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(18);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('STRATEGIC PORTFOLIO ANALYSIS', PAGE.width / 2, 15, { align: 'center' });
+
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'normal');
+                    doc.text('USMCA 2026 Impact & Trade Risk Assessment', PAGE.width / 2, 23, { align: 'center' });
+
+                    doc.setFontSize(9);
+                    doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, PAGE.width / 2, 30, { align: 'center' });
+
+                    // Reset text color for content
+                    doc.setTextColor(0, 0, 0);
+                    y = 45;
+
+                    // Parse and add sections
+                    const briefingContent = typeof portfolioBriefing === 'string' ? portfolioBriefing : '';
+                    const sections = parseSections(briefingContent);
+
+                    sections.forEach((section) => {
+                      // Section title
+                      if (section.title) {
+                        doc.setFontSize(14);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(59, 130, 246);
+
+                        if (y > PAGE.height - 30) {
+                          doc.addPage();
+                          y = PAGE.margin;
+                        }
+
+                        doc.text(section.title, PAGE.margin, y);
+                        y += 8;
+
+                        // Underline
+                        doc.setDrawColor(59, 130, 246);
+                        doc.setLineWidth(0.5);
+                        doc.line(PAGE.margin, y - 2, PAGE.width - PAGE.margin, y - 2);
+                        y += 3;
+                      }
+
+                      // Section content
+                      doc.setTextColor(31, 41, 55);
+                      const paragraphs = section.content.split('\n\n');
+
+                      paragraphs.forEach(paragraph => {
+                        if (!paragraph.trim() || paragraph.trim() === '---') return;
+
+                        // Handle bullet points
+                        if (paragraph.trim().startsWith('•') || paragraph.trim().startsWith('-')) {
+                          const bullets = paragraph.split('\n').filter(b => b.trim());
+                          bullets.forEach(bullet => {
+                            const cleanBullet = bullet.replace(/^[•\-]\s*/, '').trim();
+                            doc.setFontSize(10);
+                            doc.setFont(undefined, 'normal');
+                            const bulletLines = doc.splitTextToSize('• ' + cleanBullet, contentWidth - 5);
+
+                            bulletLines.forEach((line, idx) => {
+                              if (y > PAGE.height - PAGE.margin) {
+                                doc.addPage();
+                                y = PAGE.margin;
+                              }
+                              doc.text(line, PAGE.margin + (idx > 0 ? 5 : 0), y);
+                              y += 5;
+                            });
+                          });
+                          y += 2;
+                        } else {
+                          // Regular paragraph - remove bold markdown
+                          const cleanParagraph = paragraph.replace(/\*\*(.*?)\*\*/g, '$1');
+                          addText(cleanParagraph.trim(), 10, false);
+                        }
+                      });
+
+                      y += 3;
+                    });
+
+                    // Disclaimer footer
+                    if (y > PAGE.height - 50) {
+                      doc.addPage();
+                      y = PAGE.margin;
+                    }
+
+                    y = Math.max(y, PAGE.height - 40);
+                    doc.setFillColor(254, 243, 199);
+                    doc.rect(PAGE.margin, y, contentWidth, 30, 'F');
+
+                    doc.setTextColor(146, 64, 14);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('⚠ DISCLAIMER', PAGE.margin + 3, y + 6);
+
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(8);
+                    const disclaimerText = 'This is a research tool, not professional advice. All tariff calculations, savings estimates, and compliance guidance must be independently verified by licensed customs brokers or trade attorneys before making business decisions.';
+                    const disclaimerLines = doc.splitTextToSize(disclaimerText, contentWidth - 6);
+
+                    let disclaimerY = y + 11;
+                    disclaimerLines.forEach(line => {
+                      doc.text(line, PAGE.margin + 3, disclaimerY);
+                      disclaimerY += 4;
+                    });
+
+                    // Save the PDF
+                    const fileName = `Strategic_Portfolio_Analysis_${new Date().toISOString().split('T')[0]}.pdf`;
+                    doc.save(fileName);
+
+                  } catch (error) {
+                    console.error('Failed to generate PDF:', error);
+                    alert('Failed to generate PDF. Please try again.');
                   }
                 }}
                 className="btn-primary"
-                disabled={userTier === 'Trial'}
-                title={userTier === 'Trial' ? 'Upgrade to download PDF' : ''}
+                disabled={userTier === 'Trial' || !portfolioBriefing}
+                title={userTier === 'Trial' ? 'Upgrade to download PDF' : !portfolioBriefing ? 'Generate analysis first' : ''}
               >
                 {userTier === 'Trial' ? '🔒 Download PDF (Upgrade)' : '📄 Download PDF'}
               </button>
