@@ -543,19 +543,20 @@ export default function USMCACertificateCompletion() {
             },
             supply_chain: {
               manufacturing_location: certificateData?.analysis_results?.manufacturing_location || dataToUse?.product?.manufacturing_location || '',
-              regional_value_content: certificateData?.analysis_results?.regional_content || 0,
-              component_origins: certificateData?.analysis_results?.component_breakdown || [],
+              // ✅ FIX (Nov 9): Use dataToUse (from database) when certificateData.analysis_results doesn't exist
+              regional_value_content: certificateData?.analysis_results?.regional_content || dataToUse?.usmca?.regional_content || dataToUse?.usmca?.north_american_content || 0,
+              component_origins: certificateData?.analysis_results?.component_breakdown || dataToUse?.components || [],
               supply_chain_verified: true,
-              qualified: certificateData?.analysis_results?.qualification_status === 'QUALIFIED',
+              qualified: (certificateData?.analysis_results?.qualification_status === 'QUALIFIED') || (dataToUse?.usmca?.qualification_status === 'QUALIFIED') || false,
               rule: dataToUse?.usmca?.rule,
               threshold_applied: dataToUse?.usmca?.threshold_applied,
               // ✅ FIX (Nov 6): Use new explicit certificate fields from analysisResults
-              preference_criterion: certificateData?.analysis_results?.preference_criterion || certificateData?.analysis_results?.origin_criterion || 'B',
-              method_of_qualification: certificateData?.analysis_results?.qualification_method || 'RVC',
+              preference_criterion: certificateData?.analysis_results?.preference_criterion || certificateData?.analysis_results?.origin_criterion || dataToUse?.usmca?.preference_criterion || 'B',
+              method_of_qualification: certificateData?.analysis_results?.qualification_method || dataToUse?.usmca?.qualification_method || 'RVC',
               // ✅ FIX (Nov 9): is_producer should be based on business_type (Manufacturer = YES)
               is_producer: dataToUse?.company?.business_type === 'Manufacturer' || certificateData?.analysis_results?.is_producer || false,
-              country_of_origin: certificateData?.analysis_results?.country_of_origin || '',
-              trust_score: certificateData?.analysis_results?.trust_score,
+              country_of_origin: certificateData?.analysis_results?.country_of_origin || dataToUse?.destination_country || '',
+              trust_score: certificateData?.analysis_results?.trust_score || dataToUse?.trust?.overall_score || 0,
               verification_status: dataToUse?.usmca?.verification_status
             },
             authorization: {
