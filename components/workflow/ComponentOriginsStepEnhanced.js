@@ -1132,12 +1132,12 @@ export default function ComponentOriginsStepEnhanced({
           </div>
         ))}
 
-        {/* Add Component Button with Limit Status - Turns BLUE when last component is filled */}
+        {/* Add Component Button - Disabled until last component is complete */}
         <div className="element-spacing">
           <button
             type="button"
             onClick={addComponent}
-            className={(() => {
+            disabled={(() => {
               // Check if last component is fully filled
               const lastComponent = components[components.length - 1];
               const isLastComponentComplete = lastComponent &&
@@ -1146,8 +1146,9 @@ export default function ComponentOriginsStepEnhanced({
                 lastComponent.value_percentage > 0 &&
                 lastComponent.hs_code;
 
-              return isLastComponentComplete ? 'btn-primary add-component-button' : 'btn-secondary add-component-button';
+              return !isLastComponentComplete; // Disabled if NOT complete
             })()}
+            className="btn-primary add-component-button"
           >
             Add Component
           </button>

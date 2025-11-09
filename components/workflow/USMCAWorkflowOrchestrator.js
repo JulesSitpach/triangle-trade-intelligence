@@ -83,9 +83,11 @@ export default function USMCAWorkflowOrchestrator() {
   // Handle "View Results" - load saved workflow and jump to results
   useEffect(() => {
     const workflowId = router.query.view_results;
+    const targetStep = router.query.step ? parseInt(router.query.step) : null;
+
     if (workflowId && !hasLoadedResultsRef.current) {
       hasLoadedResultsRef.current = true;
-      console.log('📊 Loading saved workflow results:', workflowId);
+      console.log('📊 Loading saved workflow results:', workflowId, 'Target step:', targetStep);
 
       // Fetch workflow from database
       fetch('/api/dashboard-data', { credentials: 'include' })
@@ -101,6 +103,10 @@ export default function USMCAWorkflowOrchestrator() {
           });
           if (workflow && loadSavedWorkflow) {
             loadSavedWorkflow(workflow);
+            // If step parameter provided, jump directly to that step
+            if (targetStep !== null) {
+              goToStep(targetStep);
+            }
           }
         })
         .catch(async (err) => {
@@ -115,7 +121,7 @@ export default function USMCAWorkflowOrchestrator() {
     } else if (!router.query.view_results) {
       hasLoadedResultsRef.current = false;
     }
-  }, [router.query.view_results, router, loadSavedWorkflow]);
+  }, [router.query.view_results, router.query.step, router, loadSavedWorkflow, goToStep]);
 
   // Scroll to top when step changes
   useEffect(() => {

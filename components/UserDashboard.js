@@ -513,9 +513,9 @@ export default function UserDashboard({ user }) {
                           <button
                             onClick={() => {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
-                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}`);
+                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}&step=3`);
                             }}
-                            className="btn-secondary"
+                            className="btn-primary"
                           >
                             View Results
                           </button>
@@ -536,7 +536,7 @@ export default function UserDashboard({ user }) {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
                               router.push(`/trade-risk-alternatives?workflow_id=${selectedWorkflow.id}`);
                             }}
-                            className="btn-secondary"
+                            className="btn-primary"
                           >
                             ⚠️ View Alerts
                           </button>

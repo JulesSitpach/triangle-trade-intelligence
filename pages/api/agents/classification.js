@@ -273,11 +273,14 @@ export default protectedApiHandler({
       }
 
       // ✅ SAFETY: Normalize alternative_codes array (AI might return objects in reason field)
-      const safeAlternativeCodes = (aiResult.data.alternative_codes || []).map(alt => ({
-        code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
-        confidence: Number(alt.confidence) || 0,
-        reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
-      }));
+      // Filter out any alternatives with empty/invalid HS codes
+      const safeAlternativeCodes = (aiResult.data.alternative_codes || [])
+        .map(alt => ({
+          code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
+          confidence: Number(alt.confidence) || 0,
+          reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
+        }))
+        .filter(alt => alt.code && alt.code.trim() !== '' && alt.code.length >= 6); // ✅ FIX: Only keep valid HS codes (min 6 digits)
 
       // 🚨 CRITICAL FIX: Ensure PRIMARY HS code is always the HIGHEST confidence option
       // For financial compliance, the most confident classification must be primary
@@ -289,7 +292,7 @@ export default protectedApiHandler({
       const allCodes = [
         { code: primary_hs_code, confidence: primaryConfidence, isOriginalPrimary: true },
         ...finalAlternativeCodes
-      ];
+      ].filter(item => item.code && item.code.trim() !== ''); // ✅ FIX: Filter out empty/null codes
 
       const sortedByConfidence = allCodes.sort((a, b) => b.confidence - a.confidence);
       const highestConfidenceCode = sortedByConfidence[0];
