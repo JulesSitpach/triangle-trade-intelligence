@@ -186,6 +186,14 @@ export default protectedApiHandler({
         }
 
         // ✅ FIX: Fallback to JSONB workflow_data when top-level columns are NULL
+        // ✅ FIX (Nov 9): Include executive_summary in workflow_data for auto-display on Results page
+        const enrichedWorkflowData = { ...workflowData };
+        if (row.executive_summary) {
+          enrichedWorkflowData.detailed_analysis = enrichedWorkflowData.detailed_analysis || {};
+          enrichedWorkflowData.detailed_analysis.situation_brief = row.executive_summary;
+          console.log(`✅ [DASHBOARD] Added executive_summary to workflow ${row.id} for auto-display`);
+        }
+
         return {
           id: row.id,
           source: 'session',
@@ -206,8 +214,8 @@ export default protectedApiHandler({
           manufacturing_location: row.manufacturing_location,
           certificate_data: null,
           certificate_generated: false,
-          // Include full workflow_data for certificate generation
-          workflow_data: workflowData
+          // Include full workflow_data for certificate generation + executive_summary for auto-display
+          workflow_data: enrichedWorkflowData
         };
       });
 
