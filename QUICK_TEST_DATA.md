@@ -571,10 +571,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Oak Wood Panels | United States | 40 |
-| Steel Frame | Mexico | 30 |
-| Drawer Slides & Hardware | Mexico | 20 |
-| Lacquer Finish | Canada | 10 |
+| Red oak wood desk panels (kiln-dried hardwood, 3/4-inch thickness, A-grade select quality, edge-glued boards, sanded to 180-grit finish) | United States | 40 |
+| Welded tubular steel frame assembly (1.5-inch square tubing, 14-gauge cold-rolled steel, powder-coated black finish, adjustable leveling feet) | Mexico | 30 |
+| Ball-bearing drawer slide set (22-inch full-extension heavy-duty slides, 100 lb capacity per pair, zinc-plated steel, soft-close dampers) | Mexico | 20 |
+| UV-cured polyurethane lacquer finish (high-gloss clear coat, scratch-resistant formula, low VOC content, applied in 3-coat system) | Canada | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -707,10 +707,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Injection-Molded Plastic Blocks | China | 70 |
-| Cardboard Packaging | Mexico | 15 |
-| Instruction Manual Printing | Mexico | 10 |
-| Safety Testing (in Mexico) | Mexico | 5 |
+| Injection-molded ABS plastic interlocking blocks (high-impact copolymer resin, non-toxic food-grade material, bright primary colors with UV stabilizers, precision-molded with 0.01mm tolerance) | China | 70 |
+| Full-color lithographic printed cardboard packaging (350gsm SBS paperboard, 4-color process printing with aqueous coating, window cutout with clear PET film, easy-open design) | Mexico | 15 |
+| Offset-printed instruction manual (80gsm coated paper, saddle-stitched binding, full-color assembly diagrams, multiple languages, child-safe ink formulation) | Mexico | 10 |
+| Third-party safety testing and certification (ASTM F963 compliance verification, small parts testing, heavy metals analysis, choke hazard evaluation, lab reports included) | Mexico | 5 |
 
 ### Importer/Exporter/Producer Information
 
@@ -775,10 +775,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Portland Cement | Mexico | 40 |
-| Steel Rebar | Mexico | 30 |
-| Aggregate (Sand & Gravel) | Mexico | 20 |
-| Chemical Admixtures | United States | 10 |
+| Type I/II Portland cement (gray hydraulic cement, ASTM C150 compliant, 3,000 PSI minimum strength, 94 lb bags, ground clinker with gypsum additive) | Mexico | 40 |
+| Grade 60 steel reinforcement rebar (#4 deformed bars, 0.5-inch diameter, ASTM A615 specification, 60,000 PSI yield strength, epoxy-coated for corrosion resistance) | Mexico | 30 |
+| Crushed limestone aggregate mix (3/4-inch nominal size, washed and graded to ASTM C33 standards, 2.65 specific gravity, low water absorption rate) | Mexico | 20 |
+| High-range water-reducing admixture (polycarboxylate-based plasticizer, ASTM C494 Type F certified, liquid concentrate at 30% solids content, improves workability) | United States | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -843,10 +843,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Carbon Fiber Sheets | United States | 45 |
-| Epoxy Resin System | Canada | 25 |
-| Fiberglass Blade Material | Mexico | 20 |
-| Grip Tape & Finish | Canada | 10 |
+| Unidirectional carbon fiber fabric sheets (3K weave pattern, 200gsm weight, high-tensile strength, aerospace-grade T700 carbon fiber, pre-preg compatible) | United States | 45 |
+| Two-part epoxy resin system (low-viscosity formulation, 4:1 mix ratio, 120-minute pot life, high-temperature cure at 250°F, Shore D 85 hardness) | Canada | 25 |
+| E-glass fiberglass blade reinforcement (woven roving fabric, 600gsm weight, balanced plain weave, impact-resistant construction, resin-compatible finish) | Mexico | 20 |
+| Polyurethane grip tape with textured finish (0.5mm thickness, perforated for moisture wicking, tacky surface treatment, UV-resistant black color) | Canada | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -911,10 +911,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Silicon Solar Cells | China | 40 |
-| Tempered Glass Cover | Mexico | 25 |
-| Aluminum Frame | Mexico | 20 |
-| Junction Box & Wiring | United States | 15 |
+| Monocrystalline silicon photovoltaic cells (156mm square size, 21% efficiency rating, PERC technology, silver busbar contacts, anti-reflective coating) | China | 40 |
+| Low-iron tempered safety glass cover (3.2mm thickness, high-transparency solar glass, anti-reflective textured surface, impact-resistant heat treatment) | Mexico | 25 |
+| Anodized aluminum alloy frame extrusion (6063-T5 tempered aluminum, corner key assembly, pre-drilled mounting holes, silver or black finish options) | Mexico | 20 |
+| Weatherproof junction box with MC4 connectors (IP67 rated enclosure, bypass diodes included, 10AWG solar cable, positive/negative terminals labeled) | United States | 15 |
 
 ### Importer/Exporter/Producer Information
 
@@ -979,10 +979,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Titanium Alloy Forging | United States | 55 |
-| Hydraulic Cylinder Assembly | Canada | 25 |
-| Specialty Fasteners | United States | 12 |
-| Surface Treatment (coating) | Mexico | 8 |
+| Ti-6Al-4V titanium alloy forging (aerospace-grade billet stock, closed-die forged, solution treated and aged, ultrasonic tested per AMS 4928, machined to near-net shape) | United States | 55 |
+| Hydraulic actuator cylinder assembly (3-inch bore diameter, 2000 PSI operating pressure, hard-chromed piston rod, Viton seals, SAE ports, position sensors integrated) | Canada | 25 |
+| Aerospace-grade titanium fastener set (AN/MS standard bolts and nuts, torque-tension controlled, cadmium-plated finish, lot traceability, bag-and-tag packaging) | United States | 12 |
+| Thermal spray hard-chrome surface coating (HVOF-applied chromium carbide, 0.002-inch thickness, hardness 60-65 HRC, corrosion-resistant finish per AMS 2438) | Mexico | 8 |
 
 ### Importer/Exporter/Producer Information
 
@@ -1047,10 +1047,10 @@
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Corrugated Paper Sheets | Mexico | 60 |
-| Printing Inks | United States | 20 |
-| Adhesive Glue | Canada | 12 |
-| Packaging Tape | Mexico | 8 |
+| E-flute corrugated paperboard sheets (32 ECT strength rating, kraft liner outer layers, recycled medium core, moisture-resistant treatment, die-cut to template) | Mexico | 60 |
+| Water-based flexographic printing inks (CMYK full-color process inks, low-VOC formulation, FDA food-contact approved, fast-drying for high-speed production) | United States | 20 |
+| Hot-melt polyamide adhesive (EVA-based formulation, 350°F application temperature, 30-second open time, high-tack bond strength, food-safe certification) | Canada | 12 |
+| Pressure-sensitive acrylic packaging tape (2-inch width, 2 mil thickness BOPP film, aggressive adhesive, clear transparent finish, 110 yards per roll) | Mexico | 8 |
 
 ### Importer/Exporter/Producer Information
 
