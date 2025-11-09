@@ -84,7 +84,7 @@ export default protectedApiHandler({
 
       const { data: profile } = await supabase
         .from('user_profiles')
-        .select('subscription_tier, status, email')
+        .select('subscription_tier, status, email, subscription_period_start, subscription_period_end')
         .eq('user_id', userId)
         .single();
 
@@ -646,6 +646,22 @@ export default protectedApiHandler({
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
 
+      // ✅ NEW (Nov 8, 2025): Calculate period end date for 30-day rolling periods
+      const tier = profile?.subscription_tier || 'Trial';
+      let periodEnd;
+      let daysRemaining;
+
+      if (tier === 'Trial' || !profile?.subscription_period_end) {
+        // Trial users: Use calendar month end
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        periodEnd = nextMonth;
+        daysRemaining = Math.ceil((nextMonth - now) / (1000 * 60 * 60 * 24));
+      } else {
+        // Paid users: Use 30-day rolling period
+        periodEnd = new Date(profile.subscription_period_end);
+        daysRemaining = Math.ceil((periodEnd - now) / (1000 * 60 * 60 * 24));
+      }
+
       return res.status(200).json({
         workflows: allWorkflows || [],
         alerts: allAlerts || [],
@@ -655,7 +671,9 @@ export default protectedApiHandler({
           percentage: percentage,
           remaining: remaining,
           limit_reached: limitReached,
-          is_unlimited: isUnlimited
+          is_unlimited: isUnlimited,
+          period_end: periodEnd.toISOString(),
+          days_remaining: daysRemaining
         },
         briefing_usage_stats: {
           used: briefingUsed,

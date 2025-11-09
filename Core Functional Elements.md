@@ -140,7 +140,7 @@ I'll help you identify critical elements needed for your SaaS launch. Based on y
 2. Webhook updates user_profiles.subscription_tier
 3. User sees "Professional" in dashboard
 4. Service prices show 15% discount
-5. Component limit increases to unlimited
+5. Component limit increases to 20 per workflow
 ```
 
 ---

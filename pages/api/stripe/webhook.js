@@ -418,12 +418,19 @@ async function handleSubscriptionPurchase(session, userId) {
 
     // 🚨 CRITICAL FIX: Update user_profiles.subscription_tier to match
     // Without this, users pay but stay on Trial tier!
+    // ✅ NEW (Nov 8, 2025): Set 30-day rolling period dates (not calendar month)
+    const now = new Date();
+    const periodEnd = new Date(now);
+    periodEnd.setDate(periodEnd.getDate() + 30); // 30 days from now
+
     const { error: profileError } = await supabase
       .from('user_profiles')
       .update({
         subscription_tier: tierName,
         status: 'active',
-        stripe_customer_id: session.customer
+        stripe_customer_id: session.customer,
+        subscription_period_start: now.toISOString(),
+        subscription_period_end: periodEnd.toISOString()
       })
       .eq('user_id', userId);
 
@@ -571,13 +578,20 @@ async function handleSubscriptionUpdated(subscription) {
 
     // === STEP 3: If user_id found, update user_profiles.subscription_tier ===
     // This handles plan upgrades (e.g., Trial → Professional)
+    // ✅ NEW (Nov 8, 2025): Also update 30-day rolling period dates on renewal
     if (userId && updatedSub?.tier_id) {
       const tierName = updatedSub.tier_id.charAt(0).toUpperCase() + updatedSub.tier_id.slice(1);
+
+      // Calculate new 30-day period from Stripe's current_period_start
+      const periodStart = new Date(subscription.current_period_start * 1000);
+      const periodEnd = new Date(subscription.current_period_end * 1000);
 
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({
           subscription_tier: tierName,
+          subscription_period_start: periodStart.toISOString(),
+          subscription_period_end: periodEnd.toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
