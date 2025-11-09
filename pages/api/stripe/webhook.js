@@ -346,77 +346,62 @@ async function handleSubscriptionPurchase(session, userId) {
     const tierName = tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Professional';
 
     // === PREVENT MULTIPLE SUBSCRIPTIONS: Cancel any existing active subscriptions ===
-    const { data: existingSubscriptions } = await supabase
-      .from('subscriptions')
-      .select('stripe_subscription_id, tier_name')
-      .eq('user_id', userId)
-      .eq('status', 'active');
+    // 🔧 FIX (Nov 9, 2025): Query Stripe API directly (subscriptions table doesn't exist)
+    try {
+      const existingSubscriptions = await stripe.subscriptions.list({
+        customer: session.customer,
+        status: 'active',
+        limit: 100
+      });
 
-    if (existingSubscriptions && existingSubscriptions.length > 0) {
-      console.log(`⚠️ Found ${existingSubscriptions.length} existing active subscription(s) for user ${userId} - canceling them first`);
+      if (existingSubscriptions.data.length > 0) {
+        console.log(`⚠️ Found ${existingSubscriptions.data.length} active subscription(s) for customer ${session.customer}`);
 
-      for (const oldSub of existingSubscriptions) {
-        try {
-          // Cancel old subscription in Stripe immediately (not at period end)
-          await stripe.subscriptions.cancel(oldSub.stripe_subscription_id);
-          console.log(`✅ Canceled old subscription: ${oldSub.stripe_subscription_id} (${oldSub.tier_name})`);
-        } catch (cancelError) {
-          console.error(`❌ Failed to cancel old subscription ${oldSub.stripe_subscription_id}:`, cancelError);
-          // Continue anyway - webhook will handle cleanup
+        for (const oldSub of existingSubscriptions.data) {
+          // Don't cancel the subscription we just created
+          if (oldSub.id === session.subscription) {
+            console.log(`✅ Keeping new subscription: ${oldSub.id}`);
+            continue;
+          }
+
+          try {
+            // Cancel old subscription immediately (not at period end)
+            await stripe.subscriptions.cancel(oldSub.id);
+            console.log(`✅ Canceled old subscription: ${oldSub.id}`);
+          } catch (cancelError) {
+            console.error(`❌ Failed to cancel old subscription ${oldSub.id}:`, cancelError.message);
+            await logDevIssue({
+              type: 'api_error',
+              severity: 'critical',
+              component: 'stripe_webhook',
+              message: 'Failed to cancel old subscription during upgrade - USER BEING DOUBLE-BILLED',
+              data: {
+                userId,
+                oldSubscriptionId: oldSub.id,
+                newSubscriptionId: session.subscription,
+                customerId: session.customer,
+                error: cancelError.message
+              }
+            });
+          }
         }
       }
+    } catch (stripeError) {
+      console.error(`❌ Failed to query Stripe for existing subscriptions:`, stripeError.message);
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'critical',
+        component: 'stripe_webhook',
+        message: 'Failed to query Stripe subscriptions - potential double billing',
+        data: {
+          userId,
+          customerId: session.customer,
+          error: stripeError.message
+        }
+      });
     }
 
-    // === CALCULATE LOCK PERIOD (Prevents subscription gaming) ===
-    // Premium: 60 days (requires 2-month commitment)
-    // Professional: 30 days (requires 1-month commitment)
-    // Starter: 0 days (cancel anytime)
-    const lockDays = {
-      'premium': 60,
-      'professional': 30,
-      'starter': 0
-    }[tier?.toLowerCase()] || 0;
-
-    const lockedUntil = new Date();
-    lockedUntil.setDate(lockedUntil.getDate() + lockDays);
-
-    // Update or create subscription record in database
-    const { data: existingSubscription } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    const subscriptionData = {
-      user_id: userId,
-      stripe_customer_id: session.customer,
-      stripe_subscription_id: session.subscription,
-      tier_id: tier || 'professional',           // ✅ FIXED: Use tier_id not tier
-      tier_name: tierName,                       // ✅ FIXED: Use tier_name
-      billing_period: billingPeriod || 'monthly',
-      status: 'active',
-      current_period_start: new Date().toISOString(),
-      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Temporary, will be updated by subscription.created
-      locked_until: lockDays > 0 ? lockedUntil.toISOString() : null, // Set lock period (null = no lock)
-      updated_at: new Date().toISOString()
-    };
-
-    if (existingSubscription) {
-      // Update existing subscription
-      await supabase
-        .from('subscriptions')
-        .update(subscriptionData)
-        .eq('id', existingSubscription.id);
-    } else {
-      // Create new subscription
-      await supabase
-        .from('subscriptions')
-        .insert([{ ...subscriptionData, created_at: new Date().toISOString() }]);
-    }
-
-    console.log(`✅ Subscription record updated for user: ${userId} (locked until ${lockDays > 0 ? lockedUntil.toDateString() : 'never'})`);
-
-    // 🚨 CRITICAL FIX: Update user_profiles.subscription_tier to match
+    // 🚨 CRITICAL: Update user_profiles.subscription_tier to match
     // Without this, users pay but stay on Trial tier!
     // ✅ NEW (Nov 8, 2025): Set 30-day rolling period dates (not calendar month)
     const now = new Date();
@@ -474,145 +459,64 @@ async function handleSubscriptionPurchase(session, userId) {
 
 /**
  * Handle customer.subscription.created event
+ * 🔧 SIMPLIFIED (Nov 9, 2025): No subscriptions table - Stripe is source of truth
  */
 async function handleSubscriptionCreated(subscription) {
   console.log('Processing customer.subscription.created:', subscription.id);
 
-  try {
-    // Get user ID from customer metadata
-    const customer = await stripe.customers.retrieve(subscription.customer);
-    const userId = customer.metadata?.user_id;
-
-    if (!userId) {
-      await logDevIssue({
-        type: 'missing_data',
-        severity: 'high',
-        component: 'stripe_webhook',
-        message: 'Missing user_id in customer metadata for subscription.created',
-        data: {
-          subscriptionId: subscription.id,
-          customerId: subscription.customer
-        }
-      });
-      console.error('No user_id in customer metadata');
-      return;
-    }
-
-    // Update subscription with accurate period dates
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        status: subscription.status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('stripe_subscription_id', subscription.id);
-
-    if (error) {
-      await logDevIssue({
-        type: 'api_error',
-        severity: 'high',
-        component: 'stripe_webhook',
-        message: 'Failed to update subscription periods in database',
-        data: {
-          subscriptionId: subscription.id,
-          userId,
-          error: error.message
-        }
-      });
-      console.error('Error updating subscription periods:', error);
-    }
-  } catch (error) {
-    await logDevIssue({
-      type: 'api_error',
-      severity: 'high',
-      component: 'stripe_webhook',
-      message: 'Error in subscription.created handler',
-      data: {
-        subscriptionId: subscription.id,
-        error: error.message
-      }
-    });
-    console.error('Error in subscription.created handler:', error);
-  }
+  // Just log the event - user_profiles.subscription_tier already updated in handleSubscriptionPurchase
+  console.log(`✅ Subscription created: ${subscription.id} (status: ${subscription.status})`);
+  console.log(`   Period: ${new Date(subscription.current_period_start * 1000).toISOString()} → ${new Date(subscription.current_period_end * 1000).toISOString()}`);
 }
 
 /**
  * Handle customer.subscription.updated event
- * CRITICAL: Also update user_profiles.subscription_tier when plan changes
+ * 🔧 SIMPLIFIED (Nov 9, 2025): Update user_profiles.subscription_period dates on renewal
  */
 async function handleSubscriptionUpdated(subscription) {
   console.log('Processing customer.subscription.updated:', subscription.id);
 
   try {
-    // === STEP 1: Get user_id from customer metadata ===
+    // Get user_id from customer metadata
     const customer = await stripe.customers.retrieve(subscription.customer);
     const userId = customer.metadata?.user_id;
 
     if (!userId) {
       console.warn(`⚠️ No user_id in customer metadata for subscription ${subscription.id}`);
-      // Still update subscription table, but can't update user_profiles without userId
-    }
-
-    // === STEP 2: Update subscriptions table with new periods and status ===
-    const { data: updatedSub, error: subError } = await supabase
-      .from('subscriptions')
-      .update({
-        status: subscription.status,
-        current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-        cancel_at_period_end: subscription.cancel_at_period_end || false,
-        updated_at: new Date().toISOString()
-      })
-      .eq('stripe_subscription_id', subscription.id)
-      .select('tier_id')
-      .single();
-
-    if (subError) {
-      console.error('Error updating subscription:', subError);
       return;
     }
 
-    console.log('✅ Subscription updated:', subscription.id);
+    console.log(`✅ Subscription updated: ${subscription.id} (status: ${subscription.status})`);
 
-    // === STEP 3: If user_id found, update user_profiles.subscription_tier ===
-    // This handles plan upgrades (e.g., Trial → Professional)
-    // ✅ NEW (Nov 8, 2025): Also update 30-day rolling period dates on renewal
-    if (userId && updatedSub?.tier_id) {
-      const tierName = updatedSub.tier_id.charAt(0).toUpperCase() + updatedSub.tier_id.slice(1);
+    // Update user_profiles with new billing period dates (for renewals)
+    const periodStart = new Date(subscription.current_period_start * 1000);
+    const periodEnd = new Date(subscription.current_period_end * 1000);
 
-      // Calculate new 30-day period from Stripe's current_period_start
-      const periodStart = new Date(subscription.current_period_start * 1000);
-      const periodEnd = new Date(subscription.current_period_end * 1000);
+    const { error: profileError } = await supabase
+      .from('user_profiles')
+      .update({
+        subscription_period_start: periodStart.toISOString(),
+        subscription_period_end: periodEnd.toISOString(),
+        status: subscription.status === 'active' ? 'active' : subscription.status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId);
 
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
-          subscription_tier: tierName,
-          subscription_period_start: periodStart.toISOString(),
-          subscription_period_end: periodEnd.toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (profileError) {
-        await logDevIssue({
-          type: 'api_error',
-          severity: 'high',
-          component: 'stripe_webhook',
-          message: 'Failed to update user_profiles.subscription_tier on plan change',
-          data: {
-            userId,
-            subscriptionId: subscription.id,
-            newTier: tierName,
-            error: profileError.message
-          }
-        });
-        console.error('❌ Failed to update user profile tier:', profileError);
-      } else {
-        console.log(`✅ User profile tier updated to ${tierName} for user ${userId}`);
-      }
+    if (profileError) {
+      await logDevIssue({
+        type: 'api_error',
+        severity: 'high',
+        component: 'stripe_webhook',
+        message: 'Failed to update user_profiles subscription period on renewal',
+        data: {
+          userId,
+          subscriptionId: subscription.id,
+          error: profileError.message
+        }
+      });
+      console.error('❌ Failed to update user profile period:', profileError);
+    } else {
+      console.log(`✅ User profile period updated for user ${userId}`);
     }
 
   } catch (error) {
@@ -633,82 +537,63 @@ async function handleSubscriptionUpdated(subscription) {
 
 /**
  * Handle customer.subscription.deleted event
- * CRITICAL: Downgrade user to Trial if no other active subscriptions exist
+ * 🔧 SIMPLIFIED (Nov 9, 2025): Query Stripe for remaining active subscriptions
  */
 async function handleSubscriptionDeleted(subscription) {
   console.log('Processing customer.subscription.deleted:', subscription.id);
 
   try {
-    // === STEP 1: Get user_id from customer metadata ===
+    // Get user_id from customer metadata
     const customer = await stripe.customers.retrieve(subscription.customer);
     const userId = customer.metadata?.user_id;
 
-    // === STEP 2: Mark subscription as canceled in database ===
-    const { error } = await supabase
-      .from('subscriptions')
-      .update({
-        status: 'canceled',
-        canceled_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('stripe_subscription_id', subscription.id);
-
-    if (error) {
-      console.error('Error canceling subscription:', error);
+    if (!userId) {
+      console.warn('⚠️ No user_id in customer metadata - cannot update user profile');
       return;
     }
 
-    console.log('✅ Subscription canceled:', subscription.id);
+    console.log(`✅ Subscription canceled: ${subscription.id}`);
 
-    // === STEP 3: Check if user has any OTHER active subscriptions ===
-    if (userId) {
-      const { data: remainingActiveSubs, error: checkError } = await supabase
-        .from('subscriptions')
-        .select('id, tier_name')
-        .eq('user_id', userId)
-        .eq('status', 'active');
+    // Check if user has any OTHER active subscriptions in Stripe
+    const remainingSubscriptions = await stripe.subscriptions.list({
+      customer: subscription.customer,
+      status: 'active',
+      limit: 100
+    });
 
-      if (checkError) {
-        console.error('Error checking for remaining subscriptions:', checkError);
-        return;
-      }
+    if (remainingSubscriptions.data.length === 0) {
+      // No active subscriptions left - downgrade to trial_expired
+      console.log(`⬇️ No active subscriptions remaining for user ${userId} - setting to trial_expired`);
 
-      if (!remainingActiveSubs || remainingActiveSubs.length === 0) {
-        // === NO ACTIVE SUBSCRIPTIONS LEFT: Set to canceled status (read-only access) ===
-        console.log(`⬇️ No active subscriptions remaining for user ${userId} - setting to canceled (read-only)`);
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          subscription_tier: 'Trial',
+          status: 'trial_expired', // Read-only: can view past work, cannot create new
+          trial_ends_at: new Date().toISOString(), // Set to now (expired)
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
 
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .update({
-            subscription_tier: 'Trial',
-            status: 'trial_expired', // Read-only: can view past work, cannot create new
-            trial_ends_at: new Date().toISOString(), // Set to now (expired)
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-
-        if (profileError) {
-          await logDevIssue({
-            type: 'api_error',
-            severity: 'critical',
-            component: 'stripe_webhook',
-            message: 'CRITICAL: Failed to set canceled status after subscription deletion',
-            data: {
-              userId,
-              subscriptionId: subscription.id,
-              error: profileError.message
-            }
-          });
-          console.error('❌ Failed to update user status:', profileError);
-        } else {
-          console.log('✅ User set to canceled status (read-only access to past work)');
-        }
+      if (profileError) {
+        await logDevIssue({
+          type: 'api_error',
+          severity: 'critical',
+          component: 'stripe_webhook',
+          message: 'CRITICAL: Failed to downgrade user after subscription cancellation',
+          data: {
+            userId,
+            subscriptionId: subscription.id,
+            error: profileError.message
+          }
+        });
+        console.error('❌ Failed to update user status:', profileError);
       } else {
-        // User still has other active subscriptions - keep current tier
-        console.log(`✅ User ${userId} still has ${remainingActiveSubs.length} active subscription(s) - keeping tier: ${remainingActiveSubs[0].tier_name}`);
+        console.log('✅ User downgraded to trial_expired (read-only access)');
       }
     } else {
-      console.warn('⚠️ No user_id in customer metadata - cannot downgrade user');
+      // User still has other active subscriptions
+      console.log(`✅ User ${userId} still has ${remainingSubscriptions.data.length} active subscription(s) - no downgrade needed`);
     }
 
   } catch (error) {
