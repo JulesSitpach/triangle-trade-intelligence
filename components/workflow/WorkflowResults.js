@@ -57,6 +57,15 @@ export default function WorkflowResults({
     fetchUserSubscriptionTier();
   }, []);
 
+  // ✅ AUTO-SHOW: When loading from dashboard, auto-display executive summary if it exists
+  useEffect(() => {
+    if (results?.detailed_analysis?.situation_brief && !showSummary && !executiveSummary) {
+      console.log('📊 Auto-showing executive summary from database');
+      setExecutiveSummary(results.detailed_analysis);
+      setShowSummary(true);
+    }
+  }, [results?.detailed_analysis, showSummary, executiveSummary]);
+
   useEffect(() => {
     // Check if user already generated certificate for this session
     const certGenerated = sessionStorage.getItem('certificate_generated');
