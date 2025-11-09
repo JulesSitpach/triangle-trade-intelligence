@@ -225,20 +225,12 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
   return (
     <div className="executive-summary-container">
-      {/* Header */}
-      <div className="executive-summary-header">
-        <div>
-          <h2 className="form-section-title">📊 Executive Trade Advisory</h2>
-          <p className="executive-summary-subtitle">Strategic analysis for your supply chain</p>
-        </div>
-        <div className="executive-summary-actions">
-          <button onClick={handleDownloadPDF} className="btn-download">
-            📄 Download Advisory
-          </button>
-          <button onClick={onClose} className="btn-close">
-            Close
-          </button>
-        </div>
+      {/* Download Banner - Top */}
+      <div className="download-banner">
+        <span>Analysis complete and automatically saved to your dashboard.</span>
+        <button onClick={handleDownloadPDF} className="btn-primary">
+          📄 Download PDF
+        </button>
       </div>
 
       {/* AI-Generated Narrative Sections */}
@@ -284,6 +276,7 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
         </p>
       </div>
 
+
       <style jsx>{`
         .executive-summary-container {
           margin-top: 1.5rem;
@@ -316,6 +309,24 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
         .executive-summary-actions {
           display: flex;
           gap: 0.75rem;
+        }
+
+        .btn-primary {
+          padding: 0.625rem 1.25rem;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+          background: #2563eb;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
         }
 
         .btn-download {
@@ -406,18 +417,29 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           line-height: 1.5;
         }
 
+        .download-banner {
+          padding: 1rem 2rem;
+          background: #3b82f6;
+          color: white;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          border-radius: 8px 8px 0 0;
+          font-size: 0.875rem;
+        }
+
+        .download-banner span {
+          flex: 1;
+        }
+
         @media (max-width: 768px) {
-          .executive-summary-header {
+          .download-banner {
             flex-direction: column;
-            gap: 1rem;
+            align-items: stretch;
           }
 
-          .executive-summary-actions {
-            width: 100%;
-            flex-direction: column;
-          }
-
-          .btn-download, .btn-close {
+          .btn-primary {
             width: 100%;
           }
         }

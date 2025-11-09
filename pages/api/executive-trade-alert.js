@@ -442,6 +442,24 @@ export default async function handler(req, res) {
 // ============ HELPER FUNCTIONS ============
 
 /**
+ * Sanitize text for PDF rendering - removes emoji and special Unicode
+ * that cause rendering issues in jsPDF
+ */
+function sanitizeForPDFRendering(text) {
+  if (!text) return '';
+  return String(text)
+    // Remove emoji and special Unicode characters
+    .replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // Emoji ranges
+    .replace(/[\u{2600}-\u{26FF}]/gu, '') // Miscellaneous Symbols
+    .replace(/[\u{2700}-\u{27BF}]/gu, '') // Dingbats
+    .replace(/[\u{2300}-\u{23FF}]/gu, '') // Miscellaneous Technical
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, '') // Variation Selectors
+    .replace(/[\u{200B}-\u{200D}]/gu, '') // Zero-width characters
+    .replace(/[\u{FEFF}]/gu, '') // Zero-width no-break space
+    .trim();
+}
+
+/**
  * Generate Mexico nearshoring strategic options with dynamic cost/payback
  * REPLACES hardcoded +2%, 4-6 weeks, 3 months
  */
@@ -668,16 +686,20 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
       ? aiResponse
       : aiResponse.data?.raw || aiResponse.data || aiResponse.text || aiResponse.content || '';
 
+    // ✅ NEW (Nov 9): Sanitize for PDF rendering - remove emoji/special chars
+    const sanitizedBriefing = sanitizeForPDFRendering(markdownBriefing);
+
     console.log('✅ AI-generated executive summary:', {
-      markdown_length: markdownBriefing.length,
-      has_sections: markdownBriefing.includes('##'),
-      preview: markdownBriefing.substring(0, 200)
+      markdown_length: sanitizedBriefing.length,
+      has_sections: sanitizedBriefing.includes('##'),
+      preview: sanitizedBriefing.substring(0, 200),
+      emoji_removed: markdownBriefing.length - sanitizedBriefing.length + ' chars'
     });
 
     // ✅ Return markdown with structured metadata for backward compatibility
     return {
-      situation_brief: markdownBriefing, // Full markdown in main field
-      markdown_content: markdownBriefing, // Also store in dedicated field
+      situation_brief: sanitizedBriefing, // Full markdown in main field (sanitized)
+      markdown_content: sanitizedBriefing, // Also store in dedicated field (sanitized)
       problem: `Section 301 burden: $${section301Burden}`,
       annual_impact: `$${section301Burden}`,
       current_burden: `$${section301Burden}/year`,
