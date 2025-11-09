@@ -277,6 +277,7 @@ export default protectedApiHandler({
         // ✅ FIXED (Oct 24): Extract company/product fields to dedicated columns
         // ✅ FIXED (Nov 1): Support both nested (workflowData.company) and flat (workflowData) structures
         // ✅ FIXED (Nov 8): Extract company_country from top-level (workflow hook puts it there)
+        // ✅ FIXED (Nov 9): Extract ALL company fields including contact info, tax_id, address, etc.
         // Dashboard validation requires these fields to be populated in DB columns, not just JSONB
         company_name:
           companyData.company_name ||           // Nested: workflowData.company.company_name
@@ -288,13 +289,42 @@ export default protectedApiHandler({
           companyData.company_country ||        // Nested fallback
           companyData.country ||                // Alternative nested
           null,
+        company_address:
+          companyData.company_address ||
+          companyData.address ||
+          workflowData.company_address ||
+          null,
+        tax_id:
+          companyData.tax_id ||
+          workflowData.tax_id ||
+          null,
+        contact_person:
+          companyData.contact_person ||
+          workflowData.contact_person ||
+          null,
+        contact_phone:
+          companyData.contact_phone ||
+          workflowData.contact_phone ||
+          null,
+        contact_email:
+          companyData.contact_email ||
+          workflowData.contact_email ||
+          null,
         business_type:
           companyData.business_type ||          // Nested
           workflowData.business_type ||         // Flat
           null,
+        industry_sector:
+          companyData.industry_sector ||
+          workflowData.industry_sector ||
+          null,
         trade_volume:
           companyData.trade_volume ||
           workflowData.trade_volume ||
+          null,
+        supplier_country:
+          companyData.supplier_country ||
+          workflowData.supplier_country ||
           null,
         manufacturing_location:
           companyData.manufacturing_location ||

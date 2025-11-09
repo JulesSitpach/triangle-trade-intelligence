@@ -170,7 +170,8 @@ export default function EditableCertificatePreview({
     };
 
     fetchCertificateNumber();
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on mount - certificate number should only be fetched once
 
   // ✅ FIX: Update editedCert when previewData changes (async data arrives after mount)
   useEffect(() => {
@@ -281,7 +282,8 @@ export default function EditableCertificatePreview({
     });
 
     console.log('✅ Certificate state updated with all fields');
-  }, [previewData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewData]); // Only re-run when previewData changes, not when editedCert changes (would cause infinite loop)
 
   const handleFieldChange = (field, value) => {
     // Prevent editing for Trial users
@@ -825,7 +827,7 @@ export default function EditableCertificatePreview({
         }}>
           {/* Certifier Type */}
           <div style={{ borderRight: '1px solid #000', padding: '8px', minWidth: '180px' }}>
-            <div style={labelStyle}>1. CERTIFIER TYPE (INDICATE "X")</div>
+            <div style={labelStyle}>1. CERTIFIER TYPE (INDICATE &quot;X&quot;)</div>
             <div style={{ marginTop: '4px' }}>
               <label style={{ display: 'flex', gap: '4px', marginBottom: '3px' }}>
                 <input

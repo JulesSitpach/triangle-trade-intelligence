@@ -49,8 +49,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   // 🚀 AUTO-FILL EXPORTER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
   // Only auto-check "Exporter is my company" when certifier is EXPORTER or PRODUCER
   // For IMPORTER, the exporter is their SUPPLIER (not their company)
+  // ✅ FIX (Nov 9): Don't auto-fill if we're loading saved authorization data from dashboard
   useEffect(() => {
-    if (workflowData?.company && authData.certifier_type) {
+    // Skip auto-fill if we have saved authorization data (loading from dashboard)
+    const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
       const shouldAutoFillExporter = authData.certifier_type === 'EXPORTER' || authData.certifier_type === 'PRODUCER';
 
       console.log('📋 Certifier type changed:', authData.certifier_type, '→ Auto-fill exporter?', shouldAutoFillExporter);
@@ -161,8 +165,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   // 📥 AUTO-FILL IMPORTER DATA BASED ON CERTIFIER TYPE (Nov 6, 2025)
   // Only auto-fill "Importer is my company" when user is IMPORTER
   // If user is EXPORTER or PRODUCER, the importer is their CUSTOMER (not their company)
+  // ✅ FIX (Nov 9): Don't auto-fill if we're loading saved authorization data from dashboard
   useEffect(() => {
-    if (workflowData?.company && authData.certifier_type) {
+    // Skip auto-fill if we have saved authorization data (loading from dashboard)
+    const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
       const shouldAutoFillImporter = authData.certifier_type === 'IMPORTER';
 
       console.log('📥 Certifier type changed:', authData.certifier_type, '→ Auto-fill importer?', shouldAutoFillImporter);
@@ -215,8 +223,12 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
   // Auto-check "Producer is my company" when user is PRODUCER
   // For EXPORTER, they can manually check if they also manufacture
   // For IMPORTER, producer is a third party (not their company)
+  // ✅ FIX (Nov 9): Don't auto-fill if we're loading saved authorization data from dashboard
   useEffect(() => {
-    if (workflowData?.company && authData.certifier_type) {
+    // Skip auto-fill if we have saved authorization data (loading from dashboard)
+    const hasSavedAuth = workflowData?.authorization && Object.keys(workflowData.authorization).length > 0;
+
+    if (workflowData?.company && authData.certifier_type && !hasSavedAuth) {
       const shouldAutoFillProducer = authData.certifier_type === 'PRODUCER';
 
       console.log('🏭 Certifier type changed:', authData.certifier_type, '→ Auto-fill producer?', shouldAutoFillProducer);
@@ -262,6 +274,31 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authData.certifier_type, workflowData]); // Run when certifier type or workflow data changes
+
+  // 📥 LOAD SAVED AUTHORIZATION DATA (when loading from dashboard)
+  // This restores checkbox states (importer_same_as_company, etc.) from saved workflows
+  useEffect(() => {
+    if (workflowData?.authorization && Object.keys(workflowData.authorization).length > 0) {
+      console.log('📥 Loading saved authorization data from workflow:', workflowData.authorization);
+
+      setAuthData(prev => ({
+        ...prev,
+        ...workflowData.authorization,
+        // Preserve certifier_type from auto-fill logic (don't overwrite)
+        certifier_type: prev.certifier_type || workflowData.authorization.certifier_type
+      }));
+    } else if (certificateData?.authorization && Object.keys(certificateData.authorization).length > 0) {
+      console.log('📥 Loading saved authorization data from certificateData:', certificateData.authorization);
+
+      setAuthData(prev => ({
+        ...prev,
+        ...certificateData.authorization,
+        // Preserve certifier_type from auto-fill logic (don't overwrite)
+        certifier_type: prev.certifier_type || certificateData.authorization.certifier_type
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workflowData?.authorization, certificateData?.authorization]); // Run when saved authorization data arrives
 
   // 🎯 AUTO-EXPAND SECTIONS BASED ON CERTIFIER TYPE
   useEffect(() => {

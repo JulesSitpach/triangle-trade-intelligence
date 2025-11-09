@@ -166,7 +166,31 @@ export default async function handler(req, res) {
         signatory_email: certificateData.authorization?.signatory_email || '',
         signatory_phone: certificateData.authorization?.signatory_phone || '',
         signatory_date: certificateData.authorization?.signatory_date || new Date().toISOString(),
-        declaration_accepted: certificateData.authorization?.declaration_accepted || false
+        declaration_accepted: certificateData.authorization?.declaration_accepted || false,
+        // ✅ Save checkbox states so they restore when loading from dashboard
+        importer_same_as_company: certificateData.authorization?.importer_same_as_company || false,
+        exporter_same_as_company: certificateData.authorization?.exporter_same_as_company || false,
+        producer_same_as_company: certificateData.authorization?.producer_same_as_company || false,
+        producer_same_as_exporter: certificateData.authorization?.producer_same_as_exporter || false,
+        // ✅ Save all importer/exporter/producer fields from authorization step
+        importer_name: certificateData.authorization?.importer_name || '',
+        importer_address: certificateData.authorization?.importer_address || '',
+        importer_country: certificateData.authorization?.importer_country || '',
+        importer_tax_id: certificateData.authorization?.importer_tax_id || '',
+        importer_phone: certificateData.authorization?.importer_phone || '',
+        importer_email: certificateData.authorization?.importer_email || '',
+        exporter_name: certificateData.authorization?.exporter_name || '',
+        exporter_address: certificateData.authorization?.exporter_address || '',
+        exporter_country: certificateData.authorization?.exporter_country || '',
+        exporter_tax_id: certificateData.authorization?.exporter_tax_id || '',
+        exporter_phone: certificateData.authorization?.exporter_phone || '',
+        exporter_email: certificateData.authorization?.exporter_email || '',
+        producer_name: certificateData.authorization?.producer_name || '',
+        producer_address: certificateData.authorization?.producer_address || '',
+        producer_country: certificateData.authorization?.producer_country || '',
+        producer_tax_id: certificateData.authorization?.producer_tax_id || '',
+        producer_phone: certificateData.authorization?.producer_phone || '',
+        producer_email: certificateData.authorization?.producer_email || ''
       },
 
       // Trust verification
