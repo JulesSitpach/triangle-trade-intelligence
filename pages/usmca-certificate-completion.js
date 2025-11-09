@@ -418,6 +418,13 @@ export default function USMCACertificateCompletion() {
   };
 
   const generateAndDownloadCertificate = async (passedAuthData = null) => {
+    // ✅ FIX (Nov 9, 2025): Wait for workflow data to load before validating
+    if (!workflowData) {
+      console.warn('⏳ Workflow data not loaded yet - aborting validation');
+      alert('⏳ Please wait for the workflow data to finish loading, then try again.');
+      return;
+    }
+
     const authData = passedAuthData || certificateData.authorization || {};
     const preview = {
       ...certificateData,
@@ -453,14 +460,18 @@ export default function USMCACertificateCompletion() {
       });
     }
 
+    // Check company_name
+    const companyName = workflowData?.company?.company_name || workflowData?.company?.name;
+
+    if (!companyName) {
+      missingFields.push('Company Name (required for Box 3)');
+    }
+
     if (!authData?.signatory_name) {
       missingFields.push('Signatory Name (required for Box 12)');
     }
     if (!authData?.signatory_title) {
       missingFields.push('Signatory Title (required for Box 12)');
-    }
-    if (!workflowData?.company?.company_name && !workflowData?.company?.name) {
-      missingFields.push('Company Name (required for Box 3)');
     }
 
     if (missingFields.length > 0) {
