@@ -310,7 +310,6 @@ export default function CertificateSection({ results, onDownloadCertificate }) {
               <button
                 onClick={() => window.location.href = '/pricing'}
                 className="btn-secondary"
-                style={{ backgroundColor: '#059669', color: 'white' }}
               >
                 💰 Upgrade to Starter ($99/month) to Download & Edit
               </button>
