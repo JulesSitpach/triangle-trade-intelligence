@@ -345,8 +345,9 @@ async function handleSubscriptionPurchase(session, userId) {
     // Get tier name for display (capitalize first letter)
     const tierName = tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'Professional';
 
-    // === PREVENT MULTIPLE SUBSCRIPTIONS: Cancel any existing active subscriptions ===
-    // 🔧 FIX (Nov 9, 2025): Query Stripe API directly (subscriptions table doesn't exist)
+    // === PREVENT MULTIPLE SUBSCRIPTIONS: Cancel ALL existing active subscriptions ===
+    // 🔧 FIX (Nov 9, 2025): Cancel ALL old subscriptions BEFORE new one is created
+    // The new subscription (session.subscription) doesn't exist in Stripe's list yet at this point
     try {
       const existingSubscriptions = await stripe.subscriptions.list({
         customer: session.customer,
@@ -355,15 +356,9 @@ async function handleSubscriptionPurchase(session, userId) {
       });
 
       if (existingSubscriptions.data.length > 0) {
-        console.log(`⚠️ Found ${existingSubscriptions.data.length} active subscription(s) for customer ${session.customer}`);
+        console.log(`⚠️ Found ${existingSubscriptions.data.length} active subscription(s) for customer ${session.customer} - canceling ALL to prevent double-billing`);
 
         for (const oldSub of existingSubscriptions.data) {
-          // Don't cancel the subscription we just created
-          if (oldSub.id === session.subscription) {
-            console.log(`✅ Keeping new subscription: ${oldSub.id}`);
-            continue;
-          }
-
           try {
             // Cancel old subscription immediately (not at period end)
             await stripe.subscriptions.cancel(oldSub.id);
@@ -385,6 +380,8 @@ async function handleSubscriptionPurchase(session, userId) {
             });
           }
         }
+      } else {
+        console.log(`✅ No existing subscriptions to cancel for customer ${session.customer}`);
       }
     } catch (stripeError) {
       console.error(`❌ Failed to query Stripe for existing subscriptions:`, stripeError.message);
