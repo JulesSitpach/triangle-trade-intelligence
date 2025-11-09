@@ -418,13 +418,6 @@ export default function USMCACertificateCompletion() {
   };
 
   const generateAndDownloadCertificate = async (passedAuthData = null) => {
-    // ✅ FIX (Nov 9, 2025): Wait for workflow data to load before validating
-    if (!workflowData) {
-      console.warn('⏳ Workflow data not loaded yet - aborting validation');
-      alert('⏳ Please wait for the workflow data to finish loading, then try again.');
-      return;
-    }
-
     const authData = passedAuthData || certificateData.authorization || {};
     const preview = {
       ...certificateData,
@@ -543,19 +536,19 @@ export default function USMCACertificateCompletion() {
               verification_source: 'Database-verified'
             },
             supply_chain: {
-              manufacturing_location: certificateData.analysis_results.manufacturing_location,
-              regional_value_content: certificateData.analysis_results.regional_content,
-              component_origins: certificateData.analysis_results.component_breakdown,
+              manufacturing_location: certificateData?.analysis_results?.manufacturing_location || workflowData?.product?.manufacturing_location || '',
+              regional_value_content: certificateData?.analysis_results?.regional_content || 0,
+              component_origins: certificateData?.analysis_results?.component_breakdown || [],
               supply_chain_verified: true,
-              qualified: certificateData.analysis_results.qualification_status === 'QUALIFIED',
+              qualified: certificateData?.analysis_results?.qualification_status === 'QUALIFIED',
               rule: workflowData?.usmca?.rule,
               threshold_applied: workflowData?.usmca?.threshold_applied,
               // ✅ FIX (Nov 6): Use new explicit certificate fields from analysisResults
-              preference_criterion: certificateData.analysis_results.preference_criterion || certificateData.analysis_results.origin_criterion || 'B',
-              method_of_qualification: certificateData.analysis_results.qualification_method || 'RVC',
-              is_producer: certificateData.analysis_results.is_producer || false,
-              country_of_origin: certificateData.analysis_results.country_of_origin || '',
-              trust_score: certificateData.analysis_results.trust_score,
+              preference_criterion: certificateData?.analysis_results?.preference_criterion || certificateData?.analysis_results?.origin_criterion || 'B',
+              method_of_qualification: certificateData?.analysis_results?.qualification_method || 'RVC',
+              is_producer: certificateData?.analysis_results?.is_producer || false,
+              country_of_origin: certificateData?.analysis_results?.country_of_origin || '',
+              trust_score: certificateData?.analysis_results?.trust_score,
               verification_status: workflowData?.usmca?.verification_status
             },
             authorization: {
