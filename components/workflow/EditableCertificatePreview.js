@@ -555,16 +555,19 @@ export default function EditableCertificatePreview({
     if (!editedCert.certifier_country?.trim()) missingFields.push('Certifier Country');
     if (!editedCert.certifier_phone?.trim()) missingFields.push('Certifier Phone');
     if (!editedCert.certifier_email?.trim()) missingFields.push('Certifier Email');
-    if (!editedCert.tax_id?.trim()) missingFields.push('Tax ID');
+    // ✅ FIX (Nov 9): Check certifier_tax_id, not tax_id
+    if (!editedCert.certifier_tax_id?.trim()) missingFields.push('Tax ID');
 
     // Product information (Box 3-8)
     if (!editedCert.product_description?.trim()) missingFields.push('Product Description');
     if (!editedCert.hs_code?.trim()) missingFields.push('HS Code');
 
     // Authorization signature (Box 12)
-    if (!editedCert.authorized_signature_name?.trim()) missingFields.push('Authorized Signature Name');
-    if (!editedCert.authorized_signature_title?.trim()) missingFields.push('Authorized Signature Title');
-    if (!editedCert.authorized_signature_company?.trim()) missingFields.push('Company Name (Box 12)');
+    // ✅ FIX (Nov 9): Check signatory_name and signatory_title (actual field names)
+    if (!editedCert.signatory_name?.trim()) missingFields.push('Authorized Signature Name');
+    if (!editedCert.signatory_title?.trim()) missingFields.push('Authorized Signature Title');
+    // ✅ FIX (Nov 9): Check certifier_name for Box 12 company (it's the certifying company)
+    if (!editedCert.certifier_name?.trim()) missingFields.push('Company Name (Box 12)');
 
     // Show error if fields are missing
     if (missingFields.length > 0) {
