@@ -145,10 +145,10 @@ export default function USMCACertificateCompletion() {
                 authorization: dbData.authorization
               }));
 
-              // Auto-generate certificate preview (call generateAndDownloadCertificate in preview mode)
-              // Use setTimeout to ensure state is updated first
+              // Auto-generate certificate preview
+              // ✅ FIX (Nov 9): Pass initialData directly instead of waiting for state
               setTimeout(async () => {
-                await handlePreviewCertificate(dbData.authorization);
+                await handlePreviewCertificate(dbData.authorization, initialData);
               }, 100);
             } else if (dbData.authorization) {
               console.log('⚠️ Authorization data exists but incomplete (missing signatory_name) - showing form');
@@ -364,8 +364,11 @@ export default function USMCACertificateCompletion() {
     }));
   };
 
-  const handlePreviewCertificate = async (authData) => {
+  const handlePreviewCertificate = async (authData, passedWorkflowData = null) => {
     console.log('Generating certificate and opening preview for editing...');
+
+    // ✅ FIX (Nov 9): Use passedWorkflowData if provided (from database load)
+    const dataToUse = passedWorkflowData || workflowData;
 
     // Store authorization data for use in certificate generation
     setCertificateData(prev => ({
@@ -393,8 +396,8 @@ export default function USMCACertificateCompletion() {
       console.error('❌ [CERTIFICATE-COMPLETION] Error saving authorization:', error);
     }
 
-    // Generate certificate and show editable preview (pass authData to avoid async state issues)
-    await generateAndDownloadCertificate(authData);
+    // Generate certificate and show editable preview (pass both authData and workflowData)
+    await generateAndDownloadCertificate(authData, dataToUse);
   };
 
   const handlePreviewDownload = async (editedPreviewData) => {
@@ -417,7 +420,10 @@ export default function USMCACertificateCompletion() {
     await generateAndDownloadCertificate();
   };
 
-  const generateAndDownloadCertificate = async (passedAuthData = null) => {
+  const generateAndDownloadCertificate = async (passedAuthData = null, passedWorkflowData = null) => {
+    // ✅ FIX (Nov 9): Use passedWorkflowData if provided (from database load)
+    const dataToUse = passedWorkflowData || workflowData;
+
     const authData = passedAuthData || certificateData.authorization || {};
     const preview = {
       ...certificateData,
@@ -430,31 +436,31 @@ export default function USMCACertificateCompletion() {
 
     // CRITICAL DEBUG: Log what company_country value we have
     console.log('🔍 CERTIFICATE PAGE - Company Country Check:', {
-      has_workflowData: !!workflowData,
-      has_company: !!workflowData?.company,
-      company_country_value: workflowData?.company?.company_country,
-      company_country_type: typeof workflowData?.company?.company_country,
-      full_company_object: workflowData?.company
+      has_dataToUse: !!dataToUse,
+      has_company: !!dataToUse?.company,
+      company_country_value: dataToUse?.company?.company_country,
+      company_country_type: typeof dataToUse?.company?.company_country,
+      full_company_object: dataToUse?.company
     });
 
     // ✅ P0-4 FIX: Validate required fields BEFORE API call
     const missingFields = [];
 
     // Check company_country (can be ISO code or full name after conversion)
-    const companyCountry = workflowData?.company?.company_country ||
-                          workflowData?.company?.country ||
+    const companyCountry = dataToUse?.company?.company_country ||
+                          dataToUse?.company?.country ||
                           certificateData?.company_info?.exporter_country;
 
     if (!companyCountry) {
       missingFields.push('Company Country (required for Box 2 & 3)');
       console.error('❌ Missing company country. Workflow data:', {
-        company: workflowData?.company,
+        company: dataToUse?.company,
         certificate_data: certificateData?.company_info
       });
     }
 
     // Check company_name
-    const companyName = workflowData?.company?.company_name || workflowData?.company?.name;
+    const companyName = dataToUse?.company?.company_name || dataToUse?.company?.name;
 
     if (!companyName) {
       missingFields.push('Company Name (required for Box 3)');
@@ -493,32 +499,32 @@ export default function USMCACertificateCompletion() {
             // authData.certifier_type is set when user selects IMPORTER/EXPORTER/PRODUCER in AuthorizationStep
             certifier_type: authData?.certifier_type || 'EXPORTER',
             company_info: {
-              exporter_name: authData?.exporter_name || workflowData?.company?.company_name || workflowData?.company?.name || '',
-              exporter_address: authData?.exporter_address || workflowData?.company?.company_address || '',
+              exporter_name: authData?.exporter_name || dataToUse?.company?.company_name || dataToUse?.company?.name || '',
+              exporter_address: authData?.exporter_address || dataToUse?.company?.company_address || '',
               exporter_country: authData?.exporter_country || companyCountry,  // FIXED: Prefer authData, fallback to validated company country
               // ✅ FIX (Nov 4): Prefer authData.exporter_tax_id if available (user may have corrected it in AuthorizationStep)
-              exporter_tax_id: authData?.exporter_tax_id || workflowData?.company?.tax_id || '',
-              exporter_phone: authData?.exporter_phone || workflowData?.company?.contact_phone || '',
-              exporter_email: authData?.exporter_email || workflowData?.company?.contact_email || '',
+              exporter_tax_id: authData?.exporter_tax_id || dataToUse?.company?.tax_id || '',
+              exporter_phone: authData?.exporter_phone || dataToUse?.company?.contact_phone || '',
+              exporter_email: authData?.exporter_email || dataToUse?.company?.contact_email || '',
               // ✅ FIX (Nov 4): Use authData.exporter_* fields when producer_same_as_exporter is true
-              // This ensures producer gets the correct data even if workflowData.company is incomplete
+              // This ensures producer gets the correct data even if dataToUse.company is incomplete
               producer_name: authData?.producer_same_as_exporter
-                ? (authData?.exporter_name || workflowData?.company?.company_name || workflowData?.company?.name || '')
+                ? (authData?.exporter_name || dataToUse?.company?.company_name || dataToUse?.company?.name || '')
                 : (authData.producer_name || ''),
               producer_address: authData?.producer_same_as_exporter
-                ? (authData?.exporter_address || workflowData?.company?.company_address || '')
+                ? (authData?.exporter_address || dataToUse?.company?.company_address || '')
                 : (authData.producer_address || ''),
               producer_country: authData?.producer_same_as_exporter
-                ? (authData?.exporter_country || workflowData?.company?.company_country || '')
+                ? (authData?.exporter_country || dataToUse?.company?.company_country || '')
                 : (authData.producer_country || ''),
               producer_tax_id: authData?.producer_same_as_exporter
-                ? (authData?.exporter_tax_id || workflowData?.company?.tax_id || '')
+                ? (authData?.exporter_tax_id || dataToUse?.company?.tax_id || '')
                 : (authData.producer_tax_id || ''),
               producer_phone: authData?.producer_same_as_exporter
-                ? (authData?.exporter_phone || workflowData?.company?.contact_phone || '')
+                ? (authData?.exporter_phone || dataToUse?.company?.contact_phone || '')
                 : (authData.producer_phone || ''),
               producer_email: authData?.producer_same_as_exporter
-                ? (authData?.exporter_email || workflowData?.company?.contact_email || '')
+                ? (authData?.exporter_email || dataToUse?.company?.contact_email || '')
                 : (authData.producer_email || ''),
               importer_name: authData.importer_name || '',
               importer_address: authData.importer_address || '',
@@ -528,28 +534,28 @@ export default function USMCACertificateCompletion() {
               importer_email: authData.importer_email || ''
             },
             product_details: {
-              hs_code: workflowData?.product?.hs_code || certificateData?.analysis_results?.hs_code || '',
-              product_description: workflowData?.product?.description || '',
-              commercial_description: workflowData?.product?.description || '',
-              manufacturing_location: workflowData?.usmca?.manufacturing_location || certificateData?.analysis_results?.manufacturing_location || '',
+              hs_code: dataToUse?.product?.hs_code || certificateData?.analysis_results?.hs_code || '',
+              product_description: dataToUse?.product?.description || '',
+              commercial_description: dataToUse?.product?.description || '',
+              manufacturing_location: dataToUse?.usmca?.manufacturing_location || certificateData?.analysis_results?.manufacturing_location || '',
               tariff_classification_verified: true,
               verification_source: 'Database-verified'
             },
             supply_chain: {
-              manufacturing_location: certificateData?.analysis_results?.manufacturing_location || workflowData?.product?.manufacturing_location || '',
+              manufacturing_location: certificateData?.analysis_results?.manufacturing_location || dataToUse?.product?.manufacturing_location || '',
               regional_value_content: certificateData?.analysis_results?.regional_content || 0,
               component_origins: certificateData?.analysis_results?.component_breakdown || [],
               supply_chain_verified: true,
               qualified: certificateData?.analysis_results?.qualification_status === 'QUALIFIED',
-              rule: workflowData?.usmca?.rule,
-              threshold_applied: workflowData?.usmca?.threshold_applied,
+              rule: dataToUse?.usmca?.rule,
+              threshold_applied: dataToUse?.usmca?.threshold_applied,
               // ✅ FIX (Nov 6): Use new explicit certificate fields from analysisResults
               preference_criterion: certificateData?.analysis_results?.preference_criterion || certificateData?.analysis_results?.origin_criterion || 'B',
               method_of_qualification: certificateData?.analysis_results?.qualification_method || 'RVC',
               is_producer: certificateData?.analysis_results?.is_producer || false,
               country_of_origin: certificateData?.analysis_results?.country_of_origin || '',
               trust_score: certificateData?.analysis_results?.trust_score,
-              verification_status: workflowData?.usmca?.verification_status
+              verification_status: dataToUse?.usmca?.verification_status
             },
             authorization: {
               signatory_name: authData.signatory_name || '',
