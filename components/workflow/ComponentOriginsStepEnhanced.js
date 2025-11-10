@@ -288,6 +288,8 @@ export default function ComponentOriginsStepEnhanced({
             tradeVolume: formData.trade_volume,  // ✅ FIXED: Use trade_volume, not annual_trade_volume (matches CompanyInformationStep)
             companyName: formData.company_name,
             primarySupplier: formData.primary_supplier_country,
+            substantialTransformation: formData.substantial_transformation || false, // ✅ NEW (Nov 10): Critical for material-based classification
+            manufacturingProcess: formData.manufacturing_process || null, // ✅ NEW (Nov 10): Process details for transformation context
 
             // PROGRESSIVE CONTEXT: Send previously classified components (before this index)
             // This prevents duplicate HS codes - AI knows what codes it already assigned
@@ -425,6 +427,7 @@ export default function ComponentOriginsStepEnhanced({
             companyName: formData.company_name,
             primarySupplier: formData.primary_supplier_country,
             substantialTransformation: formData.substantial_transformation || false, // ✅ FIX (Nov 8): Critical for HS classification - transformed vs raw material
+            manufacturingProcess: formData.manufacturing_process || null, // ✅ NEW (Nov 10): Process details for transformation context
             previouslyClassifiedComponents: components.slice(0, index)
               .filter(c => c.description && c.hs_code)
               .map(c => ({
