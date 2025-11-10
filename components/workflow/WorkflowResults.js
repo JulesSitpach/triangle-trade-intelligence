@@ -679,14 +679,23 @@ export default function WorkflowResults({
               backgroundColor: '#f9fafb',
               borderRadius: '6px',
               border: '1px solid #d1d5db',
-              textAlign: 'center'
-            }}>
+              textAlign: 'center',
+              cursor: results.usmca?.labor_credit > 0 ? 'help' : 'default'
+            }}
+            title={results.usmca?.labor_credit > 0
+              ? `Breakdown: ${(results.usmca?.component_rvc || 0).toFixed(1)}% components + ${(results.usmca?.labor_credit || 0).toFixed(1)}% ${results.manufacturing_location || 'US'} labor credit`
+              : undefined}>
               <div style={{ fontSize: '0.6875rem', color: '#6b7280', fontWeight: '500', marginBottom: '0.25rem' }}>
                 Your Content
               </div>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' }}>
                 {(results.usmca?.north_american_content || 0).toFixed(0)}%
               </div>
+              {results.usmca?.labor_credit > 0 && (
+                <div style={{ fontSize: '0.625rem', color: '#059669', marginTop: '0.25rem', fontWeight: '500' }}>
+                  +{(results.usmca?.labor_credit || 0).toFixed(0)}% labor
+                </div>
+              )}
             </div>
 
             {/* Margin Card */}
@@ -733,7 +742,33 @@ export default function WorkflowResults({
 
             <p>
               <strong>Your Regional Value Content: {(results.usmca?.north_american_content || 0).toFixed(1)}%</strong><br/>
-              Your product is {(results.usmca?.north_american_content || 0).toFixed(1)}% made in the US, Canada, or Mexico. You need at least {results.usmca?.threshold_applied || 60}%, so you have a {((results.usmca?.north_american_content || 0) - (results.usmca?.threshold_applied || 60)).toFixed(1)}% {results.usmca?.qualified ? 'safety buffer' : 'gap to close'}.
+              {(() => {
+                const totalRVC = results.usmca?.north_american_content || 0;
+                const componentRVC = results.usmca?.component_rvc || 0;
+                const laborCredit = results.usmca?.labor_credit || 0;
+                const threshold = results.usmca?.threshold_applied || 60;
+                const gap = totalRVC - threshold;
+
+                // Show breakdown if there's labor credit
+                if (laborCredit > 0) {
+                  return (
+                    <>
+                      Your product qualifies with {totalRVC.toFixed(1)}% total North American content:
+                      <br/>
+                      <span style={{ marginLeft: '1rem', display: 'block', marginTop: '0.5rem', color: '#059669' }}>
+                        • USMCA Components: {componentRVC.toFixed(1)}% (Mexico + Canada + US parts)
+                      </span>
+                      <span style={{ marginLeft: '1rem', display: 'block', color: '#059669' }}>
+                        • Manufacturing Labor Credit: +{laborCredit.toFixed(1)}% ({results.manufacturing_location || 'US'} manufacturing)
+                      </span>
+                      <br/>
+                      You need at least {threshold}%, so you have a <strong style={{ color: gap >= 0 ? '#059669' : '#dc2626' }}>{gap >= 0 ? '+' : ''}{gap.toFixed(1)}%</strong> {gap >= 0 ? 'safety buffer' : 'gap to close'}.
+                    </>
+                  );
+                } else {
+                  return `Your product is ${totalRVC.toFixed(1)}% made in the US, Canada, or Mexico. You need at least ${threshold}%, so you have a ${gap.toFixed(1)}% ${gap >= 0 ? 'safety buffer' : 'gap to close'}.`;
+                }
+              })()}
             </p>
 
             {results.savings && (results.savings.annual_savings || 0) > 0 && (
