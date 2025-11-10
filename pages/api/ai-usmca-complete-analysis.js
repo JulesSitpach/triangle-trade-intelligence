@@ -885,49 +885,25 @@ export default protectedApiHandler({
               continue;  // Skip to next component, no AI call needed
             }
 
-            // Not in master table OR cache - need origin-aware fallback
-            console.log(`⏳ Database Cache MISS for "${component.description}" from ${baseComponent.origin_country}...`);
+            // ✅ FIX (Nov 9, 2025): HS code not in database - ALWAYS trigger AI research
+            // Don't assume duty-free based on origin - AI must research actual tariff rates
+            console.log(`⏳ [DATABASE MISS] HS code ${component.hs_code} not in tariff_intelligence_master`);
+            console.log(`🔬 [AI RESEARCH] Triggering AI tariff research for ${baseComponent.origin_country} origin...`);
 
-            // ✅ CRITICAL FIX (Nov 8, 2025): Origin-aware NULL semantics
-            // USMCA members (US/CA/MX) → assume duty-free (mfn_rate: 0)
-            // Non-USMCA (CN/VN/DE/etc) → unknown rate (mfn_rate: null) + AI research
-            const USMCA_COUNTRIES = ['US', 'CA', 'MX'];
-            const isUSMCAMember = USMCA_COUNTRIES.includes((baseComponent.origin_country || '').toUpperCase());
-
-            if (isUSMCAMember) {
-              // USMCA member - likely duty-free, but flag for verification
-              console.log(`✅ [USMCA-DEFAULT] ${baseComponent.origin_country} is USMCA member - assuming duty-free`);
-              enriched.push({
-                ...baseComponent,
-                mfn_rate: 0,  // Reasonable default for USMCA
-                base_mfn_rate: 0,
-                section_301: 0,
-                section_232: 0,
-                usmca_rate: 0,
-                rate_source: 'default_usmca_member',
-                stale: false,  // Don't trigger AI research for USMCA
-                data_source: 'usmca_default',
-                requires_verification: true,
-                verification_reason: `HS code ${component.hs_code} not in database. USMCA members are usually duty-free, but verify with customs.`
-              });
-            } else {
-              // Non-USMCA member - rate unknown, trigger AI research
-              console.log(`🚨 [NON-USMCA] ${baseComponent.origin_country} is NOT USMCA - rate unknown, needs AI research`);
-              enriched.push({
-                ...baseComponent,
-                mfn_rate: null,  // ✅ CRITICAL: null = unknown rate!
-                base_mfn_rate: null,
-                section_301: null,
-                section_232: null,
-                usmca_rate: 0,  // Not eligible for USMCA
-                rate_source: 'unknown_non_usmca',
-                stale: true,  // ✅ Trigger AI research
-                data_source: 'no_data',
-                requires_verification: true,
-                verification_reason: `Rate unknown for ${baseComponent.origin_country} origin - AI research required`
-              });
-            }
-            continue;  // Skip to next component, let Phase 3 handle AI if needed
+            enriched.push({
+              ...baseComponent,
+              mfn_rate: 0,  // Placeholder - AI will research actual rate
+              base_mfn_rate: 0,
+              section_301: 0,
+              section_232: 0,
+              usmca_rate: 0,
+              rate_source: 'database_miss_needs_ai',
+              stale: true,  // ✅ CRITICAL FIX: ALWAYS trigger AI when HS code not in database
+              data_source: 'database_miss',
+              requires_verification: true,
+              verification_reason: `HS code ${component.hs_code} not in database - AI will research actual tariff rates`
+            });
+            continue;  // Let Phase 3 AI research handle this component
           }
 
           // ✅ HYBRID (Oct 30): Check policy_tariffs_cache for volatile rates
