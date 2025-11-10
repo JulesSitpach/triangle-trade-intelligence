@@ -312,7 +312,7 @@ export default protectedApiHandler({
             code: item.code,
             confidence: item.confidence,
             reason: item.isOriginalPrimary
-              ? `Previously selected as primary (${primaryConfidence}% confidence). However, ${primary_hs_code} has higher confidence (${item.confidence}%).`
+              ? `Previously AI primary (${item.confidence}% confidence), but ${primary_hs_code} has higher confidence (${primaryConfidence}%).`
               : item.reason
           }));
       }
