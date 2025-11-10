@@ -274,9 +274,10 @@ export default protectedApiHandler({
 
       // ✅ SAFETY: Normalize alternative_codes array (AI might return objects in reason field)
       // Filter out any alternatives with empty/invalid HS codes
+      // ✅ FIX (Nov 10): AI returns hs_code, not code - support both formats
       const safeAlternativeCodes = (aiResult.data.alternative_codes || [])
         .map(alt => ({
-          code: typeof alt.code === 'string' ? alt.code : String(alt.code || ''),
+          code: typeof alt.code === 'string' ? alt.code : (typeof alt.hs_code === 'string' ? alt.hs_code : String(alt.code || alt.hs_code || '')),
           confidence: Number(alt.confidence) || 0,
           reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
         }))
