@@ -299,7 +299,7 @@ export default protectedApiHandler({
       const highestConfidenceCode = sortedByConfidence[0];
 
       // If highest confidence is NOT the original primary, swap them
-      if (highestConfidenceCode.code !== primary_hs_code) {
+      if (highestConfidenceCode && highestConfidenceCode.code !== primary_hs_code) {
         console.warn(`⚠️ CLASSIFICATION PRIORITY FIX: Highest confidence code (${highestConfidenceCode.code} at ${highestConfidenceCode.confidence}%) was not primary. Swapping with original primary (${primary_hs_code} at ${primaryConfidence}%). This is a critical fix for compliance accuracy.`);
 
         primary_hs_code = highestConfidenceCode.code;
