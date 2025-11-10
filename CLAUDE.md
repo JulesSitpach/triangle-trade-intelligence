@@ -1,8 +1,14 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 5, 2025 - Centralized Subscription Config Complete (100% Migration)
-**Status:** 75% Production-Ready (centralized config + 3-layer enforcement), 20% Ready-to-Activate (daily digest + payment webhooks), 5% Not Started
-**Recent Changes** (Nov 5):
+**Last Updated:** November 9, 2025 - AI Tariff Research Fix (Database Miss Handler)
+**Status:** 75% Production-Ready (centralized config + 3-layer enforcement + AI fallback), 20% Ready-to-Activate (daily digest + payment webhooks), 5% Not Started
+**Recent Changes** (Nov 9):
+- ✅ **CRITICAL FIX**: Database miss now triggers AI research (`stale: true` instead of `false`)
+- ✅ Fixed Desktop vs Vercel tariff rate discrepancy (both now use same AI fallback)
+- ✅ Removed USMCA origin assumption (no more "assume duty-free" logic)
+- ✅ Documented data source trust levels (what to trust in DB vs what needs AI)
+- ✅ Created USITC API integration (lib/services/usitc-api-service.js) - auth pending
+**Previous Changes** (Nov 5):
 - ✅ Created centralized subscription config (config/subscription-tier-limits.js)
 - ✅ Migrated all 6 endpoints to use single source of truth
 - ✅ Fixed Starter tier (10→15 analyses), Trial executive summaries unblocked
@@ -22,11 +28,15 @@
    - Database persistence across all steps ✅
    - Component enrichment with tariff data ✅
 
-2. **Tariff Analysis Engine** - Hybrid Database-First
+2. **Tariff Analysis Engine** - Hybrid Database-First with AI Fallback
    - tariff_intelligence_master (12,118 HS codes) as primary source ✅
-   - OpenRouter AI for edge cases (5% of requests) ✅
+   - **FIXED Nov 9**: Database miss now ALWAYS triggers AI research (stale: true) ✅
+   - OpenRouter AI for missing HS codes (~5% of requests) ✅
    - Anthropic fallback when OpenRouter unavailable ✅
+   - USITC API integration created (auth pending) ✅
    - Response time: <500ms typical, <3s worst case ✅
+   - **What to Trust**: Base MFN rates (12,118 codes), USMCA preferential rates
+   - **What NOT to Trust**: Section 301/232 in master table (all zeros - use AI or policy_tariffs_cache)
 
 3. **PDF Certificate Generation** - Server-side jsPDF
    - Official USMCA Form D layout matching government template ✅
@@ -261,20 +271,81 @@
 - ✅ `user_profiles` - 14 records
 - ✅ `workflow_sessions` - 194 in-progress workflows
 - ✅ `workflow_completions` - 20 completed certificates
-- ✅ `tariff_intelligence_master` - 12,118 HS codes
+- ✅ `tariff_intelligence_master` - 12,118 HS codes (TRUST: Base MFN rates, USMCA rates)
+- ✅ `policy_tariffs_cache` - 372 rows (TRUST: Section 301/232 rates, cron-updated)
 - ✅ `invoices` - Payment records
 - ✅ `crisis_alerts` - Active real policy announcements (queried by generate-portfolio-briefing.js)
 - ✅ `usmca_qualification_rules` - 8 industry thresholds
 
 **Partially Used:**
-- ⚠️ `policy_tariffs_cache` - 22 rows, inconsistent updates
-- ⚠️ `tariff_policy_updates` - 4 records, mostly stale
+- ⚠️ `tariff_policy_updates` - 4 records, mostly stale (DO NOT TRUST - use policy_tariffs_cache instead)
 
 **Not Used:**
 - ❌ `redis_cache_keys` - Never populated
 - ❌ 15+ other legacy tables - Created but never referenced
 - ❌ All marketplace tables
 - ❌ All admin tables
+
+---
+
+## 📊 DATA SOURCE TRUST LEVELS (Nov 9, 2025)
+
+### ✅ WHAT TO TRUST IN DATABASE
+
+**tariff_intelligence_master (12,118 HS codes)**:
+- ✅ **Base MFN rates** (mfn_ad_val_rate): 6,482 codes with rates, 5,636 duty-free
+- ✅ **USMCA preferential rates** (usmca_ad_val_rate): 100% coverage for all codes
+- ❌ **Section 301 rates**: ALL ZERO in master table (stale data from Jan 2025)
+- ❌ **Section 232 rates**: ALL ZERO in master table (stale data from Jan 2025)
+
+**policy_tariffs_cache (372 codes)**:
+- ✅ **Section 301 rates**: Cron-updated, 371 fresh (99.7%), 1 stale
+- ✅ **Section 232 rates**: Cron-updated, reliable
+- ✅ **Last updated**: Timestamp tracks freshness
+
+**Volatility Tiers** (lib/tariff/volatility-manager.js):
+- **Tier 1 (Super Volatile)**: China→US electronics (HS 85), steel/aluminum (HS 72/73/76)
+- **Tier 2 (Volatile)**: China→CA/MX, emerging Asia→US
+- **Tier 3 (Stable)**: Everything else, standard MFN rates
+
+### 🤖 WHAT REQUIRES AI RESEARCH
+
+1. **HS code NOT in database** (missing from 12,118 codes)
+   - Example: HS 39209990 (water-reducing admixture) - valid code but not in DB
+   - **Fix Nov 9**: Now sets `stale: true` to trigger AI research
+
+2. **Section 301/232 policy rates** (change frequently)
+   - Database policy_tariffs_cache has 372 codes
+   - Remaining ~11,746 codes need AI for current Section 301/232 rates
+   - Change frequency: Weekly to monthly (USTR announcements)
+
+3. **Tier 1 Volatile Components** (see volatility-manager.js)
+   - China semiconductors/electronics to USA
+   - Steel/aluminum to USA
+   - Strategic goods with reciprocal tariffs
+
+### 🐛 CRITICAL BUG FIX (Nov 9, 2025)
+
+**Problem**: Desktop showed 6.0% tariff rate, Vercel showed 0.0% for same component
+
+**Root Cause**: pages/api/ai-usmca-complete-analysis.js line 908
+```javascript
+// ❌ BEFORE (BROKEN):
+stale: false,  // Don't trigger AI research for USMCA members
+
+// ✅ AFTER (FIXED):
+stale: true,   // ALWAYS trigger AI when HS code not in database
+```
+
+**Impact**:
+- When HS code not in database (e.g., 39209990), system assumed duty-free for USMCA origins
+- Desktop had cached 6% from old AI call, Vercel showed 0% (wrong)
+- Fixed by removing USMCA origin assumption logic (lines 891-922 deleted)
+
+**Files Changed**:
+- pages/api/ai-usmca-complete-analysis.js (lines 888-906): Set stale=true for ALL database misses
+- lib/services/usitc-api-service.js (NEW): USITC API integration for 100% accurate rates (auth pending)
+- test-ai-tariff-research.js (NEW): Test script to verify AI research triggered
 
 ---
 
@@ -527,15 +598,18 @@ lib/
 ❌ **Don't:**
 - Assume database columns exist (query first)
 - Hardcode tariff rates or HS codes (use database)
+- **Assume duty-free for USMCA origins** (set stale=true, let AI research) ← Nov 9 fix
 - Create new AI calls where database data exists (use fallback only)
 - Use inline styles or Tailwind CSS (use existing CSS classes)
 - Kill the development server (ask user first)
 - Add TODO comments without fixing (either fix or remove)
 - Mix camelCase and snake_case in same file
+- **Trust Section 301/232 rates in tariff_intelligence_master** (all zeros - use AI or policy_tariffs_cache)
 
 ✅ **Do:**
 - Query schema before modifying queries
 - Use BaseAgent for AI with 2-tier fallback
+- **Set stale=true when HS code not in database** (triggers AI research) ← Nov 9 pattern
 - Trust database as primary source (95%+ coverage)
 - Test in browser before committing
 - Document breaking changes in CLAUDE.md
@@ -549,7 +623,10 @@ lib/
 | File | Purpose | Status |
 |------|---------|--------|
 | `lib/agents/base-agent.js` | AI with 2-tier fallback | ✅ Use this |
-| `pages/api/ai-usmca-complete-analysis.js` | Tariff analysis | ✅ Use this |
+| `pages/api/ai-usmca-complete-analysis.js` | Tariff analysis (Nov 9 fix: stale=true) | ✅ Use this |
+| `lib/services/usitc-api-service.js` | USITC official API (NEW Nov 9) | ⚠️ Auth pending |
+| `lib/tariff/volatility-manager.js` | 3-tier volatility system | ✅ Reference |
+| `test-ai-tariff-research.js` | Test AI fallback (NEW Nov 9) | ✅ Manual test |
 | `components/workflow/` | USMCA workflow UI | ✅ Use this |
 | `lib/schemas/component-schema.js` | Data contracts | ✅ Reference |
 | `styles/globals.css` | Styling | ✅ Use this |
@@ -571,14 +648,21 @@ lib/
 
 ---
 
-**Last Honest Assessment (Nov 5, 2025):**
+**Last Honest Assessment (Nov 9, 2025):**
 
 MAJOR RECENT CHANGES:
-1. **Nov 2**: Replaced fake template-based alert system with real portfolio briefing system
+
+1. **Nov 9**: Fixed critical AI tariff research bug (Desktop vs Vercel discrepancy)
+   - ❌ OLD: `stale: false` for USMCA origins when HS code not in database → assumed duty-free (0%)
+   - ✅ NEW: `stale: true` for ALL database misses → triggers AI research (~5-6% actual rate)
+   - **Impact**: Desktop and Vercel now show SAME tariff rates (both use AI fallback correctly)
+   - **Files**: pages/api/ai-usmca-complete-analysis.js (line 901), lib/services/usitc-api-service.js (NEW)
+
+2. **Nov 2**: Replaced fake template-based alert system with real portfolio briefing system
    - ❌ OLD: "if origin='CN' then create alert" (template IF/THEN logic)
    - ✅ NEW: Query crisis_alerts table, match to user components, show only REAL policies
 
-2. **Nov 4-5**: Implemented 3-layer subscription limit enforcement
+3. **Nov 4-5**: Implemented 3-layer subscription limit enforcement
    - ✅ Page-level: usmca-workflow.js blocks access when limit reached
    - ✅ Component-level: ComponentOriginsStepEnhanced.js disables "Analyze" button
    - ✅ API-level: classification.js + ai-usmca-complete-analysis.js reject requests
