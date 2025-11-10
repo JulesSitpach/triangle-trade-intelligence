@@ -1960,6 +1960,9 @@ export default protectedApiHandler({
         north_american_content: analysis.usmca?.north_american_content,
         regional_content: analysis.usmca?.north_american_content, // Alias for certificate
         threshold_applied: analysis.usmca?.threshold_applied,
+        // ✅ FIX (Nov 10): Extract labor credit breakdown for display
+        component_rvc: analysis.usmca?.component_rvc || 0,  // Component-only RVC (without labor)
+        labor_credit: analysis.usmca?.labor_credit || 0,    // Manufacturing labor credit
         rule: analysis.usmca?.rule || 'Regional Value Content',
         reason: analysis.usmca?.reason || 'AI analysis complete',
         // ✅ FIX (Oct 26): Use transformed components with decimal format (0.55 not 55)

@@ -711,7 +711,8 @@ export default function USMCAQualification({ results }) {
                             )}
 
                             {/* STRATEGIC: Supply Chain Alternatives for Policy-Exposed Components */}
-                            {section301 > 0 && (
+                            {/* ✅ FIX (Nov 10): Only show Section 301 message for Chinese components */}
+                            {section301 > 0 && (component.origin_country === 'CN' || component.origin_country === 'China') && (
                               <div style={{
                                 marginTop: '0.75rem',
                                 padding: '0.75rem',
