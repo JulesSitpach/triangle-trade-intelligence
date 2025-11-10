@@ -99,6 +99,8 @@ export default protectedApiHandler({
     console.log('[WORKFLOW-SESSION-DEBUG] Type of sessionId:', typeof sessionId);
     console.log('[WORKFLOW-SESSION-DEBUG] userId:', userId);
     console.log('[WORKFLOW-SESSION-DEBUG] action:', action);
+    console.log('[WORKFLOW-SESSION-DEBUG] steps_completed:', workflowData.steps_completed);
+    console.log('[WORKFLOW-SESSION-DEBUG] Type of steps_completed:', typeof workflowData.steps_completed);
     console.log('═══════════════════════════════════════════════════');
 
     // Validate required fields
@@ -145,7 +147,13 @@ export default protectedApiHandler({
     // Determine if this is a complete workflow
     const isCompleteWorkflow = action === 'complete' && workflowData.steps_completed >= 4;
 
+    console.log('🔍 [WORKFLOW-SESSION-DEBUG] Completion check:');
+    console.log('  - action === "complete"?', action === 'complete');
+    console.log('  - steps_completed >= 4?', workflowData.steps_completed >= 4);
+    console.log('  - isCompleteWorkflow?', isCompleteWorkflow);
+
     if (isCompleteWorkflow) {
+      console.log('✅ [WORKFLOW-SESSION-DEBUG] Saving to workflow_completions + incrementing usage counter');
       // Save complete workflow to workflow_completions
       // Table schema: id, user_id, email, workflow_type, workflow_name, hs_code,
       // completed_at, certificate_generated, status, total_savings, estimated_duty_savings,
@@ -270,6 +278,7 @@ export default protectedApiHandler({
         logError('Failed to increment usage counter', { error: counterError.message, userId, sessionId });
       }
     } else {
+      console.log('⚠️ [WORKFLOW-SESSION-DEBUG] Saving to workflow_sessions with state="in_progress" (NOT incrementing counter)');
       // Save in-progress workflow to workflow_sessions
       // Extract company data from workflow for dedicated columns
       const companyData = workflowData.company || {};
