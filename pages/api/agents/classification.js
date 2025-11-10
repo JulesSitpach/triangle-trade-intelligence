@@ -285,9 +285,12 @@ export default protectedApiHandler({
 
       // 🚨 CRITICAL FIX: Ensure PRIMARY HS code is always the HIGHEST confidence option
       // For financial compliance, the most confident classification must be primary
-      let primary_hs_code = aiResult.data.hs_code;
+      let primary_hs_code = aiResult.data.hs_code?.replace(/\D/g, '').substring(0, 8); // Strip to 8 digits
       let primaryConfidence = Number(aiResult.data.confidence) || 0;
-      let finalAlternativeCodes = [...safeAlternativeCodes];
+      let finalAlternativeCodes = [...safeAlternativeCodes].map(alt => ({
+        ...alt,
+        code: alt.code?.replace(/\D/g, '').substring(0, 8) // Strip to 8 digits
+      }));
 
       // Check if any alternative code has higher confidence than the primary
       const allCodes = [
