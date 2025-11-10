@@ -114,10 +114,12 @@ export default protectedApiHandler({
 
     // ✅ CRITICAL FIX: Normalize components to ensure required fields
     // Components MUST have hs_code and origin_country from API enrichment
-    const normalizeComponents = (components) => {
+    const normalizeComponents = (components, isComplete) => {
       return (components || []).map((component, idx) => {
-        if (!component.hs_code || !component.origin_country) {
-          console.warn(`⚠️ Component ${idx} missing required fields in workflow-session:`, {
+        // Only warn if workflow is COMPLETE and still missing fields (critical issue)
+        // Don't warn for in-progress workflows (user is still filling them in)
+        if (isComplete && (!component.hs_code || !component.origin_country)) {
+          console.warn(`⚠️ Component ${idx} missing required fields in COMPLETED workflow:`, {
             description: component.description,
             hasHsCode: !!component.hs_code,
             hasOriginCountry: !!component.origin_country
@@ -158,7 +160,7 @@ export default protectedApiHandler({
       // Table schema: id, user_id, email, workflow_type, workflow_name, hs_code,
       // completed_at, certificate_generated, status, total_savings, estimated_duty_savings,
       // compliance_cost_savings, workflow_data (JSONB), session_id, completion_time_minutes
-      const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || []);
+      const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || [], true);
 
       // ✅ CRITICAL FIX: Extract qualification status and regional content to top-level columns
       // Dashboard expects these fields in database columns, not just in JSONB
@@ -283,8 +285,8 @@ export default protectedApiHandler({
       // Extract company data from workflow for dedicated columns
       const companyData = workflowData.company || {};
 
-      // ✅ Normalize components for in-progress workflow too
-      const normalizedComponents = normalizeComponents(workflowData.components || workflowData.component_origins || []);
+      // ✅ Normalize components for in-progress workflow too (false = don't warn about missing fields)
+      const normalizedComponents = normalizeComponents(workflowData.component_origins || workflowData.components || [], false);
 
       const sessionRecord = {
         user_id: userId,

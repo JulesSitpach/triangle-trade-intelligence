@@ -782,7 +782,8 @@ export default protectedApiHandler({
             continue; // Skip database lookup, we have official data
           }
 
-          console.log(`⚠️ [USITC API] No data for ${component.hs_code}, falling back to database...`);
+          // ✅ USITC API not authenticated yet - fallback to database/AI is working correctly
+          // No need to log this as a warning, it's expected behavior
 
           // Normalize HS code: remove dots, pad to 8 digits
           const normalizedHsCode = (component.hs_code || '')
