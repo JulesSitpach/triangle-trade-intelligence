@@ -28,7 +28,7 @@ export default protectedApiHandler({
       // Get user's subscription tier
       const { data: userProfile, error: profileError } = await supabase
         .from('user_profiles')
-        .select('subscription_tier, trial_end_date')
+        .select('subscription_tier, trial_ends_at')
         .eq('user_id', userId)
         .single();
 
@@ -52,8 +52,8 @@ export default protectedApiHandler({
       let trialExpired = false;
       let daysRemaining = null;
 
-      if (subscriptionTier === 'trial' && userProfile.trial_end_date) {
-        const trialEnd = new Date(userProfile.trial_end_date);
+      if (subscriptionTier === 'trial' && userProfile.trial_ends_at) {
+        const trialEnd = new Date(userProfile.trial_ends_at);
         const now = new Date();
         trialExpired = now > trialEnd;
 
