@@ -787,6 +787,37 @@ export default function WorkflowResults({
       {/* Show full analysis to ALL users */}
       <USMCAQualification results={results} />
 
+      {/* TRIAL USER: Show Executive Summary upgrade callout */}
+      {!isPaidUser && (
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">🎯 Executive Summary</h3>
+          </div>
+          <div className="element-spacing">
+            <p style={{ fontSize: '0.95rem', color: '#6b7280', marginBottom: '1rem' }}>
+              Get personalized business intelligence including USMCA 2026 contingency planning, scenario analysis, and government resource guidance.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button
+                disabled
+                className="btn-secondary"
+                style={{
+                  backgroundColor: '#e5e7eb',
+                  color: '#6b7280',
+                  cursor: 'not-allowed',
+                  border: '1px solid #d1d5db'
+                }}
+              >
+                🔒 Monthly Limit Reached (0/0)
+              </button>
+              <Link href="/subscription" className="btn-primary" style={{ textDecoration: 'none' }}>
+                Upgrade for Executive Summaries
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PAID ONLY: Executive Summary Button + Strategic Recommendations */}
       {isPaidUser && (
         <>
