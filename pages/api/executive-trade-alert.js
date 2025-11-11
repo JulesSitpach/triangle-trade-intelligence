@@ -22,6 +22,7 @@ import { BaseAgent } from '../../lib/agents/base-agent.js';
 import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 import { createClient } from '@supabase/supabase-js';
 import { EXECUTIVE_SUMMARY_LIMITS } from '../../config/subscription-tier-limits.js';
+import { verifyAuth } from '../../lib/middleware/auth-middleware.js';
 
 // Initialize agents
 const executiveAgent = new BaseAgent({
@@ -50,7 +51,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_profile, workflow_intelligence, raw_alerts, user_id, workflow_completion_id } = req.body;
+    // 🔐 AUTHENTICATE USER (CRITICAL FIX Nov 11): Get user_id from session, not request body
+    // This was causing executive summary counter to NEVER increment (user_id was always undefined)
+    const authResult = await verifyAuth(req);
+    if (!authResult.authenticated) {
+      return res.status(401).json({
+        success: false,
+        error: 'Authentication required',
+        message: 'Please log in to generate executive summaries'
+      });
+    }
+    const user_id = authResult.user.id;
+
+    const { user_profile, workflow_intelligence, raw_alerts, workflow_completion_id } = req.body;
 
     // ✅ TIER-GATING: Trial users get 1 executive summary, then must upgrade
     // ✅ FIXED (Nov 5, 2025): Previously blocked Trial users completely
@@ -142,9 +155,9 @@ export default async function handler(req, res) {
       console.warn('⚠️ industry_sector missing - using fallback based on business_type');
       // Smart fallback based on business_type or company name
       const businessType = user_profile.business_type || '';
-      const companyName = user_profile.company_name || '';
+      const companyName = (user_profile.company_name || '').toLowerCase(); // Handle null company_name
 
-      if (businessType.includes('Food') || companyName.toLowerCase().includes('food') || companyName.toLowerCase().includes('gourmet')) {
+      if (businessType.includes('Food') || companyName.includes('food') || companyName.includes('gourmet')) {
         user_profile.industry_sector = 'Food & Beverage';
       } else if (businessType.includes('Manufacturer')) {
         user_profile.industry_sector = 'General Manufacturing';
@@ -391,32 +404,43 @@ export default async function handler(req, res) {
           process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
-        // ✅ SINGLE SOURCE OF TRUTH: Find workflow by EXACT session_id
-        const { data: workflow, error: queryError } = await supabase
-          .from('workflow_sessions')
-          .select('id')
+        // ✅ CRITICAL FIX (Nov 10): Save to workflow_completions table (has executive_summary column)
+        // Find completed workflow by session_id
+        const { data: completion, error: queryError } = await supabase
+          .from('workflow_completions')
+          .select('id, workflow_data')
           .eq('session_id', workflow_session_id)
           .eq('user_id', user_id)
           .single();
 
         if (queryError) {
-          console.error('❌ Failed to find workflow by session_id:', queryError, 'session_id:', workflow_session_id);
-        } else if (workflow) {
+          console.error('❌ Failed to find workflow_completion by session_id:', queryError, 'session_id:', workflow_session_id);
+        } else if (completion) {
+          // Update both executive_summary column AND workflow_data.detailed_analysis
+          const updatedWorkflowData = {
+            ...completion.workflow_data,
+            detailed_analysis: {
+              ...(completion.workflow_data?.detailed_analysis || {}),
+              situation_brief: alertStructure.situation_brief
+            }
+          };
+
           const { error: updateError } = await supabase
-            .from('workflow_sessions')
+            .from('workflow_completions')
             .update({
-              executive_summary: alertStructure.situation_brief,
+              executive_summary: alertStructure.situation_brief,  // ✅ Save to dedicated column
+              workflow_data: updatedWorkflowData,                 // ✅ Save to workflow_data JSONB for backwards compatibility
               updated_at: new Date().toISOString()
             })
-            .eq('id', workflow.id);
+            .eq('id', completion.id);
 
           if (updateError) {
             console.error('❌ Failed to save executive summary to database:', updateError);
           } else {
-            console.log('✅ Executive summary saved to EXACT workflow (session_id:', workflow_session_id, ', workflow_id:', workflow.id, ')');
+            console.log('✅ Executive summary saved to workflow_completions (session_id:', workflow_session_id, ', completion_id:', completion.id, ')');
           }
         } else {
-          console.warn('⚠️ No workflow found for session_id:', workflow_session_id, '- summary not saved to database');
+          console.warn('⚠️ No workflow_completion found for session_id:', workflow_session_id, '- summary not saved to database');
         }
       } catch (saveError) {
         console.error('❌ Error saving executive summary:', saveError);
