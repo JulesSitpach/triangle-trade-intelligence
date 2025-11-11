@@ -903,7 +903,7 @@ export default function EditableCertificatePreview({
           <div style={{ borderRight: '1px solid #000', borderBottom: '1px solid #000', padding: '8px' }}>
             <div style={labelStyle}>2. CERTIFIER NAME, ADDRESS, PHONE, AND EMAIL</div>
             <div style={{ fontSize: '8px', marginTop: '3px' }}>NAME</div>
-            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_name} onChange={(e) => handleFieldChange('certifier_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px', opacity: isTrialUser ? 0.6 : 1, cursor: isTrialUser ? 'not-allowed' : 'text' }} />
+            <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_name} onChange={(e) => handleFieldChange('certifier_name', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ fontSize: '8px' }}>ADDRESS</div>
             <input type="text" disabled={isTrialUser} readOnly={isTrialUser} value={editedCert.certifier_address} onChange={(e) => handleFieldChange('certifier_address', e.target.value)} style={{ ...inputStyle, marginBottom: '3px' }} />
             <div style={{ display: 'flex', gap: '8px' }}>
