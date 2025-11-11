@@ -2193,8 +2193,8 @@ export default function TradeRiskAlternatives() {
 
                     {/* Show upgrade CTA when limit reached */}
                     {briefingUsageStats.limit_reached && (
-                      <Link href="/pricing" className="btn-primary" style={{ textDecoration: 'none' }}>
-                        ⬆️ Upgrade for More Briefings
+                      <Link href="/subscription" className="btn-primary" style={{ textDecoration: 'none' }}>
+                        Upgrade for More Briefings
                       </Link>
                     )}
                   </div>
