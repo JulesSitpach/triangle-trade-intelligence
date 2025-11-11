@@ -240,17 +240,14 @@ export default function UserDashboard({ user }) {
             </p>
             <div className="action-buttons">
               {dashboardData?.usage_stats?.limit_reached ? (
-                <Link href="/subscription" className="btn-primary" style={{ marginRight: '10px' }}>
-                  🔒 Upgrade for More Analyses
+                <Link href="/subscription" className="btn-primary">
+                  Upgrade for More Analyses
                 </Link>
               ) : (
-                <Link href="/usmca-workflow" className="btn-primary" style={{ marginRight: '10px' }}>
-                  📊 Try USMCA Workflow
+                <Link href="/usmca-workflow" className="btn-primary">
+                  Try USMCA Workflow
                 </Link>
               )}
-              <Link href="/subscription" className="btn-secondary">
-                👀 Manage Subscription
-              </Link>
             </div>
             <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
               Trial expires {user?.trial_ends_at && new Date(user.trial_ends_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
