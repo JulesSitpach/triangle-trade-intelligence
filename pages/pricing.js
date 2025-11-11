@@ -123,7 +123,6 @@ export default function Pricing() {
       description: 'Test the platform - no credit card required',
       features: [
         '1 workflow analysis',
-        '1 executive summary',
         '3 components per workflow',
         'Certificate preview only (no download)',
         'View crisis alerts dashboard',
@@ -297,9 +296,9 @@ export default function Pricing() {
           {/* Trial Benefits */}
           <div className="hero-trial-benefits">
             <div className="trial-benefit-item">✓ 1 workflow analysis</div>
-            <div className="trial-benefit-item">✓ 1 executive summary</div>
             <div className="trial-benefit-item">✓ 3 components</div>
             <div className="trial-benefit-item">✓ Certificate preview</div>
+            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>
@@ -555,7 +554,7 @@ export default function Pricing() {
             <div className="content-card">
               <h3 className="content-card-title">How do I get started?</h3>
               <p className="content-card-description">
-                Sign up for free trial (no credit card), run 1 workflow analysis with 3 components, generate certificate preview, and view crisis alerts. Upgrade to paid plan for unlimited certificates and higher limits.
+                Sign up for free trial (no credit card), run 1 workflow analysis with 3 components, generate certificate preview, and view crisis alerts. Upgrade to paid plan for executive summaries, unlimited certificates, and higher limits.
               </p>
             </div>
 
@@ -597,7 +596,7 @@ export default function Pricing() {
             <div className="content-card">
               <div className="content-card-icon">1</div>
               <h3 className="content-card-title">Free Trial</h3>
-              <p className="content-card-description">Test platform: 1 workflow + 1 executive summary. 3 components. Certificate preview (watermarked). No credit card required.</p>
+              <p className="content-card-description">Test platform: 1 workflow analysis with 3 components. Certificate preview. Crisis alerts dashboard. No credit card required.</p>
             </div>
 
             <div className="content-card">

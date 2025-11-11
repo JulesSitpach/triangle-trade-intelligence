@@ -37,7 +37,7 @@ export const ANALYSIS_LIMITS = {
  * - pages/api/dashboard-data.js (dashboard display)
  */
 export const EXECUTIVE_SUMMARY_LIMITS = {
-  'Trial': 1,           // 1 executive summary (matches workflows)
+  'Trial': 0,           // Executive summaries not available for trial
   'Starter': 15,        // 15 executive summaries per month
   'Professional': 100,  // 100 executive summaries per month
   'Premium': 500,       // 500 executive summaries per month
