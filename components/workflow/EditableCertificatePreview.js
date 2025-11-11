@@ -679,7 +679,7 @@ export default function EditableCertificatePreview({
       // ✅ STEP 3: Generate PDF from captured image
       console.log('📄 Generating PDF from captured image...');
       const blob = await generateCertificatePDFFromImage(imageDataUrl, {
-        watermark: isTrialUser,
+        watermark: false,
         userTier: userTier
       });
 
@@ -761,7 +761,7 @@ export default function EditableCertificatePreview({
             <br /><br />
             <strong>Free Trial users can:</strong> View certificate structure, verify accuracy, preview layout
             <br />
-            <strong>Paid users can:</strong> Edit all fields, download clean certificates (no watermark), manage custom components, receive crisis alerts
+            <strong>Paid users can:</strong> Edit all fields, download certificates, manage custom components, receive crisis alerts
             <br /><br />
             <strong>Our Plans:</strong>
             <br />

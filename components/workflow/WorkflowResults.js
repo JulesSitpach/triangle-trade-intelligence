@@ -781,24 +781,10 @@ export default function WorkflowResults({
             </p>
           </div>
 
-          {/* TRIAL USER: Show they get watermarked certificate */}
-          {!isPaidUser && (
-            <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb'}}>
-              <div className="alert alert-info">
-                <div className="alert-content">
-                  <div className="alert-title">📄 Trial Certificate</div>
-                  <div className="text-body">
-                    Your certificate will include a <strong>"TRIAL VERSION"</strong> watermark.
-                    Upgrade to remove watermark and use for official customs submissions.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Show full analysis to ALL users (Trial gets watermarked PDF) */}
+      {/* Show full analysis to ALL users */}
       <USMCAQualification results={results} />
 
       {/* PAID ONLY: Executive Summary Button + Strategic Recommendations */}
