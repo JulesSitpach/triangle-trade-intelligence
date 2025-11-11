@@ -300,10 +300,12 @@ export default function UserDashboard({ user }) {
 
             {/* RENEWAL DATE & WARNINGS */}
             {!usageStats.is_unlimited && (() => {
-              const now = new Date();
-              const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-              const daysUntilReset = Math.ceil((nextMonth - now) / (1000 * 60 * 60 * 24));
-              const resetDate = nextMonth.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+              // ✅ FIX (Nov 11): Use actual subscription period_end from API instead of calculating first-of-next-month
+              // This ensures 30-day billing cycle accuracy (e.g., Nov 8 → Dec 8, not Nov 8 → Dec 1)
+              const daysUntilReset = usageStats.days_remaining || 0;
+              const resetDate = usageStats.period_end
+                ? new Date(usageStats.period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                : 'Unknown';
 
               return (
                 <div style={{ marginTop: '1rem' }}>
