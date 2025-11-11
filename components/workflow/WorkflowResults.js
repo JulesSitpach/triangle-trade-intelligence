@@ -7,6 +7,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import USMCAQualification from './results/USMCAQualification';
 import RecommendedActions from './results/RecommendedActions';
 import PolicyTimeline from './PolicyTimeline';
