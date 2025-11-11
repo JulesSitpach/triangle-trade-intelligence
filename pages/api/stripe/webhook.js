@@ -568,6 +568,7 @@ async function handleSubscriptionDeleted(subscription) {
           subscription_tier: 'Trial',
           status: 'trial_expired', // Read-only: can view past work, cannot create new
           trial_ends_at: new Date().toISOString(), // Set to now (expired)
+          canceled_at: new Date().toISOString(), // Start 90-day retention countdown
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId);
