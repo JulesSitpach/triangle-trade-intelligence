@@ -225,35 +225,6 @@ export default function UserDashboard({ user }) {
           <p className="dashboard-subtitle">Welcome back, {user?.email?.split('@')[0] || 'User'}</p>
         </div>
 
-        {/* ACTIVE TRIAL COUNTDOWN BANNER */}
-        {isActiveTrial && (
-          <div className="form-section" style={{ backgroundColor: '#E3F2FD', border: '2px solid #2196F3', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-            <h2 className="form-section-title" style={{ color: '#1565C0', marginTop: '0' }}>
-              🎉 Free Trial Active - {daysRemaining} Day{daysRemaining !== 1 ? 's' : ''} Remaining
-            </h2>
-            <p className="text-body" style={{ fontSize: '16px', marginBottom: '15px' }}>
-              {daysRemaining <= 2 ? (
-                <>Your trial ends soon! Upgrade now to keep unlimited access to USMCA analyses, alerts, and workflow downloads.</>
-              ) : (
-                <>You have {daysRemaining} days to explore Triangle Trade Intelligence. Try the USMCA workflow and see your potential tariff savings!</>
-              )}
-            </p>
-            <div className="action-buttons">
-              {dashboardData?.usage_stats?.limit_reached ? (
-                <Link href="/subscription" className="btn-primary">
-                  Upgrade for More Analyses
-                </Link>
-              ) : (
-                <Link href="/usmca-workflow" className="btn-primary">
-                  Try USMCA Workflow
-                </Link>
-              )}
-            </div>
-            <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
-              Trial expires {user?.trial_ends_at && new Date(user.trial_ends_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
-          </div>
-        )}
 
         {/* TRIAL EXPIRED BANNER */}
         {isTrialExpired && (
@@ -280,7 +251,7 @@ export default function UserDashboard({ user }) {
         <div className="form-section">
           <h2 className="form-section-title">Usage</h2>
             <p className="text-body">
-              <strong>{usageStats.used} of {usageStats.is_unlimited ? 'unlimited' : usageStats.limit}</strong> analyses used this month
+              <strong>{usageStats.used} of {usageStats.is_unlimited ? 'unlimited' : usageStats.limit}</strong> {usageStats.used > usageStats.limit ? 'analyses used (over limit)' : 'analyses used this month'}
             </p>
 
             {!usageStats.is_unlimited && (
