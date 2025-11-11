@@ -240,7 +240,7 @@ export default function UserDashboard({ user }) {
             </p>
             <div className="action-buttons">
               {dashboardData?.usage_stats?.limit_reached ? (
-                <Link href="/pricing" className="btn-primary" style={{ marginRight: '10px' }}>
+                <Link href="/subscription" className="btn-primary" style={{ marginRight: '10px' }}>
                   🔒 Upgrade for More Analyses
                 </Link>
               ) : (
@@ -248,8 +248,8 @@ export default function UserDashboard({ user }) {
                   📊 Try USMCA Workflow
                 </Link>
               )}
-              <Link href="/pricing" className="btn-secondary">
-                👀 View Plans
+              <Link href="/subscription" className="btn-secondary">
+                👀 Manage Subscription
               </Link>
             </div>
             <p className="text-body" style={{ fontSize: '14px', marginTop: '10px', color: '#666' }}>
@@ -269,7 +269,7 @@ export default function UserDashboard({ user }) {
               Your trial period has ended. Upgrade now to continue creating USMCA analyses, viewing alerts, and downloading workflows.
             </p>
             <div className="action-buttons">
-              <Link href="/pricing" className="btn-primary" style={{ fontSize: '18px', padding: '12px 30px' }}>
+              <Link href="/subscription" className="btn-primary" style={{ fontSize: '18px', padding: '12px 30px' }}>
                 🚀 Upgrade to Starter ($99/month)
               </Link>
             </div>
@@ -322,7 +322,7 @@ export default function UserDashboard({ user }) {
                         🚫 <strong>Limit Reached:</strong> {usageStats.used} of {usageStats.limit} analyses used
                       </p>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#7f1d1d', fontSize: '0.875rem' }}>
-                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/pricing" style={{ color: '#dc2626', textDecoration: 'underline' }}>Upgrade to Professional</Link>
+                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/subscription" style={{ color: '#dc2626', textDecoration: 'underline' }}>Upgrade to Professional</Link>
                       </p>
                     </div>
                   )}
@@ -340,7 +340,7 @@ export default function UserDashboard({ user }) {
                         🚨 <strong>Alert:</strong> Only {usageStats.remaining} analysis remaining!
                       </p>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.875rem' }}>
-                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/pricing" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Upgrade Now</Link>
+                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/subscription" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Upgrade Now</Link>
                       </p>
                     </div>
                   )}
@@ -375,7 +375,7 @@ export default function UserDashboard({ user }) {
 
             {usageStats.limit_reached && !usageStats.is_unlimited && (
               <div className="hero-buttons" style={{ marginTop: '1rem' }}>
-                <Link href="/pricing" className="btn-primary">
+                <Link href="/subscription" className="btn-primary">
                   Upgrade for More Analyses
                 </Link>
               </div>
@@ -429,7 +429,7 @@ export default function UserDashboard({ user }) {
                 </button>
               )}
               {isTrialExpired || dashboardData?.usage_stats?.limit_reached ? (
-                <Link href="/pricing" className="btn-primary">
+                <Link href="/subscription" className="btn-primary">
                   🔒 Upgrade for More Analyses
                 </Link>
               ) : (
@@ -452,8 +452,8 @@ export default function UserDashboard({ user }) {
                 Upgrade to view your past analyses and create new USMCA certifications.
               </p>
               <div className="action-buttons" style={{ marginTop: '20px' }}>
-                <Link href="/pricing" className="btn-primary">
-                  View Pricing Plans
+                <Link href="/subscription" className="btn-primary">
+                  Upgrade Subscription
                 </Link>
               </div>
             </div>

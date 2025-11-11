@@ -771,7 +771,7 @@ export default function EditableCertificatePreview({
             <br />
             • <strong>Premium</strong> ($599/month): 500 analyses + everything + priority support
             <br /><br />
-            <Link href="/pricing" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</Link>
+            <Link href="/subscription" style={{color: '#2563eb', textDecoration: 'underline', fontWeight: 'bold'}}>👉 Upgrade to Starter Today ($99/month)</Link>
           </div>
         </div>
       )}
