@@ -290,7 +290,7 @@ export default function UserDashboard({ user }) {
                         🚫 <strong>Limit Reached:</strong> {usageStats.used} of {usageStats.limit} analyses used
                       </p>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#7f1d1d', fontSize: '0.875rem' }}>
-                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/subscription" style={{ color: '#dc2626', textDecoration: 'underline' }}>Upgrade to Professional</Link>
+                        Resets: {resetDate} ({daysUntilReset} days)
                       </p>
                     </div>
                   )}
@@ -308,7 +308,7 @@ export default function UserDashboard({ user }) {
                         🚨 <strong>Alert:</strong> Only {usageStats.remaining} analysis remaining!
                       </p>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.875rem' }}>
-                        Resets: {resetDate} ({daysUntilReset} days) | <Link href="/subscription" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Upgrade Now</Link>
+                        Resets: {resetDate} ({daysUntilReset} days)
                       </p>
                     </div>
                   )}
