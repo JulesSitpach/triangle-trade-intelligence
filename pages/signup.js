@@ -87,9 +87,8 @@ export default function Signup() {
           alert(`✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nAfter verification, you'll be able to subscribe to the ${plan} plan.`);
           router.push(`/login?redirect=/pricing&message=Please verify your email to complete subscription`);
         } else {
-          // For trial, normal flow
-          alert('✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nOnce verified, you can sign in and start your free trial!');
-          router.push('/login?message=Account created successfully. Please sign in.');
+          // For trial, normal flow - user can login immediately
+          router.push('/login?message=Account created successfully. You can sign in now.');
         }
       }
     } catch (err) {
