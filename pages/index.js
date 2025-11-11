@@ -97,7 +97,7 @@ export default function HomePage() {
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
-            <Link href="/pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
               Get Started
             </Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
