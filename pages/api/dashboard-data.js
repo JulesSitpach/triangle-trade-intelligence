@@ -103,9 +103,10 @@ export default protectedApiHandler({
       });
 
       // === WORKFLOW ANALYSIS LIMITS ===
-      const limit = SUBSCRIPTION_LIMITS[profile?.subscription_tier] !== undefined
-        ? SUBSCRIPTION_LIMITS[profile?.subscription_tier]
-        : 10; // Default to Starter limit
+      const tierLimitValue = SUBSCRIPTION_LIMITS[profile?.subscription_tier];
+      const limit = tierLimitValue !== undefined && tierLimitValue !== null
+        ? tierLimitValue
+        : 10; // Default to Starter limit (only if tier doesn't exist in config)
 
       const used = monthlyUsed || 0;
 
@@ -116,9 +117,10 @@ export default protectedApiHandler({
       const limitReached = isUnlimited ? false : used >= limit;
 
       // === PORTFOLIO BRIEFING LIMITS ===
-      const briefingLimit = BRIEFING_LIMITS[profile?.subscription_tier] !== undefined
-        ? BRIEFING_LIMITS[profile?.subscription_tier]
-        : 50; // Default to Starter limit
+      const briefingLimitValue = BRIEFING_LIMITS[profile?.subscription_tier];
+      const briefingLimit = briefingLimitValue !== undefined && briefingLimitValue !== null
+        ? briefingLimitValue
+        : 50; // Default to Starter limit (only if tier doesn't exist in config)
 
       const briefingUsed = monthlyBriefingsUsed || 0;
 
@@ -128,9 +130,10 @@ export default protectedApiHandler({
       const briefingLimitReached = isBriefingUnlimited ? false : briefingUsed >= briefingLimit;
 
       // === EXECUTIVE SUMMARY LIMITS ===
-      const executiveSummaryLimit = EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier] !== undefined
-        ? EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier]
-        : 15; // Default to Starter limit
+      const executiveSummaryLimitValue = EXECUTIVE_SUMMARY_LIMITS[profile?.subscription_tier];
+      const executiveSummaryLimit = executiveSummaryLimitValue !== undefined && executiveSummaryLimitValue !== null
+        ? executiveSummaryLimitValue
+        : 15; // Default to Starter limit (only if tier doesn't exist in config)
 
       const executiveSummaryUsed = monthlyExecutiveSummariesUsed || 0;
 
@@ -659,11 +662,13 @@ export default protectedApiHandler({
       let periodEnd;
       let daysRemaining;
 
-      if (tier === 'Trial' || !profile?.subscription_period_end) {
-        // Trial users: Use calendar month end
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        periodEnd = nextMonth;
-        daysRemaining = Math.ceil((nextMonth - now) / (1000 * 60 * 60 * 24));
+      if (tier === 'Trial' || tier === 'trial' || !profile?.subscription_period_end) {
+        // Trial users: 7-day trial from account creation
+        const createdAt = profile?.created_at ? new Date(profile.created_at) : now;
+        const trialEnd = new Date(createdAt);
+        trialEnd.setDate(trialEnd.getDate() + 7); // 7 days from creation
+        periodEnd = trialEnd;
+        daysRemaining = Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24));
       } else {
         // Paid users: Use 30-day rolling period
         periodEnd = new Date(profile.subscription_period_end);
