@@ -164,7 +164,8 @@ export default async function handler(req, res) {
       path: '/'
     }));
 
-    logger.security('Successful login', {
+    // ✅ FIX (Nov 10): Use logger.info for successful logins (not security/high severity)
+    logger.info('Successful login', {
       component: 'auth_api',
       email,
       isAdmin: sessionData.isAdmin,

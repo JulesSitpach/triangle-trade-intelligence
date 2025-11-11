@@ -10,7 +10,8 @@ export default function WorkflowProgress({
   currentStep,
   onStepClick,
   trustIndicators,
-  isStepClickable = false
+  isStepClickable = false,
+  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
 }) {
   const [mounted, setMounted] = useState(false);
   const [certificateGenerated, setCertificateGenerated] = useState(false);
@@ -40,6 +41,13 @@ export default function WorkflowProgress({
   const getStepStatus = (step) => {
     if (!mounted) return 'inactive'; // Prevent hydration mismatch
 
+    // ✅ READ-ONLY MODE: Show all completed steps as green checkmarks, disable clicking
+    if (viewMode === 'read-only') {
+      // Steps 1-3 are complete (workflow is done), step 4 is inactive (cert not generated from view)
+      if (step <= 3) return 'complete';
+      return 'inactive';
+    }
+
     // Special handling for Step 4 (Generate Certificate)
     // Always show blue (active) when on step 4, never green
     if (step === 4) {
@@ -64,8 +72,9 @@ export default function WorkflowProgress({
         return (
           <div
             key={item.step}
-            onClick={() => handleStepClick(item.step)}
+            onClick={isStepClickable ? () => handleStepClick(item.step) : undefined}
             className={`workflow-step ${status} ${isStepClickable ? 'clickable' : ''}`}
+            style={{ cursor: isStepClickable ? 'pointer' : 'default' }}
           >
             {/* Step Indicator - Compact circle design */}
             <div className="workflow-step-indicator">

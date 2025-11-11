@@ -225,14 +225,6 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
   return (
     <div className="executive-summary-container">
-      {/* Download Banner - Top */}
-      <div className="download-banner">
-        <span>Analysis complete and automatically saved to your dashboard.</span>
-        <button onClick={handleDownloadPDF} className="btn-primary">
-          📄 Download PDF
-        </button>
-      </div>
-
       {/* AI-Generated Narrative Sections */}
       <div className="executive-summary-content">
         {sections.map((section, index) => (
@@ -276,6 +268,21 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
         </p>
       </div>
 
+      {/* Next Steps - Consistent with alerts dashboard */}
+      <div className="form-section">
+        <h2 className="form-section-title">Next Steps</h2>
+        <p className="text-body" style={{ marginBottom: '1rem' }}>
+          Analysis complete and automatically saved to your dashboard. Access from any device or download as PDF.
+        </p>
+        <div className="hero-buttons">
+          <button onClick={handleDownloadPDF} className="btn-primary">
+            📄 Download PDF
+          </button>
+          <button onClick={onClose} className="btn-secondary">
+            ← Back to Results
+          </button>
+        </div>
+      </div>
 
       <style jsx>{`
         .executive-summary-container {
@@ -415,33 +422,6 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           font-size: 0.875rem;
           color: #92400e;
           line-height: 1.5;
-        }
-
-        .download-banner {
-          padding: 1rem 2rem;
-          background: #3b82f6;
-          color: white;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 1rem;
-          border-radius: 8px 8px 0 0;
-          font-size: 0.875rem;
-        }
-
-        .download-banner span {
-          flex: 1;
-        }
-
-        @media (max-width: 768px) {
-          .download-banner {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .btn-primary {
-            width: 100%;
-          }
         }
       `}</style>
     </div>

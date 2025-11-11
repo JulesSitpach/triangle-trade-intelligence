@@ -19,7 +19,8 @@ export default function CompanyInformationStep({
   onNext,
   isStepValid,
   onNewAnalysis,
-  saveWorkflowToDatabase
+  saveWorkflowToDatabase,
+  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
@@ -497,20 +498,27 @@ export default function CompanyInformationStep({
 
         <div className="dashboard-actions">
           <div className="dashboard-actions-left">
-            {isClient && !validationError && !isNextDisabled && (
+            {isClient && !validationError && !isNextDisabled && viewMode === 'normal' && (
               <span className="form-help success">
                 ✓ All required fields completed
               </span>
             )}
+            {viewMode === 'read-only' && (
+              <span className="form-help" style={{color: '#6b7280'}}>
+                📊 Viewing saved workflow data (read-only mode)
+              </span>
+            )}
           </div>
           <div className="dashboard-actions-right">
-            <button
-              onClick={handleContinue}
-              className="btn-primary"
-              disabled={isSaving}
-            >
-              {isSaving ? '💾 Saving...' : 'Continue to Product Details'}
-            </button>
+            {viewMode === 'normal' && (
+              <button
+                onClick={handleContinue}
+                className="btn-primary"
+                disabled={isSaving}
+              >
+                {isSaving ? '💾 Saving...' : 'Continue to Product Details'}
+              </button>
+            )}
           </div>
         </div>
     </>

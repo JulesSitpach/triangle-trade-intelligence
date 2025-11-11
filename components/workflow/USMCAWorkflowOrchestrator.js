@@ -34,6 +34,17 @@ export default function USMCAWorkflowOrchestrator() {
   // Use shared auth context (eliminates redundant API call)
   const { subscriptionTier: userTier } = useSimpleAuth();
 
+  // ✅ NEW: Track view mode using sessionStorage (persists after URL cleanup, clears on tab close)
+  // - 'read-only' = from "View Results" button (no edits allowed)
+  // - 'normal' = regular workflow
+  const [viewMode, setViewMode] = React.useState(() => {
+    // Initialize from sessionStorage on mount (prevents state loss on reload)
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('workflow_view_mode') || 'normal';
+    }
+    return 'normal';
+  });
+
   const {
     currentStep,
     workflowPath,
@@ -71,6 +82,13 @@ export default function USMCAWorkflowOrchestrator() {
     if (router.query.reset === 'true' && !hasProcessedResetRef.current) {
       hasProcessedResetRef.current = true;
       console.log('🔄 New Analysis triggered - resetting workflow');
+
+      // ✅ Clear read-only mode when starting new analysis
+      setViewMode('normal');
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('workflow_view_mode');
+      }
+
       resetWorkflow();
       // Clean up the URL by removing the reset parameter
       router.replace('/usmca-workflow', undefined, { shallow: true });
@@ -80,14 +98,24 @@ export default function USMCAWorkflowOrchestrator() {
     }
   }, [router.query.reset, resetWorkflow, router]);
 
-  // Handle "View Results" - load saved workflow and jump to results
+  // Handle "View Results" - load saved workflow and jump directly to results (skip steps 1-2)
   useEffect(() => {
     const workflowId = router.query.view_results;
-    const targetStep = router.query.step ? parseInt(router.query.step) : null;
+    const targetStep = router.query.step ? parseInt(router.query.step) : 3; // Default to step 3 if not specified
 
     if (workflowId && !hasLoadedResultsRef.current) {
       hasLoadedResultsRef.current = true;
-      console.log('📊 Loading saved workflow results:', workflowId, 'Target step:', targetStep);
+      console.log('📊 Loading saved workflow results:', workflowId, 'Jumping directly to step:', targetStep);
+
+      // ✅ SET READ-ONLY MODE in both state AND sessionStorage (persists after URL cleanup)
+      setViewMode('read-only');
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('workflow_view_mode', 'read-only');
+      }
+
+      // ✅ PERFORMANCE FIX: Jump to target step IMMEDIATELY (before data loads)
+      // This prevents rendering steps 1→2→3 and instead goes directly to step 3
+      goToStep(targetStep);
 
       // Fetch workflow from database
       fetch('/api/dashboard-data', { credentials: 'include' })
@@ -102,11 +130,8 @@ export default function USMCAWorkflowOrchestrator() {
             industry_sector_value: workflow?.workflow_data?.company?.industry_sector
           });
           if (workflow && loadSavedWorkflow) {
-            loadSavedWorkflow(workflow);
-            // If step parameter provided, jump directly to that step
-            if (targetStep !== null) {
-              goToStep(targetStep);
-            }
+            // Load data but DON'T change step (we already jumped to target step above)
+            loadSavedWorkflow(workflow, { skipStepChange: true });
           }
         })
         .catch(async (err) => {
@@ -496,7 +521,8 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         currentStep={currentStep}
         trustIndicators={trustIndicators}
         onStepClick={goToStep}
-        isStepClickable={true} // Allow navigation from any step
+        isStepClickable={false} // ✅ Never clickable - prevents validation bypass, simpler UX
+        viewMode={viewMode} // Pass mode to show visual indicators
       />
 
       {/* Error Display */}
@@ -519,6 +545,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             isStepValid={() => isStepValid(1)}
             onNewAnalysis={resetWorkflow}
             saveWorkflowToDatabase={saveWorkflowToDatabase}
+            viewMode={viewMode} // Pass view mode to disable buttons in read-only
           />
         )}
 
@@ -536,6 +563,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             userTier={userTier}
             saveWorkflowToDatabase={saveWorkflowToDatabase}
             currentSessionId={currentSessionId}  // ✅ FIX (Nov 6): Pass session ID so component reacts to new sessions
+            viewMode={viewMode} // Pass view mode to disable buttons in read-only
           />
         )}
 
@@ -642,6 +670,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onDownloadCertificate={handleCertificateFormatSelection}
             onDownloadSimpleCertificate={handleDownloadSimpleCertificate}
             trustIndicators={trustIndicators}
+            viewMode={viewMode}
             onContinueToAuthorization={async () => {
               // Prepare workflow data for database capture
               const workflowData = {
@@ -773,6 +802,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onDownloadCertificate={handleCertificateFormatSelection}
             onDownloadSimpleCertificate={handleDownloadSimpleCertificate}
             trustIndicators={trustIndicators}
+            viewMode={viewMode}
           />
         )}
       </div>

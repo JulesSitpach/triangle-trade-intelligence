@@ -400,6 +400,34 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
       has_monitoring_section: markdownBriefing.includes('## What We\'re Monitoring')
     });
 
+    // 💾 SAVE BRIEFING TO DATABASE (avoids costly AI regeneration)
+    try {
+      const { data: savedBriefing, error: saveError } = await supabase
+        .from('portfolio_briefings')
+        .insert({
+          user_id: user_id,
+          workflow_session_id: workflow_data.session_id || null,
+          company_name: companyName,
+          briefing_markdown: markdownBriefing,
+          portfolio_value: totalVolume,
+          real_alerts_matched: matchedAlerts.length,
+          strategic_alerts: strategicAlerts,
+          generated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (saveError) {
+        console.error('⚠️ Failed to save briefing to database:', saveError);
+        // Non-blocking: briefing still returned to user even if save fails
+      } else {
+        console.log(`✅ Portfolio briefing saved to database (ID: ${savedBriefing.id})`);
+      }
+    } catch (saveException) {
+      console.error('⚠️ Exception saving briefing:', saveException);
+      // Non-blocking: don't fail the request
+    }
+
     // Return markdown briefing
     return res.status(200).json({
       success: true,

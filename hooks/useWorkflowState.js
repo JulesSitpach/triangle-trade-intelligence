@@ -820,8 +820,8 @@ export function useWorkflowState() {
   }, []);
 
   // Load saved workflow from dashboard
-  const loadSavedWorkflow = useCallback((workflow) => {
-    console.log('📥 Loading saved workflow:', workflow);
+  const loadSavedWorkflow = useCallback((workflow, options = {}) => {
+    console.log('📥 Loading saved workflow:', workflow, 'Options:', options);
 
     // ✅ FIX (Nov 7): Mark that we just loaded from database
     // This prevents localStorage restore from overwriting database data
@@ -943,9 +943,15 @@ export function useWorkflowState() {
 
     // Set results and jump to results page
     setResults(loadedResults);
-    setCurrentStep(5);
 
-    console.log('✅ Workflow loaded, showing results AND formData populated for navigation');
+    // ✅ PERFORMANCE FIX: Don't change step if skipStepChange is true
+    // This prevents re-rendering when orchestrator already jumped to target step
+    if (!options.skipStepChange) {
+      setCurrentStep(3); // Changed from 5 to 3 (results step)
+    }
+
+    console.log('✅ Workflow loaded, showing results AND formData populated for navigation',
+      options.skipStepChange ? '(step change skipped)' : '(step set to 3)');
   }, []);
 
   // Manual save function - called when user clicks "Next"

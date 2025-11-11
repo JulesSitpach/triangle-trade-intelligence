@@ -20,7 +20,8 @@ export default function WorkflowResults({
   workflowSessionId,
   onReset,
   onDownloadCertificate,
-  trustIndicators
+  trustIndicators,
+  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
 }) {
   const router = useRouter();
   const [dataSentToAlerts, setDataSentToAlerts] = useState(false);
@@ -58,14 +59,11 @@ export default function WorkflowResults({
     fetchUserSubscriptionTier();
   }, []);
 
-  // ✅ AUTO-SHOW: When loading from dashboard, auto-display executive summary if it exists
-  useEffect(() => {
-    if (results?.detailed_analysis?.situation_brief && !showSummary && !executiveSummary) {
-      console.log('📊 Auto-showing executive summary from database');
-      setExecutiveSummary(results.detailed_analysis);
-      setShowSummary(true);
-    }
-  }, [results?.detailed_analysis, showSummary, executiveSummary]);
+  // ✅ SIMPLIFIED: No need for complex state - just check if data exists in results
+  // Executive summary displays if EITHER:
+  // 1. Freshly generated (executiveSummary state)
+  // 2. Loaded from database (results.detailed_analysis)
+  const hasExecutiveSummary = !!results?.detailed_analysis?.situation_brief || !!executiveSummary;
 
   useEffect(() => {
     // Check if user already generated certificate for this session
@@ -821,7 +819,7 @@ export default function WorkflowResults({
               })}
 
               {/* Show banner if summary already exists */}
-              {results?.detailed_analysis?.situation_brief && (
+              {hasExecutiveSummary && (
                 <div style={{
                   backgroundColor: '#f0fdf4',
                   border: '1px solid #86efac',
@@ -835,25 +833,29 @@ export default function WorkflowResults({
                 </div>
               )}
 
-              {/* Generate button - ALWAYS visible but disabled after generation */}
-              <button
-                onClick={() => generateExecutiveSummary()}
-                className={results?.detailed_analysis?.situation_brief ? "btn-secondary" : "btn-primary"}
-                style={{
-                  width: '100%',
-                  marginBottom: '1.5rem',
-                  opacity: results?.detailed_analysis?.situation_brief ? 0.5 : 1,
-                  cursor: results?.detailed_analysis?.situation_brief ? 'not-allowed' : 'pointer'
-                }}
-                disabled={loadingSummary || !!results?.detailed_analysis?.situation_brief}
-                title={results?.detailed_analysis?.situation_brief ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
-              >
-                {loadingSummary ? '⏳ Generating Summary...' :
-                 results?.detailed_analysis?.situation_brief ? '✓ Executive Summary Generated (1 per workflow)' :
-                 '📊 Generate Business Impact Summary (1 per workflow included)'}
-              </button>
+              {/* Generate button - HIDDEN in read-only mode */}
+              {viewMode === 'normal' && (
+                <button
+                  onClick={() => generateExecutiveSummary()}
+                  className={hasExecutiveSummary ? "btn-secondary" : "btn-primary"}
+                  style={{
+                    width: '100%',
+                    marginBottom: '1.5rem',
+                    backgroundColor: hasExecutiveSummary ? '#9ca3af' : undefined,
+                    borderColor: hasExecutiveSummary ? '#9ca3af' : undefined,
+                    color: hasExecutiveSummary ? '#ffffff' : undefined,
+                    cursor: hasExecutiveSummary ? 'not-allowed' : 'pointer'
+                  }}
+                  disabled={loadingSummary || hasExecutiveSummary}
+                  title={hasExecutiveSummary ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
+                >
+                  {loadingSummary ? '⏳ Generating Summary...' :
+                   hasExecutiveSummary ? '✓ Executive Summary Generated (1 per workflow)' :
+                   '📊 Generate Business Impact Summary (1 per workflow included)'}
+                </button>
+              )}
 
-              {!results?.detailed_analysis?.situation_brief && (
+              {viewMode === 'normal' && !hasExecutiveSummary && (
                 <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
                   Get a personalized analysis of how USMCA qualification affects your business, including supply chain risks and sourcing opportunities. Each workflow includes one complimentary executive summary.
                 </p>
@@ -868,10 +870,10 @@ export default function WorkflowResults({
         </>
       )}
 
-      {/* Executive Summary Display - OUTSIDE tier gate so it always shows when generated */}
-      {showSummary && executiveSummary && (
+      {/* Executive Summary Display - SIMPLIFIED: Just show if data exists */}
+      {hasExecutiveSummary && (
         <ExecutiveSummaryDisplay
-          data={executiveSummary}
+          data={executiveSummary || results?.detailed_analysis}
           onClose={() => setShowSummary(false)}
         />
       )}
@@ -889,7 +891,7 @@ export default function WorkflowResults({
           <div className="hero-buttons">
             {/* ✅ REMOVED: "Save to Database" button (data auto-saves via API) */}
 
-            {/* Button 1: Generate Certificate (if qualified) */}
+            {/* Button 1: Generate Certificate (if qualified) - ALWAYS visible ($0 cost) */}
             {results.usmca?.qualified && (
               <button
                 onClick={() => {
@@ -912,7 +914,7 @@ export default function WorkflowResults({
               </button>
             )}
 
-            {/* Button 2: Set Up Alerts */}
+            {/* Button 2: Set Up Alerts - ALWAYS visible */}
             <button
               onClick={handleSetUpAlerts}
               className="btn-primary"
@@ -920,7 +922,7 @@ export default function WorkflowResults({
               🔔 Set Up Alerts
             </button>
 
-            {/* Button 3: New Analysis */}
+            {/* Button 3: New Analysis - ALWAYS visible */}
             <button
               onClick={() => {
                 // ✅ SIMPLIFIED: Data auto-saves via API

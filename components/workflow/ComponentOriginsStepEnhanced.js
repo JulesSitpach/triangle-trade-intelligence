@@ -26,7 +26,8 @@ export default function ComponentOriginsStepEnhanced({
   isLoading,
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL,
   saveWorkflowToDatabase,
-  currentSessionId  // ✅ FIX (Nov 6): Receive session ID from parent hook
+  currentSessionId,  // ✅ FIX (Nov 6): Receive session ID from parent hook
+  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
 }) {
   // Track if we just pushed to parent to avoid infinite restore loop
   const lastPushedRef = useRef(null);
@@ -138,7 +139,7 @@ export default function ComponentOriginsStepEnhanced({
           block: 'start'
         });
         setHasScrolledToComponents(true);
-      }, 300);
+      }, 150); // ✅ Faster scroll - reduced from 300ms to 150ms
     }
   }, [formData.product_description, formData.manufacturing_location, hasScrolledToComponents]);
 
@@ -792,25 +793,7 @@ export default function ComponentOriginsStepEnhanced({
         <h3 className="form-section-title">Product Overview</h3>
         
         <div className="form-grid-2">
-          {/* Main Product Description */}
-          <div className="form-group">
-            <label className="form-label">
-              Complete Product Description
-            </label>
-            <textarea
-              value={formData.product_description || ''}
-              onChange={(e) => updateFormData('product_description', e.target.value)}
-              placeholder="Example: '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric'"
-              className="form-input"
-              rows="3"
-            />
-            <div className="form-help">
-              Detailed product description including materials, construction, and key features for accurate classification
-            </div>
-
-          </div>
-
-          {/* Substantial Transformation Checkbox - Always visible, user ignores if not applicable */}
+          {/* LEFT COLUMN: Substantial Transformation */}
           <div className="form-group">
             <div style={{ padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
@@ -840,7 +823,7 @@ export default function ComponentOriginsStepEnhanced({
                   type="text"
                   value={formData.manufacturing_process || ''}
                   onChange={(e) => updateFormData('manufacturing_process', e.target.value)}
-                  placeholder="Example: Cooking, blending, pasteurization, bottling"
+                  placeholder="Example: PCB assembly, firmware integration, enclosure molding"
                   className="form-input"
                 />
                 <div className="form-help">
@@ -850,32 +833,52 @@ export default function ComponentOriginsStepEnhanced({
             )}
           </div>
 
-          {/* Manufacturing Location */}
-          <div className="form-group">
-            <label className="form-label required">
-              Manufacturing/Assembly Location
-            </label>
-            <select
-              value={formData.manufacturing_location || ''}
-              onChange={(e) => updateFormData('manufacturing_location', e.target.value)}
-              onBlur={scrollToComponentBreakdown}
-              className={`form-select ${formData.manufacturing_location ? 'has-value' : ''}`}
-              required
-            >
-              <option value="">Select manufacturing country...</option>
-              <option value="DOES_NOT_APPLY">Does Not Apply (Imported/Distributed Only)</option>
-              {dropdownOptions.countries?.map((country, idx) => {
-                const countryCode = typeof country === 'string' ? country : country.value || country.code;
-                const countryName = typeof country === 'string' ? country : country.label || country.name;
-                return (
-                  <option key={`mfg-loc-${countryCode}-${idx}`} value={countryCode}>
-                    {countryName}
-                  </option>
-                );
-              })}
-            </select>
-            <div className="form-help">
-              Where is the final product assembled/manufactured? (Select &quot;Does Not Apply&quot; if you import/distribute only)
+          {/* RIGHT COLUMN: Product Description + Manufacturing Location */}
+          <div>
+            {/* Main Product Description */}
+            <div className="form-group">
+              <label className="form-label">
+                Complete Product Description
+              </label>
+              <textarea
+                value={formData.product_description || ''}
+                onChange={(e) => updateFormData('product_description', e.target.value)}
+                placeholder="Example: '100% cotton crew neck t-shirts with reinforced seams, medium weight jersey knit fabric'"
+                className="form-input"
+                rows="3"
+              />
+              <div className="form-help">
+                Detailed product description including materials, construction, and key features for accurate classification
+              </div>
+            </div>
+
+            {/* Manufacturing Location - Below product description */}
+            <div className="form-group">
+              <label className="form-label required">
+                Manufacturing/Assembly Location
+              </label>
+              <select
+                value={formData.manufacturing_location || ''}
+                onChange={(e) => updateFormData('manufacturing_location', e.target.value)}
+                onBlur={scrollToComponentBreakdown}
+                className={`form-select ${formData.manufacturing_location ? 'has-value' : ''}`}
+                required
+              >
+                <option value="">Select manufacturing country...</option>
+                <option value="DOES_NOT_APPLY">Does Not Apply (Imported/Distributed Only)</option>
+                {dropdownOptions.countries?.map((country, idx) => {
+                  const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                  const countryName = typeof country === 'string' ? country : country.label || country.name;
+                  return (
+                    <option key={`mfg-loc-${countryCode}-${idx}`} value={countryCode}>
+                      {countryName}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className="form-help">
+                Where is the final product assembled/manufactured? (Select &quot;Does Not Apply&quot; if you import/distribute only)
+              </div>
             </div>
           </div>
 
@@ -1141,6 +1144,16 @@ export default function ComponentOriginsStepEnhanced({
             type="button"
             onClick={addComponent}
             disabled={(() => {
+              // Check if total percentage is already 100%
+              if (getTotalPercentage() === 100) {
+                return true;
+              }
+
+              // Check if subscription tier limit reached
+              if (!canAddComponent(userTier, usedComponentsCount)) {
+                return true;
+              }
+
               // Check if last component is fully filled
               const lastComponent = components[components.length - 1];
               const isLastComponentComplete = lastComponent &&
@@ -1241,27 +1254,38 @@ export default function ComponentOriginsStepEnhanced({
       )}
 
       {/* Navigation Buttons */}
-      <div className="dashboard-actions section-spacing">
-        <button
-          onClick={onPrevious}
-          className="btn-primary"
-        >
-          ← Previous
-        </button>
-        <button
-          onClick={handleValidateAndProceed}
-          disabled={!isValid() || isLoading || isValidating}
-          className={`${isValid() && !isLoading && !isValidating ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading || isValidating ? 'disabled' : ''}`}
-        >
-          {isLoading || isValidating ? (
-            <>{isValidating ? 'Validating...' : 'Processing...'}</>
-          ) : (
-            <>
-              Continue to USMCA Analysis
-            </>
-          )}
-        </button>
-      </div>
+      {viewMode === 'normal' && (
+        <div className="dashboard-actions section-spacing">
+          <button
+            onClick={onPrevious}
+            className="btn-primary"
+          >
+            ← Previous
+          </button>
+          <button
+            onClick={handleValidateAndProceed}
+            disabled={!isValid() || isLoading || isValidating}
+            className={`${isValid() && !isLoading && !isValidating ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading || isValidating ? 'disabled' : ''}`}
+          >
+            {isLoading || isValidating ? (
+              <>{isValidating ? 'Validating...' : 'Processing...'}</>
+            ) : (
+              <>
+                Continue to USMCA Analysis
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Read-Only Mode Indicator */}
+      {viewMode === 'read-only' && (
+        <div className="dashboard-actions section-spacing">
+          <span className="form-help" style={{color: '#6b7280', textAlign: 'center', display: 'block'}}>
+            📊 Viewing saved workflow data (read-only mode)
+          </span>
+        </div>
+      )}
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (

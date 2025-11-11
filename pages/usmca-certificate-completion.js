@@ -665,21 +665,12 @@ export default function USMCACertificateCompletion() {
     <TriangleLayout>
       <div className="user-dashboard-page">
         <div className="dashboard-container">
-          {/* Workflow Progress Indicator - Clickable Navigation */}
+          {/* Workflow Progress Indicator - Visual Only (Not Clickable) */}
           <WorkflowProgress
             currentStep={4}
-            isStepClickable={true}
+            isStepClickable={false}
             onStepClick={(step) => {
-              if (step === 1 || step === 2) {
-                // Navigate back to workflow orchestrator at specific step
-                workflowStorage.setItem('workflow_current_step', step.toString());
-                router.push('/usmca-workflow');
-              } else if (step === 3) {
-                // Navigate back to results
-                workflowStorage.setItem('workflow_current_step', '3');
-                router.push('/usmca-workflow');
-              }
-              // step 4 = current page, do nothing
+              // Steps are never clickable - use Previous/Continue buttons for navigation
             }}
           />
 

@@ -4,12 +4,31 @@
  * Generates a professional USMCA certificate object from authorization data
  */
 
+import { createClient } from '@supabase/supabase-js';
+import { verifyAuth } from '../../lib/middleware/auth-middleware.js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    // 🔐 Authenticate user
+    const authResult = await verifyAuth(req);
+    if (!authResult.authenticated) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in to generate certificates'
+      });
+    }
+
+    const user_id = authResult.user.id;
+
     const { action, certificateData } = req.body;
 
     if (!action || action !== 'generate_certificate') {
@@ -218,6 +237,27 @@ export default async function handler(req, res) {
         ready_for_customs: true
       }
     };
+
+    // 📊 Track certificate download for engagement metrics
+    try {
+      const now = new Date();
+      const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      const { data: trackingData, error: trackingError } = await supabase.rpc('increment_certificate_count', {
+        p_user_id: user_id,
+        p_month_year: month_year
+      });
+
+      if (trackingError) {
+        console.error('⚠️ Failed to track certificate download:', trackingError);
+        // Non-blocking: certificate still returned even if tracking fails
+      } else {
+        console.log(`✅ Certificate download tracked for user ${user_id}: ${trackingData[0]?.current_count} downloads in ${month_year}`);
+      }
+    } catch (trackingException) {
+      console.error('⚠️ Exception tracking certificate:', trackingException);
+      // Non-blocking: don't fail the request
+    }
 
     // Return success with certificate
     return res.status(200).json({
