@@ -1160,7 +1160,8 @@ export default function ComponentOriginsStepEnhanced({
 
                 {/* Get AI Suggestion Button - Disabled when component is locked */}
                 {!component.is_locked && (
-                  !searchingHS[index] ? (
+                  <>
+                    {!searchingHS[index] ? (
                     <button
                       type="button"
                       onClick={() => getComponentHSSuggestion(index)}
@@ -1208,7 +1209,8 @@ export default function ComponentOriginsStepEnhanced({
                         Taking longer than usual? Try simplifying the description.
                       </span>
                     </div>
-                  )}
+                    )}
+                  </>
                 )}
               </div>
             </div>
