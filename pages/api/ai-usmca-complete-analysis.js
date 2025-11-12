@@ -1178,13 +1178,22 @@ export default protectedApiHandler({
             const verifiedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
             const verifiedTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // e.g., "02:30 PM"
 
+            // ✅ FIX (Nov 12): USMCA-origin components ALWAYS get 0% USMCA rate (duty-free under USMCA)
+            const originCountry = (comp.origin_country || '').toUpperCase();
+            const isUSMCAOrigin = ['US', 'CA', 'MX'].includes(originCountry);
+            const usmcaRate = isUSMCAOrigin ? 0 : (aiResult.usmca_rate || 0);
+
+            if (isUSMCAOrigin && aiResult.usmca_rate !== 0) {
+              console.log(`   ⚠️ [USMCA-CORRECTION] Component from ${originCountry} - forcing USMCA rate to 0% (was ${aiResult.usmca_rate})`);
+            }
+
             return {
               ...comp,
               mfn_rate: aiResult.mfn_rate,
               base_mfn_rate: aiResult.mfn_rate,
               section_301: aiResult.section_301,
               section_232: aiResult.section_232,
-              usmca_rate: aiResult.usmca_rate,
+              usmca_rate: usmcaRate,  // ✅ Use corrected rate
               rate_source: 'ai_research_2025',
               data_source: 'ai_research_2025',  // ✅ FIX: Also set data_source so validation passes
               stale: false,
@@ -1485,6 +1494,49 @@ export default protectedApiHandler({
       }
     };
 
+    // ========== PHASE 3.6: CLASSIFY FINAL PRODUCT HS CODE (Nov 12, 2025) ==========
+    // Use ClassificationAgent for final product (same logic as components)
+    console.log('🏷️ [FINAL-PRODUCT] Classifying final assembled product...');
+
+    let finalProductClassification = null;
+    try {
+      const classificationAgent = new ClassificationAgent();
+
+      // Build component context for final product classification
+      const componentBreakdown = enrichedComponents
+        .map(c => `${c.description} (HS: ${c.hs_code}, ${c.value_percentage}% from ${c.origin_country})`)
+        .join(', ');
+
+      const classificationResult = await classificationAgent.suggestHSCode(
+        formData.product_description,
+        [{
+          origin_country: formData.manufacturing_location || 'Unknown',
+          value_percentage: 100  // Final product is 100% of itself
+        }],
+        {
+          overallProduct: formData.product_description,
+          industryContext: formData.industry_sector || 'other',
+          substantialTransformation: formData.substantial_transformation || false,
+          manufacturingProcess: formData.manufacturing_process || null,
+          destinationCountry: formData.destination_country,
+          componentBreakdown: componentBreakdown,
+          hasContext: true
+        }
+      );
+
+      // ✅ FIX (Nov 12): Unwrap .data from ClassificationAgent response
+      finalProductClassification = classificationResult?.success ? classificationResult.data : null;
+
+      if (finalProductClassification?.hs_code) {
+        console.log(`✅ [FINAL-PRODUCT] Classified as ${finalProductClassification.hs_code} (${finalProductClassification.confidence}% confidence)`);
+      } else {
+        console.warn(`⚠️ [FINAL-PRODUCT] Classification failed, will let USMCA AI determine product code`);
+      }
+    } catch (classError) {
+      console.error(`❌ [FINAL-PRODUCT] Classification error:`, classError.message);
+      // Continue without final product classification - USMCA AI will determine it
+    }
+
     // ✅ QUALIFICATION CACHING: Generate fingerprint of component data to avoid repeated AI calls
     // Cache key includes: HS codes, origins, percentages, destination, industry (all factors affecting qualification)
     const crypto = require('crypto');
@@ -1543,7 +1595,7 @@ export default protectedApiHandler({
     } else {
       console.log(`❌ [CACHE-MISS] No cached result found, calling AI (key: ${cacheKey})`);
 
-      // Pass enriched components with real rates and pre-calculated financials to AI prompt
+      // Pass enriched components with real rates, pre-calculated financials, and final product classification to AI prompt
       const prompt = await buildComprehensiveUSMCAPrompt(
         { ...formData, component_origins: enrichedComponents },
         (enrichedComponents || []).reduce((acc, comp) => {
@@ -1555,7 +1607,8 @@ export default protectedApiHandler({
           };
           return acc;
         }, {}),
-        preCalculatedFinancials  // ✅ Pass pre-calculated data to AI prompt
+        preCalculatedFinancials,  // ✅ Pass pre-calculated data to AI prompt
+        finalProductClassification  // ✅ Pass pre-classified final product HS code (Nov 12, 2025)
       );
 
       // Call OpenRouter API
@@ -1639,18 +1692,28 @@ export default protectedApiHandler({
         .replace(/\s+/g, ' ')  // Multiple spaces → single space
         .trim();
 
-      // ✅ AUTO-CLOSE INCOMPLETE JSON (AI sometimes truncates responses)
-      // Count opening/closing braces and auto-close if needed
+      // ✅ AUTO-CLOSE INCOMPLETE JSON (AI sometimes truncates responses OR adds commentary)
       let repairAttempted = false;
-      if (sanitizedJSON.startsWith('{') && !sanitizedJSON.endsWith('}')) {
-        const openBraces = (sanitizedJSON.match(/{/g) || []).length;
-        const closeBraces = (sanitizedJSON.match(/}/g) || []).length;
-        const missingBraces = openBraces - closeBraces;
-
-        if (missingBraces > 0) {
-          console.warn(`⚠️ [AUTO-REPAIR] Incomplete JSON detected: ${missingBraces} missing closing braces. Attempting repair...`);
-          sanitizedJSON = sanitizedJSON + '}'.repeat(missingBraces);
+      if (sanitizedJSON.startsWith('{')) {
+        // Strategy 1: Remove trailing garbage after final closing brace
+        const lastBraceIndex = sanitizedJSON.lastIndexOf('}');
+        if (lastBraceIndex !== -1 && lastBraceIndex < sanitizedJSON.length - 1) {
+          console.warn(`⚠️ [AUTO-REPAIR] Removing trailing text after final brace (length: ${sanitizedJSON.length - lastBraceIndex - 1})`);
+          sanitizedJSON = sanitizedJSON.substring(0, lastBraceIndex + 1);
           repairAttempted = true;
+        }
+
+        // Strategy 2: Add missing closing braces if still incomplete
+        if (!sanitizedJSON.endsWith('}')) {
+          const openBraces = (sanitizedJSON.match(/{/g) || []).length;
+          const closeBraces = (sanitizedJSON.match(/}/g) || []).length;
+          const missingBraces = openBraces - closeBraces;
+
+          if (missingBraces > 0) {
+            console.warn(`⚠️ [AUTO-REPAIR] Adding ${missingBraces} missing closing braces`);
+            sanitizedJSON = sanitizedJSON + '}'.repeat(missingBraces);
+            repairAttempted = true;
+          }
         }
       }
 
@@ -1956,16 +2019,17 @@ export default protectedApiHandler({
       },
 
       // Product classification
+      // ✅ FIX (Nov 12): Prefer pre-classified HS code from ClassificationAgent (database-backed)
       product: {
         success: true,
-        hs_code: analysis.product?.hs_code || '',
-        description: analysis.product?.description || formData.product_description,
+        hs_code: finalProductClassification?.hs_code || analysis.product?.hs_code || '',
+        description: finalProductClassification?.description || analysis.product?.description || formData.product_description,
         product_description: formData.product_description,
-        hs_description: analysis.product?.hs_description || '',
+        hs_description: finalProductClassification?.description || analysis.product?.hs_description || '',
         // ✅ FIX: Map both confidence and confidence_score from AI
-        confidence: analysis.product?.confidence || analysis.product?.confidence_score || 0,
-        classification_confidence: analysis.product?.confidence || analysis.product?.confidence_score || 0,
-        classification_method: 'ai_analysis',
+        confidence: finalProductClassification?.confidence || analysis.product?.confidence || analysis.product?.confidence_score || 0,
+        classification_confidence: finalProductClassification?.confidence || analysis.product?.confidence || analysis.product?.confidence_score || 0,
+        classification_method: finalProductClassification ? 'classification_agent' : 'ai_analysis',
         manufacturing_location: formData.manufacturing_location || '',
         substantial_transformation: formData.substantial_transformation || false,
         manufacturing_process: formData.manufacturing_process || null,
