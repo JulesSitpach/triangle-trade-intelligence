@@ -172,7 +172,7 @@ export default function ComponentOriginsStepEnhanced({
       setUsedComponentsCount(newUsedCount);
       console.log(`🔒 Restored ${newUsedCount} locked components`);
     }
-  }, [formData.component_origins]); // ✅ Only watch formData.component_origins, not components (would cause loop)
+  }, [formData.component_origins, normalizeComponent]); // ✅ Only watch formData.component_origins, not components (would cause loop)
 
   // 💾 AUTO-SAVE: Debounced auto-save to database when components change
   // Prevents data loss if browser crashes or page is closed during Step 2 editing
@@ -1084,9 +1084,9 @@ export default function ComponentOriginsStepEnhanced({
                   <div className="form-help">
                     <strong>Be specific:</strong> Include materials, specs, and processing.
                     <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#6b7280' }}>
-                      ✅ "100% polyester ripstop fabric (300D, DWR waterproof coating, woven from US yarn)"<br />
-                      ✅ "Piezoelectric ultrasound transducer (64-element phased array, titanium housing)"<br />
-                      ❌ "Fabric" or "Electronics part" (too vague for accurate HS code classification)
+                      ✅ &quot;100% polyester ripstop fabric (300D, DWR waterproof coating, woven from US yarn)&quot;<br />
+                      ✅ &quot;Piezoelectric ultrasound transducer (64-element phased array, titanium housing)&quot;<br />
+                      ❌ &quot;Fabric&quot; or &quot;Electronics part&quot; (too vague for accurate HS code classification)
                     </div>
                   </div>
                 )}
