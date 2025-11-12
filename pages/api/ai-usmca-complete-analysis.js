@@ -88,7 +88,7 @@ WHAT TO RESEARCH:
 ─────────────────────────────────────────────────────────────────────────────
 - Base MFN rate: Official US tariff schedule (2025)
 - Section 301: If China origin → US destination, research current rate for this HS code
-- Section 232: If steel/aluminum, research current safeguard rate
+- Section 232: If material subject to national security tariffs (commonly steel/aluminum), research current safeguard rate
 - IEEPA reciprocal: If applicable to this HS code
 - USMCA rate: If Mexico/Canada origin, research preferential rate
 
@@ -100,7 +100,7 @@ IMPORTANT: Research actual current rates for each component's HS code
 - Base MFN: Look up in HTS database for specific HS code
 - Section 301: If China→US, research CURRENT USTR rate for this specific HS code (rates vary by product)
 - IEEPA reciprocal: Research CURRENT executive orders for this HS code if applicable
-- Section 232: If steel/aluminum, research CURRENT rate
+- Section 232: If material subject to national security tariffs (commonly steel/aluminum), research CURRENT rate
 - Total: Sum all applicable rates as decimals (e.g., 0.60 for 60%)
 
 RETURN JSON ARRAY (rates as decimals, e.g., 0.034 for 3.4%):
@@ -118,13 +118,14 @@ RETURN JSON ARRAY (rates as decimals, e.g., 0.034 for 3.4%):
   }
 ]
 
-CRITICAL EXAMPLES:
-- If HTS shows "Free": mfn_rate = 0.0
-- If HTS shows "3.4%": mfn_rate = 0.034
-- If China battery with Section 301 List 4A at 7.5%: section_301 = 0.075
-- Total tariff = mfn_rate + section_301 + section_232 (sum all applicable)
+RATE CONVERSION EXAMPLES:
+- If HTS shows "Free" or "0.0%": mfn_rate = 0.0
+- If HTS shows percentage (e.g., "3.4%"): convert to decimal (mfn_rate = 0.034)
+- If component has Section 301 applicable (check USTR lists for HS code): include researched rate
+  Example: List 4A rate of 7.5% = section_301: 0.075
+- Total tariff = sum of all applicable rates as decimals (mfn_rate + section_301 + section_232 + ieepa)
 
-CRITICAL: This is for USMCA compliance certificates. Accuracy is legally required.
+IMPORTANT: This data is used for USMCA compliance certificates. Research accuracy is legally required.
 Return ONLY valid JSON array. No explanations.`;
 
   try {
