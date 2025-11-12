@@ -224,7 +224,7 @@ export default function ViewResults() {
                       <td>{component.value_percentage || component.percentage}%</td>
                       <td>{((component.mfn_rate || 0) * 100).toFixed(1)}%</td>
                       <td>{((component.usmca_rate || 0) * 100).toFixed(1)}%</td>
-                      <td>{((component.section_301 || 0) + (component.section_232 || 0)) * 100).toFixed(1)}%</td>
+                      <td>{(((component.section_301 || 0) + (component.section_232 || 0)) * 100).toFixed(1)}%</td>
                       <td>{((component.total_rate || 0) * 100).toFixed(1)}%</td>
                       <td>
                         {component.savings_amount ? (
