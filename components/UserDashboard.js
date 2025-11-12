@@ -477,14 +477,14 @@ export default function UserDashboard({ user }) {
                     </div>
 
                     <div className="action-buttons">
-                      {/* QUALIFIED: View Results, Preview Certificate, View Alerts (READ-ONLY pages) */}
+                      {/* QUALIFIED: View Results, Preview Certificate, View Alerts (READ-ONLY) */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <>
-                          {/* ✅ FIX (Nov 12): Route to READ-ONLY results page, not editable workflow */}
+                          {/* View Results - READ-ONLY workflow page at step 3 */}
                           <button
                             onClick={() => {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
-                              router.push(`/view-results?workflow_id=${selectedWorkflow.id}`);
+                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}&step=3`);
                             }}
                             className="btn-primary"
                             title="View read-only results (free, no limits)"

@@ -26,7 +26,7 @@ import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator';
 
-export default function USMCAWorkflowOrchestrator() {
+export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId = null }) {
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
   const hasLoadedResultsRef = useRef(false);
@@ -34,11 +34,14 @@ export default function USMCAWorkflowOrchestrator() {
   // Use shared auth context (eliminates redundant API call)
   const { subscriptionTier: userTier } = useSimpleAuth();
 
-  // ✅ NEW: Track view mode using sessionStorage (persists after URL cleanup, clears on tab close)
-  // - 'read-only' = from "View Results" button (no edits allowed)
-  // - 'normal' = regular workflow
+  // ✅ FIX (Nov 12): Use readOnly prop from dashboard "View Results" button
+  // - readOnly=true = from dashboard (no edits allowed)
+  // - readOnly=false = regular workflow
   const [viewMode, setViewMode] = React.useState(() => {
-    // Initialize from sessionStorage on mount (prevents state loss on reload)
+    // If readOnly prop is true, force read-only mode
+    if (readOnly) return 'read-only';
+
+    // Otherwise check sessionStorage
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('workflow_view_mode') || 'normal';
     }
