@@ -692,7 +692,7 @@ export default function ComponentOriginsStepEnhanced({
     updatedComponents[index] = {
       description: '',
       origin_country: '',
-      value_percentage: '',
+      value_percentage: 0,  // ✅ FIX: Use 0 instead of '' to properly update total percentage
       hs_code: '',
       hs_suggestions: [],  // Clear AI suggestions
       manufacturing_location: formData.manufacturing_location ?? '',
