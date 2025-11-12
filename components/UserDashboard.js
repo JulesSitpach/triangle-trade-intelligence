@@ -477,18 +477,21 @@ export default function UserDashboard({ user }) {
                     </div>
 
                     <div className="action-buttons">
-                      {/* QUALIFIED: Download Workflow + View Results */}
+                      {/* QUALIFIED: View Results, Preview Certificate, View Alerts (READ-ONLY pages) */}
                       {selectedWorkflow.qualification_status === 'QUALIFIED' && (
                         <>
+                          {/* ✅ FIX (Nov 12): Route to READ-ONLY results page, not editable workflow */}
                           <button
                             onClick={() => {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
-                              router.push(`/usmca-workflow?view_results=${selectedWorkflow.id}&step=3`);
+                              router.push(`/view-results?workflow_id=${selectedWorkflow.id}`);
                             }}
                             className="btn-primary"
+                            title="View read-only results (free, no limits)"
                           >
-                            View Results
+                            📊 View Results
                           </button>
+                          {/* Certificate preview - can download/edit PDF (free, no cost to us) */}
                           <button
                             onClick={() => {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
@@ -497,16 +500,18 @@ export default function UserDashboard({ user }) {
                             className="btn-primary"
                             disabled={isTrialExpired}
                             style={isTrialExpired ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                            title={isTrialExpired ? 'Upgrade to preview certificates' : ''}
+                            title={isTrialExpired ? 'Upgrade to preview certificates' : 'Download and edit certificate PDF (free)'}
                           >
                             📄 Preview Certificate {isTrialExpired && '(Upgrade Required)'}
                           </button>
+                          {/* Alerts page - can regenerate Strategic Analysis based on subscription */}
                           <button
                             onClick={() => {
                               clearWorkflowLocalStorage(); // ✅ Clear old workflow data
                               router.push(`/trade-risk-alternatives?workflow_id=${selectedWorkflow.id}`);
                             }}
                             className="btn-primary"
+                            title="View alerts and regenerate strategic analysis (based on subscription)"
                           >
                             ⚠️ View Alerts
                           </button>
