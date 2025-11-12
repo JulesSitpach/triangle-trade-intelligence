@@ -404,43 +404,40 @@ export default async function handler(req, res) {
           process.env.SUPABASE_SERVICE_ROLE_KEY
         );
 
-        // ✅ CRITICAL FIX (Nov 10): Save to workflow_completions table (has executive_summary column)
-        // Find completed workflow by session_id
-        const { data: completion, error: queryError } = await supabase
-          .from('workflow_completions')
-          .select('id, workflow_data')
+        // ✅ FIXED (Nov 12): Save to workflow_sessions (always exists) instead of workflow_completions (only exists after certificate download)
+        // Users can view executive summary on Results page OR Alerts page without downloading certificate
+        const { data: session, error: queryError } = await supabase
+          .from('workflow_sessions')
+          .select('id, session_data')
           .eq('session_id', workflow_session_id)
           .eq('user_id', user_id)
           .single();
 
         if (queryError) {
-          console.error('❌ Failed to find workflow_completion by session_id:', queryError, 'session_id:', workflow_session_id);
-        } else if (completion) {
-          // Update both executive_summary column AND workflow_data.detailed_analysis
-          const updatedWorkflowData = {
-            ...completion.workflow_data,
-            detailed_analysis: {
-              ...(completion.workflow_data?.detailed_analysis || {}),
-              situation_brief: alertStructure.situation_brief
-            }
+          console.error('❌ Failed to find workflow_session by session_id:', queryError, 'session_id:', workflow_session_id);
+        } else if (session) {
+          // Update session_data JSONB with executive summary
+          const updatedSessionData = {
+            ...session.session_data,
+            executive_summary: alertStructure.situation_brief,  // ✅ Save for retrieval on Alerts page
+            executive_summary_generated_at: new Date().toISOString()
           };
 
           const { error: updateError } = await supabase
-            .from('workflow_completions')
+            .from('workflow_sessions')
             .update({
-              executive_summary: alertStructure.situation_brief,  // ✅ Save to dedicated column
-              workflow_data: updatedWorkflowData,                 // ✅ Save to workflow_data JSONB for backwards compatibility
+              session_data: updatedSessionData,
               updated_at: new Date().toISOString()
             })
-            .eq('id', completion.id);
+            .eq('id', session.id);
 
           if (updateError) {
-            console.error('❌ Failed to save executive summary to database:', updateError);
+            console.error('❌ Failed to save executive summary to workflow_sessions:', updateError);
           } else {
-            console.log('✅ Executive summary saved to workflow_completions (session_id:', workflow_session_id, ', completion_id:', completion.id, ')');
+            console.log('✅ Executive summary saved to workflow_sessions (session_id:', workflow_session_id, ')');
           }
         } else {
-          console.warn('⚠️ No workflow_completion found for session_id:', workflow_session_id, '- summary not saved to database');
+          console.warn('⚠️ No workflow_session found for session_id:', workflow_session_id, '- summary not saved to database');
         }
       } catch (saveError) {
         console.error('❌ Error saving executive summary:', saveError);

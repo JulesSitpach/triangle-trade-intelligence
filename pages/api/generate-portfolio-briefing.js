@@ -20,7 +20,7 @@ const supabase = createClient(
 const portfolioAgent = new BaseAgent({
   name: 'PortfolioBriefing',
   model: 'anthropic/claude-haiku-4.5',
-  maxTokens: 3000
+  maxTokens: 3500  // Increased from 3000 to prevent truncation of monitoring streams
 });
 
 export default async function handler(req, res) {
@@ -338,19 +338,28 @@ ${alertContext}
 
 Write an expressive, narrative briefing - tell their supply chain STORY with personality and strategic insight.
 
-Write your analysis in MARKDOWN format with these sections (you can add more if needed):
+Write your analysis in MARKDOWN format with these REQUIRED sections:
 
 # Executive Advisory: ${companyName}
 
+## USMCA 2026 Renegotiation Exposure Analysis
+Write 2-3 paragraphs analyzing how the USMCA 2026 renegotiation could affect THIS company's supply chain. Focus on:
+- Their specific component origins and how cumulation rules might change
+- RVC threshold risks for their product mix
+- Timeline considerations (Q1 2026 negotiations, mid-2026 decisions)
+- Strategic positioning vs waiting
+
+Example: "Your supply chain sits at a critical inflection point. The 65% Mexican content gives you strong USMCA footing today, but Q1 2026 cumulation rule proposals could change that calculus. If negotiators tighten sourcing requirements or exclude certain non-USMCA inputs, your 15% Chinese components become a strategic liability. The 20-month window before final rules publish is your decision gate - act now or wait for clarity?"
+
 ## Active Alerts Affecting Your Supply Chain
 ${strategicAlerts.length > 0
-  ? `List ${strategicAlerts.length} alerts as bullets with emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Make each line compelling - show WHY it matters to them. Example: "🔴 US-China truce creates 90-day window - your Chinese PLC sourcing saves $400K if you ship before Feb 15"`
-  : `Write 2-3 monitoring bullets framed as opportunities/risks. Example: "🔵 USMCA 2026 hearing Q1 - cumulation rules affecting your Chinese components will be debated"`}
+  ? `List ${strategicAlerts.length} alerts as bullets with severity labels (CRITICAL, HIGH, MEDIUM). Make each line compelling - show WHY it matters to them. Example: "CRITICAL: US-China truce creates 90-day window - your Chinese PLC sourcing saves $400K if you ship before Feb 15"`
+  : `Write 2-3 monitoring bullets framed as opportunities/risks. Example: "MONITORING: USMCA 2026 hearing Q1 - cumulation rules affecting your Chinese components will be debated"`}
 
 ## Your Situation
-Write 2-3 **narrative paragraphs** painting their supply chain story. Use exact percentages by country (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave alerts naturally into narrative.' : 'Focus on 2026 context for their components.'}
+Write 2-3 **narrative paragraphs** painting their supply chain story. Use exact percentages by country (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave alerts naturally into narrative.' : 'Focus on current positioning and what makes their supply chain unique.'}
 
-Example: "Your hydraulic press sits at the intersection of three supply chains. Mexican steel (32%) gives solid USMCA footing, but Chinese PLC (22%) creates $1.2M Section 301 exposure. German hydraulics (18%) diversify risk but complicate origin rules. What worked in 2024 may need rethinking as 2026 approaches."
+Example: "Your hydraulic press sits at the intersection of three supply chains. Mexican steel (32%) gives solid USMCA footing, but Chinese PLC (22%) creates $1.2M Section 301 exposure. German hydraulics (18%) diversify risk but complicate origin rules."
 
 ## Critical Decision Gates
 Present 2-3 strategic CHOICES with no obvious answer. Frame as "choosing between futures" - show trade-offs, not recommendations. Make them THINK.

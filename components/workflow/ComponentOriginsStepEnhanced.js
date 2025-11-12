@@ -310,6 +310,34 @@ export default function ComponentOriginsStepEnhanced({
       console.log(`🤖 Agent Classification Result for Component ${index + 1}:`, result);
 
       if (result.success && result.data) {
+        // ✅ VALIDATION: Check if AI returned valid HS code and confidence
+        const hsCode = result.data.hs_code;
+        const confidence = result.data.confidence || result.data.adjustedConfidence || 0;
+
+        // ❌ FAILED CLASSIFICATION: undefined HS code or 0% confidence
+        if (!hsCode || hsCode === 'undefined' || confidence === 0) {
+          console.log(`❌ AI classification failed for component ${index + 1}: ${!hsCode ? 'No HS code' : 'Zero confidence'}`);
+
+          // Show error suggestion badge
+          setAgentSuggestions(prev => ({
+            ...prev,
+            [index]: {
+              error: true,
+              hs_code: 'Classification Failed',
+              description: 'AI could not confidently classify this component',
+              confidence: 0,
+              explanation: 'We couldn\'t confidently classify this component. This can happen with very specialized products or unclear descriptions.',
+              retryOptions: [
+                '• Click "Get AI Suggestion" again',
+                '• Simplify the component description (remove brand names, specs)',
+                '• Remove and re-add this component',
+                '• Enter HS code manually if you know it'
+              ]
+            }
+          }));
+          return; // Don't lock component on failed classification
+        }
+
         // ✅ SAFETY: Ensure explanation is always a string (AI might return objects)
         const rawExplanation = result.data.reasoning || result.data.explanation;
         const safeExplanation = typeof rawExplanation === 'string'
@@ -324,9 +352,9 @@ export default function ComponentOriginsStepEnhanced({
         }));
 
         const suggestion = {
-          hs_code: result.data.hs_code,
+          hs_code: hsCode,
           description: result.data.description, // ✅ REAL HTS DESCRIPTION
-          confidence: result.data.confidence || result.data.adjustedConfidence,
+          confidence: confidence,
           explanation: safeExplanation,
           source: 'AI Classification Agent',
           // Enhanced features from API - HS CLASSIFICATION ONLY (tariff rates looked up separately)
@@ -349,6 +377,22 @@ export default function ComponentOriginsStepEnhanced({
         // This gives user time to read AI explanation before committing
       } else {
         console.log(`❌ No valid suggestion returned for component ${index + 1}`);
+
+        // Show generic error
+        setAgentSuggestions(prev => ({
+          ...prev,
+          [index]: {
+            error: true,
+            hs_code: 'Classification Failed',
+            description: 'AI service temporarily unavailable',
+            confidence: 0,
+            explanation: 'The AI classification service encountered an error. Please try again in a moment.',
+            retryOptions: [
+              '• Click "Get AI Suggestion" again',
+              '• If problem persists, enter HS code manually'
+            ]
+          }
+        }));
       }
     } catch (error) {
       console.error(`Agent classification error for component ${index + 1}:`, error);

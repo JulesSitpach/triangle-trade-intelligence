@@ -580,6 +580,16 @@ export default function TradeRiskAlternatives() {
 
       setUserProfile(profile);
 
+      // ✅ DEFAULT EMAIL NOTIFICATIONS: Check all component email checkboxes by default
+      if (components.length > 0) {
+        const defaultNotifications = {};
+        components.forEach((_, idx) => {
+          defaultNotifications[idx] = true; // All checkboxes checked by default
+        });
+        setComponentEmailNotifications(defaultNotifications);
+        console.log(`✅ Initialized ${components.length} component email notifications (all enabled by default)`);
+      }
+
       // Show consent modal instead of automatically saving
       // Check if user is authenticated (cookie-based auth)
       const savedConsent = workflowStorage.getItem('save_data_consent');
@@ -1342,13 +1352,12 @@ export default function TradeRiskAlternatives() {
                     reason: componentVolatility.reason
                   });
 
-                  // ✅ ALERTS DASHBOARD CRITERIA (Nov 7): Broader strategic planning view
-                  // Show ALL alerts matching: Country OR Industry OR Policy Type (≤180 days)
-                  // Exclude: Operational alerts (logistics, earnings, etc.)
+                  // ✅ COMPONENT-SPECIFIC ALERTS (Nov 12): Only show alerts directly affecting THIS component
+                  // Match alerts by: (HS code match) OR (Origin country + Blanket policy)
+                  // This prevents showing ALL policy alerts on every component
                   let componentAlerts = (realPolicyAlerts || consolidatedAlerts).filter(alert => {
                     const componentOrigin = (comp.origin_country || comp.country)?.toUpperCase();
                     const componentHS = comp.hs_code;
-                    const componentIndustry = comp.industry || userProfile.industry_sector;
                     const userDestination = (userProfile.destinationCountry || 'US').toUpperCase();
 
                     console.log(`🔍 Checking alert "${alert.title?.substring(0, 50)}..." against component ${componentHS}:`, {
@@ -1388,48 +1397,7 @@ export default function TradeRiskAlternatives() {
                       return false;
                     }
 
-                    // ✅ MATCH 1: Country match (origin OR destination)
-                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
-                    if (hasCountries) {
-                      const countryMatch = alert.affected_countries.some(country => {
-                        const normalized = country.toUpperCase();
-                        return normalized === componentOrigin || normalized === userDestination;
-                      });
-
-                      if (countryMatch) {
-                        console.log(`✅ COUNTRY MATCH (Dashboard): ${alert.title} affects ${componentOrigin} or ${userDestination}`);
-                        return true;
-                      }
-                    }
-
-                    // ✅ MATCH 2: Industry match
-                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
-                    if (hasIndustries && componentIndustry) {
-                      const industryMatch = alert.relevant_industries.some(industry =>
-                        componentIndustry.toLowerCase().includes(industry.toLowerCase()) ||
-                        industry.toLowerCase().includes(componentIndustry.toLowerCase())
-                      );
-
-                      if (industryMatch) {
-                        console.log(`✅ INDUSTRY MATCH (Dashboard): ${alert.title} affects ${componentIndustry}`);
-                        return true;
-                      }
-                    }
-
-                    // ✅ MATCH 3: Policy type relevant to supply chain
-                    if (alert.policy_type) {
-                      const relevantPolicyTypes = ['USMCA', 'Section 301', 'Section 232', 'Trade Agreement', 'Tariff'];
-                      const isPolicyRelevant = relevantPolicyTypes.some(type =>
-                        alert.policy_type.toLowerCase().includes(type.toLowerCase())
-                      );
-
-                      if (isPolicyRelevant) {
-                        console.log(`✅ POLICY TYPE MATCH (Dashboard): ${alert.title} (${alert.policy_type})`);
-                        return true;
-                      }
-                    }
-
-                    // ✅ MATCH 4: HS code match (still useful for precision)
+                    // ✅ MATCH 1: HS code match (most specific - targets this exact component)
                     const validHSCodes = (alert.affected_hs_codes || []).filter(code => {
                       const normalized = String(code).replace(/\./g, '');
                       return normalized.length >= 6 && !/^20\d{2}$/.test(normalized);
@@ -1443,11 +1411,39 @@ export default function TradeRiskAlternatives() {
                       });
 
                       if (hsMatch) {
-                        console.log(`✅ HS CODE MATCH (Dashboard): ${alert.title} affects HS ${componentHS}`);
+                        console.log(`✅ HS CODE MATCH: ${alert.title} affects HS ${componentHS}`);
                         return true;
                       }
                     }
 
+                    // ✅ MATCH 2: Blanket country policy (NULL HS codes + country match)
+                    // Example: "China tariffs on ALL products" should show on China-origin components
+                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
+                    const hasNoHSCodes = !alert.affected_hs_codes || alert.affected_hs_codes.length === 0;
+
+                    if (hasCountries && hasNoHSCodes) {
+                      const countryMatch = alert.affected_countries.some(country => {
+                        const normalized = country.toUpperCase();
+                        return normalized === componentOrigin;
+                      });
+
+                      if (countryMatch) {
+                        console.log(`✅ BLANKET COUNTRY MATCH: ${alert.title} affects ${componentOrigin} (no specific HS codes)`);
+                        return true;
+                      } else {
+                        // Debug: Why didn't this match?
+                        console.log(`❌ NO MATCH: Alert targets [${alert.affected_countries.join(', ')}], component is ${componentOrigin}`);
+                      }
+                    }
+
+                    // No match - don't show this alert for this component
+                    console.log(`❌ FILTERED OUT: ${alert.title} does not affect component HS ${componentHS} from ${componentOrigin}`, {
+                      alert_countries: alert.affected_countries,
+                      alert_hs_codes: alert.affected_hs_codes,
+                      componentHS,
+                      componentOrigin,
+                      userDestination
+                    });
                     return false;
                   });
 
@@ -1473,7 +1469,7 @@ export default function TradeRiskAlternatives() {
 
                   const isExpanded = expandedComponents[idx] || false;
                   const hasAlerts = componentAlerts.length > 0;
-                  const emailEnabled = componentEmailNotifications[idx] || false;
+                  const emailEnabled = componentEmailNotifications[idx] !== undefined ? componentEmailNotifications[idx] : true; // Default to checked
 
                   const isLastRow = idx === userProfile.componentOrigins.length - 1;
 
@@ -2438,7 +2434,7 @@ export default function TradeRiskAlternatives() {
                     doc.setTextColor(146, 64, 14);
                     doc.setFontSize(9);
                     doc.setFont(undefined, 'bold');
-                    doc.text('⚠ DISCLAIMER', PAGE.margin + 3, y + 6);
+                    doc.text('DISCLAIMER', PAGE.margin + 3, y + 6);
 
                     doc.setFont(undefined, 'normal');
                     doc.setFontSize(8);

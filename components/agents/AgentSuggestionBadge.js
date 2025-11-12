@@ -12,9 +12,12 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
 
   if (!suggestion || !suggestion.data) return null;
 
+  // ❌ ERROR STATE: AI classification failed
+  const isError = suggestion.data.error === true;
+
   // ✅ SAFETY: Normalize all values to prevent React "object as child" errors
   const confidence = Number(suggestion.data.confidence || suggestion.confidence || 0);
-  const confidenceColor = confidence >= 85 ? 'green' : confidence >= 70 ? 'yellow' : 'red';
+  const confidenceColor = isError ? 'red' : (confidence >= 85 ? 'green' : confidence >= 70 ? 'yellow' : 'red');
 
   const hsCode = String(suggestion.data.suggestion || suggestion.data.value || suggestion.data.hs_code || '');
   const description = String(suggestion.data.description || '');
@@ -25,14 +28,15 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
     ? rawExplanation
     : JSON.stringify(rawExplanation);
 
-  const hasAlternatives = suggestion.data.alternative_codes?.length > 0;
+  const hasAlternatives = !isError && suggestion.data.alternative_codes?.length > 0;
   const hasExplanation = explanation.length > 0;
+  const hasRetryOptions = isError && suggestion.data.retryOptions?.length > 0;
 
   return (
     <div className={`agent-suggestion-badge agent-${confidenceColor}`}>
       <div className="agent-header">
-        <span className="agent-icon">🤖</span>
-        <span className="agent-label">AI Suggestion</span>
+        <span className="agent-icon">{isError ? '❌' : '🤖'}</span>
+        <span className="agent-label">{isError ? 'Classification Failed' : 'AI Suggestion'}</span>
         <span className={`confidence-badge confidence-${confidenceColor}`}>
           {confidence}% confidence
         </span>
@@ -51,6 +55,26 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
         {/* ✅ REMOVED: Tariff rates (shown later in enrichment)
                       REMOVED: Documentation (shown in final results)
             Focus: Just HS code classification */}
+
+        {/* Error: Show retry options */}
+        {hasRetryOptions && (
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem',
+            backgroundColor: '#fef2f2',
+            borderRadius: '4px',
+            borderLeft: '3px solid #dc2626'
+          }}>
+            <h4 style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#991b1b', marginBottom: '0.5rem' }}>
+              💡 What to try:
+            </h4>
+            <div style={{ fontSize: '0.8125rem', color: '#7f1d1d', lineHeight: '1.6' }}>
+              {suggestion.data.retryOptions.map((option, idx) => (
+                <div key={idx} style={{ marginBottom: '0.25rem' }}>{option}</div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Expandable Details Section */}
         {(hasExplanation || hasAlternatives) && (
@@ -141,7 +165,8 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
       </div>
 
       <div className="agent-actions">
-        {onAccept && (
+        {/* Hide "Use This" button for errors - user should retry or enter manually */}
+        {!isError && onAccept && (
           <button
             className="btn-action btn-primary btn-sm"
             onClick={() => onAccept(suggestion.data.suggestion || suggestion.data.hs_code)}
@@ -154,7 +179,7 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
             className="btn-action btn-secondary btn-sm"
             onClick={onDismiss}
           >
-            Dismiss
+            {isError ? 'Close' : 'Dismiss'}
           </button>
         )}
       </div>

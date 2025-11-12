@@ -262,7 +262,7 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
       {/* Disclaimer */}
       <div className="executive-summary-disclaimer">
         <p>
-          <strong>⚠️ Disclaimer:</strong> This is a research tool, not professional advice.
+          <strong>Disclaimer:</strong> This is a research tool, not professional advice.
           All tariff calculations, savings estimates, and compliance guidance must be independently verified
           by licensed customs brokers or trade attorneys before making business decisions.
         </p>
