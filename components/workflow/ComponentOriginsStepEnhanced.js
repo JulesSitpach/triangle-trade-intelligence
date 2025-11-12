@@ -99,6 +99,8 @@ export default function ComponentOriginsStepEnhanced({
   const [searchingHS, setSearchingHS] = useState({});
   const [agentSuggestions, setAgentSuggestions] = useState({});
   const [validationResult, setValidationResult] = useState(null);
+  const [searchAbortControllers, setSearchAbortControllers] = useState({}); // Track abort controllers for cancellation
+  const [searchTimeouts, setSearchTimeouts] = useState({}); // Track search timeouts
 
   // ✅ Ref for Component Breakdown section (smooth scroll after Product Overview completion)
   const componentBreakdownRef = useRef(null);
@@ -214,6 +216,53 @@ export default function ComponentOriginsStepEnhanced({
     setComponents(newComponents);
   };
 
+  // Cancel AI classification search
+  const cancelSearch = (index) => {
+    // Abort the fetch request
+    if (searchAbortControllers[index]) {
+      searchAbortControllers[index].abort();
+      console.log(`❌ User cancelled search for component ${index + 1}`);
+    }
+
+    // Clear timeout
+    if (searchTimeouts[index]) {
+      clearTimeout(searchTimeouts[index]);
+    }
+
+    // Reset search state
+    setSearchingHS(prev => ({ ...prev, [index]: false }));
+
+    // Clean up controllers
+    setSearchAbortControllers(prev => {
+      const newControllers = { ...prev };
+      delete newControllers[index];
+      return newControllers;
+    });
+    setSearchTimeouts(prev => {
+      const newTimeouts = { ...prev };
+      delete newTimeouts[index];
+      return newTimeouts;
+    });
+
+    // Show suggestion to simplify description
+    setAgentSuggestions(prev => ({
+      ...prev,
+      [index]: {
+        error: true,
+        hs_code: 'Search Cancelled',
+        description: 'Classification search was cancelled',
+        confidence: 0,
+        explanation: 'You can try again with a simpler description, or enter the HS code manually if you know it.',
+        retryOptions: [
+          '• Simplify the description (e.g., "Hydraulic cylinder actuator, 3-inch bore" instead of listing all specs)',
+          '• Remove brand names and detailed specifications',
+          '• Focus on the primary function/material of the component',
+          '• Enter HS code manually if you know it'
+        ]
+      }
+    }));
+  };
+
   // Get AI agent suggestion for specific component
   const getComponentHSSuggestion = async (index) => {
     const component = components[index];
@@ -239,7 +288,21 @@ export default function ComponentOriginsStepEnhanced({
       return;
     }
 
+    // Create abort controller for this search
+    const abortController = new AbortController();
+    setSearchAbortControllers(prev => ({ ...prev, [index]: abortController }));
+
     setSearchingHS(prev => ({ ...prev, [index]: true }));
+
+    // Set timeout to suggest simplification after 15 seconds
+    const timeoutId = setTimeout(() => {
+      if (searchingHS[index]) {
+        console.warn(`⏱️ Search taking longer than expected for component ${index + 1}`);
+        // Don't cancel automatically, just show a hint in console
+        // User can click Cancel button if they want
+      }
+    }, 15000);
+    setSearchTimeouts(prev => ({ ...prev, [index]: timeoutId }));
 
     try {
       // ✅ CRITICAL FIX (Nov 6): Use session ID from parent hook (passed via props)
@@ -270,6 +333,7 @@ export default function ComponentOriginsStepEnhanced({
       const response = await fetch('/api/agents/classification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: abortController.signal, // ✅ Allow cancellation
         body: JSON.stringify({
           action: 'suggest_hs_code',
           productDescription: component.description,
@@ -395,6 +459,13 @@ export default function ComponentOriginsStepEnhanced({
         }));
       }
     } catch (error) {
+      // Check if error is due to user cancellation
+      if (error.name === 'AbortError') {
+        console.log(`🛑 Search aborted by user for component ${index + 1}`);
+        // cancelSearch already handled the UI, just return
+        return;
+      }
+
       console.error(`Agent classification error for component ${index + 1}:`, error);
       await DevIssue.apiError('component_origins_step', '/api/agents/classification', error, {
         componentIndex: index,
@@ -403,6 +474,21 @@ export default function ComponentOriginsStepEnhanced({
       });
     } finally {
       setSearchingHS(prev => ({ ...prev, [index]: false }));
+
+      // Clean up abort controller and timeout
+      setSearchAbortControllers(prev => {
+        const newControllers = { ...prev };
+        delete newControllers[index];
+        return newControllers;
+      });
+      if (searchTimeouts[index]) {
+        clearTimeout(searchTimeouts[index]);
+        setSearchTimeouts(prev => {
+          const newTimeouts = { ...prev };
+          delete newTimeouts[index];
+          return newTimeouts;
+        });
+      }
     }
   };
 
@@ -1066,8 +1152,7 @@ export default function ComponentOriginsStepEnhanced({
                   onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
                   placeholder="Enter if known (e.g., 8544.42.90)"
                   className="form-input"
-                  disabled={component.is_locked}
-                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
+                  // ✅ Always allow manual HS code entry, even after AI suggestion
                 />
                 <div className="form-help">
                   Don&apos;t know your HS code? Get AI suggestion below.
@@ -1075,25 +1160,55 @@ export default function ComponentOriginsStepEnhanced({
 
                 {/* Get AI Suggestion Button - Disabled when component is locked */}
                 {!component.is_locked && (
-                  <button
-                    type="button"
-                    onClick={() => getComponentHSSuggestion(index)}
-                    disabled={
-                      !component.description ||
-                      component.description.length < 10 ||
-                      !component.origin_country ||
-                      !component.value_percentage ||
-                      searchingHS[index]
-                    }
-                    className={
-                      component.description && component.description.length >= 10 &&
-                      component.origin_country && component.value_percentage && !searchingHS[index]
-                        ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
-                        : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
-                    }
-                  >
-                    {searchingHS[index] ? '🤖 Analyzing...' : '🤖 Get AI HS Code Suggestion'}
-                  </button>
+                  !searchingHS[index] ? (
+                    <button
+                      type="button"
+                      onClick={() => getComponentHSSuggestion(index)}
+                      disabled={
+                        !component.description ||
+                        component.description.length < 10 ||
+                        !component.origin_country ||
+                        !component.value_percentage
+                      }
+                      className={
+                        component.description && component.description.length >= 10 &&
+                        component.origin_country && component.value_percentage
+                          ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
+                          : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
+                      }
+                    >
+                      🤖 Get AI HS Code Suggestion
+                    </button>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        disabled
+                        className="btn-secondary btn-ai-suggestion"
+                        style={{ opacity: 0.7 }}
+                      >
+                        🤖 Analyzing...
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => cancelSearch(index)}
+                        className="btn-secondary"
+                        style={{
+                          padding: '0.5rem 1rem',
+                          backgroundColor: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✕ Cancel
+                      </button>
+                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                        Taking longer than usual? Try simplifying the description.
+                      </span>
+                    </div>
+                  )}
                 )}
               </div>
             </div>
