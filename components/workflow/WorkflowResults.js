@@ -523,6 +523,30 @@ export default function WorkflowResults({
               </span>
             )}
           </h2>
+
+          {/* AI DISCLAIMER BANNER */}
+          <div style={{
+            backgroundColor: '#fffbeb',
+            border: '2px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '1rem',
+            marginTop: '1rem',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem'
+          }}>
+            <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>🚨</span>
+            <div>
+              <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '0.25rem' }}>
+                AI-Generated Classifications
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#78350f', lineHeight: '1.5' }}>
+                These HS code classifications and tariff calculations are AI-generated and should be reviewed by a licensed customs broker before filing. Users are responsible for verifying accuracy of all data submitted to customs authorities.
+              </div>
+            </div>
+          </div>
+
           <p className="alert-text-success">
             {results.usmca?.qualified
               ? 'Your product meets all requirements for preferential tariff treatment'
