@@ -77,12 +77,15 @@ ${componentsList}
 
 Product Context: ${productDescription}
 
-YOUR JOB (Simple & Clear):
+CONTEXT: These businesses are facing bankruptcy from Trump tariff policy changes. Accuracy determines
+whether they survive or close. Wrong rates = wrong strategy = business failure. Do not sugarcoat.
+
+YOUR JOB:
 ═══════════════════════════════════════════════════════════════════════════════
-1. Research each component's current 2025 tariff rates from official sources
-2. Include all applicable duties that stack (MFN + Section 301 + Section 232 + IEEPA)
-3. Explain your research process so we can validate it
-4. Confidence score reflects research quality
+1. Research ACTUAL current 2025 tariff rates from official sources (not estimates)
+2. Include ALL applicable duties that stack (MFN + Section 301 + Section 232 + IEEPA)
+3. Explain your research so we can validate it
+4. Confidence score reflects research quality - be honest about uncertainty
 
 WHAT TO RESEARCH:
 ─────────────────────────────────────────────────────────────────────────────
