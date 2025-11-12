@@ -117,9 +117,9 @@ United States
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Multilayer printed circuit board with surface-mount components, FR-4 substrate, lead-free solder | China | 45 |
-| Die-cast aluminum housing with anodized finish, powder-coated matte black, integrated mounting brackets | Mexico | 30 |
-| Capacitive touchscreen LCD display module, 7-inch diagonal, 1024x600 resolution, tempered glass surface | Canada | 25 |
+| Circuit board with components, multilayer PCB | China | 45 |
+| Aluminum housing, black finish | Mexico | 30 |
+| Touchscreen LCD display, 7-inch | Canada | 25 |
 
 ### Importer/Exporter/Producer Information
 
@@ -216,9 +216,9 @@ Mexico
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Copper magnet wire windings, enameled insulation, AWG 18 gauge, high-temperature rated for motor applications | Canada | 40 |
-| Precision-machined steel rotor shaft, AISI 4140 alloy, induction-hardened surface, spline-cut ends | Mexico | 35 |
-| Neodymium-iron-boron permanent magnets, N42 grade, nickel-plated coating, arc-segment shape for motor stator | China | 25 |
+| Copper wire windings for motor | Canada | 40 |
+| Steel rotor shaft, machined | Mexico | 35 |
+| Permanent magnets, nickel plated | China | 25 |
 
 ### Importer/Exporter/Producer Information
 
@@ -315,10 +315,10 @@ Canada
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Double-acting hydraulic cylinder assembly, 4-inch bore, 50-ton capacity, chrome-plated piston rod, high-pressure seals | Canada | 38 |
-| Welded structural steel frame, A36 carbon steel, powder-coated finish, reinforced corner gussets, bolt-hole pattern | Mexico | 28 |
-| Programmable logic controller (PLC) touchscreen panel, 10-inch HMI display, IP65 rated enclosure, 24V DC power | China | 22 |
-| Variable displacement hydraulic pump, pressure-compensated, 10 GPM flow rate, 3000 PSI max pressure, SAE mounting | Germany | 12 |
+| Hydraulic cylinder, 4-inch bore, 50-ton | Canada | 38 |
+| Welded steel frame, powder coated | Mexico | 28 |
+| PLC touchscreen control panel, 10-inch | China | 22 |
+| Hydraulic pump, variable displacement | Germany | 12 |
 
 ### Importer/Exporter/Producer Information
 
@@ -415,10 +415,10 @@ Does Not Apply
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Lithium-ion polymer battery pack, 3.7V 500mAh capacity, rechargeable, built-in protection circuit, JST connector | China | 40 |
-| Bluetooth 5.0 system-on-chip module with antenna, low-energy certified, pre-programmed firmware, FCC approved | China | 35 |
-| Injection-molded ABS plastic charging case with magnetic lid, matte finish, USB-C port, LED indicators | Mexico | 15 |
-| Printed retail packaging box with foam insert, full-color graphics, recycled cardboard, product manual included | Canada | 10 |
+| Lithium-ion battery pack, 3.7V 500mAh, rechargeable | China | 40 |
+| Bluetooth chip module with antenna | China | 35 |
+| Plastic charging case with USB-C port | Mexico | 15 |
+| Retail box with foam insert | Canada | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -515,10 +515,10 @@ Canada
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| 100% polyester ripstop shell fabric (300D weave, DWR waterproof coating, woven in Mexico from US Cordura yarn) | Mexico | 40 |
-| Polar fleece liner fabric (240gsm anti-pill polyester, brushed both sides, moisture-wicking treatment, sewn panels) | Canada | 30 |
-| YKK #5 vislon waterproof zippers (2-way front closure, storm flap, corrosion-resistant YKK Aquaguard coating) | Mexico | 15 |
-| 650-fill power white duck down insulation (RDS-certified, 90/10 down/feather ratio, baffle-box construction) | Canada | 15 |
+| Polyester ripstop shell fabric, waterproof coating | Mexico | 40 |
+| Fleece liner fabric, polyester | Canada | 30 |
+| Waterproof zippers, YKK brand | Mexico | 15 |
+| Duck down insulation, 650-fill | Canada | 15 |
 
 ### Importer/Exporter/Producer Information
 
@@ -615,10 +615,10 @@ Mexico
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Organic Roma tomatoes (vine-ripened, hand-picked, USDA Organic certified, fire-roasted and peeled, 28% solids) | Mexico | 50 |
-| Fresh jalapeño peppers (medium heat 2,500-8,000 SHU, hand-chopped, seeds removed, fire-roasted for flavor) | Mexico | 20 |
-| Clear glass Mason jars (16oz capacity, 70mm twist-off lids, tempered glass, recycled content, tamper-evident seals) | Mexico | 18 |
-| Fresh cilantro and spice blend (chopped cilantro leaves, sea salt, garlic powder, cumin, lime juice concentrate) | Mexico | 12 |
+| Organic Roma tomatoes, fire-roasted | Mexico | 50 |
+| Fresh jalapeño peppers, chopped | Mexico | 20 |
+| Glass Mason jars, 16oz with lids | Mexico | 18 |
+| Cilantro and spice blend | Mexico | 12 |
 
 ### Importer/Exporter/Producer Information
 
@@ -715,10 +715,10 @@ United States
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Piezoelectric ultrasound transducer array (64-element phased array, FDA-approved ceramic crystal, titanium housing) | United States | 45 |
-| 7-inch medical-grade OLED touchscreen display with anti-glare coating, IP65 waterproof rating, 1920x1200 resolution | Canada | 25 |
-| Custom medical PCB assembly with ARM Cortex processor, 4GB RAM, DICOM-compliant imaging chipset, EMI shielding | Mexico | 20 |
-| Medical-grade lithium-ion battery pack (7.4V 5200mAh, UN38.3 certified, integrated BMS protection circuit) | China | 10 |
+| Ultrasound transducer array, 64-element | United States | 45 |
+| OLED touchscreen display, 7-inch, waterproof | Canada | 25 |
+| Medical PCB with processor and imaging chipset | Mexico | 20 |
+| Lithium-ion battery pack, 7.4V 5200mAh | China | 10 |
 
 ### Importer/Exporter/Producer Information
 
@@ -1415,10 +1415,10 @@ United States
 ### Component Breakdown
 | Description | Origin | % Value |
 |-------------|--------|---------|
-| Ti-6Al-4V titanium alloy forging (aerospace-grade billet stock, closed-die forged, solution treated and aged, ultrasonic tested per AMS 4928, machined to near-net shape) | United States | 55 |
-| Hydraulic actuator cylinder assembly (3-inch bore diameter, 2000 PSI operating pressure, hard-chromed piston rod, Viton seals, SAE ports, position sensors integrated) | Canada | 25 |
-| Aerospace-grade titanium fastener set (AN/MS standard bolts and nuts, torque-tension controlled, cadmium-plated finish, lot traceability, bag-and-tag packaging) | United States | 12 |
-| Thermal spray hard-chrome surface coating (HVOF-applied chromium carbide, 0.002-inch thickness, hardness 60-65 HRC, corrosion-resistant finish per AMS 2438) | Mexico | 8 |
+| Titanium forged landing gear strut, machined | United States | 55 |
+| Hydraulic cylinder, 3-inch bore | Canada | 25 |
+| Titanium bolts and nuts, cadmium plated | United States | 12 |
+| Chrome coating for corrosion protection | Mexico | 8 |
 
 ### Importer/Exporter/Producer Information
 
