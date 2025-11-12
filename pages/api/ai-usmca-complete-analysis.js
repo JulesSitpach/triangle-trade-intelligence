@@ -70,7 +70,16 @@ async function getAIRatesForMissingComponents(missingComponents, destinationCoun
     .map((comp, i) => `${i + 1}. HS Code: ${comp.hs_code}, Origin: ${comp.origin_country}, Description: ${comp.description}`)
     .join('\n');
 
+  const todayDate = new Date().toISOString().split('T')[0];
+
   const prompt = `Your role: Research tariff rates for components MISSING from our database. Database is the source of truth.
+
+TODAY'S DATE: ${todayDate}
+TARIFF POLICY CONTEXT (as of today):
+- Section 301 (China): Trump administration tariffs (2018-2025 ongoing, rates vary by List 1/2/3/4A/4B)
+- Section 232 (Steel/Aluminum): 25% steel, 10% aluminum (ongoing since 2018, some exemptions)
+- IEEPA reciprocal tariffs: Check executive orders from 2024-2025
+- Search for rates EFFECTIVE TODAY, not historical rates
 
 Components requiring tariff research for ${destinationCountry} destination:
 ${componentsList}
@@ -82,29 +91,39 @@ whether they survive or close. Wrong rates = wrong strategy = business failure. 
 
 YOUR JOB:
 ═══════════════════════════════════════════════════════════════════════════════
-1. Research ACTUAL current 2025 tariff rates from official sources (not estimates)
+1. Research ACTUAL current tariff rates from official sources (not estimates)
 2. Include ALL applicable duties that stack (MFN + Section 301 + Section 232 + IEEPA)
-3. Explain your research so we can validate it
+3. Cite specific sources (USITC HTS 2025, USTR Federal Register with date, etc.)
 4. Confidence score reflects research quality - be honest about uncertainty
 
-WHAT TO RESEARCH:
+OFFICIAL SOURCES (use in priority order - if sources conflict, use most recent):
 ─────────────────────────────────────────────────────────────────────────────
-- Base MFN rate: Official US tariff schedule (2025)
-- Section 301: If China origin → US destination, research current rate for this HS code
-- Section 232: If material subject to national security tariffs (commonly steel/aluminum), research current safeguard rate
-- IEEPA reciprocal: If applicable to this HS code
-- USMCA rate: If Mexico/Canada origin, research preferential rate
+1. USITC HTS Database (hts.usitc.gov) - BASE MFN RATES
+   - Most authoritative for base tariff rates
+   - Updated annually January 1
 
-HOW TO CALCULATE TOTAL RATE:
+2. USTR Federal Register (federalregister.gov) - SECTION 301 RATES
+   - Search: "Section 301 [HS code] 2025"
+   - Lists 1, 2, 3, 4A, 4B (rates: 7.5% to 100%+)
+
+3. CBP CSMS Messages (cbp.gov) - SECTION 232 RATES
+   - Steel: Generally 25% if applicable
+   - Aluminum: Generally 10% if applicable
+
+4. Executive Orders (federalregister.gov) - IEEPA RECIPROCAL
+   - Search: "IEEPA tariff [country] 2025"
+
+IF SOURCES CONFLICT: Use most recent publication date
+IF UNCERTAIN: Mark confidence "low" and note conflict in justification
+
+HOW CBP CALCULATES TOTAL TARIFF (rate stacking):
 ─────────────────────────────────────────────────────────────────────────────
 total_rate = base_mfn_rate + section_301 + section_232 + ieepa_reciprocal
 
-IMPORTANT: Research actual current rates for each component's HS code
-- Base MFN: Look up in HTS database for specific HS code
-- Section 301: If China→US, research CURRENT USTR rate for this specific HS code (rates vary by product)
-- IEEPA reciprocal: Research CURRENT executive orders for this HS code if applicable
-- Section 232: If material subject to national security tariffs (commonly steel/aluminum), research CURRENT rate
-- Total: Sum all applicable rates as decimals (e.g., 0.60 for 60%)
+Policy tariffs ADD ON TOP of base MFN (they don't replace it). Research current rates for each policy.
+
+USMCA PREFERENTIAL RATES:
+If origin is Canada/Mexico: Research current USMCA rate for this HS code (overrides total_rate if applicable)
 
 RETURN JSON ARRAY (rates as decimals, e.g., 0.034 for 3.4%):
 [
