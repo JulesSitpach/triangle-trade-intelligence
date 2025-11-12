@@ -165,7 +165,15 @@ export default protectedApiHandler({
       // ✅ CRITICAL FIX: Extract qualification status and regional content to top-level columns
       // Dashboard expects these fields in database columns, not just in JSONB
       const qualificationStatus = workflowData.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED';
-      const regionalContent = parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0;
+
+      // ✅ FIX (Nov 12): Ensure regional_content is 0-100 percentage, not 0-1 decimal
+      let regionalContent = parseFloat(workflowData.usmca?.regional_content || workflowData.usmca?.north_american_content) || 0;
+      // If AI returned decimal format (0.82), convert to percentage (82)
+      if (regionalContent > 0 && regionalContent < 1) {
+        regionalContent = regionalContent * 100;
+      }
+      // Clamp to 0-100 range for database constraint
+      regionalContent = Math.max(0, Math.min(100, regionalContent));
 
       const workflowRecord = {
         user_id: userId,
