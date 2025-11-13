@@ -1,10 +1,12 @@
 /**
  * Public Contact Form API
  * Auto-creates sales prospects from website contact submissions
+ * Sends email notification to triangleintel@gmail.com
  * No authentication required (public endpoint)
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { sendContactFormNotification } from '../../lib/email/resend-client';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -71,6 +73,25 @@ export default async function handler(req, res) {
         console.error('Error updating prospect:', updateError);
       }
 
+      // Send notification email for updated prospect
+      try {
+        const emailResult = await sendContactFormNotification({
+          name,
+          email,
+          company,
+          phone,
+          message: `[RETURNING CONTACT] ${message || 'No message'}`,
+          industry,
+          lead_source
+        });
+
+        if (emailResult.success) {
+          console.log('✅ Contact form notification sent for updated prospect');
+        }
+      } catch (emailError) {
+        console.error('Email notification error:', emailError);
+      }
+
       return res.status(200).json({
         success: true,
         message: 'Thank you for contacting us! We will be in touch soon.',
@@ -107,8 +128,28 @@ export default async function handler(req, res) {
       });
     }
 
-    // TODO: Send notification email to sales team
-    // TODO: Add to email marketing list
+    // Send notification email to triangleintel@gmail.com
+    try {
+      const emailResult = await sendContactFormNotification({
+        name,
+        email,
+        company,
+        phone,
+        message,
+        industry,
+        lead_source
+      });
+
+      if (!emailResult.success) {
+        console.error('Failed to send notification email:', emailResult.error);
+        // Don't fail the request if email fails - prospect is still created
+      } else {
+        console.log('✅ Contact form notification sent to triangleintel@gmail.com');
+      }
+    } catch (emailError) {
+      console.error('Email notification error:', emailError);
+      // Continue - prospect creation is more important than email
+    }
 
     return res.status(201).json({
       success: true,
