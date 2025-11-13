@@ -159,26 +159,94 @@ export default function HomePage() {
       </section>
 
       {/* You're Not Alone */}
-      <section className="main-content">
-        <div className="container-app" style={{maxWidth: '800px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
             <h2 className="section-header-title">You&apos;re Not Alone</h2>
-          </div>
-
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
-            <p style={{marginBottom: '1.5rem'}}>
+            <p style={{fontSize: '1.25rem', color: '#4b5563', maxWidth: '800px', margin: '2rem auto 0', lineHeight: '1.7'}}>
               You&apos;re managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:
             </p>
+          </div>
 
-            <ul style={{paddingLeft: '1.5rem', marginBottom: '1.5rem'}}>
-              <li style={{marginBottom: '0.75rem'}}>Tariff policies change every week</li>
-              <li style={{marginBottom: '0.75rem'}}>Your customs broker charges $500 per certificate</li>
-              <li style={{marginBottom: '0.75rem'}}>You don&apos;t have time to research USMCA rules</li>
-              <li style={{marginBottom: '0.75rem'}}>You suspect you&apos;re overpaying but don&apos;t know how to check</li>
-            </ul>
+          {/* 2x2 Grid of Pain Points */}
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3.5rem'}}>
+            {/* Card 1: Tariff Policies */}
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #dc2626',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+                Tariff Policies Change Every Week
+              </h3>
+              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+                Section 301, Section 232, USMCA updates—impossible to track alone
+              </p>
+            </div>
 
-            <p style={{fontWeight: 600, color: '#1e3a8a'}}>
-              You&apos;re right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid - simply because they have trade compliance teams and you don&apos;t.
+            {/* Card 2: Broker Costs */}
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #dc2626',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+                Brokers Charge $500 Per Certificate
+              </h3>
+              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+                And you need a new one every time your supply chain changes
+              </p>
+            </div>
+
+            {/* Card 3: No Time */}
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #dc2626',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+                No Time to Research USMCA Rules
+              </h3>
+              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+                RVC calculations, origin rules, preference criteria—it&apos;s a second job
+              </p>
+            </div>
+
+            {/* Card 4: Suspect Overpaying */}
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #dc2626',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+                You Suspect You&apos;re Overpaying
+              </h3>
+              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+                But you don&apos;t have a trade team to verify if you qualify
+              </p>
+            </div>
+          </div>
+
+          {/* Empathy Statement - Dark Blue Box */}
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '3rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            maxWidth: '900px',
+            margin: '0 auto'
+          }}>
+            <p style={{fontSize: '1.25rem', lineHeight: '1.8', marginBottom: 0, fontWeight: 500}}>
+              You&apos;re right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid—simply because they have trade compliance teams and you don&apos;t.
             </p>
           </div>
         </div>
