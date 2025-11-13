@@ -360,14 +360,21 @@ export default function WorkflowResults({
             console.log('📦 Database workflow data:', dbData);
 
             // ✅ FIX: Check BOTH old location (detailed_analysis) and new location (executive_summary)
+            // Priority: detailed_analysis (full structure) > executive_summary (just string)
             const dbExecutiveData = dbData.workflow_data?.detailed_analysis?.situation_brief
-              ? dbData.workflow_data.detailed_analysis
+              ? dbData.workflow_data.detailed_analysis  // ✅ Full flattened structure
               : dbData.workflow_data?.executive_summary
-              ? { situation_brief: dbData.workflow_data.executive_summary }
+              ? { situation_brief: dbData.workflow_data.executive_summary }  // ✅ Backward compatibility (string only)
               : null;
 
             if (dbExecutiveData && (dbExecutiveData.situation_brief || typeof dbExecutiveData === 'string')) {
-              console.log('✅ Loaded executive summary from database:', dbExecutiveData);
+              console.log('✅ Loaded executive summary from database:', {
+                hasFullStructure: !!dbExecutiveData.action_items,
+                hasProblem: !!dbExecutiveData.problem,
+                hasRootCause: !!dbExecutiveData.root_cause,
+                hasBrokerInsights: !!dbExecutiveData.broker_insights
+              });
+
               // Handle both old format (object with situation_brief) and new format (string)
               const summaryData = typeof dbExecutiveData === 'string'
                 ? { situation_brief: dbExecutiveData }
@@ -376,6 +383,15 @@ export default function WorkflowResults({
               setShowSummary(true);
               setLoadingSummary(false);
               return;
+            } else {
+              console.log('❌ No executive summary found in database:', {
+                has_workflow_data: !!dbData.workflow_data,
+                has_detailed_analysis: !!dbData.workflow_data?.detailed_analysis,
+                detailed_analysis_keys: dbData.workflow_data?.detailed_analysis
+                  ? Object.keys(dbData.workflow_data.detailed_analysis)
+                  : 'none',
+                has_executive_summary: !!dbData.workflow_data?.executive_summary
+              });
             }
           }
         } catch (dbError) {

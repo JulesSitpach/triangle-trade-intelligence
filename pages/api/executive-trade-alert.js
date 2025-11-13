@@ -514,10 +514,28 @@ export default async function handler(req, res) {
         if (queryError) {
           console.error('❌ Failed to find workflow_session by session_id:', queryError, 'session_id:', workflow_session_id);
         } else if (session) {
-          // Update data JSONB with executive summary
+          // Update data JSONB with executive summary - save FULL flattened structure
+          const flattenedAlert = {
+            situation_brief: alertStructure.situation_brief,
+            problem: alertStructure.the_situation?.problem,
+            root_cause: alertStructure.the_situation?.root_cause,
+            annual_impact: alertStructure.the_situation?.annual_impact,
+            why_now: alertStructure.the_situation?.why_now,
+            current_burden: alertStructure.financial_impact?.current_annual_burden,
+            potential_savings: alertStructure.financial_impact?.potential_annual_savings,
+            payback_period: alertStructure.financial_impact?.payback_period,
+            timeline_90_days: alertStructure.timeline_90_days,
+            critical_decision_points: alertStructure.critical_decision_points,
+            action_items: alertStructure.action_this_week,
+            broker_insights: alertStructure.from_your_broker,
+            professional_disclaimer: alertStructure.professional_disclaimer,
+            save_reminder: alertStructure.save_reminder
+          };
+
           const updatedData = {
             ...session.data,
-            executive_summary: alertStructure.situation_brief,  // ✅ Save for retrieval on Alerts page
+            detailed_analysis: flattenedAlert,  // ✅ Save to detailed_analysis for compatibility
+            executive_summary: alertStructure.situation_brief,  // ✅ Keep for backward compatibility
             executive_summary_generated_at: new Date().toISOString()
           };
 
