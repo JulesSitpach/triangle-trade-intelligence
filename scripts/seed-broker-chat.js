@@ -1,7 +1,8 @@
 /**
  * Seed Broker Chat Responses
- * Loads 22 trade terms with friendly broker personality
- * Includes Mexico Triangle Routing advantages + Professional Services referrals
+ * Loads 27 trade terms with friendly broker personality
+ * Includes Mexico Triangle Routing advantages + Professional Services referrals + Platform Features
+ * NEW (Nov 2025): Subscription limits, Daily digest, Portfolio briefing, Alert badges, 2026 renegotiation
  * Run with: node scripts/seed-broker-chat.js
  */
 
@@ -628,6 +629,178 @@ Think of it like a doctor's annual physical, but for your trade operations. We l
     related_questions: ['What\'s included?', 'How fast is it?', 'What happens after?'],
     next_steps: ['Book Trade Health Check', 'Learn about other services', 'Talk to Cristina & Jorge'],
     difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  // ============ NEW PLATFORM FEATURES (November 2025) ============
+
+  {
+    term: 'Subscription Tiers & Usage Limits',
+    keywords: ['subscription limits', 'usage limits', 'analyses left', 'monthly limit', 'analyze button disabled', 'tier limits', 'usage quota', 'how many analyses'],
+    category: 'platform',
+    broker_response: `Good question! Let me explain how our subscription tiers work. 💳
+
+**What counts as an "analysis"?**
+Every time you click "Analyze USMCA Qualification" on your component breakdown, that uses 1 analysis from your monthly quota.
+
+**Tier limits:**
+- 🆓 **Trial (Free):** 1 analysis/month - Perfect for testing the platform!
+- 💼 **Starter ($99/mo):** 15 analyses/month - Good for occasional importers
+- 🚀 **Professional ($199/mo):** 100 analyses/month - For regular trade operations
+- 👑 **Premium ($349/mo):** 500 analyses/month - High-volume businesses
+
+**What happens when you hit your limit?**
+- The "Analyze" button gets disabled automatically
+- You'll see a message telling you to upgrade
+- Your existing analyses and certificates remain accessible
+- Resets at the start of each billing cycle`,
+    quick_tip: 'We have 3-layer protection: the page blocks you, the component disables the button, AND the API rejects requests. You won\'t accidentally go over your limit!',
+    real_example: 'Starter tier client hit their 15 analyses mid-month. They upgraded to Professional ($199) - got 100 analyses immediately PLUS back-filled the days already paid for. Fair billing!',
+    encouragement: 'We want you to use the platform confidently! If you\'re hitting limits regularly, upgrading pays for itself in time saved. 💪',
+    related_questions: ['How do I check my usage?', 'When does my limit reset?', 'Can I upgrade mid-month?'],
+    next_steps: ['Check usage on dashboard', 'View pricing tiers', 'Upgrade subscription'],
+    difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  {
+    term: 'Daily Tariff Digest',
+    keywords: ['daily digest', 'tariff alerts', 'email notifications', 'daily email', 'tariff changes', 'policy updates', 'alert emails', 'email frequency'],
+    category: 'platform',
+    broker_response: `Smart question! Let me explain our alert system - it\'s designed to be helpful, not annoying! 📧
+
+**How Daily Tariff Digest works:**
+Instead of spamming you every time a tariff changes (which could be 10+ emails per day!), we bundle ALL changes into ONE daily email at 8:00 AM UTC.
+
+**What\'s included in the digest:**
+- All tariff changes detected in the last 24 hours
+- Which of YOUR components are affected
+- Rate impacts (old vs new rates)
+- AI confidence levels for each change
+- Recommended action steps
+
+**Real example from yesterday\'s digest:**
+"🚨 3 changes affect your components:
+1. China semiconductors (HS 8542.31) - Section 301 increased 25% → 30%
+2. Mexican steel brackets (HS 7326.90) - USMCA rate confirmed 0%
+3. Canadian adhesive (HS 3506.10) - MFN rate decreased 5.7% → 3.8%"
+
+**Opt-in/opt-out:**
+You control this in your profile settings. You can turn it off anytime if you prefer to check the dashboard manually.`,
+    quick_tip: 'We track changes 24/7 via RSS feeds from official sources (Federal Register, USITC). You get reliable alerts without the noise!',
+    real_example: 'Electronics importer told me: "I used to check tariff rates manually every week. Now I just read my 8am email with coffee. Saves me 2 hours/week!"',
+    encouragement: 'This is one of those "set it and forget it" features. We monitor the boring stuff so you can focus on your business! ☕',
+    related_questions: ['How do I enable daily digest?', 'Can I change the time?', 'What sources do you monitor?'],
+    next_steps: ['Enable digest in profile settings', 'View recent tariff changes', 'Check affected components'],
+    difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  {
+    term: 'Portfolio Briefing vs Executive Alert',
+    keywords: ['portfolio briefing', 'executive alert', 'difference between alerts', 'which alert', 'briefing vs alert', 'strategic analysis'],
+    category: 'platform',
+    broker_response: `Great question - these two features serve different purposes! Let me break it down. 📊
+
+**📋 Portfolio Briefing** (Strategic Planning)
+Think of this like your quarterly board meeting with your CFO.
+- Analyzes YOUR ENTIRE product portfolio
+- Matches REAL policy alerts from crisis_alerts database
+- Shows 2026 USMCA renegotiation exposure
+- 4-section strategic briefing (Bottom Line, Component Risk, Strategic Considerations, Monitoring)
+- Uses conditional language ("potential", "expected") unless REAL alerts detected
+- Perfect for: Long-term planning, investor updates, strategic decisions
+
+**🚨 Executive Trade Alert** (Policy Deep-Dive)
+Think of this like calling your customs broker about a specific tariff announcement.
+- Focuses on ONE specific policy change
+- Consulting-grade analysis of financial impact
+- CBP Form 29 binding ruling guidance (90-day processing)
+- 3-phase action roadmap (Assessment → Trial → Migration)
+- Immediate action items and regulatory calendar
+- Perfect for: Responding to specific threats, tactical decisions
+
+**When to use each:**
+- **Portfolio Briefing:** "How exposed am I overall to 2026 changes?"
+- **Executive Alert:** "Section 301 just increased - what do I do NOW?"`,
+    quick_tip: 'Most clients run Portfolio Briefing quarterly (strategic planning) and Executive Alert when specific policies change (tactical response). Use both!',
+    real_example: 'Automotive client: Portfolio Briefing showed 2026 cumulation risk. Executive Alert (when Section 301 changed) gave them the 72-hour action plan. Different tools, both valuable!',
+    encouragement: 'You don\'t have to choose! Portfolio Briefing is your "big picture" - Executive Alert is your "right now" action plan. 💪',
+    related_questions: ['Which should I run first?', 'How often should I check?', 'Can I run both?'],
+    next_steps: ['Generate Portfolio Briefing', 'View Executive Alert example', 'Set up monitoring schedule'],
+    difficulty_level: 'intermediate',
+    form_field: null
+  },
+
+  {
+    term: 'Component Alert Badges',
+    keywords: ['alert badges', 'color codes', 'critical high medium low', 'alert colors', 'status badges', 'new updated resolved', 'component alerts'],
+    category: 'platform',
+    broker_response: `Those colored badges? They\'re your early warning system! Let me decode them for you. 🚦
+
+**Severity Colors (What\'s the Impact?):**
+- 🔴 **CRITICAL** (Red) - Immediate action required! (e.g., Section 301 increase >25%)
+- 🟠 **HIGH** (Orange) - Significant impact, plan response (e.g., USMCA rule change proposal)
+- 🟡 **MEDIUM** (Yellow) - Monitor closely (e.g., Mexico labor compliance update)
+- 🟢 **LOW** (Green) - FYI only, minimal impact (e.g., procedural change)
+
+**Status Badges (What\'s Happening?):**
+- ✨ **NEW** - Just detected in last 7 days
+- 🔄 **UPDATED** - Policy changed since last check
+- ✅ **RESOLVED** - Issue closed or exemption granted
+
+**How alerts match to your components:**
+1. **Specific HS code match** - Alert targets your exact product
+2. **Country match** - Alert affects your sourcing country (e.g., all China components)
+3. **Industry match** - Alert affects your industry category
+
+**Real example from a client\'s dashboard:**
+"Component: China PCB (HS 8542.31.00) - 🔴 CRITICAL ✨ NEW
+Alert: Section 301 increase 25% → 35% effective Dec 1, 2025"`,
+    quick_tip: 'Click any badge to see the full alert details! We show you WHY it matches and WHAT you should do about it.',
+    real_example: 'Electronics client saw 🔴 CRITICAL badge on their main component. Clicked it, saw Section 301 spike coming in 30 days. Switched to Mexico supplier before tariff hit. Saved $80K!',
+    encouragement: 'Those badges are working FOR you 24/7. Don\'t ignore the red ones! They\'re trying to save you money. 🚨',
+    related_questions: ['How often do alerts update?', 'Can I dismiss alerts?', 'What triggers CRITICAL status?'],
+    next_steps: ['Review your component alerts', 'Check CRITICAL badges first', 'Set up alert notifications'],
+    difficulty_level: 'beginner',
+    form_field: null
+  },
+
+  {
+    term: 'USMCA 2026 Renegotiation',
+    keywords: ['2026 renegotiation', 'usmca review', 'cumulation rules', 'rvc threshold changes', 'joint commission', 'usmca changes 2026'],
+    category: 'compliance',
+    broker_response: `The 2026 renegotiation - here\'s what you NEED to know (no fluff). 📅
+
+**What\'s happening:**
+USMCA requires a formal review every 6 years. The first one is 2026 (June deadline).
+
+**What might change:**
+- **Cumulation rules** - How non-USMCA inputs count toward regional content
+- **RVC thresholds** - Industry-specific percentages might increase
+- **Labor enforcement** - Stricter wage/safety verification
+- **Sector-specific rules** - Auto, textiles, chemicals could see tighter rules
+
+**Timeline you need to know:**
+- Q1 2026: Joint Commission publishes proposed changes
+- Mid-2026: Negotiating text and political trade-offs surface
+- Q3-Q4 2026: Final rules crystallize
+- Your decision gate: Q3 2025 - BEFORE proposals finalize
+
+**Why this matters to YOU:**
+If you currently qualify for USMCA, you need to know:
+1. Will your qualification survive 2026 rule changes?
+2. Do you need alternative suppliers as backup?
+3. Should you lock in current rules with long-term contracts?
+
+**Real talk:**
+Nobody knows EXACTLY what will change. But waiting for certainty means you\'re reactive instead of proactive.`,
+    quick_tip: 'Our Portfolio Briefing tool specifically analyzes your 2026 exposure! It looks at your supply chain and tells you where you\'re vulnerable to proposed changes.',
+    real_example: 'Machinery client: 70% RVC today (safe). Portfolio Briefing showed if RVC threshold increases to 75%, they\'d be non-qualified. They\'re qualifying Mexican alternatives NOW as insurance.',
+    encouragement: 'Look, 2026 sounds far away, but supplier qualification takes 12-18 months. If you wait until Q1 2026 to react, you\'re too late. Let\'s plan NOW! 💪',
+    related_questions: ['Will my certificate stay valid?', 'Should I wait to see what changes?', 'How do I prepare?'],
+    next_steps: ['Run Portfolio Briefing for 2026 exposure', 'Review cumulation dependency', 'Identify backup suppliers'],
+    difficulty_level: 'advanced',
     form_field: null
   }
 ];
