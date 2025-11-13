@@ -640,7 +640,9 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile, matchedA
   const totalChineseValue = chineseComponents.reduce((sum, c) => sum + (c.value_percentage || 0), 0);
 
   const tradeVolume = profile.trade_volume || workflow.trade_volume || 0;
-  const section301Burden = section301Policy?.annual_cost_impact?.annualCost || 'not calculated';
+  // ✅ FIX (Nov 12): Extract calculated values correctly (annualCost already includes $ prefix)
+  const section301BurdenFormatted = section301Policy?.annual_cost_impact?.annualCost || 'Unable to calculate';
+  const section301BurdenAmount = section301Policy?.annual_cost_impact?.annualCost || null;
   const section301Rate = section301Policy?.annual_cost_impact?.ratePercent || 'varies';
 
   // ✅ Build detailed component breakdown for AI (no lookups needed - all data already here)
@@ -663,7 +665,7 @@ ${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) -
 
 CURRENT STATUS:
 • Trade Volume: $${tradeVolume.toLocaleString()} | USMCA: ${workflow.usmca_qualified ? `✅ Qualified (RVC ${workflow.north_american_content}%)` : '❌ Not Qualified'}
-• Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year${chineseComponents.length > 0 ? `\n• Section 301 Burden: $${section301Burden} (${chineseComponents.length} Chinese components = ${totalChineseValue}% of value)` : ''}
+• Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year${chineseComponents.length > 0 ? `\n• Section 301 Burden: ${section301BurdenFormatted} (${chineseComponents.length} Chinese components = ${totalChineseValue}% of value)` : ''}
 
 ${matchedAlerts.length > 0 ? `ACTIVE POLICY THREATS (${matchedAlerts.length}):
 ${matchedAlerts.map(a => `• [${a.severity}] ${a.title} (${a.effective_date})`).join('\n')}` : ''}
@@ -678,10 +680,10 @@ ${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affe
 ## Your Certification Situation
 Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
 
-Example: "${profile.company_name}'s ${workflow.product_description} sits at an interesting certification crossroads. ${workflow.usmca_qualified ? `USMCA qualification delivers $${workflow.current_annual_savings?.toLocaleString()}/year savings` : 'Missing USMCA qualification leaves money on the table'}, but ${chineseComponents.length > 0 ? `${chineseComponents.length} Chinese components (${totalChineseValue}% of value) create $${section301Burden} Section 301 exposure` : 'geographic sourcing creates policy vulnerabilities'}. Current certification strategy faces pressure from recent developments."
+Example: "${profile.company_name}'s ${workflow.product_description} sits at an interesting certification crossroads. ${workflow.usmca_qualified ? `USMCA qualification delivers $${workflow.current_annual_savings?.toLocaleString()}/year savings` : 'Missing USMCA qualification leaves money on the table'}, but ${chineseComponents.length > 0 ? `${chineseComponents.length} Chinese components (${totalChineseValue}% of value) create ${section301BurdenFormatted} Section 301 exposure` : 'geographic sourcing creates policy vulnerabilities'}. Current certification strategy faces pressure from recent developments."
 
 ## Critical Risks & Opportunities
-Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "Path A: Accept $${section301Burden} Section 301 burden, maintain current suppliers. Path B: Nearshore to Mexico (12-18mo transition) - eliminate Section 301 but face qualification challenges for HS ${chineseComponents[0]?.hs_code}."` : 'Focus on qualification improvement vs maintaining status quo.'}
+Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "Path A: Accept ${section301BurdenFormatted} Section 301 burden, maintain current suppliers. Path B: Nearshore to Mexico (12-18mo transition) - eliminate Section 301 but face qualification challenges for HS ${chineseComponents[0]?.hs_code}."` : 'Focus on qualification improvement vs maintaining status quo.'}
 
 ## 90-Day Action Timeline
 Write 2-3 paragraphs describing action path with specific milestones:
@@ -722,13 +724,14 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
     });
 
     // ✅ Return markdown with structured metadata for backward compatibility
+    // ✅ FIX (Nov 12): Use calculated values instead of placeholder strings
     return {
       situation_brief: sanitizedBriefing, // Full markdown in main field (sanitized)
       markdown_content: sanitizedBriefing, // Also store in dedicated field (sanitized)
-      problem: `Section 301 burden: $${section301Burden}`,
-      annual_impact: `$${section301Burden}`,
-      current_burden: `$${section301Burden}/year`,
-      potential_savings: `$${section301Burden}/year`,
+      problem: section301BurdenAmount ? `Section 301 burden: ${section301BurdenFormatted}` : 'No Section 301 burden (no Chinese components)',
+      annual_impact: section301BurdenFormatted, // Already includes $ prefix
+      current_burden: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
+      potential_savings: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
       confidence: 85
     };
 
@@ -736,14 +739,15 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
     console.error('❌ AI call failed for executive advisory:', error);
 
     // ⚠️ FALLBACK: Return minimal structure (but flag the failure)
+    // ✅ FIX (Nov 12): Use calculated values even in fallback
     return {
       situation_brief: '⚠️ AI generation failed - using fallback',
       problem: `Unable to generate custom advisory. Error: ${error.message}`,
       root_cause: 'AI service temporarily unavailable',
-      annual_impact: 'Unable to calculate',
+      annual_impact: section301BurdenFormatted || 'Unable to calculate',
       why_now: 'Please retry or contact support',
-      current_burden: section301Burden || 'Unknown',
-      potential_savings: 'Calculation unavailable',
+      current_burden: section301BurdenFormatted || 'Unknown',
+      potential_savings: section301BurdenFormatted || 'Calculation unavailable',
       payback_period: 'Unable to estimate',
       confidence: 0,
       strategic_roadmap: [],
