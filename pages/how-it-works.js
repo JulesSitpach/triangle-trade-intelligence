@@ -389,34 +389,33 @@ export default function HowItWorksPage() {
           </div>
 
             {/* Results dashboard screenshot */}
-            <div style={{marginTop: '2rem', textAlign: 'center'}}>
-              <a href="/image/samples/results.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
-                <img
-                  src="/image/samples/results.png"
-                  alt="Results dashboard showing qualification status and financial breakdown"
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.02)';
-                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                  }}
-                />
-              </a>
-              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
-                Click to view full size - Real example: Company qualified at 65% RVC with $59,500 annual savings, but 35% China exposure flagged
-              </p>
-            </div>
+          <div style={{marginTop: '2rem', textAlign: 'center'}}>
+            <a href="/image/samples/results.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+              <img
+                src="/image/samples/results.png"
+                alt="Results dashboard showing qualification status and financial breakdown"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                }}
+              />
+            </a>
+            <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+              Click to view full size - Real example: Company qualified at 65% RVC with $59,500 annual savings, but 35% China exposure flagged
+            </p>
           </div>
         </div>
       </section>
