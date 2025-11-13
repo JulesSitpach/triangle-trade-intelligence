@@ -257,6 +257,14 @@ export default protectedApiHandler({
           console.log(`✅ [DASHBOARD] Added executive_summary to completion ${row.id} for auto-display`);
         }
 
+        // ✅ FIX (Nov 12): Ensure usmca.north_american_content and regional_content are populated
+        // Bug: Gap Analysis showing 0% because JSONB doesn't have these fields, but top-level column does
+        if (enrichedWorkflowData.usmca && row.regional_content_percentage) {
+          enrichedWorkflowData.usmca.north_american_content = enrichedWorkflowData.usmca.north_american_content || row.regional_content_percentage;
+          enrichedWorkflowData.usmca.regional_content = enrichedWorkflowData.usmca.regional_content || row.regional_content_percentage;
+          console.log(`✅ [DASHBOARD] Enriched usmca content for completion ${row.id}: ${row.regional_content_percentage}%`);
+        }
+
         return {
           id: row.id,
           source: 'completion',
@@ -265,7 +273,9 @@ export default protectedApiHandler({
           product_description: row.product_description || workflowData.product?.description,
           hs_code: row.hs_code || workflowData.product?.hs_code,
           qualification_status: qualificationResult.status || 'UNKNOWN',
-          regional_content_percentage: qualificationResult.regional_content || 0,
+          // ✅ FIX (Nov 12): Use top-level column first (75%), then JSONB fallback (0)
+          // Bug: Was only checking JSONB which returns 0 when qualification_result is missing values
+          regional_content_percentage: row.regional_content_percentage || qualificationResult.regional_content || 0,
           required_threshold: qualificationResult.required_threshold || 60,
           trade_volume: volumeResult.normalized || 0,  // ✅ Use validated value
           estimated_annual_savings: row.total_savings || qualificationResult.savings_calculation || 0,
