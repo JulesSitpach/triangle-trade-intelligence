@@ -2,7 +2,7 @@
   "buildCommand": "SKIP_TYPE_CHECK=true next build --no-lint",
   "framework": "nextjs",
   "functions": {
-    "api/cron/rss-polling.js": {
+    "pages/api/cron/rss-polling.js": {
       "maxDuration": 60
     }
   },
