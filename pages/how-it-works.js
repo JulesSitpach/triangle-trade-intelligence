@@ -82,6 +82,16 @@ export default function HowItWorksPage() {
           <p className="hero-description-text" style={{marginTop: '2rem'}}>
             You don&apos;t need to be a trade expert. Just answer questions about your business - we&apos;ll handle the complex calculations.
           </p>
+
+          <div className="hero-button-group">
+            <Link
+              href="/signup"
+              className="hero-primary-button"
+              aria-label="Start free analysis"
+            >
+              Start Free Analysis →
+            </Link>
+          </div>
         </div>
       </section>
 
