@@ -875,27 +875,25 @@ export default function WorkflowResults({
                 </div>
               )}
 
-              {/* Generate button - HIDDEN in read-only mode */}
-              {viewMode === 'normal' && (
-                <button
-                  onClick={() => generateExecutiveSummary()}
-                  className={hasExecutiveSummary ? "btn-secondary" : "btn-primary"}
-                  style={{
-                    width: '100%',
-                    marginBottom: '1.5rem',
-                    backgroundColor: hasExecutiveSummary ? '#9ca3af' : undefined,
-                    borderColor: hasExecutiveSummary ? '#9ca3af' : undefined,
-                    color: hasExecutiveSummary ? '#ffffff' : undefined,
-                    cursor: hasExecutiveSummary ? 'not-allowed' : 'pointer'
-                  }}
-                  disabled={loadingSummary || hasExecutiveSummary}
-                  title={hasExecutiveSummary ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
-                >
-                  {loadingSummary ? '⏳ Generating Summary...' :
-                   hasExecutiveSummary ? '✓ Executive Summary Generated (1 per workflow)' :
-                   '📊 Generate Business Impact Summary (1 per workflow included)'}
-                </button>
-              )}
+              {/* Generate button - ALWAYS visible (works in both normal and read-only modes) */}
+              <button
+                onClick={() => generateExecutiveSummary()}
+                className={hasExecutiveSummary ? "btn-secondary" : "btn-primary"}
+                style={{
+                  width: '100%',
+                  marginBottom: '1.5rem',
+                  backgroundColor: hasExecutiveSummary ? '#9ca3af' : undefined,
+                  borderColor: hasExecutiveSummary ? '#9ca3af' : undefined,
+                  color: hasExecutiveSummary ? '#ffffff' : undefined,
+                  cursor: hasExecutiveSummary ? 'not-allowed' : 'pointer'
+                }}
+                disabled={loadingSummary || hasExecutiveSummary}
+                title={hasExecutiveSummary ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
+              >
+                {loadingSummary ? '⏳ Generating Summary...' :
+                 hasExecutiveSummary ? '✓ Executive Summary Generated (1 per workflow)' :
+                 '📊 Generate Business Impact Summary (1 per workflow included)'}
+              </button>
 
               {viewMode === 'normal' && !hasExecutiveSummary && (
                 <p style={{fontSize: '0.9rem', color: '#6b7280'}}>
