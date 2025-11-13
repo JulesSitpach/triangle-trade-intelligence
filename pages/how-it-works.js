@@ -494,59 +494,58 @@ export default function HowItWorksPage() {
             </p>
           </div>
 
-            {/* Executive advisory screenshots */}
-            <div style={{marginTop: '2rem', textAlign: 'center'}}>
-              <a href="/image/samples/result ai.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
-                <img
-                  src="/image/samples/result ai.png"
-                  alt="Executive advisory showing strategic analysis"
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                    marginBottom: '1.5rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.02)';
-                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                  }}
-                />
-              </a>
-              <a href="/image/samples/result ai 2.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
-                <img
-                  src="/image/samples/result ai 2.png"
-                  alt="Strategic roadmap with phases and actions"
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.02)';
-                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                  }}
-                />
-              </a>
-              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
-                Click to view full size - Real example: Company shown nearshoring opportunity with 12-18 month timeline and payback analysis
-              </p>
-            </div>
+          {/* Executive advisory screenshots */}
+          <div style={{marginTop: '2rem', textAlign: 'center'}}>
+            <a href="/image/samples/result ai.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+              <img
+                src="/image/samples/result ai.png"
+                alt="Executive advisory showing strategic analysis"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  marginBottom: '1.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                }}
+              />
+            </a>
+            <a href="/image/samples/result ai 2.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+              <img
+                src="/image/samples/result ai 2.png"
+                alt="Strategic roadmap with phases and actions"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                }}
+              />
+            </a>
+            <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+              Click to view full size - Real example: Company shown nearshoring opportunity with 12-18 month timeline and payback analysis
+            </p>
           </div>
         </div>
       </section>
@@ -639,35 +638,34 @@ export default function HowItWorksPage() {
             </p>
           </div>
 
-            {/* Certificate preview screenshot */}
-            <div style={{marginTop: '2rem', textAlign: 'center'}}>
-              <a href="/image/samples/certificate preview.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
-                <img
-                  src="/image/samples/certificate preview.png"
-                  alt="Editable certificate preview showing all form fields"
-                  style={{
-                    maxWidth: '100%',
-                    height: 'auto',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.02)';
-                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                  }}
-                />
-              </a>
-              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
-                Click to view full size - You can edit all fields before finalizing the certificate
-              </p>
-            </div>
+          {/* Certificate preview screenshot */}
+          <div style={{marginTop: '2rem', textAlign: 'center'}}>
+            <a href="/image/samples/certificate preview.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+              <img
+                src="/image/samples/certificate preview.png"
+                alt="Editable certificate preview showing all form fields"
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.02)';
+                  e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                }}
+              />
+            </a>
+            <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+              Click to view full size - You can edit all fields before finalizing the certificate
+            </p>
           </div>
         </div>
       </section>
