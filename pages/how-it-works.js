@@ -97,62 +97,38 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Step 1: Company Info */}
-      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{marginBottom: '3rem'}}>
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
             <h2 className="section-header-title">Step 1: Tell Us About Your Company</h2>
-            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 2 minutes</p>
+            <p className="section-header-subtitle">Time: 2 minutes</p>
           </div>
 
-          <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '2rem', textAlign: 'center'}}>
+          <h3 className="content-card-title" style={{textAlign: 'center', marginBottom: '2rem'}}>
             What we need to know:
           </h3>
 
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+          <div className="grid-2-cols">
+            <div className="content-card analysis">
+              <p className="content-card-description">
                 Company name, address, and tax ID
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card analysis">
+              <p className="content-card-description">
                 Where you manufacture or assemble your product
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card analysis">
+              <p className="content-card-description">
                 Your destination market (US, Canada, or Mexico)
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card analysis">
+              <p className="content-card-description">
                 Annual trade volume
               </p>
             </div>
