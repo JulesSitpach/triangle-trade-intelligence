@@ -524,8 +524,7 @@ export default async function handler(req, res) {
           const { error: updateError } = await supabase
             .from('workflow_sessions')
             .update({
-              data: updatedData,
-              updated_at: new Date().toISOString()
+              data: updatedData
             })
             .eq('id', session.id);
 
