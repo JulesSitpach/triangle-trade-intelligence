@@ -209,7 +209,7 @@ export default function Login() {
             {/* Footer Note */}
             <div style={{ textAlign: 'center', paddingTop: '1.5rem', borderTop: '1px solid var(--gray-200)' }}>
               <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: 0 }}>
-                Need help? <Link href="/contact-support?reason=Login%20Issues" style={{ color: 'var(--blue-500)', textDecoration: 'none', fontWeight: '500' }}>Contact Support</Link>
+                Need help? <Link href="/support" style={{ color: 'var(--blue-500)', textDecoration: 'none', fontWeight: '500' }}>Contact Support</Link>
               </p>
             </div>
           </div>

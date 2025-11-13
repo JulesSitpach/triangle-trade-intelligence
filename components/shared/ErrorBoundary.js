@@ -133,7 +133,7 @@ class ErrorBoundary extends React.Component {
 
             <div className="error-help">
               <p>If this problem persists, please contact support:</p>
-              <a href="mailto:support@triangle-intelligence.com" className="error-contact-link">
+              <a href="/support" className="error-contact-link">
                 support@triangle-intelligence.com
               </a>
             </div>

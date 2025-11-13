@@ -118,19 +118,19 @@ export default function Footer() {
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               <li style={{ marginBottom: '0.5rem' }}>
-                <Link href="/contact-support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Contact Support
                 </Link>
               </li>
               <li style={{ marginBottom: '0.5rem' }}>
-                <Link href="/contact" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Contact Us
                 </Link>
               </li>
               <li style={{ marginBottom: '0.5rem' }}>
-                <a href="mailto:triangleintel@gmail.com?subject=General%20Inquiry" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                <span style={{ color: '#e0f2fe' }}>
                   Email: triangleintel@gmail.com
-                </a>
+                </span>
               </li>
             </ul>
           </div>

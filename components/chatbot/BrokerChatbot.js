@@ -304,10 +304,10 @@ export default function BrokerChatbot({ currentFormField, sessionId }) {
           </button>
         </div>
 
-        {/* Email Support Button */}
+        {/* Contact Support Button */}
         <div style={{ padding: '12px 16px', borderTop: '1px solid #e5e7eb', background: '#f9fafb' }}>
           <a
-            href="mailto:triangleintel@gmail.com?subject=Support%20Request%20from%20Dashboard"
+            href="/support"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -325,11 +325,11 @@ export default function BrokerChatbot({ currentFormField, sessionId }) {
             onMouseEnter={(e) => e.target.style.background = '#2563eb'}
             onMouseLeave={(e) => e.target.style.background = '#3b82f6'}
           >
-            <span style={{ fontSize: '16px' }}>✉️</span>
-            Email Support Team
+            <span style={{ fontSize: '16px' }}>📧</span>
+            Contact Support Team
           </a>
           <p style={{ fontSize: '12px', color: '#64748b', textAlign: 'center', marginTop: '8px', marginBottom: 0 }}>
-            Can't find what you need? Email us directly.
+            Can't find what you need? Contact our team.
           </p>
         </div>
       </div>

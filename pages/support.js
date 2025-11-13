@@ -14,23 +14,49 @@ export default function Support() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Create Gmail subject with label
-    const labelPrefix = `[${formData.category.toUpperCase()}]`;
-    const gmailSubject = `${labelPrefix} ${formData.subject}`;
+    try {
+      // Submit to contact form API (which logs to database and sends to triangleintel@gmail.com)
+      const response = await fetch('/api/contact-form', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: '', // Optional
+          phone: '', // Optional
+          message: `[${formData.category.toUpperCase()}] ${formData.subject}\n\n${formData.message}`,
+          industry: formData.category,
+          lead_source: 'support_form'
+        })
+      });
 
-    // Create mailto link with pre-filled content
-    const mailtoBody = `Name: ${formData.name}%0D%0AEmail: ${formData.email}%0D%0ACategory: ${formData.category}%0D%0A%0D%0AMessage:%0D%0A${encodeURIComponent(formData.message)}`;
-    const mailtoLink = `mailto:triangleintel@gmail.com?subject=${encodeURIComponent(gmailSubject)}&body=${mailtoBody}`;
+      const data = await response.json();
 
-    // Open user's email client
-    window.location.href = mailtoLink;
-
-    setSubmitted(true);
-    setLoading(false);
+      if (response.ok) {
+        setSubmitted(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          category: 'support',
+          subject: '',
+          message: ''
+        });
+      } else {
+        alert(`Error: ${data.message || 'Failed to send message. Please try again or email us directly.'}`);
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      alert('Failed to send message. Please try again or email us directly at triangleintel@gmail.com');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -134,7 +160,7 @@ export default function Support() {
                         disabled={loading}
                         style={{ width: '100%' }}
                       >
-                        {loading ? 'Opening Email Client...' : 'Send Message'}
+                        {loading ? 'Sending...' : 'Send Message'}
                       </button>
 
                       <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '10px', textAlign: 'center' }}>
@@ -158,18 +184,15 @@ export default function Support() {
                   borderRadius: '8px',
                   marginBottom: '40px'
                 }}>
-                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>📧</div>
+                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>✅</div>
                   <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', color: '#1E40AF' }}>
-                    Email Client Opened!
+                    Message Sent!
                   </h2>
                   <p className="text-body" style={{ marginBottom: '15px' }}>
-                    Your default email client should have opened with your message pre-filled.
+                    Your message has been sent to our support team at triangleintel@gmail.com
                   </p>
                   <p className="text-body" style={{ marginBottom: '20px' }}>
-                    If it didn't open, please email us directly at{' '}
-                    <a href="mailto:triangleintel@gmail.com" style={{ color: '#2563EB', fontWeight: 'bold' }}>
-                      triangleintel@gmail.com
-                    </a>
+                    We'll get back to you within 24 hours during business days.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
