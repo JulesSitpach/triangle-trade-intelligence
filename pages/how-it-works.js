@@ -308,7 +308,6 @@ export default function HowItWorksPage() {
                 Click to view full size - Real example: Component table showing which parts have tariff exposure and which qualify for USMCA savings
               </p>
             </div>
-          </div>
         </div>
       </section>
 
