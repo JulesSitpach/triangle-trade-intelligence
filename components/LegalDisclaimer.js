@@ -12,11 +12,11 @@ export default function LegalDisclaimer({ variant = 'default' }) {
     return (
       <div className="alert alert-info">
         <div className="alert-content">
-          <div className="alert-title">⚖️ Legal Scope</div>
+          <div className="alert-title">⚖️ Important Disclaimer</div>
           <div className="text-body">
-            <strong>What We Provide:</strong> Trade consulting, USMCA assessment guidance, and strategic recommendations.
+            <strong>What We Provide:</strong> Self-serve software platform for USMCA certificate generation and tariff analysis.
             <br />
-            <strong>What We Don't Provide:</strong> We are not trade compliance experts. Official customs declarations and legal certifications require licensed professionals.
+            <strong>Your Responsibility:</strong> You verify all data accuracy. We provide tools, you own compliance. Consult licensed customs brokers for official certifications.
           </div>
         </div>
       </div>
@@ -27,20 +27,20 @@ export default function LegalDisclaimer({ variant = 'default' }) {
   return (
     <div className="alert alert-info">
       <div className="alert-content">
-        <div className="alert-title">⚖️ Service Scope & Legal Notice</div>
+        <div className="alert-title">⚖️ Platform Disclaimer</div>
         <div className="text-body">
           <p style={{marginBottom: '0.75rem'}}>
-            <strong>What We Provide:</strong> Trade process consulting, USMCA qualification assessment and optimization guidance,
-            logistics planning recommendations, supply chain analysis, and market entry strategy support.
+            <strong>What We Provide:</strong> Self-serve SaaS platform for USMCA certificate generation, HS code classification,
+            regional content calculations, and tariff savings analysis. AI-powered tools to automate compliance workflows.
           </p>
           <p style={{marginBottom: '0.75rem'}}>
-            <strong>What We Don't Provide:</strong> We are not trade compliance experts. Official customs declarations,
-            legal USMCA certifications, and formal compliance documents require partnership with licensed professionals.
+            <strong>What We Don't Provide:</strong> We do not provide consulting, professional services, or legal advice.
+            We are a software platform only. You are responsible for verifying all data accuracy and compliance decisions.
           </p>
           <p style={{marginBottom: '0'}}>
-            <strong>Partnership Model:</strong> For official customs broker services and legal certifications, we partner
-            with licensed professionals (separate fees apply). Our services provide expert guidance and assessment to help
-            you make informed decisions about your trade operations.
+            <strong>User Responsibility:</strong> All certificate data, tariff calculations, and compliance analysis must be
+            independently verified by you or licensed customs brokers before submission to authorities. By using this platform,
+            you acknowledge sole responsibility for accuracy and compliance.
           </p>
         </div>
       </div>
