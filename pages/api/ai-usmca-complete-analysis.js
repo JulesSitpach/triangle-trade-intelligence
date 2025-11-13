@@ -779,34 +779,40 @@ export default protectedApiHandler({
         }
 
         try {
-          // ✅ NEW (Nov 9, 2025): Try USITC API FIRST for live, official tariff rates
-          // This is the most accurate source - direct from US government
-          const { USITCApiService } = await import('../../lib/services/usitc-api-service.js');
-          const usitcData = await USITCApiService.getTariffRates(component.hs_code, destinationCountry);
+          // ✅ NEW (Nov 13, 2025): Use USITC → AI fallback verification service
+          // This tries USITC first (free, 98% confidence) then falls back to AI if USITC down
+          const { verifyTariffRates } = await import('../../lib/services/tariff-verification-service.js');
+          const verificationResult = await verifyTariffRates(
+            component.hs_code,
+            component.description,
+            component.origin_country
+          );
 
-          if (usitcData) {
-            console.log(`✅ [USITC API] Got official live rates for ${component.hs_code}`);
+          if (verificationResult) {
+            console.log(`✅ [TARIFF-VERIFY] Got ${verificationResult.tier} rates for ${component.hs_code}: ${(verificationResult.confidence * 100).toFixed(0)}% confidence`);
 
             enriched.push({
               ...baseComponent,
-              mfn_rate: usitcData.mfn_rate,
-              base_mfn_rate: usitcData.mfn_rate,
-              section_301: usitcData.section_301 || 0, // USITC doesn't have this, will need Federal Register API
-              section_232: usitcData.section_232 || 0, // USITC doesn't have this, will need Federal Register API
-              usmca_rate: usitcData.usmca_rate,
-              mfn_text_rate: usitcData.mfn_text_rate,
-              rate_source: 'usitc_api',
-              data_source: 'usitc_dataweb',
+              mfn_rate: verificationResult.mfn_rate,
+              base_mfn_rate: verificationResult.mfn_rate,
+              section_301: 0, // Will query policy_tariffs_cache separately
+              section_232: 0, // Will query policy_tariffs_cache separately
+              usmca_rate: verificationResult.usmca_rate,
+              mfn_text_rate: `${(verificationResult.mfn_rate * 100).toFixed(1)}%`,
+              rate_source: verificationResult.tier, // 'usitc' or 'ai'
+              data_source: verificationResult.data_source,
               stale: false,
-              last_verified: usitcData.last_verified,
-              volatility_tier: 3,
-              volatility_reason: 'Official USITC API data (100% accurate)'
+              last_verified: new Date().toISOString(),
+              volatility_tier: verificationResult.tier === 'usitc' ? 1 : 2,
+              volatility_reason: verificationResult.tier === 'usitc'
+                ? 'Official USITC API data (government verified)'
+                : `AI Research verification (${(verificationResult.confidence * 100).toFixed(0)}% confidence)`
             });
-            continue; // Skip database lookup, we have official data
+            continue; // Skip database lookup, we have verified data
           }
 
-          // ✅ USITC API not authenticated yet - fallback to database/AI is working correctly
-          // No need to log this as a warning, it's expected behavior
+          // ✅ Verification failed - fall back to database lookup
+          console.log(`⚠️ [TARIFF-VERIFY] Verification failed for ${component.hs_code} - falling back to database`)
 
           // ✅ NEW (Nov 13, 2025): Smart HS code normalization for 10-digit AI classifications
           // AI often returns 10-digit codes (8534310000), but database uses 8-digit HTS-8 format (85343100)
