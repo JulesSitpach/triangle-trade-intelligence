@@ -2288,56 +2288,22 @@ export default protectedApiHandler({
         });
     }
 
-    // ✅ USAGE TRACKING: Increment analysis counter ONLY on first completion (Nov 12, 2025)
-    // IDEMPOTENT: Only count each workflow_session_id once to prevent double-counting
-    // when users re-analyze or edit the same workflow
-    // Fire-and-forget: don't block response, but log errors for monitoring
+    // ✅ USAGE TRACKING: Counter is incremented in workflow-session.js (Nov 12, 2025)
+    // ⚠️ CRITICAL: DO NOT increment counter here - it causes double-counting
+    // The workflow-session.js API increments the counter when action='complete'
+    // If we also increment here, the counter goes up by 2 instead of 1
+    //
+    // OLD BUG (Nov 12): Counter was incremented in BOTH places:
+    //   1. workflow-session.js (line 283) when saving completed workflow
+    //   2. ai-usmca-complete-analysis.js (here) after AI analysis
+    // Result: 11 completions in database, but counter showed 14 (+3 extra)
+    //
+    // FIX: Removed increment from this file - workflow-session.js is single source of truth
+    console.log(`[USAGE-TRACKING] ℹ️ Counter will be incremented by workflow-session.js, not here (prevents double-counting)`);
     if (formData.workflow_session_id) {
-      // Check if this workflow was already counted (column is 'session_id' in workflow_completions)
-      supabase
-        .from('workflow_completions')
-        .select('id')
-        .eq('session_id', formData.workflow_session_id)
-        .single()
-        .then(({ data: existingCompletion, error: checkError }) => {
-          // If workflow_completions doesn't have this session_id yet, count it
-          const isFirstCompletion = checkError?.code === 'PGRST116' || !existingCompletion;
-
-          if (isFirstCompletion) {
-            console.log(`[USAGE-TRACKING] 🆕 First completion for workflow ${formData.workflow_session_id}, incrementing counter`);
-
-            supabase
-              .rpc('increment_analysis_count', {
-                p_user_id: userId,
-                p_subscription_tier: subscriptionTier
-              })
-              .then(({ data, error }) => {
-                if (error) {
-                  console.error('[USAGE-TRACKING] ❌ Failed to increment analysis count:', error.message);
-                  logDevIssue({
-                    type: 'database_error',
-                    severity: 'high',
-                    component: 'usage_tracking',
-                    message: 'Failed to increment analysis count after successful workflow completion',
-                    data: { userId, subscriptionTier, error: error.message }
-                  });
-                } else {
-                  const result = data?.[0] || {};
-                  console.log(`[USAGE-TRACKING] ✅ Analysis counted: ${result.current_count}/${result.tier_limit} (Tier: ${subscriptionTier})`);
-                }
-              })
-              .catch(err => {
-                console.error('[USAGE-TRACKING] ❌ Exception incrementing analysis count:', err.message);
-              });
-          } else {
-            console.log(`[USAGE-TRACKING] ♻️ Re-analysis of workflow ${formData.workflow_session_id}, counter not incremented (already counted)`);
-          }
-        })
-        .catch(err => {
-          console.error('[USAGE-TRACKING] ❌ Exception checking workflow completion status:', err.message);
-        });
+      console.log(`[USAGE-TRACKING] ℹ️ Workflow ${formData.workflow_session_id} will be counted when saved to workflow_completions`);
     } else {
-      console.warn('[USAGE-TRACKING] ⚠️ No workflow_session_id provided, cannot track idempotently');
+      console.warn('[USAGE-TRACKING] ⚠️ No workflow_session_id provided - workflow may not be counted');
     }
 
     // DEBUG: Log what's being returned in component_origins
