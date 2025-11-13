@@ -63,8 +63,8 @@ export default function WorkflowResults({
   // ✅ SIMPLIFIED: No need for complex state - just check if data exists in results
   // Executive summary displays if EITHER:
   // 1. Freshly generated (executiveSummary state)
-  // 2. Loaded from database (results.detailed_analysis)
-  const hasExecutiveSummary = !!results?.detailed_analysis?.situation_brief || !!executiveSummary;
+  // 2. Loaded from database (results.detailed_analysis OR results.executive_summary)
+  const hasExecutiveSummary = !!results?.detailed_analysis?.situation_brief || !!results?.executive_summary || !!executiveSummary;
 
   useEffect(() => {
     // Check if user already generated certificate for this session
@@ -359,13 +359,20 @@ export default function WorkflowResults({
             const dbData = await dbResponse.json();
             console.log('📦 Database workflow data:', dbData);
 
+            // ✅ FIX: Check BOTH old location (detailed_analysis) and new location (executive_summary)
             const dbExecutiveData = dbData.workflow_data?.detailed_analysis?.situation_brief
               ? dbData.workflow_data.detailed_analysis
+              : dbData.workflow_data?.executive_summary
+              ? { situation_brief: dbData.workflow_data.executive_summary }
               : null;
 
-            if (dbExecutiveData && dbExecutiveData.situation_brief) {
+            if (dbExecutiveData && (dbExecutiveData.situation_brief || typeof dbExecutiveData === 'string')) {
               console.log('✅ Loaded executive summary from database:', dbExecutiveData);
-              setExecutiveSummary(dbExecutiveData);
+              // Handle both old format (object with situation_brief) and new format (string)
+              const summaryData = typeof dbExecutiveData === 'string'
+                ? { situation_brief: dbExecutiveData }
+                : dbExecutiveData;
+              setExecutiveSummary(summaryData);
               setShowSummary(true);
               setLoadingSummary(false);
               return;
