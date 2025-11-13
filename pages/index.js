@@ -143,130 +143,191 @@ export default function HomePage() {
           </h1>
 
           <p className="hero-description-text" style={{marginTop: '2rem'}}>
-            Are you paying tariffs when you could qualify for USMCA duty-free status?<br/>
-            Find out if you qualify in 5 minutes. Get your certificate. Stay protected.
+            Are you paying tariffs when you could qualify for duty-free status?
           </p>
-          
+
           <div className="hero-button-group">
             <Link
-              href="/pricing"
+              href="/signup"
               className="hero-primary-button"
-              aria-label="View pricing plans and start free trial"
+              aria-label="Start free analysis"
             >
-              Start Free Trial
+              Start Free Analysis →
             </Link>
-          </div>
-
-          {/* Trial Benefits */}
-          <div className="hero-trial-benefits">
-            <div className="trial-benefit-item">✓ 1 free USMCA analysis</div>
-            <div className="trial-benefit-item">✓ 3 components analyzed</div>
-            <div className="trial-benefit-item">✓ Certificate preview</div>
-            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
           </div>
         </div>
       </section>
 
-      {/* We Understand Your Situation - Empathy First */}
+      {/* You're Not Alone */}
       <section className="main-content">
-        <div className="container-app">
-          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
-            <h2 className="section-header-title">We Understand Your Situation</h2>
-            <p className="section-header-subtitle">
-              Tariffs changing every week. Customs brokers charging $500 per certificate.<br/>
-              And you&apos;re just trying to run your business.
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">You&apos;re Not Alone</h2>
+          </div>
+
+          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
+            <p style={{marginBottom: '1.5rem'}}>
+              You&apos;re managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:
+            </p>
+
+            <ul style={{paddingLeft: '1.5rem', marginBottom: '1.5rem'}}>
+              <li style={{marginBottom: '0.75rem'}}>Tariff policies change every week</li>
+              <li style={{marginBottom: '0.75rem'}}>Your customs broker charges $500 per certificate</li>
+              <li style={{marginBottom: '0.75rem'}}>You don&apos;t have time to research USMCA rules</li>
+              <li style={{marginBottom: '0.75rem'}}>You suspect you&apos;re overpaying but don&apos;t know how to check</li>
+            </ul>
+
+            <p style={{fontWeight: 600, color: '#1e3a8a'}}>
+              You&apos;re right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid - simply because they have trade compliance teams and you don&apos;t.
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid-2-cols" style={{gap: '2rem'}}>
-            {/* Pain Point 1 */}
-            <div className="content-card" style={{borderLeft: '4px solid #dc2626'}}>
-              <h3 className="content-card-title" style={{color: '#dc2626', fontSize: '1.25rem'}}>
-                😰 &quot;Section 301 tariffs changed AGAIN?&quot;
-              </h3>
-              <p className="content-card-description" style={{marginTop: '0.75rem', color: '#059669', fontWeight: 600}}>
-                → We monitor daily. You get alerts within 24 hours.
-              </p>
+      {/* What If You Had Your Own Trade Team */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">What If You Had Your Own Trade Team?</h2>
+          </div>
+
+          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
+            <p style={{marginBottom: '1.5rem'}}>
+              That&apos;s what this platform does. It handles the complex USMCA calculations and tariff research that normally requires:
+            </p>
+
+            <ul style={{paddingLeft: '1.5rem', marginBottom: '1.5rem'}}>
+              <li style={{marginBottom: '0.75rem'}}>A customs broker ($300-500 per analysis)</li>
+              <li style={{marginBottom: '0.75rem'}}>A trade compliance specialist (6+ hours of research)</li>
+              <li style={{marginBottom: '0.75rem'}}>Daily monitoring of tariff policy changes</li>
+              <li style={{marginBottom: '0.75rem'}}>Expert knowledge of USMCA rules and RVC calculations</li>
+            </ul>
+
+            <p style={{fontWeight: 600, fontSize: '1.25rem', color: '#1e3a8a'}}>
+              Now you can do it yourself in 5 minutes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Built For Business Owners Who Are On Their Own */}
+      <section className="main-content">
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">Built For Business Owners Who Are On Their Own</h2>
+          </div>
+
+          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
+            <div style={{marginBottom: '2rem'}}>
+              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>You don&apos;t need to become a trade expert.</p>
+              <p>Answer questions about your product and suppliers - we handle the technical analysis.</p>
             </div>
 
-            {/* Pain Point 2 */}
-            <div className="content-card" style={{borderLeft: '4px solid #dc2626'}}>
-              <h3 className="content-card-title" style={{color: '#dc2626', fontSize: '1.25rem'}}>
-                😰 &quot;I don&apos;t have time to learn USMCA rules&quot;
-              </h3>
-              <p className="content-card-description" style={{marginTop: '0.75rem', color: '#059669', fontWeight: 600}}>
-                → AI does it. You answer 5 questions, we calculate everything.
-              </p>
+            <div style={{marginBottom: '2rem'}}>
+              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>You don&apos;t need to monitor tariff changes.</p>
+              <p>We track Section 301, Section 232, and USMCA rule updates daily.</p>
             </div>
 
-            {/* Pain Point 3 */}
-            <div className="content-card" style={{borderLeft: '4px solid #dc2626'}}>
-              <h3 className="content-card-title" style={{color: '#dc2626', fontSize: '1.25rem'}}>
-                😰 &quot;My broker quoted $500 per certificate&quot;
-              </h3>
-              <p className="content-card-description" style={{marginTop: '0.75rem', color: '#059669', fontWeight: 600}}>
-                → Generate unlimited certificates. $99/month flat rate.
-              </p>
-            </div>
-
-            {/* Pain Point 4 */}
-            <div className="content-card" style={{borderLeft: '4px solid #dc2626'}}>
-              <h3 className="content-card-title" style={{color: '#dc2626', fontSize: '1.25rem'}}>
-                😰 &quot;What if I get it wrong?&quot;
-              </h3>
-              <p className="content-card-description" style={{marginTop: '0.75rem', color: '#059669', fontWeight: 600}}>
-                → Download the certificate, verify with your broker before filing.
-              </p>
+            <div>
+              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>You don&apos;t need to trust our math blindly.</p>
+              <p>Download the analysis, verify with your customs broker, then decide.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* That's Why We Built This */}
+      {/* Real Example */}
       <section className="main-content gradient-subtle">
-        <div className="container-app">
-          <div className="section-header" style={{textAlign: 'center', marginBottom: '2rem'}}>
-            <h2 className="section-header-title">That&apos;s Why We Built This</h2>
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">Real Example: Electronics Importer</h2>
           </div>
 
-          <div className="grid-2-cols" style={{gap: '2rem', maxWidth: '900px', margin: '0 auto'}}>
-            <div className="content-card">
-              <div className="content-card-icon">⚡</div>
-              <h3 className="content-card-title">Self-Serve</h3>
-              <p className="content-card-description">
-                No sales calls, no consultants. Just log in and run your analysis.
-              </p>
-            </div>
+          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
+            <p style={{marginBottom: '1rem'}}><strong>Before:</strong> Paying 25% Section 301 tariffs on China-sourced components</p>
+            <p style={{marginBottom: '1rem'}}><strong>After:</strong> Discovered 72% USMCA qualification through Mexico assembly</p>
+            <p style={{marginBottom: '1.5rem', fontWeight: 600, fontSize: '1.25rem', color: '#059669'}}>Annual Savings: $43,750 in eliminated tariffs</p>
+            <p style={{fontStyle: 'italic', color: '#6b7280'}}>They didn&apos;t know they qualified. They were just trying to keep their business running.</p>
+          </div>
+        </div>
+      </section>
 
-            <div className="content-card">
-              <div className="content-card-icon">⏱️</div>
-              <h3 className="content-card-title">Fast</h3>
-              <p className="content-card-description">
-                5 minutes vs 2 hours with traditional brokers.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">💰</div>
-              <h3 className="content-card-title">Affordable</h3>
-              <p className="content-card-description">
-                $99/month flat rate vs $500 per certificate.
-              </p>
-            </div>
-
-            <div className="content-card">
-              <div className="content-card-icon">🔄</div>
-              <h3 className="content-card-title">Always Current</h3>
-              <p className="content-card-description">
-                Daily tariff monitoring so you&apos;re never caught off guard.
-              </p>
-            </div>
+      {/* Your Situation, Your Control */}
+      <section className="main-content">
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">Your Situation, Your Control</h2>
           </div>
 
-          <div style={{textAlign: 'center', marginTop: '2.5rem'}}>
-            <Link href="/how-it-works" className="btn-secondary" style={{fontSize: '1.1rem'}}>
-              See How It Works →
-            </Link>
+          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
+            <p style={{marginBottom: '1.5rem'}}>
+              This isn&apos;t another service where you wait for consultants to call you back. You:
+            </p>
+
+            <ul style={{paddingLeft: '1.5rem', marginBottom: '1.5rem'}}>
+              <li style={{marginBottom: '0.75rem'}}>Run the analysis yourself whenever you need it</li>
+              <li style={{marginBottom: '0.75rem'}}>See the calculations and methodology</li>
+              <li style={{marginBottom: '0.75rem'}}>Verify the results with your own broker</li>
+              <li style={{marginBottom: '0.75rem'}}>Generate certificates on your own timeline</li>
+            </ul>
+
+            <p style={{fontWeight: 600, fontSize: '1.25rem', color: '#1e3a8a'}}>
+              You own the data. You make the decisions.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Start Free */}
+      <section className="main-content gradient-subtle">
+        <div className="container-app" style={{maxWidth: '700px', textAlign: 'center'}}>
+          <h2 className="section-header-title">Start Free - See If You Qualify</h2>
+          <p className="text-body" style={{fontSize: '1.1rem', marginBottom: '2rem'}}>
+            14-day free trial • No credit card required • Full platform access
+          </p>
+          <p className="text-body" style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '2rem', color: '#1e3a8a'}}>
+            Find out in 5 minutes if you&apos;re overpaying tariffs.
+          </p>
+          <Link href="/signup" className="btn-primary" style={{fontSize: '1.2rem', padding: '1rem 2.5rem'}}>
+            Start Free Analysis →
+          </Link>
+        </div>
+      </section>
+
+      {/* Questions */}
+      <section className="main-content">
+        <div className="container-app" style={{maxWidth: '800px'}}>
+          <div className="section-header">
+            <h2 className="section-header-title">Questions?</h2>
+          </div>
+
+          <div style={{display: 'grid', gap: '2rem'}}>
+            <div>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 600, color: '#1e3a8a', marginBottom: '0.75rem'}}>
+                &quot;What if I get the inputs wrong?&quot;
+              </h3>
+              <p className="text-body" style={{fontSize: '1.05rem', lineHeight: '1.7'}}>
+                We guide you through each field and explain what information we need. Plus you can verify results with your broker before filing.
+              </p>
+            </div>
+
+            <div>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 600, color: '#1e3a8a', marginBottom: '0.75rem'}}>
+                &quot;Is this legally valid?&quot;
+              </h3>
+              <p className="text-body" style={{fontSize: '1.05rem', lineHeight: '1.7'}}>
+                Yes. We generate official USMCA Form D certificates. You verify accuracy and your broker files with CBP.
+              </p>
+            </div>
+
+            <div>
+              <h3 style={{fontSize: '1.25rem', fontWeight: 600, color: '#1e3a8a', marginBottom: '0.75rem'}}>
+                &quot;What if my situation is complex?&quot;
+              </h3>
+              <p className="text-body" style={{fontSize: '1.05rem', lineHeight: '1.7'}}>
+                Start with our platform for the analysis. If you need consulting help, at least you&apos;ll know exactly what questions to ask.
+              </p>
+            </div>
           </div>
         </div>
       </section>
