@@ -1015,7 +1015,27 @@ export default protectedApiHandler({
           };
 
           const getUSMCARate = () => {
-            // Check if product qualifies for USMCA/NAFTA rate
+            // ✅ FIX (Nov 12, 2025): USMCA rate depends on ORIGIN, not just destination
+            // Components from USMCA countries (US, CA, MX) qualify for duty-free (0%) when going to USMCA destinations
+            // Components from non-USMCA countries (CN, etc.) do NOT qualify, pay MFN rate
+
+            const originCountry = baseComponent.origin_country;
+            const isUSMCAOrigin = ['US', 'CA', 'MX', 'USA', 'CAN', 'MEX'].includes(originCountry);
+            const isUSMCADestination = ['US', 'CA', 'MX'].includes(destinationCountry);
+
+            // If origin is USMCA member AND destination is USMCA member → Duty-free (0%)
+            if (isUSMCAOrigin && isUSMCADestination) {
+              console.log(`✅ [USMCA-RATE] ${originCountry} → ${destinationCountry}: Duty-free (USMCA qualifying component)`);
+              return 0;
+            }
+
+            // If origin is NOT USMCA member → Not eligible for preferential rate, pay MFN
+            if (!isUSMCAOrigin) {
+              console.log(`⚠️ [USMCA-RATE] ${originCountry} → ${destinationCountry}: MFN rate (non-USMCA origin)`);
+              return getMFNRate();
+            }
+
+            // Fallback: Check database USMCA rate column (for edge cases)
             const qualifies = (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') ||
                              (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') ||
                              (destinationCountry === 'US');
@@ -2268,33 +2288,57 @@ export default protectedApiHandler({
         });
     }
 
-    // ✅ USAGE TRACKING: Increment analysis counter AFTER successful completion (Nov 8, 2025)
-    // This ensures we only count workflows that successfully reach Results page
+    // ✅ USAGE TRACKING: Increment analysis counter ONLY on first completion (Nov 12, 2025)
+    // IDEMPOTENT: Only count each workflow_session_id once to prevent double-counting
+    // when users re-analyze or edit the same workflow
     // Fire-and-forget: don't block response, but log errors for monitoring
-    supabase
-      .rpc('increment_analysis_count', {
-        p_user_id: userId,
-        p_subscription_tier: subscriptionTier
-      })
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('[USAGE-TRACKING] ❌ Failed to increment analysis count:', error.message);
-          // Log to dev_issues for monitoring
-          logDevIssue({
-            type: 'database_error',
-            severity: 'high',
-            component: 'usage_tracking',
-            message: 'Failed to increment analysis count after successful workflow completion',
-            data: { userId, subscriptionTier, error: error.message }
-          });
-        } else {
-          const result = data?.[0] || {};
-          console.log(`[USAGE-TRACKING] ✅ Analysis counted: ${result.current_count}/${result.tier_limit} (Tier: ${subscriptionTier})`);
-        }
-      })
-      .catch(err => {
-        console.error('[USAGE-TRACKING] ❌ Exception incrementing analysis count:', err.message);
-      });
+    if (formData.workflow_session_id) {
+      // Check if this workflow was already counted (column is 'session_id' in workflow_completions)
+      supabase
+        .from('workflow_completions')
+        .select('id')
+        .eq('session_id', formData.workflow_session_id)
+        .single()
+        .then(({ data: existingCompletion, error: checkError }) => {
+          // If workflow_completions doesn't have this session_id yet, count it
+          const isFirstCompletion = checkError?.code === 'PGRST116' || !existingCompletion;
+
+          if (isFirstCompletion) {
+            console.log(`[USAGE-TRACKING] 🆕 First completion for workflow ${formData.workflow_session_id}, incrementing counter`);
+
+            supabase
+              .rpc('increment_analysis_count', {
+                p_user_id: userId,
+                p_subscription_tier: subscriptionTier
+              })
+              .then(({ data, error }) => {
+                if (error) {
+                  console.error('[USAGE-TRACKING] ❌ Failed to increment analysis count:', error.message);
+                  logDevIssue({
+                    type: 'database_error',
+                    severity: 'high',
+                    component: 'usage_tracking',
+                    message: 'Failed to increment analysis count after successful workflow completion',
+                    data: { userId, subscriptionTier, error: error.message }
+                  });
+                } else {
+                  const result = data?.[0] || {};
+                  console.log(`[USAGE-TRACKING] ✅ Analysis counted: ${result.current_count}/${result.tier_limit} (Tier: ${subscriptionTier})`);
+                }
+              })
+              .catch(err => {
+                console.error('[USAGE-TRACKING] ❌ Exception incrementing analysis count:', err.message);
+              });
+          } else {
+            console.log(`[USAGE-TRACKING] ♻️ Re-analysis of workflow ${formData.workflow_session_id}, counter not incremented (already counted)`);
+          }
+        })
+        .catch(err => {
+          console.error('[USAGE-TRACKING] ❌ Exception checking workflow completion status:', err.message);
+        });
+    } else {
+      console.warn('[USAGE-TRACKING] ⚠️ No workflow_session_id provided, cannot track idempotently');
+    }
 
     // DEBUG: Log what's being returned in component_origins
     console.log('📊 [RESPONSE-DEBUG] Tariff rates in API response:',
