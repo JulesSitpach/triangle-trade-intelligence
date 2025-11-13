@@ -253,6 +253,10 @@ export default protectedApiHandler({
           }
         },
 
+        // ✅ FIX (Nov 12): Copy executive_summary from workflowData if it exists
+        // Executive summaries are generated during workflow and need to persist to completions table
+        executive_summary: workflowData.detailed_analysis?.situation_brief || null,
+
         session_id: sessionId,
         completion_time_minutes: Math.ceil((workflowData.completion_time_seconds || 180) / 60)
       };

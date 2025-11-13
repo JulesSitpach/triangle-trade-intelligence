@@ -248,6 +248,15 @@ export default protectedApiHandler({
           }
         }
 
+        // ✅ FIX (Nov 12): Include executive_summary for completions (same as sessions)
+        // Executive summaries are saved in workflow_sessions but need to be copied to workflow_completions
+        const enrichedWorkflowData = { ...workflowData };
+        if (row.executive_summary) {
+          enrichedWorkflowData.detailed_analysis = enrichedWorkflowData.detailed_analysis || {};
+          enrichedWorkflowData.detailed_analysis.situation_brief = row.executive_summary;
+          console.log(`✅ [DASHBOARD] Added executive_summary to completion ${row.id} for auto-display`);
+        }
+
         return {
           id: row.id,
           source: 'completion',
@@ -265,8 +274,8 @@ export default protectedApiHandler({
           manufacturing_location: qualificationResult.manufacturing_location || '',
           certificate_data: workflowData.certificate || null,
           certificate_generated: !!row.certificate_generated,
-          // Include full workflow_data for certificate generation
-          workflow_data: workflowData
+          // Include full workflow_data for certificate generation + executive_summary for auto-display
+          workflow_data: enrichedWorkflowData
         };
       });
 
