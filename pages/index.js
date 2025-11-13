@@ -400,41 +400,150 @@ export default function HomePage() {
       </section>
 
       {/* Real Example */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app" style={{maxWidth: '800px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '900px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Real Example: Electronics Importer</h2>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
-            <p style={{marginBottom: '1rem'}}><strong>Before:</strong> Paying 25% Section 301 tariffs on China-sourced components</p>
-            <p style={{marginBottom: '1rem'}}><strong>After:</strong> Discovered 72% USMCA qualification through Mexico assembly</p>
-            <p style={{marginBottom: '1.5rem', fontWeight: 600, fontSize: '1.25rem', color: '#059669'}}>Annual Savings: $43,750 in eliminated tariffs</p>
-            <p style={{fontStyle: 'italic', color: '#6b7280'}}>They didn&apos;t know they qualified. They were just trying to keep their business running.</p>
+          <div style={{
+            background: '#fff',
+            border: '2px solid #e5e7eb',
+            borderRadius: '12px',
+            padding: '3rem',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+          }}>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem'}}>
+              <div style={{
+                padding: '2rem',
+                background: '#fef2f2',
+                borderRadius: '8px',
+                borderLeft: '4px solid #dc2626'
+              }}>
+                <h3 style={{fontSize: '1.15rem', fontWeight: 700, color: '#991b1b', marginBottom: '1rem'}}>
+                  Before
+                </h3>
+                <p style={{fontSize: '1.1rem', lineHeight: '1.7', color: '#374151', margin: 0}}>
+                  Paying 25% Section 301 tariffs on China-sourced components
+                </p>
+              </div>
+
+              <div style={{
+                padding: '2rem',
+                background: '#f0fdf4',
+                borderRadius: '8px',
+                borderLeft: '4px solid #059669'
+              }}>
+                <h3 style={{fontSize: '1.15rem', fontWeight: 700, color: '#065f46', marginBottom: '1rem'}}>
+                  After
+                </h3>
+                <p style={{fontSize: '1.1rem', lineHeight: '1.7', color: '#374151', margin: 0}}>
+                  Discovered 72% USMCA qualification through Mexico assembly
+                </p>
+              </div>
+            </div>
+
+            <div style={{
+              padding: '2rem',
+              background: '#059669',
+              borderRadius: '8px',
+              textAlign: 'center',
+              marginBottom: '2rem'
+            }}>
+              <p style={{fontSize: '1.5rem', fontWeight: 700, color: '#fff', margin: 0}}>
+                Annual Savings: $43,750 in eliminated tariffs
+              </p>
+            </div>
+
+            <p style={{
+              fontSize: '1.15rem',
+              fontStyle: 'italic',
+              color: '#6b7280',
+              textAlign: 'center',
+              margin: 0,
+              lineHeight: '1.7'
+            }}>
+              They didn&apos;t know they qualified. They were just trying to keep their business running.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Your Situation, Your Control */}
-      <section className="main-content">
-        <div className="container-app" style={{maxWidth: '800px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '2rem'}}>
             <h2 className="section-header-title">Your Situation, Your Control</h2>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8', color: '#374151'}}>
-            <p style={{marginBottom: '1.5rem'}}>
-              This isn&apos;t another service where you wait for consultants to call you back. You:
-            </p>
+          <p style={{
+            fontSize: '1.25rem',
+            color: '#4b5563',
+            textAlign: 'center',
+            marginBottom: '3.5rem',
+            maxWidth: '800px',
+            margin: '0 auto 3.5rem'
+          }}>
+            This isn&apos;t another service where you wait for consultants to call you back. You:
+          </p>
 
-            <ul style={{paddingLeft: '1.5rem', marginBottom: '1.5rem'}}>
-              <li style={{marginBottom: '0.75rem'}}>Run the analysis yourself whenever you need it</li>
-              <li style={{marginBottom: '0.75rem'}}>See the calculations and methodology</li>
-              <li style={{marginBottom: '0.75rem'}}>Verify the results with your own broker</li>
-              <li style={{marginBottom: '0.75rem'}}>Generate certificates on your own timeline</li>
-            </ul>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Run the analysis yourself whenever you need it
+              </p>
+            </div>
 
-            <p style={{fontWeight: 600, fontSize: '1.25rem', color: '#1e3a8a'}}>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                See the calculations and methodology
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Verify the results with your own broker
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Generate certificates on your own timeline
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            background: '#1e3a8a',
+            padding: '3rem',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <p style={{fontSize: '1.75rem', fontWeight: 700, color: '#fff', margin: 0, lineHeight: '1.4'}}>
               You own the data. You make the decisions.
             </p>
           </div>
