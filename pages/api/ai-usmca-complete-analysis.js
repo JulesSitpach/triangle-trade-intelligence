@@ -808,10 +808,24 @@ export default protectedApiHandler({
           // ✅ USITC API not authenticated yet - fallback to database/AI is working correctly
           // No need to log this as a warning, it's expected behavior
 
-          // Normalize HS code: remove dots, pad to 8 digits
-          const normalizedHsCode = (component.hs_code || '')
-            .replace(/\./g, '')  // Remove dots (e.g., "8542.31.00" → "854231")
-            .padEnd(8, '0');     // Pad to 8 digits (e.g., "854231" → "85423100")
+          // ✅ NEW (Nov 13, 2025): Smart HS code normalization for 10-digit AI classifications
+          // AI often returns 10-digit codes (8534310000), but database uses 8-digit HTS-8 format (85343100)
+          // USMCA certificates only require 6-digit minimum, so truncating to 8-digit is accurate
+          const rawHsCode = (component.hs_code || '').replace(/\./g, '').replace(/\s/g, '');
+
+          let normalizedHsCode;
+          if (rawHsCode.length > 8) {
+            // Truncate 10-digit to 8-digit HTS-8 format (US tariff schedule)
+            normalizedHsCode = rawHsCode.substring(0, 8);
+            console.log(`📏 [HS-NORMALIZE] Truncated ${rawHsCode} (${rawHsCode.length} digits) → ${normalizedHsCode} (8-digit HTS-8)`);
+          } else if (rawHsCode.length < 8) {
+            // Pad short codes to 8 digits
+            normalizedHsCode = rawHsCode.padEnd(8, '0');
+            console.log(`📏 [HS-NORMALIZE] Padded ${rawHsCode} (${rawHsCode.length} digits) → ${normalizedHsCode} (8-digit HTS-8)`);
+          } else {
+            normalizedHsCode = rawHsCode;
+            console.log(`✅ [HS-NORMALIZE] Already 8-digit HTS-8: ${normalizedHsCode}`);
+          }
 
           // ✅ FIX (Oct 28): Database has inconsistent formats - some with periods, some without
           // Try both formats to ensure we find the rate
@@ -835,13 +849,33 @@ export default protectedApiHandler({
           // DO NOT change or second-guess the HS code - only look up tariff rates
           if (exactMatch) {
             rateData = exactMatch;
-            console.log(`✅ [TARIFF-LOOKUP] Found rates for ${component.hs_code}: ${exactMatch.mfn_text_rate} MFN`);
+            console.log(`✅ [TARIFF-LOOKUP] Found exact match for ${component.hs_code}: ${exactMatch.mfn_text_rate} MFN`);
           }
 
-          // If exact match fails OR description doesn't match, try 6-digit prefix match (more lenient)
+          // ✅ NEW (Nov 13, 2025): Try fuzzy match for statistical suffix variations
+          // Example: AI suggests 85371090, database has 85371091 (off by 1 digit in suffix)
+          if (!rateData) {
+            const sevenDigitPrefix = normalizedHsCode.substring(0, 7);
+            console.log(`🔍 [FUZZY-LOOKUP] Trying 7-digit fuzzy match: ${sevenDigitPrefix}X (statistical suffix variation)`);
+
+            const { data: fuzzyMatches } = await supabase
+              .from('tariff_intelligence_master')
+              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
+              .ilike('hts8', `${sevenDigitPrefix}%`)
+              .order('hts8', { ascending: true })
+              .limit(3);
+
+            if (fuzzyMatches && fuzzyMatches.length > 0) {
+              rateData = fuzzyMatches[0];
+              console.log(`✅ [FUZZY-MATCH] Found similar code: ${rateData.hts8} (searched for ${normalizedHsCode})`);
+              console.log(`   Likely same product category, statistical suffix differs by ${Math.abs(parseInt(normalizedHsCode.substring(7)) - parseInt(rateData.hts8.substring(7)))}`);
+            }
+          }
+
+          // If fuzzy match fails, try 6-digit prefix match (more lenient)
           if (!rateData) {
             const sixDigitPrefix = normalizedHsCode.substring(0, 6);
-            console.log(`🔍 [PREFIX-LOOKUP] Searching for 6-digit prefix: ${sixDigitPrefix}%`);
+            console.log(`🔍 [PREFIX-LOOKUP] Searching for 6-digit chapter heading: ${sixDigitPrefix}XXXX`);
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
