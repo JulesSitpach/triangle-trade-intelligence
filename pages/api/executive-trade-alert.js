@@ -780,7 +780,7 @@ Write an expressive, narrative briefing - tell their supply chain STORY with per
 # Business Impact Summary: ${profile.company_name}
 
 ## Certification Status & Immediate Risks
-${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens $${section301Burden} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified saving $${workflow.current_annual_savings?.toLocaleString()}/year" or "⚠️ $${section301Burden} Section 301 burden on ${chineseComponents.length} Chinese components"`}
+${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens ${section301BurdenFormatted} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified saving $${workflow.current_annual_savings?.toLocaleString()}/year" or "⚠️ ${section301BurdenFormatted} Section 301 burden on ${chineseComponents.length} Chinese components"`}
 
 ## Your Certification Situation
 Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
