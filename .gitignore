@@ -195,6 +195,7 @@ test-*.html
 test-*.sh
 quick-test.js
 *.bat
+check-*.js
 
 # Dev config files
 .claudemcp.json
@@ -224,6 +225,35 @@ dev-server.log
 
 # AI Development Documentation (local only)
 CLAUDE.md
+
+# Testing and investigation documentation (local only)
+console.md
+results.md
+results report.md
+issues.md
+alerts.md
+video.md
+vercel and local.md
+test-login-payload.json
+QUICK_TEST_DATA.md
+*TECHNICAL_DEBT*.md
+*CODEBASE_DOCUMENTATION*.md
+*CONSOLE_LOG*.md
+*COUNTER_TESTING*.md
+*DOCUMENTATION_AUDIT*.md
+*HS_CODE*.md
+*JSON_PARSING*.md
+*NOV_11*.md
+*TESTING*.md
+*SUBSCRIPTION_FIXES*.md
+*REPORT_ARCHITECTURE*.md
+*DEPLOYMENT_CHECKLIST*.md
+*YOUTUBE*.md
+*LAUNCH*.md
+*AI-driven*.md
+launch tests/
+screenshots/
+NUL
 
 # HTS Tariff Data Files (large files - download separately)
 tariff_data_2025.zip
