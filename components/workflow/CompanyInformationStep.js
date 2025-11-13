@@ -206,7 +206,7 @@ export default function CompanyInformationStep({
               onClick={onNewAnalysis}
               className="btn-primary"
             >
-              + New Analysis
+              🗑️ Clear Company Info
             </button>
           </div>
         )}
