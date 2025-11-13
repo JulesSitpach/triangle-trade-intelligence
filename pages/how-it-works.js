@@ -71,7 +71,14 @@ export default function HowItWorksPage() {
         <div className="hero-gradient-overlay" />
 
         <div className="hero-content-container">
-          <h1 className="hero-main-title">How It Works</h1>
+          <div className="hero-badge">
+            5-Minute Self-Service Analysis
+          </div>
+
+          <h1 className="hero-main-title">
+            How It Works
+          </h1>
+
           <p className="hero-description-text" style={{marginTop: '2rem'}}>
             You don&apos;t need to be a trade expert. Just answer questions about your business - we&apos;ll handle the complex calculations.
           </p>
