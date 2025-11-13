@@ -7,12 +7,12 @@
  * Access: https://triangle-trade-intelligence.vercel.app/api/test-usitc-live
  */
 
-import { USITCDataWebAPI } from '../../lib/services/usitc-dataweb-api.js';
+import usitcDataWebAPI from '../../lib/services/usitc-dataweb-api.js';
 
 export default async function handler(req, res) {
   console.log('🧪 [USITC-TEST] Testing USITC API from production...');
 
-  const usitcAPI = new USITCDataWebAPI();
+  const usitcAPI = usitcDataWebAPI;
 
   // Test cases
   const testCases = [
