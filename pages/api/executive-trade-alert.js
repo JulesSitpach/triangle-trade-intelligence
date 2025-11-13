@@ -408,7 +408,7 @@ export default async function handler(req, res) {
         // Users can view executive summary on Results page OR Alerts page without downloading certificate
         const { data: session, error: queryError } = await supabase
           .from('workflow_sessions')
-          .select('id, session_data')
+          .select('id, data')
           .eq('session_id', workflow_session_id)
           .eq('user_id', user_id)
           .single();
@@ -416,9 +416,9 @@ export default async function handler(req, res) {
         if (queryError) {
           console.error('❌ Failed to find workflow_session by session_id:', queryError, 'session_id:', workflow_session_id);
         } else if (session) {
-          // Update session_data JSONB with executive summary
-          const updatedSessionData = {
-            ...session.session_data,
+          // Update data JSONB with executive summary
+          const updatedData = {
+            ...session.data,
             executive_summary: alertStructure.situation_brief,  // ✅ Save for retrieval on Alerts page
             executive_summary_generated_at: new Date().toISOString()
           };
@@ -426,7 +426,7 @@ export default async function handler(req, res) {
           const { error: updateError } = await supabase
             .from('workflow_sessions')
             .update({
-              session_data: updatedSessionData,
+              data: updatedData,
               updated_at: new Date().toISOString()
             })
             .eq('id', session.id);
