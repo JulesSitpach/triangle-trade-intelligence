@@ -2144,6 +2144,9 @@ export default protectedApiHandler({
         model: 'anthropic/claude-haiku-4.5',  // ✅ Haiku for 10x faster response time
         // ✅ confidence_score defaults to 85 if not provided (reasonable fallback for missing AI metric)
         confidence_score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85,
+        // ✅ FIX (Nov 12): Add overall_trust_score (same as confidence_score for backward compatibility)
+        overall_trust_score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85,
+        score: analysis.confidence_score !== undefined ? analysis.confidence_score : 85, // Also map to 'score' field
         disclaimer: 'AI-powered analysis for informational purposes. Consult trade compliance expert for official compliance.'
       }
     };
