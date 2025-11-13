@@ -79,63 +79,198 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Step 1: Company Info */}
-      <section className="main-content">
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Step 1: Tell Us About Your Company</h2>
+            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 2 minutes</p>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8'}}>
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>What we need to know:</h3>
-            <ul style={{paddingLeft: '1.5rem', marginBottom: '2rem'}}>
-              <li style={{marginBottom: '0.5rem'}}>Company name, address, and tax ID</li>
-              <li style={{marginBottom: '0.5rem'}}>Where you manufacture or assemble your product</li>
-              <li style={{marginBottom: '0.5rem'}}>Your destination market (US, Canada, or Mexico)</li>
-              <li style={{marginBottom: '0.5rem'}}>Annual trade volume</li>
-            </ul>
+          <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '2rem', textAlign: 'center'}}>
+            What we need to know:
+          </h3>
 
-            <div style={{background: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>Why this matters:</p>
-              <p style={{marginBottom: 0}}>
-                This basic information goes directly onto your USMCA certificate. We also use your manufacturing location and destination to determine which tariff rates apply.
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Company name, address, and tax ID
               </p>
             </div>
 
-            <p style={{fontWeight: 600, color: '#059669'}}>Time: 2 minutes</p>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Where you manufacture or assemble your product
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Your destination market (US, Canada, or Mexico)
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Annual trade volume
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <p style={{fontWeight: 600, fontSize: '1.15rem', marginBottom: '0.75rem'}}>Why this matters:</p>
+            <p style={{fontSize: '1.1rem', margin: 0, lineHeight: '1.7'}}>
+              This basic information goes directly onto your USMCA certificate. We also use your manufacturing location and destination to determine which tariff rates apply.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Step 2: Components */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Step 2: Add Your Components</h2>
+            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 3 minutes for 5-10 components</p>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8'}}>
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>What we need:</h3>
-            <ul style={{paddingLeft: '1.5rem', marginBottom: '2rem'}}>
-              <li style={{marginBottom: '0.5rem'}}>Component descriptions (simple language is fine - &quot;aluminum housing&quot; or &quot;power supply&quot;)</li>
-              <li style={{marginBottom: '0.5rem'}}>Country of origin for each component</li>
-              <li style={{marginBottom: '0.5rem'}}>Value percentage of each component</li>
-            </ul>
+          <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '2rem', textAlign: 'center'}}>
+            What we need:
+          </h3>
 
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>What we do automatically:</h3>
-            <ul style={{paddingLeft: '1.5rem', marginBottom: '2rem'}}>
-              <li style={{marginBottom: '0.5rem'}}>Classify each component with the correct HS code</li>
-              <li style={{marginBottom: '0.5rem'}}>Look up current tariff rates (MFN, USMCA, Section 301, Section 232)</li>
-              <li style={{marginBottom: '0.5rem'}}>Flag any policy risks on specific components</li>
-              <li style={{marginBottom: '0.5rem'}}>Calculate potential savings for each component</li>
-            </ul>
-
-            <div style={{background: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600}}>
-                Don&apos;t worry if you don&apos;t know HS codes. Our AI classifies components based on your descriptions. You&apos;ll see the suggested HS code and can verify it with your broker later.
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Component descriptions (simple language is fine - &quot;aluminum housing&quot; or &quot;power supply&quot;)
               </p>
             </div>
 
-            <p style={{fontWeight: 600, color: '#059669'}}>Time: 3 minutes for 5-10 components</p>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Country of origin for each component
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderTop: '4px solid #1e3a8a',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Value percentage of each component
+              </p>
+            </div>
+          </div>
+
+          <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '2rem', textAlign: 'center'}}>
+            What we do automatically:
+          </h3>
+
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #059669',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Classify each component with the correct HS code
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #059669',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Look up current tariff rates (MFN, USMCA, Section 301, Section 232)
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #059669',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Flag any policy risks on specific components
+              </p>
+            </div>
+
+            <div style={{
+              background: '#fff',
+              padding: '2rem',
+              borderRadius: '8px',
+              borderLeft: '4px solid #059669',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+            }}>
+              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+                Calculate potential savings for each component
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            marginBottom: '3rem'
+          }}>
+            <p style={{fontSize: '1.15rem', margin: 0, lineHeight: '1.7', fontWeight: 600}}>
+              Don&apos;t worry if you don&apos;t know HS codes. Our AI classifies components based on your descriptions. You&apos;ll see the suggested HS code and can verify it with your broker later.
+            </p>
+          </div>
 
             {/* Component table screenshot */}
             <div style={{marginTop: '2rem', textAlign: 'center'}}>
@@ -171,43 +306,81 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Step 3: Results */}
-      <section className="main-content">
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Step 3: See Your Complete Analysis</h2>
+            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 2 minutes to review</p>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8'}}>
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>Your results dashboard shows:</h3>
-
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>USMCA Qualification Status</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>Whether you qualify (yes/no)</li>
-                <li style={{marginBottom: '0.5rem'}}>Your exact regional content percentage</li>
-                <li style={{marginBottom: '0.5rem'}}>Required threshold for your industry</li>
-                <li style={{marginBottom: '0.5rem'}}>Safety margin (how close you are to the threshold)</li>
-              </ul>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', marginBottom: '3rem'}}>
+            {/* USMCA Qualification Status */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #1e3a8a',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1.5rem'}}>
+                USMCA Qualification Status
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Whether you qualify (yes/no)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Your exact regional content percentage
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Required threshold for your industry
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Safety margin (how close you are to the threshold)
+                </p>
+              </div>
             </div>
 
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>Financial Impact</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>Current annual savings (if qualified)</li>
-                <li style={{marginBottom: '0.5rem'}}>Potential savings with supply chain changes</li>
-                <li style={{marginBottom: '0.5rem'}}>Policy risk exposure (Section 301, Section 232)</li>
-                <li style={{marginBottom: '0.5rem'}}>Component-by-component tariff breakdown</li>
-              </ul>
+            {/* Financial Impact */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #059669',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#059669', marginBottom: '1.5rem'}}>
+                Financial Impact
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Current annual savings (if qualified)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Potential savings with supply chain changes
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Policy risk exposure (Section 301, Section 232)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Component-by-component tariff breakdown
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div style={{background: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>What this tells you:</p>
-              <p style={{marginBottom: 0}}>
-                Whether you&apos;re overpaying tariffs, what your supply chain risks are, and exactly where your money is going.
-              </p>
-            </div>
-
-            <p style={{fontWeight: 600, color: '#059669', marginBottom: '2rem'}}>Time: 2 minutes to review</p>
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            marginBottom: '3rem'
+          }}>
+            <p style={{fontSize: '1.15rem', margin: 0, lineHeight: '1.7', fontWeight: 600}}>
+              Whether you&apos;re overpaying tariffs, what your supply chain risks are, and exactly where your money is going.
+            </p>
+          </div>
 
             {/* Results dashboard screenshot */}
             <div style={{marginTop: '2rem', textAlign: 'center'}}>
@@ -243,41 +416,78 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Step 4: Strategic Recommendations */}
-      <section className="main-content gradient-subtle">
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Step 4: Get Strategic Recommendations</h2>
+            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 5 minutes to review strategic options</p>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8'}}>
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>After your analysis, you receive:</h3>
-
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>Executive Advisory Report</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>Root cause analysis of your supply chain structure</li>
-                <li style={{marginBottom: '0.5rem'}}>Financial scenarios (current state vs. alternatives)</li>
-                <li style={{marginBottom: '0.5rem'}}>Specific supplier recommendations with ROI calculations</li>
-                <li style={{marginBottom: '0.5rem'}}>Timeline and implementation roadmap</li>
-              </ul>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', marginBottom: '3rem'}}>
+            {/* Executive Advisory Report */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #1e3a8a',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1.5rem'}}>
+                Executive Advisory Report
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Root cause analysis of your supply chain structure
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Financial scenarios (current state vs. alternatives)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Specific supplier recommendations with ROI calculations
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Timeline and implementation roadmap
+                </p>
+              </div>
             </div>
 
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>3-Phase Action Plan</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>Phase 1: Immediate actions (supplier assessment, documentation audit)</li>
-                <li style={{marginBottom: '0.5rem'}}>Phase 2: Validation steps (trial shipments, quality testing)</li>
-                <li style={{marginBottom: '0.5rem'}}>Phase 3: Full implementation (migration timeline, cost commitments)</li>
-              </ul>
+            {/* 3-Phase Action Plan */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #059669',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#059669', marginBottom: '1.5rem'}}>
+                3-Phase Action Plan
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  <strong>Phase 1:</strong> Immediate actions (supplier assessment, documentation audit)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  <strong>Phase 2:</strong> Validation steps (trial shipments, quality testing)
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  <strong>Phase 3:</strong> Full implementation (migration timeline, cost commitments)
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div style={{background: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600}}>
-                This isn&apos;t generic advice. Every recommendation is specific to your components, your volumes, and your business situation.
-              </p>
-            </div>
-
-            <p style={{fontWeight: 600, color: '#059669'}}>Time: 5 minutes to review strategic options</p>
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            marginBottom: '3rem'
+          }}>
+            <p style={{fontSize: '1.15rem', margin: 0, lineHeight: '1.7', fontWeight: 600}}>
+              This isn&apos;t generic advice. Every recommendation is specific to your components, your volumes, and your business situation.
+            </p>
+          </div>
 
             {/* Executive advisory screenshots */}
             <div style={{marginTop: '2rem', textAlign: 'center'}}>
@@ -337,49 +547,92 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Step 5: Certificate */}
-      <section className="main-content">
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header">
+      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
+        <div className="container-app" style={{maxWidth: '1000px'}}>
+          <div className="section-header" style={{marginBottom: '3rem'}}>
             <h2 className="section-header-title">Step 5: Download Your Certificate (If Qualified)</h2>
+            <p style={{fontSize: '1.1rem', color: '#059669', fontWeight: 600, marginTop: '0.5rem'}}>Time: 2 minutes to edit and download</p>
           </div>
 
-          <div className="text-body" style={{fontSize: '1.1rem', lineHeight: '1.8'}}>
-            <h3 style={{fontSize: '1.25rem', fontWeight: 600, marginBottom: '1rem'}}>If you qualify for USMCA:</h3>
-
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>Certificate Preview (Editable)</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>All fields pre-filled from your analysis</li>
-                <li style={{marginBottom: '0.5rem'}}>Edit importer/exporter/producer information</li>
-                <li style={{marginBottom: '0.5rem'}}>Verify product description and HS codes</li>
-                <li style={{marginBottom: '0.5rem'}}>Modify blanket period dates if needed</li>
-              </ul>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', marginBottom: '3rem'}}>
+            {/* Certificate Preview (Editable) */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #1e3a8a',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '1.5rem'}}>
+                Certificate Preview (Editable)
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ All fields pre-filled from your analysis
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Edit importer/exporter/producer information
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Verify product description and HS codes
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Modify blanket period dates if needed
+                </p>
+              </div>
             </div>
 
-            <div style={{background: '#f0f9ff', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>What you do:</p>
-              <p style={{marginBottom: 0}}>
-                Review each field, make any corrections, then download the final PDF.
-              </p>
+            {/* Final Certificate */}
+            <div style={{
+              background: '#fff',
+              padding: '2.5rem',
+              borderRadius: '12px',
+              border: '2px solid #059669',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#059669', marginBottom: '1.5rem'}}>
+                Final Certificate
+              </h3>
+              <div style={{display: 'grid', gap: '1rem'}}>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Official USMCA Form D format
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Ready for your customs broker to file with CBP
+                </p>
+                <p style={{fontSize: '1.05rem', color: '#374151', margin: 0, padding: '0.75rem', background: '#f9fafb', borderRadius: '6px'}}>
+                  ✓ Valid for one year (blanket certificate)
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div style={{marginBottom: '2rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.75rem'}}>Final Certificate</p>
-              <ul style={{paddingLeft: '1.5rem'}}>
-                <li style={{marginBottom: '0.5rem'}}>Official USMCA Form D format</li>
-                <li style={{marginBottom: '0.5rem'}}>Ready for your customs broker to file with CBP</li>
-                <li style={{marginBottom: '0.5rem'}}>Valid for one year (blanket certificate)</li>
-              </ul>
-            </div>
+          <div style={{
+            background: '#1e3a8a',
+            color: '#fff',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            marginBottom: '2rem'
+          }}>
+            <p style={{fontSize: '1.15rem', margin: 0, lineHeight: '1.7', fontWeight: 600}}>
+              Review each field, make any corrections, then download the final PDF.
+            </p>
+          </div>
 
-            <div style={{background: '#fef3c7', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
-              <p style={{fontWeight: 600, marginBottom: '0.5rem'}}>If you don&apos;t qualify:</p>
-              <p style={{marginBottom: 0}}>
-                We show you exactly what changes would get you there - like nearshoring specific components or changing manufacturing location.
-              </p>
-            </div>
-
-            <p style={{fontWeight: 600, color: '#059669'}}>Time: 2 minutes to edit and download</p>
+          <div style={{
+            background: '#fef3c7',
+            padding: '2.5rem',
+            borderRadius: '8px',
+            textAlign: 'center',
+            marginBottom: '3rem',
+            border: '1px solid #fcd34d'
+          }}>
+            <p style={{fontWeight: 600, fontSize: '1.15rem', color: '#78350f', marginBottom: '0.75rem'}}>If you don&apos;t qualify:</p>
+            <p style={{fontSize: '1.05rem', color: '#78350f', margin: 0, lineHeight: '1.7'}}>
+              We show you exactly what changes would get you there - like nearshoring specific components or changing manufacturing location.
+            </p>
+          </div>
 
             {/* Certificate preview screenshot */}
             <div style={{marginTop: '2rem', textAlign: 'center'}}>
