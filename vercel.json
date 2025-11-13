@@ -1,6 +1,11 @@
 {
   "buildCommand": "SKIP_TYPE_CHECK=true next build --no-lint",
   "framework": "nextjs",
+  "functions": {
+    "api/cron/rss-polling.js": {
+      "maxDuration": 60
+    }
+  },
   "env": {
     "ESLINT_NO_DEV_ERRORS": "true",
     "DISABLE_ESLINT_PLUGIN": "true",
