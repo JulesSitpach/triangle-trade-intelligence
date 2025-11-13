@@ -223,58 +223,7 @@ export default function RecommendedActions({ results }) {
         </div>
       )}
 
-      {/* PHASE 3: Strategic Roadmap from Executive Trade Alert */}
-      {isQualified && executiveAlert?.strategic_roadmap && (
-        <div className="card">
-          <div className="card-header">
-            <h4 className="card-title">Strategic Implementation Roadmap</h4>
-            <p className="text-body">Three-phase plan to optimize USMCA benefits and mitigate tariff policy risks</p>
-          </div>
-          <div className="element-spacing">
-            {executiveAlert.strategic_roadmap.map((phase, idx) => (
-              <div key={idx} style={{ marginBottom: '1.5rem' }}>
-                <div style={{
-                  backgroundColor: idx === 0 ? '#fef3c7' : idx === 1 ? '#dbeafe' : '#dcfce7',
-                  padding: '1rem',
-                  borderRadius: '4px',
-                  borderLeft: `4px solid ${idx === 0 ? '#d97706' : idx === 1 ? '#0284c7' : '#16a34a'}`
-                }}>
-                  <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
-                    Phase {idx + 1}: {phase.phase} ({phase.timeline})
-                  </div>
-                  {phase.actions && phase.actions.length > 0 && (
-                    <ul style={{ margin: '0.5rem 0 0 1.5rem', paddingLeft: 0 }}>
-                      {phase.actions.map((action, i) => (
-                        <li key={i} style={{ color: '#374151', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
-                          {action}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Professional Disclaimer */}
-          {executiveAlert?.alert?.professional_disclaimer && (
-            <div style={{
-              backgroundColor: '#fffbeb',
-              padding: '1rem',
-              borderRadius: '4px',
-              borderLeft: '4px solid #f59e0b',
-              marginTop: '1.5rem'
-            }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
-                Professional Advisory Recommendation
-              </div>
-              <div style={{ fontSize: '0.875rem', color: '#78350f', lineHeight: '1.6' }}>
-                {executiveAlert.alert.professional_disclaimer}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* DEPRECATED: Strategic Roadmap removed - replaced by timeline_90_days in ExecutiveSummary component */}
 
       {/* PHASE 3: CBP Compliance Checklist from Executive Trade Alert */}
       {isQualified && executiveAlert?.cbp_compliance_strategy && (
