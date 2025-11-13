@@ -51,6 +51,58 @@ function decodeHTMLEntities(text) {
   return decoded;
 }
 
+// ✅ FIX (Nov 12): Parse action items from markdown "90-Day Action Timeline" section
+// AI returns narrative markdown with bullet points, we need to extract them as array
+function parseActionItems(markdown) {
+  if (!markdown) return [];
+
+  // Look for "90-Day Action Timeline" or "Immediate Actions" section
+  const timelineMatch = markdown.match(/## (?:90-Day Action Timeline|Immediate Actions|Action Timeline)([\s\S]*?)(?=##|$)/i);
+  if (!timelineMatch) return [];
+
+  const section = timelineMatch[1];
+
+  // Extract bullet points (lines starting with - or *)
+  const bullets = section.match(/^[\s]*[-*]\s*(.+)$/gm);
+  if (!bullets || bullets.length === 0) {
+    // If no bullet points, extract sentences from first paragraph
+    const sentences = section.split('\n\n')[0]
+      .split(/[.!?]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 20 && s.length < 200);
+    return sentences.slice(0, 3);
+  }
+
+  return bullets
+    .map(b => b.replace(/^[\s]*[-*]\s*/, '').trim())
+    .filter(b => b.length > 10)
+    .slice(0, 5); // Top 5 actions
+}
+
+// ✅ FIX (Nov 12): Parse strategic roadmap from markdown sections
+// AI returns narrative with "Week 1-2", "Week 3-4" format, we need to structure it
+function parseStrategicRoadmap(markdown) {
+  if (!markdown) return [];
+
+  // Look for timeline mentions (Week 1-2, Phase 1, etc.)
+  const weekPattern = /(?:Week|Phase)\s*(\d+[-–]?\d*)[:\s]+([^.\n]+)/gi;
+  const matches = [...markdown.matchAll(weekPattern)];
+
+  if (matches.length === 0) {
+    // Fallback: Return default roadmap structure
+    return [
+      { phase: 'Assessment (Weeks 1-2)', description: 'Gather data and evaluate current supply chain' },
+      { phase: 'Trial (Weeks 3-4)', description: 'Test alternative suppliers and calculate ROI' },
+      { phase: 'Migration (Weeks 5-12)', description: 'Implement changes and track results' }
+    ];
+  }
+
+  return matches.slice(0, 4).map(match => ({
+    phase: match[0].split(':')[0].trim(),
+    description: match[2].trim()
+  }));
+}
+
 // Initialize agents
 const executiveAgent = new BaseAgent({
   name: 'ExecutiveAdvisor',
@@ -753,7 +805,7 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
 
     // ✅ Return markdown with structured metadata for backward compatibility
     // ✅ FIX (Nov 12): Use calculated values instead of placeholder strings
-    // ✅ FIX (Nov 12): Add action_items + strategic_roadmap (AI returns narrative markdown, not structured JSON)
+    // ✅ FIX (Nov 12): Parse action_items + strategic_roadmap from AI's narrative markdown
     return {
       situation_brief: sanitizedBriefing, // Full markdown in main field (sanitized)
       markdown_content: sanitizedBriefing, // Also store in dedicated field (sanitized)
@@ -762,18 +814,10 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
       current_burden: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
       potential_savings: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
       confidence: 85,
-      // ✅ FIX (Nov 12): These are narrative in markdown, not separate arrays
-      // The full text is in situation_brief with sections like "## 90-Day Action Timeline"
-      action_items: [
-        'Review current Section 301 exposure across all Chinese-origin components',
-        'Contact Mexican suppliers for nearshoring alternatives',
-        'Review USMCA qualification requirements for component substitutions'
-      ],
-      strategic_roadmap: [
-        { phase: 'Assessment (Weeks 1-2)', description: 'Gather supplier data and tariff exposure calculations' },
-        { phase: 'Trial (Weeks 3-4)', description: 'Test Mexican supplier samples and qualification scenarios' },
-        { phase: 'Migration (Weeks 5-12)', description: 'Implement sourcing changes and track ROI' }
-      ]
+      // ✅ FIX (Nov 12): Parse structured data from AI's narrative markdown
+      // These extract bullet points and timeline from sections like "## 90-Day Action Timeline"
+      action_items: parseActionItems(sanitizedBriefing),
+      strategic_roadmap: parseStrategicRoadmap(sanitizedBriefing)
     };
 
   } catch (error) {
