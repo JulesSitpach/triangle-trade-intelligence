@@ -39,6 +39,7 @@ export default function HowItWorksPage() {
           </button>
 
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+            <Link href="/how-it-works" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>How It Works</Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
@@ -136,9 +137,34 @@ export default function HowItWorksPage() {
 
             <p style={{fontWeight: 600, color: '#059669'}}>Time: 3 minutes for 5-10 components</p>
 
-            {/* Placeholder for screenshot */}
-            <div style={{background: '#e5e7eb', padding: '3rem', borderRadius: '8px', marginTop: '2rem', textAlign: 'center', color: '#6b7280'}}>
-              <p style={{fontStyle: 'italic', marginBottom: 0}}>Screenshot: Component table showing HS codes, origins, and tariff alerts</p>
+            {/* Component table screenshot */}
+            <div style={{marginTop: '2rem', textAlign: 'center'}}>
+              <a href="/image/samples/alerts.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+                <img
+                  src="/image/samples/alerts.png"
+                  alt="Component table showing HS codes, origins, and tariff alerts"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                  }}
+                />
+              </a>
+              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+                Click to view full size - Real example: Component table showing which parts have tariff exposure and which qualify for USMCA savings
+              </p>
             </div>
           </div>
         </div>
@@ -183,9 +209,34 @@ export default function HowItWorksPage() {
 
             <p style={{fontWeight: 600, color: '#059669', marginBottom: '2rem'}}>Time: 2 minutes to review</p>
 
-            {/* Placeholder for screenshot */}
-            <div style={{background: '#e5e7eb', padding: '3rem', borderRadius: '8px', textAlign: 'center', color: '#6b7280'}}>
-              <p style={{fontStyle: 'italic', marginBottom: 0}}>Screenshot: Results dashboard showing qualification status and financial breakdown</p>
+            {/* Results dashboard screenshot */}
+            <div style={{marginTop: '2rem', textAlign: 'center'}}>
+              <a href="/image/samples/results.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+                <img
+                  src="/image/samples/results.png"
+                  alt="Results dashboard showing qualification status and financial breakdown"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                  }}
+                />
+              </a>
+              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+                Click to view full size - Real example: Company qualified at 65% RVC with $59,500 annual savings, but 35% China exposure flagged
+              </p>
             </div>
           </div>
         </div>
@@ -228,9 +279,58 @@ export default function HowItWorksPage() {
 
             <p style={{fontWeight: 600, color: '#059669'}}>Time: 5 minutes to review strategic options</p>
 
-            {/* Placeholder for screenshots */}
-            <div style={{background: '#e5e7eb', padding: '3rem', borderRadius: '8px', marginTop: '2rem', marginBottom: '1rem', textAlign: 'center', color: '#6b7280'}}>
-              <p style={{fontStyle: 'italic', marginBottom: 0}}>Screenshot: Executive advisory showing strategic analysis</p>
+            {/* Executive advisory screenshots */}
+            <div style={{marginTop: '2rem', textAlign: 'center'}}>
+              <a href="/image/samples/result ai.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+                <img
+                  src="/image/samples/result ai.png"
+                  alt="Executive advisory showing strategic analysis"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                    marginBottom: '1.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                  }}
+                />
+              </a>
+              <a href="/image/samples/result ai 2.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+                <img
+                  src="/image/samples/result ai 2.png"
+                  alt="Strategic roadmap with phases and actions"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                  }}
+                />
+              </a>
+              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+                Click to view full size - Real example: Company shown nearshoring opportunity with 12-18 month timeline and payback analysis
+              </p>
             </div>
           </div>
         </div>
@@ -281,9 +381,34 @@ export default function HowItWorksPage() {
 
             <p style={{fontWeight: 600, color: '#059669'}}>Time: 2 minutes to edit and download</p>
 
-            {/* Placeholder for screenshot */}
-            <div style={{background: '#e5e7eb', padding: '3rem', borderRadius: '8px', marginTop: '2rem', textAlign: 'center', color: '#6b7280'}}>
-              <p style={{fontStyle: 'italic', marginBottom: 0}}>Screenshot: Editable certificate preview and final certificate</p>
+            {/* Certificate preview screenshot */}
+            <div style={{marginTop: '2rem', textAlign: 'center'}}>
+              <a href="/image/samples/certificate preview.png" target="_blank" rel="noopener noreferrer" style={{display: 'inline-block'}}>
+                <img
+                  src="/image/samples/certificate preview.png"
+                  alt="Editable certificate preview showing all form fields"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                  }}
+                />
+              </a>
+              <p style={{fontStyle: 'italic', marginTop: '1rem', color: '#6b7280', fontSize: '0.9rem'}}>
+                Click to view full size - You can edit all fields before finalizing the certificate
+              </p>
             </div>
           </div>
         </div>

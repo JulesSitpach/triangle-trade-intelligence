@@ -228,6 +228,7 @@ export default function Pricing() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+            <Link href="/how-it-works" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <Link href="/pricing#pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>

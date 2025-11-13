@@ -94,6 +94,9 @@ export default function HomePage() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+            <Link href="/how-it-works" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+              How It Works
+            </Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
