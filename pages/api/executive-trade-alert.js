@@ -54,53 +54,71 @@ function decodeHTMLEntities(text) {
 // ✅ FIX (Nov 12): Parse action items from markdown "90-Day Action Timeline" section
 // AI returns narrative markdown with bullet points, we need to extract them as array
 function parseActionItems(markdown) {
-  if (!markdown) return [];
+  try {
+    if (!markdown) return [];
 
-  // Look for "90-Day Action Timeline" or "Immediate Actions" section
-  const timelineMatch = markdown.match(/## (?:90-Day Action Timeline|Immediate Actions|Action Timeline)([\s\S]*?)(?=##|$)/i);
-  if (!timelineMatch) return [];
+    // Look for "90-Day Action Timeline" or "Immediate Actions" section
+    const timelineMatch = markdown.match(/## (?:90-Day Action Timeline|Immediate Actions|Action Timeline)([\s\S]*?)(?=##|$)/i);
+    if (!timelineMatch) return [];
 
-  const section = timelineMatch[1];
+    const section = timelineMatch[1];
+    if (!section) return [];
 
-  // Extract bullet points (lines starting with - or *)
-  const bullets = section.match(/^[\s]*[-*]\s*(.+)$/gm);
-  if (!bullets || bullets.length === 0) {
-    // If no bullet points, extract sentences from first paragraph
-    const sentences = section.split('\n\n')[0]
-      .split(/[.!?]+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 20 && s.length < 200);
-    return sentences.slice(0, 3);
+    // Extract bullet points (lines starting with - or *)
+    const bullets = section.match(/^[\s]*[-*]\s*(.+)$/gm);
+    if (!bullets || bullets.length === 0) {
+      // If no bullet points, extract sentences from first paragraph
+      const firstPara = section.split('\n\n')[0];
+      if (!firstPara) return [];
+
+      const sentences = firstPara
+        .split(/[.!?]+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 20 && s.length < 200);
+      return sentences.slice(0, 3);
+    }
+
+    return bullets
+      .map(b => b.replace(/^[\s]*[-*]\s*/, '').trim())
+      .filter(b => b.length > 10)
+      .slice(0, 5); // Top 5 actions
+  } catch (error) {
+    console.error('❌ [parseActionItems] Parsing failed:', error);
+    return []; // Safe fallback
   }
-
-  return bullets
-    .map(b => b.replace(/^[\s]*[-*]\s*/, '').trim())
-    .filter(b => b.length > 10)
-    .slice(0, 5); // Top 5 actions
 }
 
 // ✅ FIX (Nov 12): Parse strategic roadmap from markdown sections
 // AI returns narrative with "Week 1-2", "Week 3-4" format, we need to structure it
 function parseStrategicRoadmap(markdown) {
-  if (!markdown) return [];
+  try {
+    if (!markdown) return [];
 
-  // Look for timeline mentions (Week 1-2, Phase 1, etc.)
-  const weekPattern = /(?:Week|Phase)\s*(\d+[-–]?\d*)[:\s]+([^.\n]+)/gi;
-  const matches = [...markdown.matchAll(weekPattern)];
+    // Look for timeline mentions (Week 1-2, Phase 1, etc.)
+    const weekPattern = /(?:Week|Phase)\s*(\d+[-–]?\d*)[:\s]+([^.\n]+)/gi;
+    const matches = [...markdown.matchAll(weekPattern)];
 
-  if (matches.length === 0) {
-    // Fallback: Return default roadmap structure
+    if (matches.length === 0) {
+      // Fallback: Return default roadmap structure
+      return [
+        { phase: 'Assessment (Weeks 1-2)', description: 'Gather data and evaluate current supply chain' },
+        { phase: 'Trial (Weeks 3-4)', description: 'Test alternative suppliers and calculate ROI' },
+        { phase: 'Migration (Weeks 5-12)', description: 'Implement changes and track results' }
+      ];
+    }
+
+    return matches.slice(0, 4).map(match => ({
+      phase: match[0].split(':')[0].trim(),
+      description: match[2] ? match[2].trim() : 'Strategic action'
+    }));
+  } catch (error) {
+    console.error('❌ [parseStrategicRoadmap] Parsing failed:', error);
     return [
       { phase: 'Assessment (Weeks 1-2)', description: 'Gather data and evaluate current supply chain' },
       { phase: 'Trial (Weeks 3-4)', description: 'Test alternative suppliers and calculate ROI' },
       { phase: 'Migration (Weeks 5-12)', description: 'Implement changes and track results' }
     ];
   }
-
-  return matches.slice(0, 4).map(match => ({
-    phase: match[0].split(':')[0].trim(),
-    description: match[2].trim()
-  }));
 }
 
 // Initialize agents
@@ -537,9 +555,16 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Executive alert generation failed:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error name:', error.name);
+
+    // Return detailed error for debugging
     return res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      error_type: error.name,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      details: 'Executive alert generation encountered an error. Check server logs for details.'
     });
   }
 }
