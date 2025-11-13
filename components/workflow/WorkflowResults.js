@@ -76,6 +76,29 @@ export default function WorkflowResults({
     // ✅ REMOVED: save_data_consent check (data auto-saves via API)
   }, []);
 
+  // ✅ FIX (Nov 12): Auto-load executive summary from localStorage on mount
+  // When viewing from dashboard, the summary might be in localStorage but not in results prop yet
+  useEffect(() => {
+    // Only try to load if we don't already have a summary
+    if (!hasExecutiveSummary) {
+      try {
+        const storedData = workflowStorage.getItem('usmca_workflow_results');
+        if (storedData) {
+          const workflowResults = JSON.parse(storedData);
+          const detailed_analysis = workflowResults.detailed_analysis || {};
+
+          if (detailed_analysis.situation_brief) {
+            console.log('✅ Auto-loaded executive summary from localStorage on mount');
+            setExecutiveSummary(detailed_analysis);
+            setShowSummary(true);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error auto-loading executive summary from localStorage:', error);
+      }
+    }
+  }, [hasExecutiveSummary]);
+
   // DISABLED: Auto-modal removed - users now use manual "Save to Dashboard" button
   // useEffect(() => {
   //   // Show save consent modal after results are displayed (only once)
