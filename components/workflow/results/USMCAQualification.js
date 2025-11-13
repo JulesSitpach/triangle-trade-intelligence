@@ -116,7 +116,7 @@ export default function USMCAQualification({ results }) {
     // CRITICAL FIX: NO FALLBACK for MFN rate - must come from AI/database
     const avgTariffRate = results.product?.mfn_rate;
     if (!avgTariffRate) {
-      console.error('❌ [HARDCODING] Missing product.mfn_rate - cannot calculate savings without AI tariff data');
+      console.error('❌ Missing product.mfn_rate - gap analysis requires tariff data from API');
       return null; // Don't show gap analysis without actual tariff rate
     }
 
