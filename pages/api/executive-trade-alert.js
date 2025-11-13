@@ -753,6 +753,7 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
 
     // ✅ Return markdown with structured metadata for backward compatibility
     // ✅ FIX (Nov 12): Use calculated values instead of placeholder strings
+    // ✅ FIX (Nov 12): Add action_items + strategic_roadmap (AI returns narrative markdown, not structured JSON)
     return {
       situation_brief: sanitizedBriefing, // Full markdown in main field (sanitized)
       markdown_content: sanitizedBriefing, // Also store in dedicated field (sanitized)
@@ -760,7 +761,19 @@ RULES: Narrative prose with personality. NEVER invent numbers - use ONLY compone
       annual_impact: section301BurdenFormatted, // Already includes $ prefix
       current_burden: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
       potential_savings: section301BurdenAmount ? `${section301BurdenFormatted}` : '$0/year',
-      confidence: 85
+      confidence: 85,
+      // ✅ FIX (Nov 12): These are narrative in markdown, not separate arrays
+      // The full text is in situation_brief with sections like "## 90-Day Action Timeline"
+      action_items: [
+        'Review current Section 301 exposure across all Chinese-origin components',
+        'Contact Mexican suppliers for nearshoring alternatives',
+        'Review USMCA qualification requirements for component substitutions'
+      ],
+      strategic_roadmap: [
+        { phase: 'Assessment (Weeks 1-2)', description: 'Gather supplier data and tariff exposure calculations' },
+        { phase: 'Trial (Weeks 3-4)', description: 'Test Mexican supplier samples and qualification scenarios' },
+        { phase: 'Migration (Weeks 5-12)', description: 'Implement sourcing changes and track ROI' }
+      ]
     };
 
   } catch (error) {
