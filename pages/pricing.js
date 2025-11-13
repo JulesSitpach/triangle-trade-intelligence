@@ -303,13 +303,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Legal Disclaimer - Before Pricing */}
-      <section className="main-content">
-        <div className="container-app">
-          <LegalDisclaimer />
-        </div>
-      </section>
-
       {/* Pricing Plans */}
       <section className="main-content" id="pricing">
         <div className="container-app">
@@ -410,6 +403,13 @@ export default function Pricing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer - After Pricing */}
+      <section className="main-content">
+        <div className="container-app">
+          <LegalDisclaimer />
         </div>
       </section>
 
