@@ -878,22 +878,25 @@ export default protectedApiHandler({
             }
           }
 
-          // If fuzzy match fails, try 6-digit prefix match (more lenient)
+          // If fuzzy match fails, try 5-digit prefix match (chapter family level)
+          // ✅ FIX (Nov 13, 2025): Changed 6-digit to 5-digit prefix
+          // Bug: AI classified 8542.31 → 85423100, 6-digit search "854231%" didn't match "854232%"/"854233%"
+          // Fix: 5-digit search "85423%" matches entire chapter family (85423200, 85423300, 85423900)
           if (!rateData) {
-            const sixDigitPrefix = normalizedHsCode.substring(0, 6);
-            console.log(`🔍 [PREFIX-LOOKUP] Searching for 6-digit chapter heading: ${sixDigitPrefix}XXXX`);
+            const fiveDigitPrefix = normalizedHsCode.substring(0, 5);
+            console.log(`🔍 [PREFIX-LOOKUP] Searching for 5-digit chapter family: ${fiveDigitPrefix}XXX`);
 
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
               .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
-              .ilike('hts8', `${sixDigitPrefix}%`)
+              .ilike('hts8', `${fiveDigitPrefix}%`)
               .order('hts8', { ascending: true }) // Get general category first (e.g., 8504.40.00 before 8504.40.95)
               .limit(5); // Get multiple to find best description match
 
             if (prefixMatches && prefixMatches.length > 0) {
-              // Use first match from 6-digit prefix
+              // Use first match from 5-digit chapter family
               rateData = prefixMatches[0];
-              console.log(`✅ [PREFIX-FALLBACK] Exact match not found, using 6-digit prefix match: ${rateData.hts8}`);
+              console.log(`✅ [PREFIX-FALLBACK] Exact match not found, using 5-digit family match: ${rateData.hts8}`);
             }
           }
 
