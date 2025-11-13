@@ -30,12 +30,12 @@ function decodeHTMLEntities(text) {
   if (!text) return text;
 
   const entities = {
-    '&#8216;': ''', // left single quote
-    '&#8217;': ''', // right single quote
+    '&#8216;': "'", // left single quote
+    '&#8217;': "'", // right single quote
     '&#8220;': '"', // left double quote
     '&#8221;': '"', // right double quote
-    '&#8211;': '–', // en dash
-    '&#8212;': '—', // em dash
+    '&#8211;': '-', // en dash
+    '&#8212;': '-', // em dash
     '&quot;': '"',
     '&amp;': '&',
     '&lt;': '<',
