@@ -76,7 +76,8 @@ export default function HowItWorksPage() {
           </div>
 
           <h1 className="hero-main-title">
-            How It Works
+            How It Works<br/>
+            <span className="hero-yellow-highlight">You Answer, We Calculate</span>
           </h1>
 
           <p className="hero-description-text" style={{marginTop: '2rem'}}>
