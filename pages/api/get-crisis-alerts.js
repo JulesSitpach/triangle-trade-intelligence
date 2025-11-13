@@ -12,6 +12,33 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+// ✅ FIX (Nov 12): Decode HTML entities from RSS feed titles/descriptions
+// RSS feeds often contain &#8216; ('), &#8217; ('), &#8220; ("), &#8221; ("), etc.
+function decodeHTMLEntities(text) {
+  if (!text) return text;
+
+  const entities = {
+    '&#8216;': ''', // left single quote
+    '&#8217;': ''', // right single quote
+    '&#8220;': '"', // left double quote
+    '&#8221;': '"', // right double quote
+    '&#8211;': '–', // en dash
+    '&#8212;': '—', // em dash
+    '&quot;': '"',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&nbsp;': ' '
+  };
+
+  let decoded = text;
+  for (const [entity, char] of Object.entries(entities)) {
+    decoded = decoded.replace(new RegExp(entity, 'g'), char);
+  }
+
+  return decoded;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -46,8 +73,9 @@ export default async function handler(req, res) {
 
       return {
         id: alert.id,
-        title: alert.title,
-        description: alert.description || alert.business_impact,
+        // ✅ FIX (Nov 12): Decode HTML entities (&#8216; → ', &#8217; → ')
+        title: decodeHTMLEntities(alert.title),
+        description: decodeHTMLEntities(alert.description || alert.business_impact),
 
         // ✅ SCHEMA COMPATIBILITY: Support both old and new field names
         severity: normalizedSeverity,

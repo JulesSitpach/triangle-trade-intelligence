@@ -24,6 +24,33 @@ import { createClient } from '@supabase/supabase-js';
 import { EXECUTIVE_SUMMARY_LIMITS } from '../../config/subscription-tier-limits.js';
 import { verifyAuth } from '../../lib/middleware/auth-middleware.js';
 
+// ✅ FIX (Nov 12): Decode HTML entities from RSS feed titles/descriptions
+// RSS feeds often contain &#8216; ('), &#8217; ('), &#8220; ("), &#8221; ("), etc.
+function decodeHTMLEntities(text) {
+  if (!text) return text;
+
+  const entities = {
+    '&#8216;': ''', // left single quote
+    '&#8217;': ''', // right single quote
+    '&#8220;': '"', // left double quote
+    '&#8221;': '"', // right double quote
+    '&#8211;': '–', // en dash
+    '&#8212;': '—', // em dash
+    '&quot;': '"',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&nbsp;': ' '
+  };
+
+  let decoded = text;
+  for (const [entity, char] of Object.entries(entities)) {
+    decoded = decoded.replace(new RegExp(entity, 'g'), char);
+  }
+
+  return decoded;
+}
+
 // Initialize agents
 const executiveAgent = new BaseAgent({
   name: 'ExecutiveAdvisor',
@@ -349,11 +376,12 @@ export default async function handler(req, res) {
       policies_affecting_you: applicablePolicies.map(p => p.policy),
       // ✅ NEW (Nov 7): Show matched crisis alerts count
       active_policy_threats: matchedAlerts.length,
+      // ✅ FIX (Nov 12): Decode HTML entities in alert titles/descriptions
       matched_alerts: topAlerts.map(a => ({
-        title: a.title,
+        title: decodeHTMLEntities(a.title),
         severity: a.severity,
         effective_date: a.effective_date,
-        description: a.description
+        description: decodeHTMLEntities(a.description)
       })),
       from_your_broker: executiveAdvisory.broker_insights || 'Positioning your supply chain for trade policy resilience.',
       // ✅ FIX: Include professional_disclaimer and save_reminder (were being stripped out)
