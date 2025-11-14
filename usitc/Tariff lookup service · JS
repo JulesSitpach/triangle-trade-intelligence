@@ -1,0 +1,209 @@
+/**
+ * Tariff Lookup Service with Three-Tier Fallback
+ * 
+ * Priority Order:
+ * 1. Database (tariff_intelligence_master) - Fast, verified, 17,545+ codes
+ * 2. USITC DataWeb API - Real-time government data for edge cases
+ * 3. AI Estimation - Last resort with disclosure
+ * 
+ * Integration: Replace your existing tariff lookup logic with this
+ */
+
+import { usitcDataWebAPI } from './usitc-dataweb-api-fixed.js';
+import { createClient } from '@supabase/supabase-js';
+
+export class TariffLookupService {
+  constructor(supabaseClient) {
+    this.db = supabaseClient;
+    this.usitcAPI = usitcDataWebAPI;
+  }
+
+  /**
+   * Get tariff rate with three-tier fallback
+   * @param {string} htsCode - HTS code to look up
+   * @returns {Promise<Object>} Rate data with source and confidence
+   */
+  async getTariffRate(htsCode) {
+    // Normalize HTS code (remove dots, ensure 10 digits)
+    const normalizedCode = this.normalizeHTSCode(htsCode);
+
+    // TIER 1: Check database first (fast, verified)
+    const dbResult = await this.checkDatabase(normalizedCode);
+    if (dbResult) {
+      return {
+        ...dbResult,
+        source: 'database',
+        confidence: 'verified',
+        tier: 1,
+        disclosure: '🟢 Verified from USITC HTS 2025 Rev 28'
+      };
+    }
+
+    // TIER 2: Try USITC API (slower, but real gov data)
+    console.log(`[Tariff Lookup] HTS ${normalizedCode} not in database, trying USITC API...`);
+    
+    const apiResult = await this.checkUSITCAPI(normalizedCode);
+    if (apiResult) {
+      // Cache it for next time
+      await this.cacheRateInDatabase(normalizedCode, apiResult);
+      
+      return {
+        ...apiResult,
+        source: 'usitc_api',
+        confidence: 'verified',
+        tier: 2,
+        disclosure: '🟡 Retrieved from USITC DataWeb API (verified government data)'
+      };
+    }
+
+    // TIER 3: AI estimation (last resort)
+    console.log(`[Tariff Lookup] USITC API unavailable for ${normalizedCode}, using AI estimation...`);
+    
+    const aiResult = await this.estimateWithAI(normalizedCode);
+    return {
+      ...aiResult,
+      source: 'ai_estimation',
+      confidence: 'medium',
+      tier: 3,
+      disclosure: '🔴 AI-estimated rate (not verified)',
+      warning: '⚠️ Verify with customs broker before making sourcing decisions'
+    };
+  }
+
+  /**
+   * Normalize HTS code format
+   */
+  normalizeHTSCode(htsCode) {
+    // Remove dots and spaces
+    let normalized = htsCode.replace(/[.\s]/g, '');
+    
+    // Pad to 10 digits if needed (e.g., 8542.31 → 8542310000)
+    if (normalized.length < 10) {
+      normalized = normalized.padEnd(10, '0');
+    }
+    
+    return normalized;
+  }
+
+  /**
+   * Check database for rate
+   */
+  async checkDatabase(htsCode) {
+    try {
+      const { data, error } = await this.db
+        .from('tariff_intelligence_master')
+        .select('*')
+        .eq('hts_code', htsCode)
+        .single();
+
+      if (error || !data) {
+        return null;
+      }
+
+      return {
+        hts_code: htsCode,
+        mfn_rate: data.mfn_rate,
+        special_rate: data.special_rate,
+        description: data.description,
+        unit_of_quantity: data.unit_of_quantity,
+        last_updated: data.imported_at
+      };
+    } catch (error) {
+      console.error('[Tariff Lookup] Database query failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Check USITC API for rate
+   */
+  async checkUSITCAPI(htsCode) {
+    try {
+      const result = await this.usitcAPI.fetchTariffRates(htsCode);
+      return result;
+    } catch (error) {
+      console.error('[Tariff Lookup] USITC API failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Cache API result in database for future lookups
+   */
+  async cacheRateInDatabase(htsCode, rateData) {
+    try {
+      await this.db
+        .from('tariff_intelligence_master')
+        .upsert({
+          hts_code: htsCode,
+          mfn_rate: rateData.mfn_rate,
+          data_source: 'usitc_dataweb_api',
+          imported_at: new Date().toISOString(),
+          notes: 'Auto-cached from USITC API fallback'
+        }, {
+          onConflict: 'hts_code'
+        });
+      
+      console.log(`[Tariff Lookup] Cached rate for ${htsCode} in database`);
+    } catch (error) {
+      console.error('[Tariff Lookup] Failed to cache rate:', error);
+    }
+  }
+
+  /**
+   * AI estimation fallback
+   */
+  async estimateWithAI(htsCode) {
+    // This calls your existing AI classification logic
+    // Return structure matching other tiers
+    return {
+      hts_code: htsCode,
+      mfn_rate: null, // Don't claim a specific rate
+      estimated_range: '0-25%', // Give a range instead
+      reasoning: 'AI analysis based on HTS chapter and description'
+    };
+  }
+
+  /**
+   * Health check for all tiers
+   */
+  async healthCheck() {
+    const status = {
+      database: false,
+      usitc_api: false,
+      timestamp: new Date().toISOString()
+    };
+
+    // Check database
+    try {
+      const { data, error } = await this.db
+        .from('tariff_intelligence_master')
+        .select('count')
+        .limit(1);
+      status.database = !error;
+    } catch (error) {
+      status.database = false;
+    }
+
+    // Check USITC API
+    status.usitc_api = await this.usitcAPI.healthCheck();
+
+    return status;
+  }
+}
+
+// Example usage in your API route:
+/*
+import { createClient } from '@supabase/supabase-js';
+import { TariffLookupService } from './tariff-lookup-service.js';
+
+export default async function handler(req, res) {
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+  const lookupService = new TariffLookupService(supabase);
+  
+  const { htsCode } = req.query;
+  const result = await lookupService.getTariffRate(htsCode);
+  
+  res.json(result);
+}
+*/

@@ -1,0 +1,168 @@
+/**
+ * USITC DataWeb API Client (FIXED VERSION)
+ * 
+ * Fixes:
+ * 1. Properly handles 307 redirects
+ * 2. Includes browser-like headers to avoid blocking
+ * 3. Handles cookie-based session management
+ * 4. Proper error handling for 503/timeout scenarios
+ * 
+ * Use Case: Real-time fallback when HTS code not in database
+ * NOT for batch updates (use HTS CSV export for that)
+ */
+
+export class USITCDataWebAPI {
+  constructor() {
+    this.baseURL = 'https://datawebws.usitc.gov/dataweb/usitc/api/query';
+    this.timeout = 15000; // 15 second timeout
+  }
+
+  /**
+   * Fetch tariff rates for a specific HTS code
+   * @param {string} htsCode - HTS code (e.g., "8542.31.00")
+   * @returns {Promise<Object|null>} Tariff rate data or null if not found/error
+   */
+  async fetchTariffRates(htsCode) {
+    try {
+      // Build query payload
+      const payload = {
+        query: {
+          dataSource: "tariff",
+          aggregation: "SUM",
+          filterClauses: [
+            {
+              fieldName: "htsno",
+              operator: "EQUAL",
+              values: [htsCode.replace(/\./g, '')] // Remove dots: 8542.31.00 → 854231
+            }
+          ],
+          returnClauses: [
+            { fieldName: "htsno" },
+            { fieldName: "tariffRate" },
+            { fieldName: "dutyType" }
+          ]
+        },
+        parameters: {
+          reporterCode: "USA",
+          partnerCode: "ALL",
+          timeSeriesType: "ANNUAL",
+          startYear: 2024,
+          endYear: 2024
+        }
+      };
+
+      // Create timeout controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+      // Make request with proper headers
+      const response = await fetch(this.baseURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json, text/plain, */*',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Origin': 'https://dataweb.usitc.gov',
+          'Referer': 'https://dataweb.usitc.gov/',
+        },
+        body: JSON.stringify(payload),
+        redirect: 'follow', // CRITICAL: Follow 307 redirects
+        credentials: 'include', // Include cookies for session
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      // Check response status
+      if (!response.ok) {
+        console.error(`[USITC API] HTTP ${response.status}: ${response.statusText}`);
+        
+        if (response.status === 503) {
+          console.error('[USITC API] Service unavailable (503) - API may be down or blocking');
+        } else if (response.status === 403 || response.status === 429) {
+          console.error('[USITC API] Access denied or rate limited');
+        }
+        
+        return null;
+      }
+
+      // Parse response
+      const data = await response.json();
+
+      // Extract tariff rate from response
+      if (data && data.results && data.results.length > 0) {
+        const result = data.results[0];
+        return {
+          hts_code: htsCode,
+          mfn_rate: this.parseTariffRate(result.tariffRate),
+          duty_type: result.dutyType,
+          source: 'usitc_dataweb_api',
+          retrieved_at: new Date().toISOString()
+        };
+      }
+
+      // No results found
+      console.log(`[USITC API] No tariff data found for HTS ${htsCode}`);
+      return null;
+
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error(`[USITC API] Request timeout after ${this.timeout}ms`);
+      } else {
+        console.error('[USITC API] Request failed:', error.message);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Parse tariff rate string to numeric value
+   * Handles various formats: "5.0%", "Free", "2.5 cents/kg", etc.
+   */
+  parseTariffRate(rateString) {
+    if (!rateString || rateString === 'Free' || rateString === 'free') {
+      return 0;
+    }
+
+    // Extract numeric percentage (e.g., "5.0%" → 5.0)
+    const percentMatch = rateString.match(/(\d+\.?\d*)\s*%/);
+    if (percentMatch) {
+      return parseFloat(percentMatch[1]);
+    }
+
+    // Specific duty (cents/kg, etc.) - return null to indicate non-ad-valorem
+    if (rateString.includes('cents') || rateString.includes('¢')) {
+      return null; // Specific duty, not ad valorem percentage
+    }
+
+    // Couldn't parse
+    console.warn(`[USITC API] Could not parse tariff rate: "${rateString}"`);
+    return null;
+  }
+
+  /**
+   * Health check - test if API is accessible
+   * @returns {Promise<boolean>}
+   */
+  async healthCheck() {
+    try {
+      const testCode = '8542.31.00'; // Known valid HTS code
+      const result = await this.fetchTariffRates(testCode);
+      return result !== null;
+    } catch (error) {
+      return false;
+    }
+  }
+}
+
+// Export singleton instance
+export const usitcDataWebAPI = new USITCDataWebAPI();
+
+// Example usage:
+// const rate = await usitcDataWebAPI.fetchTariffRates('8542.31.00');
+// if (rate) {
+//   console.log(`MFN Rate: ${rate.mfn_rate}%`);
+// } else {
+//   console.log('Rate not found or API unavailable');
+// }

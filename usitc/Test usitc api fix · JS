@@ -1,0 +1,64 @@
+/**
+ * Test Script for USITC API Fix
+ * 
+ * Run this to verify the API client is working properly
+ * 
+ * Usage: node test-usitc-api-fix.js
+ */
+
+import { usitcDataWebAPI } from './usitc-dataweb-api-fixed.js';
+
+async function runTests() {
+  console.log('🧪 Testing USITC DataWeb API Fix\n');
+  console.log('='.repeat(60));
+
+  // Test 1: Health Check
+  console.log('\n📋 Test 1: Health Check');
+  const isHealthy = await usitcDataWebAPI.healthCheck();
+  console.log(`Status: ${isHealthy ? '✅ API is accessible' : '❌ API is down or blocked'}`);
+
+  if (!isHealthy) {
+    console.log('\n⚠️  API health check failed. Possible reasons:');
+    console.log('   1. USITC API is temporarily down (503)');
+    console.log('   2. Rate limiting / IP blocking');
+    console.log('   3. Network connectivity issues');
+    console.log('\n💡 This is why we have the three-tier fallback system!');
+    return;
+  }
+
+  // Test 2: Known HTS Code (your PCB example)
+  console.log('\n📋 Test 2: Fetch PCB Rate (HTS 8542.31.00)');
+  const pcbRate = await usitcDataWebAPI.fetchTariffRates('8542.31.00');
+  
+  if (pcbRate) {
+    console.log('✅ Success!');
+    console.log(JSON.stringify(pcbRate, null, 2));
+  } else {
+    console.log('❌ Failed to fetch rate');
+  }
+
+  // Test 3: Known HTS Code (aluminum housing example)
+  console.log('\n📋 Test 3: Fetch Aluminum Rate (HTS 7616.90.90)');
+  const aluminumRate = await usitcDataWebAPI.fetchTariffRates('7616.90.90.00');
+  
+  if (aluminumRate) {
+    console.log('✅ Success!');
+    console.log(JSON.stringify(aluminumRate, null, 2));
+  } else {
+    console.log('❌ Failed to fetch rate');
+  }
+
+  // Test 4: Invalid HTS Code
+  console.log('\n📋 Test 4: Invalid HTS Code (should return null gracefully)');
+  const invalidRate = await usitcDataWebAPI.fetchTariffRates('9999.99.99.99');
+  console.log(`Result: ${invalidRate ? '❌ Unexpected result' : '✅ Correctly returned null'}`);
+
+  console.log('\n' + '='.repeat(60));
+  console.log('✅ Tests complete!\n');
+}
+
+// Run tests
+runTests().catch(error => {
+  console.error('❌ Test failed with error:', error);
+  process.exit(1);
+});
