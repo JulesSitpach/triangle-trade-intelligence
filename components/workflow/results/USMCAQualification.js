@@ -271,35 +271,35 @@ export default function USMCAQualification({ results }) {
                         </p>
                       )}
                     </div>
+
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#fef3c7',
+                      borderRadius: '4px',
+                      border: '1px solid #dc2626',
+                      marginBottom: '1rem'
+                    }}>
+                      <strong style={{ color: '#7f1d1d' }}>⚠️ Rates Change Frequently</strong>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#991b1b', fontSize: '0.8125rem' }}>
+                        China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements. Always verify current rates before shipment.
+                      </p>
+                    </div>
+
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#d1fae5',
+                      borderRadius: '4px',
+                      border: '1px solid #059669'
+                    }}>
+                      <strong style={{ color: '#065f46' }}>💰 Nearshoring to USMCA WOULD Eliminate ALL Tariffs</strong>
+                      <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
+                        <strong>Currently:</strong> Paying {((baseMfn || 0) * 100).toFixed(1)}% base + {((section301 || 0) * 100).toFixed(1)}% Section 301 = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
+                        <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See "Potential" in Annual Savings column.
+                      </p>
+                    </div>
                   </>
                 );
               })()}
-
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: '#fef3c7',
-                borderRadius: '4px',
-                border: '1px solid #dc2626',
-                marginBottom: '1rem'
-              }}>
-                <strong style={{ color: '#7f1d1d' }}>⚠️ Rates Change Frequently</strong>
-                <p style={{ margin: '0.5rem 0 0 0', color: '#991b1b', fontSize: '0.8125rem' }}>
-                  China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements. Always verify current rates before shipment.
-                </p>
-              </div>
-
-              <div style={{
-                padding: '0.75rem',
-                backgroundColor: '#d1fae5',
-                borderRadius: '4px',
-                border: '1px solid #059669'
-              }}>
-                <strong style={{ color: '#065f46' }}>💰 Nearshoring to USMCA WOULD Eliminate ALL Tariffs</strong>
-                <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
-                  <strong>Currently:</strong> Paying {((baseMfn || 0) * 100).toFixed(1)}% base + {((section301 || 0) * 100).toFixed(1)}% Section 301 = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
-                  <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See "Potential" in Annual Savings column.
-                </p>
-              </div>
             </div>
           )}
         </div>
