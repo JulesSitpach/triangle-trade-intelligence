@@ -555,6 +555,41 @@ export default function WorkflowResults({
       workflowStorage.setItem('usmca_workflow_results', JSON.stringify(savedWorkflowResults));
       console.log('✅ Saved executive alert to localStorage');
 
+      // ✅ CRITICAL FIX: Save executive summary to DATABASE to prevent infinite free regeneration
+      // Before this fix: Users could generate unlimited summaries by clicking "View Results" repeatedly
+      // After this fix: Summary persists in database, shows existing summary instead of "Generate" button
+      if (workflowSessionId) {
+        try {
+          console.log('💾 Saving executive summary to database...', { workflowSessionId });
+
+          const saveResponse = await fetch('/api/workflow-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              sessionId: workflowSessionId,
+              workflowData: {
+                executive_summary: alertData.situation_brief, // Save full text to executive_summary column
+                detailed_analysis: alertData // Save full structured data to workflow_data JSONB
+              },
+              action: 'update_executive_summary'
+            })
+          });
+
+          if (saveResponse.ok) {
+            console.log('✅ Executive summary saved to database successfully');
+          } else {
+            const errorText = await saveResponse.text();
+            console.error('❌ Failed to save executive summary to database:', errorText);
+          }
+        } catch (dbError) {
+          console.error('❌ Database save failed (non-critical):', dbError);
+          // Don't block UI - localStorage save succeeded
+        }
+      } else {
+        console.warn('⚠️ No workflowSessionId - cannot save to database');
+      }
+
       // Display the executive summary (data is already in correct format)
       setExecutiveSummary(alertData);
       setShowSummary(true);

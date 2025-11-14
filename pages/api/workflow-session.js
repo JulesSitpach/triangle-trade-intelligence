@@ -146,6 +146,91 @@ export default protectedApiHandler({
       });
     };
 
+    // ✅ CRITICAL FIX: Handle executive_summary update separately
+    // This prevents infinite free summary regeneration by saving to database
+    if (action === 'update_executive_summary') {
+      console.log('💾 [WORKFLOW-SESSION] Updating executive summary for session:', sessionId);
+
+      try {
+        // First, fetch existing data to merge with new summary
+        const { data: existingSession } = await supabase
+          .from('workflow_sessions')
+          .select('data')
+          .eq('session_id', sessionId)
+          .eq('user_id', userId)
+          .single();
+
+        const { data: existingCompletion } = await supabase
+          .from('workflow_completions')
+          .select('workflow_data')
+          .eq('session_id', sessionId)
+          .eq('user_id', userId)
+          .single();
+
+        // Merge executive summary into existing data
+        const mergedSessionData = {
+          ...(existingSession?.data || {}),
+          detailed_analysis: workflowData.detailed_analysis
+        };
+
+        const mergedCompletionData = {
+          ...(existingCompletion?.workflow_data || {}),
+          detailed_analysis: workflowData.detailed_analysis
+        };
+
+        // Update workflow_sessions if it exists
+        let sessionUpdateSuccess = false;
+        if (existingSession) {
+          const { error: sessionError } = await supabase
+            .from('workflow_sessions')
+            .update({
+              executive_summary: workflowData.executive_summary,
+              data: mergedSessionData
+            })
+            .eq('session_id', sessionId)
+            .eq('user_id', userId);
+
+          sessionUpdateSuccess = !sessionError;
+          if (sessionError) {
+            console.error('⚠️ Failed to update workflow_sessions:', sessionError);
+          } else {
+            console.log('✅ Updated workflow_sessions with executive summary');
+          }
+        }
+
+        // Update workflow_completions if it exists
+        let completionUpdateSuccess = false;
+        if (existingCompletion) {
+          const { error: completionError } = await supabase
+            .from('workflow_completions')
+            .update({
+              executive_summary: workflowData.executive_summary,
+              workflow_data: mergedCompletionData
+            })
+            .eq('session_id', sessionId)
+            .eq('user_id', userId);
+
+          completionUpdateSuccess = !completionError;
+          if (completionError) {
+            console.error('⚠️ Failed to update workflow_completions:', completionError);
+          } else {
+            console.log('✅ Updated workflow_completions with executive summary');
+          }
+        }
+
+        if (!sessionUpdateSuccess && !completionUpdateSuccess) {
+          console.error('❌ Failed to save executive summary to any table');
+          return sendError(res, 'Failed to save executive summary', 500);
+        }
+
+        console.log('✅ Executive summary saved to database successfully');
+        return sendSuccess(res, { saved: true }, 'Executive summary saved successfully');
+      } catch (error) {
+        console.error('❌ Error saving executive summary:', error);
+        return sendError(res, 'Failed to save executive summary', 500);
+      }
+    }
+
     // Determine if this is a complete workflow
     const isCompleteWorkflow = action === 'complete' && workflowData.steps_completed >= 4;
 
