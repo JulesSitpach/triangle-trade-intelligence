@@ -782,6 +782,20 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile, matchedA
   // ✅ OPTIMIZED (Nov 7): Match portfolio briefing narrative style
   const prompt = `You are a Trade Compliance Director writing a strategic briefing for ${profile.company_name}'s operations team about tariff impacts and IMMEDIATE certification issues.
 
+🚨 CRITICAL DATA VALUES - READ CAREFULLY BEFORE WRITING:
+────────────────────────────────────────────────────────────
+CURRENT Savings (what they're saving NOW): $${workflow.current_annual_savings?.toLocaleString() || '0'}/year
+POTENTIAL Savings (what they COULD save if nearshored): $${workflow.potential_annual_savings?.toLocaleString() || '0'}/year
+TOTAL (current + potential): $${((workflow.current_annual_savings || 0) + (workflow.potential_annual_savings || 0)).toLocaleString()}/year
+
+❌ DO NOT say: "generates $${((workflow.current_annual_savings || 0) + (workflow.potential_annual_savings || 0)).toLocaleString()}/year in tariff savings" (this is the TOTAL, not CURRENT)
+❌ DO NOT say: "capturing $${((workflow.current_annual_savings || 0) + (workflow.potential_annual_savings || 0)).toLocaleString()} in USMCA savings" (this is the TOTAL, not CURRENT)
+❌ DO NOT say: "$${((workflow.current_annual_savings || 0) + (workflow.potential_annual_savings || 0)).toLocaleString()}/year in CURRENT savings" (this is the TOTAL, not CURRENT)
+
+✅ ALWAYS say: "$${workflow.current_annual_savings?.toLocaleString() || '0'}/year in CURRENT savings from Mexican and Canadian components"
+✅ ALWAYS say: "POTENTIAL $${workflow.potential_annual_savings?.toLocaleString() || '0'}/year if nearshored"
+────────────────────────────────────────────────────────────
+
 COMPONENTS (${components.length} total):
 ${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) - ${c.value_percentage}% | HS: ${c.hs_code} | MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}% | Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}%`).join('\n')}
 
