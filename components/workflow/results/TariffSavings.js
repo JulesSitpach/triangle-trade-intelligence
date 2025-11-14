@@ -43,9 +43,17 @@ export default function TariffSavings({ results }) {
 
   components.forEach(c => {
     const componentValue = tradeVolume * (parseFloat(c.percentage || c.value_percentage || 0) / 100);
-    const base_mfn = parseFloat(c.mfn_rate || c.base_mfn_rate || 0);
-    const section_301 = parseFloat(c.section_301 || 0);
-    const total_rate = parseFloat(c.total_rate || base_mfn + section_301);
+
+    // ✅ CRITICAL FIX (Nov 14): Preserve null vs 0 distinction
+    // null = "pending verification", 0 = "verified duty-free"
+    const base_mfn = c.mfn_rate !== null && c.mfn_rate !== undefined
+      ? parseFloat(c.mfn_rate)
+      : (c.base_mfn_rate !== null && c.base_mfn_rate !== undefined ? parseFloat(c.base_mfn_rate) : null);
+
+    const section_301 = c.section_301 !== null && c.section_301 !== undefined ? parseFloat(c.section_301) : null;
+    const total_rate = c.total_rate !== null && c.total_rate !== undefined
+      ? parseFloat(c.total_rate)
+      : (base_mfn !== null && section_301 !== null ? base_mfn + section_301 : null);
 
     // ✅ FIX (Oct 28): Rates are in DECIMAL format (0.35 = 35%), NOT percentage format
     // API returns decimals, so NO /100 needed for calculations
@@ -54,17 +62,21 @@ export default function TariffSavings({ results }) {
       description: c.description || c.component_type,
       origin: c.origin_country || c.country,
       percentage: parseFloat(c.percentage || c.value_percentage || 0),
-      base_mfn: base_mfn * 100,  // Convert to percentage for display (0.35 → 35)
-      section_301: section_301 * 100,  // Convert to percentage for display (0.60 → 60)
-      total_rate: total_rate * 100,  // Convert to percentage for display (0.95 → 95)
+      base_mfn: base_mfn !== null ? base_mfn * 100 : null,  // null shows "Pending"
+      section_301: section_301 !== null ? section_301 * 100 : null,  // null shows "Pending"
+      total_rate: total_rate !== null ? total_rate * 100 : null,  // null shows "Pending"
       componentValue,
-      base_mfn_savings: componentValue * base_mfn,  // ✅ base_mfn is already decimal (0.35)
-      section_301_cost: componentValue * section_301  // ✅ section_301 is already decimal (0.60)
+      base_mfn_savings: base_mfn !== null ? componentValue * base_mfn : null,  // Skip if pending
+      section_301_cost: section_301 !== null ? componentValue * section_301 : null,  // Skip if pending
+      isPending: base_mfn === null || section_301 === null  // Flag for UI
     });
 
     // Calculate ONLY for component-level display (not for final number)
-    calculatedBaseMFNSavings += componentValue * base_mfn;  // ✅ base_mfn already decimal
-    if (section_301 > 0) {
+    // Skip components with pending (null) rates from totals
+    if (base_mfn !== null) {
+      calculatedBaseMFNSavings += componentValue * base_mfn;  // ✅ base_mfn already decimal
+    }
+    if (section_301 !== null && section_301 > 0) {
       calculatedSection301Burden += componentValue * section_301;  // ✅ section_301 already decimal
     }
   });
@@ -108,7 +120,7 @@ export default function TariffSavings({ results }) {
       )}
 
       {/* Component-Level Tariff Breakdown */}
-      {componentBreakdown.length > 0 && componentBreakdown.some(c => c.section_301 > 0) && (
+      {componentBreakdown.length > 0 && (
         <div style={{ padding: '1.5rem', backgroundColor: '#ffffff', borderRadius: '4px', marginBottom: '1rem', border: '1px solid #e5e7eb' }}>
           <div style={{ fontSize: '0.875rem', color: '#374151', marginBottom: '1rem', fontWeight: '600' }}>📊 Component-Level Tariff Breakdown</div>
           {componentBreakdown.map((comp, idx) => (
@@ -116,21 +128,25 @@ export default function TariffSavings({ results }) {
               <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
                 {comp.description} ({comp.origin}) - {comp.percentage}% of product
               </div>
-              {comp.section_301 > 0 ? (
+              {comp.isPending ? (
+                <div style={{ fontSize: '0.75rem', color: '#f59e0b', fontStyle: 'italic' }}>
+                  ⏳ Tariff rates pending verification - awaiting USITC data
+                </div>
+              ) : comp.section_301 !== null && comp.section_301 > 0 ? (
                 <>
                   <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
-                    Base MFN Rate: {comp.base_mfn}% + Section 301: {comp.section_301}% = <strong>Total: {comp.total_rate}%</strong>
+                    Base MFN Rate: {comp.base_mfn.toFixed(1)}% + Section 301: {comp.section_301.toFixed(1)}% = <strong>Total: {comp.total_rate.toFixed(1)}%</strong>
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#059669', marginBottom: '0.25rem' }}>
-                    ✅ USMCA Saves: ${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.base_mfn}% eliminated)
+                    ✅ USMCA Saves: ${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.base_mfn.toFixed(1)}% eliminated)
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#dc2626' }}>
-                    ❌ Section 301 Remains: ${comp.section_301_cost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.section_301}% still applies)
+                    ❌ Section 301 Remains: ${comp.section_301_cost.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})} ({comp.section_301.toFixed(1)}% still applies)
                   </div>
                 </>
               ) : (
                 <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                  Tariff Rate: {comp.total_rate}% | USMCA Saves: ${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+                  Tariff Rate: {comp.total_rate !== null ? `${comp.total_rate.toFixed(1)}%` : 'Pending'} | USMCA Saves: {comp.base_mfn_savings !== null ? `$${comp.base_mfn_savings.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}` : 'Pending'}
                 </div>
               )}
             </div>

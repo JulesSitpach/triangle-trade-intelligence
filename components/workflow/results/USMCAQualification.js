@@ -211,26 +211,37 @@ export default function USMCAQualification({ results }) {
 
                 if (!chinaComponent) return null;
 
-                const section301 = chinaComponent.section_301 || 0;
-                const reciprocal = chinaComponent.ieepa_reciprocal || 0;
-                const baseMfn = chinaComponent.base_mfn_rate || chinaComponent.mfn_rate || 0;
-                const totalRate = chinaComponent.total_rate || (baseMfn + section301 + reciprocal);
+                // ✅ CRITICAL FIX (Nov 14): Preserve null vs 0 distinction for Section 301
+                const section301 = chinaComponent.section_301 !== null && chinaComponent.section_301 !== undefined
+                  ? parseFloat(chinaComponent.section_301)
+                  : null;
+                const reciprocal = chinaComponent.ieepa_reciprocal !== null && chinaComponent.ieepa_reciprocal !== undefined
+                  ? parseFloat(chinaComponent.ieepa_reciprocal)
+                  : null;
+                const baseMfn = chinaComponent.base_mfn_rate !== null && chinaComponent.base_mfn_rate !== undefined
+                  ? parseFloat(chinaComponent.base_mfn_rate)
+                  : (chinaComponent.mfn_rate !== null && chinaComponent.mfn_rate !== undefined ? parseFloat(chinaComponent.mfn_rate) : null);
+                const totalRate = chinaComponent.total_rate !== null && chinaComponent.total_rate !== undefined
+                  ? parseFloat(chinaComponent.total_rate)
+                  : (baseMfn !== null && section301 !== null && reciprocal !== null ? baseMfn + section301 + reciprocal : null);
                 const verifiedDate = chinaComponent.verified_date || chinaComponent.last_verified;
                 const expiresAt = chinaComponent.expires_at || chinaComponent.cache_expires_at;
 
                 return (
                   <>
                     <div style={{ marginBottom: '1rem' }}>
-                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
-                        Section 301 Tariff: +{(section301 * 100).toFixed(1)}%
-                        {verifiedDate && <span style={{ color: '#78350f', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(verified {new Date(verifiedDate).toLocaleDateString()})</span>}
+                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: section301 === null ? '#f59e0b' : '#92400e', fontSize: '0.9375rem' }}>
+                        Section 301 Tariff: {section301 !== null ? `+${(section301 * 100).toFixed(1)}%` : '⏳ Pending verification'}
+                        {section301 !== null && verifiedDate && <span style={{ color: '#78350f', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(verified {new Date(verifiedDate).toLocaleDateString()})</span>}
                       </strong>
-                      <p style={{ margin: 0, color: '#78350f' }}>
-                        Additional tariffs on Chinese imports for your specific HS code. This rate is AI-calculated based on current USTR lists.
+                      <p style={{ margin: 0, color: section301 === null ? '#f59e0b' : '#78350f' }}>
+                        {section301 !== null
+                          ? 'Additional tariffs on Chinese imports for your specific HS code. This rate is AI-calculated based on current USTR lists.'
+                          : 'Section 301 rate verification in progress - database lookup required.'}
                       </p>
                     </div>
 
-                    {reciprocal > 0 && (
+                    {reciprocal !== null && reciprocal > 0 && (
                       <div style={{ marginBottom: '1rem' }}>
                         <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
                           Reciprocal Tariffs: +{(reciprocal * 100).toFixed(1)}%
