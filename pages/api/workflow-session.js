@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
-import { protectedApiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
+import { protectedApiHandler, sendSuccess, sendError } from '../../lib/api/apiHandler.js';
 import { ApiError, validateRequiredFields } from '../../lib/api/errorHandler.js';
 
 const supabase = createClient(
