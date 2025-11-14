@@ -490,7 +490,8 @@ export default function WorkflowResults({
           trade_volume: results.company.trade_volume,
           usmca_qualified: results.usmca.qualified,
           preference_criterion: results.usmca?.preference_criterion || null,
-          current_annual_savings: results.savings?.annual_savings || null,  // ✅ Current USMCA savings
+          current_annual_savings: results.savings?.current_annual_savings || null,  // 🚨 CRITICAL FIX: Use current_annual_savings (not annual_savings which is TOTAL)
+          potential_annual_savings: results.savings?.potential_annual_savings || null,  // 🚨 CRITICAL FIX: Add potential savings
           monthly_savings: results.savings?.monthly_savings || null,  // ✅ Monthly breakdown
           strategic_insights: results.detailed_analysis?.strategic_insights || null  // ✅ Context from main analysis
         }
