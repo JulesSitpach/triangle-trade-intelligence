@@ -608,7 +608,7 @@ export default function WorkflowResults({
             marginBottom: '0.75rem'
           }}>
             {/* Current Savings Card */}
-            {results.usmca?.qualified && results.savings && (results.savings.annual_savings || 0) > 0 && (
+            {results.usmca?.qualified && results.savings && (results.savings.current_annual_savings || 0) > 0 && (
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: '#ecfdf5',
@@ -619,10 +619,10 @@ export default function WorkflowResults({
                   💰 Current Annual Savings
                 </div>
                 <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>
-                  ${(results.savings.annual_savings || 0).toLocaleString()}
+                  ${(results.savings.current_annual_savings || 0).toLocaleString()}
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: '#047857', marginTop: '0.25rem' }}>
-                  ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()}/mo
+                  ${(results.savings.current_monthly_savings || Math.round((results.savings.current_annual_savings || 0) / 12)).toLocaleString()}/mo
                 </div>
                 <div style={{
                   marginTop: '0.5rem',
@@ -631,13 +631,13 @@ export default function WorkflowResults({
                   fontSize: '0.625rem',
                   color: '#065f46'
                 }}>
-                  USMCA {((results.savings.usmca_rate || 0) * 100).toFixed(1)}% vs {((results.savings.mfn_rate || 0) * 100).toFixed(1)}% MFN
+                  From USMCA components (MX/CA/US)
                 </div>
               </div>
             )}
 
             {/* Potential Savings Card */}
-            {results.usmca?.qualified && results.savings?.section_301_exposure?.is_exposed && (
+            {results.usmca?.qualified && results.savings && (results.savings.potential_annual_savings || 0) > 0 && (
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: '#fffbeb',
@@ -648,10 +648,10 @@ export default function WorkflowResults({
                   💡 Potential Additional
                 </div>
                 <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#d97706' }}>
-                  ${(results.savings.section_301_exposure.annual_cost_burden || 0).toLocaleString()}
+                  ${(results.savings.potential_annual_savings || 0).toLocaleString()}
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: '#b45309', marginTop: '0.25rem' }}>
-                  ${Math.round((results.savings.section_301_exposure.annual_cost_burden || 0) / 12).toLocaleString()}/mo
+                  ${(results.savings.potential_monthly_savings || Math.round((results.savings.potential_annual_savings || 0) / 12)).toLocaleString()}/mo
                 </div>
                 <div style={{
                   marginTop: '0.5rem',
@@ -660,7 +660,7 @@ export default function WorkflowResults({
                   fontSize: '0.625rem',
                   color: '#92400e'
                 }}>
-                  Nearshore to MX/CA/US
+                  If you nearshore non-USMCA to MX/CA/US
                 </div>
               </div>
             )}
@@ -840,10 +840,27 @@ export default function WorkflowResults({
               })()}
             </p>
 
-            {results.savings && (results.savings.annual_savings || 0) > 0 && (
+            {results.savings && ((results.savings.current_annual_savings || 0) > 0 || (results.savings.potential_annual_savings || 0) > 0) && (
               <p>
-                <strong>💰 Potential Savings: ${(results.savings.annual_savings || 0).toLocaleString()}/year</strong><br/>
-                That's ${Math.round((results.savings.annual_savings || 0) / 12).toLocaleString()} per month by using USMCA rates instead of standard tariffs ({(results.savings.savings_percentage || 0).toFixed(1)}% savings).
+                {(results.savings.current_annual_savings || 0) > 0 && (
+                  <>
+                    <strong>💰 Current Savings: ${(results.savings.current_annual_savings || 0).toLocaleString()}/year</strong><br/>
+                    You're saving ${(results.savings.current_monthly_savings || Math.round((results.savings.current_annual_savings || 0) / 12)).toLocaleString()} per month on USMCA components from Mexico, Canada, and US.
+                  </>
+                )}
+                {(results.savings.potential_annual_savings || 0) > 0 && (
+                  <>
+                    <br/><br/>
+                    <strong>💡 Additional Potential: ${(results.savings.potential_annual_savings || 0).toLocaleString()}/year</strong><br/>
+                    You could save an additional ${(results.savings.potential_monthly_savings || Math.round((results.savings.potential_annual_savings || 0) / 12)).toLocaleString()} per month if you nearshore non-USMCA components to Mexico/Canada.
+                  </>
+                )}
+                {(results.savings.current_annual_savings || 0) > 0 && (results.savings.potential_annual_savings || 0) > 0 && (
+                  <>
+                    <br/><br/>
+                    <strong>📊 Total Potential: ${(results.savings.annual_savings || 0).toLocaleString()}/year</strong> ({(results.savings.savings_percentage || 0).toFixed(1)}% of trade volume)
+                  </>
+                )}
               </p>
             )}
 

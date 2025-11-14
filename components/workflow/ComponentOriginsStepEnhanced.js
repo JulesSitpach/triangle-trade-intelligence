@@ -66,7 +66,12 @@ export default function ComponentOriginsStepEnhanced({
       total_rate: component?.total_rate ?? null,
       annual_savings: component?.annual_savings ?? null,
       rate_source: component?.rate_source ?? null,
-      stale: component?.stale ?? false
+      stale: component?.stale ?? false,
+
+      // ✅ NEW: Section 232 material checkbox and material origin
+      contains_section_232_material: component?.contains_section_232_material ?? false,
+      material_origin: component?.material_origin ?? 'unknown',
+      material_notes: component?.material_notes ?? ''
     };
   }, [formData.manufacturing_location]);
 
@@ -107,6 +112,13 @@ export default function ComponentOriginsStepEnhanced({
   const [isValidating, setIsValidating] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [hasScrolledToComponents, setHasScrolledToComponents] = useState(false);
+
+  // ✅ Helper function to check if Material Origin field should show
+  // User manually indicates if component contains Section 232 material via checkbox
+  const shouldShowMaterialOrigin = (component) => {
+    // Show field when user checks the "contains steel/aluminum/copper" checkbox
+    return component.contains_section_232_material === true;
+  };
 
   // Update parent form data when components change
   // CRITICAL: Prevent infinite loop by tracking when we push to parent
@@ -1068,136 +1080,248 @@ export default function ComponentOriginsStepEnhanced({
               </div>
             </div>
 
+            {/* 2-Column Grid Layout */}
             <div className="form-grid-2">
-              {/* Component Description */}
-              <div className="form-group">
-                <label className="form-label">
-                  Component Description {component.is_locked && '🔒'}
-                </label>
-                <input
-                  type="text"
-                  value={component.description || ''}
-                  onChange={(e) => {
-                    updateComponent(index, 'description', e.target.value);
-                  }}
-                  placeholder="Example: 'Polyester fabric outer shell' or 'Stainless steel fasteners'"
-                  className="form-input"
-                  disabled={component.is_locked}
-                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
-                />
-                {component.is_locked ? (
-                  <div className="form-help" style={{ color: '#f59e0b', fontWeight: 500 }}>
-                    🔒 Component locked after HS lookup (counts toward your tier limit)
-                  </div>
-                ) : (
-                  <div className="form-help">
-                    <strong>Be specific:</strong> Include materials, specs, and processing.
-                    <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#6b7280' }}>
-                      ✅ &quot;100% polyester ripstop fabric (300D, DWR waterproof coating, woven from US yarn)&quot;<br />
-                      ✅ &quot;Piezoelectric ultrasound transducer (64-element phased array, titanium housing)&quot;<br />
-                      ❌ &quot;Fabric&quot; or &quot;Electronics part&quot; (too vague for accurate HS code classification)
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Origin Country */}
-              <div className="form-group">
-                <label className="form-label">
-                  Origin Country {component.is_locked && '🔒'}
-                </label>
-                <select
-                  value={component.origin_country || ''}
-                  onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
-                  className={`form-select ${component.origin_country ? 'has-value' : ''}`}
-                  disabled={component.is_locked}
-                  style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
-                >
-                  <option value="">Select origin country...</option>
-                  {dropdownOptions.countries?.map((country, idx) => {
-                    const countryCode = typeof country === 'string' ? country : country.value || country.code;
-                    const countryName = typeof country === 'string' ? country : country.label || country.name;
-                    return (
-                      <option key={`origin-${countryCode}-${idx}`} value={countryCode}>
-                        {countryName}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              {/* Value Percentage */}
-              <div className="form-group">
-                <label className="form-label">
-                  Value Percentage {component.is_locked && '🔒'}
-                </label>
-                <div className="form-input-group">
+              {/* LEFT COLUMN: Component Description + Section 232 Checkbox */}
+              <div>
+                <div className="form-group">
+                  <label className="form-label">
+                    Component Description {component.is_locked && '🔒'}
+                  </label>
                   <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={component.value_percentage || ''}
-                    onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || '')}
-                    placeholder="Example: 45"
+                    type="text"
+                    value={component.description || ''}
+                    onChange={(e) => {
+                      updateComponent(index, 'description', e.target.value);
+                    }}
+                    placeholder="Example: 'Polyester fabric outer shell' or 'Stainless steel fastener'"
                     className="form-input"
                     disabled={component.is_locked}
                     style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                   />
-                  <span className="form-input-suffix">%</span>
+                  {component.is_locked ? (
+                    <div className="form-help" style={{ color: '#f59e0b', fontWeight: 500 }}>
+                      🔒 Component locked after HS lookup (counts toward your tier limit)
+                    </div>
+                  ) : (
+                    <div className="form-help">
+                      <strong>Be specific:</strong> Include materials, specs, and processing.
+                      <div style={{ marginTop: '0.25rem', fontSize: '0.8125rem', color: '#6b7280' }}>
+                        ✅ &quot;100% polyester ripstop fabric (300D, DWR waterproof coating, woven from US yarn)&quot;
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Section 232 Material Checkbox - Under Description */}
+                <div className="form-group">
+                  <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
+                    <input
+                      type="checkbox"
+                      checked={component.contains_section_232_material || false}
+                      onChange={(e) => updateComponent(index, 'contains_section_232_material', e.target.checked)}
+                      disabled={component.is_locked}
+                      style={{ marginRight: '0.5rem', marginTop: '0.125rem', cursor: component.is_locked ? 'not-allowed' : 'pointer' }}
+                    />
+                    <span style={{ color: component.is_locked ? '#9ca3af' : '#374151', lineHeight: '1.5' }}>
+                      This component contains steel, aluminum, or copper
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.125rem' }}>
+                        Check this if your component is subject to Section 232 tariffs (50% on steel/aluminum/copper materials)
+                      </div>
+                    </span>
+                  </label>
+                </div>
+
+                {/* Material Origin Field - Show only for Section 232 materials */}
+                {shouldShowMaterialOrigin(component) && (
+                  <div style={{
+                    marginTop: '0.75rem',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '4px'
+                  }}>
+                    <label className="form-label" style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                      Material Origin (for Section 232 exemption)
+                    </label>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                        <input
+                          type="radio"
+                          name={`material_origin_${index}`}
+                          value="unknown"
+                          checked={component.material_origin === 'unknown'}
+                          onChange={(e) => updateComponent(index, 'material_origin', e.target.value)}
+                        />
+                        <span>Unknown</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                        <input
+                          type="radio"
+                          name={`material_origin_${index}`}
+                          value="non_na"
+                          checked={component.material_origin === 'non_na'}
+                          onChange={(e) => updateComponent(index, 'material_origin', e.target.value)}
+                        />
+                        <span>Outside North America</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                        <input
+                          type="radio"
+                          name={`material_origin_${index}`}
+                          value="mx_ca"
+                          checked={component.material_origin === 'mx_ca'}
+                          onChange={(e) => updateComponent(index, 'material_origin', e.target.value)}
+                        />
+                        <span>Mexico or Canada</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', fontSize: '0.875rem' }}>
+                        <input
+                          type="radio"
+                          name={`material_origin_${index}`}
+                          value="us"
+                          checked={component.material_origin === 'us'}
+                          onChange={(e) => updateComponent(index, 'material_origin', e.target.value)}
+                        />
+                        <span>United States (may be exempt)</span>
+                      </label>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={component.material_notes || ''}
+                      onChange={(e) => updateComponent(index, 'material_notes', e.target.value)}
+                      placeholder="Optional notes"
+                      className="form-input"
+                      style={{ fontSize: '0.875rem' }}
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* HS Code Input - Simple Hybrid Approach */}
-              <div className="form-group">
-                <label className="form-label">
-                  HS Code * {component.is_locked && '🔒'}
-                </label>
-                <div className="form-help">
-                  Required for accurate AI classification (like a tax form needs accurate information)
-                </div>
-                <input
-                  type="text"
-                  value={component.hs_code || ''}
-                  onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
-                  placeholder="Enter if known (e.g., 8544.42.90)"
-                  className="form-input"
-                  // ✅ Always allow manual HS code entry, even after AI suggestion
-                />
-                <div className="form-help">
-                  Don&apos;t know your HS code? Get AI suggestion below.
+              {/* RIGHT COLUMN: Stacked fields */}
+              <div>
+                {/* Origin Country */}
+                <div className="form-group">
+                  <label className="form-label">
+                    Origin Country {component.is_locked && '🔒'}
+                  </label>
+                  <select
+                    value={component.origin_country || ''}
+                    onChange={(e) => updateComponent(index, 'origin_country', e.target.value)}
+                    className={`form-select ${component.origin_country ? 'has-value' : ''}`}
+                    disabled={component.is_locked}
+                    style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
+                  >
+                    <option value="">Select origin country...</option>
+                    {dropdownOptions.countries?.map((country, idx) => {
+                      const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                      const countryName = typeof country === 'string' ? country : country.label || country.name;
+                      return (
+                        <option key={`origin-${countryCode}-${idx}`} value={countryCode}>
+                          {countryName}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
 
-                {/* Get AI Suggestion Button - Disabled when component is locked */}
-                {!component.is_locked && (
-                  <>
-                    {!searchingHS[index] ? (
-                    <button
-                      type="button"
-                      onClick={() => getComponentHSSuggestion(index)}
-                      disabled={
-                        !component.description ||
-                        component.description.length < 10 ||
-                        !component.origin_country ||
-                        !component.value_percentage
-                      }
-                      className={
-                        component.description && component.description.length >= 10 &&
-                        component.origin_country && component.value_percentage
-                          ? 'btn-primary btn-ai-suggestion'  // BLUE when all required fields filled
-                          : 'btn-secondary btn-ai-suggestion'  // Gray when fields incomplete
-                      }
-                    >
-                      🤖 Get AI HS Code Suggestion
-                    </button>
-                  ) : (
+                {/* Value Percentage */}
+                <div className="form-group">
+                  <label className="form-label">
+                    Value Percentage {component.is_locked && '🔒'}
+                  </label>
+                  <div className="form-input-group">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={component.value_percentage || ''}
+                      onChange={(e) => updateComponent(index, 'value_percentage', parseFloat(e.target.value) || '')}
+                      placeholder="Example: 45"
+                      className="form-input"
+                      disabled={component.is_locked}
+                      style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
+                    />
+                    <span className="form-input-suffix">%</span>
+                  </div>
+                </div>
+
+                {/* HS Code */}
+                <div className="form-group">
+                  <label className="form-label">
+                    HS Code * {component.is_locked && '🔒'}
+                  </label>
+                  <input
+                    type="text"
+                    value={component.hs_code || ''}
+                    onChange={(e) => updateComponent(index, 'hs_code', e.target.value)}
+                    placeholder="Enter if known (e.g., 8544.42.90)"
+                    className="form-input"
+                  />
+                  <div className="form-help">
+                    Required for accurate AI classification (like a tax form needs accurate information)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Suggestion Button - FULL WIDTH below grid */}
+            {!component.is_locked && (
+              <div className="form-group">
+                <div className="form-help" style={{ marginBottom: '0.5rem' }}>
+                  Don&apos;t know your HS code? Get AI suggestion below.
+                </div>
+                {!searchingHS[index] ? (
+                  <button
+                    type="button"
+                    onClick={() => getComponentHSSuggestion(index)}
+                    disabled={
+                      !component.description ||
+                      component.description.length < 10 ||
+                      !component.origin_country ||
+                      !component.value_percentage
+                    }
+                    className={
+                      component.description && component.description.length >= 10 &&
+                      component.origin_country && component.value_percentage
+                        ? 'btn-primary btn-ai-suggestion'
+                        : 'btn-secondary btn-ai-suggestion'
+                    }
+                    style={{ width: '100%' }}
+                  >
+                    🤖 Get AI HS Code Suggestion
+                  </button>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <button
                         type="button"
                         disabled
                         className="btn-secondary btn-ai-suggestion"
-                        style={{ opacity: 0.7 }}
+                        style={{
+                          opacity: 1,
+                          flex: '1 1 auto',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          backgroundColor: '#3b82f6',
+                          color: 'white'
+                        }}
                       >
-                        🤖 Analyzing...
+                        <span style={{ position: 'relative', zIndex: 1 }}>🤖 Analyzing (2-3 sec typical)...</span>
+                        <span style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: '-100%',
+                          width: '100%',
+                          height: '100%',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          animation: 'shimmer 1.5s infinite'
+                        }}></span>
                       </button>
                       <button
                         type="button"
@@ -1214,15 +1338,17 @@ export default function ComponentOriginsStepEnhanced({
                       >
                         ✕ Cancel
                       </button>
-                      <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                        Taking longer than usual? Try simplifying the description.
-                      </span>
                     </div>
-                    )}
-                  </>
+                    <style>{`
+                      @keyframes shimmer {
+                        0% { left: -100%; }
+                        100% { left: 100%; }
+                      }
+                    `}</style>
+                  </div>
                 )}
               </div>
-            </div>
+            )}
 
             {/* AI Agent HS Code Suggestion - FULL WIDTH outside grid */}
             {agentSuggestions[index] && (
@@ -1305,6 +1431,7 @@ export default function ComponentOriginsStepEnhanced({
                 </div>
               </div>
             )}
+
           </div>
         ))}
 

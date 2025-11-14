@@ -7,27 +7,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Define progress milestones with time estimates (in milliseconds)
-// Spread evenly across full duration (up to 180s) with many granular steps at the end
+// Realistic timing: typical analysis takes 5-10 seconds
 const PROGRESS_MILESTONES = [
-  { step: 'validating', label: '🔍 Validating input data...', targetTime: 1000, percentage: 3 },
-  { step: 'classifying', label: '🏷️ Classifying product...', targetTime: 8000, percentage: 8 },
-  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 18000, percentage: 15 },
-  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 30000, percentage: 23 },
-  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 42000, percentage: 31 },
-  { step: 'generating', label: '📜 Generating certificate...', targetTime: 54000, percentage: 39 },
-
-  // Finalizing stage - many granular sub-steps so progress doesn't get stuck
-  { step: 'finalizing-components', label: '⚙️ Enriching components with tariff data...', targetTime: 66000, percentage: 45 },
-  { step: 'finalizing-validation', label: '✓ Validating regional content calculation...', targetTime: 78000, percentage: 52 },
-  { step: 'finalizing-alerts', label: '🚨 Generating tariff policy alerts...', targetTime: 90000, percentage: 59 },
-  { step: 'finalizing-analysis', label: '📈 Computing strategic opportunities...', targetTime: 102000, percentage: 66 },
-  { step: 'finalizing-certificate', label: '📄 Preparing certificate template...', targetTime: 114000, percentage: 73 },
-  { step: 'finalizing-formatting', label: '🎨 Formatting final response...', targetTime: 126000, percentage: 80 },
-  { step: 'finalizing-validation2', label: '✓ Validating response integrity...', targetTime: 138000, percentage: 86 },
-  { step: 'finalizing-serializing', label: '📦 Serializing data...', targetTime: 150000, percentage: 91 },
-  { step: 'finalizing-preparing', label: '⏳ Preparing for delivery...', targetTime: 160000, percentage: 95 },
-  { step: 'finalizing-almost', label: '⏳ Almost there...', targetTime: 168000, percentage: 97 },
-  { step: 'finalizing-wrapping', label: '⏳ Wrapping up...', targetTime: 174000, percentage: 99 }
+  { step: 'validating', label: '🔍 Validating input data...', targetTime: 200, percentage: 5 },
+  { step: 'classifying', label: '🏷️ Classifying components...', targetTime: 1000, percentage: 15 },
+  { step: 'enriching', label: '📊 Loading tariff rates...', targetTime: 2000, percentage: 30 },
+  { step: 'checking', label: '🌍 Checking USMCA qualification...', targetTime: 4000, percentage: 50 },
+  { step: 'calculating', label: '💰 Calculating tariff savings...', targetTime: 6000, percentage: 70 },
+  { step: 'finalizing', label: '📜 Finalizing analysis...', targetTime: 8000, percentage: 85 },
+  { step: 'wrapping', label: '⏳ Almost done...', targetTime: 9000, percentage: 95 }
 ];
 
 export function useProgressMonitor() {
@@ -41,7 +29,7 @@ export function useProgressMonitor() {
   });
 
   // Start monitoring progress
-  const startMonitoring = useCallback((expectedDurationMs = 30000) => {
+  const startMonitoring = useCallback((expectedDurationMs = 10000) => {
     setProgress({
       currentStep: 'processing',
       percentage: 0,

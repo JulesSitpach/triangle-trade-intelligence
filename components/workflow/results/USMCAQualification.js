@@ -526,35 +526,42 @@ export default function USMCAQualification({ results }) {
                         )}
                       </td>
 
-                      {/* Column 8: Annual Savings (in dollars from API) */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: component.annual_savings > 0 ? (isUSMCAOrigin ? '#059669' : '#2563eb') : '#6b7280' }}>
-                        {component.annual_savings > 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                            <span
-                              style={{ whiteSpace: 'nowrap', cursor: 'help', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '600' }}
-                              title={isUSMCAOrigin
-                                ? `Already saving: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${component.annual_savings.toLocaleString()}/year (using USMCA supplier)`
-                                : `Could save: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${component.annual_savings.toLocaleString()}/year (if switched to USMCA supplier)`}
-                            >
-                              {isUSMCAOrigin ? '✓ ' : '💡 '}${component.annual_savings.toLocaleString()}
-                            </span>
-                            <span style={{ fontSize: '0.65rem', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                              {isUSMCAOrigin ? 'Current' : 'Potential'}
-                            </span>
-                          </div>
-                        ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
-                            <span
-                              style={{ whiteSpace: 'nowrap', cursor: 'help', color: '#6b7280', fontWeight: '600' }}
-                              title="Component already has 0% tariff - no savings opportunity"
-                            >
-                              $0
-                            </span>
-                            <span style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                              Duty-Free
-                            </span>
-                          </div>
-                        )}
+                      {/* Column 8: Annual Savings (CURRENT for USMCA, POTENTIAL for non-USMCA) */}
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: (isUSMCAOrigin ? (component.current_annual_savings || 0) : (component.potential_annual_savings || 0)) > 0 ? (isUSMCAOrigin ? '#059669' : '#2563eb') : '#6b7280' }}>
+                        {(() => {
+                          // 🚨 CRITICAL FIX (Nov 14): Show CURRENT for USMCA components, POTENTIAL for non-USMCA
+                          const displaySavings = isUSMCAOrigin
+                            ? (component.current_annual_savings || 0)
+                            : (component.potential_annual_savings || 0);
+
+                          return displaySavings > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                              <span
+                                style={{ whiteSpace: 'nowrap', cursor: 'help', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '600' }}
+                                title={isUSMCAOrigin
+                                  ? `Already saving: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${displaySavings.toLocaleString()}/year (using USMCA supplier)`
+                                  : `Could save: $${((results.company?.trade_volume || 0) * component.value_percentage / 100).toLocaleString()} × ${(totalAppliedRate * 100).toFixed(1)}% = $${displaySavings.toLocaleString()}/year (if switched to USMCA supplier)`}
+                              >
+                                {isUSMCAOrigin ? '✓ ' : '💡 '}${displaySavings.toLocaleString()}
+                              </span>
+                              <span style={{ fontSize: '0.65rem', color: isUSMCAOrigin ? '#059669' : '#2563eb', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                {isUSMCAOrigin ? 'Current' : 'Potential'}
+                              </span>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                              <span
+                                style={{ whiteSpace: 'nowrap', cursor: 'help', color: '#6b7280', fontWeight: '600' }}
+                                title="Component already has 0% tariff - no savings opportunity"
+                              >
+                                $0
+                              </span>
+                              <span style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                Duty-Free
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
                     </tr>
 
@@ -766,6 +773,43 @@ export default function USMCAQualification({ results }) {
                                 </div>
                                 <div style={{ marginTop: '0.5rem', padding: '0.5rem', backgroundColor: '#ffffff', borderRadius: '3px', fontSize: '0.75rem', color: '#5f4800', fontStyle: 'italic' }}>
                                   ⚠️ Cost premiums, timelines, and payback periods vary by industry and product complexity. Refer to the AI-generated strategic alternatives section above for calculations specific to your business.
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Section 232 Critical Warning - Applies to ALL Countries */}
+                            {section232 > 0 && (
+                              <div style={{
+                                marginTop: '0.75rem',
+                                padding: '0.75rem',
+                                backgroundColor: '#fef2f2',
+                                borderRadius: '4px',
+                                borderLeft: '3px solid #dc2626'
+                              }}>
+                                <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#991b1b', marginBottom: '0.5rem' }}>
+                                  🚨 CRITICAL: Section 232 Applies to ALL Countries (50% Steel/Aluminum Tariff)
+                                </div>
+                                <div style={{ fontSize: '0.8125rem', color: '#7f1d1d', lineHeight: '1.5', marginBottom: '0.5rem' }}>
+                                  <strong>Your {component.description || 'component'} from {component.origin_country}</strong> is subject to <strong>{(section232 * 100).toFixed(1)}%</strong> Section 232 tariffs on steel/aluminum, costing approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section232) / 12).toFixed(0)}/month</strong>.
+                                </div>
+                                <div style={{ padding: '0.5rem', backgroundColor: '#fee2e2', borderRadius: '3px', marginBottom: '0.5rem', border: '1px solid #fca5a5' }}>
+                                  <div style={{ fontSize: '0.75rem', color: '#7f1d1d', fontWeight: '600', marginBottom: '0.25rem' }}>
+                                    ⚠️ Section 232 applies to ALL countries including USMCA members
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#7f1d1d' }}>
+                                    There is NO USMCA exemption. Mexico and Canada pay the same 50% tariff as China. Switching to USMCA suppliers does NOT eliminate Section 232.
+                                  </div>
+                                </div>
+                                <div style={{ padding: '0.5rem', backgroundColor: '#fef3c7', borderRadius: '3px', border: '1px solid #fcd34d' }}>
+                                  <div style={{ fontSize: '0.75rem', color: '#78350f', fontWeight: '600', marginBottom: '0.25rem' }}>
+                                    💡 ONLY EXEMPTION: US-Smelted Aluminum or US-Melted Steel
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#78350f', marginBottom: '0.25rem' }}>
+                                    If this component is made from <strong>aluminum exclusively smelted and cast in the United States</strong>, or <strong>steel exclusively melted and poured in the United States</strong>, it is EXEMPT from Section 232 (0% tariff).
+                                  </div>
+                                  <div style={{ fontSize: '0.75rem', color: '#78350f', fontWeight: '600', fontStyle: 'italic' }}>
+                                    ✅ ACTION REQUIRED: Verify with your supplier whether the aluminum/steel is US-smelted/melted. If yes, provide documentation to eliminate this ${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section232) / 12).toFixed(0)}/month cost.
+                                  </div>
                                 </div>
                               </div>
                             )}

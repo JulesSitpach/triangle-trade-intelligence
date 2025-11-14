@@ -669,6 +669,11 @@ export default protectedApiHandler({
     const missingFields = Object.keys(requiredFields).filter(key => {
       const value = requiredFields[key];
       // Check for missing values (null, undefined, empty string, empty array)
+      // ✅ FIX: Allow false for boolean fields (substantial_transformation)
+      // ✅ FIX: Allow null for optional fields (manufacturing_process)
+      if (key === 'substantial_transformation' || key === 'manufacturing_process') {
+        return value === undefined; // Only flag if completely missing
+      }
       if (!value) return true;
       if (Array.isArray(value) && value.length === 0) return true;
       return false;
@@ -795,40 +800,9 @@ export default protectedApiHandler({
         }
 
         try {
-          // ✅ NEW (Nov 13, 2025): Use USITC → AI fallback verification service
-          // This tries USITC first (free, 98% confidence) then falls back to AI if USITC down
-          const { verifyTariffRates } = await import('../../lib/services/tariff-verification-service.js');
-          const verificationResult = await verifyTariffRates(
-            component.hs_code,
-            component.description,
-            component.origin_country
-          );
-
-          if (verificationResult) {
-            console.log(`✅ [TARIFF-VERIFY] Got ${verificationResult.tier} rates for ${component.hs_code}: ${(verificationResult.confidence * 100).toFixed(0)}% confidence`);
-
-            enriched.push({
-              ...baseComponent,
-              mfn_rate: verificationResult.mfn_rate,
-              base_mfn_rate: verificationResult.mfn_rate,
-              section_301: 0, // Will query policy_tariffs_cache separately
-              section_232: 0, // Will query policy_tariffs_cache separately
-              usmca_rate: verificationResult.usmca_rate,
-              mfn_text_rate: `${(verificationResult.mfn_rate * 100).toFixed(1)}%`,
-              rate_source: verificationResult.tier, // 'usitc' or 'ai'
-              data_source: verificationResult.data_source,
-              stale: false,
-              last_verified: new Date().toISOString(),
-              volatility_tier: verificationResult.tier === 'usitc' ? 1 : 2,
-              volatility_reason: verificationResult.tier === 'usitc'
-                ? 'Official USITC API data (government verified)'
-                : `AI Research verification (${(verificationResult.confidence * 100).toFixed(0)}% confidence)`
-            });
-            continue; // Skip database lookup, we have verified data
-          }
-
-          // ✅ Verification failed - fall back to database lookup
-          console.log(`⚠️ [TARIFF-VERIFY] Verification failed for ${component.hs_code} - falling back to database`)
+          // ✅ DATABASE-FIRST APPROACH (Nov 14, 2025): Query our 17,545 USITC codes directly
+          // Skip USITC API (down, not needed) - we have better data from HTS CSV export
+          // Flow: Database → AI fallback (only if missing)
 
           // ✅ NEW (Nov 13, 2025): Smart HS code normalization for 10-digit AI classifications
           // AI often returns 10-digit codes (8534310000), but database uses 8-digit HTS-8 format (85343100)
@@ -1142,11 +1116,90 @@ export default protectedApiHandler({
             Math.floor((now - new Date(policyRates.verified_date)) / (1000 * 60 * 60 * 24)) :
             0;
 
+          // ✅ NEW (Nov 14, 2025): Section 232 Detection + Material Origin Exemption
+          // Section 232 Rules: Steel/aluminum/copper from ALL countries face 50% tariff
+          // ONLY exemption: Material smelted/melted in the United States
+          // USMCA membership does NOT exempt from Section 232 (Mexico/Canada still pay 50%)
+
+          // STEP 1: Check if user indicated Section 232 material via checkbox
+          // ✅ NEW (Nov 14): User manually selects via checkbox instead of auto-detection
+          const isSection232Material = component.contains_section_232_material === true;
+          console.log(`🔍 [SECTION-232-CHECK] Component "${component.description}": contains_section_232_material = ${isSection232Material}`);
+
+          // STEP 2: Get Section 232 rate from database OR use default 50% for Section 232 materials
+          let appliedSection232 = parseFloat(policyRates.section_232) || 0;
+          console.log(`🔍 [SECTION-232-RATE] policyRates.section_232: ${policyRates.section_232}, appliedSection232: ${appliedSection232}`);
+
+          if (isSection232Material && appliedSection232 === 0) {
+            // User indicated Section 232 material but database doesn't have rate - apply default 50%
+            appliedSection232 = 0.50;
+            console.log(`⚠️ [SECTION-232-DEFAULT] User indicated Section 232 material, applying default 50% tariff`);
+          }
+
+          // STEP 3: Check material_origin for exemption
+          let section232Exemption = null;
+
+          if (appliedSection232 > 0 && component.material_origin) {
+            switch (component.material_origin) {
+              case 'us':
+                // US-origin material: EXEMPT from Section 232
+                section232Exemption = {
+                  original_rate: appliedSection232,
+                  applied_rate: 0,
+                  exemption_amount: appliedSection232,
+                  reason: 'US-origin material - Section 232 exempt',
+                  material_notes: component.material_notes || null
+                };
+                appliedSection232 = 0;
+                console.log(`✅ [SECTION-232-EXEMPT] Component "${component.description}": US-origin material, exempting ${(section232Exemption.original_rate * 100).toFixed(1)}% Section 232 tariff`);
+                break;
+
+              case 'mx_ca':
+                // Mexico/Canada origin: Section 232 still applies (no USMCA exemption)
+                section232Exemption = {
+                  original_rate: appliedSection232,
+                  applied_rate: appliedSection232,
+                  exemption_amount: 0,
+                  reason: 'Mexico/Canada origin - USMCA member but Section 232 still applies',
+                  material_notes: component.material_notes || null
+                };
+                console.log(`⚠️ [SECTION-232-APPLIES] Component "${component.description}": Mexico/Canada origin, ${(appliedSection232 * 100).toFixed(1)}% Section 232 tariff applies`);
+                break;
+
+              case 'non_na':
+                // Outside North America: Full Section 232 applies
+                section232Exemption = {
+                  original_rate: appliedSection232,
+                  applied_rate: appliedSection232,
+                  exemption_amount: 0,
+                  reason: 'Non-North American origin - Section 232 applies',
+                  material_notes: component.material_notes || null
+                };
+                console.log(`⚠️ [SECTION-232-APPLIES] Component "${component.description}": Non-NA origin, ${(appliedSection232 * 100).toFixed(1)}% Section 232 tariff applies`);
+                break;
+
+              case 'unknown':
+              default:
+                // Unknown origin: Assume Section 232 applies (safe default)
+                section232Exemption = {
+                  original_rate: appliedSection232,
+                  applied_rate: appliedSection232,
+                  exemption_amount: 0,
+                  reason: 'Material origin unknown - assumed non-US',
+                  potential_savings: appliedSection232,  // Show what user could save if US-origin
+                  material_notes: component.material_notes || null
+                };
+                console.log(`⚠️ [SECTION-232-UNKNOWN] Component "${component.description}": Unknown origin, ${(appliedSection232 * 100).toFixed(1)}% Section 232 assumed to apply`);
+                break;
+            }
+          }
+
           const standardFields = {
             mfn_rate: mfnRate,
             base_mfn_rate: baseMfnRate,
             section_301: section301Rate,  // ✅ HYBRID: From policy_tariffs_cache (7-day freshness)
-            section_232: parseFloat(policyRates.section_232) || 0,  // ✅ HYBRID: From policy_tariffs_cache (30-day freshness)
+            section_232: appliedSection232,  // ✅ NEW: After applying material_origin exemption
+            section_232_exemption: section232Exemption,  // ✅ NEW: Track exemption details for display
             usmca_rate: usmcaRate,
             mfn_text_rate: rateData?.mfn_text_rate || null,  // ✅ Track "Free" vs missing data
             rate_source: rateData ? 'tariff_intelligence_master' : 'component_input',
@@ -1514,12 +1567,26 @@ export default protectedApiHandler({
       // - Total elimination = full totalRate (varies by component)
       const nearshoringPotential = !isUSMCAMember ? componentValue * totalRate : 0;
 
-      // ✅ FIX (Nov 8): Simple savings = total duties avoided if product qualifies for USMCA
-      // If product qualifies, ALL components (including China) get 0% USMCA rate
-      // Savings = (MFN + Section 301 + Section 232) - USMCA rate
-      const savingsPerYear = (mfnCost + (componentValue * (section301 + section232))) - usmcaCost;
+      // 🚨 CRITICAL FIX (Nov 14): Split savings into CURRENT (USMCA components) vs POTENTIAL (nearshoring)
+      // WRONG ASSUMPTION (Nov 8): "If product qualifies, ALL components (including China) get 0% USMCA rate"
+      // CORRECT: Only components ALREADY from USMCA countries (MX, CA, US) get preferential treatment
+      // China components are NOT USMCA-eligible - the $1.68M is POTENTIAL savings IF you nearshore
 
-      console.log('   Savings Calculation:', Math.round(savingsPerYear));
+      // CURRENT = Savings you're ALREADY getting from USMCA-member components (MX, CA, US)
+      const currentSavings = isUSMCAMember
+        ? (mfnCost + (componentValue * (section301 + section232))) - usmcaCost
+        : 0;
+
+      // POTENTIAL = Savings you COULD get if you nearshored non-USMCA components (CN, etc.)
+      const potentialSavings = !isUSMCAMember
+        ? (mfnCost + (componentValue * (section301 + section232)))  // Full elimination if nearshored
+        : 0;
+
+      // For backwards compatibility, annual_savings = current (not misleading total)
+      const savingsPerYear = currentSavings;
+
+      console.log('   Current Savings (USMCA components only):', Math.round(currentSavings));
+      console.log('   Potential Savings (if nearshored):', Math.round(potentialSavings));
 
       return {
         hs_code: comp.hs_code,
@@ -1529,7 +1596,9 @@ export default protectedApiHandler({
         annual_mfn_cost: Math.round(mfnCost),
         annual_nearshoring_potential: Math.round(nearshoringPotential),
         annual_usmca_cost: Math.round(usmcaCost),
-        annual_savings: Math.round(savingsPerYear)
+        annual_savings: Math.round(savingsPerYear),  // Current savings only (not misleading)
+        current_annual_savings: Math.round(currentSavings),  // NEW: Explicit current
+        potential_annual_savings: Math.round(potentialSavings)  // NEW: Explicit potential
       };
     });
 
@@ -1538,10 +1607,18 @@ export default protectedApiHandler({
     // ✅ FIX (Oct 29): Calculate TOTAL nearshoring potential (full rate elimination for non-USMCA components)
     const totalNearshoringPotential = componentFinancials.reduce((sum, c) => sum + c.annual_nearshoring_potential, 0);
     const totalAnnualUSMCACost = componentFinancials.reduce((sum, c) => sum + c.annual_usmca_cost, 0);
-    // ✅ FIX (Oct 27): Total savings from ALL components when product qualifies for USMCA
-    // Don't filter by is_usmca_member - if product qualifies, all components benefit
-    const totalAnnualSavings = componentFinancials
-      .reduce((sum, c) => sum + c.annual_savings, 0);
+
+    // 🚨 CRITICAL FIX (Nov 14): Split total savings into CURRENT vs POTENTIAL
+    // CURRENT = Savings you're ALREADY getting (USMCA components: MX, CA, US)
+    const totalCurrentSavings = componentFinancials
+      .reduce((sum, c) => sum + c.current_annual_savings, 0);
+
+    // POTENTIAL = Savings you COULD get (nearshoring non-USMCA components: CN, etc.)
+    const totalPotentialSavings = componentFinancials
+      .reduce((sum, c) => sum + c.potential_annual_savings, 0);
+
+    // TOTAL POTENTIAL = Current + Potential (if you nearshored everything)
+    const totalAnnualSavings = totalCurrentSavings + totalPotentialSavings;
 
     // ✅ FIX (Nov 1): Calculate weighted average MFN RATE (percentage), not total cost (dollars)
     // Each component contributes to average based on its value percentage
@@ -1553,9 +1630,23 @@ export default protectedApiHandler({
 
     const preCalculatedFinancials = {
       trade_volume: tradeVolume,
+
+      // 🚨 CRITICAL FIX (Nov 14): Split savings into CURRENT vs POTENTIAL
+      // CURRENT = Savings you're ALREADY getting from USMCA components (MX, CA, US)
+      current_annual_savings: Math.round(totalCurrentSavings),
+      current_monthly_savings: Math.round(totalCurrentSavings / 12),
+      current_savings_percentage: tradeVolume > 0 ? Math.round((totalCurrentSavings / tradeVolume) * 10000) / 100 : 0,
+
+      // POTENTIAL = Savings you COULD get if nearshoring non-USMCA components (CN, etc.)
+      potential_annual_savings: Math.round(totalPotentialSavings),
+      potential_monthly_savings: Math.round(totalPotentialSavings / 12),
+      potential_savings_percentage: tradeVolume > 0 ? Math.round((totalPotentialSavings / tradeVolume) * 10000) / 100 : 0,
+
+      // TOTAL POTENTIAL = Current + Potential (maximum possible if nearshored everything)
       annual_tariff_savings: Math.round(totalAnnualSavings),
       monthly_tariff_savings: Math.round(totalAnnualSavings / 12),
       savings_percentage: tradeVolume > 0 ? Math.round((totalAnnualSavings / tradeVolume) * 10000) / 100 : 0,
+
       tariff_cost_without_qualification: Math.round(totalAnnualMFNCost),
       weighted_average_mfn_rate: Math.round(weightedAverageMFNRate * 10) / 10,  // Round to 1 decimal: 23.4%
       // ✅ NEW: RVC material component percentage (not just 0%)
@@ -2374,9 +2465,11 @@ export default protectedApiHandler({
         description: c.description,
         mfn_rate: c.mfn_rate,
         section_301: c.section_301,
+        section_232: c.section_232,  // ✅ DEBUG (Nov 14): Verify Section 232 rates included
+        section_232_exemption: c.section_232_exemption,  // ✅ DEBUG (Nov 14): Verify exemption object included
         usmca_rate: c.usmca_rate,
         total_rate: c.total_rate,
-        annual_savings: c.annual_savings  // ✅ NEW (Oct 28): Verify savings are included
+        annual_savings: c.annual_savings
       }))
     );
 
