@@ -30,7 +30,7 @@ export default function WorkflowResults({
   const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
   const [loadingTier, setLoadingTier] = useState(true);
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [summaryElapsedSeconds, setSummaryElapsedSeconds] = useState(40);
+  const [summaryElapsedSeconds, setSummaryElapsedSeconds] = useState(50);
   const [executiveSummary, setExecutiveSummary] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   // ✅ REMOVED: showSaveConsentModal, userMadeChoice, modalChoice state (data auto-saves via API)
@@ -105,8 +105,8 @@ export default function WorkflowResults({
     let interval;
 
     if (loadingSummary) {
-      // Reset timer when loading starts (countdown from 40)
-      setSummaryElapsedSeconds(40);
+      // Reset timer when loading starts (countdown from 50)
+      setSummaryElapsedSeconds(50);
 
       // Update timer every second (count DOWN)
       interval = setInterval(() => {
