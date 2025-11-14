@@ -294,9 +294,10 @@ export default function USMCAQualification({ results }) {
                 borderRadius: '4px',
                 border: '1px solid #059669'
               }}>
-                <strong style={{ color: '#065f46' }}>💰 USMCA Eliminates ALL Tariffs</strong>
+                <strong style={{ color: '#065f46' }}>💰 Nearshoring to USMCA WOULD Eliminate ALL Tariffs</strong>
                 <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
-                  Switching to Mexico/Canada manufacturing pays 0% - eliminates base rate, Section 301, AND reciprocal tariffs. See "Annual Savings" column for financial impact.
+                  <strong>Currently:</strong> Paying {((component.base_mfn_rate || 0) * 100).toFixed(1)}% base + {((component.section_301 || 0) * 100).toFixed(1)}% Section 301 = {((component.total_rate || 0) * 100).toFixed(1)}% total<br/>
+                  <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See "Potential" in Annual Savings column.
                 </p>
               </div>
             </div>
