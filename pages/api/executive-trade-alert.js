@@ -835,7 +835,20 @@ RULES:
 - Present real trade-offs between Path A (maintain current) vs Path B (nearshore)
 - Use their HS codes, exact percentages
 - When describing CURRENT state: emphasize they're saving $${workflow.current_annual_savings?.toLocaleString()}/year NOW
-- When describing POTENTIAL: emphasize they COULD save an additional $${workflow.potential_annual_savings?.toLocaleString()}/year if nearshored`;
+- When describing POTENTIAL: emphasize they COULD save an additional $${workflow.potential_annual_savings?.toLocaleString()}/year if nearshored
+
+🚨 FORBIDDEN PHRASES - DO NOT USE THESE:
+- ❌ "delivering $${(workflow.current_annual_savings + workflow.potential_annual_savings)?.toLocaleString()} in annual tariff savings right now"
+- ❌ "Your current USMCA savings of $${(workflow.current_annual_savings + workflow.potential_annual_savings)?.toLocaleString()}"
+- ❌ "generating $${(workflow.current_annual_savings + workflow.potential_annual_savings)?.toLocaleString()} in annual tariff savings"
+- ❌ "it's delivering $${(workflow.current_annual_savings + workflow.potential_annual_savings)?.toLocaleString()}"
+- ❌ Any phrase that claims the TOTAL ($${(workflow.current_annual_savings + workflow.potential_annual_savings)?.toLocaleString()}) is being saved RIGHT NOW
+
+✅ CORRECT PHRASES - USE THESE INSTEAD:
+- ✅ "generating $${workflow.current_annual_savings?.toLocaleString()}/year in CURRENT savings from Mexican and Canadian components"
+- ✅ "CURRENTLY saving $${workflow.current_annual_savings?.toLocaleString()}/year from USMCA components"
+- ✅ "The POTENTIAL here is significant: nearshoring would unlock an additional $${workflow.potential_annual_savings?.toLocaleString()}/year"
+- ✅ "could save an additional $${workflow.potential_annual_savings?.toLocaleString()}/year if nearshored to Mexico"`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');
