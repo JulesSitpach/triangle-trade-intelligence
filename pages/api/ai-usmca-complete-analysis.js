@@ -2127,6 +2127,9 @@ export default protectedApiHandler({
         data_source: component.data_source || 'database_cache_current',
         // ✅ NEW (Oct 28): Include annual_savings for frontend display
         annual_savings: financialData.annual_savings || 0,
+        // 🚨 CRITICAL FIX (Nov 14): Include split savings for current vs potential
+        current_annual_savings: financialData.current_annual_savings || 0,
+        potential_annual_savings: financialData.potential_annual_savings || 0,
         // ✅ NEW (Nov 8): Origin-aware NULL semantics - flag unknown rates for UI warnings
         hasUnknownRate: hasUnknownRate,
         requires_verification: component.requires_verification || false,
