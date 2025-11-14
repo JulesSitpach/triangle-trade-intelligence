@@ -331,7 +331,8 @@ COMPONENTS (${components.length} total):
 ${components.map(c => {
   const pct = c.percentage || (totalVolume > 0 ? (c.annual_volume / totalVolume * 100).toFixed(1) : 0);
   const vol = VolatilityManager.getVolatilityTier(c.hs_code, c.origin_country || c.country, destination);
-  return `• ${c.component_type || c.description} (${c.origin_country || c.country}) - ${pct}% | HS: ${c.hs_code}${vol.tier <= 2 ? ` ⚠️ ${vol.reason}` : ''}`;
+  const section301 = c.section_301 ? ` | Section 301: ${(c.section_301 * 100).toFixed(1)}%` : '';
+  return `• ${c.component_type || c.description} (${c.origin_country || c.country}) - ${pct}% | HS: ${c.hs_code}${section301}${vol.tier <= 2 ? ` ⚠️ ${vol.reason}` : ''}`;
 }).join('\n')}
 
 ${alertContext}
@@ -374,6 +375,8 @@ Example: "Three streams: (1) USMCA Joint Commission schedule - Q1 2026 cumulatio
 ---
 
 RULES: Narrative prose with personality. NEVER invent numbers - use ONLY component data. Weave alerts naturally. Readable language ("works beautifully" not "current methodology allows"). Present real trade-offs. Avoid political names. Use their HS codes, exact percentages. Structure around Q1/Mid/Q3-Q4 2026.
+
+🚨 CRITICAL: When mentioning Section 301 tariffs, use the SPECIFIC rate from component data (e.g., "Section 301 tariffs of 25%"), NOT vague ranges like "15-25%". If a component has Section 301 data, cite the exact percentage.
 
 **Return ONLY markdown. NO JSON. NO code fences.**`;
 
