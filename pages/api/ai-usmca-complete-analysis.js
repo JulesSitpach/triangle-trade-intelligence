@@ -2257,6 +2257,14 @@ export default protectedApiHandler({
       // But we calculated all financial metrics correctly in preCalculatedFinancials (lines 449-462)
       // ✅ FIX (Nov 1): mfn_rate should be PERCENTAGE (23.4%), not DOLLARS ($1,118,090)
       savings: analysis.usmca?.qualified ? {
+        // 🚨 CRITICAL FIX (Nov 14): Include split savings for current vs potential
+        current_annual_savings: preCalculatedFinancials.current_annual_savings,
+        current_monthly_savings: preCalculatedFinancials.current_monthly_savings,
+        current_savings_percentage: preCalculatedFinancials.current_savings_percentage,
+        potential_annual_savings: preCalculatedFinancials.potential_annual_savings,
+        potential_monthly_savings: preCalculatedFinancials.potential_monthly_savings,
+        potential_savings_percentage: preCalculatedFinancials.potential_savings_percentage,
+        // Legacy fields (for backwards compatibility)
         annual_savings: preCalculatedFinancials.annual_tariff_savings,
         monthly_savings: preCalculatedFinancials.monthly_tariff_savings,
         savings_percentage: preCalculatedFinancials.savings_percentage,
@@ -2264,6 +2272,12 @@ export default protectedApiHandler({
         usmca_rate: 0,  // USMCA rate is 0% for qualifying products
         section_301_exposure: preCalculatedFinancials.section_301_exposure
       } : {
+        current_annual_savings: 0,
+        current_monthly_savings: 0,
+        current_savings_percentage: 0,
+        potential_annual_savings: 0,
+        potential_monthly_savings: 0,
+        potential_savings_percentage: 0,
         annual_savings: 0,
         monthly_savings: 0,
         savings_percentage: 0,
