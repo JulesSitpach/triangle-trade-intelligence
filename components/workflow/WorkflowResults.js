@@ -30,6 +30,7 @@ export default function WorkflowResults({
   const [userSubscriptionTier, setUserSubscriptionTier] = useState(null);
   const [loadingTier, setLoadingTier] = useState(true);
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [summaryElapsedSeconds, setSummaryElapsedSeconds] = useState(0);
   const [executiveSummary, setExecutiveSummary] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   // ✅ REMOVED: showSaveConsentModal, userMadeChoice, modalChoice state (data auto-saves via API)
@@ -98,6 +99,28 @@ export default function WorkflowResults({
       }
     }
   }, [hasExecutiveSummary]);
+
+  // Timer effect: Update elapsed time every second while loading summary
+  useEffect(() => {
+    let interval;
+
+    if (loadingSummary) {
+      // Reset timer when loading starts
+      setSummaryElapsedSeconds(0);
+
+      // Update timer every second
+      interval = setInterval(() => {
+        setSummaryElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    }
+
+    // Cleanup interval when loading stops or component unmounts
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [loadingSummary]);
 
   // DISABLED: Auto-modal removed - users now use manual "Save to Dashboard" button
   // useEffect(() => {
@@ -953,7 +976,7 @@ export default function WorkflowResults({
                 disabled={loadingSummary || hasExecutiveSummary}
                 title={hasExecutiveSummary ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
               >
-                {loadingSummary ? '⏳ Generating Summary...' :
+                {loadingSummary ? `⏳ Generating Summary... ${summaryElapsedSeconds}s` :
                  hasExecutiveSummary ? '✓ Executive Summary Generated (1 per workflow)' :
                  '📊 Generate Business Impact Summary (1 per workflow included)'}
               </button>
