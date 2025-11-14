@@ -7,6 +7,17 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
+// CRITICAL: Safe tariff rate display - distinguishes null (pending) from 0 (duty-free)
+const formatTariffRate = (rate) => {
+  if (rate === null || rate === undefined) {
+    return { text: 'Pending', color: '#f59e0b', title: 'Tariff verification in progress' };
+  }
+  if (rate === 0) {
+    return { text: 'Free', color: '#059669', title: 'Duty-free (0.0%)' };
+  }
+  return { text: `${(rate * 100).toFixed(1)}%`, color: '#dc2626', title: `${(rate * 100).toFixed(1)}% tariff rate` };
+};
+
 // EDUCATIONAL: Simple tooltip component for trade terminology
 const Tooltip = ({ text, children }) => {
   const [show, setShow] = useState(false);
@@ -623,15 +634,23 @@ export default function USMCAQualification({ results }) {
                                 }}>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>MFN Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#dc2626' }}>{((component.mfn_rate || 0) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: formatTariffRate(component.mfn_rate).color }} title={formatTariffRate(component.mfn_rate).title}>
+                                      {formatTariffRate(component.mfn_rate).text}
+                                    </div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>USMCA Rate</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{((component.usmca_rate || 0) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: formatTariffRate(component.usmca_rate).color }} title={formatTariffRate(component.usmca_rate).title}>
+                                      {formatTariffRate(component.usmca_rate).text}
+                                    </div>
                                   </div>
                                   <div>
                                     <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Savings</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>{(((component.mfn_rate || 0) - (component.usmca_rate || 0)) * 100).toFixed(1)}%</div>
+                                    <div style={{ fontWeight: '600', color: '#059669' }}>
+                                      {component.mfn_rate !== null && component.usmca_rate !== null
+                                        ? `${((component.mfn_rate - component.usmca_rate) * 100).toFixed(1)}%`
+                                        : 'Pending'}
+                                    </div>
                                   </div>
                                 </div>
 
@@ -645,7 +664,7 @@ export default function USMCAQualification({ results }) {
                                     borderLeft: '3px solid #f59e0b'
                                   }}>
                                     <div style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#92400e', marginBottom: '0.5rem' }}>
-                                      📊 How We Calculate {((component.mfn_rate || 0) * 100).toFixed(1)}% Total Rate:
+                                      📊 How We Calculate {formatTariffRate(component.mfn_rate).text} Total Rate:
                                     </div>
                                     <div style={{ fontSize: '0.8125rem', color: '#78350f', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                                       {component.policy_adjustments.map((adj, idx) => {

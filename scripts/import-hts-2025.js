@@ -10,6 +10,9 @@
  * 3. Verify: Check hts_official_2025 table in Supabase
  */
 
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';

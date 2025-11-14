@@ -723,9 +723,10 @@ export default function ComponentOriginsStepEnhanced({
     setComponents(newComponents);
 
     // Update main formData with HS classification and tariff rates for certificate workflow
+    // CRITICAL: Preserve null values (don't convert to 0) - null means "pending verification"
     updateFormData('classified_hs_code', suggestion.hs_code);
-    updateFormData('current_tariff_rate', suggestion.mfn_rate || 0);
-    updateFormData('usmca_tariff_rate', suggestion.usmca_rate || 0);
+    updateFormData('current_tariff_rate', suggestion.mfn_rate !== undefined ? suggestion.mfn_rate : null);
+    updateFormData('usmca_tariff_rate', suggestion.usmca_rate !== undefined ? suggestion.usmca_rate : null);
 
     // Calculate and save annual savings based on trade volume
     // Use the centralized parseTradeVolume utility for consistency across the app
@@ -740,13 +741,21 @@ export default function ComponentOriginsStepEnhanced({
       });
     }
 
-    const mfnRate = parseFloat(suggestion.mfn_rate || 0);
-    const usmcaRate = parseFloat(suggestion.usmca_rate || 0);
-    const tariffSavings = (mfnRate - usmcaRate) / 100; // Convert percentage to decimal
-    const annualSavings = (tradeVolume || 0) * tariffSavings;
+    // CRITICAL: Only calculate savings if both rates are available (not null)
+    // If either rate is pending verification, save null for savings (not 0)
+    const mfnRate = suggestion.mfn_rate;
+    const usmcaRate = suggestion.usmca_rate;
 
-    updateFormData('calculated_savings', Math.round(annualSavings));
-    updateFormData('monthly_savings', Math.round(annualSavings / 12));
+    if (mfnRate !== null && mfnRate !== undefined && usmcaRate !== null && usmcaRate !== undefined) {
+      const tariffSavings = (parseFloat(mfnRate) - parseFloat(usmcaRate)) / 100;
+      const annualSavings = (tradeVolume || 0) * tariffSavings;
+      updateFormData('calculated_savings', Math.round(annualSavings));
+      updateFormData('monthly_savings', Math.round(annualSavings / 12));
+    } else {
+      // Rates pending - don't calculate yet
+      updateFormData('calculated_savings', null);
+      updateFormData('monthly_savings', null);
+    }
 
     console.log('Updated formData with HS classification results:', {
       hs_code: suggestion.hs_code,

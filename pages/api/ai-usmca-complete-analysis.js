@@ -176,19 +176,29 @@ Return ONLY valid JSON array. No explanations.`;
     // ✅ Keep rates in DECIMAL format (0-1 range, not percentages)
     // Financial calculations expect decimals: 0.026 means 2.6%
     // DO NOT multiply by 100 - AI returns decimals, we use decimals throughout
-    const normalizedResults = results.map(result => ({
-      hs_code: result.hs_code,
-      mfn_rate: parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0,
-      base_mfn_rate: parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0,
-      section_301: parseFloat(result.section_301) || 0,
-      section_232: parseFloat(result.section_232) || 0,
-      usmca_rate: parseFloat(result.usmca_rate) || 0,
-      total_rate: parseFloat(result.total_rate) || 0,
-      // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
-      justification: result.justification || 'No justification provided',
-      confidence: result.confidence || 'low',
-      data_quality_flag: result.data_quality_flag || null
-    }));
+    // CRITICAL: Preserve null values - they indicate "pending verification" not "0% tariff"
+    const normalizedResults = results.map(result => {
+      const parsedMfn = result.mfn_rate !== undefined && result.mfn_rate !== null ? parseFloat(result.mfn_rate) : null;
+      const parsedBaseMfn = result.base_mfn_rate !== undefined && result.base_mfn_rate !== null ? parseFloat(result.base_mfn_rate) : null;
+      const parsedSection301 = result.section_301 !== undefined && result.section_301 !== null ? parseFloat(result.section_301) : null;
+      const parsedSection232 = result.section_232 !== undefined && result.section_232 !== null ? parseFloat(result.section_232) : null;
+      const parsedUsmca = result.usmca_rate !== undefined && result.usmca_rate !== null ? parseFloat(result.usmca_rate) : null;
+      const parsedTotal = result.total_rate !== undefined && result.total_rate !== null ? parseFloat(result.total_rate) : null;
+
+      return {
+        hs_code: result.hs_code,
+        mfn_rate: parsedMfn !== null ? parsedMfn : parsedBaseMfn,
+        base_mfn_rate: parsedBaseMfn !== null ? parsedBaseMfn : parsedMfn,
+        section_301: parsedSection301,
+        section_232: parsedSection232,
+        usmca_rate: parsedUsmca,
+        total_rate: parsedTotal,
+        // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
+        justification: result.justification || 'No justification provided',
+        confidence: result.confidence || 'low',
+        data_quality_flag: result.data_quality_flag || null
+      };
+    });
 
     // DEBUG: Fallback rates retrieved with AI validation
     return normalizedResults;
@@ -233,19 +243,25 @@ Return ONLY valid JSON array. No explanations.`;
 
       // ✅ Keep rates in DECIMAL format (0-1 range, not percentages)
       // Financial calculations expect decimals: 0.026 means 2.6%
-      const normalizedResults = results.map(result => ({
-        hs_code: result.hs_code,
-        mfn_rate: parseFloat(result.mfn_rate) || parseFloat(result.base_mfn_rate) || 0,
-        base_mfn_rate: parseFloat(result.base_mfn_rate) || parseFloat(result.mfn_rate) || 0,
-        section_301: parseFloat(result.section_301) || 0,
-        section_232: parseFloat(result.section_232) || 0,
-        usmca_rate: parseFloat(result.usmca_rate) || 0,
-        total_rate: parseFloat(result.total_rate) || 0,
-        // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
-        justification: result.justification || 'No justification provided',
-        confidence: result.confidence || 'low',
-        data_quality_flag: result.data_quality_flag || null
-      }));
+      // CRITICAL: Preserve null (pending verification) vs 0 (duty-free)
+      const normalizedResults = results.map(result => {
+        const parsedMfn = result.mfn_rate !== undefined && result.mfn_rate !== null ? parseFloat(result.mfn_rate) : null;
+        const parsedBaseMfn = result.base_mfn_rate !== undefined && result.base_mfn_rate !== null ? parseFloat(result.base_mfn_rate) : null;
+
+        return {
+          hs_code: result.hs_code,
+          mfn_rate: parsedMfn !== null ? parsedMfn : parsedBaseMfn,
+          base_mfn_rate: parsedBaseMfn !== null ? parsedBaseMfn : parsedMfn,
+          section_301: result.section_301 !== undefined && result.section_301 !== null ? parseFloat(result.section_301) : null,
+          section_232: result.section_232 !== undefined && result.section_232 !== null ? parseFloat(result.section_232) : null,
+          usmca_rate: result.usmca_rate !== undefined && result.usmca_rate !== null ? parseFloat(result.usmca_rate) : null,
+          total_rate: result.total_rate !== undefined && result.total_rate !== null ? parseFloat(result.total_rate) : null,
+          // ✅ Preserve AI validation data (NEW - Oct 28, 2025)
+          justification: result.justification || 'No justification provided',
+          confidence: result.confidence || 'low',
+          data_quality_flag: result.data_quality_flag || null
+        };
+      });
 
       // Anthropic Direct fallback succeeded with validation data
       return normalizedResults;
