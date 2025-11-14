@@ -82,6 +82,9 @@ export default function TradeRiskAlternatives() {
   // Portfolio Briefing state (AI-generated strategic analysis)
   const [portfolioBriefing, setPortfolioBriefing] = useState(null);
 
+  // Timer state for analysis progress indicator
+  const [analysisElapsedSeconds, setAnalysisElapsedSeconds] = useState(0);
+
   // Email notification preferences for each component (default: all checked)
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
 
@@ -153,6 +156,28 @@ export default function TradeRiskAlternatives() {
     }
   }, [userProfile?.companyName, userProfile?.componentOrigins?.length]);
   */
+
+  // Timer effect: Update elapsed time every second while loading
+  useEffect(() => {
+    let interval;
+
+    if (isLoadingPolicyAlerts) {
+      // Reset timer when loading starts
+      setAnalysisElapsedSeconds(0);
+
+      // Update timer every second
+      interval = setInterval(() => {
+        setAnalysisElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    }
+
+    // Cleanup interval when loading stops or component unmounts
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isLoadingPolicyAlerts]);
 
   // Clear old localStorage data on page load (one-time cleanup)
   useEffect(() => {
@@ -2179,7 +2204,7 @@ export default function TradeRiskAlternatives() {
                       style={briefingUsageStats.limit_reached ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
                     >
                       {isLoadingPolicyAlerts
-                        ? '⏳ Analyzing...'
+                        ? `⏳ Analyzing... ${analysisElapsedSeconds}s`
                         : briefingUsageStats.limit_reached
                         ? `🔒 Monthly Limit Reached (${briefingUsageStats.used}/${briefingUsageStats.limit})`
                         : portfolioBriefing
