@@ -787,7 +787,8 @@ ${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) -
 
 CURRENT STATUS:
 • Trade Volume: $${tradeVolume.toLocaleString()} | USMCA: ${workflow.usmca_qualified ? `✅ Qualified (RVC ${workflow.north_american_content}%)` : '❌ Not Qualified'}
-• Savings: $${workflow.current_annual_savings?.toLocaleString() || '0'}/year${chineseComponents.length > 0 ? `\n• Section 301 Burden: ${section301BurdenFormatted} (${chineseComponents.length} Chinese components = ${totalChineseValue}% of value)` : ''}
+• CURRENT Savings (from USMCA components): $${workflow.current_annual_savings?.toLocaleString() || '0'}/year
+• POTENTIAL Additional (if nearshore non-USMCA): $${workflow.potential_annual_savings?.toLocaleString() || '0'}/year${chineseComponents.length > 0 ? `\n• Section 301 Burden: ${section301BurdenFormatted} (${chineseComponents.length} Chinese components = ${totalChineseValue}% of value)` : ''}
 
 ${matchedAlerts.length > 0 ? `ACTIVE POLICY THREATS (${matchedAlerts.length}):
 ${matchedAlerts.map(a => `• [${a.severity}] ${a.title} (${a.effective_date})`).join('\n')}` : ''}
@@ -797,15 +798,17 @@ Write an expressive, narrative briefing - tell their supply chain STORY with per
 # Business Impact Summary: ${profile.company_name}
 
 ## Certification Status & Immediate Risks
-${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens ${section301BurdenFormatted} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified saving $${workflow.current_annual_savings?.toLocaleString()}/year" or "⚠️ ${section301BurdenFormatted} Section 301 burden on ${chineseComponents.length} Chinese components"`}
+${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens ${section301BurdenFormatted} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified - CURRENTLY saving $${workflow.current_annual_savings?.toLocaleString()}/year from Mexico/Canada components, with $${workflow.potential_annual_savings?.toLocaleString()}/year POTENTIAL if China components nearshored" or "⚠️ ${section301BurdenFormatted} Section 301 burden on ${chineseComponents.length} Chinese components limits current savings"`}
 
 ## Your Certification Situation
-Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts (calculate from data - don't invent!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
+Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts from CURRENT vs POTENTIAL fields (don't calculate totals yourself - use provided split!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
 
-Example: "${profile.company_name}'s ${workflow.product_description} sits at an interesting certification crossroads. ${workflow.usmca_qualified ? `USMCA qualification delivers $${workflow.current_annual_savings?.toLocaleString()}/year savings` : 'Missing USMCA qualification leaves money on the table'}, but ${chineseComponents.length > 0 ? `${chineseComponents.length} Chinese components (${totalChineseValue}% of value) create ${section301BurdenFormatted} Section 301 exposure` : 'geographic sourcing creates policy vulnerabilities'}. Current certification strategy faces pressure from recent developments."
+Example: "${profile.company_name}'s ${workflow.product_description} operates a beautifully balanced supply chain that ${workflow.usmca_qualified ? `currently achieves USMCA qualification, generating $${workflow.current_annual_savings?.toLocaleString()}/year in CURRENT savings` : 'currently misses USMCA qualification, leaving money on the table'}. ${chineseComponents.length > 0 ? `However, ${chineseComponents.length} Chinese components (${totalChineseValue}% of value) introduce ${section301BurdenFormatted} Section 301 burden that nearly offsets your USMCA benefits. The POTENTIAL here is significant: nearshoring these components to Mexico would unlock an additional $${workflow.potential_annual_savings?.toLocaleString()}/year in tariff elimination` : 'Your geographic sourcing creates policy vulnerabilities that merit attention'}. The question isn't whether USMCA is worth pursuing - it clearly is. The question is whether accepting the current Section 301 costs is a calculated business decision or an unexamined default."
+
+CRITICAL: Use $${workflow.current_annual_savings?.toLocaleString()} for CURRENT savings and $${workflow.potential_annual_savings?.toLocaleString()} for POTENTIAL savings. DO NOT add up component rates to calculate totals - use these pre-calculated fields!
 
 ## Critical Risks & Opportunities
-Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "Path A: Accept ${section301BurdenFormatted} Section 301 burden, maintain current suppliers. Path B: Nearshore to Mexico (12-18mo transition) - eliminate Section 301 but face qualification challenges for HS ${chineseComponents[0]?.hs_code}."` : 'Focus on qualification improvement vs maintaining status quo.'}
+Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "**Path A: Accept the Section 301 Burden, Optimize Within Current Structure** involves maintaining your Chinese PCB supplier while continuing to capture $${workflow.current_annual_savings?.toLocaleString()}/year CURRENT USMCA savings from Mexican/Canadian components. You keep absorbing ${section301BurdenFormatted} Section 301 costs, but avoid supply chain disruption. The risk: if Section 301 escalates, your net position deteriorates further. **Path B: Nearshore PCB Assembly to Mexico, Eliminate Section 301 Exposure** means qualifying a Mexican supplier over 12-18 months. This path offers structural advantage: moving to Mexico eliminates the ${section301BurdenFormatted} burden entirely, unlocking the full $${workflow.potential_annual_savings?.toLocaleString()}/year potential. However, transition carries qualification risk for HS ${chineseComponents[0]?.hs_code} specifications."` : 'Focus on qualification improvement vs maintaining status quo.'}
 
 ## 90-Day Action Timeline
 Write 2-3 paragraphs describing action path with specific milestones:
@@ -822,7 +825,17 @@ Write 2-3 paragraphs of professional perspective. ${matchedAlerts.length > 0 ? '
 
 **Return ONLY markdown. NO JSON. NO code fences.**
 
-RULES: Narrative prose with personality. NEVER invent numbers - use ONLY component data. Readable language ("works beautifully" not "current methodology allows"). Present real trade-offs. Use their HS codes, exact percentages.`;
+RULES:
+- Narrative prose with personality
+- NEVER invent numbers - use ONLY provided fields
+- 🚨 CRITICAL: Use $${workflow.current_annual_savings?.toLocaleString()} for CURRENT savings (what they're getting NOW from USMCA components)
+- 🚨 CRITICAL: Use $${workflow.potential_annual_savings?.toLocaleString()} for POTENTIAL savings (what they COULD get if nearshored)
+- DO NOT add up component MFN/Section 301 rates to calculate totals - the current/potential split is already calculated!
+- Readable language ("works beautifully" not "current methodology allows")
+- Present real trade-offs between Path A (maintain current) vs Path B (nearshore)
+- Use their HS codes, exact percentages
+- When describing CURRENT state: emphasize they're saving $${workflow.current_annual_savings?.toLocaleString()}/year NOW
+- When describing POTENTIAL: emphasize they COULD save an additional $${workflow.potential_annual_savings?.toLocaleString()}/year if nearshored`;
 
   try {
     console.log('🤖 Calling AI for executive advisory...');
