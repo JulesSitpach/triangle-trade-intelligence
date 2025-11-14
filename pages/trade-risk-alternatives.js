@@ -83,7 +83,7 @@ export default function TradeRiskAlternatives() {
   const [portfolioBriefing, setPortfolioBriefing] = useState(null);
 
   // Timer state for analysis progress indicator
-  const [analysisElapsedSeconds, setAnalysisElapsedSeconds] = useState(0);
+  const [analysisElapsedSeconds, setAnalysisElapsedSeconds] = useState(40);
 
   // Email notification preferences for each component (default: all checked)
   const [componentEmailNotifications, setComponentEmailNotifications] = useState({});
@@ -162,12 +162,12 @@ export default function TradeRiskAlternatives() {
     let interval;
 
     if (isLoadingPolicyAlerts) {
-      // Reset timer when loading starts
-      setAnalysisElapsedSeconds(0);
+      // Reset timer when loading starts (countdown from 40)
+      setAnalysisElapsedSeconds(40);
 
-      // Update timer every second
+      // Update timer every second (count DOWN)
       interval = setInterval(() => {
-        setAnalysisElapsedSeconds(prev => prev + 1);
+        setAnalysisElapsedSeconds(prev => Math.max(0, prev - 1));
       }, 1000);
     }
 
