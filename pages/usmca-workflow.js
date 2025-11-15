@@ -115,13 +115,13 @@ export default function USMCAWorkflow() {
           <div className="main-content">
             <div className="container-app">
               <div className="content-card" style={{ maxWidth: '600px', margin: '50px auto', padding: '40px' }}>
-                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                <div className="text-center" style={{ marginBottom: '30px' }}>
                   <div style={{ fontSize: '64px', marginBottom: '10px' }}>🔒</div>
-                  <h2 className="card-title" style={{ color: '#dc2626', marginBottom: '10px' }}>
+                  <h2 className="content-card-title text-red" style={{ marginBottom: '10px' }}>
                     Monthly Analysis Limit Reached
                   </h2>
-                  <p className="text-body" style={{ fontSize: '18px', color: '#6b7280' }}>
-                    You've used <strong>{used} of {limit}</strong> analyses this month
+                  <p className="text-body text-lg text-gray-600">
+                    You&apos;ve used <strong>{used} of {limit}</strong> analyses this month
                   </p>
                 </div>
 
@@ -131,55 +131,55 @@ export default function USMCAWorkflow() {
                     <br />
                     <strong>Usage:</strong> {used}/{limit} analyses used
                     <br />
-                    <strong>Status:</strong> <span style={{ color: '#dc2626', fontWeight: 'bold' }}>Limit Reached</span>
+                    <strong>Status:</strong> <span className="text-red font-bold">Limit Reached</span>
                   </p>
                   <p className="text-body">
                     To create more USMCA workflows, upgrade to a paid plan with higher monthly limits.
                   </p>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div className="grid-2-cols" style={{ gap: '15px', marginBottom: '20px' }}>
                   <div style={{ padding: '20px', border: '2px solid #10b981', borderRadius: '8px', backgroundColor: '#F0FDF4' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', color: '#065f46' }}>
+                    <h3 className="font-bold" style={{ fontSize: '16px', marginBottom: '10px', color: '#065f46' }}>
                       Starter
                     </h3>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '5px', color: '#047857' }}>
+                    <p className="font-bold" style={{ fontSize: '24px', marginBottom: '5px', color: '#047857' }}>
                       $99/mo
                     </p>
                     <p style={{ fontSize: '14px', color: '#047857', marginBottom: '10px' }}>
                       15 analyses/month
                     </p>
-                    <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                    <p className="text-sm text-gray-600">
                       Perfect for small importers
                     </p>
                   </div>
 
                   <div style={{ padding: '20px', border: '2px solid #3b82f6', borderRadius: '8px', backgroundColor: '#EFF6FF' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', color: '#1e40af' }}>
+                    <h3 className="font-bold" style={{ fontSize: '16px', marginBottom: '10px', color: '#1e40af' }}>
                       Professional
                     </h3>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '5px', color: '#2563eb' }}>
+                    <p className="font-bold" style={{ fontSize: '24px', marginBottom: '5px', color: '#2563eb' }}>
                       $299/mo
                     </p>
                     <p style={{ fontSize: '14px', color: '#2563eb', marginBottom: '10px' }}>
                       100 analyses/month
                     </p>
-                    <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                    <p className="text-sm text-gray-600">
                       For growing businesses
                     </p>
                   </div>
                 </div>
 
                 <div className="hero-button-group" style={{ flexDirection: 'column', gap: '10px' }}>
-                  <Link href="/pricing" className="btn-primary" style={{ width: '100%', textAlign: 'center', fontSize: '18px', padding: '15px' }}>
+                  <Link href="/pricing" className="btn-primary btn-lg text-center" style={{ width: '100%' }}>
                     🚀 Upgrade Now
                   </Link>
-                  <Link href="/dashboard" className="btn-secondary" style={{ width: '100%', textAlign: 'center' }}>
+                  <Link href="/dashboard" className="btn-secondary text-center" style={{ width: '100%' }}>
                     ← Back to Dashboard
                   </Link>
                 </div>
 
-                <p className="text-body" style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', marginTop: '20px' }}>
+                <p className="text-body text-center text-sm" style={{ color: '#9ca3af', marginTop: '20px' }}>
                   Your usage resets on the 1st of each month
                 </p>
               </div>

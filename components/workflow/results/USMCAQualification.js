@@ -23,7 +23,7 @@ const Tooltip = ({ text, children }) => {
   const [show, setShow] = useState(false);
 
   return (
-    <span style={{ position: 'relative', display: 'inline-block' }}>
+    <span className="relative" style={{ display: 'inline-block' }}>
       <span
         onMouseEnter={() => setShow(true)}
         onMouseLeave={() => setShow(false)}
@@ -32,8 +32,7 @@ const Tooltip = ({ text, children }) => {
         {children}
       </span>
       {show && (
-        <span style={{
-          position: 'absolute',
+        <span className="absolute" style={{
           bottom: '100%',
           left: '50%',
           transform: 'translateX(-50%)',
@@ -49,8 +48,7 @@ const Tooltip = ({ text, children }) => {
           lineHeight: '1.4'
         }}>
           {text}
-          <span style={{
-            position: 'absolute',
+          <span className="absolute" style={{
             top: '100%',
             left: '50%',
             transform: 'translateX(-50%)',
@@ -325,7 +323,7 @@ export default function USMCAQualification({ results }) {
                       <strong style={{ color: '#065f46' }}>💰 Nearshoring to USMCA WOULD Eliminate ALL Tariffs</strong>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
                         <strong>Currently:</strong> Paying {((baseMfn || 0) * 100).toFixed(1)}% base + {((section301 || 0) * 100).toFixed(1)}% Section 301 = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
-                        <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See "Potential" in Annual Savings column.
+                        <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See &ldquo;Potential&rdquo; in Annual Savings column.
                       </p>
                     </div>
                   </>
@@ -934,7 +932,7 @@ export default function USMCAQualification({ results }) {
 
             {/* CTA to Professional Services */}
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <Link href="/services/logistics-support" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              <Link href="/services/logistics-support" className="btn-primary" style={{ display: 'inline-block' }}>
                 🇲🇽 Get Expert Help to Qualify
               </Link>
               <p className="text-body" style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#6b7280' }}>

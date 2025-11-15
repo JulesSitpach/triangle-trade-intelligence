@@ -1021,7 +1021,7 @@ export default function WorkflowResults({
                           💰 Current Savings: ${(results.savings.current_annual_savings || 0).toLocaleString()}/year
                         </div>
                         <div style={{ fontSize: '0.95rem', color: '#374151' }}>
-                          You're saving ${(results.savings.current_monthly_savings || Math.round((results.savings.current_annual_savings || 0) / 12)).toLocaleString()} per month on USMCA components from Mexico, Canada, and US.
+                          You&apos;re saving ${(results.savings.current_monthly_savings || Math.round((results.savings.current_annual_savings || 0) / 12)).toLocaleString()} per month on USMCA components from Mexico, Canada, and US.
                         </div>
                       </div>
                     )}
@@ -1093,7 +1093,7 @@ export default function WorkflowResults({
               >
                 🔒 Monthly Limit Reached (0/0)
               </button>
-              <Link href="/subscription" className="btn-primary" style={{ textDecoration: 'none' }}>
+              <Link href="/subscription" className="btn-primary">
                 Upgrade for Executive Summaries
               </Link>
             </div>
