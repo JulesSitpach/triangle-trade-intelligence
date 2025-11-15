@@ -78,6 +78,32 @@ export default function USMCAQualification({ results }) {
   const [expandedComponents, setExpandedComponents] = useState({});
   const [showTariffExplanation, setShowTariffExplanation] = useState(false);
 
+  const handleToggleTariffExplanation = () => {
+    const wasExpanded = showTariffExplanation;
+    setShowTariffExplanation(!showTariffExplanation);
+
+    // If collapsing, scroll to next section after a brief delay
+    if (wasExpanded) {
+      setTimeout(() => {
+        // Find the button element and its parent container
+        const tariffButton = document.querySelector('button');
+        if (tariffButton) {
+          const container = tariffButton.closest('.card-content') || tariffButton.closest('div');
+          const nextSection = container?.nextElementSibling;
+          if (nextSection) {
+            const elementTop = nextSection.getBoundingClientRect().top;
+            const offset = 100;
+
+            window.scrollTo({
+              top: window.pageYOffset + elementTop - offset,
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 100);
+    }
+  };
+
   if (!results?.usmca) return null;
 
   const { qualified, rule, reason, documentation_required } = results.usmca;
@@ -160,7 +186,7 @@ export default function USMCAQualification({ results }) {
       {hasChineseComponents && (
         <div style={{ marginBottom: '1.5rem' }}>
           <button
-            onClick={() => setShowTariffExplanation(!showTariffExplanation)}
+            onClick={handleToggleTariffExplanation}
             style={{
               width: '100%',
               padding: '0.75rem 1rem',
@@ -173,14 +199,19 @@ export default function USMCAQualification({ results }) {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              gap: '0.5rem',
               transition: 'all 0.2s'
             }}
           >
-            <span>💡 Understanding China Tariff Rates</span>
-            <span style={{ fontSize: '1.25rem' }}>
-              {showTariffExplanation ? '−' : '+'}
+            <span style={{
+              display: 'inline-block',
+              transition: 'transform 0.2s',
+              transform: showTariffExplanation ? 'rotate(90deg)' : 'rotate(0deg)',
+              fontSize: '0.75rem'
+            }}>
+              ▶
             </span>
+            <span>💡 Understanding China Tariff Rates</span>
           </button>
 
           {showTariffExplanation && (

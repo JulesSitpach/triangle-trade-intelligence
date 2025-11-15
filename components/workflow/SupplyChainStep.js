@@ -223,11 +223,20 @@ export default function SupplyChainStep({ data = {}, onChange, validation = { er
               className="form-select"
             >
               <option value="">Select country...</option>
-              {countries.map(country => (
-                <option key={country.value} value={country.value}>
+              {/* USMCA countries first (Canada, Mexico, USA) */}
+              {countries.filter(country => ['CA', 'MX', 'US'].includes(country.value)).map(country => (
+                <option key={`usmca-${country.value}`} value={country.value}>
                   {getCountryFlag(country.value)} {country.label}
                 </option>
               ))}
+              {/* Other countries grouped below */}
+              <optgroup label="Other Countries">
+                {countries.filter(country => !['CA', 'MX', 'US'].includes(country.value)).map(country => (
+                  <option key={`other-${country.value}`} value={country.value}>
+                    {getCountryFlag(country.value)} {country.label}
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
 
@@ -322,11 +331,20 @@ export default function SupplyChainStep({ data = {}, onChange, validation = { er
         className="form-select"
       >
         <option value="">Select manufacturing country...</option>
-        {countries.map(country => (
-          <option key={country.value} value={country.value}>
+        {/* USMCA countries first (Canada, Mexico, USA) */}
+        {countries.filter(country => ['CA', 'MX', 'US'].includes(country.value)).map(country => (
+          <option key={`mfg-usmca-${country.value}`} value={country.value}>
             {getCountryFlag(country.value)} {country.label}
           </option>
         ))}
+        {/* Other countries grouped below */}
+        <optgroup label="Other Countries">
+          {countries.filter(country => !['CA', 'MX', 'US'].includes(country.value)).map(country => (
+            <option key={`mfg-other-${country.value}`} value={country.value}>
+              {getCountryFlag(country.value)} {country.label}
+            </option>
+          ))}
+        </optgroup>
       </select>
       
       <div className="form-help">

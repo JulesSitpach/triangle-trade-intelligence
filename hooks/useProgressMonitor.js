@@ -94,15 +94,18 @@ export function useProgressMonitor() {
     updateProgress();
   }, []);
 
-  // Mark as complete
+  // Mark as complete (with 8-second delay so users can see the 95% "Almost done..." state)
   const completeMonitoring = useCallback(() => {
-    setProgress(prev => ({
-      ...prev,
-      percentage: 100,
-      message: '✅ Analysis complete!',
-      estimatedTimeRemaining: 0,
-      isComplete: true
-    }));
+    // Wait 8 seconds before showing 100% complete
+    setTimeout(() => {
+      setProgress(prev => ({
+        ...prev,
+        percentage: 100,
+        message: '✅ Analysis complete!',
+        estimatedTimeRemaining: 0,
+        isComplete: true
+      }));
+    }, 8000); // 8 seconds to let users see "Almost done..." at 95%
   }, []);
 
   // Reset progress

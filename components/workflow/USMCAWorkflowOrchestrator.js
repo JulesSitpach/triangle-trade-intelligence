@@ -30,6 +30,7 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
   const hasLoadedResultsRef = useRef(false);
+  const workAreaRef = useRef(null); // ✅ UI ENHANCEMENT: Ref for smooth scroll to work area
 
   // Use shared auth context (eliminates redundant API call)
   const { subscriptionTier: userTier } = useSimpleAuth();
@@ -151,9 +152,28 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
     }
   }, [router.query.view_results, router.query.step, router, loadSavedWorkflow, goToStep]);
 
-  // Scroll to top when step changes
+  // ✅ UI ENHANCEMENT: Smooth scroll to work area when step changes
+  // First resets to top, pauses 1 second, then scrolls to work area
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (workAreaRef.current) {
+      // Step 1: Immediately scroll to top (instant, no animation)
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Step 2: Wait 1 second to let users see the page title and orient themselves
+      const scrollTimer = setTimeout(() => {
+        // Step 3: Smooth scroll to work area with offset
+        const elementTop = workAreaRef.current.getBoundingClientRect().top;
+        const offset = 150; // Pixels from top - keeps section title visible
+
+        window.scrollTo({
+          top: window.pageYOffset + elementTop - offset,
+          behavior: 'smooth'
+        });
+      }, 1000); // 1 second pause
+
+      // Cleanup timer if component unmounts or step changes again
+      return () => clearTimeout(scrollTimer);
+    }
   }, [currentStep]);
 
   // Enhanced certificate download handler with trust verification
@@ -536,7 +556,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       />
 
       {/* Workflow Content */}
-      <div className="form-section">
+      <div className="form-section" ref={workAreaRef}>
         {/* Step Components */}
         {currentStep === 1 && (
           <CompanyInformationStep

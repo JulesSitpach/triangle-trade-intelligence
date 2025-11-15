@@ -29,6 +29,7 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
   const [threats, setThreats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
+  const [sectionExpanded, setSectionExpanded] = useState(true); // Expanded by default (critical info)
 
   useEffect(() => {
     if (!components || components.length === 0) {
@@ -336,14 +337,50 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
     return '🟡';
   };
 
+  const handleToggleSection = () => {
+    const wasExpanded = sectionExpanded;
+    setSectionExpanded(!sectionExpanded);
+
+    // If collapsing, scroll to next section after a brief delay (let animation start)
+    if (wasExpanded) {
+      setTimeout(() => {
+        const nextSection = document.querySelector('.policy-threats-card')?.nextElementSibling;
+        if (nextSection) {
+          const elementTop = nextSection.getBoundingClientRect().top;
+          const offset = 100; // Keep some spacing from top
+
+          window.scrollTo({
+            top: window.pageYOffset + elementTop - offset,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
   return (
     <div className="policy-threats-card">
-      <div className="threats-header">
-        <h3 className="threats-title">⚠️ Tariff Policy Threats ({threats.length})</h3>
+      <div
+        className="threats-header"
+        onClick={handleToggleSection}
+        style={{ cursor: 'pointer' }}
+      >
+        <h3 className="threats-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{
+            display: 'inline-block',
+            transition: 'transform 0.2s',
+            transform: sectionExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            fontSize: '0.875rem'
+          }}>
+            ▶
+          </span>
+          ⚠️ Tariff Policy Threats ({threats.length})
+        </h3>
         <p className="threats-subtitle">Active policies affecting your volatile components</p>
       </div>
 
-      <div className="threats-list">
+      {sectionExpanded && (
+        <div className="threats-list">
         {threats.map((threat) => (
           <div
             key={threat.id}
@@ -399,7 +436,8 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       <style jsx>{`
         .policy-threats-card {

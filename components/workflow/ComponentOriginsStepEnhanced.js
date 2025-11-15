@@ -109,9 +109,13 @@ export default function ComponentOriginsStepEnhanced({
 
   // ✅ Ref for Component Breakdown section (smooth scroll after Product Overview completion)
   const componentBreakdownRef = useRef(null);
+  // ✅ UI ENHANCEMENT: Refs for AI suggestion sections (smooth scroll after HS code lookup)
+  const suggestionRefs = useRef([]);
   const [isValidating, setIsValidating] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [hasScrolledToComponents, setHasScrolledToComponents] = useState(false);
+  // ✅ UI ENHANCEMENT: Track which suggestions we've already scrolled to (prevent re-scroll)
+  const [scrolledSuggestions, setScrolledSuggestions] = useState({});
 
   // ✅ Helper function to check if Material Origin field should show
   // User manually indicates if component contains Section 232 material via checkbox
@@ -138,6 +142,35 @@ export default function ComponentOriginsStepEnhanced({
   useEffect(() => {
     updateFormData('used_components_count', usedComponentsCount);
   }, [usedComponentsCount, updateFormData]);
+
+  // ✅ UI ENHANCEMENT: Auto-scroll to AI suggestion when it appears
+  useEffect(() => {
+    // Check each component for new suggestions
+    Object.keys(agentSuggestions).forEach(indexStr => {
+      const index = parseInt(indexStr);
+      const suggestion = agentSuggestions[index];
+
+      // Only scroll if we haven't scrolled to this suggestion yet
+      if (suggestion && !scrolledSuggestions[index]) {
+        // Wait for React to render the suggestion badge
+        setTimeout(() => {
+          if (suggestionRefs.current[index]) {
+            const elementTop = suggestionRefs.current[index].getBoundingClientRect().top;
+            const offset = 120; // Keep HS Code input visible above suggestion
+
+            window.scrollTo({
+              top: window.pageYOffset + elementTop - offset,
+              behavior: 'smooth'
+            });
+
+            // Mark this suggestion as scrolled
+            setScrolledSuggestions(prev => ({ ...prev, [index]: true }));
+            console.log('✅ Scrolled to AI suggestion for component', index + 1);
+          }
+        }, 100); // Small delay for React to render
+      }
+    });
+  }, [agentSuggestions, scrolledSuggestions]);
 
   // ✅ AUTO-SCROLL: Function to scroll to Component Breakdown
   const scrollToComponentBreakdown = useCallback(() => {
@@ -612,6 +645,8 @@ export default function ComponentOriginsStepEnhanced({
           confidence: suggestion.confidence,
           alternatives: suggestion.alternative_codes?.length || 0
         });
+
+        // ✅ UI ENHANCEMENT: Scroll happens automatically via useEffect (lines 146-173)
       } else {
         console.log(`⚠️ No HS code suggestions found for component ${index + 1}`);
         alert('No HS code suggestions found. Try a more specific product description.');
@@ -686,7 +721,14 @@ export default function ComponentOriginsStepEnhanced({
       const newComponentIndex = components.length;
       const componentElement = document.querySelector(`[data-component-index="${newComponentIndex}"]`);
       if (componentElement) {
-        componentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // ✅ UI ENHANCEMENT: Manual scroll with offset to keep component title visible
+        const elementTop = componentElement.getBoundingClientRect().top;
+        const offset = 100; // Pixels from top - keeps component title visible with spacing
+
+        window.scrollTo({
+          top: window.pageYOffset + elementTop - offset,
+          behavior: 'smooth'
+        });
       }
     }, 100);
   };
@@ -1195,7 +1237,7 @@ export default function ComponentOriginsStepEnhanced({
                       type="text"
                       value={component.material_notes || ''}
                       onChange={(e) => updateComponent(index, 'material_notes', e.target.value)}
-                      placeholder="Optional notes"
+                      placeholder="Example: Aluminum smelted in Pittsburgh, PA by Alcoa - verified with supplier"
                       className="form-input"
                       style={{ fontSize: '0.875rem' }}
                     />
@@ -1218,15 +1260,30 @@ export default function ComponentOriginsStepEnhanced({
                     style={component.is_locked ? { backgroundColor: '#f3f4f6', cursor: 'not-allowed' } : {}}
                   >
                     <option value="">Select origin country...</option>
-                    {dropdownOptions.countries?.map((country, idx) => {
-                      const countryCode = typeof country === 'string' ? country : country.value || country.code;
-                      const countryName = typeof country === 'string' ? country : country.label || country.name;
+                    {/* USMCA countries first (Canada, Mexico, USA) */}
+                    {dropdownOptions.usmcaCountries?.map(country => {
+                      const countryCode = country.code || country.value;
+                      const countryName = country.label || country.name;
                       return (
-                        <option key={`origin-${countryCode}-${idx}`} value={countryCode}>
-                          {countryName}
-                        </option>
+                        <option key={`origin-usmca-${countryCode}`} value={countryCode}>{countryName}</option>
                       );
                     })}
+                    {/* Other countries grouped below */}
+                    <optgroup label="Other Countries">
+                      {dropdownOptions.countries?.filter(country => {
+                        const code = typeof country === 'string' ? country : country.code || country.value;
+                        // Filter out USMCA countries (CA, MX, US)
+                        return !['CA', 'MX', 'US'].includes(code);
+                      }).map((country, idx) => {
+                        const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                        const countryName = typeof country === 'string' ? country : country.label || country.name;
+                        return (
+                          <option key={`origin-other-${countryCode}-${idx}`} value={countryCode}>
+                            {countryName}
+                          </option>
+                        );
+                      })}
+                    </optgroup>
                   </select>
                 </div>
 
@@ -1352,7 +1409,8 @@ export default function ComponentOriginsStepEnhanced({
 
             {/* AI Agent HS Code Suggestion - FULL WIDTH outside grid */}
             {agentSuggestions[index] && (
-              <AgentSuggestionBadge
+              <div ref={el => suggestionRefs.current[index] = el}>
+                <AgentSuggestionBadge
                 suggestion={{
                   success: true,
                   data: {
@@ -1391,6 +1449,7 @@ export default function ComponentOriginsStepEnhanced({
                   setAgentSuggestions(newSuggestions);
                 }}
               />
+              </div>
             )}
 
             {/* EDUCATIONAL: Show AI classification indicator after acceptance */}
