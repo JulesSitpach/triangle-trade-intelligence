@@ -280,7 +280,9 @@ export default function TradeRiskAlternatives() {
               workflowId: workflow.id,
               companyName: profile.companyName,
               componentCount: components.length,
-              hasImpactAnalysis: !!profile.impactAnalysis
+              hasImpactAnalysis: !!profile.impactAnalysis,
+              detailedAnalysisPath: workflowData.detailed_analysis ? 'EXISTS' : 'MISSING',
+              portfolioBriefingPath: workflowData.detailed_analysis?.portfolio_briefing ? 'EXISTS' : 'MISSING'
             });
 
             setUserProfile(profile);
@@ -378,6 +380,7 @@ export default function TradeRiskAlternatives() {
 
           const profile = {
             userId: user?.id,
+            workflowId: mostRecentWorkflow.id, // ✅ Store workflow ID for Impact Analysis
             companyName: mostRecentWorkflow.company_name || workflowData.company?.company_name,
             companyCountry: mostRecentWorkflow.company_country || workflowData.company?.company_country || 'US',
             destinationCountry: mostRecentWorkflow.destination_country || workflowData.company?.destination_country || 'US',
@@ -390,7 +393,8 @@ export default function TradeRiskAlternatives() {
             qualificationStatus: mostRecentWorkflow.qualification_status || getQualificationStatus(workflowData.usmca),
             savings: mostRecentWorkflow.estimated_annual_savings || workflowData.savings?.annual_savings || 0,
             componentOrigins: components,
-            regionalContent: workflowData.usmca?.regional_content || 0
+            regionalContent: workflowData.usmca?.regional_content || 0,
+            impactAnalysis: workflowData.detailed_analysis?.portfolio_briefing || null // ✅ FIX: Load cached portfolio briefing from database
           };
 
           console.log('✅ Loaded user profile from database:', {
@@ -398,7 +402,10 @@ export default function TradeRiskAlternatives() {
             tradeVolume: profile.tradeVolume,
             hasTradeVolume: !!profile.tradeVolume,
             componentCount: components.length,
-            componentPercentages: components.map(c => `${c.component_type}: ${c.percentage}%`)
+            componentPercentages: components.map(c => `${c.component_type}: ${c.percentage}%`),
+            hasImpactAnalysis: !!profile.impactAnalysis,
+            detailedAnalysisPath: workflowData.detailed_analysis ? 'EXISTS' : 'MISSING',
+            portfolioBriefingPath: workflowData.detailed_analysis?.portfolio_briefing ? 'EXISTS' : 'MISSING'
           });
 
           // Extract rich workflow intelligence if available
@@ -415,6 +422,14 @@ export default function TradeRiskAlternatives() {
           }
 
           setUserProfile(profile);
+
+          // ✅ AUTO-DISPLAY: If Impact Analysis exists, show it immediately
+          if (profile.impactAnalysis) {
+            console.log('✅ Found cached Impact Analysis, displaying automatically');
+            setPortfolioBriefing(profile.impactAnalysis);
+            setAlertsGenerated(true);
+          }
+
           setIsLoading(false);
           return;
         } else {
@@ -947,7 +962,12 @@ export default function TradeRiskAlternatives() {
         // ✅ AUTO-SAVE: Save portfolio briefing to database automatically
         // No manual button needed - user already consented by completing workflow
         try {
-          await fetch('/api/workflow-session/update-executive-alert', {
+          console.log('💾 Saving portfolio briefing to database...', {
+            briefingLength: data.briefing?.length,
+            alertCount: data.matched_alerts?.length
+          });
+
+          const saveResponse = await fetch('/api/workflow-session/update-executive-alert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -959,7 +979,13 @@ export default function TradeRiskAlternatives() {
               }
             })
           });
-          console.log('✅ Portfolio briefing auto-saved to database');
+
+          const saveResult = await saveResponse.json();
+          if (saveResponse.ok && saveResult.success) {
+            console.log('✅ Portfolio briefing auto-saved to database successfully');
+          } else {
+            console.error('⚠️ Auto-save returned error:', saveResult);
+          }
         } catch (saveError) {
           console.error('⚠️ Auto-save failed (non-critical):', saveError);
           // Don't block UI - briefing still displays from state
