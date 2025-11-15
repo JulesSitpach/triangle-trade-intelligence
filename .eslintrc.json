@@ -2,6 +2,16 @@
   "extends": ["next/core-web-vitals"],
   "rules": {
     "@typescript-eslint/no-unused-vars": "off",
-    "import/no-anonymous-default-export": "off"
+    "import/no-anonymous-default-export": "off",
+
+    // CSS CLEANUP ENFORCEMENT (Nov 15, 2025)
+    // Currently "warn" due to 1,841 existing inline styles
+    // TODO: Change to "error" once cleanup complete (target: <100 inline styles)
+    "react/forbid-component-props": ["warn", {
+      "forbid": [{
+        "propName": "style",
+        "message": "Inline styles are forbidden. Use CSS classes from globals.css instead. See CSS_CLEANUP_BATTLE_PLAN.md"
+      }]
+    }]
   }
 }
