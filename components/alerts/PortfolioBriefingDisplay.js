@@ -63,7 +63,8 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
    * Toggle individual section and scroll to next section when collapsing
    */
   const handleToggleSection = (index, event) => {
-    const wasExpanded = expandedSections[index];
+    // Default to expanded if undefined (same logic as render)
+    const wasExpanded = expandedSections[index] !== false;
 
     setExpandedSections(prev => ({
       ...prev,
