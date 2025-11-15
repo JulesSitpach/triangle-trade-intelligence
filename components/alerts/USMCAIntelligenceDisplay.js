@@ -103,18 +103,6 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
 
   return (
     <div style={{ marginTop: '2rem' }}>
-      {/* Header */}
-      <div className="card" style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-        <div style={{ padding: '1.5rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>
-            🎯 Your USMCA Intelligence Report
-          </h2>
-          <p style={{ margin: '0.5rem 0 0 0', opacity: 0.9 }}>
-            Personalized analysis based on your workflow data
-          </p>
-        </div>
-      </div>
-
       {/* Immediate Action Items */}
       {recommendations.length > 0 && (
         <CollapsibleSection
