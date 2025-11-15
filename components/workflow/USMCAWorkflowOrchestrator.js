@@ -14,7 +14,6 @@ import workflowStorage from '../../lib/services/workflow-storage-adapter.js';
 import WorkflowProgress from './WorkflowProgress';
 import CompanyInformationStep from './CompanyInformationStep';
 import ComponentOriginsStepEnhanced from './ComponentOriginsStepEnhanced';
-import SupplyChainStep from './SupplyChainStep';
 import WorkflowResults from './WorkflowResults';
 import WorkflowLoading from './WorkflowLoading';
 import WorkflowError from './WorkflowError';
@@ -597,83 +596,6 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onSelectAlertsSubscription={handleSelectAlertsSubscription}
             onSelectCertificate={handleSelectCertificate}
           />
-        )}
-        {currentStep === 3 && workflowPath === 'certificate' && (
-          <div>
-            <SupplyChainStep
-              data={formData}
-              onChange={updateFormData}
-              validation={{ errors: [] }}
-            />
-            <div className="hero-buttons">
-              <button onClick={previousStep} className="btn-secondary">
-                ← Previous Step
-              </button>
-              <button onClick={() => nextStep()} className="btn-primary">
-                Continue to Authorization →
-              </button>
-            </div>
-          </div>
-        )}
-        {currentStep === 4 && workflowPath === 'certificate' && (
-          <div>
-            <AuthorizationStep
-              formData={formData}
-              updateFormData={updateFormData}
-              workflowData={{
-                company: {
-                  name: formData.company_name,
-                  company_name: formData.company_name,
-                  country: formData.company_country,
-                  company_country: formData.company_country,
-                  address: formData.company_address,
-                  company_address: formData.company_address,
-                  tax_id: formData.tax_id,
-                  contact_person: formData.contact_person,
-                  contact_phone: formData.contact_phone,
-                  contact_email: formData.contact_email,
-                  business_type: formData.business_type,
-                  industry_sector: formData.industry_sector,
-                  trade_volume: formData.trade_volume,
-                  destination_country: formData.destination_country,
-                  supplier_country: formData.supplier_country,
-                  manufacturing_location: formData.manufacturing_location
-                },
-                product: {
-                  hs_code: formData.classified_hs_code,
-                  description: formData.product_description
-                }
-              }}
-              certificateData={{
-                certifier_type: formData.certifier_type || 'EXPORTER',  // Pass certifier_type from Step 1
-                company_info: {
-                  exporter_name: formData.company_name,
-                  exporter_address: formData.company_address,
-                  exporter_country: formData.company_country,  // FIXED: Use company's country, not supplier country
-                  exporter_tax_id: formData.tax_id,
-                  exporter_phone: formData.contact_phone,  // FIXED: Map contact_phone to exporter_phone
-                  exporter_email: formData.contact_email,  // FIXED: Map contact_email to exporter_email
-                  importer_name: formData.importer_name,
-                  importer_address: formData.importer_address,
-                  importer_country: formData.importer_country,
-                  importer_tax_id: formData.importer_tax_id
-                },
-                product_details: {
-                  hs_code: formData.classified_hs_code,
-                  commercial_description: formData.product_description,
-                  manufacturing_location: formData.manufacturing_location
-                }
-              }}
-            />
-            <div className="hero-buttons">
-              <button onClick={previousStep} className="btn-secondary">
-                ← Previous Step
-              </button>
-              <button onClick={() => nextStep()} className="btn-primary">
-                Continue to Review & Generate →
-              </button>
-            </div>
-          </div>
         )}
 
         {currentStep === 3 && workflowPath === 'crisis-calculator' && (
