@@ -340,7 +340,7 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
       {/* AI-Generated Narrative Sections - Only show if main is expanded */}
       {mainExpanded && (
-        <div className="executive-summary-content">
+        <div style={{ padding: '2rem' }}>
           {sections.map((section, index) => {
             // Skip rendering the first section entirely if it matches the main header (avoid duplicate)
             const isDuplicateTitle = index === 0 &&
@@ -350,37 +350,51 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
             // Don't render duplicate section at all
             if (isDuplicateTitle) return null;
 
+            const isExpanded = expandedSections[index] !== false; // Default to expanded
+
             return (
-              <div key={index} className="form-section executive-section">
+              <div key={index} className="executive-section" style={{ marginBottom: '1.5rem' }}>
                 {/* Section Header with Smaller Triangle */}
-                <div
+                <h3
                   onClick={(e) => handleToggleSection(index, e)}
                   style={{
+                    fontSize: '1.25rem',
+                    fontWeight: '600',
+                    color: '#3b82f6',
+                    margin: '0 0 0.75rem 0',
                     cursor: 'pointer',
-                    marginBottom: expandedSections[index] ? '1rem' : '0'
-                  }}
-                >
-                  <h3 className="form-section-title" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: 0
+                    gap: '0.75rem',
+                    padding: '0.5rem 0',
+                    transition: 'color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#2563eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#3b82f6';
+                  }}
+                >
+                  <span style={{
+                    display: 'inline-block',
+                    transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease',
+                    fontSize: '0.875rem'
                   }}>
-                    <span style={{
-                      display: 'inline-block',
-                      transition: 'transform 0.2s',
-                      transform: expandedSections[index] ? 'rotate(90deg)' : 'rotate(0deg)',
-                      fontSize: '0.875rem'
-                    }}>
-                      ▶
-                    </span>
-                    {section.title}
-                  </h3>
-                </div>
+                    ▶
+                  </span>
+                  {section.title}
+                </h3>
 
                 {/* Section Content - Only show if expanded */}
-                {expandedSections[index] && (
-                  <div className="narrative-content">
+                {isExpanded && (
+                  <div style={{
+                    fontSize: '0.9375rem',
+                    color: '#374151',
+                    lineHeight: '1.7',
+                    paddingLeft: '2rem'
+                  }}>
                     {section.content.split('\n\n').map((paragraph, pIndex) => {
                       // Skip empty paragraphs and dividers
                       if (!paragraph.trim() || paragraph.trim() === '---') return null;
@@ -389,9 +403,11 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
                       if (paragraph.trim().startsWith('•') || paragraph.trim().startsWith('-')) {
                         const bullets = paragraph.split('\n').filter(b => b.trim());
                         return (
-                          <ul key={pIndex} className="narrative-bullets">
+                          <ul key={pIndex} style={{ marginLeft: '1.5rem', marginBottom: '0.5rem' }}>
                             {bullets.map((bullet, bIndex) => (
-                              <li key={bIndex}>{bullet.replace(/^[•\-]\s*/, '').trim()}</li>
+                              <li key={bIndex} style={{ marginBottom: '0.5rem' }}>
+                                {bullet.replace(/^[•\-]\s*/, '').trim()}
+                              </li>
                             ))}
                           </ul>
                         );
@@ -399,7 +415,7 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
                       // Regular paragraphs
                       return (
-                        <p key={pIndex} className="narrative-paragraph">
+                        <p key={pIndex} style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
                           {paragraph.trim()}
                         </p>
                       );
