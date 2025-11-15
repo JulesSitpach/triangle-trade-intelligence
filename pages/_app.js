@@ -7,6 +7,7 @@ import { AlertProvider } from '../lib/contexts/AlertContext'
 import { SimpleAuthProvider } from '../lib/contexts/SimpleAuthContext'
 import { ToastProvider } from '../components/Toast'
 import ErrorBoundary from '../components/ErrorBoundary'
+import { Analytics } from '@vercel/analytics/react'
 // import '../lib/i18n' // Initialize proper i18n system
 // import GlobalHSCodeChat from '../components/GlobalHSCodeChat'
 // import BilingualSalesChatBot from '../components/BilingualSalesChatBot'
@@ -30,6 +31,7 @@ export default function App({ Component, pageProps }) {
           </SimpleAuthProvider>
         </ToastProvider>
       </ErrorBoundary>
+      <Analytics />
     </>
   )
 }
