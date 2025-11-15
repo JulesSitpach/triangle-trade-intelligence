@@ -330,7 +330,7 @@ export default function Pricing() {
             </div>
           </div>
 
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2rem'}}>
+          <div className="pricing-cards-grid">
             {plans.map((plan, index) => (
               <div key={index} className={`content-card ${plan.popular ? 'popular-plan' : ''}`}>
                 {plan.popular && <div className="popular-badge">Most Popular</div>}
