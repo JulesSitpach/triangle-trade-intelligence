@@ -10,7 +10,6 @@ import React, { useState, useEffect } from 'react';
 export default function RealTimeMonitoringDashboard({ userProfile }) {
   const [monitoringData, setMonitoringData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showEmailSettings, setShowEmailSettings] = useState(false);
 
   useEffect(() => {
     if (userProfile?.componentOrigins) {
@@ -44,7 +43,6 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
 
       // Show error state instead of fake data
       setMonitoringData(null);
-      setCensusAlerts([]);
     } finally {
       setIsLoading(false);
     }
@@ -109,33 +107,47 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
       marginBottom: '1.5rem',
       border: '1px solid #e5e7eb'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
-              📡 Real-Time Policy Monitoring
-            </h2>
-            <span style={{
-              background: '#dc2626',
-              color: 'white',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '16px',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              letterSpacing: '0.5px',
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              boxShadow: '0 0 10px rgba(220, 38, 38, 0.5)'
-            }}>
-              🔴 LIVE
-            </span>
-          </div>
+      {/* Compact horizontal status bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 600, margin: 0, color: '#111827' }}>
+            📡 Real-Time Policy Monitoring
+          </h2>
+          <span style={{
+            background: '#dc2626',
+            color: 'white',
+            padding: '0.25rem 0.75rem',
+            borderRadius: '12px',
+            fontSize: '0.6875rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            boxShadow: '0 0 8px rgba(220, 38, 38, 0.4)'
+          }}>
+            🔴 LIVE
+          </span>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem' }}>
-            Last Update
+
+        {/* Compact inline stats */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+          <div>
+            <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}</span>
+            <span style={{ marginLeft: '0.25rem' }}>last scan</span>
           </div>
-          <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#059669' }}>
-            {monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}
+          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
+          <div>
+            <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.htsCodesMonitored || 0}</span>
+            <span style={{ marginLeft: '0.25rem' }}>HS codes</span>
+          </div>
+          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
+          <div>
+            <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.dataSourcesChecked?.length || 0}</span>
+            <span style={{ marginLeft: '0.25rem' }}>sources</span>
+          </div>
+          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
+          <div>
+            <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.alertsGenerated || 0}</span>
+            <span style={{ marginLeft: '0.25rem' }}>alerts</span>
           </div>
         </div>
       </div>
@@ -151,76 +163,6 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
           }
         }
       `}</style>
-
-      <div className="status-grid" style={{ marginTop: '1rem' }}>
-        <div className="status-card">
-          <div className="status-label">Last Scan</div>
-          <div className="status-value" style={{ color: '#059669' }}>
-            {monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}
-          </div>
-          <p className="form-help">
-            {monitoringData.lastScan ? new Date(monitoringData.lastScan).toLocaleString() : 'No scans yet'}
-          </p>
-        </div>
-
-        <div className="status-card">
-          <div className="status-label">HS Codes Monitored</div>
-          <div className="status-value">{monitoringData.htsCodesMonitored || 0}</div>
-          <p className="form-help">Your component HS codes</p>
-        </div>
-
-        <div className="status-card">
-          <div className="status-label">Data Sources</div>
-          <div className="status-value">{monitoringData.dataSourcesChecked?.length || 0}</div>
-          <p className="form-help">
-            {monitoringData.dataSourcesChecked?.length > 0
-              ? monitoringData.dataSourcesChecked.join(', ')
-              : 'Configuring sources...'}
-          </p>
-        </div>
-
-        <div className="status-card">
-          <div className="status-label">Alerts This Month</div>
-          <div className="status-value">{monitoringData.alertsGenerated || 0}</div>
-          <p className="form-help">
-            From {(monitoringData.thisMonth?.totalScans || 0).toLocaleString()} scans
-          </p>
-        </div>
-      </div>
-
-
-      {/* Compact Email Settings - Collapsible */}
-      <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e5e7eb', paddingTop: '1rem' }}>
-        <button
-          onClick={() => setShowEmailSettings(!showEmailSettings)}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            fontSize: '0.875rem',
-            color: '#3b82f6',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          📧 Email Notification Settings {showEmailSettings ? '▼' : '▶'}
-        </button>
-
-        {showEmailSettings && (
-          <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', paddingLeft: '1.5rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
-              <input type="checkbox" defaultChecked={true} style={{ marginRight: '0.5rem' }} />
-              <span>Email me when import volume changes detected</span>
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem', cursor: 'pointer' }}>
-              <input type="checkbox" defaultChecked={true} style={{ marginRight: '0.5rem' }} />
-              <span>Email me when supply concentration risks identified</span>
-            </label>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

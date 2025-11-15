@@ -109,12 +109,49 @@ export default function TradeRiskAlternatives() {
     }));
   };
 
-  // Toggle email notifications for specific component
-  const toggleComponentEmailNotification = (idx) => {
+  // Toggle email notifications for specific component (and save to database)
+  const toggleComponentEmailNotification = async (idx) => {
+    const newValue = !componentEmailNotifications[idx];
+
+    // Update local state immediately for responsive UI
     setComponentEmailNotifications(prev => ({
       ...prev,
-      [idx]: !prev[idx]
+      [idx]: newValue
     }));
+
+    // Save to database
+    try {
+      const response = await fetch('/api/user-profile/update-email-preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          userId: user?.id,
+          preferences: {
+            ...componentEmailNotifications,
+            [idx]: newValue
+          }
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to save email preferences');
+        // Revert on error
+        setComponentEmailNotifications(prev => ({
+          ...prev,
+          [idx]: !newValue
+        }));
+      } else {
+        console.log(`✅ Saved email preference for component ${idx}: ${newValue}`);
+      }
+    } catch (error) {
+      console.error('Error saving email preferences:', error);
+      // Revert on error
+      setComponentEmailNotifications(prev => ({
+        ...prev,
+        [idx]: !newValue
+      }));
+    }
   };
 
   const { user } = useSimpleAuth();
@@ -137,6 +174,13 @@ export default function TradeRiskAlternatives() {
       loadRealPolicyAlerts(userProfile);
     }
   }, [userProfile?.componentOrigins?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load email preferences from database on page load
+  useEffect(() => {
+    if (user?.id) {
+      loadEmailPreferences();
+    }
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ✅ DISABLED: Auto-load portfolio briefing on page load
   // Reason: Users found it confusing to see analysis auto-generate without clicking button
@@ -711,6 +755,39 @@ export default function TradeRiskAlternatives() {
    */
 
   /**
+   * Load email notification preferences from database
+   */
+  const loadEmailPreferences = async () => {
+    try {
+      const response = await fetch('/api/user-profile/get-email-preferences', {
+        method: 'GET',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        console.warn('Could not load email preferences, using defaults (all enabled)');
+        return;
+      }
+
+      const data = await response.json();
+      const preferences = data.email_preferences || {};
+
+      console.log('✅ Loaded email preferences from database:', preferences);
+
+      // Set component email notifications
+      setComponentEmailNotifications(preferences);
+
+      // Set market intel email preference
+      if (preferences.marketIntel !== undefined) {
+        setIncludeMarketIntelInEmail(preferences.marketIntel);
+      }
+    } catch (error) {
+      console.error('Error loading email preferences:', error);
+      // Use defaults (all enabled)
+    }
+  };
+
+  /**
    * Load saved alerts from database (fast, no AI calls)
    * NOW INCLUDES: Alert lifecycle status, historical context, recent activity
    */
@@ -1253,7 +1330,7 @@ export default function TradeRiskAlternatives() {
                       }}
                       style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                     />
-                    <span>🤖 Allow AI to choose the most relevant alerts, or select up to 3 of your own</span>
+                    <span>🤖 Allow AI to choose alerts for <strong>Portfolio Briefing report</strong>, or manually select up to 3 (HIGH/CRITICAL alerts only)</span>
                   </label>
 
                   {/* Manual Alert Selection Summary - ONLY show when AI checkbox is unchecked */}
@@ -1266,10 +1343,10 @@ export default function TradeRiskAlternatives() {
                       borderRadius: '6px'
                     }}>
                       <div style={{ marginBottom: '0.5rem', fontWeight: 600, color: '#111827', fontSize: '0.875rem' }}>
-                        📋 Select up to 3 alerts from components below
+                        📋 Select up to 3 HIGH/CRITICAL alerts for Portfolio Briefing report
                       </div>
                       <p style={{ fontSize: '0.8125rem', color: '#6b7280', margin: '0 0 0.75rem 0' }}>
-                        Expand any component and check the alerts you want to focus on. Your selections will appear here.
+                        Choose from component alerts (🔴 CRITICAL, 🟠 HIGH, or 🆕 NEW) and/or USMCA 2026 Market Intelligence. Expand components below to see selectable alerts.
                       </p>
                       {selectedAlertIds.length === 0 ? (
                         <div style={{
@@ -1558,8 +1635,15 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Component Name */}
-                        <div style={{ flex: '2', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span>{comp.component_type || comp.description || `Component ${idx + 1}`}</span>
+                        <div style={{ flex: '2', fontWeight: 600, fontSize: '0.875rem', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span title={comp.component_type || comp.description || `Component ${idx + 1}`}>
+                            {(() => {
+                              const fullName = comp.component_type || comp.description || `Component ${idx + 1}`;
+                              // Take first part before comma (e.g., "Printed circuit board assembly")
+                              const shortName = fullName.split(',')[0].trim();
+                              return shortName;
+                            })()}
+                          </span>
                           {/* Volatility Badge */}
                           {comp.volatility_tier === 1 && (
                             <span
@@ -1600,17 +1684,17 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Origin Country */}
-                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontFamily: 'monospace' }}>
+                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontSize: '0.875rem' }}>
                           {comp.origin_country || comp.country}
                         </div>
 
                         {/* HS Code */}
-                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#6b7280' }}>
+                        <div style={{ flex: '1', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
                           {comp.hs_code || '—'}
                         </div>
 
                         {/* Value Percentage */}
-                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, color: '#111827' }}>
+                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem', color: '#111827' }}>
                           {comp.percentage || comp.value_percentage}%
                         </div>
 
@@ -1622,7 +1706,7 @@ export default function TradeRiskAlternatives() {
                               color: '#dc2626',
                               padding: '0.25rem 0.75rem',
                               borderRadius: '12px',
-                              fontSize: '0.8125rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600
                             }}>
                               🚨 {componentAlerts.length} alert{componentAlerts.length !== 1 ? 's' : ''}
@@ -1633,7 +1717,7 @@ export default function TradeRiskAlternatives() {
                               color: '#059669',
                               padding: '0.25rem 0.75rem',
                               borderRadius: '12px',
-                              fontSize: '0.8125rem',
+                              fontSize: '0.875rem',
                               fontWeight: 600
                             }}>
                               ✅ No alerts
@@ -1757,6 +1841,9 @@ export default function TradeRiskAlternatives() {
                                     severity === 'medium' ? '#fef3c7' :
                                     severity === 'low' ? '#dcfce7' : '#e5e7eb';
 
+                                  // ✅ Only allow selection of HIGH/CRITICAL severity OR NEW status alerts
+                                  const isSelectableAlert = severity === 'critical' || severity === 'high' || alert.lifecycle_status === 'NEW';
+
                                   return (
                                   <div key={alertIdx} style={{
                                     background: 'white',
@@ -1767,8 +1854,8 @@ export default function TradeRiskAlternatives() {
                                     opacity: alert.lifecycle_status === 'RESOLVED' ? 0.7 : 1
                                   }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                                      {/* ✅ NEW (Nov 8): Alert selection checkbox for Portfolio Briefing */}
-                                      {!allowAISelectAlerts && (
+                                      {/* ✅ Alert selection checkbox - ONLY for HIGH/CRITICAL/NEW alerts */}
+                                      {!allowAISelectAlerts && isSelectableAlert && (
                                         <div style={{ marginRight: '0.75rem', paddingTop: '0.125rem' }}>
                                           <input
                                             type="checkbox"
@@ -1796,7 +1883,7 @@ export default function TradeRiskAlternatives() {
                                                 ? 'Selected for Portfolio Briefing'
                                                 : selectedAlertIds.length >= 3
                                                 ? 'Maximum 3 alerts already selected'
-                                                : 'Select this alert for Portfolio Briefing (max 3)'
+                                                : 'Select this alert for Portfolio Briefing (HIGH/CRITICAL only)'
                                             }
                                           />
                                         </div>
@@ -1966,22 +2053,22 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Name */}
-                        <div style={{ flex: '2', fontWeight: 600, color: '#92400e' }}>
-                          🇺🇸🇨🇦🇲🇽 USMCA 2026 Renegotiation & Market Intelligence
+                        <div style={{ flex: '2', fontWeight: 600, fontSize: '0.875rem', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          🇺🇸🇨🇦🇲🇽 USMCA 2026 Market Intelligence
                         </div>
 
                         {/* Origin */}
-                        <div style={{ flex: '1', textAlign: 'center', color: '#92400e', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontFamily: 'monospace', fontSize: '0.875rem' }}>
                           All Users
                         </div>
 
                         {/* HS Code */}
-                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#92400e' }}>
+                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#6b7280' }}>
                           —
                         </div>
 
                         {/* Value % */}
-                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, color: '#92400e' }}>
+                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem', color: '#111827' }}>
                           N/A
                         </div>
 
@@ -1992,7 +2079,7 @@ export default function TradeRiskAlternatives() {
                             color: '#92400e',
                             padding: '0.25rem 0.75rem',
                             borderRadius: '12px',
-                            fontSize: '0.8125rem',
+                            fontSize: '0.875rem',
                             fontWeight: 600,
                             border: '1px solid #f59e0b'
                           }}>
@@ -2005,13 +2092,41 @@ export default function TradeRiskAlternatives() {
                           <input
                             type="checkbox"
                             checked={includeMarketIntelInEmail}
-                            onChange={(e) => {
+                            onChange={async (e) => {
                               e.stopPropagation();
                               if (userTier === 'Trial' || userTier === 'trial') {
-                                alert('📧 Email alerts are available on paid plans. Upgrade to Starter ($29/mo) to receive email notifications.');
+                                alert('📧 Email alerts available on paid plans. Upgrade to Starter ($29/mo) to receive email notifications.');
                                 return;
                               }
-                              setIncludeMarketIntelInEmail(e.target.checked);
+
+                              const newValue = e.target.checked;
+                              setIncludeMarketIntelInEmail(newValue);
+
+                              // Save to database
+                              try {
+                                const response = await fetch('/api/user-profile/update-email-preferences', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  credentials: 'include',
+                                  body: JSON.stringify({
+                                    userId: user?.id,
+                                    preferences: {
+                                      ...componentEmailNotifications,
+                                      marketIntel: newValue
+                                    }
+                                  })
+                                });
+
+                                if (!response.ok) {
+                                  console.error('Failed to save market intel email preference');
+                                  setIncludeMarketIntelInEmail(!newValue); // Revert
+                                } else {
+                                  console.log(`✅ Saved market intel email preference: ${newValue}`);
+                                }
+                              } catch (error) {
+                                console.error('Error saving market intel email preference:', error);
+                                setIncludeMarketIntelInEmail(!newValue); // Revert
+                              }
                             }}
                             disabled={userTier === 'Trial' || userTier === 'trial'}
                             title={userTier === 'Trial' || userTier === 'trial' ? '🔒 Email alerts available on paid plans - Upgrade to enable' : 'Include market intelligence in email alerts (AI always uses these for analysis)'}

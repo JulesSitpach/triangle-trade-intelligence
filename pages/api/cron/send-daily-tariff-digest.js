@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     // 2. Get all active users with notifications enabled
     const { data: profiles, error: profilesError } = await supabase
       .from('user_profiles')
-      .select('user_id, email')
+      .select('user_id, email, email_preferences')
       .eq('email_notifications', true)
       .neq('email_notifications', false);
 
@@ -77,6 +77,15 @@ export default async function handler(req, res) {
     // 3. For each user, find affected changes and send digest
     for (const profile of profiles || []) {
       try {
+        // ✅ CHECK EMAIL PREFERENCES: Skip if all components & market intel are unchecked
+        const emailPrefs = profile.email_preferences || {};
+        const hasAnyPreferenceEnabled = Object.values(emailPrefs).some(val => val !== false);
+
+        if (!hasAnyPreferenceEnabled && Object.keys(emailPrefs).length > 0) {
+          logInfo(`⏭️ Skipping user ${profile.user_id}: All email preferences disabled`);
+          continue;
+        }
+
         // Find changes affecting this user's workflows
         const userChanges = await findUserAffectedChanges(profile.user_id, changes);
 
