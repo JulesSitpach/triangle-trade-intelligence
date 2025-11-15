@@ -15,6 +15,7 @@ import RealTimeMonitoringDashboard from '../components/alerts/RealTimeMonitoring
 import BrokerChatbot from '../components/chatbot/BrokerChatbot';
 import USMCAIntelligenceDisplay from '../components/alerts/USMCAIntelligenceDisplay';
 import ExecutiveSummaryDisplay from '../components/workflow/results/ExecutiveSummaryDisplay';
+import PortfolioBriefingDisplay from '../components/alerts/PortfolioBriefingDisplay';
 import workflowStorage from '../lib/services/workflow-storage-adapter.js';
 
 // Import configuration from centralized config file
@@ -2220,62 +2221,12 @@ export default function TradeRiskAlternatives() {
                     )}
                   </div>
 
-                  {/* Display Portfolio Briefing */}
+                  {/* Display Portfolio Briefing with Collapsible Structure */}
                   {portfolioBriefing && (
-                    <div style={{
-                      marginTop: '2rem',
-                      padding: '2rem',
-                      background: 'white',
-                      borderRadius: '12px',
-                      border: '2px solid #3b82f6',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}>
-                      {/* ✅ FIX (Nov 7): Render markdown briefing with expressive narrative formatting */}
-                      <div
-                        style={{
-                          fontSize: '0.9375rem',
-                          color: '#374151',
-                          lineHeight: '1.7'
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: typeof portfolioBriefing === 'string'
-                            ? portfolioBriefing
-                              // Convert markdown to basic HTML
-                              .replace(/^# (.*?)$/gm, '<h1 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.75rem;">$1</h1>')
-                              .replace(/^## (.*?)$/gm, '<h2 style="font-size: 1.25rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">$1</h2>')
-                              .replace(/^### (.*?)$/gm, '<h3 style="font-size: 1.125rem; font-weight: 600; color: #6b7280; margin-top: 1rem; margin-bottom: 0.5rem;">$1</h3>')
-                              .replace(/^- (.*?)$/gm, '<li style="margin-left: 1.5rem; margin-bottom: 0.5rem;">$1</li>')
-                              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                              .replace(/\n\n/g, '</p><p style="margin-top: 1rem; margin-bottom: 1rem;">')
-                              .replace(/^(?!<[hl]|<li)/gm, '<p style="margin-top: 0.5rem; margin-bottom: 0.5rem;">')
-                              .replace(/\n/g, '<br/>')
-                            : `<div style="margin-bottom: 1.5rem;">
-                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1rem; margin-bottom: 0.75rem;">
-                                  What This Means for Your Business
-                                </h4>
-                                <p style="margin: 0">${portfolioBriefing.business_overview || ''}</p>
-                              </div>
-                              <div style="margin-bottom: 1.5rem;">
-                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
-                                  Component Risk Breakdown
-                                </h4>
-                                <p style="margin: 0">${portfolioBriefing.component_analysis || ''}</p>
-                              </div>
-                              <div style="margin-bottom: 1.5rem;">
-                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
-                                  Strategic Considerations
-                                </h4>
-                                <p style="margin: 0">${portfolioBriefing.strategic_trade_offs || ''}</p>
-                              </div>
-                              <div>
-                                <h4 style="font-size: 1.125rem; font-weight: 600; color: #3b82f6; margin-top: 1.5rem; margin-bottom: 0.75rem;">
-                                  What We're Monitoring for You
-                                </h4>
-                                <p style="margin: 0">${portfolioBriefing.monitoring_plan || ''}</p>
-                              </div>`
-                        }}
-                      />
-                    </div>
+                    <PortfolioBriefingDisplay
+                      briefingContent={portfolioBriefing}
+                      userTier={userTier}
+                    />
                   )}
                 </>
               )}
@@ -2285,7 +2236,7 @@ export default function TradeRiskAlternatives() {
 
         {/* Next Steps - ALWAYS show after analysis runs (even if 0 alerts) */}
         {alertsGenerated && (
-          <div className="form-section">
+          <div className="form-section" style={{ marginTop: '2rem' }}>
             <h2 className="form-section-title">Next Steps</h2>
             <p className="text-body" style={{ marginBottom: '1rem' }}>
               ✅ Analysis complete and automatically saved to your dashboard. Access from any device or download as PDF.
