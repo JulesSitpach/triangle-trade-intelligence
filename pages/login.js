@@ -118,7 +118,7 @@ export default function Login() {
 
               <div className="form-group">
                 <label htmlFor="password" className="form-label">Password</label>
-                <div className="relative">
+                <div className="input-wrapper">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -128,13 +128,12 @@ export default function Login() {
                     required
                     autoComplete="current-password"
                     className="form-input"
-                    style={{paddingRight: '3rem'}}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="btn-secondary"
-                    style={{position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.25rem'}}
+                    className="input-toggle-btn"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
