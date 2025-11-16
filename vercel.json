@@ -4,6 +4,9 @@
   "functions": {
     "pages/api/cron/rss-polling.js": {
       "maxDuration": 60
+    },
+    "pages/api/cron/apply-policy-tariff-changes.js": {
+      "maxDuration": 60
     }
   },
   "env": {
@@ -36,6 +39,10 @@
     {
       "path": "/api/cron/sync-mfn-rates",
       "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/apply-policy-tariff-changes",
+      "schedule": "0 2 * * 0"
     }
   ]
 }
