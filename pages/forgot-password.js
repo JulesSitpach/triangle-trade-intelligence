@@ -44,12 +44,12 @@ export default function ForgotPassword() {
 
       <TriangleLayout>
         <div className="main-content">
-          <div className="container-app">
-            <div className="content-card" style={{ maxWidth: '500px', margin: '50px auto' }}>
+          <div className="container-app" style={{maxWidth: '500px'}}>
+            <div className="content-card">
               {!submitted ? (
                 <>
                   <h1 className="card-title">Reset Your Password</h1>
-                  <p className="text-body" style={{ marginBottom: '30px' }}>
+                  <p className="text-body">
                     Enter your email address and we'll send you a link to reset your password.
                   </p>
 
@@ -68,14 +68,8 @@ export default function ForgotPassword() {
                     </div>
 
                     {error && (
-                      <div style={{
-                        padding: '12px',
-                        backgroundColor: '#FEE2E2',
-                        border: '1px solid #FCA5A5',
-                        borderRadius: '6px',
-                        marginBottom: '20px'
-                      }}>
-                        <p style={{ color: '#DC2626', margin: 0 }}>{error}</p>
+                      <div className="status-error">
+                        {error}
                       </div>
                     )}
 
@@ -83,13 +77,12 @@ export default function ForgotPassword() {
                       type="submit"
                       className="btn-primary"
                       disabled={loading}
-                      style={{ width: '100%', marginBottom: '20px' }}
                     >
                       {loading ? 'Sending...' : 'Send Reset Link'}
                     </button>
 
-                    <div style={{ textAlign: 'center' }}>
-                      <Link href="/login" style={{ color: '#2563EB', textDecoration: 'none' }}>
+                    <div className="text-center">
+                      <Link href="/login" className="content-card-link">
                         ← Back to Login
                       </Link>
                     </div>
@@ -97,21 +90,21 @@ export default function ForgotPassword() {
                 </>
               ) : (
                 <>
-                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '10px' }}>✉️</div>
+                  <div className="text-center">
+                    <div className="badge badge-primary">✉️</div>
                     <h1 className="card-title">Check Your Email</h1>
                   </div>
 
-                  <p className="text-body" style={{ marginBottom: '20px' }}>
+                  <p className="text-body">
                     We've sent a password reset link to <strong>{email}</strong>
                   </p>
 
-                  <p className="text-body" style={{ marginBottom: '30px' }}>
+                  <p className="text-body">
                     Click the link in the email to reset your password. If you don't see the email,
                     check your spam folder.
                   </p>
 
-                  <div style={{ textAlign: 'center' }}>
+                  <div className="text-center">
                     <Link href="/login" className="btn-primary">
                       Return to Login
                     </Link>

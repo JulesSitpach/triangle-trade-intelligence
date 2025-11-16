@@ -159,7 +159,7 @@ export default function USMCAIntelligenceDisplay({ workflowIntelligence }) {
               <h4 style={{ margin: '0 0 0.75rem 0', color: '#dc2626' }}>🔥 Immediate Actions (Next 4 Weeks)</h4>
               <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
                 {compliance_roadmap.immediate_actions.map((action, idx) => (
-                  <li key={idx} style={{ marginBottom: '0.5rem' }}>{action}</li>
+                  <li key={idx} className="mb-2">{action}</li>
                 ))}
               </ul>
             </div>

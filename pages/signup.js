@@ -109,20 +109,20 @@ export default function Signup() {
 
       {/* Clean Centered SaaS Signup - Matching Login Style */}
       <div className="main-content">
-        <div className="container-app">
-          <div className="content-card" style={{maxWidth: '400px', margin: '0 auto'}}>
+        <div className="container-app" style={{maxWidth: '400px'}}>
+          <div className="content-card">
             {/* Logo & Header */}
-            <div style={{textAlign: 'center', marginBottom: '2rem'}}>
-              <Link href="/" style={{display: 'inline-block', marginBottom: '1.5rem'}}>
+            <div className="text-center">
+              <Link href="/" className="nav-logo-link">
                 <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 style={{fontSize: '1.75rem', fontWeight: '600', margin: '0 0 0.5rem 0', color: '#111'}}>
+              <h1 className="section-header-title">
                 {plan === 'starter' && 'Create Your Account'}
                 {plan === 'professional' && 'Create Your Account'}
                 {plan === 'premium' && 'Create Your Account'}
                 {(!plan || plan === 'trial') && 'Start Your Free Trial'}
               </h1>
-              <p style={{fontSize: '0.9375rem', color: '#666', margin: '0'}}>
+              <p className="section-header-subtitle">
                 {plan === 'starter' && 'Subscribe to Starter plan after signup'}
                 {plan === 'professional' && 'Subscribe to Professional plan after signup'}
                 {plan === 'premium' && 'Subscribe to Premium plan after signup'}
@@ -239,7 +239,6 @@ export default function Signup() {
                   <input
                     type="checkbox"
                     required
-                    style={{marginRight: '0.5rem'}}
                   />
                   <span className="text-body">
                     I agree to the <Link href="/terms-of-service" target="_blank" className="nav-link">Terms of Service</Link> and <Link href="/privacy-policy" target="_blank" className="nav-link">Privacy Policy</Link>, including automatic storage of workflow data for alerts and services.
@@ -262,8 +261,8 @@ export default function Signup() {
             </form>
 
             {/* Simple Footer Text - No Boxes */}
-            <div style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee', textAlign: 'center'}}>
-              <p className="text-body" style={{fontSize: '0.875rem', color: '#666', margin: '0'}}>
+            <div className="text-center" style={{marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #eee'}}>
+              <p className="form-help">
                 {(!plan || plan === 'trial') && 'Free trial includes 1 analysis • No credit card required'}
                 {plan === 'starter' && 'After signup, complete payment via Stripe'}
                 {plan === 'professional' && 'After signup, complete payment via Stripe'}

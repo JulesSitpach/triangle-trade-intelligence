@@ -78,6 +78,7 @@ export default function SupplyChainStep({ data = {}, onChange, validation = { er
       regional_value_content: calculateRegionalContent()
     });
   }, [componentOrigins, manufacturingLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Auto-calculate qualification when supply chain changes
@@ -85,6 +86,7 @@ export default function SupplyChainStep({ data = {}, onChange, validation = { er
       calculateUSMCAQualification();
     }
   }, [componentOrigins, manufacturingLocation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
 
   const loadCountries = async () => {
     try {

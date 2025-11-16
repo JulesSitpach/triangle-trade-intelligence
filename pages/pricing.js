@@ -228,9 +228,10 @@ export default function Pricing() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/how-it-works" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>How It Works</Link>
+            <Link href="/certificate-of-origin" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Certificate</Link>
+            <Link href="/ongoing-alerts" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Alerts</Link>
             <Link href="/pricing" className="nav-menu-link active" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-            <Link href="/pricing#pricing" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
+            <Link href="/pricing#pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Get Started</Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
           </div>
         </div>
@@ -368,7 +369,6 @@ export default function Pricing() {
                   <button
                     disabled
                     className="content-card-link btn-secondary"
-                    style={{cursor: 'not-allowed', opacity: 0.6}}
                   >
                     Current Plan
                   </button>
@@ -385,18 +385,9 @@ export default function Pricing() {
 
                 {/* Commitment Notice */}
                 {plan.commitment && (
-                  <div style={{
-                    marginTop: '1rem',
-                    padding: '0.75rem',
-                    backgroundColor: '#fef3c7',
-                    border: '1px solid #fcd34d',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    color: '#78350f',
-                    textAlign: 'center'
-                  }}>
+                  <div className="alert-warning text-center">
                     <strong>ℹ️ {plan.commitment}</strong>
-                    <p style={{marginTop: '0.5rem', marginBottom: 0, fontSize: '0.8rem'}}>
+                    <p className="form-help">
                       Cannot downgrade during lock period. Ensures stable compliance workflow.
                     </p>
                   </div>

@@ -1378,7 +1378,7 @@ export default function TradeRiskAlternatives() {
                                 <div style={{ fontWeight: 600, color: '#111827', marginBottom: '0.25rem' }}>
                                   {alert.title}
                                 </div>
-                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                                <div className="text-gray-600" style={{ fontSize: '0.75rem' }}>
                                   {alert.severity_level && (
                                     <span style={{
                                       background: alert.severity_level === 'critical' ? '#fee2e2' : alert.severity_level === 'high' ? '#fef3c7' : '#dbeafe',
@@ -1436,22 +1436,22 @@ export default function TradeRiskAlternatives() {
                   gap: '1rem'
                 }}>
                   <div style={{ width: '1.25rem' }}></div> {/* Spacer for expand icon */}
-                  <div style={{ flex: '2', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="font-bold text-sm text-gray-600" style={{ flex: '2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Component
                   </div>
-                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="text-center font-bold text-sm text-gray-600" style={{ flex: '1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Origin
                   </div>
-                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="text-center font-bold text-sm text-gray-600" style={{ flex: '1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     HS Code
                   </div>
-                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="text-center font-bold text-sm text-gray-600" style={{ flex: '1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Value %
                   </div>
-                  <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="text-center font-bold text-sm text-gray-600" style={{ flex: '1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Alerts
                   </div>
-                  <div style={{ flex: '0.75', textAlign: 'center', fontWeight: 600, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div className="text-center font-bold text-sm text-gray-600" style={{ flex: '0.75', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Email
                   </div>
                 </div>
@@ -1635,7 +1635,7 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Component Name */}
-                        <div style={{ flex: '2', fontWeight: 600, fontSize: '0.875rem', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="font-bold text-sm" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span title={comp.component_type || comp.description || `Component ${idx + 1}`}>
                             {(() => {
                               const fullName = comp.component_type || comp.description || `Component ${idx + 1}`;
@@ -1684,7 +1684,7 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Origin Country */}
-                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontSize: '0.875rem' }}>
+                        <div className="text-center text-sm text-gray-600" style={{ flex: '1' }}>
                           {comp.origin_country || comp.country}
                         </div>
 
@@ -1694,7 +1694,7 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Value Percentage */}
-                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem', color: '#111827' }}>
+                        <div className="text-center font-bold text-sm" style={{ flex: '1', color: '#111827' }}>
                           {comp.percentage || comp.value_percentage}%
                         </div>
 
@@ -2053,7 +2053,7 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Name */}
-                        <div style={{ flex: '2', fontWeight: 600, fontSize: '0.875rem', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="font-bold text-sm" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           🇺🇸🇨🇦🇲🇽 USMCA 2026 Market Intelligence
                         </div>
 
@@ -2068,7 +2068,7 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Value % */}
-                        <div style={{ flex: '1', textAlign: 'center', fontWeight: 600, fontSize: '0.875rem', color: '#111827' }}>
+                        <div className="text-center font-bold text-sm" style={{ flex: '1', color: '#111827' }}>
                           N/A
                         </div>
 
@@ -2356,7 +2356,7 @@ export default function TradeRiskAlternatives() {
 
                     {/* Show upgrade CTA when limit reached */}
                     {briefingUsageStats.limit_reached && (
-                      <Link href="/subscription" className="btn-primary" style={{ textDecoration: 'none' }}>
+                      <Link href="/subscription" className="btn-primary">
                         Upgrade for More Briefings
                       </Link>
                     )}

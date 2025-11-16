@@ -152,7 +152,7 @@ export default function PersonalizedPolicyAlert({ alert, userProfile }) {
             </div>
             <ol style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
               {personalizedAnalysis.action_items.map((action, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                <li key={idx} className="mb-2">
                   {action}
                 </li>
               ))}

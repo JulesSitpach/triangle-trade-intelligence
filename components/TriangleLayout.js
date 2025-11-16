@@ -116,13 +116,14 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                   {/* User Menu */}
                   <div className="admin-dropdown">
                     <button
-                      className="nav-cta-button"
+                      className="btn-primary"
                       onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     >
                       👤 {user?.user_metadata?.company_name || user?.email?.split('@')[0] || 'User'}
                       <span className="badge badge-info" style={{marginLeft: '8px'}}>
                         {user?.subscription_tier || 'Trial'}
                       </span>
+                      <span style={{marginLeft: '8px'}}>▼</span>
                     </button>
                     {userDropdownOpen && (
                       <div className="admin-dropdown-menu">
@@ -142,7 +143,7 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
               ) : (
                 // Signed out navigation
                 <>
-                  <Link href="/login" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+                  <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
                     Sign In
                   </Link>
                   <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>

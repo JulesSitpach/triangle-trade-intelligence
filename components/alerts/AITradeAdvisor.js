@@ -353,7 +353,7 @@ function PremiumAdvisor({ insights }) {
           📊 Strategic Position Analysis
         </h3>
 
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className="mb-6">
           <h4 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.5rem', color: '#374151' }}>
             Competitive Standing
           </h4>
@@ -398,7 +398,7 @@ function PremiumAdvisor({ insights }) {
           🎯 Strategic Action Plan
         </h3>
 
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className="mb-6">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{
               background: '#dc2626',
@@ -420,7 +420,7 @@ function PremiumAdvisor({ insights }) {
           </p>
         </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className="mb-6">
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.75rem' }}>
             <span style={{
               background: '#f59e0b',

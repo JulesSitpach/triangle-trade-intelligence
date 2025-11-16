@@ -69,15 +69,15 @@ export default function Support() {
 
       <TriangleLayout>
         <div className="main-content">
-          <div className="container-app">
-            <div className="content-card" style={{ maxWidth: '800px', margin: '50px auto' }}>
+          <div className="container-app" style={{maxWidth: '800px'}}>
+            <div className="content-card">
               <h1 className="card-title">Support & Help</h1>
 
               {!submitted ? (
                 <>
-                  <div style={{ marginBottom: '40px' }}>
+                  <div className="element-spacing">
                     <h2 className="content-card-title">📧 Contact Us</h2>
-                    <p className="text-body" style={{ marginBottom: '20px' }}>
+                    <p className="text-body">
                       Fill out the form below and we'll get back to you within 24 hours during business days.
                     </p>
 
@@ -122,7 +122,7 @@ export default function Support() {
                           <option value="subscription">Subscription/Billing</option>
                           <option value="services">Professional Services</option>
                         </select>
-                        <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '5px' }}>
+                        <p className="form-help">
                           This helps us route your message to the right team
                         </p>
                       </div>
@@ -150,7 +150,6 @@ export default function Support() {
                           required
                           rows="6"
                           placeholder="Please provide details about your question or issue..."
-                          style={{ minHeight: '150px' }}
                         />
                       </div>
 
@@ -158,16 +157,15 @@ export default function Support() {
                         type="submit"
                         className="btn-primary"
                         disabled={loading}
-                        style={{ width: '100%' }}
                       >
                         {loading ? 'Sending...' : 'Send Message'}
                       </button>
 
-                      <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '10px', textAlign: 'center' }}>
+                      <p className="form-help text-center">
                         Or email us directly at{' '}
                         <a
                           href="mailto:triangleintel@gmail.com?subject=[SUPPORT] General Inquiry"
-                          style={{ color: '#2563EB' }}
+                          className="content-card-link"
                         >
                           triangleintel@gmail.com
                         </a>
@@ -176,22 +174,15 @@ export default function Support() {
                   </div>
                 </>
               ) : (
-                <div style={{
-                  padding: '40px',
-                  textAlign: 'center',
-                  backgroundColor: '#EFF6FF',
-                  border: '1px solid #BFDBFE',
-                  borderRadius: '8px',
-                  marginBottom: '40px'
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>✅</div>
-                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', color: '#1E40AF' }}>
+                <div className="alert-info text-center">
+                  <div className="badge badge-success">✅</div>
+                  <h2 className="content-card-title">
                     Message Sent!
                   </h2>
-                  <p className="text-body" style={{ marginBottom: '15px' }}>
+                  <p className="text-body">
                     Your message has been sent to our support team at triangleintel@gmail.com
                   </p>
-                  <p className="text-body" style={{ marginBottom: '20px' }}>
+                  <p className="text-body">
                     We'll get back to you within 24 hours during business days.
                   </p>
                   <button
@@ -203,31 +194,31 @@ export default function Support() {
                 </div>
               )}
 
-              <div style={{ marginBottom: '40px' }}>
+              <div className="element-spacing">
                 <h2 className="content-card-title">🔧 Common Issues</h2>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <div className="element-spacing">
+                  <h3 className="form-section-title">
                     Can't log in?
                   </h3>
                   <p className="text-body">
-                    Try the <Link href="/forgot-password" style={{ color: '#2563EB' }}>password reset</Link> page.
+                    Try the <Link href="/forgot-password" className="content-card-link">password reset</Link> page.
                     If issues persist, contact us at triangleintel@gmail.com
                   </p>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <div className="element-spacing">
+                  <h3 className="form-section-title">
                     Subscription or billing questions?
                   </h3>
                   <p className="text-body">
-                    Visit your <Link href="/dashboard" style={{ color: '#2563EB' }}>dashboard</Link> to manage
+                    Visit your <Link href="/dashboard" className="content-card-link">dashboard</Link> to manage
                     your subscription, or email us for billing assistance.
                   </p>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <div className="element-spacing">
+                  <h3 className="form-section-title">
                     Need help with USMCA qualification?
                   </h3>
                   <p className="text-body">
@@ -237,38 +228,33 @@ export default function Support() {
                 </div>
               </div>
 
-              <div style={{ marginBottom: '40px' }}>
+              <div className="element-spacing">
                 <h2 className="content-card-title">📚 Resources</h2>
-                <ul style={{ paddingLeft: '20px' }}>
-                  <li className="text-body" style={{ marginBottom: '10px' }}>
-                    <Link href="/usmca-workflow" style={{ color: '#2563EB' }}>Start a new USMCA analysis</Link>
+                <ul className="bullet-list">
+                  <li className="text-body">
+                    <Link href="/usmca-workflow" className="content-card-link">Start a new USMCA analysis</Link>
                   </li>
-                  <li className="text-body" style={{ marginBottom: '10px' }}>
-                    <Link href="/pricing" style={{ color: '#2563EB' }}>View subscription plans</Link>
+                  <li className="text-body">
+                    <Link href="/pricing" className="content-card-link">View subscription plans</Link>
                   </li>
-                  <li className="text-body" style={{ marginBottom: '10px' }}>
-                    <Link href="/dashboard" style={{ color: '#2563EB' }}>Access your dashboard</Link>
+                  <li className="text-body">
+                    <Link href="/dashboard" className="content-card-link">Access your dashboard</Link>
                   </li>
                 </ul>
               </div>
 
-              <div style={{
-                padding: '20px',
-                backgroundColor: '#EFF6FF',
-                border: '1px solid #BFDBFE',
-                borderRadius: '8px'
-              }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px', color: '#1E40AF' }}>
+              <div className="alert-info">
+                <h3 className="form-section-title">
                   💡 Tip: User Responsibility
                 </h3>
-                <p className="text-body" style={{ margin: 0 }}>
+                <p className="text-body">
                   Triangle provides tools to help you analyze USMCA compliance, but you are responsible
                   for verifying the accuracy of all data submitted. Always review your certificates
                   before using them for customs filings.
                 </p>
               </div>
 
-              <div style={{ marginTop: '40px', textAlign: 'center' }}>
+              <div className="element-spacing text-center">
                 <Link href="/" className="btn-secondary">
                   ← Back to Home
                 </Link>

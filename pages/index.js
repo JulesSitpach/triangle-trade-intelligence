@@ -94,13 +94,16 @@ export default function HomePage() {
           </button>
           
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/how-it-works" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              How It Works
+            <Link href="/certificate-of-origin" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+              Certificate
+            </Link>
+            <Link href="/ongoing-alerts" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+              Alerts
             </Link>
             <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
-            <Link href="/signup" className="nav-cta-button" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
               Get Started
             </Link>
             <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
@@ -145,7 +148,7 @@ export default function HomePage() {
             <span className="hero-yellow-highlight">But Don&apos;t Know It</span>
           </h1>
 
-          <p className="hero-description-text" style={{marginTop: '2rem'}}>
+          <p className="hero-description-text homepage-margin-top-2">
             Are you paying tariffs when you could qualify for duty-free status?
           </p>
 
@@ -162,93 +165,61 @@ export default function HomePage() {
       </section>
 
       {/* You're Not Alone */}
-      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
+      <section className="main-content homepage-section-gray">
+        <div className="container-app homepage-container-narrow">
+          <div className="section-header homepage-section-header-centered">
             <h2 className="section-header-title">You&apos;re Not Alone</h2>
-            <p style={{fontSize: '1.25rem', color: '#4b5563', maxWidth: '800px', margin: '2rem auto 0', lineHeight: '1.7'}}>
+            <p className="homepage-subtitle">
               You&apos;re managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:
             </p>
           </div>
 
           {/* 2x2 Grid of Pain Points */}
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3.5rem'}}>
+          <div className="grid-2-cols">
             {/* Card 1: Tariff Policies */}
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #dc2626',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 Tariff Policies Change Every Week
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 Section 301, Section 232, USMCA updates—impossible to track alone
               </p>
             </div>
 
             {/* Card 2: Broker Costs */}
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #dc2626',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 Brokers Charge $500 Per Certificate
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 And you need a new one every time your supply chain changes
               </p>
             </div>
 
             {/* Card 3: No Time */}
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #dc2626',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 No Time to Research USMCA Rules
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 RVC calculations, origin rules, preference criteria—it&apos;s a second job
               </p>
             </div>
 
             {/* Card 4: Suspect Overpaying */}
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #dc2626',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 You Suspect You&apos;re Overpaying
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 But you don&apos;t have a trade team to verify if you qualify
               </p>
             </div>
           </div>
 
           {/* Empathy Statement - Dark Blue Box */}
-          <div style={{
-            background: '#1e3a8a',
-            color: '#fff',
-            padding: '3rem',
-            borderRadius: '8px',
-            textAlign: 'center',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}>
-            <p style={{fontSize: '1.25rem', lineHeight: '1.8', marginBottom: 0, fontWeight: 500}}>
+          <div className="homepage-empathy-box">
+            <p>
               You&apos;re right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid—simply because they have trade compliance teams and you don&apos;t.
             </p>
           </div>
@@ -256,89 +227,57 @@ export default function HomePage() {
       </section>
 
       {/* What If You Had Your Own Trade Team */}
-      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{textAlign: 'center', marginBottom: '3rem'}}>
+      <section className="main-content homepage-section-white">
+        <div className="container-app homepage-container-narrow">
+          <div className="section-header homepage-section-header-centered">
             <h2 className="section-header-title">What If You Had Your Own Trade Team?</h2>
-            <p style={{fontSize: '1.25rem', color: '#4b5563', maxWidth: '800px', margin: '2rem auto 0', lineHeight: '1.7'}}>
+            <p className="homepage-subtitle">
               That&apos;s what this platform does. It handles the complex USMCA calculations and tariff research that normally requires:
             </p>
           </div>
 
           {/* 2x2 Grid - What You'd Need */}
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3.5rem'}}>
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+          <div className="grid-2-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">
                 A Customs Broker
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 $300-500 per analysis
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 A Trade Compliance Specialist
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 6+ hours of research
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 Daily Policy Monitoring
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 Tariff policy changes
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '0.75rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 Expert Knowledge
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 USMCA rules and RVC calculations
               </p>
             </div>
           </div>
 
           {/* Green Success Box */}
-          <div style={{
-            background: '#059669',
-            color: '#fff',
-            padding: '3rem',
-            borderRadius: '8px',
-            textAlign: 'center',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}>
-            <p style={{fontSize: '1.5rem', lineHeight: '1.8', marginBottom: 0, fontWeight: 600}}>
+          <div className="homepage-success-box">
+            <p>
               Now you can do it yourself in 5 minutes.
             </p>
           </div>
@@ -346,55 +285,37 @@ export default function HomePage() {
       </section>
 
       {/* Built For Business Owners Who Are On Their Own */}
-      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{textAlign: 'center', marginBottom: '3.5rem'}}>
+      <section className="main-content homepage-section-gray">
+        <div className="container-app homepage-container-narrow">
+          <div className="section-header homepage-section-header-centered">
             <h2 className="section-header-title">Built For Business Owners Who Are On Their Own</h2>
           </div>
 
           {/* 3 Cards in Row */}
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem'}}>
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+          <div className="grid-3-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">
                 You don&apos;t need to become a trade expert
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 Answer questions about your product and suppliers - we handle the technical analysis
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 You don&apos;t need to monitor tariff changes
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 We track Section 301, Section 232, and USMCA rule updates daily
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.25rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 You don&apos;t need to trust our math blindly
               </h3>
-              <p style={{color: '#6b7280', fontSize: '1rem', lineHeight: '1.6', marginBottom: 0}}>
+              <p className="content-card-description">
                 Download the analysis, verify with your customs broker, then decide
               </p>
             </div>
@@ -403,69 +324,33 @@ export default function HomePage() {
       </section>
 
       {/* Real Example */}
-      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '900px'}}>
-          <div className="section-header" style={{marginBottom: '3rem'}}>
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
             <h2 className="section-header-title">Real Example: Electronics Importer</h2>
           </div>
 
-          <div style={{
-            background: '#fff',
-            border: '2px solid #e5e7eb',
-            borderRadius: '12px',
-            padding: '3rem',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
-          }}>
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem'}}>
-              <div style={{
-                padding: '2rem',
-                background: '#fef2f2',
-                borderRadius: '8px',
-                borderLeft: '4px solid #dc2626'
-              }}>
-                <h3 style={{fontSize: '1.15rem', fontWeight: 700, color: '#991b1b', marginBottom: '1rem'}}>
-                  Before
-                </h3>
-                <p style={{fontSize: '1.1rem', lineHeight: '1.7', color: '#374151', margin: 0}}>
-                  Paying 25% Section 301 tariffs on China-sourced components
-                </p>
-              </div>
-
-              <div style={{
-                padding: '2rem',
-                background: '#f0fdf4',
-                borderRadius: '8px',
-                borderLeft: '4px solid #059669'
-              }}>
-                <h3 style={{fontSize: '1.15rem', fontWeight: 700, color: '#065f46', marginBottom: '1rem'}}>
-                  After
-                </h3>
-                <p style={{fontSize: '1.1rem', lineHeight: '1.7', color: '#374151', margin: 0}}>
-                  Discovered 72% USMCA qualification through Mexico assembly
-                </p>
-              </div>
-            </div>
-
-            <div style={{
-              padding: '2rem',
-              background: '#059669',
-              borderRadius: '8px',
-              textAlign: 'center',
-              marginBottom: '2rem'
-            }}>
-              <p style={{fontSize: '1.5rem', fontWeight: 700, color: '#fff', margin: 0}}>
-                Annual Savings: $43,750 in eliminated tariffs
+          <div className="grid-2-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">Before</h3>
+              <p className="content-card-description">
+                Paying 25% Section 301 tariffs on China-sourced components
               </p>
             </div>
 
-            <p style={{
-              fontSize: '1.15rem',
-              fontStyle: 'italic',
-              color: '#6b7280',
-              textAlign: 'center',
-              margin: 0,
-              lineHeight: '1.7'
-            }}>
+            <div className="content-card">
+              <h3 className="content-card-title">After</h3>
+              <p className="content-card-description">
+                Discovered 72% USMCA qualification through Mexico assembly
+              </p>
+              <p className="content-card-description">
+                <strong>Annual Savings: $43,750 in eliminated tariffs</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="section-header">
+            <p className="section-header-subtitle">
               They didn&apos;t know they qualified. They were just trying to keep their business running.
             </p>
           </div>
@@ -473,209 +358,101 @@ export default function HomePage() {
       </section>
 
       {/* Your Situation, Your Control */}
-      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{marginBottom: '2rem'}}>
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
             <h2 className="section-header-title">Your Situation, Your Control</h2>
+            <p className="section-header-subtitle">
+              This isn&apos;t another service where you wait for consultants to call you back. You:
+            </p>
           </div>
 
-          <p style={{
-            fontSize: '1.25rem',
-            color: '#4b5563',
-            textAlign: 'center',
-            marginBottom: '3.5rem',
-            maxWidth: '800px',
-            margin: '0 auto 3.5rem'
-          }}>
-            This isn&apos;t another service where you wait for consultants to call you back. You:
-          </p>
-
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem', marginBottom: '3rem'}}>
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+          <div className="grid-2-cols">
+            <div className="content-card">
+              <p className="content-card-description">
                 Run the analysis yourself whenever you need it
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card">
+              <p className="content-card-description">
                 See the calculations and methodology
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card">
+              <p className="content-card-description">
                 Verify the results with your own broker
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2rem',
-              borderRadius: '8px',
-              borderTop: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{fontSize: '1.1rem', fontWeight: 600, color: '#111827', margin: 0}}>
+            <div className="content-card">
+              <p className="content-card-description">
                 Generate certificates on your own timeline
               </p>
             </div>
           </div>
 
-          <div style={{
-            background: '#1e3a8a',
-            padding: '3rem',
-            borderRadius: '8px',
-            textAlign: 'center'
-          }}>
-            <p style={{fontSize: '1.75rem', fontWeight: 700, color: '#fff', margin: 0, lineHeight: '1.4'}}>
-              You own the data. You make the decisions.
+          <div className="section-header">
+            <p className="section-header-subtitle">
+              <strong>You own the data. You make the decisions.</strong>
             </p>
           </div>
         </div>
       </section>
 
       {/* Start Free */}
-      <section className="main-content" style={{paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '800px'}}>
-          <div style={{
-            background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)',
-            padding: '4rem 3rem',
-            borderRadius: '12px',
-            textAlign: 'center',
-            boxShadow: '0 10px 40px rgba(30, 58, 138, 0.2)'
-          }}>
-            <h2 style={{
-              fontSize: '2.5rem',
-              fontWeight: 700,
-              color: '#fff',
-              marginBottom: '1.5rem',
-              lineHeight: '1.2'
-            }}>
-              Start Free - See If You Qualify
-            </h2>
+      <section className="main-content">
+        <div className="container-app text-center">
+          <h2 className="section-header-title">Start Free - See If You Qualify</h2>
 
-            <div style={{
-              display: 'inline-flex',
-              gap: '1.5rem',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '2rem',
-              flexWrap: 'wrap'
-            }}>
-              <span style={{color: '#fff', fontSize: '1.1rem', fontWeight: 500}}>14-day free trial</span>
-              <span style={{color: 'rgba(255,255,255,0.6)'}}>•</span>
-              <span style={{color: '#fff', fontSize: '1.1rem', fontWeight: 500}}>No credit card required</span>
-              <span style={{color: 'rgba(255,255,255,0.6)'}}>•</span>
-              <span style={{color: '#fff', fontSize: '1.1rem', fontWeight: 500}}>Full platform access</span>
-            </div>
-
-            <p style={{
-              fontSize: '1.35rem',
-              fontWeight: 600,
-              color: '#fef3c7',
-              marginBottom: '2.5rem',
-              lineHeight: '1.6'
-            }}>
-              Find out in 5 minutes if you&apos;re overpaying tariffs.
-            </p>
-
-            <Link
-              href="/signup"
-              style={{
-                display: 'inline-block',
-                background: '#fff',
-                color: '#1e3a8a',
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                padding: '1.25rem 3rem',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
-                transition: 'transform 0.2s, box-shadow 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 14px rgba(0,0,0,0.15)';
-              }}
-            >
-              Start Free Analysis →
-            </Link>
+          <div className="hero-trial-benefits">
+            <div className="trial-benefit-item">14-day free trial</div>
+            <div className="trial-benefit-item">No credit card required</div>
+            <div className="trial-benefit-item">Full platform access</div>
           </div>
+
+          <p className="section-header-subtitle">
+            Find out in 5 minutes if you&apos;re overpaying tariffs.
+          </p>
+
+          <Link href="/signup" className="btn-primary">
+            Start Free Analysis →
+          </Link>
         </div>
       </section>
 
       {/* Questions */}
-      <section className="main-content" style={{background: '#f9fafb', paddingTop: '5rem', paddingBottom: '5rem'}}>
-        <div className="container-app" style={{maxWidth: '1000px'}}>
-          <div className="section-header" style={{marginBottom: '3.5rem'}}>
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
             <h2 className="section-header-title">Questions?</h2>
           </div>
 
-          <div style={{display: 'grid', gap: '1.5rem'}}>
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+          <div className="grid-2-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">
                 &quot;What if I get the inputs wrong?&quot;
               </h3>
-              <p style={{fontSize: '1.05rem', lineHeight: '1.7', color: '#6b7280', margin: 0}}>
+              <p className="content-card-description">
                 We guide you through each field and explain what information we need. Plus you can verify results with your broker before filing.
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 &quot;Is this legally valid?&quot;
               </h3>
-              <p style={{fontSize: '1.05rem', lineHeight: '1.7', color: '#6b7280', margin: 0}}>
+              <p className="content-card-description">
                 Yes. We generate official USMCA Form D certificates. You verify accuracy and your broker files with CBP.
               </p>
             </div>
 
-            <div style={{
-              background: '#fff',
-              padding: '2.5rem',
-              borderRadius: '8px',
-              borderLeft: '4px solid #1e3a8a',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h3 style={{fontSize: '1.35rem', fontWeight: 700, color: '#111827', marginBottom: '1rem'}}>
+            <div className="content-card">
+              <h3 className="content-card-title">
                 &quot;What if my situation is complex?&quot;
               </h3>
-              <p style={{fontSize: '1.05rem', lineHeight: '1.7', color: '#6b7280', margin: 0}}>
+              <p className="content-card-description">
                 Start with our platform for the analysis. If you need consulting help, at least you&apos;ll know exactly what questions to ask.
               </p>
             </div>

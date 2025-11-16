@@ -127,7 +127,7 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
             </h4>
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#374151' }}>
               {displayData.portfolio_risks.map((item, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                <li key={idx} className="mb-2">
                   {item}
                 </li>
               ))}
@@ -148,7 +148,7 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
             </h4>
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#374151' }}>
               {displayData.portfolio_opportunities.map((item, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                <li key={idx} className="mb-2">
                   {item}
                 </li>
               ))}
@@ -169,7 +169,7 @@ export default function AlertImpactAnalysisDisplay({ data, consolidatedAlertsCou
             </h4>
             <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#374151' }}>
               {displayData.immediate_actions.map((item, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                <li key={idx} className="mb-2">
                   {item}
                 </li>
               ))}

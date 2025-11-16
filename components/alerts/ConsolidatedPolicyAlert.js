@@ -151,7 +151,7 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
             </div>
             <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
               {consolidatedAlert.what_you_might_not_know.map((insight, idx) => (
-                <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                <li key={idx} className="mb-2">
                   {insight}
                 </li>
               ))}
@@ -297,7 +297,7 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
                 </div>
                 <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem', color: '#6b7280' }}>
                   {consolidatedAlert.what_you_know.map((known, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                    <li key={idx} className="mb-2">
                       {known}
                     </li>
                   ))}
@@ -313,7 +313,7 @@ export default function ConsolidatedPolicyAlert({ consolidatedAlert, userProfile
                 </div>
                 <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem', color: '#6b7280' }}>
                   {consolidatedAlert.related_alerts.map((alertTitle, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                    <li key={idx} className="mb-2">
                       {alertTitle}
                     </li>
                   ))}

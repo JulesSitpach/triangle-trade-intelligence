@@ -153,8 +153,10 @@ export default function SubscriptionManagement() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading...</p>
+      <div className="main-content">
+        <div className="container-app text-center">
+          <p>Loading...</p>
+        </div>
       </div>
     )
   }
@@ -169,39 +171,16 @@ export default function SubscriptionManagement() {
         <meta name="description" content="Manage your subscription and upgrade your plan" />
       </Head>
 
-      <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div className="main-content">
         {/* Header */}
-        <nav style={{
-          backgroundColor: 'white',
-          borderBottom: '1px solid #e5e7eb',
-          padding: '1rem 0'
-        }}>
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 1.5rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <Link href="/dashboard" style={{
-              fontSize: '1.25rem',
-              fontWeight: 700,
-              color: '#1e40af',
-              textDecoration: 'none'
-            }}>
+        <nav className="nav-fixed">
+          <div className="nav-container">
+            <Link href="/dashboard" className="nav-logo-link">
               ← Back to Dashboard
             </Link>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <span style={{ color: '#6b7280' }}>{user?.email}</span>
-              <Link href="/dashboard" style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                borderRadius: '0.375rem',
-                textDecoration: 'none',
-                fontSize: '0.875rem'
-              }}>
+            <div className="nav-menu">
+              <span className="text-body">{user?.email}</span>
+              <Link href="/dashboard" className="btn-primary">
                 Dashboard
               </Link>
             </div>
@@ -209,34 +188,19 @@ export default function SubscriptionManagement() {
         </nav>
 
         {/* Main Content */}
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          padding: '3rem 1.5rem'
-        }}>
+        <div className="container-app">
           {/* Current Subscription */}
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            padding: '2rem',
-            marginBottom: '3rem',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-          }}>
-            <h2 style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: '#111827',
-              marginBottom: '1rem'
-            }}>
+          <div className="content-card">
+            <h2 className="content-card-title">
               Current Subscription
             </h2>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="dashboard-actions">
               <div>
-                <p style={{ fontSize: '1.875rem', fontWeight: 700, color: '#1e40af', margin: 0 }}>
+                <p className="section-header-title">
                   {currentTier} Plan
                 </p>
                 {currentTier !== 'Trial' && (
-                  <p style={{ fontSize: '1.25rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                  <p className="section-header-subtitle">
                     ${plans.find(p => p.tier === currentTier.toLowerCase())?.monthlyPrice || 0}/month
                   </p>
                 )}
@@ -245,17 +209,7 @@ export default function SubscriptionManagement() {
                 <button
                   onClick={handleManageBilling}
                   disabled={upgradeLoading === 'manage'}
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    backgroundColor: '#6b7280',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '0.375rem',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    cursor: upgradeLoading === 'manage' ? 'not-allowed' : 'pointer',
-                    opacity: upgradeLoading === 'manage' ? 0.5 : 1
-                  }}
+                  className="btn-secondary"
                 >
                   {upgradeLoading === 'manage' ? 'Loading...' : 'Manage Billing'}
                 </button>
@@ -264,61 +218,28 @@ export default function SubscriptionManagement() {
           </div>
 
           {/* Billing Period Toggle */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '2rem',
-            gap: '1rem'
-          }}>
+          <div className="hero-button-group">
             <button
               onClick={() => setBillingPeriod('monthly')}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: billingPeriod === 'monthly' ? '#3b82f6' : 'white',
-                color: billingPeriod === 'monthly' ? 'white' : '#374151',
-                border: '2px solid #3b82f6',
-                borderRadius: '0.375rem',
-                fontSize: '1rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              className={billingPeriod === 'monthly' ? 'btn-primary' : 'btn-secondary'}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingPeriod('annual')}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: billingPeriod === 'annual' ? '#3b82f6' : 'white',
-                color: billingPeriod === 'annual' ? 'white' : '#374151',
-                border: '2px solid #3b82f6',
-                borderRadius: '0.375rem',
-                fontSize: '1rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              className={billingPeriod === 'annual' ? 'btn-primary' : 'btn-secondary'}
             >
               Annual (Save ~15%)
             </button>
           </div>
 
           {/* Upgrade Options */}
-          <div style={{ marginBottom: '3rem' }}>
-            <h2 style={{
-              fontSize: '1.875rem',
-              fontWeight: 700,
-              color: '#111827',
-              marginBottom: '2rem',
-              textAlign: 'center'
-            }}>
+          <div className="section-header">
+            <h2 className="section-header-title text-center">
               {currentTier === 'Trial' ? 'Choose Your Plan' : 'Upgrade Your Plan'}
             </h2>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '2rem'
-            }}>
+            <div className="pricing-cards-grid">
               {plans.map((plan) => {
                 const isCurrent = isCurrentPlan(plan.tier)
                 const price = billingPeriod === 'monthly' ? plan.monthlyPrice : plan.annualPrice
@@ -326,101 +247,41 @@ export default function SubscriptionManagement() {
                 return (
                   <div
                     key={plan.tier}
-                    style={{
-                      backgroundColor: 'white',
-                      borderRadius: '0.5rem',
-                      padding: '2rem',
-                      boxShadow: plan.popular ? '0 10px 30px rgba(59, 130, 246, 0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
-                      border: plan.popular ? '2px solid #3b82f6' : isCurrent ? '2px solid #10b981' : '1px solid #e5e7eb',
-                      position: 'relative'
-                    }}
+                    className={`content-card ${plan.popular ? 'popular-plan' : ''}`}
                   >
                     {plan.popular && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '-12px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: '#3b82f6',
-                        color: 'white',
-                        padding: '0.25rem 1rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.875rem',
-                        fontWeight: 600
-                      }}>
+                      <div className="popular-badge">
                         Most Popular
                       </div>
                     )}
 
                     {isCurrent && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '-12px',
-                        right: '1rem',
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        padding: '0.25rem 1rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.875rem',
-                        fontWeight: 600
-                      }}>
+                      <div className="badge badge-success" style={{position: 'absolute', top: '-12px', right: '1rem'}}>
                         Current Plan
                       </div>
                     )}
 
-                    <h3 style={{
-                      fontSize: '1.5rem',
-                      fontWeight: 700,
-                      color: '#111827',
-                      marginBottom: '0.5rem'
-                    }}>
+                    <h3 className="content-card-title">
                       {plan.name}
                     </h3>
 
-                    <div style={{ marginBottom: '1.5rem' }}>
-                      <span style={{
-                        fontSize: '2.5rem',
-                        fontWeight: 700,
-                        color: '#1e40af'
-                      }}>
-                        ${price}
-                      </span>
-                      <span style={{ color: '#6b7280', marginLeft: '0.5rem' }}>
-                        /{billingPeriod === 'monthly' ? 'mo' : 'yr'}
-                      </span>
+                    <div className="price-display">
+                      <p className="text-body">
+                        <strong>${price}</strong>
+                        {' '}/{billingPeriod === 'monthly' ? 'mo' : 'yr'}
+                      </p>
                     </div>
 
-                    <ul style={{
-                      listStyle: 'none',
-                      padding: 0,
-                      marginBottom: '1.5rem'
-                    }}>
+                    <div>
                       {plan.features.map((feature, idx) => (
-                        <li key={idx} style={{
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: '0.5rem',
-                          marginBottom: '0.75rem',
-                          color: '#374151',
-                          fontSize: '0.875rem'
-                        }}>
-                          <span style={{ color: '#10b981', flexShrink: 0 }}>✓</span>
-                          <span>{feature}</span>
-                        </li>
+                        <p key={idx} className="text-body">
+                          ✓ {feature}
+                        </p>
                       ))}
-                    </ul>
+                    </div>
 
                     {plan.commitment && (
-                      <div style={{
-                        backgroundColor: '#fef3c7',
-                        border: '1px solid #fbbf24',
-                        borderRadius: '0.375rem',
-                        padding: '0.75rem',
-                        marginBottom: '1rem',
-                        fontSize: '0.75rem',
-                        color: '#78350f',
-                        textAlign: 'center'
-                      }}>
+                      <div className="alert-warning text-center">
                         <strong>ℹ️ {plan.commitment}</strong>
                       </div>
                     )}
@@ -428,18 +289,7 @@ export default function SubscriptionManagement() {
                     <button
                       onClick={() => handleUpgrade(plan.tier)}
                       disabled={isCurrent || upgradeLoading === plan.tier}
-                      style={{
-                        width: '100%',
-                        padding: '1rem',
-                        backgroundColor: isCurrent ? '#9ca3af' : '#3b82f6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '0.375rem',
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        cursor: isCurrent || upgradeLoading === plan.tier ? 'not-allowed' : 'pointer',
-                        opacity: isCurrent || upgradeLoading === plan.tier ? 0.5 : 1
-                      }}
+                      className={isCurrent ? 'btn-secondary' : 'btn-primary'}
                     >
                       {upgradeLoading === plan.tier ? 'Processing...' : isCurrent ? 'Current Plan' : `Upgrade to ${plan.name}`}
                     </button>
@@ -451,36 +301,17 @@ export default function SubscriptionManagement() {
 
           {/* Cancel Subscription Section */}
           {currentTier !== 'Trial' && (
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '0.5rem',
-              padding: '2rem',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              border: '1px solid #fca5a5'
-            }}>
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#dc2626',
-                marginBottom: '1rem'
-              }}>
+            <div className="content-card" style={{border: '1px solid #fca5a5'}}>
+              <h3 className="content-card-title" style={{color: '#dc2626'}}>
                 Cancel Subscription
               </h3>
-              <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
+              <p className="text-body">
                 Need to cancel your subscription? Access your billing portal to manage cancellation.
               </p>
               <button
                 onClick={handleManageBilling}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: '#dc2626',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
+                className="btn-primary"
+                style={{backgroundColor: '#dc2626'}}
               >
                 Manage Billing & Cancellation
               </button>

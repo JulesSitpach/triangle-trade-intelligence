@@ -1,8 +1,5 @@
 import Head from 'next/head'
 import '../styles/globals.css'
-import '../styles/dashboard-user.css'
-import '../styles/salesforce-tables.css'
-import '../styles/agent-components.css'
 import { AlertProvider } from '../lib/contexts/AlertContext'
 import { SimpleAuthProvider } from '../lib/contexts/SimpleAuthContext'
 import { ToastProvider } from '../components/Toast'

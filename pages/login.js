@@ -80,38 +80,30 @@ export default function Login() {
         <title>Sign In - Triangle Trade Intelligence</title>
       </Head>
 
-      <div className="main-content" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--gray-50)' }}>
-        <div style={{ maxWidth: '480px', width: '100%', padding: '2rem' }}>
-          <div className="content-card" style={{ padding: '3rem' }}>
+      <div className="main-content">
+        <div className="container-app" style={{maxWidth: '480px'}}>
+          <div className="content-card">
 
             {/* Logo */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <Link href="/">
-                <div className="nav-logo-icon" style={{ margin: '0 auto 1.5rem', width: '64px', height: '64px', fontSize: '2rem' }}>T</div>
+            <div className="text-center">
+              <Link href="/" className="nav-logo-link">
+                <div className="nav-logo-icon">T</div>
               </Link>
-              <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--navy-900)', marginBottom: '0.5rem' }}>WELCOME BACK</h1>
-              <p className="text-body" style={{ fontSize: '1rem', color: 'var(--gray-600)' }}>Sign in to your Triangle Trade Intelligence account</p>
+              <h1 className="section-header-title">WELCOME BACK</h1>
+              <p className="section-header-subtitle">Sign in to your Triangle Trade Intelligence account</p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div style={{
-                background: 'var(--red-50)',
-                border: '1px solid var(--red-300)',
-                borderRadius: 'var(--radius-base)',
-                padding: '0.75rem 1rem',
-                marginBottom: '1.5rem',
-                color: 'var(--red-700)',
-                fontSize: '0.875rem'
-              }}>
+              <div className="status-error">
                 {error}
               </div>
             )}
 
             {/* Login Form */}
-            <form onSubmit={handleSubmit} style={{ marginBottom: '1.5rem' }}>
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--gray-700)', fontSize: '0.875rem' }}>Email</label>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">Email</label>
                 <input
                   type="email"
                   id="email"
@@ -120,22 +112,13 @@ export default function Login() {
                   onChange={handleChange}
                   required
                   autoComplete="email"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: '1px solid var(--gray-300)',
-                    borderRadius: 'var(--radius-base)',
-                    fontSize: '1rem',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--blue-500)'}
-                  onBlur={(e) => e.target.style.borderColor = 'var(--gray-300)'}
+                  className="form-input"
                 />
               </div>
 
-              <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--gray-700)', fontSize: '0.875rem' }}>Password</label>
-                <div style={{ position: 'relative' }}>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">Password</label>
+                <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -144,48 +127,22 @@ export default function Login() {
                     onChange={handleChange}
                     required
                     autoComplete="current-password"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 3rem 0.75rem 1rem',
-                      border: '1px solid var(--gray-300)',
-                      borderRadius: 'var(--radius-base)',
-                      fontSize: '1rem',
-                      transition: 'all 0.15s ease'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = 'var(--blue-500)'}
-                    onBlur={(e) => e.target.style.borderColor = 'var(--gray-300)'}
+                    className="form-input"
+                    style={{paddingRight: '3rem'}}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.75rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '1.25rem',
-                      padding: '0.25rem',
-                      color: 'var(--gray-500)'
-                    }}
+                    className="btn-secondary"
+                    style={{position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', padding: '0.25rem'}}
                   >
                     {showPassword ? '👁️' : '👁️‍🗨️'}
                   </button>
                 </div>
               </div>
 
-              <div style={{ textAlign: 'right', marginBottom: '1.5rem' }}>
-                <Link
-                  href="/forgot-password"
-                  style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--blue-500)',
-                    textDecoration: 'none',
-                    fontWeight: '500'
-                  }}
-                >
+              <div className="text-right">
+                <Link href="/forgot-password" className="content-card-link">
                   Forgot your password?
                 </Link>
               </div>
@@ -194,22 +151,15 @@ export default function Login() {
                 type="submit"
                 className="btn-primary"
                 disabled={isLoading}
-                style={{
-                  width: '100%',
-                  padding: '0.875rem',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  justifyContent: 'center'
-                }}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
 
             {/* Footer Note */}
-            <div style={{ textAlign: 'center', paddingTop: '1.5rem', borderTop: '1px solid var(--gray-200)' }}>
-              <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: 0 }}>
-                Need help? <Link href="/support" style={{ color: 'var(--blue-500)', textDecoration: 'none', fontWeight: '500' }}>Contact Support</Link>
+            <div className="text-center" style={{paddingTop: '1.5rem', borderTop: '1px solid var(--gray-200)'}}>
+              <p className="form-help">
+                Need help? <Link href="/support" className="content-card-link">Contact Support</Link>
               </p>
             </div>
           </div>

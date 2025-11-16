@@ -391,9 +391,9 @@ export default function UserDashboard({ user }) {
                       }
                     }
                   }}
-                  className="btn-delete-small"
+                  className="btn-secondary"
                 >
-                  🗑️ Clear All
+                  Clear All
                 </button>
               )}
               {isTrialExpired || dashboardData?.usage_stats?.limit_reached ? (
@@ -577,9 +577,9 @@ export default function UserDashboard({ user }) {
                             }
                           }
                         }}
-                        className="btn-delete"
+                        className="btn-secondary btn-sm"
                       >
-                        🗑️ Delete
+                        Delete
                       </button>
                     </div>
                   </>

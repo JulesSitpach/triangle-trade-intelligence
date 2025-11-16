@@ -693,7 +693,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       {/* 2. Exporter Information */}
       <div className="form-section">
         {/* Checkbox OUTSIDE the collapsed section - always visible */}
-        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+        <div className="form-group mb-6">
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
             <input
               type="checkbox"
@@ -840,7 +840,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       {/* 3. Importer Information */}
       <div className="form-section">
         {/* Checkbox OUTSIDE the collapsed section - always visible */}
-        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+        <div className="form-group mb-6">
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
             <input
               type="checkbox"
@@ -988,7 +988,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
       {/* 4. Producer Information - NEW SECTION PER CRISTINA'S FEEDBACK */}
       <div className="form-section">
         {/* Checkbox OUTSIDE the collapsed section - always visible */}
-        <div className="form-group" style={{marginBottom: '1.5rem'}}>
+        <div className="form-group mb-6">
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
             <input
               type="checkbox"
@@ -1140,7 +1140,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           Please certify the accuracy of the information before generating your certificate
         </p>
 
-        <div className="checkbox-group" style={{marginBottom: '1.5rem'}}>
+        <div className="checkbox-group mb-6">
           <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '1rem'}}>
             <input
               type="checkbox"
@@ -1168,7 +1168,7 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           </label>
         </div>
 
-        <div className="alert alert-info" style={{marginBottom: '1.5rem'}}>
+        <div className="alert alert-info mb-6">
           <div className="alert-content">
             <div className="alert-title">Certification Statement</div>
             <div className="text-body">

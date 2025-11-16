@@ -118,15 +118,15 @@ export default function ResetPassword() {
 
       <TriangleLayout>
         <div className="main-content">
-          <div className="container-app">
-            <div className="content-card" style={{ maxWidth: '500px', margin: '50px auto' }}>
+          <div className="container-app" style={{maxWidth: '500px'}}>
+            <div className="content-card">
               {!success ? (
                 <>
                   <h1 className="card-title">Reset Your Password</h1>
 
                   {validToken ? (
                     <>
-                      <p className="text-body" style={{ marginBottom: '30px' }}>
+                      <p className="text-body">
                         Enter your new password below.
                       </p>
 
@@ -159,14 +159,8 @@ export default function ResetPassword() {
                         </div>
 
                         {error && (
-                          <div style={{
-                            padding: '12px',
-                            backgroundColor: '#FEE2E2',
-                            border: '1px solid #FCA5A5',
-                            borderRadius: '6px',
-                            marginBottom: '20px'
-                          }}>
-                            <p style={{ color: '#DC2626', margin: 0 }}>{error}</p>
+                          <div className="status-error">
+                            {error}
                           </div>
                         )}
 
@@ -174,28 +168,21 @@ export default function ResetPassword() {
                           type="submit"
                           className="btn-primary"
                           disabled={loading}
-                          style={{ width: '100%', marginBottom: '20px' }}
                         >
                           {loading ? 'Resetting Password...' : 'Reset Password'}
                         </button>
 
-                        <div style={{ textAlign: 'center' }}>
-                          <Link href="/login" style={{ color: '#2563EB', textDecoration: 'none' }}>
+                        <div className="text-center">
+                          <Link href="/login" className="content-card-link">
                             ← Back to Login
                           </Link>
                         </div>
                       </form>
                     </>
                   ) : (
-                    <div style={{
-                      padding: '20px',
-                      backgroundColor: '#FEE2E2',
-                      border: '1px solid #FCA5A5',
-                      borderRadius: '6px',
-                      marginBottom: '20px'
-                    }}>
-                      <p style={{ color: '#DC2626', margin: 0 }}>{error}</p>
-                      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <div className="status-error">
+                      {error}
+                      <div className="text-center">
                         <Link href="/forgot-password" className="btn-primary">
                           Request New Reset Link
                         </Link>
@@ -204,10 +191,10 @@ export default function ResetPassword() {
                   )}
                 </>
               ) : (
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '10px' }}>✅</div>
+                <div className="text-center">
+                  <div className="badge badge-success">✅</div>
                   <h1 className="card-title">Password Reset Successful!</h1>
-                  <p className="text-body" style={{ marginBottom: '20px' }}>
+                  <p className="text-body">
                     Your password has been updated. Redirecting you to login...
                   </p>
                   <Link href="/login" className="btn-primary">

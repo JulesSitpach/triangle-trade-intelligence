@@ -1183,7 +1183,7 @@ export default function ComponentOriginsStepEnhanced({
                     backgroundColor: '#f9fafb',
                     borderRadius: '4px'
                   }}>
-                    <label className="form-label" style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                    <label className="form-label text-sm mb-2">
                       Material Origin (for Section 232 exemption)
                     </label>
 
@@ -1330,7 +1330,7 @@ export default function ComponentOriginsStepEnhanced({
             {/* AI Suggestion Button - FULL WIDTH below grid */}
             {!component.is_locked && (
               <div className="form-group">
-                <div className="form-help" style={{ marginBottom: '0.5rem' }}>
+                <div className="form-help mb-2">
                   Don&apos;t know your HS code? Get AI suggestion below.
                 </div>
                 {!searchingHS[index] ? (
@@ -1661,10 +1661,10 @@ export default function ComponentOriginsStepEnhanced({
               <div style={{background: '#f3f4f6', padding: '1.5rem', borderRadius: '8px', marginBottom: '1.5rem'}}>
                 <h3 style={{fontSize: '1.125rem', fontWeight: 600, marginBottom: '0.75rem'}}>Starter Plan - $99/mo</h3>
                 <ul style={{listStyle: 'none', padding: 0, margin: 0}}>
-                  <li style={{marginBottom: '0.5rem'}}>✓ 10 components per analysis</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ 10 analyses per month</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ Full certificate download</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ Email crisis alerts</li>
+                  <li className="mb-2">✓ 10 components per analysis</li>
+                  <li className="mb-2">✓ 10 analyses per month</li>
+                  <li className="mb-2">✓ Full certificate download</li>
+                  <li className="mb-2">✓ Email crisis alerts</li>
                 </ul>
               </div>
 
@@ -1681,10 +1681,10 @@ export default function ComponentOriginsStepEnhanced({
                   }}>POPULAR</span>
                 </div>
                 <ul style={{listStyle: 'none', padding: 0, margin: 0}}>
-                  <li style={{marginBottom: '0.5rem'}}>✓ 25 components per analysis</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ Unlimited analyses</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ 15% service discounts</li>
-                  <li style={{marginBottom: '0.5rem'}}>✓ Priority support (48hr)</li>
+                  <li className="mb-2">✓ 25 components per analysis</li>
+                  <li className="mb-2">✓ Unlimited analyses</li>
+                  <li className="mb-2">✓ 15% service discounts</li>
+                  <li className="mb-2">✓ Priority support (48hr)</li>
                 </ul>
               </div>
 

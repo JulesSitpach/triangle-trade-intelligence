@@ -54,22 +54,22 @@ export default function Footer() {
               Platform
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/signup" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Get Started (Free Trial)
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/pricing" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Pricing Plans
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/services" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Expert Services
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/dashboard" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Dashboard Login
                 </Link>
@@ -88,17 +88,17 @@ export default function Footer() {
               Resources
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/about" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   About Us
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/mexico-savings-calculator" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Savings Calculator
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/secure-supply-chain-mexico" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Supply Chain Security
                 </Link>
@@ -117,17 +117,17 @@ export default function Footer() {
               Support & Legal
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Contact Support
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Contact Us
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
+              <li className="mb-2">
                 <span style={{ color: '#e0f2fe' }}>
                   Email: triangleintel@gmail.com
                 </span>
