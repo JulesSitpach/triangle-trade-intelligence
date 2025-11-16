@@ -3357,6 +3357,50 @@ textarea.form-input:not(:placeholder-shown) {
     font-size: 1.25rem;
   }
 
+  /* Mobile form alignment fixes */
+  .form-group,
+  .form-group > div {
+    width: 100% !important;
+  }
+
+  .form-label {
+    font-size: 0.8125rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .form-input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 0.875rem !important;
+  }
+
+  .form-help {
+    font-size: 0.6875rem !important;
+    line-height: 1.4 !important;
+    margin-top: 0.25rem !important;
+  }
+
+  textarea.form-input {
+    min-height: 80px !important;
+  }
+
+  /* Reduce padding on mobile containers */
+  .form-section {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .content-card {
+    padding: 1rem !important;
+  }
+
+  .main-content,
+  .container-app {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
   .workflow-progress {
     padding: 0.5rem;
   }

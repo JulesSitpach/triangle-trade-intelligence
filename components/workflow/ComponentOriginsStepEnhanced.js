@@ -988,22 +988,17 @@ export default function ComponentOriginsStepEnhanced({
         <div className="form-grid-2">
           {/* LEFT COLUMN: Substantial Transformation */}
           <div className="form-group">
-            <div style={{ padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.substantial_transformation || false}
-                  onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
-                  style={{ marginTop: '0.125rem', marginRight: '0.5rem', flexShrink: 0 }}
-                />
-                <span style={{ color: '#0c4a6e', lineHeight: '1.5' }}>
-                  <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
-                  <br />
-                  <span style={{ fontSize: '0.8125rem', color: '#075985', fontStyle: 'italic' }}>
-                    Check this if your manufacturing process in US/Canada/Mexico creates significant value beyond basic assembly (welding, forming, heat treatment, etc.). Leave unchecked if you only import/distribute or manufacture elsewhere.
-                  </span>
-                </span>
-              </label>
+            <label className="form-label">
+              <input
+                type="checkbox"
+                checked={formData.substantial_transformation || false}
+                onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
+              />
+              {' '}
+              <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
+            </label>
+            <div className="form-help">
+              Check this if your manufacturing process in US/Canada/Mexico creates significant value beyond basic assembly (welding, forming, heat treatment, etc.). Leave unchecked if you only import/distribute or manufacture elsewhere.
             </div>
 
             {/* Manufacturing Process Details - Show when substantial transformation is checked */}
