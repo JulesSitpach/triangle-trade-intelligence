@@ -53,8 +53,15 @@ export default function WorkflowResults({
     }, 100); // Brief delay to let component render
   };
 
-  // Collapsible card state for Your USMCA Impact (expanded by default)
-  const [impactExpanded, setImpactExpanded] = useState(true);
+  // Collapsible card state for Your USMCA Impact (collapsed on mobile by default)
+  const [impactExpanded, setImpactExpanded] = useState(false);
+
+  // Check if desktop on mount and expand if so
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+      setImpactExpanded(true);
+    }
+  }, []);
 
   const handleToggleImpact = () => {
     const wasExpanded = impactExpanded;
@@ -659,33 +666,33 @@ export default function WorkflowResults({
       {/* QUALIFICATION RESULT */}
       <div className={results.usmca?.qualified ? 'alert-success' : 'alert-warning'}>
         <div className="alert-content">
-          <h2 className="alert-title-success">
-            {results.usmca?.qualified ? '✓ USMCA Qualified' : '✗ Not Qualified'}
+          <h2 className="alert-title-success" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
+            <span>{results.usmca?.qualified ? '✓ USMCA Qualified' : '✗ Not Qualified'}</span>
             {results.product?.hs_code && (
               <>
                 <span style={{
-                  marginLeft: '1rem',
                   fontSize: '1.25rem',
                   fontWeight: '600',
                   color: results.usmca?.qualified ? '#059669' : '#d97706',
                   backgroundColor: results.usmca?.qualified ? '#ecfdf5' : '#fffbeb',
                   padding: '0.375rem 0.75rem',
                   borderRadius: '0.375rem',
-                  border: `1px solid ${results.usmca?.qualified ? '#10b981' : '#f59e0b'}`
+                  border: `1px solid ${results.usmca?.qualified ? '#10b981' : '#f59e0b'}`,
+                  whiteSpace: 'nowrap'
                 }}>
                   HS {results.product.hs_code}
                 </span>
                 {/* Confidence Score Badge */}
                 {(results.product.confidence || results.product.confidence_score || results.product.classification_confidence) && (
                   <span style={{
-                    marginLeft: '0.5rem',
                     fontSize: '0.875rem',
                     fontWeight: '600',
                     color: '#1e40af',
                     backgroundColor: '#eff6ff',
                     padding: '0.25rem 0.5rem',
                     borderRadius: '0.375rem',
-                    border: '1px solid #3b82f6'
+                    border: '1px solid #3b82f6',
+                    whiteSpace: 'nowrap'
                   }}>
                     {Math.round(results.product.confidence || results.product.confidence_score || results.product.classification_confidence)}% confidence
                   </span>
@@ -701,19 +708,13 @@ export default function WorkflowResults({
             borderRadius: '8px',
             padding: '1rem',
             marginTop: '1rem',
-            marginBottom: '1rem',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.75rem'
+            marginBottom: '1rem'
           }}>
-            <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>🚨</span>
-            <div>
-              <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '0.25rem' }}>
-                AI-Generated Classifications
-              </div>
-              <div style={{ fontSize: '0.875rem', color: '#78350f', lineHeight: '1.5' }}>
-                These HS code classifications and tariff calculations are AI-generated and should be reviewed by a licensed customs broker before filing. Users are responsible for verifying accuracy of all data submitted to customs authorities.
-              </div>
+            <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '0.5rem', fontSize: '0.9375rem' }}>
+              AI-Generated Classifications
+            </div>
+            <div style={{ fontSize: '0.875rem', color: '#78350f', lineHeight: '1.5' }}>
+              These HS code classifications and tariff calculations are AI-generated and should be reviewed by a licensed customs broker before filing. Users are responsible for verifying accuracy of all data submitted to customs authorities.
             </div>
           </div>
 
@@ -941,14 +942,17 @@ export default function WorkflowResults({
         {impactExpanded && (
           <div className="element-spacing">
           <div style={{
-            padding: '1.5rem',
+            padding: '1rem',
             backgroundColor: '#f9fafb',
             border: '2px solid #e5e7eb',
             borderRadius: '8px',
-            lineHeight: '1.7'
+            lineHeight: '1.7',
+            overflow: 'hidden',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
           }}>
-            {/* 2-Column Grid Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            {/* 2-Column Grid Layout - stacks on mobile */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
 
               {/* LEFT COLUMN */}
               <div>
@@ -957,7 +961,7 @@ export default function WorkflowResults({
                   <div style={{ fontWeight: '600', color: '#1f2937', marginBottom: '0.5rem' }}>
                     Your qualification means:
                   </div>
-                  <div style={{ color: '#374151', fontSize: '0.95rem' }}>
+                  <div style={{ color: '#374151', fontSize: '0.95rem', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                     {results.usmca?.qualified
                       ? 'You meet USMCA requirements and can pay preferential tariff rates instead of standard tariffs.'
                       : 'You do NOT meet USMCA requirements. You must pay standard (MFN) tariff rates instead of preferential rates.'}
@@ -981,12 +985,12 @@ export default function WorkflowResults({
                         return (
                           <>
                             Your product qualifies with {totalRVC.toFixed(1)}% total North American content:
-                            <div style={{ marginLeft: '1rem', marginTop: '0.5rem' }}>
+                            <div style={{ marginLeft: '0.5rem', marginTop: '0.5rem', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                               <div style={{ color: '#059669', marginBottom: '0.25rem' }}>
-                                • USMCA Components: {componentRVC.toFixed(1)}% (Mexico + Canada + US parts)
+                                • USMCA Components: {componentRVC.toFixed(1)}%
                               </div>
                               <div style={{ color: '#059669' }}>
-                                • Manufacturing Labor Credit: +{laborCredit.toFixed(1)}% ({results.manufacturing_location || 'US'} manufacturing)
+                                • Manufacturing Credit: +{laborCredit.toFixed(1)}%
                               </div>
                             </div>
                             <div style={{ marginTop: '0.75rem' }}>

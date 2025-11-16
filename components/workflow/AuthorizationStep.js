@@ -512,12 +512,65 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
           Select your role in this transaction. This determines which fields appear on the USMCA certificate.
         </p>
 
-        {/* 2-COLUMN GRID: Role Selection + Documentation Requirements */}
-        <div style={{display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', marginTop: '1.5rem'}}>
-          {/* LEFT COLUMN: Role Selection */}
-          <div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-              <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '1rem', border: '2px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', backgroundColor: authData.certifier_type === 'IMPORTER' ? '#eff6ff' : 'transparent'}}>
+        {/* DOCUMENTATION FIRST ON MOBILE */}
+        <div style={{
+          padding: '1rem',
+          backgroundColor: '#f9fafb',
+          borderRadius: '8px',
+          border: '1px solid #e5e7eb',
+          marginTop: '1rem',
+          marginBottom: '1rem'
+        }}>
+          <div style={{marginBottom: '0.75rem'}}>
+            <div style={{fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem'}}>
+              Documentation You Need
+            </div>
+            <div style={{fontSize: '0.75rem', color: '#6b7280'}}>
+              {authData.certifier_type ? 'Gather these before completing:' : 'Select your role to see required documents'}
+            </div>
+          </div>
+
+          {authData.certifier_type === 'IMPORTER' && (
+            <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.5'}}>
+              <li>Purchase order</li>
+              <li>Commercial invoice</li>
+              <li>Bill of lading</li>
+              <li>Packing list</li>
+              <li>Supplier USMCA certificate</li>
+            </ul>
+          )}
+
+          {authData.certifier_type === 'EXPORTER' && (
+            <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.5'}}>
+              <li>Commercial invoice</li>
+              <li>Packing list</li>
+              <li>Export permit (if required)</li>
+              <li>Bill of materials (BOM)</li>
+              <li>Supplier origin declarations</li>
+            </ul>
+          )}
+
+          {authData.certifier_type === 'PRODUCER' && (
+            <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.5'}}>
+              <li>Manufacturing records</li>
+              <li>Bill of materials (BOM)</li>
+              <li>Supplier declarations</li>
+              <li>RVC calculation worksheets</li>
+              <li>Component origin certificates</li>
+            </ul>
+          )}
+
+          {!authData.certifier_type && (
+            <div style={{fontSize: '0.8125rem', color: '#9ca3af', fontStyle: 'italic', padding: '0.5rem 0'}}>
+              Choose your role below
+            </div>
+          )}
+        </div>
+
+        {/* ROLE SELECTION */}
+        <div style={{marginTop: '1rem'}}>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
+            <label className="checkbox-item" style={{display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.75rem', border: '2px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', backgroundColor: authData.certifier_type === 'IMPORTER' ? '#eff6ff' : 'transparent'}}>
                 <input
                   type="radio"
                   name="certifier_type"
@@ -572,59 +625,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
             {!authData.certifier_type && (
               <div style={{padding: '1rem', backgroundColor: '#fef3c7', borderRadius: '6px', marginTop: '1rem'}}>
                 <strong>⚠️ Required:</strong> Please select who is completing this certificate before continuing.
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT COLUMN: Documentation Requirements */}
-          <div style={{padding: '1.25rem', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
-            <div style={{marginBottom: '1rem'}}>
-              <div style={{fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem'}}>
-                📋 Documentation You'll Need
-              </div>
-              <div style={{fontSize: '0.75rem', color: '#6b7280', marginBottom: '1rem'}}>
-                {authData.certifier_type ? 'Gather these documents before completing the certificate:' : 'Select your role to see required documentation'}
-              </div>
-            </div>
-
-            {authData.certifier_type === 'IMPORTER' && (
-              <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.6'}}>
-                <li>Purchase order from supplier</li>
-                <li>Commercial invoice</li>
-                <li>Bill of lading / air waybill</li>
-                <li>Packing list</li>
-                <li>USMCA certificate from supplier</li>
-                <li>Supplier declarations of origin</li>
-              </ul>
-            )}
-
-            {authData.certifier_type === 'EXPORTER' && (
-              <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.6'}}>
-                <li>Commercial invoice</li>
-                <li>Packing list</li>
-                <li>Export permit (if required)</li>
-                <li>Freight / shipping documents</li>
-                <li>Product specifications</li>
-                <li>Supplier origin declarations</li>
-                <li>Bill of materials (BOM)</li>
-              </ul>
-            )}
-
-            {authData.certifier_type === 'PRODUCER' && (
-              <ul style={{margin: 0, paddingLeft: '1.25rem', fontSize: '0.8125rem', color: '#4b5563', lineHeight: '1.6'}}>
-                <li>Manufacturing records</li>
-                <li>Bill of materials (BOM)</li>
-                <li>Supplier declarations</li>
-                <li>Production documentation</li>
-                <li>Component origin certificates</li>
-                <li>RVC calculation worksheets</li>
-                <li>Quality control records</li>
-              </ul>
-            )}
-
-            {!authData.certifier_type && (
-              <div style={{fontSize: '0.8125rem', color: '#9ca3af', fontStyle: 'italic', padding: '2rem 0', textAlign: 'center'}}>
-                Choose your role above to see specific documentation requirements
               </div>
             )}
           </div>

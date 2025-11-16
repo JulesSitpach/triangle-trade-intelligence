@@ -4,7 +4,7 @@
  * NO duplicate qualification status (shown in hero section)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 // CRITICAL: Safe tariff rate display - distinguishes null (pending) from 0 (duty-free)
@@ -75,6 +75,15 @@ export default function USMCAQualification({ results }) {
   }
   const [expandedComponents, setExpandedComponents] = useState({});
   const [showTariffExplanation, setShowTariffExplanation] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleToggleTariffExplanation = () => {
     const wasExpanded = showTariffExplanation;
@@ -336,8 +345,129 @@ export default function USMCAQualification({ results }) {
 
       {/* Component Breakdown Table */}
       {results.usmca.component_breakdown && results.usmca.component_breakdown.length > 0 && (
-        <div className="element-spacing">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', tableLayout: 'fixed' }}>
+        <>
+          {/* MOBILE: Card Layout */}
+          {isMobile && (
+            <div className="element-spacing">
+              {results.usmca.component_breakdown.map((component, index) => {
+                const baseMfnRate = component.base_mfn_rate ?? component.mfn_rate ?? null;
+                const section301 = component.section_301 ?? null;
+                const section232 = component.section_232 ?? null;
+                const totalAppliedRate = component.total_rate ?? (baseMfnRate !== null && section301 !== null && section232 !== null ? baseMfnRate + section301 + section232 : null);
+                const isUSMCAOrigin = ['US', 'CA', 'MX'].includes(component.origin_country);
+                const displaySavings = isUSMCAOrigin ? (component.current_annual_savings || 0) : (component.potential_annual_savings || 0);
+
+                return (
+                  <div key={index} style={{
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    padding: '1rem',
+                    marginBottom: '0.75rem',
+                    backgroundColor: '#ffffff'
+                  }}>
+                    {/* Component Name + Origin */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <div style={{ fontWeight: '600', color: '#1f2937', fontSize: '0.95rem', marginBottom: '0.25rem' }}>
+                        {component.description || ('Component ' + (index + 1))}
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Origin: <strong>{component.origin_country}</strong></span>
+                        <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Value: <strong>{component.value_percentage}%</strong></span>
+                        {component.volatility_tier && component.volatility_tier <= 2 && (
+                          <span style={{
+                            fontSize: '0.7rem',
+                            fontWeight: '600',
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: '9999px',
+                            backgroundColor: component.volatility_tier === 1 ? '#fef3c7' : '#dbeafe',
+                            color: component.volatility_tier === 1 ? '#92400e' : '#1e40af'
+                          }}>
+                            Volatile
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Tariff Rates Grid */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '0.5rem',
+                      fontSize: '0.8125rem',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <div>
+                        <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>Total Rate</div>
+                        <div style={{ fontWeight: '600', color: '#1f2937' }}>
+                          {totalAppliedRate !== null ? `${(totalAppliedRate * 100).toFixed(1)}%` : 'N/A'}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>
+                          {isUSMCAOrigin ? 'Current Savings' : 'Potential Savings'}
+                        </div>
+                        <div style={{
+                          fontWeight: '600',
+                          color: displaySavings > 0 ? (isUSMCAOrigin ? '#059669' : '#2563eb') : '#6b7280'
+                        }}>
+                          {displaySavings > 0 ? `$${displaySavings.toLocaleString()}/yr` : '$0'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expand button for details */}
+                    {(component.ai_reasoning || component.alternative_codes || component.confidence) && (
+                      <button
+                        onClick={() => toggleComponentDetails(index)}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          fontSize: '0.8125rem',
+                          fontWeight: '500',
+                          color: '#374151',
+                          backgroundColor: '#f3f4f6',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {expandedComponents[index] ? '▼ Hide Details' : '▶ Show AI Details'}
+                      </button>
+                    )}
+
+                    {/* Expanded Details */}
+                    {expandedComponents[index] && (
+                      <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #e5e7eb', fontSize: '0.8125rem' }}>
+                        {component.confidence && (
+                          <div style={{ marginBottom: '0.5rem' }}>
+                            <strong>AI Confidence:</strong> {component.confidence}%
+                          </div>
+                        )}
+                        {component.hs_code && (
+                          <div style={{ marginBottom: '0.5rem' }}>
+                            <strong>HS Code:</strong> <code style={{ backgroundColor: '#f3f4f6', padding: '0.125rem 0.25rem', borderRadius: '3px' }}>{component.hs_code}</code>
+                          </div>
+                        )}
+                        {component.ai_reasoning && (
+                          <div style={{ marginBottom: '0.5rem' }}>
+                            <strong>AI Reasoning:</strong>
+                            <div style={{ marginTop: '0.25rem', color: '#4b5563', fontStyle: 'italic' }}>
+                              {component.ai_reasoning}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* DESKTOP: Table Layout */}
+          {!isMobile && (
+        <div className="element-spacing" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', tableLayout: 'fixed', minWidth: '800px' }}>
             <colgroup>
               <col style={{ width: '25%' }} />
               <col style={{ width: '8%' }} />
@@ -900,6 +1030,8 @@ export default function USMCAQualification({ results }) {
             </tbody>
           </table>
         </div>
+          )}
+        </>
       )}
 
       {/* Gap Analysis for NOT QUALIFIED products */}

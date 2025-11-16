@@ -29,7 +29,14 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
   const [threats, setThreats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
-  const [sectionExpanded, setSectionExpanded] = useState(true); // Expanded by default (critical info)
+  const [sectionExpanded, setSectionExpanded] = useState(false); // Collapsed by default on mobile
+
+  // Expand on desktop by default
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+      setSectionExpanded(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!components || components.length === 0) {

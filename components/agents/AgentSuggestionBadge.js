@@ -136,14 +136,15 @@ export default function AgentSuggestionBadge({ suggestion, onAccept, onDismiss }
                               border: '1px solid #fde68a'
                             }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem', flexWrap: 'wrap', gap: '0.25rem' }}>
                               <strong style={{ fontFamily: 'monospace', color: '#78350f' }}>{safeCode}</strong>
                               <span style={{
                                 fontSize: '0.75rem',
                                 padding: '0.125rem 0.5rem',
                                 borderRadius: '12px',
                                 backgroundColor: safeConfidence >= 70 ? '#fef3c7' : '#fee2e2',
-                                color: safeConfidence >= 70 ? '#92400e' : '#991b1b'
+                                color: safeConfidence >= 70 ? '#92400e' : '#991b1b',
+                                whiteSpace: 'nowrap'
                               }}>
                                 {safeConfidence}% match
                               </span>

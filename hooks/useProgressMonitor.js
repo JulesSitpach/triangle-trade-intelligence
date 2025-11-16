@@ -94,18 +94,36 @@ export function useProgressMonitor() {
     updateProgress();
   }, []);
 
-  // Mark as complete (with 8-second delay so users can see the 95% "Almost done..." state)
+  // Mark as complete (slowly creep from 95% to 100% over 10 seconds)
   const completeMonitoring = useCallback(() => {
-    // Wait 8 seconds before showing 100% complete
-    setTimeout(() => {
-      setProgress(prev => ({
-        ...prev,
-        percentage: 100,
-        message: '✅ Analysis complete!',
-        estimatedTimeRemaining: 0,
-        isComplete: true
-      }));
-    }, 8000); // 8 seconds to let users see "Almost done..." at 95%
+    // Slowly increment from 95% to 100% over 10 seconds
+    let currentPercentage = 95;
+    const targetPercentage = 100;
+    const totalDuration = 10000; // 10 seconds
+    const updateInterval = 500; // Update every 500ms
+    const incrementPerUpdate = (targetPercentage - currentPercentage) / (totalDuration / updateInterval);
+
+    const creepUp = setInterval(() => {
+      currentPercentage += incrementPerUpdate;
+
+      if (currentPercentage >= 100) {
+        clearInterval(creepUp);
+        setProgress(prev => ({
+          ...prev,
+          percentage: 100,
+          message: '✅ Analysis complete!',
+          estimatedTimeRemaining: 0,
+          isComplete: true
+        }));
+      } else {
+        setProgress(prev => ({
+          ...prev,
+          percentage: Math.round(currentPercentage),
+          message: '⏳ Almost done...',
+          estimatedTimeRemaining: Math.max(0, (100 - currentPercentage) * (totalDuration / 5))
+        }));
+      }
+    }, updateInterval);
   }, []);
 
   // Reset progress

@@ -7,8 +7,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 export default function ExecutiveSummaryDisplay({ data, onClose }) {
   const [narrativeContent, setNarrativeContent] = useState('');
-  const [mainExpanded, setMainExpanded] = useState(true); // Main container expanded by default
-  const [expandedSections, setExpandedSections] = useState({}); // Track each section's state
+  const [mainExpanded, setMainExpanded] = useState(true); // Main header always expanded by default (shows sections list)
+  const [expandedSections, setExpandedSections] = useState({}); // Track each section's state (collapsed on mobile)
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     // Extract AI-generated narrative from the alert structure
@@ -57,13 +69,14 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
     return sections;
   }, []);
 
-  // Initialize all sections as expanded when content loads
+  // Initialize all sections as expanded on desktop, collapsed on mobile
   useEffect(() => {
     if (narrativeContent) {
       const sections = parseSections(narrativeContent);
       const initialState = {};
+      const shouldExpand = typeof window !== 'undefined' && window.innerWidth >= 768;
       sections.forEach((_, index) => {
-        initialState[index] = true; // All sections expanded by default
+        initialState[index] = shouldExpand; // Expanded on desktop, collapsed on mobile
       });
       setExpandedSections(initialState);
     }
@@ -282,7 +295,9 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '1.5rem 2rem'
+          padding: isMobile ? '0.75rem 1rem' : '1.5rem 2rem',
+          flexWrap: 'wrap',
+          gap: '0.5rem'
         }}
       >
         <h2
@@ -340,7 +355,7 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
       {/* AI-Generated Narrative Sections - Only show if main is expanded */}
       {mainExpanded && (
-        <div style={{ padding: '2rem' }}>
+        <div style={{ padding: isMobile ? '0.75rem' : '2rem' }}>
           {sections.map((section, index) => {
             // Skip rendering the first section entirely if it matches the main header (avoid duplicate)
             const isDuplicateTitle = index === 0 &&
@@ -353,21 +368,23 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
             const isExpanded = expandedSections[index] !== false; // Default to expanded
 
             return (
-              <div key={index} className="executive-section" style={{ marginBottom: '1.5rem' }}>
+              <div key={index} className="executive-section" style={{ marginBottom: isMobile ? '0.75rem' : '1.5rem' }}>
                 {/* Section Header with Smaller Triangle */}
                 <h3
                   onClick={(e) => handleToggleSection(index, e)}
                   style={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: '600',
                     color: '#3b82f6',
-                    margin: '0 0 0.75rem 0',
+                    margin: '0 0 0.5rem 0',
                     cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.5rem 0',
-                    transition: 'color 0.2s ease'
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
+                    padding: '0.25rem 0',
+                    transition: 'color 0.2s ease',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.color = '#2563eb';
@@ -390,10 +407,10 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
                 {/* Section Content - Only show if expanded */}
                 {isExpanded && (
                   <div style={{
-                    fontSize: '0.9375rem',
+                    fontSize: isMobile ? '0.875rem' : '0.9375rem',
                     color: '#374151',
-                    lineHeight: '1.7',
-                    paddingLeft: '2rem'
+                    lineHeight: '1.6',
+                    paddingLeft: isMobile ? '1rem' : '2rem'
                   }}>
                     {section.content.split('\n\n').map((paragraph, pIndex) => {
                       // Skip empty paragraphs and dividers
@@ -601,6 +618,20 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
           font-size: 0.875rem;
           color: #92400e;
           line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+          .executive-main-header h2 {
+            font-size: 0.95rem !important;
+          }
+
+          .executive-summary-disclaimer {
+            padding: 0.75rem 1rem;
+          }
+
+          .executive-summary-disclaimer p {
+            font-size: 0.75rem;
+          }
         }
       `}</style>
     </div>
