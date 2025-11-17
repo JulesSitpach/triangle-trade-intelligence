@@ -790,8 +790,8 @@ export default function WorkflowResults({
               </div>
             )}
 
-            {/* Policy Risk Alert Card */}
-            {results.usmca?.qualified && results.savings?.section_301_exposure?.is_exposed && (
+            {/* Policy Risk Alert Card - Only show if component_breakdown data is available */}
+            {results.usmca?.qualified && results.savings?.section_301_exposure?.is_exposed && results.usmca?.component_breakdown?.length > 0 && (
               <div style={{
                 padding: '0.75rem',
                 backgroundColor: '#fef2f2',
