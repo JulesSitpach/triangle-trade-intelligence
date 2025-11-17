@@ -456,7 +456,141 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* Removed: Sample screenshots, FAQ, and Growth Path sections - keeping pricing page focused and clean for busy SMBs */}
+      {/* FAQ Section */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Frequently Asked Questions</h2>
+          </div>
+
+          <div style={{
+            maxWidth: '900px',
+            margin: '0 auto'
+          }}>
+            {/* Broker Usage FAQ */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '2rem',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1e3a8a',
+                marginBottom: '1rem'
+              }}>
+                Q: Should I still use a customs broker?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '1.5rem' }}>
+                <strong>A: It depends on your risk tolerance and transaction complexity:</strong>
+              </p>
+
+              {/* Low Risk Scenario */}
+              <div style={{
+                backgroundColor: '#f0fdf4',
+                padding: '1rem',
+                borderRadius: '6px',
+                border: '1px solid #bbf7d0',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ fontWeight: '600', color: '#166534', marginBottom: '0.5rem' }}>
+                  🟢 Low-risk scenario (platform only):
+                </p>
+                <ul style={{ paddingLeft: '1.5rem', margin: '0', color: '#166534' }}>
+                  <li>Simple supply chains (5-10 components)</li>
+                  <li>Clear USMCA qualification (70%+ RVC)</li>
+                  <li>Stable suppliers with good documentation</li>
+                  <li>Lower transaction values (&lt;$50,000)</li>
+                </ul>
+                <p style={{ marginTop: '0.5rem', fontWeight: '500', color: '#166534' }}>
+                  Cost: $99-299/month platform only
+                </p>
+              </div>
+
+              {/* Medium Risk Scenario */}
+              <div style={{
+                backgroundColor: '#fefce8',
+                padding: '1rem',
+                borderRadius: '6px',
+                border: '1px solid #fef08a',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ fontWeight: '600', color: '#854d0e', marginBottom: '0.5rem' }}>
+                  🟡 Medium-risk scenario (platform + broker review):
+                </p>
+                <ul style={{ paddingLeft: '1.5rem', margin: '0', color: '#854d0e' }}>
+                  <li>Moderate complexity (10-20 components)</li>
+                  <li>Borderline qualification (55-65% RVC)</li>
+                  <li>First-time USMCA claims</li>
+                  <li>Higher transaction values ($50,000-200,000)</li>
+                </ul>
+                <p style={{ marginTop: '0.5rem', fontWeight: '500', color: '#854d0e' }}>
+                  Cost: Platform ($99-299/month) + broker review ($200-400 one-time)
+                </p>
+              </div>
+
+              {/* High Risk Scenario */}
+              <div style={{
+                backgroundColor: '#fff7ed',
+                padding: '1rem',
+                borderRadius: '6px',
+                border: '1px solid #fed7aa',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ fontWeight: '600', color: '#9a3412', marginBottom: '0.5rem' }}>
+                  🟠 High-risk scenario (platform + broker partnership):
+                </p>
+                <ul style={{ paddingLeft: '1.5rem', margin: '0', color: '#9a3412' }}>
+                  <li>Complex supply chains (20+ components)</li>
+                  <li>Multiple transformation processes</li>
+                  <li>High transaction values ($200,000+)</li>
+                  <li>History of CBP audits</li>
+                </ul>
+                <p style={{ marginTop: '0.5rem', fontWeight: '500', color: '#9a3412' }}>
+                  Cost: Platform ($299-599/month) + broker ($200-400/hour as needed)
+                </p>
+              </div>
+
+              {/* Very High Risk Scenario */}
+              <div style={{
+                backgroundColor: '#fef2f2',
+                padding: '1rem',
+                borderRadius: '6px',
+                border: '1px solid #fecaca',
+                marginBottom: '1rem'
+              }}>
+                <p style={{ fontWeight: '600', color: '#991b1b', marginBottom: '0.5rem' }}>
+                  🔴 Very high-risk scenario (full broker management):
+                </p>
+                <ul style={{ paddingLeft: '1.5rem', margin: '0', color: '#991b1b' }}>
+                  <li>Automotive/textile (high CBP scrutiny)</li>
+                  <li>Section 301 tariff exposure</li>
+                  <li>Questionable origin documentation</li>
+                  <li>Previous CBP penalties</li>
+                </ul>
+                <p style={{ marginTop: '0.5rem', fontWeight: '500', color: '#991b1b' }}>
+                  Cost: Full broker services ($500-2,000+/month retainer)
+                </p>
+              </div>
+
+              <div style={{
+                backgroundColor: '#f8fafc',
+                padding: '1rem',
+                borderRadius: '6px',
+                marginTop: '1rem'
+              }}>
+                <p className="text-body" style={{ fontStyle: 'italic', marginBottom: '0' }}>
+                  <strong>Our recommendation:</strong> Use the platform for analysis and certificate generation,
+                  then consult a licensed customs broker for high-value or complex transactions.
+                  The platform helps you prepare better questions and documentation, reducing broker billable hours.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="main-content">
