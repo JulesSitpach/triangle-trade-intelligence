@@ -395,6 +395,86 @@ export default function Pricing() {
         </div>
       </section>
 
+      {/* Feature Comparison Table */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Compare Plan Features</h2>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              overflow: 'hidden'
+            }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc' }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Feature</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', borderBottom: '2px solid #e2e8f0' }}>Trial</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', borderBottom: '2px solid #e2e8f0' }}>Starter</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', borderBottom: '2px solid #e2e8f0', backgroundColor: '#dbeafe' }}>Professional</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', borderBottom: '2px solid #e2e8f0' }}>Premium</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Monthly Price</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>$0</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>$99</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>$299</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>$599</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>AI Credits/Month</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>1</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>15</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>100</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>500</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Components per Workflow</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>3</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>10</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>15</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>20</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Certificate Downloads</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>Preview only</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>Unlimited</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>Unlimited</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>Unlimited</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Executive Summaries</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>-</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>✓</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>✓</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>✓</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Daily Crisis Alerts</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>View only</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>✓ + Email</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>✓ + Email</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>✓ + Email</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>Commitment Period</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>7 days</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>None</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>30 days</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>60 days</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* Cost Savings Comparison - Directly under subscription tiers */}
       <section className="main-content" style={{ backgroundColor: '#ecfdf5' }}>
         <div className="container-app">
@@ -681,6 +761,73 @@ export default function Pricing() {
                   The platform helps you prepare better questions and documentation, reducing broker billable hours.
                 </p>
               </div>
+            </div>
+
+            {/* Additional FAQ Questions */}
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '2rem',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1e3a8a',
+                marginBottom: '1rem'
+              }}>
+                Q: What counts as an AI credit?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                Each workflow analysis (USMCA qualification + tariff calculation) uses 1 credit.
+                Each executive summary uses 1 credit. HS code classification is included in the workflow credit.
+              </p>
+            </div>
+
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '2rem',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1e3a8a',
+                marginBottom: '1rem'
+              }}>
+                Q: Can I cancel anytime?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                <strong>Trial:</strong> Auto-expires after 7 days, no commitment.<br/>
+                <strong>Starter:</strong> Cancel anytime, no lock-in period.<br/>
+                <strong>Professional:</strong> 30-day commitment, then cancel anytime.<br/>
+                <strong>Premium:</strong> 60-day commitment, then cancel anytime.<br/>
+                Commitments ensure stable compliance workflows for higher-volume users.
+              </p>
+            </div>
+
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '2rem',
+              border: '1px solid #e2e8f0',
+              marginBottom: '1.5rem'
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#1e3a8a',
+                marginBottom: '1rem'
+              }}>
+                Q: Why choose annual billing?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                Annual billing saves up to 20% compared to monthly. Example: Professional plan is $299/month or $2,850/year
+                ($237.50/month effective rate). You save $588/year with annual commitment.
+              </p>
             </div>
           </div>
         </div>
