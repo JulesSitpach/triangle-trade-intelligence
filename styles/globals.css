@@ -947,7 +947,7 @@ textarea.form-input {
   }
 
   .nav-menu.mobile-open .nav-menu-link {
-    padding: 1rem 2rem;
+    padding: 0.75rem 1.5rem;
     min-height: 44px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
@@ -960,13 +960,35 @@ textarea.form-input {
   }
 
   .nav-menu.mobile-open .nav-cta-button {
-    margin: 1rem 2rem;
-    padding: 1rem;
+    margin: 0.75rem 1.5rem;
+    padding: 0.75rem;
     text-align: center;
     min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .nav-menu.mobile-open .admin-dropdown {
+    padding: 0.75rem 1.5rem;
+  }
+
+  .nav-menu.mobile-open .admin-dropdown .btn-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-menu.mobile-open .admin-dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 0.5rem;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .nav-menu.mobile-open .admin-dropdown-item {
+    padding: 0.75rem 1rem;
   }
 
   .hero-content-container {
