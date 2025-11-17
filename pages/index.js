@@ -158,7 +158,7 @@ export default function HomePage() {
               className="hero-primary-button"
               aria-label="Start free analysis"
             >
-              Start Free Analysis →
+              Try Free - 1 Analysis, No Credit Card
             </Link>
           </div>
 
@@ -452,7 +452,7 @@ export default function HomePage() {
           </p>
 
           <Link href="/signup" className="btn-primary">
-            Start Free Analysis →
+            Try Free - 1 Analysis, No Credit Card
           </Link>
         </div>
       </section>
@@ -559,6 +559,106 @@ export default function HomePage() {
             <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280', fontStyle: 'italic' }}>
               <strong>Verification Required:</strong> All tariff rates are for informational purposes. Users must verify with official USITC sources or licensed customs brokers before making business decisions.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Best of Both Worlds - Platform + Broker Savings */}
+      <section className="main-content" style={{ backgroundColor: '#ecfdf5' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Best of Both Worlds</h2>
+            <p className="section-header-subtitle">
+              Use our platform for analysis, get broker validation when needed - save 65-75% either way
+            </p>
+          </div>
+
+          <div className="content-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{
+              backgroundColor: '#fefce8',
+              padding: '1.25rem',
+              borderRadius: '6px',
+              border: '1px solid #fef08a',
+              marginBottom: '1.5rem'
+            }}>
+              <p style={{ fontWeight: '600', color: '#854d0e', marginBottom: '0.5rem' }}>
+                Key insight:
+              </p>
+              <p style={{ color: '#854d0e', marginBottom: '0' }}>
+                Our platform does the heavy lifting (HS classification, RVC calculation, certificate drafting).
+                Your broker just validates in <strong>1 hour</strong> instead of creating from scratch in <strong>10 hours</strong>.
+              </p>
+            </div>
+
+            <div style={{
+              backgroundColor: '#1e3a8a',
+              color: 'white',
+              padding: '1.25rem',
+              borderRadius: '6px',
+              textAlign: 'center'
+            }}>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0' }}>
+                Platform + Broker Validation = <strong>Save 65-75%</strong> vs broker-only approach
+              </p>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <Link href="/pricing#pricing" className="btn-primary">
+                See Cost Comparison →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="main-content">
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Frequently Asked Questions</h2>
+          </div>
+
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div className="content-card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+                Q: Do I still need a customs broker?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                For low-risk situations (simple supply chains, clear qualification), you can use the platform alone.
+                For higher-value or complex transactions, use the platform for analysis and have your broker validate.
+                Either way, you save 65-75% compared to broker-only approach.
+              </p>
+            </div>
+
+            <div className="content-card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+                Q: How accurate is the tariff data?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                75% of lookups use official USITC database (12,118 HS codes). 25% use real-time AI research for current
+                Section 301/232 policy rates. All rates are informational - verify with official sources before customs submission.
+              </p>
+            </div>
+
+            <div className="content-card" style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+                Q: What&apos;s included in the free trial?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                1 complete workflow analysis, up to 3 components, certificate preview (no download), and access to crisis alerts dashboard.
+                No credit card required.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <h3 style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+                Q: How long does an analysis take?
+              </h3>
+              <p className="text-body" style={{ marginBottom: '0' }}>
+                5 minutes or less. Enter company info, add components with origins, and get USMCA qualification results with
+                tariff savings calculations instantly.
+              </p>
+            </div>
           </div>
         </div>
       </section>
