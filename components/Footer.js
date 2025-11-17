@@ -69,11 +69,6 @@ export default function Footer() {
                   Sign In
                 </Link>
               </li>
-              <li className="mb-2">
-                <Link href="/dashboard-user" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Dashboard
-                </Link>
-              </li>
             </ul>
           </div>
 
