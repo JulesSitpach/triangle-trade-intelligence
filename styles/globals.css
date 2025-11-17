@@ -293,12 +293,13 @@ a:hover {
 .nav-menu-link.active {
   color: white;
   font-weight: 500;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.2) 100%);
+  background: transparent;
 }
 
 .nav-menu-link.active::after {
-  width: 80%;
-  background: var(--blue-400);
+  width: 100%;
+  background: white;
+  height: 2px;
 }
 
 /* DELETED: .nav-cta-button - use .btn-primary instead */
