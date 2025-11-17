@@ -395,68 +395,7 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* What's Included in All Plans */}
-      <section className="main-content" style={{ backgroundColor: '#f0f9ff' }}>
-        <div className="container-app">
-          <div className="section-header">
-            <h2 className="section-header-title">What&apos;s Included in All Plans</h2>
-            <p className="section-header-subtitle">
-              Every subscription includes access to our complete data infrastructure
-            </p>
-          </div>
-
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '2rem',
-            border: '1px solid #dbeafe',
-            maxWidth: '800px',
-            margin: '0 auto'
-          }}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Access to 12,118 HS code database (official USITC rates)
-              </p>
-              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> AI-powered HS code classification for missing codes
-              </p>
-              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Real-time Section 301/232 policy rate lookups via AI
-              </p>
-              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Daily tariff change monitoring (Federal Register RSS)
-              </p>
-              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> USMCA certificate generation (official Form D format)
-              </p>
-            </div>
-
-            <div style={{
-              backgroundColor: '#fefce8',
-              padding: '1rem',
-              borderRadius: '6px',
-              border: '1px solid #fef08a'
-            }}>
-              <p style={{ fontSize: '0.875rem', color: '#854d0e', marginBottom: '0.5rem' }}>
-                <strong>Data Freshness Notice:</strong>
-              </p>
-              <p style={{ fontSize: '0.875rem', color: '#854d0e', lineHeight: '1.5' }}>
-                Database updated November 2025. AI fallback provides real-time lookups for current policy rates.
-                Users must verify rates with official sources or licensed customs brokers before customs submission.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Legal Disclaimer - After Pricing */}
-      <section className="main-content">
-        <div className="container-app">
-          <LegalDisclaimer />
-        </div>
-      </section>
-
-      {/* Cost Savings Comparison */}
+      {/* Cost Savings Comparison - Directly under subscription tiers */}
       <section className="main-content" style={{ backgroundColor: '#ecfdf5' }}>
         <div className="container-app">
           <div className="section-header">
@@ -466,14 +405,7 @@ export default function Pricing() {
             </p>
           </div>
 
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '2rem',
-            border: '1px solid #bbf7d0',
-            maxWidth: '900px',
-            margin: '0 auto'
-          }}>
+          <div className="content-card" style={{ maxWidth: '900px', margin: '0 auto' }}>
             {/* Comparison Table */}
             <div style={{ overflowX: 'auto' }}>
               <table style={{
@@ -558,6 +490,60 @@ export default function Pricing() {
             }}>
               <p style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0' }}>
                 Use our platform + get broker validation = <strong>Save 65-75%</strong> vs broker-only approach
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What's Included in All Plans */}
+      <section className="main-content" style={{ backgroundColor: '#f0f9ff' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">What&apos;s Included in All Plans</h2>
+            <p className="section-header-subtitle">
+              Every subscription includes access to our complete data infrastructure
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '2rem',
+            border: '1px solid #dbeafe',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Access to 12,118 HS code database (official USITC rates)
+              </p>
+              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> AI-powered HS code classification for missing codes
+              </p>
+              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Real-time Section 301/232 policy rate lookups via AI
+              </p>
+              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> Daily tariff change monitoring (Federal Register RSS)
+              </p>
+              <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                <span style={{ color: '#2563eb', fontWeight: 'bold' }}>✓</span> USMCA certificate generation (official Form D format)
+              </p>
+            </div>
+
+            <div style={{
+              backgroundColor: '#fefce8',
+              padding: '1rem',
+              borderRadius: '6px',
+              border: '1px solid #fef08a'
+            }}>
+              <p style={{ fontSize: '0.875rem', color: '#854d0e', marginBottom: '0.5rem' }}>
+                <strong>Data Freshness Notice:</strong>
+              </p>
+              <p style={{ fontSize: '0.875rem', color: '#854d0e', lineHeight: '1.5' }}>
+                Database updated November 2025. AI fallback provides real-time lookups for current policy rates.
+                Users must verify rates with official sources or licensed customs brokers before customs submission.
               </p>
             </div>
           </div>
@@ -720,6 +706,13 @@ export default function Pricing() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Legal Disclaimer - Bottom of page, just above footer */}
+      <section className="main-content">
+        <div className="container-app">
+          <LegalDisclaimer />
         </div>
       </section>
 
