@@ -241,10 +241,10 @@ export default function HomePage() {
             {/* Card 2: Broker Costs */}
             <div className="content-card">
               <h3 className="content-card-title">
-                Brokers Charge $500 Per Certificate
+                Broker Consulting Fees Add Up Fast
               </h3>
               <p className="content-card-description">
-                And you need a new one every time your supply chain changes
+                $200-400/hour every time you need supply chain impact analysis
               </p>
             </div>
 
@@ -419,30 +419,13 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid-2-cols">
-            <div className="content-card">
-              <p className="content-card-description">
-                Run the analysis yourself whenever you need it
-              </p>
-            </div>
-
-            <div className="content-card">
-              <p className="content-card-description">
-                See the calculations and methodology
-              </p>
-            </div>
-
-            <div className="content-card">
-              <p className="content-card-description">
-                Verify the results with your own broker
-              </p>
-            </div>
-
-            <div className="content-card">
-              <p className="content-card-description">
-                Generate certificates on your own timeline
-              </p>
-            </div>
+          <div className="content-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+            <ul className="bullet-list">
+              <li className="text-body">Run the analysis yourself whenever you need it</li>
+              <li className="text-body">See the calculations and methodology</li>
+              <li className="text-body">Verify the results with your own broker</li>
+              <li className="text-body">Generate certificates on your own timeline</li>
+            </ul>
           </div>
 
           <div className="section-header">
