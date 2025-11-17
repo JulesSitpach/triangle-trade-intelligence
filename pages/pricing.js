@@ -56,6 +56,15 @@ export default function Pricing() {
         return
       }
 
+      // ✅ FIX (Nov 17): Check authenticated field, not just HTTP status
+      // /api/auth/me returns 200 with authenticated: false when no session exists
+      const authData = await authCheck.json()
+      if (!authData.authenticated) {
+        // User not logged in - redirect to signup with selected plan
+        router.push(`/signup?plan=${tier}`)
+        return
+      }
+
       // If user already has an ACTIVE subscription (changing plans), redirect to customer portal
       // NOTE: Only send to portal if they have a paid tier AND an active Stripe customer ID
       if (currentTier && currentTier !== 'trial') {
