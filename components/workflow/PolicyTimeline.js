@@ -106,8 +106,30 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
         severity_level: alert.severity // Database has 'severity', code expects 'severity_level'
       })) || [];
 
+      // ✅ AGE-BASED FILTERING: Keep alerts based on severity (prevent clutter)
+      // CRITICAL/HIGH: 30 days, MEDIUM: 14 days, LOW: 7 days
+      const now = new Date();
+      const ageFilteredAlerts = normalizedAlerts.filter(alert => {
+        const alertAge = (now - new Date(alert.created_at)) / (1000 * 60 * 60 * 24); // days
+        const severity = (alert.severity || '').toUpperCase();
+
+        if (severity === 'CRITICAL' || severity === 'HIGH') {
+          return alertAge <= 30; // Keep for 30 days
+        } else if (severity === 'MEDIUM') {
+          return alertAge <= 14; // Keep for 14 days
+        } else {
+          return alertAge <= 7; // LOW/unknown: 7 days
+        }
+      });
+
+      console.log('📅 [POLICYTIMELINE] Age-filtered alerts:', {
+        before: normalizedAlerts.length,
+        after: ageFilteredAlerts.length,
+        removed: normalizedAlerts.length - ageFilteredAlerts.length
+      });
+
       // ✅ SEVERITY FILTER: Only show critical/high severity (filter in JS for schema compatibility)
-      const highSeverityAlerts = normalizedAlerts.filter(alert => {
+      const highSeverityAlerts = ageFilteredAlerts.filter(alert => {
         const severity = (alert.severity_level || '').toLowerCase();
         return severity === 'critical' || severity === 'high';
       });

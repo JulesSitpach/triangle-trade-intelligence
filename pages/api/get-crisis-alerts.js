@@ -64,10 +64,28 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to fetch alerts' });
     }
 
+    // ✅ AGE-BASED FILTERING (Nov 17): Prevent alert clutter
+    // CRITICAL/HIGH: 30 days, MEDIUM: 14 days, LOW: 7 days
+    const now = new Date();
+    const ageFilteredAlerts = (alerts || []).filter(alert => {
+      const alertAge = (now - new Date(alert.created_at)) / (1000 * 60 * 60 * 24); // days
+      const severity = (alert.severity || alert.severity_level || '').toUpperCase();
+
+      if (severity === 'CRITICAL' || severity === 'HIGH') {
+        return alertAge <= 30; // Keep for 30 days
+      } else if (severity === 'MEDIUM') {
+        return alertAge <= 14; // Keep for 14 days
+      } else {
+        return alertAge <= 7; // LOW/unknown: 7 days
+      }
+    });
+
+    console.log(`📅 Age-filtered alerts: ${alerts?.length || 0} → ${ageFilteredAlerts.length} (removed ${(alerts?.length || 0) - ageFilteredAlerts.length} old alerts)`);
+
     // ✅ FIX (Nov 8): Map to ACTUAL crisis_alerts schema
     // Schema from migrations/011_create_rss_monitoring_tables.sql
     // ✅ SCHEMA COMPATIBILITY (Nov 8): Handle both old (severity) and new (severity_level) schemas
-    const formattedAlerts = (alerts || []).map(alert => {
+    const formattedAlerts = ageFilteredAlerts.map(alert => {
       // Normalize severity field (database has 'severity', not 'severity_level')
       const normalizedSeverity = alert.severity_level || alert.severity;
 
