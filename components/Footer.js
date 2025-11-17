@@ -118,11 +118,6 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <a href="mailto:triangleintel@gmail.com" style={{ color: '#e0f2fe', textDecoration: 'none', fontSize: '0.9rem' }}>
-                  triangleintel@gmail.com
-                </a>
-              </li>
             </ul>
           </div>
         </div>
