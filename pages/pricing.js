@@ -419,7 +419,7 @@ export default function Pricing() {
                     className="content-card-link btn-primary"
                   >
                     {loading === plan.tier ? 'Loading...' :
-                      currentTier ? 'Change Plan' : plan.cta}
+                      currentTier && currentTier !== 'trial' ? 'Change Plan' : plan.cta}
                   </button>
                 )}
 
