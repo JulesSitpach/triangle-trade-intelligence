@@ -12,6 +12,7 @@ export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState('monthly')
   const [loading, setLoading] = useState(null)
   const [currentTier, setCurrentTier] = useState(null) // Track user's current subscription
+  const [pendingAutoSubscribe, setPendingAutoSubscribe] = useState(null) // ✅ FIX (Nov 17): Auto-trigger checkout
   const router = useRouter()
 
   useEffect(() => {
@@ -23,10 +24,34 @@ export default function Pricing() {
         const response = await fetch('/api/auth/me', { credentials: 'include' })
         if (response.ok) {
           const data = await response.json()
-          if (data.user && data.user.subscription_tier) {
+          if (data.authenticated && data.user && data.user.subscription_tier) {
             // Store in lowercase for comparison (database has "Starter", "Professional", "Premium")
             setCurrentTier(data.user.subscription_tier.toLowerCase())
             console.log('Current user tier:', data.user.subscription_tier)
+
+            // ✅ FIX (Nov 17): Check for pending subscription from signup flow
+            // User signed up with plan=starter, verified email, now auto-redirect to checkout
+            const pendingPlan = localStorage.getItem('pendingSubscriptionPlan')
+            const pendingTimestamp = localStorage.getItem('pendingSubscriptionTimestamp')
+
+            if (pendingPlan && pendingTimestamp) {
+              const elapsed = Date.now() - parseInt(pendingTimestamp, 10)
+              const oneHour = 60 * 60 * 1000
+
+              // Only auto-subscribe if within 1 hour of signup and user is on Trial tier
+              if (elapsed < oneHour && data.user.subscription_tier.toLowerCase() === 'trial') {
+                console.log('🔄 Detected pending subscription from signup:', pendingPlan)
+                // Clear the pending subscription immediately to prevent loops
+                localStorage.removeItem('pendingSubscriptionPlan')
+                localStorage.removeItem('pendingSubscriptionTimestamp')
+                // Set state to trigger checkout (handleSubscribe not available yet)
+                setPendingAutoSubscribe(pendingPlan)
+              } else {
+                // Expired or user already has paid tier - clean up
+                localStorage.removeItem('pendingSubscriptionPlan')
+                localStorage.removeItem('pendingSubscriptionTimestamp')
+              }
+            }
           }
         }
       } catch (error) {
@@ -121,6 +146,15 @@ export default function Pricing() {
       setLoading(null)
     }
   }
+
+  // ✅ FIX (Nov 17): Auto-trigger checkout for pending subscription from signup
+  useEffect(() => {
+    if (pendingAutoSubscribe && !loading) {
+      console.log('🚀 Auto-triggering checkout for:', pendingAutoSubscribe)
+      handleSubscribe(pendingAutoSubscribe)
+      setPendingAutoSubscribe(null) // Clear to prevent re-triggering
+    }
+  }, [pendingAutoSubscribe, loading])
 
   const plans = [
     {

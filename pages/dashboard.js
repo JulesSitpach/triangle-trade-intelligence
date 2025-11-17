@@ -18,6 +18,29 @@ export default function Dashboard() {
       router.push('/login?redirect=/dashboard');
     } else if (!loading && user) {
       console.log('✅ Dashboard access granted for:', user.isAdmin ? 'admin' : 'user');
+
+      // ✅ FIX (Nov 17): Check for pending subscription from signup flow
+      // If user just verified email after signing up with paid plan, redirect to pricing to complete checkout
+      if (typeof window !== 'undefined') {
+        const pendingPlan = localStorage.getItem('pendingSubscriptionPlan');
+        const pendingTimestamp = localStorage.getItem('pendingSubscriptionTimestamp');
+
+        if (pendingPlan && pendingTimestamp) {
+          const elapsed = Date.now() - parseInt(pendingTimestamp, 10);
+          const oneHour = 60 * 60 * 1000;
+
+          // Only redirect if within 1 hour of signup
+          if (elapsed < oneHour) {
+            console.log('🔄 Detected pending subscription from signup, redirecting to pricing:', pendingPlan);
+            router.push('/pricing');
+            return;
+          } else {
+            // Expired - clean up
+            localStorage.removeItem('pendingSubscriptionPlan');
+            localStorage.removeItem('pendingSubscriptionTimestamp');
+          }
+        }
+      }
     }
   }, [loading, user, router]);
 

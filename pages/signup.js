@@ -83,6 +83,12 @@ export default function Signup() {
 
         // Redirect based on selected plan
         if (plan && plan !== 'trial') {
+          // ✅ FIX (Nov 17): Store selected plan in localStorage for after email verification
+          // When Supabase confirms email, user is logged in directly - we need to remember their plan choice
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('pendingSubscriptionPlan', plan);
+            localStorage.setItem('pendingSubscriptionTimestamp', Date.now().toString());
+          }
           // For paid plans, redirect to login and then back to pricing
           alert(`✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nAfter verification, you'll be able to subscribe to the ${plan} plan.`);
           router.push(`/login?redirect=/pricing&message=Please verify your email to complete subscription`);
