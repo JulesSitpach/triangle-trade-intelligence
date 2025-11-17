@@ -367,45 +367,65 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
 
             const isExpanded = expandedSections[index] !== false; // Default to expanded
 
+            // Check if this is a company/product title (contains pipe | or has no real content beyond company name)
+            const isCompanyTitle = section.title.includes('|') ||
+              (index === 0 && !section.content.trim() && section.title.match(/^[A-Z].*(?:SA de CV|LLC|Inc|Corp|Ltd)/i));
+
             return (
               <div key={index} className="executive-section" style={{ marginBottom: isMobile ? '0.75rem' : '1.5rem' }}>
-                {/* Section Header with Smaller Triangle */}
-                <h3
-                  onClick={(e) => handleToggleSection(index, e)}
-                  style={{
-                    fontSize: isMobile ? '1rem' : '1.25rem',
-                    fontWeight: '600',
-                    color: '#3b82f6',
-                    margin: '0 0 0.5rem 0',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.5rem',
-                    padding: '0.25rem 0',
-                    transition: 'color 0.2s ease',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#2563eb';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#3b82f6';
-                  }}
-                >
-                  <span style={{
-                    display: 'inline-block',
-                    transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.3s ease',
-                    fontSize: '0.875rem'
-                  }}>
-                    ▶
-                  </span>
-                  {section.title}
-                </h3>
+                {/* Section Header - No arrow for company/product title, collapsible for others */}
+                {isCompanyTitle ? (
+                  <h3
+                    style={{
+                      fontSize: isMobile ? '1rem' : '1.25rem',
+                      fontWeight: '600',
+                      color: '#3b82f6',
+                      margin: '0 0 0.5rem 0',
+                      padding: '0.25rem 0',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word'
+                    }}
+                  >
+                    {section.title}
+                  </h3>
+                ) : (
+                  <h3
+                    onClick={(e) => handleToggleSection(index, e)}
+                    style={{
+                      fontSize: isMobile ? '1rem' : '1.25rem',
+                      fontWeight: '600',
+                      color: '#3b82f6',
+                      margin: '0 0 0.5rem 0',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.5rem',
+                      padding: '0.25rem 0',
+                      transition: 'color 0.2s ease',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#2563eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#3b82f6';
+                    }}
+                  >
+                    <span style={{
+                      display: 'inline-block',
+                      transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.3s ease',
+                      fontSize: '0.875rem'
+                    }}>
+                      ▶
+                    </span>
+                    {section.title}
+                  </h3>
+                )}
 
-                {/* Section Content - Only show if expanded */}
-                {isExpanded && (
+                {/* Section Content - Always show for company title, conditionally for others */}
+                {(isCompanyTitle || isExpanded) && section.content.trim() && (
                   <div style={{
                     fontSize: isMobile ? '0.875rem' : '0.9375rem',
                     color: '#374151',

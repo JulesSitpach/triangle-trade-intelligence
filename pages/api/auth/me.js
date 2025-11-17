@@ -96,12 +96,13 @@ export default async function handler(req, res) {
     // EXPECTED BEHAVIOR: Unauthenticated users don't have session cookies
     // ✅ FIX (Nov 6): Don't log missing triangle_session as error
     // Having __stripe_mid or other cookies without triangle_session is NORMAL for non-logged-in users
+    // ✅ FIX (Nov 16): Return 200 instead of 401 to prevent browser console errors
     if (!sessionCookie) {
-      // Return 401 - this is normal unauthenticated access
-      return res.status(401).json({
-        success: false,
+      // Return 200 with authenticated: false - this is normal unauthenticated access
+      return res.status(200).json({
+        success: true,
         authenticated: false,
-        error: 'No session found'
+        message: 'No session found'
       });
     }
 
@@ -115,10 +116,11 @@ export default async function handler(req, res) {
         message: 'Session verification failed',
         data: { endpoint: '/api/auth/me' }
       });
-      return res.status(401).json({
-        success: false,
+      // Return 200 with authenticated: false instead of 401 to prevent browser console errors
+      return res.status(200).json({
+        success: true,
         authenticated: false,
-        error: 'Invalid session'
+        message: 'Invalid session'
       });
     }
 

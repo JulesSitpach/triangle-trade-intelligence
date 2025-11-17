@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { logInfo, logError } from '../../lib/utils/production-logger.js';
-import { protectedApiHandler, sendSuccess, sendError } from '../../lib/api/apiHandler.js';
+import { protectedApiHandler, sendSuccess } from '../../lib/api/apiHandler.js';
 import { ApiError, validateRequiredFields } from '../../lib/api/errorHandler.js';
 
 const supabase = createClient(
@@ -220,14 +220,14 @@ export default protectedApiHandler({
 
         if (!sessionUpdateSuccess && !completionUpdateSuccess) {
           console.error('❌ Failed to save executive summary to any table');
-          return sendError(res, 'Failed to save executive summary', 500);
+          return res.status(500).json({ success: false, error: 'Failed to save executive summary' });
         }
 
         console.log('✅ Executive summary saved to database successfully');
         return sendSuccess(res, { saved: true }, 'Executive summary saved successfully');
       } catch (error) {
         console.error('❌ Error saving executive summary:', error);
-        return sendError(res, 'Failed to save executive summary', 500);
+        return res.status(500).json({ success: false, error: 'Failed to save executive summary' });
       }
     }
 

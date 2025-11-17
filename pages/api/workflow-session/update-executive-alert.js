@@ -18,7 +18,7 @@ const supabase = createClient(
 export default protectedApiHandler({
   POST: async (req, res) => {
     const userId = req.user.id;
-    const { detailed_analysis } = req.body;
+    const { detailed_analysis, workflow_id } = req.body;
 
     if (!detailed_analysis) {
       return res.status(400).json({
@@ -28,23 +28,46 @@ export default protectedApiHandler({
     }
 
     try {
-      console.log('📝 Saving executive alert to database for user:', userId);
+      console.log('📝 Saving executive alert to database for user:', userId, 'workflow_id:', workflow_id);
 
-      // Get most recent workflow session
-      const { data: sessionsRows } = await supabase
-        .from('workflow_sessions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('completed_at', { ascending: false })
-        .limit(1);
+      let sessionsRows = [];
+      let completionsRows = [];
 
-      // Get most recent workflow completion
-      const { data: completionsRows } = await supabase
-        .from('workflow_completions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('completed_at', { ascending: false })
-        .limit(1);
+      // ✅ FIX: If workflow_id provided, save to SPECIFIC workflow (not "most recent")
+      if (workflow_id) {
+        const { data: sessionData } = await supabase
+          .from('workflow_sessions')
+          .select('*')
+          .eq('id', workflow_id)
+          .eq('user_id', userId)
+          .limit(1);
+        sessionsRows = sessionData || [];
+
+        const { data: completionData } = await supabase
+          .from('workflow_completions')
+          .select('*')
+          .eq('id', workflow_id)
+          .eq('user_id', userId)
+          .limit(1);
+        completionsRows = completionData || [];
+      } else {
+        // Fallback to most recent (legacy behavior)
+        const { data: sessionData } = await supabase
+          .from('workflow_sessions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('completed_at', { ascending: false })
+          .limit(1);
+        sessionsRows = sessionData || [];
+
+        const { data: completionData } = await supabase
+          .from('workflow_completions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('completed_at', { ascending: false })
+          .limit(1);
+        completionsRows = completionData || [];
+      }
 
       let updated = false;
 

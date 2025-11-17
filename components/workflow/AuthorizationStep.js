@@ -620,7 +620,6 @@ export default function AuthorizationStep({ formData, updateFormData, workflowDa
                   </div>
                 </div>
               </label>
-            </div>
 
             {!authData.certifier_type && (
               <div style={{padding: '1rem', backgroundColor: '#fef3c7', borderRadius: '6px', marginTop: '1rem'}}>
