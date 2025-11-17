@@ -162,6 +162,12 @@ a:hover {
   color: var(--blue-700);
 }
 
+/* Override for button links - keep text white */
+a.btn-primary:hover,
+button.btn-primary:hover {
+  color: white !important;
+}
+
 /* ================== 3. LAYOUT CONTAINERS ================== */
 
 .container-app {
@@ -664,6 +670,7 @@ a:hover {
 }
 
 .btn-primary:hover {
+  color: white;
   background: linear-gradient(135deg, var(--navy-700) 0%, var(--navy-900) 100%);
   box-shadow: var(--shadow-md-enhanced);
   transform: translateY(-1px);
