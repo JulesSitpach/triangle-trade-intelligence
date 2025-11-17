@@ -120,7 +120,7 @@ export default function Support() {
                           <option value="support">Technical Support</option>
                           <option value="sales">Sales Inquiry</option>
                           <option value="subscription">Subscription/Billing</option>
-                          <option value="services">Professional Services</option>
+                          <option value="feedback">Feature Request/Feedback</option>
                         </select>
                         <p className="form-help">
                           This helps us route your message to the right team
