@@ -217,8 +217,136 @@ export default function OngoingAlertsPage() {
         </div>
       </section>
 
-      {/* Portfolio Briefing - THE FOCUS */}
+      {/* What We're Monitoring - 3 Streams */}
       <section className="main-content homepage-section-gray">
+        <div className="container-app homepage-container-narrow">
+          <div className="section-header homepage-section-header-centered">
+            <h2 className="section-header-title">What We&apos;re Monitoring Right Now</h2>
+            <p className="homepage-subtitle">
+              Forward-looking intelligence on 2026 policy changes - not just current rates
+            </p>
+          </div>
+
+          {/* Stream 1: USMCA */}
+          <div className="content-card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #2563eb' }}>
+            <h3 style={{ color: '#2563eb', fontSize: '1.2rem', marginBottom: '1rem' }}>
+              📅 Stream 1: USMCA Renegotiation Watch
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Timeline:</strong> January-March 2026
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>What to Watch:</strong> Cumulation rule changes, Chinese PCBA component restrictions
+                </p>
+              </div>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Monitoring:</strong> Weekly (USTR, Mexico Economy Ministry, Canadian Global Affairs)
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Why It Matters:</strong> Could force PCBA sourcing changes within 90 days
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Stream 2: Section 301 */}
+          <div className="content-card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #dc2626' }}>
+            <h3 style={{ color: '#dc2626', fontSize: '1.2rem', marginBottom: '1rem' }}>
+              📊 Stream 2: Section 301 Tariff Rate Cycles
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Timeline:</strong> March-April rate reviews, April-May announcements
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>What to Watch:</strong> HS 8534.00.00 (PCBA) rate changes (currently 15-25%)
+                </p>
+              </div>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Monitoring:</strong> Daily (USTR.gov tracker, trade press)
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Why It Matters:</strong> 5-10% rate increase = significant cost impact
+                </p>
+              </div>
+            </div>
+            {/* Dollar Impact Callout */}
+            <div style={{
+              backgroundColor: '#fef2f2',
+              padding: '1rem',
+              borderRadius: '6px',
+              border: '1px solid #fecaca',
+              marginTop: '1rem',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: '#991b1b', fontWeight: '600', fontSize: '1.1rem', marginBottom: '0' }}>
+                💰 Impact Example: 5-10% rate increase on $4M China imports = <strong>$200k-$400k annual cost increase</strong>
+              </p>
+            </div>
+          </div>
+
+          {/* Stream 3: Mexican Supply Chain */}
+          <div className="content-card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #059669' }}>
+            <h3 style={{ color: '#059669', fontSize: '1.2rem', marginBottom: '1rem' }}>
+              🔍 Stream 3: Mexican Labor & Aluminum Sourcing
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Timeline:</strong> Quarterly deep dives (ongoing)
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>What to Watch:</strong> Labor verification rules, Section 232 aluminum sourcing
+                </p>
+              </div>
+              <div>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Monitoring:</strong> Quarterly (Diario Oficial, aluminum industry reports)
+                </p>
+                <p className="text-body" style={{ marginBottom: '0.5rem' }}>
+                  <strong>Why It Matters:</strong> Tightening could force supplier restructuring
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Critical Intelligence Gaps - Highlighted Box */}
+          <div style={{
+            backgroundColor: '#fefce8',
+            padding: '1.5rem',
+            borderRadius: '8px',
+            border: '2px solid #fef08a',
+            marginTop: '2rem'
+          }}>
+            <h3 style={{ color: '#854d0e', marginBottom: '1rem' }}>
+              ⚠️ Critical Intelligence Gaps We Identify
+            </h3>
+            <p style={{ color: '#854d0e', marginBottom: '0.5rem' }}>
+              <strong>Gap 1:</strong> What specific HS codes might be affected by cumulation rule changes?
+            </p>
+            <p style={{ color: '#854d0e', marginBottom: '1rem' }}>
+              <strong>Gap 2:</strong> Are your Mexican suppliers compliant with tightening labor verification?
+            </p>
+            <p style={{ color: '#854d0e', fontStyle: 'italic', marginBottom: '0' }}>
+              These gaps should be addressed through supplier conversations in Q4 2025 - before the 2026 changes hit.
+            </p>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <Link href="/signup" className="btn-primary">
+              Start Monitoring These Streams - Free Trial →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio Briefing - THE FOCUS */}
+      <section className="main-content homepage-section-white">
         <div className="container-app homepage-container-narrow">
           <div className="section-header homepage-section-header-centered">
             <h2 className="section-header-title">Strategic Portfolio Reports</h2>
