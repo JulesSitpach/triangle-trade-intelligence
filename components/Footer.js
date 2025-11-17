@@ -96,7 +96,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support & Legal */}
+          {/* Support */}
           <div>
             <h4 style={{
               fontSize: '1.1rem',
@@ -104,23 +104,18 @@ export default function Footer() {
               marginBottom: '1rem',
               color: '#fff'
             }}>
-              Support & Legal
+              Support
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li className="mb-2">
-                <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Contact Support
-                </Link>
-              </li>
               <li className="mb-2">
                 <Link href="/support" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
                   Contact Us
                 </Link>
               </li>
               <li className="mb-2">
-                <span style={{ color: '#e0f2fe' }}>
-                  Email: triangleintel@gmail.com
-                </span>
+                <a href="mailto:triangleintel@gmail.com" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  triangleintel@gmail.com
+                </a>
               </li>
             </ul>
           </div>
