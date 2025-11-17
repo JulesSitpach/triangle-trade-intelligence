@@ -161,6 +161,58 @@ export default function HomePage() {
               Start Free Analysis →
             </Link>
           </div>
+
+          {/* Data Freshness Trust Badge */}
+          <div style={{
+            marginTop: '2rem',
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1rem',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
+              <span style={{ color: 'white', fontSize: '0.875rem' }}>
+                <strong>12,118</strong> HS codes (USITC official)
+              </span>
+            </div>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
+              <span style={{ color: 'white', fontSize: '0.875rem' }}>
+                <strong>Real-time</strong> AI tariff lookups
+              </span>
+            </div>
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
+              <span style={{ color: 'white', fontSize: '0.875rem' }}>
+                <strong>Daily</strong> policy monitoring
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -461,6 +513,72 @@ export default function HomePage() {
       </section>
 
       {/* Removed: Long "See It In Action" screenshot galleries, "Alert Monitoring", and calculator sections - keeping homepage focused for busy SMBs */}
+
+      {/* Data Transparency Section */}
+      <section className="main-content" style={{ backgroundColor: '#f8fafc' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Always Current, Always Transparent</h2>
+            <p className="section-header-subtitle">
+              Unlike competitors with quarterly-updated databases, we use a hybrid approach for maximum accuracy
+            </p>
+          </div>
+
+          <div className="grid-3-cols" style={{ marginTop: '2rem' }}>
+            <div className="content-card">
+              <div style={{ fontSize: '2.5rem', color: '#2563eb', marginBottom: '0.5rem' }}>75%</div>
+              <h3 className="content-card-title">Instant Database</h3>
+              <p className="content-card-description">
+                12,118 HS codes from official USITC Harmonized Tariff Schedule
+              </p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                Response time: &lt;100ms
+              </p>
+            </div>
+
+            <div className="content-card">
+              <div style={{ fontSize: '2.5rem', color: '#7c3aed', marginBottom: '0.5rem' }}>25%</div>
+              <h3 className="content-card-title">AI Real-Time Lookup</h3>
+              <p className="content-card-description">
+                Claude 3.5 Haiku fetches current Section 301/232 rates for codes not in database
+              </p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                Response time: 2-3 seconds (always current)
+              </p>
+            </div>
+
+            <div className="content-card">
+              <div style={{ fontSize: '2.5rem', color: '#059669', marginBottom: '0.5rem' }}>24h</div>
+              <h3 className="content-card-title">Daily Policy Monitoring</h3>
+              <p className="content-card-description">
+                Federal Register RSS feeds detect tariff policy changes within 24 hours
+              </p>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                Alert window: Same business day
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            marginTop: '2rem',
+            padding: '1.5rem',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb'
+          }}>
+            <h4 style={{ marginBottom: '1rem', color: '#1f2937' }}>Data Sources & Accuracy</h4>
+            <ul style={{ marginLeft: '1.5rem', lineHeight: '1.6', color: '#4b5563' }}>
+              <li><strong>Primary:</strong> USITC Harmonized Tariff Schedule (official government data, 12,118 codes)</li>
+              <li><strong>Fallback:</strong> AI-powered research via OpenRouter (Claude 3.5 Haiku) for current policy rates</li>
+              <li><strong>Policy Tracking:</strong> Federal Register RSS feeds for Section 301/232 changes</li>
+              <li><strong>Last Updated:</strong> November 2025 (database refresh), AI provides real-time lookups</li>
+            </ul>
+            <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#6b7280', fontStyle: 'italic' }}>
+              <strong>Verification Required:</strong> All tariff rates are for informational purposes. Users must verify with official USITC sources or licensed customs brokers before making business decisions.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Legal Disclaimer */}
       <section className="main-content">
