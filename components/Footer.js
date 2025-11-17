@@ -140,6 +140,17 @@ export default function Footer() {
             </p>
           </div>
 
+          {/* Legal Disclaimer */}
+          <p style={{
+            color: '#94a3b8',
+            fontSize: '0.75rem',
+            textAlign: 'center',
+            margin: '0 0 1rem 0',
+            lineHeight: '1.4'
+          }}>
+            All tariff rates and compliance calculations are AI-generated and should be verified with a licensed customs broker before use. You are responsible for the accuracy of data you submit.
+          </p>
+
           {/* Trust Badges */}
           <div style={{
             display: 'flex',
