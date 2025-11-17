@@ -1054,15 +1054,29 @@ export default function ComponentOriginsStepEnhanced({
               >
                 <option value="">Select manufacturing country...</option>
                 <option value="DOES_NOT_APPLY">Does Not Apply (Imported/Distributed Only)</option>
-                {dropdownOptions.countries?.map((country, idx) => {
-                  const countryCode = typeof country === 'string' ? country : country.value || country.code;
-                  const countryName = typeof country === 'string' ? country : country.label || country.name;
+                {dropdownOptions.usmcaCountries?.map(country => {
+                  const countryCode = country.code || country.value;
+                  const countryName = country.label || country.name;
                   return (
-                    <option key={`mfg-loc-${countryCode}-${idx}`} value={countryCode}>
+                    <option key={`mfg-loc-usmca-${countryCode}`} value={countryCode}>
                       {countryName}
                     </option>
                   );
                 })}
+                <optgroup label="Other Countries">
+                  {dropdownOptions.countries?.filter(country => {
+                    const code = typeof country === 'string' ? country : country.value || country.code;
+                    return !['US', 'CA', 'MX'].includes(code);
+                  }).map((country, idx) => {
+                    const countryCode = typeof country === 'string' ? country : country.value || country.code;
+                    const countryName = typeof country === 'string' ? country : country.label || country.name;
+                    return (
+                      <option key={`mfg-loc-other-${countryCode}-${idx}`} value={countryCode}>
+                        {countryName}
+                      </option>
+                    );
+                  })}
+                </optgroup>
               </select>
               <div className="form-help">
                 Where is the final product assembled/manufactured? (Select &quot;Does Not Apply&quot; if you import/distribute only)

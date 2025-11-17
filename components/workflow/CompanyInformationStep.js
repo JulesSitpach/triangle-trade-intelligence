@@ -416,13 +416,25 @@ export default function CompanyInformationStep({
               ) : (
                 <>
                   <option value="">Select supplier country</option>
-                  {dropdownOptions.countries?.map((country, idx) => {
-                    const countryName = typeof country === 'string' ? country : country.name || country.label;
-                    const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                  {dropdownOptions.usmcaCountries?.map(country => {
+                    const countryCode = country.code || country.value;
+                    const countryName = country.label || country.name;
                     return (
-                      <option key={`supplier-${countryCode}-${idx}`} value={countryCode}>{countryName}</option>
+                      <option key={`supplier-usmca-${countryCode}`} value={countryCode}>{countryName}</option>
                     );
                   })}
+                  <optgroup label="Other Countries">
+                    {dropdownOptions.countries?.filter(country => {
+                      const code = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                      return !SYSTEM_CONFIG.countries.usmcaCountries.includes(code);
+                    }).map((country, idx) => {
+                      const countryName = typeof country === 'string' ? country : country.name || country.label;
+                      const countryCode = typeof country === 'string' ? getCountryCode(country) : country.code || country.value;
+                      return (
+                        <option key={`supplier-other-${countryCode}-${idx}`} value={countryCode}>{countryName}</option>
+                      );
+                    })}
+                  </optgroup>
                 </>
               )}
             </select>

@@ -439,11 +439,18 @@ export default function UserDashboard({ user }) {
                       setSelectedWorkflow(workflow);
                     }}
                   >
-                    {workflows.map(w => (
-                      <option key={w.id} value={w.id}>
-                        {w.product_description} - {w.qualification_status} - {new Date(w.completed_at).toLocaleDateString()}
-                      </option>
-                    ))}
+                    {workflows.map(w => {
+                      // ✅ FIX: Truncate to 25 chars max for mobile (native select doesn't wrap)
+                      const truncatedDesc = w.product_description.length > 25
+                        ? w.product_description.substring(0, 25) + '...'
+                        : w.product_description;
+                      const shortDate = new Date(w.completed_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+                      return (
+                        <option key={w.id} value={w.id}>
+                          {truncatedDesc} ({shortDate})
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

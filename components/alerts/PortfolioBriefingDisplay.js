@@ -4,12 +4,51 @@
  * Matches ExecutiveSummaryDisplay.js structure with two-level collapsible navigation
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export default function PortfolioBriefingDisplay({ briefingContent, userTier }) {
   // State for collapsible sections
   const [mainExpanded, setMainExpanded] = useState(true);
   const [expandedSections, setExpandedSections] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Initialize sections as collapsed on mobile, expanded on desktop
+  useEffect(() => {
+    if (briefingContent) {
+      const sections = parseSections(typeof briefingContent === 'string' ? briefingContent : '');
+      const shouldExpand = typeof window !== 'undefined' && window.innerWidth >= 768;
+      const initialState = {};
+      sections.forEach((_, index) => {
+        initialState[index] = shouldExpand;
+      });
+      setExpandedSections(initialState);
+    }
+  }, [briefingContent]);
+
+  /**
+   * Extract main title (# heading) from content
+   */
+  const extractMainTitle = useCallback((content) => {
+    if (!content) return '';
+    const lines = content.split('\n');
+    for (const line of lines) {
+      if (line.startsWith('# ') && !line.startsWith('## ')) {
+        return line.replace('# ', '').trim();
+      }
+    }
+    return '';
+  }, []);
 
   /**
    * Parse markdown content into sections
@@ -33,8 +72,8 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
           title: line.replace('## ', '').trim(),
           content: ''
         };
-      } else if (line.startsWith('# ')) {
-        // Skip main title (# heading)
+      } else if (line.startsWith('# ') && !line.startsWith('## ')) {
+        // Skip main title (# heading) - handled separately
         return;
       } else {
         // Add to current section content
@@ -50,6 +89,7 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
     return sections;
   }, []);
 
+  const mainTitle = extractMainTitle(typeof briefingContent === 'string' ? briefingContent : '');
   const sections = parseSections(typeof briefingContent === 'string' ? briefingContent : '');
 
   /**
@@ -287,9 +327,11 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '1.5rem 2rem',
+          padding: isMobile ? '0.75rem 1rem' : '1.5rem 2rem',
           cursor: 'pointer',
-          transition: 'background 0.2s ease'
+          transition: 'background 0.2s ease',
+          flexWrap: 'wrap',
+          gap: '0.5rem'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
@@ -302,12 +344,12 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
           onClick={handleToggleMain}
           style={{
             color: 'white',
-            fontSize: '1.5rem',
+            fontSize: isMobile ? '1rem' : '1.5rem',
             fontWeight: '700',
             margin: 0,
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem',
+            gap: isMobile ? '0.5rem' : '1rem',
             flex: 1
           }}
         >
@@ -315,7 +357,7 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
             display: 'inline-block',
             transform: mainExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: 'transform 0.3s ease',
-            fontSize: '1rem'
+            fontSize: isMobile ? '0.875rem' : '1rem'
           }}>
             ▶
           </span>
@@ -362,26 +404,45 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
 
       {/* Collapsible Content */}
       {mainExpanded && (
-        <div style={{ padding: '2rem' }}>
+        <div style={{ padding: isMobile ? '0.75rem' : '2rem' }}>
+          {/* Main Report Title - No Arrow */}
+          {mainTitle && (
+            <h2
+              style={{
+                fontSize: isMobile ? '1.125rem' : '1.375rem',
+                fontWeight: '700',
+                color: '#1f2937',
+                margin: '0 0 1.5rem 0',
+                paddingBottom: '0.75rem',
+                borderBottom: '2px solid #e5e7eb',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word'
+              }}
+            >
+              {mainTitle}
+            </h2>
+          )}
           {sections.map((section, index) => {
             const isExpanded = expandedSections[index] !== false; // Default to expanded
 
             return (
-              <div key={index} className="portfolio-section" style={{ marginBottom: '1.5rem' }}>
+              <div key={index} className="portfolio-section" style={{ marginBottom: isMobile ? '0.75rem' : '1.5rem' }}>
                 {/* Section Header */}
                 <h3
                   onClick={(e) => handleToggleSection(index, e)}
                   style={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: '600',
                     color: '#3b82f6',
-                    margin: '0 0 0.75rem 0',
+                    margin: '0 0 0.5rem 0',
                     cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.5rem 0',
-                    transition: 'color 0.2s ease'
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
+                    padding: '0.25rem 0',
+                    transition: 'color 0.2s ease',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.color = '#2563eb';
@@ -394,7 +455,9 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
                     display: 'inline-block',
                     transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                     transition: 'transform 0.3s ease',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    flexShrink: 0,
+                    marginTop: '0.2rem'
                   }}>
                     ▶
                   </span>
@@ -405,10 +468,10 @@ export default function PortfolioBriefingDisplay({ briefingContent, userTier }) 
                 {isExpanded && (
                   <div
                     style={{
-                      fontSize: '0.9375rem',
+                      fontSize: isMobile ? '0.9rem' : '0.9375rem',
                       color: '#374151',
                       lineHeight: '1.7',
-                      paddingLeft: '2rem'
+                      paddingLeft: isMobile ? '1.5rem' : '2rem'
                     }}
                     dangerouslySetInnerHTML={{
                       __html: formatContent(section.content)

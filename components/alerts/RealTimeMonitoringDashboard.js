@@ -129,22 +129,19 @@ export default function RealTimeMonitoringDashboard({ userProfile }) {
         </div>
 
         {/* Compact inline stats */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
-          <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem', color: '#6b7280', flexWrap: 'wrap' }}>
+          <div style={{ whiteSpace: 'nowrap' }}>
             <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.lastScan ? getTimeAgo(monitoringData.lastScan) : 'Pending'}</span>
-            <span style={{ marginLeft: '0.25rem' }}>last scan</span>
+            <span style={{ marginLeft: '0.25rem' }}>scan</span>
           </div>
-          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
           <div>
             <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.htsCodesMonitored || 0}</span>
-            <span style={{ marginLeft: '0.25rem' }}>HS codes</span>
+            <span style={{ marginLeft: '0.25rem' }}>HS</span>
           </div>
-          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
           <div>
             <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.dataSourcesChecked?.length || 0}</span>
-            <span style={{ marginLeft: '0.25rem' }}>sources</span>
+            <span style={{ marginLeft: '0.25rem' }}>src</span>
           </div>
-          <div style={{ width: '1px', height: '1rem', background: '#e5e7eb' }}></div>
           <div>
             <span style={{ fontWeight: 600, color: '#111827' }}>{monitoringData.alertsGenerated || 0}</span>
             <span style={{ marginLeft: '0.25rem' }}>alerts</span>

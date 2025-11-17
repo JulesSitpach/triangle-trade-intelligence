@@ -15,7 +15,7 @@ import USMCAWorkflowOrchestrator from '../components/workflow/USMCAWorkflowOrche
 
 export default function USMCAWorkflow() {
   const router = useRouter();
-  const { view_results } = router.query; // ✅ Check if viewing read-only results
+  const { view_results, workflow_id } = router.query; // ✅ Check if viewing read-only results OR loading specific workflow
   const [usageLimitReached, setUsageLimitReached] = useState(false);
   const [usageStats, setUsageStats] = useState(null);
   const [checkingLimit, setCheckingLimit] = useState(true);
@@ -233,7 +233,7 @@ export default function USMCAWorkflow() {
       </Head>
 
       <TriangleLayout>
-        <USMCAWorkflowOrchestrator readOnly={!!view_results} workflowId={view_results} />
+        <USMCAWorkflowOrchestrator readOnly={!!view_results} workflowId={view_results || workflow_id} />
       </TriangleLayout>
     </>
   );

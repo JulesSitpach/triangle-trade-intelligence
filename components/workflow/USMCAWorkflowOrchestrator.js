@@ -103,17 +103,24 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
 
   // Handle "View Results" - load saved workflow and jump directly to results (skip steps 1-2)
   useEffect(() => {
-    const workflowId = router.query.view_results;
+    const viewResultsId = router.query.view_results;
+    const workflowIdParam = router.query.workflow_id;
     const targetStep = router.query.step ? parseInt(router.query.step) : 3; // Default to step 3 if not specified
 
-    if (workflowId && !hasLoadedResultsRef.current) {
-      hasLoadedResultsRef.current = true;
-      console.log('📊 Loading saved workflow results:', workflowId, 'Jumping directly to step:', targetStep);
+    // NEW: Also support loading workflow via workflow_id parameter (not just view_results)
+    const idToLoad = viewResultsId || workflowIdParam;
+    const isReadOnlyMode = !!viewResultsId; // Only read-only if using view_results
 
-      // ✅ SET READ-ONLY MODE in both state AND sessionStorage (persists after URL cleanup)
-      setViewMode('read-only');
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('workflow_view_mode', 'read-only');
+    if (idToLoad && !hasLoadedResultsRef.current) {
+      hasLoadedResultsRef.current = true;
+      console.log('📊 Loading saved workflow:', idToLoad, isReadOnlyMode ? '(read-only)' : '(editable)', 'Jumping to step:', targetStep);
+
+      // ✅ SET VIEW MODE based on how it was accessed
+      if (isReadOnlyMode) {
+        setViewMode('read-only');
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('workflow_view_mode', 'read-only');
+        }
       }
 
       // ✅ PERFORMANCE FIX: Jump to target step IMMEDIATELY (before data loads)
@@ -124,7 +131,7 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
       fetch('/api/dashboard-data', { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
-          const workflow = data.workflows?.find(w => w.id === workflowId);
+          const workflow = data.workflows?.find(w => w.id === idToLoad);
           console.log('🔍 WORKFLOW FROM API:', {
             has_workflow_data: !!workflow?.workflow_data,
             workflow_data_keys: workflow?.workflow_data ? Object.keys(workflow.workflow_data) : [],
@@ -140,16 +147,16 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
         .catch(async (err) => {
           console.error('Failed to load workflow:', err);
           await DevIssue.apiError('workflow_orchestrator', 'load-saved-workflow', err, {
-            workflowId
+            workflowIdParam: idToLoad
           });
         });
 
       // Clean up URL
       router.replace('/usmca-workflow', undefined, { shallow: true });
-    } else if (!router.query.view_results) {
+    } else if (!router.query.view_results && !router.query.workflow_id) {
       hasLoadedResultsRef.current = false;
     }
-  }, [router.query.view_results, router.query.step, router, loadSavedWorkflow, goToStep]);
+  }, [router.query.view_results, router.query.workflow_id, router.query.step, router, loadSavedWorkflow, goToStep]);
 
   // ✅ UI ENHANCEMENT: Smooth scroll to work area when step changes
   // First resets to top, pauses 1 second, then scrolls to work area

@@ -4,11 +4,34 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { parse } from 'cookie';
+import crypto from 'crypto';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// Verify custom triangle_session cookie (same as auth/me.js)
+function verifySession(cookieValue) {
+  try {
+    if (!cookieValue) return null;
+    const decoded = Buffer.from(cookieValue, 'base64').toString('utf-8');
+    const { data, sig } = JSON.parse(decoded);
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return null;
+    const dataString = typeof data === 'string' ? data : JSON.stringify(data);
+    const expectedSig = crypto.createHmac('sha256', secret).update(dataString).digest('hex');
+    if (sig !== expectedSig) return null;
+    const sessionData = typeof data === 'string' ? JSON.parse(data) : data;
+    // Check expiration (7 days)
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - sessionData.timestamp > sevenDaysMs) return null;
+    return sessionData;
+  } catch (error) {
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -16,26 +39,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get user from session
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.replace('Bearer ', '') || req.cookies['sb-access-token'];
+    // Get user from triangle_session cookie (matching auth/me.js pattern)
+    const cookies = parse(req.headers.cookie || '');
+    const sessionCookie = cookies.triangle_session;
 
-    if (!token) {
+    if (!sessionCookie) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Verify token and get user
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const session = verifySession(sessionCookie);
 
-    if (authError || !user) {
+    if (!session) {
       return res.status(401).json({ error: 'Invalid session' });
     }
 
-    // Get email preferences from user_profiles
+    // Get email preferences from user_profiles using session.userId
     const { data, error } = await supabase
       .from('user_profiles')
       .select('email_preferences')
-      .eq('user_id', user.id)
+      .eq('user_id', session.userId)
       .single();
 
     if (error) {
@@ -46,7 +68,7 @@ export default async function handler(req, res) {
     // Default to empty object (all enabled) if not set
     const preferences = data?.email_preferences || {};
 
-    console.log(`✅ Loaded email preferences for user ${user.id}`);
+    console.log(`✅ Loaded email preferences for user ${session.userId}`);
 
     return res.status(200).json({
       success: true,

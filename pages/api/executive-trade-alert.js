@@ -21,7 +21,7 @@ import { getIndustryThreshold } from '../../lib/services/industry-thresholds-ser
 import { BaseAgent } from '../../lib/agents/base-agent.js';
 import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
 import { createClient } from '@supabase/supabase-js';
-import { EXECUTIVE_SUMMARY_LIMITS } from '../../config/subscription-tier-limits.js';
+import { ANALYSIS_LIMITS } from '../../config/subscription-tier-limits.js';
 import { verifyAuth } from '../../lib/middleware/auth-middleware.js';
 
 // ✅ FIX (Nov 12): Decode HTML entities from RSS feed titles/descriptions
@@ -193,13 +193,13 @@ export default async function handler(req, res) {
         const now = new Date();
         const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        // ✅ Centralized tier limits (from config/subscription-tier-limits.js)
-        const userLimit = EXECUTIVE_SUMMARY_LIMITS[subscriptionTier] || EXECUTIVE_SUMMARY_LIMITS['Trial'];
+        // ✅ CHANGED: Executive summaries now consume from main analysis credits (not separate pool)
+        const userLimit = ANALYSIS_LIMITS[subscriptionTier] || ANALYSIS_LIMITS['Trial'];
 
-        // Get current usage
+        // Get current usage from main analysis_count (shared pool)
         const { data: usageData, error: usageError } = await supabase
           .from('monthly_usage_tracking')
-          .select('executive_summary_count')
+          .select('analysis_count')
           .eq('user_id', user_id)
           .eq('month_year', month_year)
           .single();
@@ -208,14 +208,14 @@ export default async function handler(req, res) {
           console.error('❌ Error checking usage:', usageError);
         }
 
-        const currentUsage = usageData?.executive_summary_count || 0;
+        const currentUsage = usageData?.analysis_count || 0;
 
         if (currentUsage >= userLimit) {
           return res.status(403).json({
             success: false,
             error: 'LIMIT_EXCEEDED',
-            code: 'EXECUTIVE_SUMMARY_LIMIT_REACHED',
-            message: `You've reached your monthly executive summary limit (${userLimit} for ${subscriptionTier} tier)`,
+            code: 'AI_CREDIT_LIMIT_REACHED',
+            message: `You've reached your monthly AI credit limit (${userLimit} for ${subscriptionTier} tier). Executive summaries cost 1 credit each.`,
             current_usage: currentUsage,
             limit: userLimit,
             tier: subscriptionTier,
@@ -223,7 +223,7 @@ export default async function handler(req, res) {
           });
         }
 
-        console.log(`✅ Executive summary usage: ${currentUsage}/${userLimit} for ${subscriptionTier} tier`);
+        console.log(`✅ AI credit usage: ${currentUsage}/${userLimit} for ${subscriptionTier} tier (executive summary will cost 1 credit)`);
       } catch (limitCheckError) {
         console.error('❌ Limit check error:', limitCheckError);
         // Continue with request even if limit check fails (fail open)
@@ -475,15 +475,28 @@ export default async function handler(req, res) {
         const now = new Date();
         const month_year = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        const { error: updateError } = await supabase.rpc('increment_executive_summary_count', {
-          p_user_id: user_id,
-          p_month_year: month_year
-        });
+        // ✅ CHANGED: Increment main analysis_count (executive summary costs 1 credit)
+        const { error: updateError } = await supabase
+          .from('monthly_usage_tracking')
+          .upsert({
+            user_id: user_id,
+            month_year: month_year,
+            analysis_count: (await supabase
+              .from('monthly_usage_tracking')
+              .select('analysis_count')
+              .eq('user_id', user_id)
+              .eq('month_year', month_year)
+              .single()
+              .then(r => r.data?.analysis_count || 0)) + 1,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,month_year'
+          });
 
         if (updateError) {
-          console.error('❌ Failed to increment executive summary counter:', updateError);
+          console.error('❌ Failed to increment analysis credit counter:', updateError);
         } else {
-          console.log('✅ Executive summary counter incremented for user:', user_id, 'month:', month_year);
+          console.log('✅ Analysis credit consumed (executive summary) for user:', user_id, 'month:', month_year);
         }
       } catch (trackingError) {
         console.error('❌ Usage tracking error:', trackingError);

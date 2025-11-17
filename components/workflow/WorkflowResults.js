@@ -1127,11 +1127,11 @@ export default function WorkflowResults({
                   cursor: hasExecutiveSummary ? 'not-allowed' : 'pointer'
                 }}
                 disabled={loadingSummary || hasExecutiveSummary}
-                title={hasExecutiveSummary ? 'Executive summary already generated for this workflow (1 per workflow included)' : ''}
+                title={hasExecutiveSummary ? 'Executive summary already generated for this workflow' : 'Uses 1 AI credit from your monthly allowance'}
               >
                 {loadingSummary ? `⏳ Generating Summary... ${summaryElapsedSeconds}s` :
-                 hasExecutiveSummary ? '✓ Executive Summary Generated (1 per workflow)' :
-                 '📊 Generate Business Impact Summary (1 per workflow included)'}
+                 hasExecutiveSummary ? '✓ Executive Summary Generated' :
+                 '📊 Generate Business Impact Summary (costs 1 AI credit)'}
               </button>
 
               {viewMode === 'normal' && !hasExecutiveSummary && (

@@ -94,14 +94,14 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                     Dashboard
                   </Link>
                   <Link
-                    href="/usmca-workflow"
+                    href={router.query.workflow_id ? `/usmca-workflow?workflow_id=${router.query.workflow_id}` : '/usmca-workflow'}
                     className={`nav-menu-link ${router.pathname === '/usmca-workflow' || router.pathname === '/usmca-certificate-completion' ? 'active' : ''}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Workflows
                   </Link>
                   <Link
-                    href="/trade-risk-alternatives"
+                    href={router.query.workflow_id ? `/trade-risk-alternatives?workflow_id=${router.query.workflow_id}` : '/trade-risk-alternatives'}
                     className={`nav-menu-link ${router.pathname === '/trade-risk-alternatives' ? 'active' : ''}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >

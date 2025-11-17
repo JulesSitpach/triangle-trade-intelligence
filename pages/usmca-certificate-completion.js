@@ -27,13 +27,40 @@ export default function USMCACertificateCompletion() {
   const [showPreview, setShowPreview] = useState(false); // Track whether to show preview or authorization
   const [previewEditedData, setPreviewEditedData] = useState(null); // Store edits from preview
 
-  // ✅ RESET showPreview on fresh page load (when coming from results page)
-  // Note: Don't reset if we're loading from dashboard with workflow_id
+  // ✅ RESTORE certificate preview on page load (survives reload)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const workflowId = urlParams.get('workflow_id');
 
-    // Only reset preview if NOT loading from dashboard
+    // ✅ RESTORE: Check if we have a saved certificate preview from previous session
+    try {
+      const savedPreview = workflowStorage.getItem('usmca_certificate_preview');
+      if (savedPreview) {
+        const parsed = JSON.parse(savedPreview);
+        console.log('🔄 Found saved certificate preview from:', parsed.timestamp);
+
+        // Only restore if less than 1 hour old (user still in active session)
+        const savedTime = new Date(parsed.timestamp).getTime();
+        const ageInMinutes = (Date.now() - savedTime) / (1000 * 60);
+
+        if (ageInMinutes < 60) {
+          setPreviewData({
+            ...parsed.preview,
+            professional_certificate: parsed.professional_certificate
+          });
+          setShowPreview(true);
+          console.log('✅ Certificate preview restored from localStorage (age:', Math.round(ageInMinutes), 'min)');
+          return; // Don't reset if we restored
+        } else {
+          console.log('⏰ Saved preview too old (', Math.round(ageInMinutes), 'min), not restoring');
+          workflowStorage.removeItem('usmca_certificate_preview');
+        }
+      }
+    } catch (err) {
+      console.error('⚠️ Failed to restore preview from localStorage:', err);
+    }
+
+    // Only reset preview if NOT loading from dashboard AND didn't restore from localStorage
     if (!workflowId) {
       setShowPreview(false);
     }
@@ -625,6 +652,19 @@ export default function USMCACertificateCompletion() {
           professional_certificate: cert
         });
         setShowPreview(true);
+
+        // ✅ PERSIST: Save certificate preview to localStorage so it survives page reload
+        try {
+          const previewBackup = {
+            preview: preview,
+            professional_certificate: cert,
+            timestamp: new Date().toISOString()
+          };
+          workflowStorage.setItem('usmca_certificate_preview', JSON.stringify(previewBackup));
+          console.log('💾 Certificate preview saved to localStorage (survives reload)');
+        } catch (err) {
+          console.error('⚠️ Failed to save preview to localStorage:', err);
+        }
 
         console.log('✅ Certificate generated successfully');
         console.log('🔍 showPreview should now be TRUE - preview should display on same page');

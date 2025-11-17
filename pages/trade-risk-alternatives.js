@@ -78,7 +78,7 @@ export default function TradeRiskAlternatives() {
   const [expandedComponents, setExpandedComponents] = useState({});
 
   // Market Intelligence email preference (AI always uses these, user controls emails)
-  const [includeMarketIntelInEmail, setIncludeMarketIntelInEmail] = useState(false);
+  const [includeMarketIntelInEmail, setIncludeMarketIntelInEmail] = useState(true);
 
   // Portfolio Briefing state (AI-generated strategic analysis)
   const [portfolioBriefing, setPortfolioBriefing] = useState(null);
@@ -1424,7 +1424,7 @@ export default function TradeRiskAlternatives() {
                 })()}
 
                 {/* Table Header */}
-                <div style={{
+                <div className="component-table-header" style={{
                   marginTop: '1rem',
                   padding: '0.75rem 1rem',
                   backgroundColor: '#f9fafb',
@@ -1612,6 +1612,7 @@ export default function TradeRiskAlternatives() {
                     }}>
                       {/* Collapsed Header - Always visible */}
                       <div
+                        className="component-table-row"
                         onClick={() => toggleExpanded(idx, hasAlerts)}
                         style={{
                           padding: '1rem',
@@ -1625,7 +1626,7 @@ export default function TradeRiskAlternatives() {
                         }}
                       >
                         {/* Expand/Collapse Icon */}
-                        <span style={{
+                        <span className="component-expand-icon" style={{
                           fontSize: '1.25rem',
                           color: hasAlerts ? '#6b7280' : '#d1d5db',
                           width: '1.25rem',
@@ -1635,7 +1636,7 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Component Name */}
-                        <div className="font-bold text-sm" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="component-table-cell font-bold text-sm" data-label="Component" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span title={comp.component_type || comp.description || `Component ${idx + 1}`}>
                             {(() => {
                               const fullName = comp.component_type || comp.description || `Component ${idx + 1}`;
@@ -1684,22 +1685,22 @@ export default function TradeRiskAlternatives() {
                         </div>
 
                         {/* Origin Country */}
-                        <div className="text-center text-sm text-gray-600" style={{ flex: '1' }}>
+                        <div className="component-table-cell text-center text-sm text-gray-600" data-label="Origin" style={{ flex: '1' }}>
                           {comp.origin_country || comp.country}
                         </div>
 
                         {/* HS Code */}
-                        <div style={{ flex: '1', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
+                        <div className="component-table-cell" data-label="HS Code" style={{ flex: '1', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
                           {comp.hs_code || '—'}
                         </div>
 
                         {/* Value Percentage */}
-                        <div className="text-center font-bold text-sm" style={{ flex: '1', color: '#111827' }}>
+                        <div className="component-table-cell text-center font-bold text-sm" data-label="Value %" style={{ flex: '1', color: '#111827' }}>
                           {comp.percentage || comp.value_percentage}%
                         </div>
 
                         {/* Alert Badge */}
-                        <div style={{ flex: '1', textAlign: 'center' }}>
+                        <div className="component-table-cell" data-label="Alerts" style={{ flex: '1', textAlign: 'center' }}>
                           {componentAlerts.length > 0 ? (
                             <span style={{
                               background: '#fee2e2',
@@ -1727,7 +1728,7 @@ export default function TradeRiskAlternatives() {
 
                         {/* Email Notification Checkbox - Show for ALL components (alerts might come in future) */}
                         {/* ✅ FIX (Nov 8): Default to CHECKED for better user retention */}
-                        <div style={{ flex: '0.75', textAlign: 'center' }}>
+                        <div className="component-table-cell" data-label="Email Alerts" style={{ flex: '0.75', textAlign: 'center' }}>
                           <input
                             type="checkbox"
                             checked={emailEnabled ?? true}
@@ -1853,7 +1854,7 @@ export default function TradeRiskAlternatives() {
                                     padding: '1rem',
                                     opacity: alert.lifecycle_status === 'RESOLVED' ? 0.7 : 1
                                   }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                                    <div className="alert-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                                       {/* ✅ Alert selection checkbox - ONLY for HIGH/CRITICAL/NEW alerts */}
                                       {!allowAISelectAlerts && isSelectableAlert && (
                                         <div style={{ marginRight: '0.75rem', paddingTop: '0.125rem' }}>
@@ -1888,10 +1889,10 @@ export default function TradeRiskAlternatives() {
                                           />
                                         </div>
                                       )}
-                                      <div style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', flex: 1 }}>
+                                      <div className="alert-card-title" style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', flex: 1 }}>
                                         {alert.consolidated_title || alert.title}
                                       </div>
-                                      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                                      <div className="alert-card-badges" style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                                         {/* ✅ STATUS BADGE - NEW/UPDATED/RESOLVED */}
                                         <span style={{
                                           background: alert.lifecycle_status === 'NEW' ? '#3b82f6' :
@@ -2027,6 +2028,7 @@ export default function TradeRiskAlternatives() {
                     }}>
                       {/* Collapsed Header */}
                       <div
+                        className="component-table-row"
                         onClick={() => setExpandedComponents(prev => ({
                           ...prev,
                           'market_intel': !prev['market_intel']
@@ -2043,7 +2045,7 @@ export default function TradeRiskAlternatives() {
                         }}
                       >
                         {/* Expand Icon */}
-                        <span style={{
+                        <span className="component-expand-icon" style={{
                           fontSize: '1.25rem',
                           color: '#f59e0b',
                           width: '1.25rem',
@@ -2053,27 +2055,27 @@ export default function TradeRiskAlternatives() {
                         </span>
 
                         {/* Name */}
-                        <div className="font-bold text-sm" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          🇺🇸🇨🇦🇲🇽 USMCA 2026 Market Intelligence
+                        <div className="component-table-cell font-bold text-sm" data-label="Component" style={{ flex: '2', color: '#111827', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          🇺🇸🇨🇦🇲🇽 USMCA 2026
                         </div>
 
                         {/* Origin */}
-                        <div style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                          All Users
+                        <div className="component-table-cell" data-label="Origin" style={{ flex: '1', textAlign: 'center', color: '#6b7280', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                          All
                         </div>
 
                         {/* HS Code */}
-                        <div style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#6b7280' }}>
+                        <div className="component-table-cell" data-label="HS Code" style={{ flex: '1', textAlign: 'center', fontFamily: 'monospace', fontSize: '0.875rem', color: '#6b7280' }}>
                           —
                         </div>
 
                         {/* Value % */}
-                        <div className="text-center font-bold text-sm" style={{ flex: '1', color: '#111827' }}>
+                        <div className="component-table-cell text-center font-bold text-sm" data-label="Value %" style={{ flex: '1', color: '#111827' }}>
                           N/A
                         </div>
 
                         {/* Alert Badge */}
-                        <div style={{ flex: '1', textAlign: 'center' }}>
+                        <div className="component-table-cell" data-label="Alerts" style={{ flex: '1', textAlign: 'center' }}>
                           <span style={{
                             background: '#fef3c7',
                             color: '#92400e',
@@ -2083,12 +2085,12 @@ export default function TradeRiskAlternatives() {
                             fontWeight: 600,
                             border: '1px solid #f59e0b'
                           }}>
-                            📌 {marketIntelAlerts.length} insight{marketIntelAlerts.length !== 1 ? 's' : ''}
+                            📌 {marketIntelAlerts.length} insights
                           </span>
                         </div>
 
                         {/* Email Checkbox */}
-                        <div style={{ flex: '0.75', textAlign: 'center' }}>
+                        <div className="component-table-cell" data-label="Email Alerts" style={{ flex: '0.75', textAlign: 'center' }}>
                           <input
                             type="checkbox"
                             checked={includeMarketIntelInEmail}

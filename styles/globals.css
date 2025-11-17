@@ -3401,6 +3401,13 @@ textarea.form-input:not(:placeholder-shown) {
     padding-right: 0.5rem !important;
   }
 
+  /* Allow button text to wrap on mobile */
+  .btn-primary,
+  .btn-secondary {
+    white-space: normal !important;
+    font-size: 0.8125rem !important;
+  }
+
   .workflow-progress {
     padding: 0.5rem;
   }
@@ -3745,6 +3752,7 @@ textarea.form-input:not(:placeholder-shown) {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .agent-icon {
@@ -3760,7 +3768,7 @@ textarea.form-input:not(:placeholder-shown) {
   margin-left: auto;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -4454,6 +4462,96 @@ textarea.form-input:not(:placeholder-shown) {
     font-weight: 600;
     margin-right: 0.5rem;
     color: var(--navy-700);
+  }
+}
+
+/* Component Tariff Table - Mobile Cards */
+@media (max-width: 768px) {
+  .component-table-header {
+    display: none !important;
+  }
+
+  .component-table-row {
+    flex-wrap: wrap !important;
+    gap: 0.25rem 0.5rem !important;
+    padding: 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .component-expand-icon {
+    flex: 0 0 auto !important;
+    font-size: 1rem !important;
+  }
+
+  .component-table-cell[data-label="Component"] {
+    flex: 0 0 auto !important;
+    max-width: 45% !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .component-table-cell[data-label="Origin"] {
+    flex: 0 0 auto !important;
+    font-size: 0.75rem !important;
+  }
+
+  .component-table-cell[data-label="HS Code"] {
+    flex: 0 0 auto !important;
+    font-size: 0.6875rem !important;
+    color: #6b7280 !important;
+  }
+
+  .component-table-cell[data-label="Value %"] {
+    flex: 0 0 auto !important;
+    font-size: 0.75rem !important;
+  }
+
+  .component-table-cell[data-label="Alerts"] {
+    flex: 1 1 100% !important;
+    text-align: left !important;
+    padding-left: 1.5rem !important;
+    margin-top: 0.25rem !important;
+  }
+
+  .component-table-cell[data-label="Alerts"] span {
+    font-size: 0.6875rem !important;
+    padding: 0.125rem 0.5rem !important;
+  }
+
+  .component-table-cell[data-label="Email Alerts"] {
+    position: absolute !important;
+    bottom: 0.5rem !important;
+    right: 0.5rem !important;
+    flex: none !important;
+  }
+
+  .component-table-row {
+    position: relative !important;
+  }
+
+  .component-table-cell::before {
+    display: none !important;
+  }
+
+  /* Alert Card Mobile Layout */
+  .alert-card-header {
+    flex-direction: column-reverse !important;
+    gap: 0.5rem !important;
+  }
+
+  .alert-card-title {
+    font-size: 0.8125rem !important;
+  }
+
+  .alert-card-badges {
+    justify-content: flex-start !important;
+  }
+
+  .alert-card-badges span {
+    font-size: 0.625rem !important;
+    padding: 0.125rem 0.5rem !important;
   }
 }
 
