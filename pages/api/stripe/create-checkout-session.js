@@ -1,6 +1,6 @@
 import { protectedApiHandler } from '../../../lib/api/apiHandler';
 import { ApiError, validateRequiredFields } from '../../../lib/api/errorHandler';
-import { stripe, STRIPE_PRICES, getOrCreateStripeCustomer } from '../../../lib/stripe/server';
+import { stripe, STRIPE_PRICES, getOrCreateStripeCustomer, ensureStripeConfigured } from '../../../lib/stripe/server';
 import { createClient } from '@supabase/supabase-js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue';
 
@@ -19,6 +19,9 @@ const supabase = createClient(
  */
 export default protectedApiHandler({
   POST: async (req, res) => {
+    // ✅ FIX (Nov 17): Check Stripe is configured at runtime, not module load
+    ensureStripeConfigured();
+
     const { tier, billing_period } = req.body;
     const userId = req.user.id;
 
