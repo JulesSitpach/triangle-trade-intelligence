@@ -1,8 +1,28 @@
 # Triangle Intelligence Platform
 
-Global SaaS for international trade compliance automation. Supporting USMCA, EU-UK TCA, CPTPP, and bilateral trade agreements.
+Self-serve USMCA certificate generation SaaS platform. AI-powered trade compliance automation for US-Canada-Mexico trade.
 
 **Live**: https://triangle-trade-intelligence.vercel.app
+**Status**: 🔒 **PRODUCTION LOCKED** (November 10, 2025)
+
+---
+
+## 🔒 PROJECT LOCKDOWN NOTICE
+
+**This project is in PRODUCTION LOCKDOWN as of November 10, 2025.**
+
+- **26+ critical files are FROZEN** - Cannot be modified without owner approval
+- **Only UI styling changes allowed** without approval
+- **Database schema, API endpoints, and calculations are FROZEN**
+
+**Before making ANY changes, read:**
+- 📖 **PROJECT_LOCKDOWN.md** - Comprehensive lockdown policy
+- 📖 **UI_CHANGE_GUIDE.md** - What UI changes are safe
+- 📖 **FROZEN_FILES_LIST.md** - Complete list of frozen files
+
+**If unsure whether your change is safe, the answer is NO. Ask the owner first.**
+
+---
 
 ## 🚀 Quick Start
 
@@ -27,11 +47,10 @@ open http://localhost:3001
 **Processing**: AI-powered HS code classification + tariff rate lookup + USMCA qualification analysis
 **Output**: USMCA eligibility assessment + tariff savings calculation + official certificate
 
-### Four-Step Workflow
-1. **Company Information** - Business profile and destination market
-2. **Component Details** - Product components with AI classification
-3. **Results & Alerts** - USMCA qualification status, tariff analysis, policy alerts
-4. **Certificate Preview & Download** - Official USMCA form with editable fields + responsibility confirmation
+### Three-Step Workflow
+1. **Company Information** - Business profile and destination market (US/CA/MX only)
+2. **Component Details** - Product components with AI-powered HS code classification
+3. **Results & Certificate** - USMCA qualification status, tariff analysis, policy alerts, editable certificate preview with responsibility confirmation
 
 ### Key Features
 - 🤖 AI-powered HS code classification (OpenRouter + Anthropic 2-tier fallback)
@@ -225,11 +244,14 @@ A component qualifies for USMCA benefits if:
 - **Preference Criterion**: Must be A, B, C, or D (never NULL for qualified products)
 - **No tariff escalation**: RVC must not be achieved through tariff evasion
 
-### Database-First Tariff Lookup (95% Coverage)
+### Database-First Tariff Lookup (75% Coverage - Nov 13, 2025)
 1. **Database** (tariff_intelligence_master: 12,118 HS codes) - Primary source: ~200ms
-2. **OpenRouter API** (primary fallback for edge cases) - 5% of requests: ~2-3 seconds
+   - **NEW Nov 13**: HS code normalization (10-digit → 8-digit HTS-8) increased hit rate from 0% to 75%
+   - 3-tier lookup: Exact → Fuzzy → Prefix matching
+2. **OpenRouter API** (fallback for ~25% of requests) - ~2-3 seconds
 3. **Anthropic Direct** (backup fallback) - If OpenRouter unavailable
-4. **Note**: Database data updated regularly, AI used only for missing/new HS codes
+4. **USITC API** (ready but blocked) - Government verification pending API availability
+5. **Note**: Base MFN rates trustworthy in DB. Section 301/232 rates require AI or policy_tariffs_cache.
 
 ### Subscription Tiers & Limits (Nov 4-5 Enforcement)
 - **Trial**: 1 analysis/month (watermarked certificates)
@@ -302,23 +324,24 @@ killall node              # macOS/Linux
 
 ## 📊 Recent Changes
 
-### Phase 1 Complete (Oct 22, 2025)
-- ✅ Destination country field + USMCA eligibility gate
-- ✅ Component data restoration (fixed data loss bug)
-- ✅ Database consolidation (unified tariff_rates_cache → tariff_intelligence_master)
+### Phase 5 Complete (Nov 9-13, 2025) - Critical Bug Fixes + HS Code Normalization
+- ✅ **Nov 13**: HS code normalization - database hit rate 0% → 75%
+  - Smart truncation: 10-digit → 8-digit HTS-8
+  - Fuzzy matching for statistical suffix variations
+  - 3-tier lookup: Exact → Fuzzy → Prefix → AI fallback
+- ✅ **Nov 13**: USITC DataWeb API integration ready (blocked by API downtime)
+- ✅ **Nov 10**: PROJECT LOCKDOWN implemented
+  - 26+ critical files frozen (APIs, agents, config, database schema)
+  - Pre-commit hooks enforce lockdown automatically
+  - Created UI_CHANGE_GUIDE.md, FROZEN_FILES_LIST.md
+- ✅ **Nov 9**: CRITICAL BUG FIX - Desktop vs Vercel tariff rate discrepancy
+  - OLD: `stale: false` assumed duty-free for USMCA origins → 0% (WRONG)
+  - NEW: `stale: true` for ALL database misses → triggers AI research
+  - Impact: Both environments now show correct rates (~5-6% actual)
+- ✅ **Nov 9**: Removed USMCA origin assumption logic entirely
+- ✅ **Nov 9**: Documented data source trust levels (what to trust in DB vs AI)
 
-### Phase 2 Complete (Oct 24-25, 2025) - Business Intelligence
-- ✅ Executive Trade Alert API with consulting-grade strategic advisory
-- ✅ Enhanced USMCA AI Prompt with financial impact analysis
-- ✅ Personalized alert filtering by relevance scoring
-
-### Phase 2.5 Complete (Nov 1-2, 2025) - Real Alert System
-- ✅ **Nov 1**: Daily tariff digest system (ready to activate with Vercel cron)
-- ✅ **Nov 2**: Replaced fake template alerts with real crisis_alerts matching
-- ✅ **Nov 2**: Portfolio briefing API using real RSS-detected policies
-- ✅ **Nov 2**: HS code normalization (fixed China component alert matching)
-
-### Phase 3 Complete (Nov 4-5, 2025) - Subscription Enforcement + Centralized Config
+### Phase 4 Complete (Nov 4-5, 2025) - Subscription Enforcement + Centralized Config
 - ✅ **3-layer subscription limit enforcement**:
   1. Page-level blocking (usmca-workflow.js)
   2. Component-level blocking (ComponentOriginsStepEnhanced.js)
@@ -331,44 +354,45 @@ killall node              # macOS/Linux
 - ✅ **Race condition handling**: Reservation system prevents double-counting
 - ✅ **Security fix**: HS code bypass closed (workflow session verification)
 - ✅ **Bug fixes**: Starter tier 10→15, Trial executive summaries unblocked
+- ✅ Corrected technical debt metrics (9 TODOs not 300+, 14 deprecated not 42+)
 
-### Documentation Corrections (Nov 5, 2025)
-- ✅ Corrected technical debt metrics (were overstated by 10-30x)
-- ✅ Updated CLAUDE.md with Nov 5 centralized config
-- ✅ Updated README.md with current accurate information
-- ✅ Added SUBSCRIPTION_LIMITS_AUDIT.md
+### Phase 3 Complete (Nov 1-2, 2025) - Real Alert System
+- ✅ **Nov 2**: Replaced fake template alerts with real crisis_alerts matching
+- ✅ **Nov 2**: Portfolio briefing API using real RSS-detected policies
+- ✅ **Nov 2**: HS code normalization (fixed China component alert matching)
+- ✅ **Nov 1**: Daily tariff digest system (ready to activate with Vercel cron)
 
-### Recent Commits (Nov 5, 2025)
-```
-11dbd7e - refactor: Migrate all subscription checks to centralized config
-03be5e4 - docs: Add entry points analysis from subscription work
-b0cf1e8 - feat: Implement centralized subscription enforcement (Option 2)
-7e7008b - docs: Update CLAUDE.md and README.md with Nov 5 changes
-d46fd19 - fix: Align subscription limits with pricing page + close HS code bypass
-```
+### Phase 2 Complete (Oct 24-25, 2025) - Business Intelligence
+- ✅ Executive Trade Alert API with consulting-grade strategic advisory
+- ✅ Enhanced USMCA AI Prompt with financial impact analysis
+- ✅ Personalized alert filtering by relevance scoring
+
+### Phase 1 Complete (Oct 22, 2025) - Core Foundation
+- ✅ Destination country field + USMCA eligibility gate
+- ✅ Component data restoration (fixed data loss bug)
+- ✅ Database consolidation (unified tariff_rates_cache → tariff_intelligence_master)
 
 ## 🔮 Roadmap
 
-### Phase 4 (Next - Ready to Activate)
-- ✅ Daily tariff digest cron job (just needs Vercel config)
-- ✅ Email queue processing (ready to activate)
-- Delete web search + Redis dead code (P0 cleanup)
-- Document subscription enforcement pattern
+### Phase 6 (Current - Maintenance & Cleanup)
+- [ ] Activate daily tariff digest cron job (code ready, needs Vercel config)
+- [ ] Delete web search + Redis dead code (P0 cleanup)
+- [ ] Activate USITC API when service returns online (auth token renewal)
+- [ ] Cross-tab workflow synchronization
+- [ ] Consolidate config files (34 → ~20)
+- [ ] Cost optimization (A/B test Haiku vs Sonnet for AI calls)
 
-### Phase 5 (Q1 2026 - Maintenance & Optimization)
+### Phase 7 (Future - Post-Lockdown Enhancements)
 - Error handling + dev_issues logging improvements
-- Cross-tab workflow synchronization
-- Cost optimization (A/B test Haiku vs Sonnet)
 - API rate limiting (100 req/min per user)
-- Consolidate config files (33 → ~20)
-
-### Phase 6 (Q2+ 2026 - New Agreements)
-- EU-UK TCA agreement support
-- CPTPP agreement support
-- Multi-agreement dashboard
-- Bilateral agreement templates (US-Japan, US-India, etc.)
 - Advanced analytics and reporting
 - Partner API
+
+### Phase 8 (Long-term - New Agreements)
+- EU-UK TCA agreement support (not currently implemented)
+- CPTPP agreement support (not currently implemented)
+- Multi-agreement dashboard
+- Bilateral agreement templates (US-Japan, US-India, etc.)
 
 ## 📚 Documentation
 
@@ -397,8 +421,12 @@ Proprietary - Triangle Intelligence Platform
 
 ---
 
-**Latest Update**: November 5, 2025 | **Status**: Production Ready
-- Phase 1-3 Complete: Core workflow + Business intelligence + Subscription enforcement
-- 70% production-ready, 25% ready-to-activate (daily digest cron), 5% future work
+**Latest Update**: November 17, 2025 | **Status**: 🔒 PRODUCTION LOCKED (Nov 10)
+- Phase 1-5 Complete: Core workflow + Business intelligence + Subscription enforcement + Critical bug fixes + HS code normalization
+- 🔒 **PROJECT LOCKDOWN**: 26+ files frozen, only UI changes allowed without owner approval
+- **Database hit rate**: 75% (improved from 0% via HS code normalization Nov 13)
+- **Critical fix** (Nov 9): Desktop vs Vercel tariff rate discrepancy resolved
 - 90 API endpoints (76 active, 14 deprecated), ~75% clean production code
-- Technical debt corrected: 9 TODOs (not 300+), 14 deprecated files (not 42+), ~1,050 lines deprecated code (not ~7,900)
+- Technical debt: 9 TODOs (not 300+), 14 deprecated files (not 42+), ~1,050 lines deprecated code
+
+**For full implementation details and lockdown policy, see [CLAUDE.md](./CLAUDE.md)**

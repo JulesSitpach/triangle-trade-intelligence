@@ -1,4 +1,13 @@
 /**
+ * Triangle Intelligence Platform - Executive Trade Alert API
+ * Copyright © 2025 Triangle Intelligence Platform. All rights reserved.
+ *
+ * PROPRIETARY AND CONFIDENTIAL
+ * Unauthorized copying, modification, or distribution prohibited.
+ * This file contains proprietary strategic advisory methodology.
+ */
+
+/**
  * EXECUTIVE TRADE ALERT API
  * Generates strategic business intelligence for tariff policy impacts
  *

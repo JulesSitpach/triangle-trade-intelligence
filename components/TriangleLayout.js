@@ -159,6 +159,34 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
         <main className="main-content">
           {children}
         </main>
+
+        {/* Footer with Copyright and Legal Links */}
+        <footer style={{
+          backgroundColor: '#f8f9fa',
+          borderTop: '1px solid #e9ecef',
+          padding: '1.5rem 0',
+          marginTop: '2rem',
+          textAlign: 'center',
+          fontSize: '0.875rem',
+          color: '#6c757d'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+            <p style={{ marginBottom: '0.5rem' }}>
+              © 2025 Triangle Intelligence Platform. All rights reserved.
+            </p>
+            <p style={{ marginBottom: '0.5rem' }}>
+              Proprietary USMCA analysis methodology and tariff intelligence system.
+            </p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <Link href="/terms-of-service" style={{ color: '#007bff', marginRight: '1rem', textDecoration: 'none' }}>
+                Terms of Service
+              </Link>
+              <Link href="/privacy-policy" style={{ color: '#007bff', textDecoration: 'none' }}>
+                Privacy Policy
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   )

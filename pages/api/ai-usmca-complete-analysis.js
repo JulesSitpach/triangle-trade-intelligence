@@ -1,4 +1,13 @@
 /**
+ * Triangle Intelligence Platform - USMCA Complete Analysis Engine
+ * Copyright © 2025 Triangle Intelligence Platform. All rights reserved.
+ *
+ * PROPRIETARY AND CONFIDENTIAL
+ * Unauthorized copying, modification, or distribution prohibited.
+ * This file contains proprietary AI-powered tariff analysis methodology.
+ */
+
+/**
  * HYBRID TARIFF ANALYSIS - DATABASE-FIRST + AI FALLBACK
  *
  * Architecture (Oct 28, 2025):
