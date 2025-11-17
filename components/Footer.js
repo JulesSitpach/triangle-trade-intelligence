@@ -65,19 +65,19 @@ export default function Footer() {
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/services" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Expert Services
+                <Link href="/login" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Sign In
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/dashboard" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Dashboard Login
+                <Link href="/dashboard-user" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Dashboard
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Legal */}
           <div>
             <h4 style={{
               fontSize: '1.1rem',
@@ -85,22 +85,17 @@ export default function Footer() {
               marginBottom: '1rem',
               color: '#fff'
             }}>
-              Resources
+              Legal
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               <li className="mb-2">
-                <Link href="/about" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  About Us
+                <Link href="/terms-of-service" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Terms of Service
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/mexico-savings-calculator" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Savings Calculator
-                </Link>
-              </li>
-              <li className="mb-2">
-                <Link href="/secure-supply-chain-mexico" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
-                  Supply Chain Security
+                <Link href="/privacy-policy" style={{ color: '#e0f2fe', textDecoration: 'none' }}>
+                  Privacy Policy
                 </Link>
               </li>
             </ul>
@@ -150,7 +145,7 @@ export default function Footer() {
             © {currentYear} Triangle Trade Intelligence. All rights reserved.
           </p>
           <p style={{ color: '#e0f2fe', margin: 0, fontSize: '0.9rem' }}>
-            Not a licensed customs broker. Consulting services only.
+            Self-serve compliance tools only. Not a licensed customs broker.
           </p>
         </div>
       </div>
