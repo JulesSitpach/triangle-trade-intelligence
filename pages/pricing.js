@@ -456,6 +456,114 @@ export default function Pricing() {
         </div>
       </section>
 
+      {/* Cost Savings Comparison */}
+      <section className="main-content" style={{ backgroundColor: '#ecfdf5' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Save 45-70% on Compliance Costs</h2>
+            <p className="section-header-subtitle">
+              Even with broker validation, users save significantly vs traditional approach
+            </p>
+          </div>
+
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '2rem',
+            border: '1px solid #bbf7d0',
+            maxWidth: '900px',
+            margin: '0 auto'
+          }}>
+            {/* Comparison Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '0.95rem'
+              }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f0fdf4' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #16a34a', fontWeight: '600' }}>Company Size</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #16a34a', fontWeight: '600' }}>Traditional Cost</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #16a34a', fontWeight: '600' }}>Platform + Broker</th>
+                    <th style={{ padding: '1rem', textAlign: 'left', borderBottom: '2px solid #16a34a', fontWeight: '600', color: '#16a34a' }}>Your Savings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>
+                      <strong>Small</strong><br/>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>$5M imports</span>
+                    </td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$5,000-8,000/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$1,500-2,500/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontWeight: '600' }}>
+                      $3,500-5,500<br/>
+                      <span style={{ fontSize: '0.85rem' }}>(60-70% savings)</span>
+                    </td>
+                  </tr>
+                  <tr style={{ backgroundColor: '#f8fafc' }}>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>
+                      <strong>Medium</strong><br/>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>$20M imports</span>
+                    </td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$12,000-18,000/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$4,000-6,000/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontWeight: '600' }}>
+                      $8,000-12,000<br/>
+                      <span style={{ fontSize: '0.85rem' }}>(65-70% savings)</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>
+                      <strong>Large</strong><br/>
+                      <span style={{ fontSize: '0.85rem', color: '#64748b' }}>$100M imports</span>
+                    </td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$180,000-220,000/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>$100,000-120,000/year</td>
+                    <td style={{ padding: '1rem', borderBottom: '1px solid #e2e8f0', color: '#16a34a', fontWeight: '600' }}>
+                      $80,000-100,000<br/>
+                      <span style={{ fontSize: '0.85rem' }}>(45-50% savings)</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Key Insight */}
+            <div style={{
+              backgroundColor: '#fefce8',
+              padding: '1.25rem',
+              borderRadius: '6px',
+              border: '1px solid #fef08a',
+              marginTop: '1.5rem'
+            }}>
+              <p style={{ fontWeight: '600', color: '#854d0e', marginBottom: '0.5rem' }}>
+                Key insight:
+              </p>
+              <p style={{ color: '#854d0e', marginBottom: '0' }}>
+                Our platform does the heavy lifting (HS classification, RVC calculation, certificate drafting).
+                Your broker just validates in <strong>1 hour</strong> instead of creating from scratch in <strong>10 hours</strong>.
+              </p>
+            </div>
+
+            {/* Strongest Selling Point */}
+            <div style={{
+              backgroundColor: '#1e3a8a',
+              color: 'white',
+              padding: '1.25rem',
+              borderRadius: '6px',
+              marginTop: '1rem',
+              textAlign: 'center'
+            }}>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0' }}>
+                Use our platform + get broker validation = <strong>Save 65-75%</strong> vs broker-only approach
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="main-content">
         <div className="container-app">
