@@ -28,6 +28,10 @@ const supabase = createClient(
 // SIAVI API endpoint (unofficial, parsed from HTML)
 const SIAVI_BASE_URL = 'http://siavi.economia.gob.mx/siavi5r/aranceles.php';
 
+// ✅ FIXED (Nov 18, 2025): Use direct iframe URL instead of wrapper page
+// SIAVI loads actual tariff data in an iframe from this domain
+const SIAVI_IFRAME_BASE = 'http://www.siicex-caaarem.org.mx/Bases/TIGIE2007.nsf/General';
+
 class MexicoTariffSeeder {
   constructor() {
     this.stats = {
@@ -41,38 +45,71 @@ class MexicoTariffSeeder {
 
   /**
    * Fetch tariff data from SIAVI for a specific HS code
+   * ✅ FIXED (Nov 18, 2025): Fetch iframe content directly for accurate rates
    */
   async fetchFromSIAVI(hsCode) {
     try {
       // Normalize: Remove periods, ensure 8 digits
       const normalized = hsCode.replace(/\./g, '').padEnd(8, '0').substring(0, 8);
 
-      const response = await axios.get(SIAVI_BASE_URL, {
-        params: { fraccion: normalized },
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
+      // Strategy 1: Try direct iframe URL (more reliable)
+      let response = null;
+      let source = 'unknown';
 
-      if (response.status !== 200) {
-        return { error: `HTTP ${response.status}` };
+      try {
+        const iframeUrl = `${SIAVI_IFRAME_BASE}/${normalized}`;
+        response = await axios.get(iframeUrl, {
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        source = 'iframe';
+      } catch (iframeError) {
+        // Fallback to main SIAVI page
+        response = await axios.get(SIAVI_BASE_URL, {
+          params: { fraccion: normalized },
+          timeout: 10000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        source = 'main';
+      }
+
+      if (!response || response.status !== 200) {
+        return { error: `HTTP ${response?.status || 'no response'}` };
       }
 
       // Parse HTML response
       const $ = cheerio.load(response.data);
 
       // Extract rates from SIAVI page structure
-      // (Structure may vary - this is an approximation)
+      // ✅ TRY MULTIPLE LABEL VARIATIONS (Nov 18, 2025)
       const mfnRate = this.extractRate($, 'IGI General') ||
-                      this.extractRate($, 'Arancel General');
+                      this.extractRate($, 'Arancel General') ||
+                      this.extractRate($, 'General') ||
+                      this.extractRate($, 'MFN');
+
       const usmcaRate = this.extractRate($, 'T-MEC') ||
+                        this.extractRate($, 'TMEC') ||
                         this.extractRate($, 'TLCAN') ||
+                        this.extractRate($, 'USMCA') ||
                         0; // Default 0 for USMCA members
 
-      // Extract description
+      // Extract description (try multiple patterns)
       const description = $('td:contains("Descripción")').next().text().trim() ||
-                         $('td:contains("Description")').next().text().trim();
+                         $('td:contains("Description")').next().text().trim() ||
+                         $('h2, h3').first().text().trim() ||
+                         '';
+
+      // Debug: If MFN still null and --debug flag, save HTML
+      if (mfnRate === null && process.env.DEBUG_SIAVI) {
+        const fs = require('fs');
+        const debugPath = `debug-siavi-${normalized}.html`;
+        fs.writeFileSync(debugPath, response.data);
+        console.log(`  🐛 DEBUG: Saved HTML to ${debugPath} for inspection`);
+      }
 
       return {
         hs_code: normalized,
@@ -96,19 +133,52 @@ class MexicoTariffSeeder {
 
   /**
    * Extract rate from parsed HTML
+   * ✅ ENHANCED (Nov 18, 2025): Multiple fallback strategies
    */
   extractRate($, label) {
-    const cell = $(`td:contains("${label}")`).next();
-    const text = cell.text().trim();
+    // Strategy 1: Look for label in <td>, rate in next <td>
+    let cell = $(`td:contains("${label}")`).next();
+    let text = cell.text().trim();
 
-    // Look for percentage patterns
-    const match = text.match(/(\d+\.?\d*)\s*%/);
-    if (match) {
+    if (text) {
+      const rate = this.parseRateText(text);
+      if (rate !== null) return rate;
+    }
+
+    // Strategy 2: Look for label in <th>, rate in corresponding <td> (table header)
+    const headerIndex = $(`th:contains("${label}")`).index();
+    if (headerIndex >= 0) {
+      const row = $(`th:contains("${label}")`).closest('tr').next();
+      text = row.find('td').eq(headerIndex).text().trim();
+      const rate = this.parseRateText(text);
+      if (rate !== null) return rate;
+    }
+
+    // Strategy 3: Look for label anywhere, extract nearby number
+    const labelCell = $(`*:contains("${label}")`).first();
+    if (labelCell.length) {
+      const siblings = labelCell.parent().text();
+      const rate = this.parseRateText(siblings);
+      if (rate !== null) return rate;
+    }
+
+    return null;
+  }
+
+  /**
+   * Parse rate text to numeric value
+   */
+  parseRateText(text) {
+    if (!text) return null;
+
+    // Look for percentage patterns: "5.5%", "5.5 %", "5.5"
+    const match = text.match(/(\d+\.?\d*)\s*%?/);
+    if (match && match[1]) {
       return parseFloat(match[1]);
     }
 
-    // Check if it says "Exento" (exempt) or "Free"
-    if (/exento|free|0%/i.test(text)) {
+    // Check if it says "Exento" (exempt), "Free", or "Ex"
+    if (/exento|^ex$|free|0\s*%/i.test(text)) {
       return 0;
     }
 
@@ -140,21 +210,42 @@ class MexicoTariffSeeder {
 
   /**
    * Get all US HS codes to use as seed list
+   * ✅ FIXED (Nov 18, 2025): Added pagination to fetch all 17,545+ codes
    */
   async getUSHSCodes() {
     console.log('📋 Fetching US HS codes from tariff_intelligence_master...');
 
-    const { data, error } = await supabase
-      .from('tariff_intelligence_master')
-      .select('hts8, brief_description')
-      .order('hts8');
+    const pageSize = 1000;
+    let allCodes = [];
+    let page = 0;
+    let hasMore = true;
 
-    if (error) {
-      throw new Error(`Failed to fetch US codes: ${error.message}`);
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('tariff_intelligence_master')
+        .select('hts8, brief_description')
+        .order('hts8')
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (error) {
+        throw new Error(`Failed to fetch US codes (page ${page}): ${error.message}`);
+      }
+
+      if (data && data.length > 0) {
+        allCodes = allCodes.concat(data);
+        page++;
+        hasMore = data.length === pageSize; // Continue if we got a full page
+
+        if (page % 5 === 0) {
+          console.log(`   Fetched ${allCodes.length} codes so far...`);
+        }
+      } else {
+        hasMore = false;
+      }
     }
 
-    console.log(`✅ Found ${data.length} US HS codes\n`);
-    return data;
+    console.log(`✅ Found ${allCodes.length} US HS codes (${page} pages)\n`);
+    return allCodes;
   }
 
   /**

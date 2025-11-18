@@ -153,22 +153,94 @@ export default async function handler(req, res) {
       console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} alerts manually selected by user`);
     } else {
       // ✅ AI AUTO-SELECT MODE: Match alerts to components automatically
+      // ✅ FIXED (Nov 18, 2025): Use AND logic when alert has both filters (prevents false positives)
       matchedAlerts = (realAlerts || []).filter(alert => {
-        const countryMatch = alert.affected_countries?.some(country =>
-          userComponentOrigins.includes(country.toUpperCase())
-        );
+        const hasCountryFilter = alert.affected_countries && alert.affected_countries.length > 0;
+        const hasHSFilter = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
 
-        const hsMatch = alert.affected_hs_codes?.some(code => {
-          const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
-          return userComponentHS.some(compHS =>
-            compHS.startsWith(normalizedAlertCode)
+        const countryMatch = hasCountryFilter &&
+          alert.affected_countries.some(country =>
+            userComponentOrigins.includes(country.toUpperCase())
           );
-        });
 
-        return countryMatch || hsMatch;
+        const hsMatch = hasHSFilter &&
+          alert.affected_hs_codes.some(code => {
+            const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+            return userComponentHS.some(compHS =>
+              compHS.startsWith(normalizedAlertCode)
+            );
+          });
+
+        // Smart matching logic:
+        // - If alert has BOTH country AND HS codes → Require BOTH match (AND logic)
+        // - If alert has ONLY country → Match on country
+        // - If alert has ONLY HS codes → Match on HS codes
+        // - If alert has NEITHER → Don't match (invalid alert)
+        if (hasCountryFilter && hasHSFilter) {
+          return countryMatch && hsMatch;  // ✅ AND logic (precision)
+        } else if (hasCountryFilter) {
+          return countryMatch;  // Blanket country alert
+        } else if (hasHSFilter) {
+          return hsMatch;  // HS-specific alert (no country filter)
+        } else {
+          return false;  // Invalid alert (no filters)
+        }
       });
       console.log(`📊 Portfolio briefing for ${companyName}: ${matchedAlerts.length} alerts auto-matched by AI`);
     }
+
+    // ✅ NEW (Nov 18, 2025): Add confidence scoring to matched alerts
+    // Helps users assess reliability of alert matches
+    matchedAlerts = matchedAlerts.map(alert => {
+      const hasCountryFilter = alert.affected_countries && alert.affected_countries.length > 0;
+      const hasHSFilter = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+
+      // Calculate how many components match this alert
+      const countryMatches = components.filter(c =>
+        hasCountryFilter && alert.affected_countries.includes((c.origin_country || c.country || '').toUpperCase())
+      ).length;
+
+      const hsMatches = components.filter(c => {
+        if (!hasHSFilter) return false;
+        return alert.affected_hs_codes.some(code => {
+          const normalizedAlertCode = code.replace(/\./g, '').substring(0, 6);
+          const compHS = (c.hs_code || '').replace(/\./g, '').substring(0, 6);
+          return compHS.startsWith(normalizedAlertCode);
+        });
+      }).length;
+
+      // Determine confidence level
+      let confidence_level, confidence_reason;
+
+      if (hasCountryFilter && hasHSFilter && countryMatches > 0 && hsMatches > 0) {
+        confidence_level = 'HIGH';
+        confidence_reason = `Specific match: ${countryMatches} component(s) from affected country + ${hsMatches} matching HS code(s)`;
+      } else if (hasCountryFilter && !hasHSFilter && countryMatches > 0) {
+        confidence_level = 'MEDIUM';
+        confidence_reason = `Blanket country alert: ${countryMatches} component(s) from ${alert.affected_countries.join(', ')}`;
+      } else if (!hasCountryFilter && hasHSFilter && hsMatches > 0) {
+        confidence_level = 'MEDIUM';
+        confidence_reason = `Product-specific: ${hsMatches} component(s) with matching HS codes`;
+      } else if (alert.affected_industries && alert.affected_industries.length > 0) {
+        confidence_level = 'LOW';
+        confidence_reason = `Industry-based inference: ${alert.affected_industries.join(', ')}`;
+      } else {
+        confidence_level = 'LOW';
+        confidence_reason = 'Generic alert with no specific filters';
+      }
+
+      return {
+        ...alert,
+        confidence_level,
+        confidence_reason,
+        component_matches: {
+          country: countryMatches,
+          hs_code: hsMatches
+        }
+      };
+    });
+
+    console.log(`🎯 Confidence distribution: HIGH=${matchedAlerts.filter(a => a.confidence_level === 'HIGH').length}, MEDIUM=${matchedAlerts.filter(a => a.confidence_level === 'MEDIUM').length}, LOW=${matchedAlerts.filter(a => a.confidence_level === 'LOW').length}`);
 
     // STEP 3: Build portfolio analysis for AI prompt (with volatility detection)
     const destination = workflow_data.company?.destination_country || 'US';
@@ -258,8 +330,10 @@ ALERTS TO REVIEW:
 ${rankedAlerts.map((a, idx) => `
 [${idx + 1}] ${a.severity} - ${a.title}
 Impact: ${a.impactScore.toFixed(1)}% of portfolio
+Confidence: ${a.confidence_level} (${a.confidence_reason})
 Description: ${a.description}
 Countries: ${(a.affected_countries || []).join(', ')}
+HS Codes: ${(a.affected_hs_codes || []).join(', ') || 'blanket alert'}
 `).join('\n')}
 
 TASK: Return ONLY the alert numbers (e.g., "1, 3, 7") that help sourcing/shipping decisions. Be strict - when in doubt, exclude.
@@ -307,6 +381,7 @@ ${strategicAlerts.map((a, idx) => {
   const affectedNames = affectedComps.map(c => c.component_type || c.description).join(', ');
 
   return `[${idx + 1}] ${a.severity.toUpperCase()} - ${a.title}
+  Confidence: ${a.confidence_level} (${a.confidence_reason})
   Affects: ${affectedNames || 'supply chain'} (${a.impactScore.toFixed(1)}% of portfolio)
   ${a.description}`;
 }).join('\n\n')}`
