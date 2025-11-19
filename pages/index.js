@@ -11,6 +11,7 @@ import Footer from '../components/Footer'
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('importer') // importer, exporter, manufacturer
   const router = useRouter()
   const { user, logout, loading } = useSimpleAuth()
 
@@ -28,6 +29,66 @@ export default function HomePage() {
     }
     setMobileMenuOpen(false)
   }
+
+  // Content for each user type
+  const contentByType = {
+    importer: {
+      badge: 'Trade Policy Update: USMCA Optimization Opportunities Available',
+      headline: '70% of SMBs Qualify for USMCA',
+      highlightText: "But Don't Know It",
+      description: 'Are you paying tariffs when you could qualify for duty-free status?',
+      painPoints: [
+        { title: 'Tariff Policies Change Every Week', desc: 'Section 301, Section 232, USMCA updates—impossible to track alone' },
+        { title: 'Broker Consulting Fees Add Up Fast', desc: '$200-400/hour every time you need supply chain impact analysis' },
+        { title: 'No Time to Research USMCA Rules', desc: "RVC calculations, origin rules, preference criteria—it's a second job" },
+        { title: "You Suspect You're Overpaying", desc: "But you don't have a trade team to verify if you qualify" }
+      ],
+      empathy: "You're right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid—simply because they have trade compliance teams and you don't.",
+      exampleTitle: 'Real Example: Electronics Importer',
+      exampleBefore: 'Paying 25% Section 301 tariffs on China-sourced components',
+      exampleAfter: 'Discovered 72% USMCA qualification through Mexico assembly',
+      exampleSavings: 'Annual Savings: $43,750 in eliminated tariffs',
+      exampleNote: "They didn't know they qualified. They were just trying to keep their business running."
+    },
+    exporter: {
+      badge: 'Win More B2B Contracts: USMCA Certificate Generation',
+      headline: 'Your Buyers Are Paying 25% Tariffs',
+      highlightText: 'On YOUR Products',
+      description: 'Provide USMCA certificates so your customers qualify for duty-free import',
+      painPoints: [
+        { title: 'Lost Deals to USMCA-Ready Competitors', desc: 'Buyers choose suppliers who provide compliant certificates—costing you contracts' },
+        { title: 'Customer Complaints About Tariff Costs', desc: 'Your products are great, but import duties make you too expensive vs local suppliers' },
+        { title: 'Manual Certificate Paperwork Takes Days', desc: 'Each customer request requires hours of documentation and customs research' },
+        { title: 'No Way to Prove USMCA Qualification', desc: "You know your products qualify, but can't provide the required Form D certificates" }
+      ],
+      empathy: "You're losing deals because you can't document what you already know—that your products qualify for duty-free treatment under USMCA.",
+      exampleTitle: 'Real Example: Furniture Exporter (Mexico → US)',
+      exampleBefore: 'Losing B2B contracts because US buyers paid 10% import duties',
+      exampleAfter: 'Started providing USMCA certificates, documented 85% regional content',
+      exampleSavings: 'Won 3 new contracts worth $180K/year with duty-free certification',
+      exampleNote: "They had the qualifying products all along. They just couldn't prove it until now."
+    },
+    manufacturer: {
+      badge: 'Manufacturer Documentation: Prove Your USMCA Origin',
+      headline: 'Your Distributors Need Certificates',
+      highlightText: "You Can't Provide Them",
+      description: 'Generate compliant USMCA certificates showing your products qualify for duty-free status',
+      painPoints: [
+        { title: 'Distributor Certificate Requests Pile Up', desc: "Every customer asks for USMCA Form D, but you don't have the time or expertise to create them" },
+        { title: 'RVC Calculations Are Confusing', desc: 'Regional Value Content thresholds vary by industry—electronics 65%, automotive 75%, textiles 55%' },
+        { title: 'Origin Rules Keep Changing', desc: 'USMCA 2026 renegotiation, Section 301 updates, new tariff classifications—impossible to track' },
+        { title: 'Manual Documentation Takes 6+ Hours', desc: "Calculating bill of materials, origin tracing, percentage calculations—it's a second full-time job" }
+      ],
+      empathy: "You manufacture in North America. Your products qualify. But proving it to customs authorities and B2B buyers requires documentation you don't have time to create.",
+      exampleTitle: 'Real Example: Auto Parts Manufacturer (Mexico)',
+      exampleBefore: 'Manually calculating RVC for each distributor request, taking 8 hours per certificate',
+      exampleAfter: 'Platform documented 78% regional content in 10 minutes with AI-powered BOM analysis',
+      exampleSavings: 'Now provides certificates same-day, enabling distributors to save $125K/year in tariffs',
+      exampleNote: "They were already compliant. They just needed a way to document it quickly."
+    }
+  }
+
+  const content = contentByType[activeTab]
 
   return (
     <>
@@ -201,17 +262,108 @@ export default function HomePage() {
 
         {/* Hero Content */}
         <div className="hero-content-container">
+          {/* User Type Tabs */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            marginBottom: '2rem',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              onClick={() => setActiveTab('importer')}
+              style={{
+                padding: '0.75rem 2rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                border: activeTab === 'importer' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: activeTab === 'importer' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'importer') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'importer') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              I IMPORT
+            </button>
+            <button
+              onClick={() => setActiveTab('exporter')}
+              style={{
+                padding: '0.75rem 2rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                border: activeTab === 'exporter' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: activeTab === 'exporter' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'exporter') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'exporter') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              I EXPORT
+            </button>
+            <button
+              onClick={() => setActiveTab('manufacturer')}
+              style={{
+                padding: '0.75rem 2rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                border: activeTab === 'manufacturer' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
+                backgroundColor: activeTab === 'manufacturer' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(10px)'
+              }}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'manufacturer') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'manufacturer') {
+                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              I MANUFACTURE
+            </button>
+          </div>
+
           <div className="hero-badge">
-            Trade Policy Update: USMCA Optimization Opportunities Available
+            {content.badge}
           </div>
 
           <h1 className="hero-main-title">
-            70% of SMBs Qualify for USMCA<br/>
-            <span className="hero-yellow-highlight">But Don&apos;t Know It</span>
+            {content.headline}<br/>
+            <span className="hero-yellow-highlight">{content.highlightText}</span>
           </h1>
 
           <p className="hero-description-text homepage-margin-top-2">
-            Are you paying tariffs when you could qualify for duty-free status?
+            {content.description}
           </p>
 
           <div className="hero-button-group">
@@ -284,57 +436,30 @@ export default function HomePage() {
           <div className="section-header homepage-section-header-centered">
             <h2 className="section-header-title">You&apos;re Not Alone</h2>
             <p className="homepage-subtitle">
-              You&apos;re managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:
+              {activeTab === 'importer' && "You're managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:"}
+              {activeTab === 'exporter' && "You're shipping great products, but losing deals because of tariff complications. Meanwhile:"}
+              {activeTab === 'manufacturer' && "You're making quality products in North America, but drowning in certificate requests. Meanwhile:"}
             </p>
           </div>
 
-          {/* 2x2 Grid of Pain Points */}
+          {/* 2x2 Grid of Pain Points - Dynamic */}
           <div className="grid-2-cols">
-            {/* Card 1: Tariff Policies */}
-            <div className="content-card">
-              <h3 className="content-card-title">
-                Tariff Policies Change Every Week
-              </h3>
-              <p className="content-card-description">
-                Section 301, Section 232, USMCA updates—impossible to track alone
-              </p>
-            </div>
-
-            {/* Card 2: Broker Costs */}
-            <div className="content-card">
-              <h3 className="content-card-title">
-                Broker Consulting Fees Add Up Fast
-              </h3>
-              <p className="content-card-description">
-                $200-400/hour every time you need supply chain impact analysis
-              </p>
-            </div>
-
-            {/* Card 3: No Time */}
-            <div className="content-card">
-              <h3 className="content-card-title">
-                No Time to Research USMCA Rules
-              </h3>
-              <p className="content-card-description">
-                RVC calculations, origin rules, preference criteria—it&apos;s a second job
-              </p>
-            </div>
-
-            {/* Card 4: Suspect Overpaying */}
-            <div className="content-card">
-              <h3 className="content-card-title">
-                You Suspect You&apos;re Overpaying
-              </h3>
-              <p className="content-card-description">
-                But you don&apos;t have a trade team to verify if you qualify
-              </p>
-            </div>
+            {content.painPoints.map((pain, index) => (
+              <div key={index} className="content-card">
+                <h3 className="content-card-title">
+                  {pain.title}
+                </h3>
+                <p className="content-card-description">
+                  {pain.desc}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* Empathy Statement - Dark Blue Box */}
           <div className="homepage-empathy-box">
             <p>
-              You&apos;re right to be frustrated. Small businesses get stuck paying tariffs that larger competitors avoid—simply because they have trade compliance teams and you don&apos;t.
+              {content.empathy}
             </p>
           </div>
         </div>
@@ -437,35 +562,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Real Example */}
+      {/* Real Example - Dynamic */}
       <section className="main-content">
         <div className="container-app">
           <div className="section-header">
-            <h2 className="section-header-title">Real Example: Electronics Importer</h2>
+            <h2 className="section-header-title">{content.exampleTitle}</h2>
           </div>
 
           <div className="grid-2-cols">
             <div className="content-card">
               <h3 className="content-card-title">Before</h3>
               <p className="content-card-description">
-                Paying 25% Section 301 tariffs on China-sourced components
+                {content.exampleBefore}
               </p>
             </div>
 
             <div className="content-card">
               <h3 className="content-card-title">After</h3>
               <p className="content-card-description">
-                Discovered 72% USMCA qualification through Mexico assembly
+                {content.exampleAfter}
               </p>
               <p className="content-card-description">
-                <strong>Annual Savings: $43,750 in eliminated tariffs</strong>
+                <strong>{content.exampleSavings}</strong>
               </p>
             </div>
           </div>
 
           <div className="section-header">
             <p className="section-header-subtitle">
-              They didn&apos;t know they qualified. They were just trying to keep their business running.
+              {content.exampleNote}
             </p>
           </div>
         </div>
