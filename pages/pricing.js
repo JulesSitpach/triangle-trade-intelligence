@@ -308,14 +308,12 @@ export default function Pricing() {
           </div>
           
           <h1 className="hero-main-title">
-            Professional Trade Compliance
+            Professional Trade Compliance<br/>
+            <span className="hero-yellow-highlight">For Importers, Exporters & Producers</span>
           </h1>
-          <h2 className="hero-sub-title">
-            For <span className="hero-yellow-highlight">Importers, Exporters & Producers</span>
-          </h2>
 
           <p className="hero-description-text">
-            Self-serve USMCA compliance platform for businesses. Generate certificates, monitor tariff policy changes, and analyze qualification. Plans start at $99/month with AI-powered analysis.
+            Self-serve USMCA compliance platform. Generate certificates, monitor tariff changes, analyze qualification. Plans start at $99/month.
           </p>
           
           <div className="hero-button-group">
@@ -334,21 +332,13 @@ export default function Pricing() {
               View Plans
             </Link>
           </div>
-
-          {/* Trial Benefits */}
-          <div className="hero-trial-benefits">
-            <div className="trial-benefit-item">✓ 1 workflow analysis</div>
-            <div className="trial-benefit-item">✓ 3 components</div>
-            <div className="trial-benefit-item">✓ Certificate preview</div>
-            <div className="trial-benefit-item">✓ Crisis alerts dashboard</div>
-          </div>
         </div>
       </section>
 
       {/* Pricing Plans */}
-      <section className="main-content" id="pricing">
+      <section className="main-content" id="pricing" style={{ paddingTop: '2rem' }}>
         <div className="container-app">
-          <div className="section-header">
+          <div className="section-header" style={{ marginBottom: '2rem' }}>
             <h2 className="section-header-title">Subscription Plans</h2>
             <p className="section-header-subtitle">
               USMCA qualification analysis, HS code classification, certificate generation, and daily policy alert monitoring

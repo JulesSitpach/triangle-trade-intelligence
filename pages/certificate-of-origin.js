@@ -90,7 +90,7 @@ export default function CertificateOfOriginPage() {
             <span className="hero-yellow-highlight">Generate in 5 Minutes</span>
           </h1>
 
-          <p className="hero-description-text mt-8">
+          <p className="hero-description-text">
             For importers, exporters, and manufacturers. Answer simple questions about your product - we calculate qualification and generate your official Form D certificate.
           </p>
 

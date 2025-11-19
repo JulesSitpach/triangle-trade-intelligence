@@ -280,12 +280,11 @@ export default function HomePage() {
                 fontSize: '1rem',
                 fontWeight: '600',
                 border: activeTab === 'importer' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: activeTab === 'importer' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTab === 'importer' ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.15)',
                 color: 'white',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)'
+                transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 if (activeTab !== 'importer') {
@@ -307,12 +306,11 @@ export default function HomePage() {
                 fontSize: '1rem',
                 fontWeight: '600',
                 border: activeTab === 'exporter' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: activeTab === 'exporter' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTab === 'exporter' ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.15)',
                 color: 'white',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)'
+                transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 if (activeTab !== 'exporter') {
@@ -334,12 +332,11 @@ export default function HomePage() {
                 fontSize: '1rem',
                 fontWeight: '600',
                 border: activeTab === 'manufacturer' ? '2px solid #fbbf24' : '2px solid rgba(255, 255, 255, 0.3)',
-                backgroundColor: activeTab === 'manufacturer' ? 'rgba(251, 191, 36, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTab === 'manufacturer' ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.15)',
                 color: 'white',
                 borderRadius: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)'
+                transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
                 if (activeTab !== 'manufacturer') {
@@ -365,7 +362,7 @@ export default function HomePage() {
             <span className="hero-yellow-highlight">{content.highlightText}</span>
           </h1>
 
-          <p className="hero-description-text homepage-margin-top-2">
+          <p className="hero-description-text">
             {content.description}
           </p>
 
@@ -378,75 +375,17 @@ export default function HomePage() {
               Try Free - 1 Analysis, No Credit Card
             </Link>
           </div>
-
-          {/* Data Freshness Trust Badge */}
-          <div style={{
-            marginTop: '2rem',
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '1rem',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '0.5rem 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
-              <span style={{ color: 'white', fontSize: '0.875rem' }}>
-                <strong>12,118</strong> HS codes (USITC official)
-              </span>
-            </div>
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '0.5rem 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
-              <span style={{ color: 'white', fontSize: '0.875rem' }}>
-                <strong>Real-time</strong> AI tariff lookups
-              </span>
-            </div>
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '8px',
-              padding: '0.5rem 1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <span style={{ color: '#10b981', fontSize: '1.1rem' }}>✓</span>
-              <span style={{ color: 'white', fontSize: '0.875rem' }}>
-                <strong>Daily</strong> policy monitoring
-              </span>
-            </div>
-          </div>
         </div>
       </section>
 
       {/* You're Not Alone */}
-      <section className="main-content homepage-section-gray">
+      <section className="main-content homepage-section-gray" style={{ paddingTop: '2rem' }}>
         <div className="container-app homepage-container-narrow">
-          <div className="section-header homepage-section-header-centered">
-            <h2 style={{
-              fontSize: '3rem',
-              fontWeight: '700',
-              color: 'var(--navy-900)',
-              textAlign: 'center',
-              marginBottom: '0.5rem'
-            }}>
+          <div className="section-header homepage-section-header-centered" style={{ marginBottom: '2rem' }}>
+            <h2 className="section-header-title">
               {activeTab === 'importer' ? 'Importers' : activeTab === 'exporter' ? 'Exporters' : 'Manufacturers'}
             </h2>
-            <h3 className="section-header-title" style={{ fontSize: '1.75rem' }}>You&apos;re Not Alone</h3>
+            <h3 className="section-header-subtitle">You&apos;re Not Alone</h3>
             <p className="homepage-subtitle">
               {activeTab === 'importer' && "You're managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:"}
               {activeTab === 'exporter' && "You're shipping great products, but losing deals because of tariff complications. Meanwhile:"}

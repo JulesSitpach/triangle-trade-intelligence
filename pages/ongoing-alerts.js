@@ -90,7 +90,7 @@ export default function OngoingAlertsPage() {
             <span className="hero-yellow-highlight">Stay Ahead of Policy Changes</span>
           </h1>
 
-          <p className="hero-description-text mt-8">
+          <p className="hero-description-text">
             For importers, exporters, and manufacturers. Tariff policies change constantly. We monitor Section 301, Section 232, and USMCA updates daily - and alert you only when it affects YOUR components.
           </p>
 

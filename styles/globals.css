@@ -282,7 +282,7 @@ button.btn-primary:hover {
   letter-spacing: 0.05em;
   font-size: 0.95rem;
   transition: all var(--transition-base);
-  padding: var(--space-2) var(--space-3);
+  padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
   position: relative;
 }
@@ -327,7 +327,7 @@ button.btn-primary:hover {
 .hero-video-section {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 80vh;
   overflow: hidden;
   background: #0d274d;
   display: flex;
@@ -364,7 +364,7 @@ button.btn-primary:hover {
   width: 100%;
   max-width: 1200px;
   padding: 2rem;
-  margin-top: 80px;
+  margin-top: 140px;
 }
 
 .hero-badge {
@@ -375,7 +375,7 @@ button.btn-primary:hover {
   font-size: 0.875rem;
   font-weight: 500;
   display: inline-block;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 /* Workflow Progress Badge States */
@@ -401,7 +401,7 @@ button.btn-primary:hover {
   font-size: clamp(2rem, 5vw, 4rem); /* Responsive: 32px min, 64px max */
   font-weight: 900;
   color: #fff;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   line-height: 1.2;
 }
@@ -433,7 +433,7 @@ button.btn-primary:hover {
   font-size: clamp(1rem, 2.5vw, 1.25rem); /* Responsive: 16px min, 20px max */
   opacity: 0.9;
   max-width: 800px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 0.75rem;
   line-height: 1.6;
   color: white;
 }
@@ -441,7 +441,7 @@ button.btn-primary:hover {
 .hero-button-group {
   display: flex;
   gap: 1rem;
-  margin-bottom: 4rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -683,7 +683,7 @@ button.btn-primary:hover {
 
 .btn-primary:hover {
   color: white;
-  background: linear-gradient(135deg, var(--navy-700) 0%, var(--navy-900) 100%);
+  background: linear-gradient(135deg, var(--blue-400) 0%, var(--blue-600) 100%);
   box-shadow: var(--shadow-md-enhanced);
   transform: translateY(-1px);
 }
@@ -763,6 +763,57 @@ button.btn-primary:hover {
   border-color: var(--gray-300);
   transform: none;
   box-shadow: none;
+}
+
+/* Hero Buttons - Extend base button styles */
+.hero-primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm-enhanced);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.hero-primary-button:hover {
+  color: white;
+  background: linear-gradient(135deg, var(--blue-400) 0%, var(--blue-600) 100%);
+  box-shadow: var(--shadow-md-enhanced);
+  transform: translateY(-1px);
+}
+
+.hero-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy-700);
+  background-color: white;
+  border: 2px solid var(--navy-700);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-xs);
+}
+
+.hero-secondary-button:hover {
+  background-color: var(--navy-700);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Google OAuth Button */

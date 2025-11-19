@@ -285,7 +285,7 @@ export default function ExportersPage() {
             <span className="hero-yellow-highlight">{content.highlightText}</span>
           </h1>
 
-          <p className="hero-description-text homepage-margin-top-2">
+          <p className="hero-description-text">
             {content.description}
           </p>
 
