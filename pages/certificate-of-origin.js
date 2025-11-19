@@ -91,7 +91,7 @@ export default function CertificateOfOriginPage() {
           </h1>
 
           <p className="hero-description-text mt-8">
-            Self-service certificate generation. Answer simple questions about your product - we calculate qualification and generate your official Form D certificate.
+            For importers, exporters, and manufacturers. Answer simple questions about your product - we calculate qualification and generate your official Form D certificate.
           </p>
 
           <div className="hero-button-group">
@@ -102,6 +102,38 @@ export default function CertificateOfOriginPage() {
             >
               Start Free Analysis →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem', backgroundColor: '#f8f9fa' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Who Is This For?</h2>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">Importers</h3>
+              <p className="content-card-description">
+                Verify USMCA qualification before paying tariffs. See if your products qualify for duty-free status and calculate potential savings.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Exporters</h3>
+              <p className="content-card-description">
+                Provide USMCA certificates to your B2B buyers. Help them qualify for duty-free import and win more contracts.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Manufacturers</h3>
+              <p className="content-card-description">
+                Respond to distributor certificate requests quickly. Document your products qualify for USMCA preferential treatment.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -152,13 +184,13 @@ export default function CertificateOfOriginPage() {
                   ✓ Company name, address, and tax ID
                 </p>
                 <p className="content-card-description">
-                  ✓ Where you manufacture or assemble your product
+                  ✓ Where you source or manufacture your product
                 </p>
                 <p className="content-card-description">
                   ✓ Your destination market (US, Canada, or Mexico)
                 </p>
                 <p className="content-card-description">
-                  ✓ Annual trade volume
+                  ✓ Annual trade volume (for importers/exporters)
                 </p>
               </div>
             </div>
@@ -167,7 +199,7 @@ export default function CertificateOfOriginPage() {
           <div className="homepage-empathy-box">
             <p className="font-bold text-lg mb-3">Why this matters:</p>
             <p className="text-lg m-0 leading-relaxed">
-              This basic information goes directly onto your USMCA certificate. We also use your manufacturing location and destination to determine which tariff rates apply.
+              This basic information goes directly onto your USMCA certificate. We use your sourcing/manufacturing location and destination market to determine which tariff rates apply and calculate your potential savings.
             </p>
           </div>
         </div>
