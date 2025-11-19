@@ -138,13 +138,13 @@ export default function ExportersPage() {
                   Workflows
                 </Link>
                 <div className="admin-dropdown">
-                  <button
+                  <span
                     className="nav-menu-link"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0.75rem 1rem'}}
+                    style={{cursor: 'pointer'}}
                   >
-                    {user?.email?.split('@')[0] || 'User'} <span style={{marginLeft: '4px'}}>▼</span>
-                  </button>
+                    {user?.email?.split('@')[0] || 'User'} ▼
+                  </span>
                   {userDropdownOpen && (
                     <div className="admin-dropdown-menu">
                       <Link href="/subscription" className="admin-dropdown-item">
