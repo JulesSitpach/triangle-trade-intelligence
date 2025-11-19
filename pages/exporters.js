@@ -353,7 +353,10 @@ export default function ExportersPage() {
       {/* You're Not Alone Section */}
       <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem' }}>
         <div className="container-app">
-          <h2 className="section-header-title" style={{ marginBottom: '1rem' }}>You're Not Alone</h2>
+          <h2 className="section-header-title" style={{ marginBottom: '0.5rem' }}>
+            {activeTab === 'importer' ? 'Importers' : activeTab === 'exporter' ? 'Exporters' : 'Manufacturers'}
+          </h2>
+          <h3 className="section-header-title" style={{ marginBottom: '1rem', fontSize: '1.75rem' }}>You're Not Alone</h3>
           <p className="section-header-subtitle" style={{ fontSize: '1.125rem', maxWidth: '800px', margin: '0 auto 2rem' }}>
             {content.notAloneText}
           </p>
