@@ -158,21 +158,15 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
 
                   {/* User Menu */}
                   <div className="admin-dropdown">
-                    <button
-                      className="btn-primary"
+                    <span
+                      className="nav-menu-link"
                       onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                      style={{cursor: 'pointer'}}
                     >
-                      👤 {user?.user_metadata?.company_name || user?.email?.split('@')[0] || 'User'}
-                      <span className="badge badge-info" style={{marginLeft: '8px'}}>
-                        {user?.subscription_tier || 'Trial'}
-                      </span>
-                      <span style={{marginLeft: '8px'}}>▼</span>
-                    </button>
+                      {user?.email?.split('@')[0] || 'User'} ▼
+                    </span>
                     {userDropdownOpen && (
                       <div className="admin-dropdown-menu">
-                        <Link href="/dashboard" className="admin-dropdown-item">
-                          Dashboard
-                        </Link>
                         <Link href="/subscription" className="admin-dropdown-item">
                           Subscription/Billing
                         </Link>
