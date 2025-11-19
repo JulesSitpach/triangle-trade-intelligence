@@ -94,8 +94,8 @@ export default function ExportersPage() {
         <title>USMCA Certificate Generator for Exporters | Triangle Trade Intelligence</title>
         <meta name="description" content="Exporters: Win more B2B contracts. Our AI platform analyzes USMCA qualification in 5 minutes and generates compliant certificates. Save $40K+/year." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="USMCA Tariff Calculator for Importers" />
-        <meta property="og:description" content="AI-powered USMCA qualification analysis for importers. Stop paying unnecessary tariffs on qualifying products." />
+        <meta property="og:title" content="USMCA Certificate Generator for Exporters" />
+        <meta property="og:description" content="AI-powered USMCA certificate generation for exporters. Win more B2B contracts with duty-free certificates." />
       </Head>
 
       {/* Fixed Navigation */}
