@@ -35,6 +35,7 @@ export default function ImportersPage() {
       headline: '70% of SMBs Qualify for USMCA',
       highlightText: "But Don't Know It",
       description: 'Are you paying tariffs when you could qualify for duty-free status?',
+      notAloneText: "You're running a profitable business, but confused about USMCA qualification and uncertain about tariff costs. Meanwhile:",
       painPoints: [
         { title: 'Tariff Policies Change Every Week', desc: 'Section 301, Section 232, USMCA updates—impossible to track alone' },
         { title: 'Broker Consulting Fees Add Up Fast', desc: '$200-400/hour every time you need supply chain impact analysis' },
@@ -53,6 +54,7 @@ export default function ImportersPage() {
       headline: 'Your Buyers Are Paying 25% Tariffs',
       highlightText: 'On YOUR Products',
       description: 'Provide USMCA certificates so your customers qualify for duty-free import',
+      notAloneText: "You're making quality products, but losing B2B deals to certificate-ready competitors. Meanwhile:",
       painPoints: [
         { title: 'Lost Deals to USMCA-Ready Competitors', desc: 'Buyers choose suppliers who provide compliant certificates—costing you contracts' },
         { title: 'Customer Complaints About Tariff Costs', desc: 'Your products are great, but import duties make you too expensive vs local suppliers' },
@@ -71,6 +73,7 @@ export default function ImportersPage() {
       headline: 'Your Distributors Need Certificates',
       highlightText: "You Can't Provide Them",
       description: 'Generate compliant USMCA certificates showing your products qualify for duty-free status',
+      notAloneText: "You're making quality products in North America, but drowning in certificate requests. Meanwhile:",
       painPoints: [
         { title: 'Distributor Certificate Requests Pile Up', desc: "Every customer asks for USMCA Form D, but you don't have the time or expertise to create them" },
         { title: 'RVC Calculations Are Confusing', desc: 'Regional Value Content thresholds vary by industry—electronics 65%, automotive 75%, textiles 55%' },
@@ -347,10 +350,18 @@ export default function ImportersPage() {
         </div>
       </section>
 
-      {/* Rest of content stays the same as homepage - just import the sections */}
-      {/* I'll add a note at the bottom */}
+      {/* You're Not Alone Section */}
+      <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem' }}>
+        <div className="container-app">
+          <h2 className="section-header-title" style={{ marginBottom: '1rem' }}>You're Not Alone</h2>
+          <p className="section-header-subtitle" style={{ fontSize: '1.125rem', maxWidth: '800px', margin: '0 auto 2rem' }}>
+            {content.notAloneText}
+          </p>
+        </div>
+      </section>
 
-      <section className="main-content">
+      {/* CTA Section */}
+      <section className="main-content" style={{ paddingTop: '1rem' }}>
         <div className="container-app text-center">
           <h2 className="section-header-title">Ready to Stop Overpaying Tariffs?</h2>
           <p className="section-header-subtitle">
