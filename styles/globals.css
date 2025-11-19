@@ -2302,6 +2302,30 @@ textarea.form-input {
   border-radius: var(--radius-md);
 }
 
+.homepage-success-box {
+  padding: var(--space-6);
+  background-color: var(--green-50);
+  border-left: 4px solid var(--green-500);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--navy-700);
+}
+
+.homepage-empathy-box {
+  padding: var(--space-6);
+  background-color: var(--blue-50);
+  border-left: 4px solid var(--blue-500);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--navy-700);
+}
+
 /* DELETED: .recommendations-grid - use .grid-2-cols or .grid-3-cols */
 
 /* DELETED: .recommendation-card - use .content-card instead */
