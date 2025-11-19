@@ -107,7 +107,7 @@ export default function CertificateOfOriginPage() {
       </section>
 
       {/* Use Cases Section */}
-      <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem', backgroundColor: '#f8f9fa' }}>
+      <section className="main-content homepage-section-gray" style={{ paddingTop: '3rem', paddingBottom: '1rem' }}>
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">Who Is This For?</h2>

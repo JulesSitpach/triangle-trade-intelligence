@@ -107,7 +107,7 @@ export default function OngoingAlertsPage() {
       </section>
 
       {/* Who Needs Ongoing Alerts */}
-      <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem', backgroundColor: '#f8f9fa' }}>
+      <section className="main-content homepage-section-gray" style={{ paddingTop: '3rem', paddingBottom: '1rem' }}>
         <div className="container-app">
           <div className="section-header">
             <h2 className="section-header-title">Who Needs Ongoing Alerts?</h2>
