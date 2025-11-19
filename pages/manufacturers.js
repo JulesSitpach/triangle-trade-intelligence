@@ -139,20 +139,16 @@ export default function ManufacturersPage() {
                 </Link>
                 <div className="admin-dropdown">
                   <button
-                    className="btn-primary"
+                    className="nav-menu-link"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    style={{marginLeft: '8px'}}
+                    style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0.75rem 1rem'}}
                   >
-                    👤 {user?.email?.split('@')[0] || 'User'}
-                    <span style={{marginLeft: '4px'}}>▼</span>
+                    {user?.email?.split('@')[0] || 'User'} <span style={{marginLeft: '4px'}}>▼</span>
                   </button>
                   {userDropdownOpen && (
                     <div className="admin-dropdown-menu">
-                      <Link href="/dashboard" className="admin-dropdown-item">
-                        Dashboard
-                      </Link>
                       <Link href="/subscription" className="admin-dropdown-item">
-                        Subscription
+                        Subscription/Billing
                       </Link>
                       <button onClick={logout} className="admin-dropdown-item">
                         Sign Out
