@@ -18,6 +18,13 @@ export default function PrivacyPolicy() {
 
       <div className="auth-container">
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
+          {/* Logo - clickable to return home */}
+          <div className="text-center" style={{marginBottom: '2rem'}}>
+            <Link href="/" className="nav-logo-link">
+              <div className="nav-logo-icon">T</div>
+            </Link>
+          </div>
+
           <div className="form-section">
             <h1 className="form-section-title">Privacy Policy</h1>
             <p className="text-body" style={{ marginBottom: '1rem' }}>

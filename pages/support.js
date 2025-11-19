@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import TriangleLayout from '../components/TriangleLayout';
 
 export default function Support() {
   const [formData, setFormData] = useState({
@@ -67,10 +66,16 @@ export default function Support() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <TriangleLayout>
-        <div className="main-content">
+      <div className="main-content">
           <div className="container-app" style={{maxWidth: '800px'}}>
             <div className="content-card">
+              {/* Logo - clickable to return home */}
+              <div className="text-center" style={{marginBottom: '2rem'}}>
+                <Link href="/" className="nav-logo-link">
+                  <div className="nav-logo-icon">T</div>
+                </Link>
+              </div>
+
               <h1 className="card-title">Support & Help</h1>
 
               {!submitted ? (
@@ -262,7 +267,6 @@ export default function Support() {
             </div>
           </div>
         </div>
-      </TriangleLayout>
     </>
   );
 }
