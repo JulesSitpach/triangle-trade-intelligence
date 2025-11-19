@@ -357,6 +357,27 @@ export default function ImportersPage() {
           <p className="section-header-subtitle" style={{ fontSize: '1.125rem', maxWidth: '800px', margin: '0 auto 2rem' }}>
             {content.notAloneText}
           </p>
+
+          {/* Pain Points Grid */}
+          <div className="grid-2-cols">
+            {content.painPoints.map((pain, index) => (
+              <div key={index} className="content-card">
+                <h3 className="content-card-title">
+                  {pain.title}
+                </h3>
+                <p className="content-card-description">
+                  {pain.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Empathy Statement */}
+          <div className="homepage-empathy-box">
+            <p>
+              {content.empathy}
+            </p>
+          </div>
         </div>
       </section>
 
