@@ -3,7 +3,7 @@
  * Returns authenticated user data if valid session exists
  */
 
-import { parse } from 'cookie';
+import { parse, serialize } from 'cookie';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
@@ -157,6 +157,23 @@ export default async function handler(req, res) {
       profile_error: profileError?.message,
       profile_error_code: profileError?.code
     });
+
+    // ✅ FIX: If profile not found (deleted account), clear the orphaned session cookie
+    if (!profile) {
+      console.log('⚠️ [AUTH-ME] Profile not found for session, clearing orphaned cookie');
+      res.setHeader('Set-Cookie', serialize('triangle_session', '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 0, // Delete immediately
+        path: '/'
+      }));
+      return res.status(200).json({
+        success: true,
+        authenticated: false,
+        message: 'Profile not found'
+      });
+    }
 
     // Calculate if trial has expired
     const subscriptionTier = profile?.subscription_tier || 'Trial';

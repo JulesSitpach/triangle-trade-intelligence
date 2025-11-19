@@ -94,14 +94,57 @@ export default function TriangleLayout({ children, showCrisisBanner = false }) {
                     Dashboard
                   </Link>
                   <Link
-                    href={router.query.workflow_id ? `/usmca-workflow?workflow_id=${router.query.workflow_id}` : '/usmca-workflow'}
+                    href="/usmca-workflow"
                     className={`nav-menu-link ${router.pathname === '/usmca-workflow' || router.pathname === '/usmca-certificate-completion' ? 'active' : ''}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={async (e) => {
+                      setMobileMenuOpen(false);
+
+                      // ✅ FIX (Nov 19): Auto-load most recent workflow (same as "View Results")
+                      // Check if there's an active workflow in URL first
+                      const urlWorkflowId = router.query.workflow_id || router.query.view_results;
+                      if (urlWorkflowId) {
+                        e.preventDefault();
+                        router.push(`/usmca-workflow?workflow_id=${urlWorkflowId}`);
+                        return;
+                      }
+
+                      // Fetch most recent workflow from database
+                      e.preventDefault();
+                      try {
+                        const response = await fetch('/api/dashboard-data', { credentials: 'include' });
+                        if (response.ok) {
+                          const data = await response.json();
+                          const latestWorkflow = data.workflows?.[0]; // Most recent
+                          if (latestWorkflow) {
+                            console.log('🔄 Auto-loading most recent workflow:', latestWorkflow.id);
+                            router.push(`/usmca-workflow?workflow_id=${latestWorkflow.id}&step=3`);
+                            return;
+                          }
+                        }
+                      } catch (error) {
+                        console.error('Failed to fetch latest workflow:', error);
+                      }
+
+                      // Fallback: new workflow
+                      router.push('/usmca-workflow');
+                    }}
                   >
                     Workflows
                   </Link>
                   <Link
-                    href={router.query.workflow_id ? `/trade-risk-alternatives?workflow_id=${router.query.workflow_id}` : '/trade-risk-alternatives'}
+                    href={(() => {
+                      // ✅ FIX (Nov 19): Preserve session when navigating to alerts
+                      const urlWorkflowId = router.query.workflow_id || router.query.view_results;
+                      if (urlWorkflowId) return `/trade-risk-alternatives?workflow_id=${urlWorkflowId}`;
+
+                      // Check localStorage for active session
+                      if (typeof window !== 'undefined') {
+                        const sessionId = localStorage.getItem('workflow_session_id');
+                        if (sessionId) return `/trade-risk-alternatives?workflow_id=${sessionId}`;
+                      }
+
+                      return '/trade-risk-alternatives'; // Default: no session
+                    })()}
                     className={`nav-menu-link ${router.pathname === '/trade-risk-alternatives' ? 'active' : ''}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >

@@ -864,12 +864,13 @@ export function useWorkflowState() {
         ...workflowData.product
       },
       usmca: {
+        ...workflowData.usmca, // ✅ FIX (Nov 19): Spread first so column values can override
         qualified: workflow.qualification_status === 'QUALIFIED',
-        north_american_content: workflow.regional_content_percentage,
-        regional_content: workflow.regional_content_percentage,
-        threshold_applied: workflow.required_threshold,
-        component_breakdown: workflow.component_origins || workflowData.components || [],
-        ...workflowData.usmca
+        // ✅ FIX (Nov 19): Use nullish coalescing to handle 0% correctly (don't fallback if value is 0)
+        north_american_content: workflow.regional_content_percentage ?? workflowData.usmca?.north_american_content ?? 0,
+        regional_content: workflow.regional_content_percentage ?? workflowData.usmca?.regional_content ?? 0,
+        threshold_applied: workflow.required_threshold ?? workflowData.usmca?.threshold_applied ?? 60,
+        component_breakdown: workflow.component_origins || workflowData.components || []
       },
       savings: {
         annual_savings: workflow.estimated_annual_savings || 0,

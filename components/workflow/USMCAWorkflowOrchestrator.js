@@ -102,6 +102,7 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
   }, [router.query.reset, resetWorkflow, router]);
 
   // Handle "View Results" - load saved workflow and jump directly to results (skip steps 1-2)
+  // ✅ FIX (Nov 19): Also auto-load current session when navigating back from alerts
   useEffect(() => {
     const viewResultsId = router.query.view_results;
     const workflowIdParam = router.query.workflow_id;
@@ -110,6 +111,11 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
     // NEW: Also support loading workflow via workflow_id parameter (not just view_results)
     const idToLoad = viewResultsId || workflowIdParam;
     const isReadOnlyMode = !!viewResultsId; // Only read-only if using view_results
+
+    // ✅ NEW: If no query params but there's a current session with results, stay on that session
+    // This handles the case when user goes: Workflow → Alerts → Workflow (nav link)
+    const hasQueryParams = !!(viewResultsId || workflowIdParam);
+    const hasCurrentSession = currentSessionId && results;
 
     if (idToLoad && !hasLoadedResultsRef.current) {
       hasLoadedResultsRef.current = true;

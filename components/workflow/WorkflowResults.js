@@ -201,23 +201,31 @@ export default function WorkflowResults({
 
   const sendCertificateDataToAlerts = async (completionResults) => {
     try {
-      // Prepare certificate completion data for alerts dashboard
+      // ✅ DEBUG: Log the company object structure to identify missing fields
+      console.log('🔍 Company object structure:', {
+        company: completionResults.company,
+        has_business_type: !!completionResults.company?.business_type,
+        has_industry_sector: !!completionResults.company?.industry_sector,
+        has_trade_volume: !!completionResults.company?.trade_volume
+      });
+
+      // ✅ FIX (Nov 19): Correct property paths from actual results object structure
       const certificateData = {
         company: {
-          name: completionResults.company?.name,
+          name: completionResults.company?.name || completionResults.company?.company_name,
           business_type: completionResults.company?.business_type,
           industry_sector: completionResults.company?.industry_sector,
           trade_volume: completionResults.company?.trade_volume
         },
         product: {
-          hs_code: completionResults.product?.hs_code,
+          hs_code: completionResults.product?.hs_code || completionResults.classified_hs_code,
           description: completionResults.product?.description
         },
         certificate: {
-          id: completionResults.certificate.id,
+          id: workflowSessionId, // ✅ Use the session ID passed as prop
           status: 'completed',
-          qualification_result: completionResults.qualification?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED',
-          savings: completionResults.savings?.total_savings
+          qualification_result: completionResults.usmca?.qualified ? 'QUALIFIED' : 'NOT_QUALIFIED', // ✅ FIX: Use usmca.qualified
+          savings: completionResults.savings?.annual_savings || completionResults.savings?.total_savings // ✅ FIX: Use annual_savings
         },
         workflow_path: 'certificate',
         completion_timestamp: new Date().toISOString()
@@ -226,7 +234,7 @@ export default function WorkflowResults({
       // Save to localStorage for alerts dashboard pickup
       // ✅ FIXED: Removed duplicate keys - only use usmca_workflow_results
 
-      console.log('Certificate completion data sent to alerts system:', certificateData);
+      console.log('✅ Certificate completion data sent to alerts system:', certificateData);
       setDataSentToAlerts(true);
 
     } catch (error) {

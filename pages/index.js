@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext'
 import TriangleLayout from '../components/TriangleLayout'
 import SimpleSavingsCalculator from '../components/SimpleSavingsCalculator'
 import LegalDisclaimer from '../components/LegalDisclaimer'
@@ -8,9 +10,23 @@ import Footer from '../components/Footer'
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const router = useRouter()
+  const { user, logout, loading } = useSimpleAuth()
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)
+  }
+
+  // Smart "Get Started" - logged in → dashboard, logged out → pricing section
+  const handleGetStarted = (e) => {
+    e.preventDefault()
+    if (user) {
+      router.push('/dashboard')
+    } else {
+      router.push('/pricing#pricing')  // ✅ Scroll to pricing section on pricing page
+    }
+    setMobileMenuOpen(false)
   }
 
   return (
@@ -84,7 +100,7 @@ export default function HomePage() {
             </div>
           </Link>
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className="nav-menu-toggle"
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile navigation menu"
@@ -92,23 +108,69 @@ export default function HomePage() {
           >
             ☰
           </button>
-          
+
+          {/* ✅ SMART NAVIGATION - Shows different links based on auth status */}
           <div className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-            <Link href="/certificate-of-origin" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Certificate
-            </Link>
-            <Link href="/ongoing-alerts" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Alerts
-            </Link>
-            <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Pricing
-            </Link>
-            <Link href="/signup" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Get Started
-            </Link>
-            <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
-              Sign In
-            </Link>
+            {loading ? (
+              // Loading state - show minimal nav while checking auth
+              null
+            ) : user ? (
+              // 🔐 LOGGED IN NAVIGATION
+              <>
+                <Link href="/dashboard" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Dashboard
+                </Link>
+                <Link href="/usmca-workflow" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Workflows
+                </Link>
+                <div className="admin-dropdown">
+                  <button
+                    className="btn-primary"
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    style={{marginLeft: '8px'}}
+                  >
+                    👤 {user?.email?.split('@')[0] || 'User'}
+                    <span style={{marginLeft: '4px'}}>▼</span>
+                  </button>
+                  {userDropdownOpen && (
+                    <div className="admin-dropdown-menu">
+                      <Link href="/dashboard" className="admin-dropdown-item">
+                        Dashboard
+                      </Link>
+                      <Link href="/subscription" className="admin-dropdown-item">
+                        Subscription
+                      </Link>
+                      <button onClick={logout} className="admin-dropdown-item">
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              // 🌍 LOGGED OUT NAVIGATION
+              <>
+                <Link href="/certificate-of-origin" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Certificate
+                </Link>
+                <Link href="/ongoing-alerts" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Alerts
+                </Link>
+                <Link href="/pricing" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Pricing
+                </Link>
+                <button
+                  onClick={handleGetStarted}
+                  className="nav-menu-link"
+                  style={{background: 'none', border: 'none', cursor: 'pointer', padding: '0.75rem 1rem'}}
+                >
+                  Get Started
+                </button>
+                <Link href="/login" className="nav-menu-link" onClick={() => setMobileMenuOpen(false)}>
+                  Sign In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -133,16 +195,16 @@ export default function HomePage() {
           <source src="/image/earth-seamless-loop.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-        
+
         {/* Gradient Overlay */}
         <div className="hero-gradient-overlay" />
-        
+
         {/* Hero Content */}
         <div className="hero-content-container">
           <div className="hero-badge">
             Trade Policy Update: USMCA Optimization Opportunities Available
           </div>
-          
+
           <h1 className="hero-main-title">
             70% of SMBs Qualify for USMCA<br/>
             <span className="hero-yellow-highlight">But Don&apos;t Know It</span>

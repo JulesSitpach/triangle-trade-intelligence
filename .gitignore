@@ -173,11 +173,14 @@ test-results/
 docs/
 supabase/
 
-# Backup folders
+# Backup folders and files
 components-backup-*/
 *-backup-*/
 archive-unused-*/
 _archive/
+*.backup
+*.backup.*
+**/*.backup
 
 # Cleanup scripts
 cleanup-production.sh
@@ -197,6 +200,25 @@ quick-test.js
 *.bat
 check-*.js
 
+# Debug and audit files
+debug-*.html
+inline-styles-audit.txt
+*-audit.txt
+
+# Root-level documentation (temporary/personal)
+/plan.md
+/review.md
+/superbase.md
+/UX*.md
+/copyright*.md
+/data*.md
+CLAUDE_HEADER_UPDATE.md
+CSS_CLASS_REFERENCE.md
+DEPLOYMENT_RULES.md
+HANDOFF_*.md
+LANDING_NAV_FIX.js
+NO_PUSH_TO_PRODUCTION.md
+
 # Dev config files
 .claudemcp.json
 .mcp.json
@@ -214,6 +236,12 @@ create_premium_user.sql
 
 # Misplaced components
 ServiceWorkflowModal.js
+
+# Temporary/experimental pages and scripts
+pages/clear-session.js
+pages/auth/
+scripts/create-cristina-account.js
+scripts/inspect-excel.js
 
 # Security - never commit
 google-service-account.json
