@@ -91,7 +91,7 @@ export default function OngoingAlertsPage() {
           </h1>
 
           <p className="hero-description-text mt-8">
-            Tariff policies change constantly. We monitor Section 301, Section 232, and USMCA updates daily - and alert you only when it affects YOUR components.
+            For importers, exporters, and manufacturers. Tariff policies change constantly. We monitor Section 301, Section 232, and USMCA updates daily - and alert you only when it affects YOUR components.
           </p>
 
           <div className="hero-button-group">
@@ -102,6 +102,38 @@ export default function OngoingAlertsPage() {
             >
               Start Free Trial →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Who Needs Ongoing Alerts */}
+      <section className="main-content" style={{ paddingTop: '3rem', paddingBottom: '1rem', backgroundColor: '#f8f9fa' }}>
+        <div className="container-app">
+          <div className="section-header">
+            <h2 className="section-header-title">Who Needs Ongoing Alerts?</h2>
+          </div>
+
+          <div className="grid-3-cols">
+            <div className="content-card">
+              <h3 className="content-card-title">Importers</h3>
+              <p className="content-card-description">
+                Avoid overpaying when tariffs increase. Get notified 30 days before Section 301 or Section 232 rate changes affect your products - giving you time to adjust pricing or find alternative suppliers.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Exporters</h3>
+              <p className="content-card-description">
+                Notify your B2B buyers when policy changes affect their duty-free status. Maintain competitive advantage by proactively addressing tariff impacts before your buyers discover them.
+              </p>
+            </div>
+
+            <div className="content-card">
+              <h3 className="content-card-title">Manufacturers</h3>
+              <p className="content-card-description">
+                Know when policy changes could invalidate certificates you provided to distributors. Get alerts when USMCA thresholds or origin rules change, so you can update documentation before customs issues arise.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -156,7 +188,7 @@ export default function OngoingAlertsPage() {
 
           <div className="homepage-empathy-box">
             <p>
-              Most businesses find out about tariff changes AFTER they&apos;ve already paid higher rates for 2-3 months. That&apos;s money you can&apos;t get back.
+              Most importers, exporters, and manufacturers find out about tariff changes AFTER they&apos;ve already paid higher rates for 2-3 months. That&apos;s money you can&apos;t get back.
             </p>
           </div>
         </div>
@@ -403,7 +435,7 @@ export default function OngoingAlertsPage() {
 
           <div className="homepage-success-box">
             <p>
-              These aren&apos;t generic reports. Every briefing is specific to your components, your volumes, and the exact policies affecting you.
+              These aren&apos;t generic reports. Whether you&apos;re importing, exporting, or manufacturing - every briefing is specific to your components, your volumes, and the exact policies affecting you.
             </p>
           </div>
         </div>
