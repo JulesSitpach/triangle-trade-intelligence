@@ -434,7 +434,16 @@ export default function HomePage() {
       <section className="main-content homepage-section-gray">
         <div className="container-app homepage-container-narrow">
           <div className="section-header homepage-section-header-centered">
-            <h2 className="section-header-title">You&apos;re Not Alone</h2>
+            <h2 style={{
+              fontSize: '3rem',
+              fontWeight: '700',
+              color: 'var(--navy-900)',
+              textAlign: 'center',
+              marginBottom: '0.5rem'
+            }}>
+              {activeTab === 'importer' ? 'Importers' : activeTab === 'exporter' ? 'Exporters' : 'Manufacturers'}
+            </h2>
+            <h3 className="section-header-title" style={{ fontSize: '1.75rem' }}>You&apos;re Not Alone</h3>
             <p className="homepage-subtitle">
               {activeTab === 'importer' && "You're managing imports, dealing with customs brokers, and trying to keep costs down. Meanwhile:"}
               {activeTab === 'exporter' && "You're shipping great products, but losing deals because of tariff complications. Meanwhile:"}
