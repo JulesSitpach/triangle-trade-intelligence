@@ -43,6 +43,7 @@ export default function USMCAWorkflow() {
   const { user, loading } = useSimpleAuth();
 
   // ✅ Clean up URL after localStorage cleared
+  // ✅ FIX (Nov 20): Keep forceReset=true for 2 seconds to prevent auto-loading saved data
   useEffect(() => {
     if (reset === 'true' || force_new === 'true') {
       // Set forceReset ref to true (persists even after URL params cleared)
@@ -50,9 +51,14 @@ export default function USMCAWorkflow() {
 
       // Remove query params after clearing (clean URL)
       router.replace('/usmca-workflow', undefined, { shallow: true });
-    } else {
-      // Reset the ref when no reset params (allows future resets to work)
-      forceResetRef.current = false;
+
+      // ✅ Reset forceReset after 2 seconds (gives time for components to mount with empty state)
+      const timer = setTimeout(() => {
+        forceResetRef.current = false;
+        console.log('🔄 [FORCE RESET] Timer completed - ready for next "New Analysis"');
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
   }, [reset, force_new, router]);
 

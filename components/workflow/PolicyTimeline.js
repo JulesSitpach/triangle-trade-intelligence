@@ -143,34 +143,45 @@ export default function PolicyTimeline({ components = [], destination = 'US' }) 
       // ✅ IMMEDIATE THREATS ONLY: Filter to alerts affecting THIS workflow
       // ONLY show alerts that have DIRECT relevance to user's components
       const relevantAlerts = highSeverityAlerts?.filter(alert => {
+        // ✅ STRICT FILTER (Nov 20 #3): Reject generic RSS news
+        // Real tariff alerts MUST have HS codes OR industries (countries alone = generic news)
+        const hasHSCodes = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+        const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
+
+        if (!hasHSCodes && !hasIndustries) {
+          console.log(`❌ [POLICYTIMELINE] Skipping generic news: "${alert.title}" (no HS codes AND no industries - just country names)`);
+          return false;
+        }
+
+        let matched = false;
+
         // ✅ CRITERION 1: HS Code match (alert specifically affects user's components)
-        if (alert.affected_hs_codes && alert.affected_hs_codes.length > 0) {
+        if (hasHSCodes) {
           const normalizedAlertHS = alert.affected_hs_codes.map(hs => (hs || '').replace(/\./g, '').substring(0, 6));
           const normalizedUserHS = allHSCodes.map(hs => (hs || '').replace(/\./g, '').substring(0, 6));
           const hasHSMatch = normalizedAlertHS.some(alertHS => normalizedUserHS.includes(alertHS));
           if (hasHSMatch) {
             console.log(`✅ [POLICYTIMELINE] HS code match: "${alert.title}" matches user HS codes`);
-            return true;
+            matched = true;
           }
-          // Alert has specific HS codes but none match user - skip it
-          return false;
         }
 
-        // ✅ CRITERION 2: Country match (alert affects user's component origins)
-        // Only show if alert has countries AND those countries match user's components
-        if (alert.affected_countries && alert.affected_countries.length > 0) {
+        // ✅ CRITERION 2: Industry + Country match (e.g., Yazaki automotive alert)
+        // Must have BOTH industry relevance AND country match
+        if (!matched && hasIndustries && alert.affected_countries?.length > 0) {
           const alertCountries = alert.affected_countries.map(c => normalizeCountry(c));
           const hasCountryMatch = alertCountries.some(alertCountry => affectedCountries.includes(alertCountry));
           if (hasCountryMatch) {
-            console.log(`✅ [POLICYTIMELINE] Country match: "${alert.title}" affects user's supply chain countries`);
-            return true;
+            console.log(`✅ [POLICYTIMELINE] Industry + Country match: "${alert.title}" affects user's supply chain (${alert.relevant_industries.join(', ')} in ${alertCountries.join(', ')})`);
+            matched = true;
           }
         }
 
-        // ❌ REJECT: Generic trade news with no specific HS codes or country match
-        // These are just general news articles, not actionable threats
-        console.log(`❌ [POLICYTIMELINE] Skipping generic news: "${alert.title}" (no HS codes or country match)`);
-        return false;
+        if (!matched) {
+          console.log(`❌ [POLICYTIMELINE] No match: "${alert.title}" does not affect user's components`);
+        }
+
+        return matched;
       }) || [];
 
       console.log(`🤖 PolicyTimeline alert matching: ${relevantAlerts.length}/${highSeverityAlerts.length} high/critical alerts matched user components (${crisisAlerts?.length || 0} total alerts in DB)`);

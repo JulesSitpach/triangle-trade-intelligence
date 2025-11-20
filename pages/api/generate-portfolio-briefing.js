@@ -266,6 +266,7 @@ export default async function handler(req, res) {
     }).join('\n');
 
     // STEP 4: Rank matched alerts by severity and component impact
+    // ✅ ENHANCED (Nov 20): Multi-factor scoring for strategic importance
     const rankedAlerts = matchedAlerts
       .map(alert => {
         // Calculate impact severity based on affected components
@@ -286,18 +287,47 @@ export default async function handler(req, res) {
           return score + componentScore;
         }, 0);
 
+        // ✅ NEW (Nov 20): Strategic importance scoring
+        let strategicScore = impactScore; // Base: financial impact
+        const title = (alert.title || '').toLowerCase();
+
+        // CRITICAL: USMCA 2026 renegotiation affects ALL users (existential threat)
+        if (title.includes('usmca') && (title.includes('2026') || title.includes('renegotiation'))) {
+          strategicScore += 50; // Massive boost (affects entire business model)
+        }
+
+        // HIGH: Section 301/232 tariff changes (immediate cost impact)
+        if (title.includes('section 301') || title.includes('section 232')) {
+          strategicScore += 25;
+        }
+
+        // HIGH: Labor/compliance issues at named suppliers (supply chain disruption)
+        if ((title.includes('workers') && title.includes('rights')) || title.includes('yazaki') || title.includes('thyssenkrupp')) {
+          strategicScore += 20;
+        }
+
+        // MEDIUM: General policy announcements
+        if (title.includes('trade representative') || title.includes('sme dialogue')) {
+          strategicScore += 10;
+        }
+
         return {
           ...alert,
           impactScore,
+          strategicScore, // New: combined importance
           severity: impactScore > 20 ? 'CRITICAL' : impactScore > 10 ? 'HIGH' : 'MEDIUM'
         };
       })
-      .sort((a, b) => b.impactScore - a.impactScore);
+      .sort((a, b) => b.strategicScore - a.strategicScore); // ✅ Sort by strategic importance, not just financial
 
     // STEP 4.5: AI Strategic Filtering - "Helps user decide whether to ship/change sourcing"
+    // ✅ SKIP (Nov 20): If user manually selected alerts, use their selection (already in rankedAlerts)
     let strategicAlerts = rankedAlerts;
 
-    if (rankedAlerts.length > 0) {
+    if (isManualAlertSelection) {
+      console.log(`👤 User manually selected ${rankedAlerts.length} alerts - skipping AI filter, using user choices`);
+      strategicAlerts = rankedAlerts.slice(0, 3); // Still limit to 3 max
+    } else if (rankedAlerts.length > 0) {
       console.log(`🤖 AI filtering ${rankedAlerts.length} alerts for strategic relevance...`);
 
       const filterPrompt = `You are a trade intelligence analyst. Review these policy alerts and SELECT ONLY those that help business owners decide:
@@ -353,16 +383,24 @@ Response format: Just numbers separated by commas (e.g., "1, 3, 5") or "NONE" if
           if (selectedIndices.length > 0) {
             strategicAlerts = selectedIndices.map(idx => rankedAlerts[idx - 1]);
             console.log(`✅ AI filtered: ${strategicAlerts.length}/${rankedAlerts.length} strategic alerts`);
+
+            // ✅ NEW (Nov 20): Limit to top 3 most important alerts for focused analysis
+            if (strategicAlerts.length > 3) {
+              console.log(`📊 Limiting to top 3 most strategic alerts (was ${strategicAlerts.length})`);
+              strategicAlerts = strategicAlerts.slice(0, 3);
+            }
           } else {
-            console.log('⚠️ AI returned no valid indices, using all ranked alerts');
+            console.log('⚠️ AI returned no valid indices, using top 3 ranked alerts');
+            strategicAlerts = rankedAlerts.slice(0, 3); // Fallback: top 3 by strategic score
           }
         } else {
           console.log('🤖 AI found no strategic alerts, using forward-looking language only');
           strategicAlerts = [];
         }
       } catch (filterError) {
-        console.error('❌ AI strategic filtering failed, using all ranked alerts:', filterError);
-        // Fallback: use all ranked alerts
+        console.error('❌ AI strategic filtering failed, using top 3 ranked alerts:', filterError);
+        // Fallback: use top 3 ranked alerts (already sorted by strategicScore)
+        strategicAlerts = rankedAlerts.slice(0, 3);
       }
     }
 

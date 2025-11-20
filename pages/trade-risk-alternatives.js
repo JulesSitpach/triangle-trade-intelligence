@@ -1497,6 +1497,16 @@ export default function TradeRiskAlternatives() {
                       alert_hs_codes: alert.affected_hs_codes
                     });
 
+                    // ✅ STRICT FILTER (Nov 20): Reject generic RSS news
+                    // Real tariff alerts MUST have HS codes OR industries (countries alone = generic news)
+                    const hasHSCodes = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+                    const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
+
+                    if (!hasHSCodes && !hasIndustries) {
+                      console.log(`❌ [ALERTS DASHBOARD] Skipping generic news: "${alert.title}" (no HS codes AND no industries)`);
+                      return false;
+                    }
+
                     // ✅ CRITERION 1: Check days until impact (≤180 days)
                     if (alert.effective_date) {
                       const effectiveDate = new Date(alert.effective_date);
@@ -1545,23 +1555,17 @@ export default function TradeRiskAlternatives() {
                       }
                     }
 
-                    // ✅ MATCH 2: Blanket country policy (NULL HS codes + country match)
-                    // Example: "China tariffs on ALL products" should show on China-origin components
-                    const hasCountries = alert.affected_countries && alert.affected_countries.length > 0;
-                    const hasNoHSCodes = !alert.affected_hs_codes || alert.affected_hs_codes.length === 0;
-
-                    if (hasCountries && hasNoHSCodes) {
+                    // ✅ MATCH 2: Industry + Country match (e.g., Yazaki automotive alert)
+                    // Must have BOTH industry relevance AND country match
+                    if (hasIndustries && alert.affected_countries?.length > 0) {
                       const countryMatch = alert.affected_countries.some(country => {
                         const normalized = country.toUpperCase();
                         return normalized === componentOrigin;
                       });
 
                       if (countryMatch) {
-                        console.log(`✅ BLANKET COUNTRY MATCH: ${alert.title} affects ${componentOrigin} (no specific HS codes)`);
+                        console.log(`✅ [ALERTS DASHBOARD] Industry + Country match: "${alert.title}" affects ${componentOrigin} (${alert.relevant_industries.join(', ')})`);
                         return true;
-                      } else {
-                        // Debug: Why didn't this match?
-                        console.log(`❌ NO MATCH: Alert targets [${alert.affected_countries.join(', ')}], component is ${componentOrigin}`);
                       }
                     }
 
@@ -2011,9 +2015,53 @@ export default function TradeRiskAlternatives() {
 
                   const userIndustry = userProfile.industry_sector?.toLowerCase() || '';
 
-                  // ✅ AI-FILTERED: Use strategicAlerts (filtered by AI in loadRealPolicyAlerts)
-                  // This removes earnings reports, logistics pricing, and irrelevant news
-                  const marketIntelAlerts = strategicAlerts || [];
+                  // ✅ DEDUPLICATE (Nov 20): Only show alerts NOT already matched to components
+                  // Avoid showing the same alert twice (once in component rows, again here)
+                  const allComponentAlerts = userProfile.componentOrigins.flatMap(comp => {
+                    return (realPolicyAlerts || []).filter(alert => {
+                      const hasHSCodes = alert.affected_hs_codes && alert.affected_hs_codes.length > 0;
+                      const hasIndustries = alert.relevant_industries && alert.relevant_industries.length > 0;
+                      if (!hasHSCodes && !hasIndustries) return false;
+
+                      // Check if this alert matches this component
+                      const componentHS = comp.hs_code;
+                      if (hasHSCodes && componentHS) {
+                        const hsMatch = alert.affected_hs_codes.some(code => {
+                          const normalizedComponentHS = componentHS.replace(/\./g, '').substring(0, 6);
+                          const normalizedAlertCode = String(code).replace(/\./g, '').substring(0, 6);
+                          return normalizedComponentHS === normalizedAlertCode;
+                        });
+                        if (hsMatch) return true;
+                      }
+                      return false;
+                    });
+                  });
+
+                  const componentAlertIds = new Set(allComponentAlerts.map(a => a.id));
+
+                  // ✅ STRATEGIC ALERTS ONLY: Broad policy changes affecting ALL users
+                  // EXCLUDE alerts already shown in component rows
+                  const marketIntelAlerts = (strategicAlerts || []).filter(alert => {
+                    // Skip if already shown in component alerts
+                    if (componentAlertIds.has(alert.id)) {
+                      console.log(`⏭️ [USMCA 2026] Skipping "${alert.title}" (already shown in component alerts)`);
+                      return false;
+                    }
+
+                    // ✅ ONLY show broad policy alerts (no specific HS codes, or very general)
+                    // Example: "USMCA 2026 Renegotiation", "General tariff policy changes"
+                    const title = alert.title?.toLowerCase() || '';
+                    const isUSMCARenegotiation = title.includes('usmca') && (title.includes('2026') || title.includes('renegotiation'));
+                    const isGeneralPolicy = title.includes('agreement') || title.includes('trade representative') || title.includes('sme dialogue');
+
+                    if (isUSMCARenegotiation || isGeneralPolicy) {
+                      console.log(`✅ [USMCA 2026] Including broad policy: "${alert.title}"`);
+                      return true;
+                    }
+
+                    console.log(`⏭️ [USMCA 2026] Skipping component-specific: "${alert.title}"`);
+                    return false;
+                  });
 
                   // ✅ ALWAYS SHOW this section (even with 0 alerts) so users can opt into USMCA 2026 monitoring
                   const isExpanded = expandedComponents['market_intel'] || false;

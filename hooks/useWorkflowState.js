@@ -185,10 +185,11 @@ export function useWorkflowState(forceReset = false) {
   // ✅ FIX (Oct 30): Load saved form data AFTER dropdown options are loaded
   // This prevents race condition where saved dropdown values can't be selected because options aren't available yet
   // ✅ CRITICAL: Skip if forceReset=true (prevents loading stale demo data)
+  // ✅ FIX (Nov 20): BLOCK loading saved data when forceReset=true (user clicked "New Analysis")
   useEffect(() => {
-    // ✅ SKIP if forceReset=true
+    // ✅ SKIP if forceReset=true - this prevents auto-loading demo data
     if (forceReset) {
-      console.log('⚠️ [FORCE RESET] Skipping loadSavedData - starting fresh');
+      console.log('⚠️ [FORCE RESET] Skipping loadSavedData - starting fresh (no auto-populate)');
       return;
     }
 
@@ -198,14 +199,14 @@ export function useWorkflowState(forceReset = false) {
         setFormData(saved);
         console.log('✅ Loaded saved form data from localStorage (after options loaded):', {
           company_name: saved.company_name,
-          company_country: saved.company_country,  // ✅ Debug: Check if this is being loaded
+          company_country: saved.company_country,
           business_type: saved.business_type,
           industry_sector: saved.industry_sector,
-          supplier_country: saved.supplier_country,  // ✅ Debug: Check if this is being loaded
+          supplier_country: saved.supplier_country,
           destination_country: saved.destination_country,
           manufacturing_location: saved.manufacturing_location,
-          substantial_transformation: saved.substantial_transformation,  // ✅ Debug: Check if this is being loaded
-          manufacturing_process: saved.manufacturing_process,  // ✅ Debug: Check if this is being loaded
+          substantial_transformation: saved.substantial_transformation,
+          manufacturing_process: saved.manufacturing_process,
           product_description: saved.product_description,
           component_origins_count: saved.component_origins?.length
         });
