@@ -128,17 +128,15 @@ export default async function handler(req, res) {
       email: email,
       password: password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/login?message=Account created successfully. Please sign in.`,
         data: {
           full_name: full_name || 'New User',
           company_name: company_name,
           subscription_tier: 'Trial',
           terms_accepted_at: termsAcceptedAt,
           privacy_accepted_at: termsAcceptedAt
-        },
-        // ✅ Skip email confirmation for trial users = instant conversion
-        // This dramatically improves signup conversion by eliminating email friction
-        emailRedirectTo: isTrial ? undefined : `${process.env.NEXT_PUBLIC_APP_URL}/login?message=Account created successfully. Please sign in.`
+        }
+        // ✅ Email confirmation will be handled manually via admin API after signup
+        // This eliminates email verification friction for instant trial access
       }
     });
 
@@ -201,8 +199,22 @@ export default async function handler(req, res) {
 
     console.log('✅ User profile created:', profile.id);
 
-    // ✅ CONVERSION FIX: For trial users, create immediate session (no email verification)
-    // Sign in the user immediately after registration
+    // ✅ CONVERSION FIX: For trial users, manually confirm email and create immediate session
+    // Step 1: Manually confirm the user's email using admin API (skip email verification)
+    console.log('📧 Manually confirming email for instant trial access...');
+    const { data: confirmedUser, error: confirmError } = await supabaseAdmin.auth.admin.updateUserById(
+      userId,
+      { email_confirm: true }
+    );
+
+    if (confirmError) {
+      console.error('⚠️ Email confirmation failed:', confirmError);
+      // Continue anyway - will require manual login
+    } else {
+      console.log('✅ Email confirmed via admin API');
+    }
+
+    // Step 2: Sign in the user immediately after registration
     const { data: sessionData, error: sessionError } = await supabaseAuth.auth.signInWithPassword({
       email: email,
       password: password
