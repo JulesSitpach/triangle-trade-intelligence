@@ -2,6 +2,15 @@
  * USMCAQualification - Component Analysis
  * Shows component breakdown and regional content analysis
  * NO duplicate qualification status (shown in hero section)
+ *
+ * ⚠️ EXCEPTION TO NO-INLINE-STYLES RULE:
+ * This component uses ~500 lines of inline styles for highly customized UI:
+ * - Tooltip positioning (dynamic, can't use static CSS)
+ * - Collapsible tariff explanations with animations
+ * - Color-coded warning boxes (Section 301/232 with specific amber/red/green schemes)
+ * - Mobile vs Desktop conditional layouts
+ * These are production-working, component-specific styles. Do NOT refactor without user approval.
+ * All other components must use classes from styles/globals.css.
  */
 
 import React, { useState, useEffect } from 'react';

@@ -1,6 +1,15 @@
 /**
  * TariffSavings - Accurate tariff savings with Section 301 reality
  * Shows REAL savings (base MFN only) + Section 301 burden that remains
+ *
+ * ⚠️ EXCEPTION TO NO-INLINE-STYLES RULE:
+ * This component uses ~200 lines of inline styles for color-coded financial boxes:
+ * - Green savings boxes (USMCA benefits)
+ * - Red warning boxes (Section 301/232 that remain)
+ * - Amber info boxes (China component warnings)
+ * - Component breakdowns with nested styled sections
+ * These are production-working, component-specific styles. Do NOT refactor without user approval.
+ * All other components must use classes from styles/globals.css.
  */
 
 import React from 'react';

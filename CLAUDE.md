@@ -27,6 +27,7 @@ This project is now in **PRODUCTION LOCKDOWN** as of November 10, 2025.
 - 📖 **PROJECT_LOCKDOWN.md** - Comprehensive lockdown policy (200+ lines)
 - 📖 **UI_CHANGE_GUIDE.md** - What UI changes are safe (300+ lines)
 - 📖 **FROZEN_FILES_LIST.md** - Complete list of frozen files (26+ files)
+- 📖 **CSS_RULES.md** - NO INLINE STYLES (335 classes available, 2 documented exceptions only)
 
 ### Quick Rules:
 
