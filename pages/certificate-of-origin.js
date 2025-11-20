@@ -148,37 +148,16 @@ export default function CertificateOfOriginPage() {
 
           <div className="grid-2-cols mb-12">
             <div className="content-card">
-              <img
-                src="/image/samples/dasboard.png"
-                alt="Dashboard overview preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/dasboard.png')}
-              />
-              <h3 className="content-card-title">Your Dashboard:</h3>
-              <div className="grid gap-4">
-                <p className="content-card-description">
-                  ✓ Track all your analyses in one place
-                </p>
-                <p className="content-card-description">
-                  ✓ See qualification status at a glance
-                </p>
-                <p className="content-card-description">
-                  ✓ Download certificates anytime
-                </p>
-                <p className="content-card-description">
-                  ✓ Monitor policy alerts affecting your products
-                </p>
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/compnay inforatnion page filled.png"
+                  alt="Company information form filled preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/compnay inforatnion page filled.png')}
+                />
               </div>
-            </div>
-
-            <div className="content-card">
-              <img
-                src="/image/samples/step 1.png"
-                alt="Company information form preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/step 1.png')}
-              />
-              <h3 className="content-card-title">What we need to know:</h3>
+              <h3 className="content-card-title">Company Information:</h3>
               <div className="grid gap-4">
                 <p className="content-card-description">
                   ✓ Company name, address, and tax ID
@@ -191,6 +170,33 @@ export default function CertificateOfOriginPage() {
                 </p>
                 <p className="content-card-description">
                   ✓ Annual trade volume (for importers/exporters)
+                </p>
+              </div>
+            </div>
+
+            <div className="content-card">
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/dashobard.png"
+                  alt="Dashboard tracking all analyses preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/dashobard.png')}
+                />
+              </div>
+              <h3 className="content-card-title">Product Details:</h3>
+              <div className="grid gap-4">
+                <p className="content-card-description">
+                  ✓ Track all your analyses in one place
+                </p>
+                <p className="content-card-description">
+                  ✓ See qualification status at a glance
+                </p>
+                <p className="content-card-description">
+                  ✓ Download certificates anytime
+                </p>
+                <p className="content-card-description">
+                  ✓ Monitor policy alerts affecting your products
                 </p>
               </div>
             </div>
@@ -215,12 +221,22 @@ export default function CertificateOfOriginPage() {
 
           <div className="grid-2-cols mb-12">
             <div className="content-card">
-              <img
-                src="/image/samples/Component page.png"
-                alt="Component input form preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/Component page.png')}
-              />
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <img
+                  src="/image/samples/product information.png"
+                  alt="Product information form preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/product information.png')}
+                />
+                <img
+                  src="/image/samples/component 2.png"
+                  alt="Component details preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/component 2.png')}
+                />
+              </div>
               <h3 className="content-card-title">What we need:</h3>
               <ul className="content-card-description">
                 <li className="mb-3">✓ Component descriptions (simple language is fine - &quot;aluminum housing&quot; or &quot;power supply&quot;)</li>
@@ -230,12 +246,22 @@ export default function CertificateOfOriginPage() {
             </div>
 
             <div className="content-card">
-              <img
-                src="/image/samples/Component Breakdown.png"
-                alt="AI classification preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/Component Breakdown.png')}
-              />
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <img
+                  src="/image/samples/component table collapsed.png"
+                  alt="Component table collapsed view"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/component table collapsed.png')}
+                />
+                <img
+                  src="/image/samples/component table expanded on china.png"
+                  alt="Component table expanded with tariff analysis"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/component table expanded on china.png')}
+                />
+              </div>
               <h3 className="content-card-title">What we do automatically:</h3>
               <ul className="content-card-description">
                 <li className="mb-3">✓ Classify each component with the correct HS code</li>
@@ -264,12 +290,22 @@ export default function CertificateOfOriginPage() {
 
           <div className="grid-2-cols mb-12">
             <div className="content-card">
-              <img
-                src="/image/samples/results .png"
-                alt="USMCA qualification status preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/results .png')}
-              />
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <img
+                  src="/image/samples/USMCA Compliance Analysis Results top page.png"
+                  alt="USMCA qualification status preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/USMCA Compliance Analysis Results top page.png')}
+                />
+                <img
+                  src="/image/samples/Your USMCA Impact.png"
+                  alt="Your USMCA impact analysis"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/Your USMCA Impact.png')}
+                />
+              </div>
               <h3 className="content-card-title text-blue-900">
                 Do You Qualify?
               </h3>
@@ -291,12 +327,15 @@ export default function CertificateOfOriginPage() {
 
             {/* Executive Advisory Report */}
             <div className="content-card">
-              <img
-                src="/image/samples/results report.png"
-                alt="Executive advisory report preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/results report.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/executinve summary results page.png"
+                  alt="Executive summary results preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/executinve summary results page.png')}
+                />
+              </div>
               <h3 className="content-card-title">
                 Executive Advisory Report
               </h3>
@@ -337,12 +376,22 @@ export default function CertificateOfOriginPage() {
           <div className="grid-2-cols mb-12">
             {/* Certificate Preview (Editable) */}
             <div className="content-card">
-              <img
-                src="/image/samples/certificate form .png"
-                alt="Certificate preview editable preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/certificate form .png')}
-              />
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                <img
+                  src="/image/samples/certificate information.png"
+                  alt="Certificate information form preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/certificate information.png')}
+                />
+                <img
+                  src="/image/samples/certificate preview.png"
+                  alt="Certificate preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%' }}
+                  onClick={() => openModal('/image/samples/certificate preview.png')}
+                />
+              </div>
               <h3 className="content-card-title">
                 Certificate Preview (Editable)
               </h3>
@@ -364,12 +413,15 @@ export default function CertificateOfOriginPage() {
 
             {/* Final Certificate */}
             <div className="content-card">
-              <img
-                src="/image/samples/certificate download.png"
-                alt="Final certificate preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/certificate download.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/certificate download.png"
+                  alt="Final certificate download"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/certificate download.png')}
+                />
+              </div>
               <h3 className="content-card-title">
                 Final Certificate
               </h3>

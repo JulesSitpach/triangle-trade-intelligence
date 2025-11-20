@@ -203,12 +203,15 @@ export default function OngoingAlertsPage() {
 
           <div className="grid-2-cols">
             <div className="content-card">
-              <img
-                src="/image/samples/component level alerts.png"
-                alt="Component-level alerts preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/component level alerts.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/Tariff Policy Threats biggest threat number 1.png"
+                  alt="Tariff policy threats for components"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/Tariff Policy Threats biggest threat number 1.png')}
+                />
+              </div>
               <h3 className="content-card-title">Component-Level Alerts</h3>
               <p className="content-card-description">
                 ✓ Specific to YOUR HS codes and origin countries
@@ -225,12 +228,15 @@ export default function OngoingAlertsPage() {
             </div>
 
             <div className="content-card">
-              <img
-                src="/image/samples/301 alert.png"
-                alt="Section 301 policy alerts preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/301 alert.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/Tariff Policy Threats biggest threat number 2.png"
+                  alt="Section 301 policy alerts preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/Tariff Policy Threats biggest threat number 2.png')}
+                />
+              </div>
               <h3 className="content-card-title">Live Policy Alerts (Section 301, 232)</h3>
               <p className="content-card-description">
                 ✓ Country-wide tariff changes (e.g., all China imports)
@@ -389,12 +395,15 @@ export default function OngoingAlertsPage() {
 
           <div className="grid-2-cols">
             <div className="content-card">
-              <img
-                src="/image/samples/🇺🇸🇨🇦🇲🇽 USMCA 2026 Market Intelligence.png"
-                alt="Portfolio briefing preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/🇺🇸🇨🇦🇲🇽 USMCA 2026 Market Intelligence.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/alerts dashboard expanded 🇺🇸🇨🇦🇲🇽 USMCA 2026 alerts.png"
+                  alt="Portfolio briefing dashboard preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/alerts dashboard expanded 🇺🇸🇨🇦🇲🇽 USMCA 2026 alerts.png')}
+                />
+              </div>
               <h3 className="content-card-title">Bottom Line Impact Analysis</h3>
               <p className="content-card-description">
                 ✓ Which components are affected by new policies
@@ -411,12 +420,15 @@ export default function OngoingAlertsPage() {
             </div>
 
             <div className="content-card">
-              <img
-                src="/image/samples/alerts critical descistions.png"
-                alt="Strategic recommendations preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/alerts critical descistions.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/alerts dasboard Executive Advisory Industrias del Norte  close up active alerts affecting your supply chain.png"
+                  alt="Executive advisory close-up preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/alerts dasboard Executive Advisory Industrias del Norte  close up active alerts affecting your supply chain.png')}
+                />
+              </div>
               <h3 className="content-card-title">Strategic Considerations</h3>
               <p className="content-card-description">
                 ✓ Supplier diversification opportunities
@@ -453,12 +465,15 @@ export default function OngoingAlertsPage() {
 
           <div className="grid-2-cols">
             <div className="content-card">
-              <img
-                src="/image/samples/alerts daboard overview.png"
-                alt="Alert dashboard preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/alerts daboard overview.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/full alerts dashboard .png"
+                  alt="Full alert dashboard preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/full alerts dashboard .png')}
+                />
+              </div>
               <h3 className="content-card-title">Active Alerts</h3>
               <p className="content-card-description">
                 ✓ Color-coded by severity (Critical/High/Medium/Low)
@@ -475,12 +490,15 @@ export default function OngoingAlertsPage() {
             </div>
 
             <div className="content-card">
-              <img
-                src="/image/samples/alerts report.png"
-                alt="Report library preview"
-                className="screenshot-thumbnail mb-4"
-                onClick={() => openModal('/image/samples/alerts report.png')}
-              />
+              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
+                <img
+                  src="/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png"
+                  alt="Full executive report preview"
+                  className="screenshot-thumbnail"
+                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
+                  onClick={() => openModal('/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png')}
+                />
+              </div>
               <h3 className="content-card-title">Report Library</h3>
               <p className="content-card-description">
                 ✓ Portfolio briefings for each policy change
