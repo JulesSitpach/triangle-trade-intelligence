@@ -27,7 +27,8 @@ export default function ComponentOriginsStepEnhanced({
   userTier = SUBSCRIPTION_TIERS.FREE_TRIAL,
   saveWorkflowToDatabase,
   currentSessionId,  // ✅ FIX (Nov 6): Receive session ID from parent hook
-  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
+  viewMode = 'normal', // 'normal', 'read-only', 'edit', or 'refresh'
+  onLoadDemoData // ✅ NEW: Callback to load demo data for Step 2
 }) {
   // Track if we just pushed to parent to avoid infinite restore loop
   const lastPushedRef = useRef(null);
@@ -116,6 +117,8 @@ export default function ComponentOriginsStepEnhanced({
   const [hasScrolledToComponents, setHasScrolledToComponents] = useState(false);
   // ✅ UI ENHANCEMENT: Track which suggestions we've already scrolled to (prevent re-scroll)
   const [scrolledSuggestions, setScrolledSuggestions] = useState({});
+  // ✅ NEW: Track demo mode state
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // ✅ Helper function to check if Material Origin field should show
   // User manually indicates if component contains Section 232 material via checkbox
@@ -835,6 +838,18 @@ export default function ComponentOriginsStepEnhanced({
       c.hs_code.trim() !== ''
     );
     return total === 100 && allFieldsFilled;
+  };
+
+  // ✅ NEW: Handle demo data loading for Step 2
+  const handleLoadDemoData = () => {
+    console.log('🚀 Loading Step 2 demo data...');
+    setIsDemoMode(true);
+
+    if (onLoadDemoData) {
+      onLoadDemoData();
+    }
+
+    console.log('✅ Demo data loaded - review and click Analyze');
   };
 
   // Validate workflow data before proceeding
@@ -1620,27 +1635,55 @@ export default function ComponentOriginsStepEnhanced({
 
       {/* Navigation Buttons */}
       {viewMode === 'normal' && (
-        <div className="dashboard-actions section-spacing">
-          <button
-            onClick={onPrevious}
-            className="btn-primary"
-          >
-            ← Previous
-          </button>
-          <button
-            onClick={handleValidateAndProceed}
-            disabled={!isValid() || isLoading || isValidating}
-            className={`${isValid() && !isLoading && !isValidating ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading || isValidating ? 'disabled' : ''}`}
-          >
-            {isLoading || isValidating ? (
-              <>{isValidating ? 'Validating...' : 'Processing...'}</>
-            ) : (
-              <>
-                Continue to USMCA Analysis
-              </>
-            )}
-          </button>
-        </div>
+        <>
+          {/* ✅ NEW: Demo Data Button */}
+          {!isDemoMode && onLoadDemoData && (
+            <div className="section-spacing" style={{ textAlign: 'center' }}>
+              <button
+                onClick={handleLoadDemoData}
+                className="btn-secondary"
+                style={{ marginBottom: '1rem' }}
+              >
+                🚀 Try Demo Data
+              </button>
+              <p className="form-help" style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                Auto-fill with sample components to test the workflow
+              </p>
+            </div>
+          )}
+
+          {/* ✅ Demo Mode Banner */}
+          {isDemoMode && (
+            <div className="alert-info" style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#eff6ff', borderLeft: '4px solid #3b82f6' }}>
+              <strong>📊 Demo Mode Active</strong>
+              <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem' }}>
+                Demo workflows don't count against your subscription limit.
+              </p>
+            </div>
+          )}
+
+          <div className="dashboard-actions section-spacing">
+            <button
+              onClick={onPrevious}
+              className="btn-primary"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={handleValidateAndProceed}
+              disabled={!isValid() || isLoading || isValidating}
+              className={`${isValid() && !isLoading && !isValidating ? 'btn-primary' : 'btn-secondary'} ${!isValid() || isLoading || isValidating ? 'disabled' : ''}`}
+            >
+              {isLoading || isValidating ? (
+                <>{isValidating ? 'Validating...' : 'Processing...'}</>
+              ) : (
+                <>
+                  Continue to USMCA Analysis
+                </>
+              )}
+            </button>
+          </div>
+        </>
       )}
 
       {/* Read-Only Mode Indicator */}

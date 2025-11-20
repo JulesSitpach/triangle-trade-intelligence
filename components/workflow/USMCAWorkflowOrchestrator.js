@@ -288,9 +288,23 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     processWorkflow();
   };
 
-  // ✅ NEW: Handle demo data loading - populate data, let user click through
+  // ✅ NEW: Handle Step 1 demo data - just mark as demo mode
   const handleLoadDemoData = (demoData) => {
-    console.log('🚀 [Orchestrator] Demo data loaded, populating form...');
+    console.log('🚀 [Orchestrator] Step 1 demo data loaded');
+    updateFormData('is_demo', true);
+
+    // Store demo data for Step 2 to use
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('demo_mode_active', 'true');
+      localStorage.setItem('demo_company_data', JSON.stringify(demoData));
+    }
+  };
+
+  // ✅ NEW: Handle Step 2 demo data - populate components
+  const handleLoadStep2DemoData = () => {
+    console.log('🚀 [Orchestrator] Loading Step 2 demo data...');
+
+    const demoData = DEMO_COMPANY_DATA;
 
     // Populate Step 2 fields required for validation
     updateFormData('product_description', demoData.product_description);
@@ -309,9 +323,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       });
     });
 
-    console.log('✅ Demo data populated - user can review and click Next');
-    // ✅ NO auto-advance - let user click "Next" button themselves
-    // ✅ NO auto-trigger - let user click "Analyze" button themselves
+    console.log('✅ Step 2 demo data populated - user can click Analyze');
   };
 
   // Handle Step 2 completion - stay in workflow
@@ -627,6 +639,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             saveWorkflowToDatabase={saveWorkflowToDatabase}
             currentSessionId={currentSessionId}  // ✅ FIX (Nov 6): Pass session ID so component reacts to new sessions
             viewMode={viewMode} // Pass view mode to disable buttons in read-only
+            onLoadDemoData={handleLoadStep2DemoData} // ✅ NEW: Enable demo data quick-start for Step 2
           />
         )}
 
