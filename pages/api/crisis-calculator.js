@@ -30,26 +30,35 @@ const supabase = createClient(
  */
 async function getSection301Rate(originCountry, hsCode) {
   try {
-    // Section 301 applies to all USMCA members (US, CA, MX) importing from China
-    // Only CN/China origin gets Section 301 tariffs
-    if (!originCountry || (originCountry.toUpperCase() !== 'CN' && originCountry.toLowerCase() !== 'china')) {
-      return 0; // No Section 301 for non-China origin
+    // ✅ FIX (Nov 20, 2025): Section 301 applies to MULTIPLE origins, not just China
+    // Countries with Section 301 tariffs: China (CN), Vietnam (VN), Russia (RU), etc.
+    // Must query database for ALL origins, not hardcode China-only logic
+
+    if (!originCountry) {
+      return 0; // No origin = no Section 301
     }
 
-    // Query database for China-specific Section 301 rate
+    // Query database for Section 301 rate for ANY origin
+    // The policy_tariffs_cache table has origin_country filter
     const { data, error } = await supabase
-      .from('tariff_rates_cache')
+      .from('policy_tariffs_cache')  // ✅ Use policy cache (cron-updated)
       .select('section_301')
       .eq('hs_code', hsCode)
+      .eq('origin_country', originCountry.toUpperCase())  // Match by origin
       .limit(1)
       .single();
 
     if (error || !data?.section_301) {
-      console.warn(`⚠️ [TARIFF-DB] No Section 301 rate found for ${hsCode} (China origin). Returning null for manual review.`);
-      return null; // Signal missing data - don't use hardcoded default
+      // Check if this is a high-risk origin that should have Section 301
+      const highRiskOrigins = ['CN', 'VN', 'RU'];
+      if (highRiskOrigins.includes(originCountry.toUpperCase())) {
+        console.warn(`⚠️ [TARIFF-DB] No Section 301 rate found for ${hsCode} (${originCountry} origin). Returning null for manual review.`);
+        return null; // Signal missing data for high-risk origin
+      }
+      return 0; // No Section 301 for this origin
     }
 
-    return data.section_301 / 100; // Convert from percentage to decimal
+    return data.section_301; // Already in decimal format (0-1) from database
   } catch (err) {
     console.error(`❌ [TARIFF-DB-ERROR] Failed to fetch Section 301 rate for ${hsCode}:`, err.message);
     return null; // Fail loud - don't use hardcoded default

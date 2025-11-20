@@ -1074,14 +1074,18 @@ export default protectedApiHandler({
 
             // For all WTO countries (including China), use MFN rate
             if (textRate === 'Free') {
-              return 0;
+              return 0;  // ✅ OK: "Free" means legitimately 0% duty
             }
 
             const rate = parseFloat(mfnAdValRate);
             if (!isNaN(rate)) {
               return rate;
             }
-            return 0;
+
+            // ✅ FIX (Nov 20): If database has no MFN rate, trigger AI research instead of defaulting to 0
+            console.log(`⚠️ [MFN-RATE] HS ${component.hs_code}: No MFN rate in database (stale: true)`);
+            component.stale = true;  // Trigger AI research
+            return 0;  // Temporary fallback until AI research completes
           };
 
           const getSection301Rate = () => {
@@ -1089,65 +1093,95 @@ export default protectedApiHandler({
             // Falls back to tariff_intelligence_master if not in cache
             // NOTE: API returns rates in DECIMAL format (0-1); frontend multiplies by 100 for display
 
-            // Check if origin is China AND destination is US
-            const isChineseOrigin = component.origin_country === 'CN' || component.origin_country === 'China';
+            // ✅ FIX (Nov 20): Section 301 applies to MULTIPLE origins, not just China
+            // Countries with Section 301 tariffs: China, Vietnam, Russia, etc.
+            // Must check policy_tariffs_cache for ALL origins, not hardcode China-only logic
+
             const isUSDestination = destinationCountry === 'US';
 
-            if (isChineseOrigin && isUSDestination) {
-              // Use policy cache value (overrides master table if present)
-              const section301Rate = parseFloat(policyRates.section_301) || 0;
+            if (!isUSDestination) {
+              // Section 301 only applies to imports into the US
+              return 0;
+            }
+
+            // Check policy_tariffs_cache for Section 301 rate (ANY origin)
+            // The cache query already filtered by origin_country, so trust the result
+            const section301Rate = parseFloat(policyRates.section_301);
+
+            if (!isNaN(section301Rate) && section301Rate > 0) {
+              console.log(`✅ [SECTION-301] HS ${component.hs_code} (${component.origin_country} → US): ${(section301Rate * 100).toFixed(1)}% from policy_tariffs_cache`);
               return section301Rate;  // Return decimal format (0-1)
             }
 
-            // Section 301 doesn't apply to non-China origins or non-US destinations
-            return 0;
+            // If no Section 301 in cache, check if we should trigger AI research
+            // Only trigger if this is a high-risk origin (China, Vietnam, Russia)
+            const highRiskOrigins = ['CN', 'China', 'VN', 'Vietnam', 'RU', 'Russia'];
+            if (highRiskOrigins.includes(component.origin_country)) {
+              console.log(`⚠️ [SECTION-301] HS ${component.hs_code} (${component.origin_country}): Not in policy cache, may need AI research`);
+              // Note: Don't set stale=true here, as Section 301 is checked separately in tariff research agent
+            }
+
+            return 0;  // No Section 301 for this HS code + origin combination
           };
 
           const getUSMCARate = () => {
-            // ✅ FIX (Nov 12, 2025): USMCA rate depends on ORIGIN, not just destination
-            // Components from USMCA countries (US, CA, MX) qualify for duty-free (0%) when going to USMCA destinations
-            // Components from non-USMCA countries (CN, etc.) do NOT qualify, pay MFN rate
+            // ✅ CRITICAL FIX (Nov 20, 2025): USMCA rate is the PREFERENTIAL RATE for this HS code
+            // This is what you pay IF the final product qualifies for USMCA (based on RVC)
+            // Component origin does NOT determine the USMCA rate - only RVC calculation
+            //
+            // Example: China component in qualified product:
+            //   - MFN Rate: 2.9% (standard duty for China imports)
+            //   - USMCA Rate: 0% (preferential rate IF product qualifies)
+            //   - Savings: 2.9% (difference between MFN and USMCA)
+            //
+            // The USMCA rate should ALWAYS come from database, NOT from component origin logic
 
-            const originCountry = baseComponent.origin_country;
-            const isUSMCAOrigin = ['US', 'CA', 'MX', 'USA', 'CAN', 'MEX'].includes(originCountry);
+            // Step 1: Check if USMCA destination (only US, CA, MX have USMCA)
             const isUSMCADestination = ['US', 'CA', 'MX'].includes(destinationCountry);
 
-            // If origin is USMCA member AND destination is USMCA member → Duty-free (0%)
-            if (isUSMCAOrigin && isUSMCADestination) {
-              console.log(`✅ [USMCA-RATE] ${originCountry} → ${destinationCountry}: Duty-free (USMCA qualifying component)`);
-              return 0;
+            if (!isUSMCADestination) {
+              // No USMCA preferential rate for non-USMCA destinations
+              console.log(`⚠️ [USMCA-RATE] Destination ${destinationCountry} not USMCA member, no preferential rate`);
+              return getMFNRate();  // Use MFN rate (no preference available)
             }
 
-            // If origin is NOT USMCA member → Not eligible for preferential rate, pay MFN
-            if (!isUSMCAOrigin) {
-              console.log(`⚠️ [USMCA-RATE] ${originCountry} → ${destinationCountry}: MFN rate (non-USMCA origin)`);
-              return getMFNRate();
-            }
-
-            // Fallback: Check database USMCA rate column (for edge cases)
-            const qualifies = (destinationCountry === 'MX' && rateData?.nafta_mexico_ind === 'Y') ||
-                             (destinationCountry === 'CA' && rateData?.nafta_canada_ind === 'Y') ||
-                             (destinationCountry === 'US');
-
-            if (!qualifies) {
-              return getMFNRate();  // Not eligible, use MFN rate
-            }
-
+            // Step 2: Look up USMCA preferential rate from database for this HS code
             // Determine which rate column to use based on destination
             let rateValue;
+            let rateSource;
+
             if (destinationCountry === 'MX') {
               rateValue = rateData?.mexico_ad_val_rate;
-            } else {
+              rateSource = 'mexico_ad_val_rate';
+            } else if (destinationCountry === 'CA') {
+              // Canada uses usmca_ad_val_rate column (CUSMA is Canada's name for USMCA)
               rateValue = rateData?.usmca_ad_val_rate;
+              rateSource = 'usmca_ad_val_rate (CUSMA)';
+            } else {
+              // US destination
+              rateValue = rateData?.usmca_ad_val_rate;
+              rateSource = 'usmca_ad_val_rate';
             }
 
-            // If Free, return 0. Otherwise return ad valorem rate.
-            if (rateData?.mfn_text_rate === 'Free') {
+            // Step 3: Parse the rate
+            // If "Free" text rate, return 0
+            if (rateData?.mfn_text_rate === 'Free' || rateData?.usmca_text_rate === 'Free') {
+              console.log(`✅ [USMCA-RATE] HS ${component.hs_code} → ${destinationCountry}: Free (duty-free)`);
               return 0;
             }
 
+            // Parse numeric rate
             const rate = parseFloat(rateValue);
-            return !isNaN(rate) ? rate : getMFNRate();
+
+            if (!isNaN(rate)) {
+              console.log(`✅ [USMCA-RATE] HS ${component.hs_code} → ${destinationCountry}: ${(rate * 100).toFixed(1)}% from ${rateSource}`);
+              return rate;
+            }
+
+            // Step 4: If database has no USMCA rate, trigger AI research
+            console.log(`⚠️ [USMCA-RATE] HS ${component.hs_code}: No USMCA rate in database (stale: true)`);
+            component.stale = true;  // Trigger AI research
+            return 0;  // Temporary fallback until AI research completes
           };
 
           // 🔧 CONSISTENT CONTRACT: Always return same structure
