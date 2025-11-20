@@ -81,31 +81,37 @@ export default function Signup() {
       const { data, error } = await signUp(
         formData.email,
         formData.password,
+        formData.fullName || 'My Company', // Use full name as company name to reduce signup friction
         formData.fullName
       );
 
       if (error) {
         setError(error);
       } else {
-        // Registration successful with email confirmation
-        console.log('Registration successful, check email for confirmation');
-        setError(''); // Clear any previous errors
+        // ✅ CONVERSION FIX: Check if instant access was granted (trial users)
+        if (data.instant_access && data.session) {
+          console.log('🚀 Trial signup complete - redirecting to dashboard');
 
-        // Redirect based on selected plan
-        if (plan && plan !== 'trial') {
-          // ✅ FIX (Nov 17): Store selected plan in localStorage for after email verification
-          // When Supabase confirms email, user is logged in directly - we need to remember their plan choice
+          // Store session for the auth context
+          if (typeof window !== 'undefined' && data.session) {
+            // The session is already set by the API via cookies
+            // Just redirect - the SimpleAuthContext will pick it up
+            setTimeout(() => {
+              router.push('/dashboard?welcome=true');
+            }, 500);
+          }
+        } else if (plan && plan !== 'trial') {
+          // ✅ For paid plans, redirect to login and then back to pricing
           if (typeof window !== 'undefined') {
             localStorage.setItem('pendingSubscriptionPlan', plan);
             localStorage.setItem('pendingSubscriptionTimestamp', Date.now().toString());
           }
-          // For paid plans, redirect to login and then back to pricing
           alert(`✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nAfter verification, you'll be able to subscribe to the ${plan} plan.`);
           router.push(`/login?redirect=/pricing&message=Please verify your email to complete subscription`);
         } else {
-          // For trial, show email verification notice
-          alert(`✅ Account Created Successfully!\n\n📧 IMPORTANT: Check your email to verify your account.\n\n⏰ Email may take 2-5 minutes to arrive\n📬 Check your spam/junk folder\n💬 No email? Contact triangleintel@gmail.com\n\nAfter verification, you can sign in and start your free trial.`);
-          router.push('/login?message=Please check your email to verify your account before signing in.');
+          // Fallback: should not reach here for trial, but handle gracefully
+          console.log('Registration successful, redirecting to dashboard');
+          router.push('/dashboard?welcome=true');
         }
       }
     } catch (err) {

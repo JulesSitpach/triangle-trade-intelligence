@@ -118,9 +118,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // Step 1: Create user in auth.users via Supabase Auth with email confirmation
-    console.log('📝 Creating auth user with email confirmation...');
+    // Step 1: Create user in auth.users via Supabase Auth
+    // ✅ CONVERSION FIX: Skip email verification for trial users (instant access)
+    console.log('📝 Creating auth user...');
     const termsAcceptedAt = new Date().toISOString();
+    const isTrial = true; // All new signups start on trial
 
     const { data: authData, error: authError } = await supabaseAuth.auth.signUp({
       email: email,
@@ -133,7 +135,10 @@ export default async function handler(req, res) {
           subscription_tier: 'Trial',
           terms_accepted_at: termsAcceptedAt,
           privacy_accepted_at: termsAcceptedAt
-        }
+        },
+        // ✅ Skip email confirmation for trial users = instant conversion
+        // This dramatically improves signup conversion by eliminating email friction
+        emailRedirectTo: isTrial ? undefined : `${process.env.NEXT_PUBLIC_APP_URL}/login?message=Account created successfully. Please sign in.`
       }
     });
 
@@ -195,13 +200,36 @@ export default async function handler(req, res) {
     }
 
     console.log('✅ User profile created:', profile.id);
-    console.log('📧 Email confirmation sent - user can login after verification');
 
-    // Return success with email verification notice
+    // ✅ CONVERSION FIX: For trial users, create immediate session (no email verification)
+    // Sign in the user immediately after registration
+    const { data: sessionData, error: sessionError } = await supabaseAuth.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (sessionError || !sessionData.session) {
+      console.error('⚠️ Auto-login after trial signup failed:', sessionError);
+      // Fallback: Return success but require manual login
+      return res.status(201).json({
+        message: 'Registration successful! You can now sign in.',
+        email_confirmation_required: false,
+        user_id: userId,
+        profile: profile
+      });
+    }
+
+    console.log('✅ Trial user auto-logged in - instant access granted');
+
+    // Return session data so frontend can redirect immediately
     return res.status(201).json({
-      message: 'Registration successful! Please check your email to confirm your account.',
-      email_confirmation_required: true,
-      user_id: userId
+      message: 'Registration successful! Redirecting to dashboard...',
+      email_confirmation_required: false,
+      user_id: userId,
+      profile: profile,
+      session: sessionData.session,
+      user: sessionData.user,
+      instant_access: true
     });
 
   } catch (error) {
