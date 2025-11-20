@@ -9,9 +9,15 @@ import { workflowService } from '../lib/services/workflow-service.js';
 import { CrossTabSync } from '../lib/utils/cross-tab-sync.js';
 import workflowStorage from '../lib/services/workflow-storage-adapter.js';
 
-export function useWorkflowState() {
+export function useWorkflowState(forceReset = false) {
   // Initialize step - check localStorage for saved session
   const [currentStep, setCurrentStep] = useState(() => {
+    // ✅ CRITICAL: Skip localStorage if forceReset=true (prevents loading stale demo data)
+    if (forceReset) {
+      console.log('⚠️ [FORCE RESET] Skipping localStorage restore - starting fresh');
+      return 1; // Start at step 1
+    }
+
     // Check if there's a saved step from a previous session
     if (typeof window !== 'undefined') {
       const savedStep = workflowStorage.getItem('workflow_current_step');
@@ -112,6 +118,9 @@ export function useWorkflowState() {
       producer_country: '',
       producer_same_as_exporter: false,
 
+      // Demo mode flag
+      is_demo: false,  // ✅ Tracks if demo data is loaded (affects button display)
+
       // Component Origins
       component_origins: []
   });
@@ -175,7 +184,14 @@ export function useWorkflowState() {
 
   // ✅ FIX (Oct 30): Load saved form data AFTER dropdown options are loaded
   // This prevents race condition where saved dropdown values can't be selected because options aren't available yet
+  // ✅ CRITICAL: Skip if forceReset=true (prevents loading stale demo data)
   useEffect(() => {
+    // ✅ SKIP if forceReset=true
+    if (forceReset) {
+      console.log('⚠️ [FORCE RESET] Skipping loadSavedData - starting fresh');
+      return;
+    }
+
     if (!isLoadingOptions && dropdownOptions.businessTypes?.length > 0) {
       const saved = loadSavedData();
       if (saved) {
@@ -197,11 +213,18 @@ export function useWorkflowState() {
         console.log('ℹ️ No saved form data found in localStorage');
       }
     }
-  }, [isLoadingOptions, dropdownOptions.businessTypes]);
+  }, [isLoadingOptions, dropdownOptions.businessTypes, forceReset]);
 
   // Load saved results from localStorage (client-side only)
   // Note: currentStep is now restored in the useState initializer
+  // ✅ CRITICAL: Skip if forceReset=true
   useEffect(() => {
+    // ✅ SKIP if forceReset=true
+    if (forceReset) {
+      console.log('⚠️ [FORCE RESET] Skipping saved results restore');
+      return;
+    }
+
     const savedResults = workflowStorage.getItem('usmca_workflow_results');
 
     if (savedResults) {
@@ -235,11 +258,17 @@ export function useWorkflowState() {
         console.error('Error loading saved results:', e);
       }
     }
-  }, []);
+  }, [forceReset]);  // ✅ Add forceReset to dependency array
 
   // ✅ FIX (Nov 1): Reload results from localStorage when navigating back to results page
   // This handles cases where user navigates away (e.g., to alerts page) and comes back
+  // ✅ CRITICAL: Skip if forceReset=true
   useEffect(() => {
+    // ✅ SKIP if forceReset=true
+    if (forceReset) {
+      return;
+    }
+
     // Only check when on results step (step 3) and results is missing
     if (currentStep === 3 && !results) {
       const savedResults = workflowStorage.getItem('usmca_workflow_results');
@@ -274,12 +303,18 @@ export function useWorkflowState() {
         }
       }
     }
-  }, [currentStep, results]);
+  }, [currentStep, results, forceReset]);  // ✅ Add forceReset to dependency array
 
   // ✅ FIX (Nov 1): Reload formData from localStorage when navigating back to Steps 1 or 2
   // ✅ FIX (Nov 7): Don't reload if we just loaded from database (view_results in URL history)
   // This ensures form fields are populated when users navigate back from Results or Alerts pages
   useEffect(() => {
+    // ✅ CRITICAL: Skip if forceReset=true (prevents loading stale demo data)
+    if (forceReset) {
+      console.log('⚠️ [FORCE RESET] Skipping formData restore from localStorage');
+      return;
+    }
+
     // ⚠️ Don't reload if user just clicked "+ New Analysis" (reset=true in URL)
     const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const isResetting = urlParams.get('reset') === 'true';
@@ -336,7 +371,7 @@ export function useWorkflowState() {
         }
       }
     }
-  }, [currentStep, formData.company_name]);
+  }, [currentStep, formData.company_name, forceReset]);
 
   // Load workflow data from database on mount
   useEffect(() => {
@@ -719,6 +754,7 @@ export function useWorkflowState() {
       producer_email: '',
       producer_country: '',
       producer_same_as_exporter: false,
+      is_demo: false,  // ✅ FIX: Explicitly clear demo mode when resetting workflow
       component_origins: []  // ✅ No default - user must add components
     });
   }, []);

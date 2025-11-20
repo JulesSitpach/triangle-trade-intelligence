@@ -28,7 +28,8 @@ export default function ComponentOriginsStepEnhanced({
   saveWorkflowToDatabase,
   currentSessionId,  // ✅ FIX (Nov 6): Receive session ID from parent hook
   viewMode = 'normal', // 'normal', 'read-only', 'edit', or 'refresh'
-  onLoadDemoData // ✅ NEW: Callback to load demo data for Step 2
+  onLoadDemoData, // ✅ NEW: Callback to load demo data for Step 2
+  onClearDemoData // ✅ NEW: Callback to clear demo data for Step 2
 }) {
   // Track if we just pushed to parent to avoid infinite restore loop
   const lastPushedRef = useRef(null);
@@ -120,6 +121,24 @@ export default function ComponentOriginsStepEnhanced({
   // ✅ NEW: Track demo mode state
   const [isDemoMode, setIsDemoMode] = useState(false);
 
+  // ✅ CRITICAL FIX: Detect demo mode by checking if form has EXACT demo data
+  // Check for specific demo component signatures
+  useEffect(() => {
+    const components = formData.component_origins || [];
+
+    // Demo data has exactly 3 components with these specific characteristics:
+    // 1. Ceramic friction material (MX, 50%)
+    // 2. Steel backing plates (US, 30%)
+    // 3. Hardware assembly (CN, 20%)
+    const hasExactDemoData =
+      components.length === 3 &&
+      components.some(c => c.description?.includes('Ceramic friction') && c.origin_country === 'MX' && c.value_percentage === 50) &&
+      components.some(c => c.description?.includes('steel backing') && c.origin_country === 'US' && c.value_percentage === 30) &&
+      components.some(c => c.description?.includes('hardware assembly') && c.origin_country === 'CN' && c.value_percentage === 20);
+
+    setIsDemoMode(hasExactDemoData);
+  }, [formData.component_origins]);
+
   // ✅ Helper function to check if Material Origin field should show
   // User manually indicates if component contains Section 232 material via checkbox
   const shouldShowMaterialOrigin = (component) => {
@@ -205,12 +224,12 @@ export default function ComponentOriginsStepEnhanced({
       const normalizedComponents = formData.component_origins.map(normalizeComponent);
       const formDataString = JSON.stringify(normalizedComponents);
 
-      // Skip if we just pushed this exact data (prevents loop)
+      // ✅ FIX: ALWAYS check for duplicates to prevent infinite loop (even in demo mode)
       if (lastPushedRef.current === formDataString) {
         return;
       }
 
-      console.log(`🔄 Syncing components from formData (navigation restore)`);
+      console.log(`🔄 Syncing ${normalizedComponents.length} components from formData`, formData.is_demo ? '(DEMO MODE)' : '(navigation restore)');
       setComponents(normalizedComponents);
 
       // ✅ P1-1 FIX: Recalculate usedComponentsCount to stay in sync with restored components
@@ -220,7 +239,8 @@ export default function ComponentOriginsStepEnhanced({
       setUsedComponentsCount(newUsedCount);
       console.log(`🔒 Restored ${newUsedCount} locked components`);
     }
-  }, [formData.component_origins, normalizeComponent]); // ✅ Only watch formData.component_origins, not components (would cause loop)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.component_origins, formData.is_demo]); // normalizeComponent removed to prevent re-runs when manufacturing_location changes
 
   // 💾 AUTO-SAVE: Debounced auto-save to database when components change
   // Prevents data loss if browser crashes or page is closed during Step 2 editing
@@ -849,7 +869,7 @@ export default function ComponentOriginsStepEnhanced({
       onLoadDemoData();
     }
 
-    console.log('✅ Demo data loaded - review and click Analyze');
+    console.log('✅ Demo data loaded - user can scroll down to review');
   };
 
   // Validate workflow data before proceeding
@@ -998,8 +1018,42 @@ export default function ComponentOriginsStepEnhanced({
     <div className="dashboard-container">
       {/* Product Overview Section */}
       <div className="form-section">
-        <h3 className="form-section-title">Product Overview</h3>
-        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h3 className="form-section-title" style={{ margin: 0 }}>Product Overview</h3>
+
+          {/* ✅ Demo Data Buttons - Now at TOP */}
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {!isDemoMode && onLoadDemoData && (
+              <button
+                onClick={handleLoadDemoData}
+                className="btn-secondary"
+                title="Auto-fill with sample automotive components"
+              >
+                🚀 Try Demo Data
+              </button>
+            )}
+            {isDemoMode && onClearDemoData && (
+              <button
+                onClick={onClearDemoData}
+                className="btn-secondary"
+                title="Clear demo data and start fresh"
+              >
+                🗑️ Clear Demo
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ✅ Demo Mode Banner */}
+        {isDemoMode && (
+          <div className="alert-info" style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#eff6ff', borderLeft: '4px solid #3b82f6' }}>
+            <strong>📊 Demo Mode Active</strong>
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem' }}>
+              Demo workflows don't count against your subscription limit. Feel free to test "Search for HS code" and explore all features.
+            </p>
+          </div>
+        )}
+
         <div className="form-grid-2">
           {/* LEFT COLUMN: Substantial Transformation */}
           <div className="form-group">
@@ -1636,32 +1690,6 @@ export default function ComponentOriginsStepEnhanced({
       {/* Navigation Buttons */}
       {viewMode === 'normal' && (
         <>
-          {/* ✅ NEW: Demo Data Button */}
-          {!isDemoMode && onLoadDemoData && (
-            <div className="section-spacing" style={{ textAlign: 'center' }}>
-              <button
-                onClick={handleLoadDemoData}
-                className="btn-secondary"
-                style={{ marginBottom: '1rem' }}
-              >
-                🚀 Try Demo Data
-              </button>
-              <p className="form-help" style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                Auto-fill with sample components to test the workflow
-              </p>
-            </div>
-          )}
-
-          {/* ✅ Demo Mode Banner */}
-          {isDemoMode && (
-            <div className="alert-info" style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#eff6ff', borderLeft: '4px solid #3b82f6' }}>
-              <strong>📊 Demo Mode Active</strong>
-              <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem' }}>
-                Demo workflows don't count against your subscription limit.
-              </p>
-            </div>
-          )}
-
           <div className="dashboard-actions section-spacing">
             <button
               onClick={onPrevious}

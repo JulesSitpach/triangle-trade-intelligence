@@ -26,7 +26,7 @@ import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator';
 import { DEMO_COMPANY_DATA } from '../../lib/constants/demo-data.js';
 
-export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId = null }) {
+export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId = null, forceReset = false }) {
   const router = useRouter();
   const hasProcessedResetRef = useRef(false);
   const hasLoadedResultsRef = useRef(false);
@@ -74,7 +74,7 @@ export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId
     loadSavedWorkflow,
     saveWorkflowToDatabase,
     currentSessionId  // ✅ FIX (Nov 6): Get session ID from hook state to pass to child components
-  } = useWorkflowState();
+  } = useWorkflowState(forceReset);
 
   const { trustIndicators } = useTrustIndicators();
 
@@ -310,20 +310,69 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     updateFormData('product_description', demoData.product_description);
     updateFormData('manufacturing_location', demoData.manufacturing_location);
 
-    // Add demo components to form data
-    demoData.components.forEach((comp, index) => {
-      addComponentOrigin();
-      updateComponentOrigin(index, {
+    // ✅ NEW: Add substantial transformation checkbox (automotive manufacturing involves transformation)
+    updateFormData('substantial_transformation', true);
+    updateFormData('manufacturing_process', 'Complete brake pad assembly including friction material mixing, steel backing plate stamping, adhesive bonding, heat treatment, and quality inspection. Final assembly transforms raw components into certified automotive brake systems meeting FMVSS-135 standards.');
+
+    // Mark as demo mode
+    updateFormData('is_demo', true);
+
+    // ✅ FIX: Build complete component_origins array and set it directly (avoid state timing issues)
+    const demoComponents = demoData.components.map(comp => {
+      const hasSection232Material = (comp.name.includes('Steel') || comp.name.includes('Hardware'));
+
+      // ✅ Material Origin radio button values (not country codes!)
+      // Steel Backing Plate (US) → 'us' (United States - may be exempt)
+      // Hardware Kit (CN) → 'non_na' (Outside North America)
+      let materialOrigin = 'unknown';
+      if (hasSection232Material) {
+        if (comp.origin === 'US') {
+          materialOrigin = 'us';  // United States (may be exempt)
+        } else if (comp.origin === 'MX' || comp.origin === 'CA') {
+          materialOrigin = 'mx_ca';  // Mexico or Canada
+        } else {
+          materialOrigin = 'non_na';  // Outside North America (China, etc.)
+        }
+      }
+
+      return {
         component_name: comp.name,
-        origin_country: comp.origin,
-        component_description: comp.description,
-        cost_percentage: comp.cost_percentage,
-        suggested_hs_code: comp.suggested_hs_code,
-        is_demo: true
-      });
+        description: comp.description,  // ✅ Component Description
+        origin_country: comp.origin,  // ✅ Origin Country (MX, US, CN)
+        value_percentage: comp.cost_percentage,  // ✅ Value Percentage
+        // ❌ REMOVED: HS codes - let users test search functionality
+        hs_code: '',
+        suggested_hs_code: '',
+        // ✅ Steel/Aluminum/Copper checkbox - Steel Backing Plate and Hardware Kit
+        contains_section_232_material: hasSection232Material,
+        // ✅ Material Origin for Section 232 exemption (radio button values)
+        material_origin: materialOrigin,
+        material_notes: hasSection232Material ? (comp.origin === 'US' ? 'Domestic steel from Ohio supplier' : 'Imported steel hardware from China') : '',
+        manufacturing_location: demoData.manufacturing_location,  // ✅ Manufacturing Location (Mexico)
+        is_locked: false,  // NOT locked - user can test "Search for HS code"
+        is_demo: true,
+        hs_suggestions: []
+      };
     });
 
-    console.log('✅ Step 2 demo data populated - user can click Analyze');
+    // Set all components at once
+    updateFormData('component_origins', demoComponents);
+
+    console.log('✅ Step 2 demo data populated:', demoComponents.length, 'components with ALL fields');
+  };
+
+  // ✅ NEW: Clear Step 2 demo data
+  const handleClearStep2DemoData = () => {
+    console.log('🗑️ [Orchestrator] Clearing Step 2 demo data...');
+
+    updateFormData('product_description', '');
+    updateFormData('manufacturing_location', '');
+    updateFormData('substantial_transformation', false);
+    updateFormData('manufacturing_process', '');
+    updateFormData('is_demo', false);
+    updateFormData('component_origins', []);
+
+    console.log('✅ Step 2 demo data cleared');
   };
 
   // Handle Step 2 completion - stay in workflow
@@ -640,6 +689,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             currentSessionId={currentSessionId}  // ✅ FIX (Nov 6): Pass session ID so component reacts to new sessions
             viewMode={viewMode} // Pass view mode to disable buttons in read-only
             onLoadDemoData={handleLoadStep2DemoData} // ✅ NEW: Enable demo data quick-start for Step 2
+            onClearDemoData={handleClearStep2DemoData} // ✅ NEW: Clear demo data for Step 2
           />
         )}
 

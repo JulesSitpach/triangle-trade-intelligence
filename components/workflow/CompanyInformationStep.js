@@ -82,7 +82,11 @@ export default function CompanyInformationStep({
   }, [formData.company_country, formData.destination_country, updateFormData]);
 
   // Auto-scroll to next section when current section is complete
+  // ✅ FIX: Disable auto-scroll when in demo mode (let users review at their own pace)
   useEffect(() => {
+    // Skip auto-scroll if demo mode is active
+    if (isDemoMode) return;
+
     // Check if Company Information section (first 6 fields) is complete
     const companyInfoComplete = !!(
       formData.company_name &&
@@ -114,7 +118,7 @@ export default function CompanyInformationStep({
       setScrolledToTrade(true);
       console.log('✅ Contact Information complete - scrolling to Trade Routes');
     }
-  }, [formData, scrolledToContact, scrolledToTrade]);
+  }, [formData, scrolledToContact, scrolledToTrade, isDemoMode]);
 
   // Clear validation error when user starts filling in fields
   useEffect(() => {
@@ -162,9 +166,9 @@ export default function CompanyInformationStep({
 
     // Populate Step 1 fields
     updateFormData('company_name', DEMO_COMPANY_DATA.company_name);
-    updateFormData('business_type', 'producer'); // Producer/Manufacturer
-    updateFormData('certifier_type', '1'); // Producer
-    updateFormData('industry_sector', DEMO_COMPANY_DATA.industry);
+    updateFormData('business_type', 'Manufacturer'); // ✅ FIX: Use actual BUSINESS_TYPES value
+    updateFormData('certifier_type', 'PRODUCER'); // ✅ FIX: Use actual CERTIFIER_TYPES value
+    updateFormData('industry_sector', 'automotive'); // ✅ FIX: Use lowercase dropdown value
     updateFormData('tax_id', 'MX-RFC-123456789');
     updateFormData('company_address', 'Av. Industria 1000, Monterrey, Nuevo León');
     updateFormData('company_country', 'MX'); // ✅ FIX: Use country CODE, not name
@@ -206,13 +210,16 @@ export default function CompanyInformationStep({
     }
   };
 
-  // Check if demo mode is active on mount
+  // ✅ CRITICAL FIX: Detect demo mode by checking if form has EXACT demo data
+  // Don't trust formData.is_demo flag - check actual field values
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const demoActive = localStorage.getItem('demo_mode_active') === 'true';
-      setIsDemoMode(demoActive);
-    }
-  }, []);
+    const hasExactDemoData =
+      formData.company_name === DEMO_COMPANY_DATA.company_name &&
+      formData.company_country === 'MX' &&
+      formData.destination_country === 'US';
+
+    setIsDemoMode(hasExactDemoData);
+  }, [formData.company_name, formData.company_country, formData.destination_country]);
 
   const handleContinue = async () => {
     setAttemptedSubmit(true);

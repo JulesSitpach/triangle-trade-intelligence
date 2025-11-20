@@ -242,7 +242,8 @@ async function main() {
 
         // Get existing Section 301 data (preserve it)
         const existing = existingCache[code] || {};
-        const existingSection301 = existing.section_301 !== undefined ? existing.section_301 : 0;
+        // ✅ FIXED Nov 20, 2025: Use null instead of 0 (null = needs research, 0 = confirmed duty-free)
+        const existingSection301 = existing.section_301 !== undefined ? existing.section_301 : null;
 
         // Merge Section 232 with existing Section 301
         results.push({

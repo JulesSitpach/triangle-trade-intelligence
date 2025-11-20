@@ -1,9 +1,9 @@
 // UPGRADED Classification Agent API - Database-backed classification cache
-// Uses ClassificationAgent for HS code suggestions
+// Uses ClassificationAgentV2 for HS code suggestions (SIMPLIFIED REASONING-BASED PROMPT)
 // SUBSCRIPTION-AWARE: Integrates subscription validation and usage tracking
 // 🔒 AUTHENTICATION REQUIRED: Prevents unauthenticated AI classification abuse
 
-import { ClassificationAgent } from '../../../lib/agents/classification-agent.js';
+import { ClassificationAgentV2 as ClassificationAgent } from '../../../lib/agents/classification-agent-v2.js';
 import { addSubscriptionContext } from '../../../lib/services/subscription-service.js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 import { createClient } from '@supabase/supabase-js';
@@ -275,17 +275,40 @@ export default protectedApiHandler({
       // ✅ SAFETY: Normalize alternative_codes array (AI might return objects in reason field)
       // Filter out any alternatives with empty/invalid HS codes
       // ✅ FIX (Nov 10): AI returns hs_code, not code - support both formats
+      // ✅ FIX (Nov 20): Normalize HS codes from V2 agent (remove periods, ensure 8-digit)
       const safeAlternativeCodes = (aiResult.data.alternative_codes || [])
-        .map(alt => ({
-          code: typeof alt.code === 'string' ? alt.code : (typeof alt.hs_code === 'string' ? alt.hs_code : String(alt.code || alt.hs_code || '')),
-          confidence: Number(alt.confidence) || 0,
-          reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
-        }))
+        .map(alt => {
+          // Extract HS code from either field
+          let rawCode = typeof alt.code === 'string' ? alt.code : (typeof alt.hs_code === 'string' ? alt.hs_code : String(alt.code || alt.hs_code || ''));
+
+          // Normalize to 8-digit format (remove periods, truncate/pad)
+          let normalizedCode = rawCode.replace(/[.\s-]/g, '');
+          if (normalizedCode.length > 8) {
+            normalizedCode = normalizedCode.substring(0, 8);
+          } else if (normalizedCode.length < 8 && normalizedCode.length >= 6) {
+            normalizedCode = normalizedCode.padEnd(8, '0');
+          }
+
+          return {
+            code: normalizedCode,
+            confidence: Number(alt.confidence) || 0,
+            reason: typeof alt.reason === 'string' ? alt.reason : JSON.stringify(alt.reason || 'Alternative classification option')
+          };
+        })
         .filter(alt => alt.code && alt.code.trim() !== '' && alt.code.length >= 6); // ✅ FIX: Only keep valid HS codes (min 6 digits)
 
       // 🚨 CRITICAL FIX: Ensure PRIMARY HS code is always the HIGHEST confidence option
       // For financial compliance, the most confident classification must be primary
-      let primary_hs_code = aiResult.data.hs_code;
+
+      // ✅ FIX (Nov 20, 2025): ClassificationAgentV2 returns codes with periods ("7326.90.70")
+      // Normalize to 8-digit HTS-8 format without periods ("73269070") for database lookup
+      let primary_hs_code = aiResult.data.hs_code.replace(/[.\s-]/g, '');  // Remove periods, spaces, dashes
+      if (primary_hs_code.length > 8) {
+        primary_hs_code = primary_hs_code.substring(0, 8);  // Truncate to 8 digits
+      } else if (primary_hs_code.length < 8) {
+        primary_hs_code = primary_hs_code.padEnd(8, '0');  // Pad to 8 digits
+      }
+
       let primaryConfidence = Number(aiResult.data.confidence) || 0;
       let finalAlternativeCodes = [...safeAlternativeCodes];
 

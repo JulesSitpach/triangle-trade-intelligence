@@ -5,24 +5,19 @@
  * Security: Rate limited to 5 attempts per 15 minutes
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServiceClient, getSupabaseClient } from '../../../lib/database/supabase-client.js';
 import { serialize } from 'cookie';
 import crypto from 'crypto';
 import { applyRateLimit, authLimiter } from '../../../lib/security/rateLimiter';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 import { logger } from '../../../lib/utils/enhanced-production-logger.js';
 
+// ✅ FIX: Use singleton clients to prevent multiple GoTrueClient instances
 // Admin client for user profile lookup
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseAdmin = getSupabaseServiceClient();
 
 // Auth client for password verification
-const supabaseAuth = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+const supabaseAuth = getSupabaseClient();
 
 // Secure session signing - NO FALLBACK
 // Store stringified data to avoid JSON.stringify order issues

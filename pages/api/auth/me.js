@@ -5,13 +5,11 @@
 
 import { parse, serialize } from 'cookie';
 import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServiceClient } from '../../../lib/database/supabase-client.js';
 import { logDevIssue, DevIssue } from '../../../lib/utils/logDevIssue.js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// ✅ FIX: Use singleton service client to prevent multiple GoTrueClient instances
+const supabase = getSupabaseServiceClient();
 
 function verifySession(cookieValue) {
   try {

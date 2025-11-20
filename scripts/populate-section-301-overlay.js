@@ -186,7 +186,8 @@ async function main() {
         results.push({
           hs_code: code,
           section_301: result.section_301,
-          section_232: result.section_232 || 0,
+          // ✅ FIXED Nov 20, 2025: Use null instead of 0 (null = needs research, 0 = confirmed duty-free)
+          section_232: result.section_232 || null,
           verified_date: result.verified_date,
           expires_at: result.expires_at,
           data_source: result.data_source,

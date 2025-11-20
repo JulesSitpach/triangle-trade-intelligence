@@ -5,7 +5,7 @@
  * PROTECTED: Requires authentication
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useSimpleAuth } from '../lib/contexts/SimpleAuthContext';
 import Head from 'next/head';
@@ -15,13 +15,46 @@ import USMCAWorkflowOrchestrator from '../components/workflow/USMCAWorkflowOrche
 
 export default function USMCAWorkflow() {
   const router = useRouter();
-  const { view_results, workflow_id } = router.query; // ✅ Check if viewing read-only results OR loading specific workflow
+  const { view_results, workflow_id, reset, force_new } = router.query; // ✅ Check if viewing read-only results OR loading specific workflow OR forcing new workflow
+
+  // ✅ CRITICAL FIX: Use ref to persist forceReset state even after URL params are cleared
+  const forceResetRef = useRef(reset === 'true' || force_new === 'true');
+
+  // ✅ CRITICAL FIX: Clear localStorage SYNCHRONOUSLY before any hooks run
+  // This prevents useWorkflowState from loading stale demo data
+  if (typeof window !== 'undefined' && (reset === 'true' || force_new === 'true')) {
+    console.log('🔄 [NEW WORKFLOW] Clearing all cached workflow data SYNCHRONOUSLY...');
+    localStorage.removeItem('workflowSession');
+    localStorage.removeItem('workflowData');
+    localStorage.removeItem('demoMode');
+    localStorage.removeItem('demo_mode_active');
+    localStorage.removeItem('demo_company_data');
+    localStorage.removeItem('triangleUserData');  // ⚠️ CRITICAL: Contains formData with is_demo flag
+    localStorage.removeItem('usmca_workflow_results');
+    localStorage.removeItem('workflow_session_id');
+    localStorage.removeItem('workflow_current_step');
+  }
+
   const [usageLimitReached, setUsageLimitReached] = useState(false);
   const [usageStats, setUsageStats] = useState(null);
   const [checkingLimit, setCheckingLimit] = useState(true);
 
   // Use shared auth context instead of redundant API call
   const { user, loading } = useSimpleAuth();
+
+  // ✅ Clean up URL after localStorage cleared
+  useEffect(() => {
+    if (reset === 'true' || force_new === 'true') {
+      // Set forceReset ref to true (persists even after URL params cleared)
+      forceResetRef.current = true;
+
+      // Remove query params after clearing (clean URL)
+      router.replace('/usmca-workflow', undefined, { shallow: true });
+    } else {
+      // Reset the ref when no reset params (allows future resets to work)
+      forceResetRef.current = false;
+    }
+  }, [reset, force_new, router]);
 
   // Redirect if not authenticated (only runs after auth check completes)
   useEffect(() => {
@@ -233,7 +266,11 @@ export default function USMCAWorkflow() {
       </Head>
 
       <TriangleLayout>
-        <USMCAWorkflowOrchestrator readOnly={!!view_results} workflowId={view_results || workflow_id} />
+        <USMCAWorkflowOrchestrator
+          readOnly={!!view_results}
+          workflowId={view_results || workflow_id}
+          forceReset={forceResetRef.current}
+        />
       </TriangleLayout>
     </>
   );

@@ -22,7 +22,7 @@
  * - lib/middleware/subscription-guard.js (API enforcement)
  */
 export const ANALYSIS_LIMITS = {
-  'Trial': 1,           // Free trial: 1 workflow analysis
+  'Trial': 2,           // Free trial: 2 workflow analyses (1 demo + 1 personal)
   'Starter': 15,        // $99/month: 15 workflow analyses
   'Professional': 100,  // $299/month: 100 workflow analyses
   'Premium': 500,       // $599/month: 500 workflow analyses

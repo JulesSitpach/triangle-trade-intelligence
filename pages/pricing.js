@@ -165,7 +165,7 @@ export default function Pricing() {
       period: '7 days',
       description: 'Test the platform - no credit card required',
       features: [
-        '1 workflow analysis',
+        '2 workflow analyses (1 demo + 1 personal)',
         '3 components per workflow',
         'Certificate preview only (no download)',
         'View crisis alerts dashboard',
@@ -462,7 +462,10 @@ export default function Pricing() {
                 </tr>
                 <tr>
                   <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0' }}>AI Credits/Month</td>
-                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>1</td>
+                  <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>
+                    2<br/>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>(1 demo + 1 personal)</span>
+                  </td>
                   <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>15</td>
                   <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0', backgroundColor: '#eff6ff' }}>100</td>
                   <td style={{ padding: '0.75rem 1rem', textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>500</td>

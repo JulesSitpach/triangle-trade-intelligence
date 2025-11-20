@@ -975,12 +975,59 @@ export default protectedApiHandler({
           // ✅ HYBRID (Oct 30): Check policy_tariffs_cache for volatile rates
           // Overwrite Section 301/232 from master table with fresh cache values
           let policyRates = { section_301: rateData?.section_301 || 0, section_232: rateData?.section_232 || 0 };
+
+          console.log(`🔍 [POLICY-CACHE-DEBUG] About to start multi-level lookup for ${component.hs_code} (normalized: ${normalizedHsCode})`);
+          console.log(`🔍 [POLICY-CACHE-DEBUG] rateData exists: ${!!rateData}, rateData.hts8: ${rateData?.hts8}`);
+
+          // ✅ FIX (Nov 20, 2025): Multi-level lookup strategy for policy rates
+          // 1. Try exact 8-digit match (e.g., "73269070")
+          // 2. Try parent 6-digit match (e.g., "732690")
+          // 3. Try matched code from tariff_intelligence_master (after prefix fallback)
+          let policyCache = null;
+
           try {
-            const { data: policyCache } = await supabase
+            // Strategy 1: Exact match
+            const { data: exactMatch } = await supabase
               .from('policy_tariffs_cache')
               .select('section_301, section_232, verified_date, is_stale')
               .eq('hs_code', normalizedHsCode)
-              .single();
+              .maybeSingle();
+
+            if (exactMatch) {
+              policyCache = exactMatch;
+              console.log(`✅ [POLICY-CACHE] Exact match for ${normalizedHsCode}`);
+            } else {
+              // Strategy 2: Try parent 6-digit code
+              const parent6Digit = normalizedHsCode.substring(0, 6);
+              const { data: parentMatch } = await supabase
+                .from('policy_tariffs_cache')
+                .select('section_301, section_232, verified_date, is_stale')
+                .eq('hs_code', parent6Digit)
+                .maybeSingle();
+
+              if (parentMatch) {
+                policyCache = parentMatch;
+                console.log(`✅ [POLICY-CACHE] Parent match ${parent6Digit} for ${normalizedHsCode}`);
+              } else if (rateData?.hts8 && rateData.hts8 !== normalizedHsCode) {
+                // Strategy 3: Try matched code from prefix fallback
+                const { data: matchedCode } = await supabase
+                  .from('policy_tariffs_cache')
+                  .select('section_301, section_232, verified_date, is_stale')
+                  .eq('hs_code', rateData.hts8)
+                  .maybeSingle();
+
+                if (matchedCode) {
+                  policyCache = matchedCode;
+                  console.log(`✅ [POLICY-CACHE] Matched code ${rateData.hts8} for ${normalizedHsCode}`);
+                }
+              }
+            }
+          } catch (policyCacheError) {
+            console.log(`⚠️ [POLICY-CACHE] Lookup error: ${policyCacheError.message}`);
+          }
+
+          // Apply policy rates if found
+          try {
 
             if (policyCache && !policyCache.is_stale) {
               // Use cached policy rates (fresher than master table)
@@ -1140,9 +1187,23 @@ export default protectedApiHandler({
           console.log(`🔍 [SECTION-232-RATE] policyRates.section_232: ${policyRates.section_232}, appliedSection232: ${appliedSection232}`);
 
           if (isSection232Material && appliedSection232 === 0) {
-            // User indicated Section 232 material but database doesn't have rate - apply default 50%
-            appliedSection232 = 0.50;
-            console.log(`⚠️ [SECTION-232-DEFAULT] User indicated Section 232 material, applying default 50% tariff`);
+            // User indicated Section 232 material but database doesn't have rate - call Section 232 agent for correct rate
+            console.log(`🔍 [SECTION-232-AI] Database missing Section 232 rate for ${component.hs_code}, calling Section 232 agent...`);
+
+            try {
+              const { section232Agent } = await import('../../lib/agents/section-232-research-agent.js');
+              const section232Result = await section232Agent.researchRate(component.hs_code, {
+                originCountry: component.origin_country,
+                aluminumSource: component.material_origin === 'us' ? 'us_smelted' : 'non_us'
+              });
+
+              appliedSection232 = section232Result.section_232;
+              console.log(`✅ [SECTION-232-AI] Section 232 agent returned ${(appliedSection232 * 100).toFixed(1)}% for ${component.hs_code}`);
+            } catch (error) {
+              console.error(`❌ [SECTION-232-AI] Failed to get Section 232 rate from agent:`, error.message);
+              // ✅ FIXED Nov 20, 2025: Removed hardcoded 50% fallback - let it stay 0 to be visible as an error
+              appliedSection232 = 0;
+            }
           }
 
           // STEP 3: Check material_origin for exemption
