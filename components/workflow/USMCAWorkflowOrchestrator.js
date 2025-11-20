@@ -288,9 +288,9 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     processWorkflow();
   };
 
-  // ✅ NEW: Handle demo data loading - auto-complete entire workflow
+  // ✅ NEW: Handle demo data loading - populate data, let user click through
   const handleLoadDemoData = (demoData) => {
-    console.log('🚀 [Orchestrator] Demo data loaded, auto-populating components...');
+    console.log('🚀 [Orchestrator] Demo data loaded, populating form...');
 
     // Populate Step 2 fields required for validation
     updateFormData('product_description', demoData.product_description);
@@ -309,17 +309,9 @@ NOTE: Complete all fields and obtain proper signatures before submission.
       });
     });
 
-    // Auto-advance to step 2 after a brief delay
-    setTimeout(() => {
-      console.log('✅ Demo components loaded, advancing to step 2');
-      goToStep(2);
-
-      // Auto-trigger analysis after another brief delay
-      setTimeout(async () => {
-        console.log('🚀 Auto-triggering analysis for demo workflow...');
-        await handleProcessStep2();
-      }, 1000);
-    }, 500);
+    console.log('✅ Demo data populated - user can review and click Next');
+    // ✅ NO auto-advance - let user click "Next" button themselves
+    // ✅ NO auto-trigger - let user click "Analyze" button themselves
   };
 
   // Handle Step 2 completion - stay in workflow
