@@ -292,6 +292,10 @@ NOTE: Complete all fields and obtain proper signatures before submission.
   const handleLoadDemoData = (demoData) => {
     console.log('🚀 [Orchestrator] Demo data loaded, auto-populating components...');
 
+    // Populate Step 2 fields required for validation
+    updateFormData('product_description', demoData.product_description);
+    updateFormData('manufacturing_location', demoData.manufacturing_location);
+
     // Add demo components to form data
     demoData.components.forEach((comp, index) => {
       addComponentOrigin();
