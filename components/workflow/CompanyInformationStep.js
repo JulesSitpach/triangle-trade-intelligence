@@ -7,6 +7,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SYSTEM_CONFIG } from '../../config/system-config.js';
 import { BUSINESS_TYPES, CERTIFIER_TYPES, mapBusinessTypeToCertifierType } from '../../config/business-types.js';
+import { DEMO_COMPANY_DATA } from '../../lib/constants/demo-data.js';
 
 // Professional SVG icons for form fields
 // Icons removed - no longer using icon placeholders
@@ -20,13 +21,15 @@ export default function CompanyInformationStep({
   isStepValid,
   onNewAnalysis,
   saveWorkflowToDatabase,
-  viewMode = 'normal' // 'normal', 'read-only', 'edit', or 'refresh'
+  viewMode = 'normal', // 'normal', 'read-only', 'edit', or 'refresh'
+  onLoadDemoData // NEW: Callback to load demo data for entire workflow
 }) {
   // Fix hydration mismatch by using state for client-side calculations
   const [isClient, setIsClient] = useState(false);
   const [validationError, setValidationError] = useState(null);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false); // Track if demo data is loaded
 
   // Refs for auto-scrolling to sections
   const contactInfoRef = useRef(null);
@@ -149,6 +152,68 @@ export default function CompanyInformationStep({
                         !formData.contact_phone ||
                         !formData.contact_email;
 
+  // ✅ NEW: Load demo data handler
+  const handleLoadDemoData = () => {
+    console.log('🚀 Loading demo data for instant workflow preview');
+
+    // Mark as demo mode
+    setIsDemoMode(true);
+    updateFormData('is_demo', true);
+
+    // Populate Step 1 fields
+    updateFormData('company_name', DEMO_COMPANY_DATA.company_name);
+    updateFormData('business_type', 'producer'); // Producer/Manufacturer
+    updateFormData('certifier_type', '1'); // Producer
+    updateFormData('industry_sector', DEMO_COMPANY_DATA.industry);
+    updateFormData('tax_id', 'MX-RFC-123456789');
+    updateFormData('company_address', 'Av. Industria 1000, Monterrey, Nuevo León');
+    updateFormData('company_country', DEMO_COMPANY_DATA.manufacturing_location);
+    updateFormData('contact_person', 'José García');
+    updateFormData('contact_email', 'demo@industriasdelnorte.mx');
+    updateFormData('contact_phone', '+52-81-1234-5678');
+    updateFormData('trade_volume', '5000000'); // $5M annual
+    updateFormData('supplier_country', 'Mexico');
+    updateFormData('destination_country', DEMO_COMPANY_DATA.destination_country);
+
+    // Store demo data in localStorage for step 2 to pick up
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('demo_mode_active', 'true');
+      localStorage.setItem('demo_company_data', JSON.stringify(DEMO_COMPANY_DATA));
+    }
+
+    // Call parent callback to load component data
+    if (onLoadDemoData) {
+      onLoadDemoData(DEMO_COMPANY_DATA);
+    }
+
+    console.log('✅ Demo data loaded - user can proceed to step 2');
+  };
+
+  // ✅ NEW: Clear demo data handler
+  const handleClearDemoData = () => {
+    console.log('🗑️ Clearing demo data');
+    setIsDemoMode(false);
+
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('demo_mode_active');
+      localStorage.removeItem('demo_company_data');
+    }
+
+    // Reset to trigger onNewAnalysis
+    if (onNewAnalysis) {
+      onNewAnalysis();
+    }
+  };
+
+  // Check if demo mode is active on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const demoActive = localStorage.getItem('demo_mode_active') === 'true';
+      setIsDemoMode(demoActive);
+    }
+  }, []);
+
   const handleContinue = async () => {
     setAttemptedSubmit(true);
 
@@ -200,17 +265,46 @@ export default function CompanyInformationStep({
         <div className="dashboard-actions-left">
           <h2 className="form-section-title">Company Information</h2>
         </div>
-        {onNewAnalysis && (
-          <div className="dashboard-actions-right">
+        <div className="dashboard-actions-right" style={{ display: 'flex', gap: '0.5rem' }}>
+          {/* ✅ NEW: Try Demo Data - One-click complete workflow */}
+          {!isDemoMode && onLoadDemoData && (
+            <button
+              onClick={handleLoadDemoData}
+              className="btn-secondary"
+              title="Load sample company data and see results instantly"
+            >
+              🚀 Try Demo Data
+            </button>
+          )}
+          {isDemoMode && (
+            <button
+              onClick={handleClearDemoData}
+              className="btn-secondary"
+              title="Clear demo data and start with your own information"
+            >
+              🗑️ Clear Demo
+            </button>
+          )}
+          {onNewAnalysis && !isDemoMode && (
             <button
               onClick={onNewAnalysis}
               className="btn-primary"
             >
               🗑️ Clear Company Info
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* ✅ Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="alert-info" style={{ marginBottom: '1rem' }}>
+          <strong>📋 Demo Mode Active</strong> - Viewing sample Mexican automotive manufacturer data.
+          Replace with your real company information or click "Clear Demo" to start fresh.
+          <strong> Demo workflows don't count against your subscription limit.</strong>
+        </div>
+      )}
+
       <p className="form-section-description">Step 1 of 3 - Business profile for compliance analysis</p>
 
         <div className="form-grid-2">

@@ -264,6 +264,8 @@ export default protectedApiHandler({
         user_id: userId,
         email: req.user?.email || null,
         workflow_type: workflowData.workflow_type || 'usmca_compliance',
+        // ✅ DEMO MODE: Mark demo workflows in database (Nov 20, 2025)
+        is_demo: workflowData.is_demo === true,
         product_description:
           workflowData.product?.description ||
           workflowData.product_description ||
@@ -358,23 +360,30 @@ export default protectedApiHandler({
 
       // ✅ STANDARD SAAS PATTERN: Increment usage counter ONLY on successful workflow completion
       // This ensures users are only charged for completed workflows, not abandoned ones
-      try {
-        // ✅ FIX (Nov 9): Get user's subscription tier before incrementing counter
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('subscription_tier')
-          .eq('user_id', userId)
-          .single();
+      // ✅ DEMO MODE: Skip usage counter for demo workflows (is_demo: true)
+      const isDemoWorkflow = workflowData.is_demo === true;
 
-        const subscriptionTier = profile?.subscription_tier || 'Trial';
+      if (isDemoWorkflow) {
+        console.log(`[WORKFLOW-SESSION] 🚀 Demo workflow completed - NOT incrementing usage counter (is_demo: true)`);
+      } else {
+        try {
+          // ✅ FIX (Nov 9): Get user's subscription tier before incrementing counter
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('subscription_tier')
+            .eq('user_id', userId)
+            .single();
 
-        const { incrementAnalysisCount } = require('../../lib/services/usage-tracking-service.js');
-        await incrementAnalysisCount(userId, subscriptionTier);
-        console.log(`[WORKFLOW-SESSION] ✅ Usage counter incremented for user ${userId} (${subscriptionTier}) after workflow completion`);
-      } catch (counterError) {
-        // Log but don't block - tracking failure shouldn't prevent workflow completion
-        console.error('[WORKFLOW-SESSION] ⚠️ Failed to increment usage counter:', counterError);
-        logError('Failed to increment usage counter', { error: counterError.message, userId, sessionId });
+          const subscriptionTier = profile?.subscription_tier || 'Trial';
+
+          const { incrementAnalysisCount } = require('../../lib/services/usage-tracking-service.js');
+          await incrementAnalysisCount(userId, subscriptionTier);
+          console.log(`[WORKFLOW-SESSION] ✅ Usage counter incremented for user ${userId} (${subscriptionTier}) after workflow completion`);
+        } catch (counterError) {
+          // Log but don't block - tracking failure shouldn't prevent workflow completion
+          console.error('[WORKFLOW-SESSION] ⚠️ Failed to increment usage counter:', counterError);
+          logError('Failed to increment usage counter', { error: counterError.message, userId, sessionId });
+        }
       }
     } else {
       console.log('⚠️ [WORKFLOW-SESSION-DEBUG] Saving to workflow_sessions with state="in_progress" (NOT incrementing counter)');

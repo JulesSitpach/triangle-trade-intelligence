@@ -4,7 +4,7 @@
  * Integrates all focused components and trust microservices
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState as useStateReact } from 'react';
 import { useRouter } from 'next/router';
 import { useSimpleAuth } from '../../lib/contexts/SimpleAuthContext';
 import { useWorkflowState } from '../../hooks/useWorkflowState';
@@ -24,6 +24,7 @@ import BrokerChatbot from '../chatbot/BrokerChatbot';
 import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { parseTradeVolume } from '../../lib/utils/parseTradeVolume.js';
 import { generateUSMCACertificatePDF } from '../../lib/utils/usmca-certificate-pdf-generator';
+import { DEMO_COMPANY_DATA } from '../../lib/constants/demo-data.js';
 
 export default function USMCAWorkflowOrchestrator({ readOnly = false, workflowId = null }) {
   const router = useRouter();
@@ -285,6 +286,36 @@ NOTE: Complete all fields and obtain proper signatures before submission.
   const handleRetryProcessing = () => {
     clearError();
     processWorkflow();
+  };
+
+  // ✅ NEW: Handle demo data loading - auto-complete entire workflow
+  const handleLoadDemoData = (demoData) => {
+    console.log('🚀 [Orchestrator] Demo data loaded, auto-populating components...');
+
+    // Add demo components to form data
+    demoData.components.forEach((comp, index) => {
+      addComponentOrigin();
+      updateComponentOrigin(index, {
+        component_name: comp.name,
+        origin_country: comp.origin,
+        component_description: comp.description,
+        cost_percentage: comp.cost_percentage,
+        suggested_hs_code: comp.suggested_hs_code,
+        is_demo: true
+      });
+    });
+
+    // Auto-advance to step 2 after a brief delay
+    setTimeout(() => {
+      console.log('✅ Demo components loaded, advancing to step 2');
+      goToStep(2);
+
+      // Auto-trigger analysis after another brief delay
+      setTimeout(async () => {
+        console.log('🚀 Auto-triggering analysis for demo workflow...');
+        await handleProcessStep2();
+      }, 1000);
+    }, 500);
   };
 
   // Handle Step 2 completion - stay in workflow
@@ -581,6 +612,7 @@ NOTE: Complete all fields and obtain proper signatures before submission.
             onNewAnalysis={resetWorkflow}
             saveWorkflowToDatabase={saveWorkflowToDatabase}
             viewMode={viewMode} // Pass view mode to disable buttons in read-only
+            onLoadDemoData={handleLoadDemoData} // ✅ NEW: Enable demo data quick-start
           />
         )}
 
