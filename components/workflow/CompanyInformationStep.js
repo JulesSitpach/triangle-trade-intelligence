@@ -167,13 +167,13 @@ export default function CompanyInformationStep({
     updateFormData('industry_sector', DEMO_COMPANY_DATA.industry);
     updateFormData('tax_id', 'MX-RFC-123456789');
     updateFormData('company_address', 'Av. Industria 1000, Monterrey, Nuevo León');
-    updateFormData('company_country', DEMO_COMPANY_DATA.manufacturing_location);
+    updateFormData('company_country', 'MX'); // ✅ FIX: Use country CODE, not name
     updateFormData('contact_person', 'José García');
     updateFormData('contact_email', 'demo@industriasdelnorte.mx');
     updateFormData('contact_phone', '+52-81-1234-5678');
     updateFormData('trade_volume', '5000000'); // $5M annual
-    updateFormData('supplier_country', 'Mexico');
-    updateFormData('destination_country', DEMO_COMPANY_DATA.destination_country);
+    updateFormData('supplier_country', 'MX'); // ✅ FIX: Use country CODE, not name
+    updateFormData('destination_country', 'US'); // ✅ FIX: Use country CODE, not name
 
     // Store demo data in localStorage for step 2 to pick up
     if (typeof window !== 'undefined') {
