@@ -1021,9 +1021,11 @@ export default protectedApiHandler({
                 is_stale: section301Result.needs_research || section232Result.needs_research
               };
 
-              // Use the higher confidence level
-              lookupConfidence = Math.max(section301Result.confidence, section232Result.confidence);
-              lookupSource = section301Result.confidence > section232Result.confidence
+              // ✅ FIX (Nov 20, 2025): Use LOWEST confidence (most conservative)
+              // If Section 301 is verified (100%) but Section 232 is estimated (50%),
+              // show 50% so user knows at least one rate is uncertain
+              lookupConfidence = Math.min(section301Result.confidence, section232Result.confidence);
+              lookupSource = section301Result.confidence < section232Result.confidence
                 ? section301Result.source
                 : section232Result.source;
 
