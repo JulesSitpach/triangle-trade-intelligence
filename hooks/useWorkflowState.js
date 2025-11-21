@@ -190,6 +190,12 @@ export function useWorkflowState(forceReset = false) {
     // ✅ SKIP if forceReset=true - this prevents auto-loading demo data
     if (forceReset) {
       console.log('⚠️ [FORCE RESET] Skipping loadSavedData - starting fresh (no auto-populate)');
+      // ✅ FIX (Nov 21): Double-check localStorage is clear (prevent race conditions)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('triangleUserData');
+        localStorage.removeItem('demo_mode_active');
+        localStorage.removeItem('demo_company_data');
+      }
       return;
     }
 

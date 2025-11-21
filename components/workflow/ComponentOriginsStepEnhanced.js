@@ -136,7 +136,8 @@ export default function ComponentOriginsStepEnhanced({
       components.some(c => c.description?.includes('steel backing') && c.origin_country === 'US' && c.value_percentage === 30) &&
       components.some(c => c.description?.includes('hardware assembly') && c.origin_country === 'CN' && c.value_percentage === 20);
 
-    setIsDemoMode(hasExactDemoData);
+    // ✅ FIX (Nov 21): Only set demo mode if components exist (prevents false positive on fresh start)
+    setIsDemoMode(hasExactDemoData && components.length > 0);
   }, [formData.component_origins]);
 
   // ✅ Helper function to check if Material Origin field should show

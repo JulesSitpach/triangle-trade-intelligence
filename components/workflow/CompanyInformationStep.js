@@ -218,7 +218,10 @@ export default function CompanyInformationStep({
       formData.company_country === 'MX' &&
       formData.destination_country === 'US';
 
-    setIsDemoMode(hasExactDemoData);
+    // ✅ FIX (Nov 21): Only set demo mode if all fields are non-empty (prevents false positive on fresh start)
+    const allFieldsPopulated = formData.company_name && formData.company_country && formData.destination_country;
+
+    setIsDemoMode(hasExactDemoData && allFieldsPopulated);
   }, [formData.company_name, formData.company_country, formData.destination_country]);
 
   const handleContinue = async () => {

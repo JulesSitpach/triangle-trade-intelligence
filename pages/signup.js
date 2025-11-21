@@ -27,7 +27,7 @@ export default function Signup() {
         router.push('/dashboard');
       }
     }
-  }, [user, plan]);
+  }, [user, plan, router]);
 
   const handleChange = (e) => {
     setFormData({
