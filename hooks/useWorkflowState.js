@@ -185,17 +185,12 @@ export function useWorkflowState(forceReset = false) {
   // ✅ FIX (Oct 30): Load saved form data AFTER dropdown options are loaded
   // This prevents race condition where saved dropdown values can't be selected because options aren't available yet
   // ✅ CRITICAL: Skip if forceReset=true (prevents loading stale demo data)
-  // ✅ FIX (Nov 20): BLOCK loading saved data when forceReset=true (user clicked "New Analysis")
+  // ✅ FIX (Nov 21): BLOCK loading saved data when forceReset=true (user clicked "New Analysis")
   useEffect(() => {
     // ✅ SKIP if forceReset=true - this prevents auto-loading demo data
     if (forceReset) {
       console.log('⚠️ [FORCE RESET] Skipping loadSavedData - starting fresh (no auto-populate)');
-      // ✅ FIX (Nov 21): Double-check localStorage is clear (prevent race conditions)
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('triangleUserData');
-        localStorage.removeItem('demo_mode_active');
-        localStorage.removeItem('demo_company_data');
-      }
+      console.log('   SessionManager data should already be cleared by usmca-workflow.js');
       return;
     }
 
@@ -203,7 +198,7 @@ export function useWorkflowState(forceReset = false) {
       const saved = loadSavedData();
       if (saved) {
         setFormData(saved);
-        console.log('✅ Loaded saved form data from localStorage (after options loaded):', {
+        console.log('✅ Loaded saved form data from SessionManager (after options loaded):', {
           company_name: saved.company_name,
           company_country: saved.company_country,
           business_type: saved.business_type,
@@ -217,7 +212,7 @@ export function useWorkflowState(forceReset = false) {
           component_origins_count: saved.component_origins?.length
         });
       } else {
-        console.log('ℹ️ No saved form data found in localStorage');
+        console.log('ℹ️ No saved form data found in SessionManager');
       }
     }
   }, [isLoadingOptions, dropdownOptions.businessTypes, forceReset]);
@@ -441,7 +436,14 @@ export function useWorkflowState(forceReset = false) {
   // This eliminates 150+ unnecessary database writes during form filling
   // localStorage still updates immediately for instant form restoration
   // 🔄 BROADCASTS changes to other tabs via cross-tab sync
+  // ✅ FIX (Nov 21): SKIP auto-save during forceReset window (prevents re-saving empty data)
   useEffect(() => {
+    // ✅ SKIP if forceReset=true - prevents immediately re-saving cleared data
+    if (forceReset) {
+      console.log('⚠️ [FORCE RESET] Skipping auto-save to SessionManager');
+      return;
+    }
+
     if (typeof window !== 'undefined' && formData.company_name) {
       workflowStorage.setItem('triangleUserData', JSON.stringify(formData));
 
@@ -450,7 +452,7 @@ export function useWorkflowState(forceReset = false) {
         syncRef.current.broadcastChange('triangleUserData', formData);
       }
     }
-  }, [formData]);
+  }, [formData, forceReset]);
 
   // Update form data utility
   const updateFormData = useCallback((field, value) => {

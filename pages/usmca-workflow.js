@@ -20,19 +20,42 @@ export default function USMCAWorkflow() {
   // ✅ CRITICAL FIX: Use ref to persist forceReset state even after URL params are cleared
   const forceResetRef = useRef(reset === 'true' || force_new === 'true');
 
-  // ✅ CRITICAL FIX: Clear localStorage SYNCHRONOUSLY before any hooks run
-  // This prevents useWorkflowState from loading stale demo data
+  // ✅ CRITICAL FIX (Nov 21): Clear SessionManager data SYNCHRONOUSLY before any hooks run
+  // The app uses SessionManager which prefixes keys like: workflow_session_ABC123_triangleUserData
+  // Clearing raw localStorage.removeItem('triangleUserData') doesn't work - need to clear session!
   if (typeof window !== 'undefined' && (reset === 'true' || force_new === 'true')) {
-    console.log('🔄 [NEW WORKFLOW] Clearing all cached workflow data SYNCHRONOUSLY...');
+    console.log('🔄 [NEW WORKFLOW] Clearing all cached workflow data via SessionManager...');
+
+    // Clear ALL localStorage keys that match the current session pattern
+    const currentSessionId = localStorage.getItem('workflow_current_session_id');
+    if (currentSessionId) {
+      const prefix = `workflow_session_${currentSessionId}_`;
+      const keysToRemove = [];
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          keysToRemove.push(key);
+        }
+      }
+
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log(`🗑️ Cleared ${keysToRemove.length} session keys with prefix: ${prefix}`);
+    }
+
+    // Also clear non-prefixed keys (legacy compatibility)
     localStorage.removeItem('workflowSession');
     localStorage.removeItem('workflowData');
     localStorage.removeItem('demoMode');
     localStorage.removeItem('demo_mode_active');
     localStorage.removeItem('demo_company_data');
-    localStorage.removeItem('triangleUserData');  // ⚠️ CRITICAL: Contains formData with is_demo flag
+    localStorage.removeItem('triangleUserData');
     localStorage.removeItem('usmca_workflow_results');
     localStorage.removeItem('workflow_session_id');
     localStorage.removeItem('workflow_current_step');
+    localStorage.removeItem('workflow_current_session_id');
+
+    console.log('✅ All workflow data cleared - starting fresh');
   }
 
   const [usageLimitReached, setUsageLimitReached] = useState(false);
