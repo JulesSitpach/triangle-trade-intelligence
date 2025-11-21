@@ -213,18 +213,12 @@ export default function OngoingAlertsPage() {
                 />
               </div>
               <h3 className="content-card-title">Component-Level Alerts</h3>
-              <p className="content-card-description">
-                ✓ Specific to YOUR HS codes and origin countries
-              </p>
-              <p className="content-card-description">
-                ✓ Section 301 rate adjustments (China tariffs)
-              </p>
-              <p className="content-card-description">
-                ✓ Section 232 national security tariffs
-              </p>
-              <p className="content-card-description">
-                ✓ USMCA threshold changes
-              </p>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Specific to YOUR HS codes and origin countries</li>
+                <li className="mb-3">✓ Section 301 rate adjustments (China tariffs)</li>
+                <li className="mb-3">✓ Section 232 national security tariffs</li>
+                <li className="mb-3">✓ USMCA threshold changes</li>
+              </ul>
             </div>
 
             <div className="content-card">
@@ -238,18 +232,12 @@ export default function OngoingAlertsPage() {
                 />
               </div>
               <h3 className="content-card-title">Live Policy Alerts (Section 301, 232)</h3>
-              <p className="content-card-description">
-                ✓ Country-wide tariff changes (e.g., all China imports)
-              </p>
-              <p className="content-card-description">
-                ✓ Industry-specific policy shifts
-              </p>
-              <p className="content-card-description">
-                ✓ Trade agreement updates (USMCA renegotiation)
-              </p>
-              <p className="content-card-description">
-                ✓ Reciprocal tariff announcements
-              </p>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Country-wide tariff changes (e.g., all China imports)</li>
+                <li className="mb-3">✓ Industry-specific policy shifts</li>
+                <li className="mb-3">✓ Trade agreement updates (USMCA renegotiation)</li>
+                <li className="mb-3">✓ Reciprocal tariff announcements</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -405,18 +393,12 @@ export default function OngoingAlertsPage() {
                 />
               </div>
               <h3 className="content-card-title">Bottom Line Impact Analysis</h3>
-              <p className="content-card-description">
-                ✓ Which components are affected by new policies
-              </p>
-              <p className="content-card-description">
-                ✓ Financial impact on your specific supply chain
-              </p>
-              <p className="content-card-description">
-                ✓ Timeline of when changes take effect
-              </p>
-              <p className="content-card-description">
-                ✓ Confidence scoring on each recommendation
-              </p>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Which components are affected by new policies</li>
+                <li className="mb-3">✓ Financial impact on your specific supply chain</li>
+                <li className="mb-3">✓ Timeline of when changes take effect</li>
+                <li className="mb-3">✓ Confidence scoring on each recommendation</li>
+              </ul>
             </div>
 
             <div className="content-card">
@@ -430,18 +412,12 @@ export default function OngoingAlertsPage() {
                 />
               </div>
               <h3 className="content-card-title">Strategic Considerations</h3>
-              <p className="content-card-description">
-                ✓ Supplier diversification opportunities
-              </p>
-              <p className="content-card-description">
-                ✓ Mexico nearshoring ROI calculations
-              </p>
-              <p className="content-card-description">
-                ✓ CBP binding ruling guidance (Form 29)
-              </p>
-              <p className="content-card-description">
-                ✓ 3-phase action plan with timeline
-              </p>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Supplier diversification opportunities</li>
+                <li className="mb-3">✓ Mexico nearshoring ROI calculations</li>
+                <li className="mb-3">✓ CBP binding ruling guidance (Form 29)</li>
+                <li className="mb-3">✓ 3-phase action plan with timeline</li>
+              </ul>
             </div>
           </div>
 
@@ -475,36 +451,24 @@ export default function OngoingAlertsPage() {
                 />
               </div>
               <h3 className="content-card-title">Active Alerts</h3>
-              <p className="content-card-description">
-                ✓ Color-coded by severity (Critical/High/Medium/Low)
-              </p>
-              <p className="content-card-description">
-                ✓ Status tracking (New/Updated/Resolved)
-              </p>
-              <p className="content-card-description">
-                ✓ Organized by component
-              </p>
-              <p className="content-card-description">
-                ✓ Click to expand for full details
-              </p>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Color-coded by severity (Critical/High/Medium/Low)</li>
+                <li className="mb-3">✓ Status tracking (New/Updated/Resolved)</li>
+                <li className="mb-3">✓ Organized by component</li>
+                <li className="mb-3">✓ Click to expand for full details</li>
+              </ul>
             </div>
 
             <div className="content-card">
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
                 <div>
                   <h3 className="content-card-title">Report Library</h3>
-                  <p className="content-card-description">
-                    ✓ Portfolio briefings for each policy change
-                  </p>
-                  <p className="content-card-description">
-                    ✓ Historical analysis archive
-                  </p>
-                  <p className="content-card-description">
-                    ✓ Download as PDF for broker review
-                  </p>
-                  <p className="content-card-description">
-                    ✓ Share with your team or consultants
-                  </p>
+                  <ul className="content-card-description">
+                    <li className="mb-3">✓ Portfolio briefings for each policy change</li>
+                    <li className="mb-3">✓ Historical analysis archive</li>
+                    <li className="mb-3">✓ Download as PDF for broker review</li>
+                    <li className="mb-3">✓ Share with your team or consultants</li>
+                  </ul>
                 </div>
                 <div>
                   <img

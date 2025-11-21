@@ -151,20 +151,12 @@ export default function CertificateOfOriginPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
                 <div>
                   <h3 className="content-card-title">Company Information:</h3>
-                  <div className="grid gap-4">
-                    <p className="content-card-description">
-                      ✓ Company name, address, and tax ID
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Where you source or manufacture your product
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Your destination market (US, Canada, or Mexico)
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Annual trade volume (for importers/exporters)
-                    </p>
-                  </div>
+                  <ul className="content-card-description">
+                    <li className="mb-3">✓ Company name, address, and tax ID</li>
+                    <li className="mb-3">✓ Where you source or manufacture your product</li>
+                    <li className="mb-3">✓ Your destination market (US, Canada, or Mexico)</li>
+                    <li className="mb-3">✓ Annual trade volume (for importers/exporters)</li>
+                  </ul>
                 </div>
                 <div>
                   <img
@@ -189,20 +181,12 @@ export default function CertificateOfOriginPage() {
                 />
               </div>
               <h3 className="content-card-title">Product Details:</h3>
-              <div className="grid gap-4">
-                <p className="content-card-description">
-                  ✓ Track all your analyses in one place
-                </p>
-                <p className="content-card-description">
-                  ✓ See qualification status at a glance
-                </p>
-                <p className="content-card-description">
-                  ✓ Download certificates anytime
-                </p>
-                <p className="content-card-description">
-                  ✓ Monitor policy alerts affecting your products
-                </p>
-              </div>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Track all your analyses in one place</li>
+                <li className="mb-3">✓ See qualification status at a glance</li>
+                <li className="mb-3">✓ Download certificates anytime</li>
+                <li className="mb-3">✓ Monitor policy alerts affecting your products</li>
+              </ul>
             </div>
           </div>
 
@@ -313,20 +297,12 @@ export default function CertificateOfOriginPage() {
               <h3 className="content-card-title text-blue-900">
                 Do You Qualify?
               </h3>
-              <div className="grid gap-4">
-                <p className="content-card-description">
-                  ✓ Whether you qualify (yes/no)
-                </p>
-                <p className="content-card-description">
-                  ✓ Your exact regional content percentage
-                </p>
-                <p className="content-card-description">
-                  ✓ Required threshold for your industry
-                </p>
-                <p className="content-card-description">
-                  ✓ Safety margin (how close you are to the threshold)
-                </p>
-              </div>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Whether you qualify (yes/no)</li>
+                <li className="mb-3">✓ Your exact regional content percentage</li>
+                <li className="mb-3">✓ Required threshold for your industry</li>
+                <li className="mb-3">✓ Safety margin (how close you are to the threshold)</li>
+              </ul>
             </div>
 
             {/* Executive Advisory Report */}
@@ -336,20 +312,12 @@ export default function CertificateOfOriginPage() {
                   <h3 className="content-card-title">
                     Executive Advisory Report
                   </h3>
-                  <div className="flex-col flex-gap-4">
-                    <p className="content-card-description">
-                      ✓ Root cause analysis of your supply chain structure
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Financial scenarios (current state vs. alternatives)
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Specific supplier recommendations with ROI calculations
-                    </p>
-                    <p className="content-card-description">
-                      ✓ Timeline and implementation roadmap
-                    </p>
-                  </div>
+                  <ul className="content-card-description">
+                    <li className="mb-3">✓ Root cause analysis of your supply chain structure</li>
+                    <li className="mb-3">✓ Financial scenarios (current state vs. alternatives)</li>
+                    <li className="mb-3">✓ Specific supplier recommendations with ROI calculations</li>
+                    <li className="mb-3">✓ Timeline and implementation roadmap</li>
+                  </ul>
                 </div>
                 <div>
                   <img
@@ -403,20 +371,12 @@ export default function CertificateOfOriginPage() {
               <h3 className="content-card-title">
                 Certificate Preview (Editable)
               </h3>
-              <div className="flex-col flex-gap-4">
-                <p className="content-card-description">
-                  ✓ All fields pre-filled from your analysis
-                </p>
-                <p className="content-card-description">
-                  ✓ Edit importer/exporter/producer information
-                </p>
-                <p className="content-card-description">
-                  ✓ Verify product description and HS codes
-                </p>
-                <p className="content-card-description">
-                  ✓ Modify blanket period dates if needed
-                </p>
-              </div>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ All fields pre-filled from your analysis</li>
+                <li className="mb-3">✓ Edit importer/exporter/producer information</li>
+                <li className="mb-3">✓ Verify product description and HS codes</li>
+                <li className="mb-3">✓ Modify blanket period dates if needed</li>
+              </ul>
             </div>
 
             {/* Final Certificate */}
@@ -433,17 +393,11 @@ export default function CertificateOfOriginPage() {
               <h3 className="content-card-title">
                 Final Certificate
               </h3>
-              <div className="flex-col flex-gap-4">
-                <p className="content-card-description">
-                  ✓ Official USMCA Form D format
-                </p>
-                <p className="content-card-description">
-                  ✓ Ready for your customs broker to file with CBP
-                </p>
-                <p className="content-card-description">
-                  ✓ Valid for one year (blanket certificate)
-                </p>
-              </div>
+              <ul className="content-card-description">
+                <li className="mb-3">✓ Official USMCA Form D format</li>
+                <li className="mb-3">✓ Ready for your customs broker to file with CBP</li>
+                <li className="mb-3">✓ Valid for one year (blanket certificate)</li>
+              </ul>
             </div>
           </div>
 
