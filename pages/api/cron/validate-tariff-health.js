@@ -158,27 +158,64 @@ async function checkSteelSection232() {
 }
 
 /**
- * CHECK 5: Data freshness
+ * CHECK 5: Data freshness (Enhanced Nov 20, 2025)
+ * Checks both overall freshness and volatile tariff freshness
  */
 async function checkDataFreshness() {
   const { count: total } = await supabase
     .from('policy_tariffs_cache')
     .select('*', { count: 'exact', head: true });
 
+  const { count: fresh7d } = await supabase
+    .from('policy_tariffs_cache')
+    .select('*', { count: 'exact', head: true })
+    .gte('verified_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
   const { count: fresh90d } = await supabase
     .from('policy_tariffs_cache')
     .select('*', { count: 'exact', head: true })
     .gte('verified_date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString());
 
+  // Check volatile tariffs (China Section 301 - should be <7 days)
+  const { count: chinaTotal } = await supabase
+    .from('policy_tariffs_cache')
+    .select('*', { count: 'exact', head: true })
+    .eq('origin_country', 'CN')
+    .not('section_301', 'is', null);
+
+  const { count: chinaFresh7d } = await supabase
+    .from('policy_tariffs_cache')
+    .select('*', { count: 'exact', head: true })
+    .eq('origin_country', 'CN')
+    .not('section_301', 'is', null)
+    .gte('verified_date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
   const staleCount = total - fresh90d;
   const stalePercent = ((staleCount / total) * 100).toFixed(1);
-  const passed = stalePercent < 5;
+  const chinaStalePercent = chinaTotal > 0 ? (((chinaTotal - chinaFresh7d) / chinaTotal) * 100).toFixed(1) : 0;
 
-  if (!passed) {
-    return { name: 'Data Freshness', passed: false, message: `${stalePercent}% of data is stale (>90 days)`, severity: 'warning' };
+  const passed = stalePercent < 5;
+  const volatilePassed = chinaStalePercent < 10;
+
+  if (!passed || !volatilePassed) {
+    const severity = volatilePassed ? 'warning' : 'critical';
+    const issues = [];
+    if (!passed) issues.push(`${stalePercent}% overall stale`);
+    if (!volatilePassed) issues.push(`${chinaStalePercent}% China Section 301 stale`);
+
+    return {
+      name: 'Data Freshness',
+      passed: false,
+      message: `${issues.join(', ')}. Fresh: ${fresh7d} in 7d, ${fresh90d} in 90d. China: ${chinaFresh7d}/${chinaTotal}`,
+      severity
+    };
   }
 
-  return { name: 'Data Freshness', passed: true, message: `${stalePercent}% stale (${staleCount} codes)` };
+  return {
+    name: 'Data Freshness',
+    passed: true,
+    message: `${stalePercent}% stale (${staleCount}/${total}). Fresh: ${fresh7d} in 7d. China: ${chinaFresh7d}/${chinaTotal} (${(100 - chinaStalePercent).toFixed(1)}%)`
+  };
 }
 
 /**
