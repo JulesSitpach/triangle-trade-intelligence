@@ -490,28 +490,32 @@ export default function OngoingAlertsPage() {
             </div>
 
             <div className="content-card">
-              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
-                <img
-                  src="/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png"
-                  alt="Full executive report preview"
-                  className="screenshot-thumbnail"
-                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
-                  onClick={() => openModal('/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png')}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+                <div>
+                  <h3 className="content-card-title">Report Library</h3>
+                  <p className="content-card-description">
+                    ✓ Portfolio briefings for each policy change
+                  </p>
+                  <p className="content-card-description">
+                    ✓ Historical analysis archive
+                  </p>
+                  <p className="content-card-description">
+                    ✓ Download as PDF for broker review
+                  </p>
+                  <p className="content-card-description">
+                    ✓ Share with your team or consultants
+                  </p>
+                </div>
+                <div>
+                  <img
+                    src="/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png"
+                    alt="Full executive report preview"
+                    className="screenshot-thumbnail"
+                    style={{ width: '100%', height: 'auto' }}
+                    onClick={() => openModal('/image/samples/full report of alerts dasboard Executive Advisory Industrias del Norte.png')}
+                  />
+                </div>
               </div>
-              <h3 className="content-card-title">Report Library</h3>
-              <p className="content-card-description">
-                ✓ Portfolio briefings for each policy change
-              </p>
-              <p className="content-card-description">
-                ✓ Historical analysis archive
-              </p>
-              <p className="content-card-description">
-                ✓ Download as PDF for broker review
-              </p>
-              <p className="content-card-description">
-                ✓ Share with your team or consultants
-              </p>
             </div>
           </div>
         </div>

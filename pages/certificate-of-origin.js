@@ -148,29 +148,33 @@ export default function CertificateOfOriginPage() {
 
           <div className="grid-2-cols mb-12">
             <div className="content-card">
-              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
-                <img
-                  src="/image/samples/compnay inforatnion page filled.png"
-                  alt="Company information form filled preview"
-                  className="screenshot-thumbnail"
-                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
-                  onClick={() => openModal('/image/samples/compnay inforatnion page filled.png')}
-                />
-              </div>
-              <h3 className="content-card-title">Company Information:</h3>
-              <div className="grid gap-4">
-                <p className="content-card-description">
-                  ✓ Company name, address, and tax ID
-                </p>
-                <p className="content-card-description">
-                  ✓ Where you source or manufacture your product
-                </p>
-                <p className="content-card-description">
-                  ✓ Your destination market (US, Canada, or Mexico)
-                </p>
-                <p className="content-card-description">
-                  ✓ Annual trade volume (for importers/exporters)
-                </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+                <div>
+                  <h3 className="content-card-title">Company Information:</h3>
+                  <div className="grid gap-4">
+                    <p className="content-card-description">
+                      ✓ Company name, address, and tax ID
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Where you source or manufacture your product
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Your destination market (US, Canada, or Mexico)
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Annual trade volume (for importers/exporters)
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <img
+                    src="/image/samples/compnay inforatnion page filled.png"
+                    alt="Company information form filled preview"
+                    className="screenshot-thumbnail"
+                    style={{ width: '100%', height: 'auto' }}
+                    onClick={() => openModal('/image/samples/compnay inforatnion page filled.png')}
+                  />
+                </div>
               </div>
             </div>
 
@@ -327,31 +331,35 @@ export default function CertificateOfOriginPage() {
 
             {/* Executive Advisory Report */}
             <div className="content-card">
-              <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
-                <img
-                  src="/image/samples/executinve summary results page.png"
-                  alt="Executive summary results preview"
-                  className="screenshot-thumbnail"
-                  style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '50%' }}
-                  onClick={() => openModal('/image/samples/executinve summary results page.png')}
-                />
-              </div>
-              <h3 className="content-card-title">
-                Executive Advisory Report
-              </h3>
-              <div className="flex-col flex-gap-4">
-                <p className="content-card-description">
-                  ✓ Root cause analysis of your supply chain structure
-                </p>
-                <p className="content-card-description">
-                  ✓ Financial scenarios (current state vs. alternatives)
-                </p>
-                <p className="content-card-description">
-                  ✓ Specific supplier recommendations with ROI calculations
-                </p>
-                <p className="content-card-description">
-                  ✓ Timeline and implementation roadmap
-                </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start' }}>
+                <div>
+                  <h3 className="content-card-title">
+                    Executive Advisory Report
+                  </h3>
+                  <div className="flex-col flex-gap-4">
+                    <p className="content-card-description">
+                      ✓ Root cause analysis of your supply chain structure
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Financial scenarios (current state vs. alternatives)
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Specific supplier recommendations with ROI calculations
+                    </p>
+                    <p className="content-card-description">
+                      ✓ Timeline and implementation roadmap
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <img
+                    src="/image/samples/executinve summary results page.png"
+                    alt="Executive summary results preview"
+                    className="screenshot-thumbnail"
+                    style={{ width: '100%', height: 'auto' }}
+                    onClick={() => openModal('/image/samples/executinve summary results page.png')}
+                  />
+                </div>
               </div>
             </div>
           </div>
