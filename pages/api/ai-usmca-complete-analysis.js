@@ -987,48 +987,68 @@ export default protectedApiHandler({
           // ✅ FIX (Nov 20, 2025): Multi-level lookup strategy for policy rates
           // 1. Try exact 8-digit match (e.g., "73269070")
           // 2. Try parent 6-digit match (e.g., "732690")
-          // 3. Try matched code from tariff_intelligence_master (after prefix fallback)
+          // 3. Query policy_tariffs_cache with intelligent fallback hierarchy
+          // ✅ NEW (Nov 20, 2025): Use tariff-rate-lookup.js for 5-level fallback
           let policyCache = null;
+          let lookupConfidence = 0;
+          let lookupSource = 'not_found';
 
           try {
-            // Strategy 1: Exact match
-            const { data: exactMatch } = await supabase
-              .from('policy_tariffs_cache')
-              .select('section_301, section_232, verified_date, is_stale')
-              .eq('hs_code', normalizedHsCode)
-              .maybeSingle();
+            // Import fallback hierarchy lookup
+            const { getTariffRateWithFallback } = await import('../../lib/services/tariff-rate-lookup.js');
 
-            if (exactMatch) {
-              policyCache = exactMatch;
-              console.log(`✅ [POLICY-CACHE] Exact match for ${normalizedHsCode}`);
-            } else {
-              // Strategy 2: Try parent 6-digit code
-              const parent6Digit = normalizedHsCode.substring(0, 6);
-              const { data: parentMatch } = await supabase
-                .from('policy_tariffs_cache')
-                .select('section_301, section_232, verified_date, is_stale')
-                .eq('hs_code', parent6Digit)
-                .maybeSingle();
+            // Try Section 301 lookup with fallback
+            const section301Result = await getTariffRateWithFallback(
+              normalizedHsCode,
+              component.origin_country,
+              'section_301'
+            );
 
-              if (parentMatch) {
-                policyCache = parentMatch;
-                console.log(`✅ [POLICY-CACHE] Parent match ${parent6Digit} for ${normalizedHsCode}`);
-              } else if (rateData?.hts8 && rateData.hts8 !== normalizedHsCode) {
-                // Strategy 3: Try matched code from prefix fallback
-                const { data: matchedCode } = await supabase
-                  .from('policy_tariffs_cache')
-                  .select('section_301, section_232, verified_date, is_stale')
-                  .eq('hs_code', rateData.hts8)
-                  .maybeSingle();
+            // Try Section 232 lookup with fallback
+            const section232Result = await getTariffRateWithFallback(
+              normalizedHsCode,
+              component.origin_country,
+              'section_232'
+            );
 
-                if (matchedCode) {
-                  policyCache = matchedCode;
-                  console.log(`✅ [POLICY-CACHE] Matched code ${rateData.hts8} for ${normalizedHsCode}`);
-                }
-              }
+            // Combine results
+            if (section301Result.rate !== null || section232Result.rate !== null) {
+              policyCache = {
+                section_301: section301Result.rate,
+                section_232: section232Result.rate,
+                verified_date: section301Result.verified_date || section232Result.verified_date,
+                is_stale: section301Result.needs_research || section232Result.needs_research
+              };
+
+              // Use the higher confidence level
+              lookupConfidence = Math.max(section301Result.confidence, section232Result.confidence);
+              lookupSource = section301Result.confidence > section232Result.confidence
+                ? section301Result.source
+                : section232Result.source;
+
+              console.log(`✅ [POLICY-CACHE-ENHANCED] ${lookupSource} for ${normalizedHsCode} (${lookupConfidence}% confidence)`);
+              console.log(`  Section 301: ${section301Result.rate !== null ? (section301Result.rate * 100).toFixed(1) + '%' : 'null'} (${section301Result.source})`);
+              console.log(`  Section 232: ${section232Result.rate !== null ? (section232Result.rate * 100).toFixed(1) + '%' : 'null'} (${section232Result.source})`);
             }
           } catch (policyCacheError) {
-            console.log(`⚠️ [POLICY-CACHE] Lookup error: ${policyCacheError.message}`);
+            console.log(`⚠️ [POLICY-CACHE] Enhanced lookup error: ${policyCacheError.message}`);
+            // Fallback to old manual query if new system fails
+            try {
+              const { data: fallbackMatch } = await supabase
+                .from('policy_tariffs_cache')
+                .select('section_301, section_232, verified_date, is_stale')
+                .eq('hs_code', normalizedHsCode)
+                .maybeSingle();
+
+              if (fallbackMatch) {
+                policyCache = fallbackMatch;
+                lookupConfidence = 100;
+                lookupSource = 'exact_match_fallback';
+                console.log(`✅ [POLICY-CACHE] Fallback exact match for ${normalizedHsCode}`);
+              }
+            } catch (fallbackError) {
+              console.log(`⚠️ [POLICY-CACHE] Fallback also failed: ${fallbackError.message}`);
+            }
           }
 
           // Apply policy rates if found
@@ -1316,6 +1336,9 @@ export default protectedApiHandler({
             stale: false,  // All rates now from database - no AI enrichment needed
             data_source: rateData ? 'tariff_intelligence_master' : 'no_data',
             last_updated: new Date().toISOString(),
+            // ✅ NEW (Nov 20, 2025): Confidence level from enhanced lookup
+            lookup_confidence: lookupConfidence,  // 0-100 confidence score
+            lookup_source: lookupSource,  // exact_match, category_rate, heading_rate, chapter_prefix, not_found
             // Volatility metadata for UI freshness indicators
             volatility_tier: componentVolatility.tier,
             volatility_reason: componentVolatility.reason,
