@@ -30,6 +30,7 @@ import { logDevIssue, DevIssue } from '../../lib/utils/logDevIssue.js';
 import { reserveAnalysisSlot, incrementAnalysisCount } from '../../lib/services/usage-tracking-service.js';
 import { ClassificationAgent } from '../../lib/agents/classification-agent.js';
 import { VolatilityManager } from '../../lib/tariff/volatility-manager.js';
+import { TariffError, DatabaseError, formatErrorResponse } from '../../lib/utils/user-friendly-errors.js';
 
 // ✅ Phase 3 Extraction: Form validation utilities (Oct 23, 2025)
 import {
@@ -2637,11 +2638,13 @@ export default protectedApiHandler({
       processing_time: processingTime
     });
 
+    // ✅ NEW (Nov 20, 2025): Use formatErrorResponse for consistent user-friendly errors
+    // Converts UserFriendlyError instances to proper format, handles generic errors gracefully
+    const errorResponse = formatErrorResponse(error);
     return res.status(500).json({
-      success: false,
-      error: 'Analysis failed',
-      message: error.message,
-      timestamp: new Date().toISOString()
+      ...errorResponse,
+      timestamp: new Date().toISOString(),
+      processing_time: processingTime
     });
   }
   }
