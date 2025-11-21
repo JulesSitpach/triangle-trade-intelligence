@@ -999,18 +999,69 @@ export default protectedApiHandler({
             const { getTariffRateWithFallback } = await import('../../lib/services/tariff-rate-lookup.js');
 
             // Try Section 301 lookup with fallback
-            const section301Result = await getTariffRateWithFallback(
+            let section301Result = await getTariffRateWithFallback(
               normalizedHsCode,
               component.origin_country,
               'section_301'
             );
 
             // Try Section 232 lookup with fallback
-            const section232Result = await getTariffRateWithFallback(
+            let section232Result = await getTariffRateWithFallback(
               normalizedHsCode,
               component.origin_country,
               'section_232'
             );
+
+            // ✅ NEW (Nov 21, 2025): AI FALLBACK when database miss occurs
+            // If database returns needs_research: true, trigger AI agents
+            if (section301Result.needs_research && component.origin_country === 'CN') {
+              console.log(`🤖 [SECTION-301-AI] Database miss, calling Section 301 agent for ${normalizedHsCode}...`);
+              try {
+                const { section301Agent } = await import('../../lib/agents/section-301-research-agent.js');
+                const aiResult = await section301Agent.researchRate(normalizedHsCode, {
+                  originCountry: component.origin_country
+                });
+
+                section301Result = {
+                  rate: aiResult.section_301,
+                  confidence: aiResult.confidence === 'high' ? 85 : aiResult.confidence === 'medium' ? 70 : 50,
+                  source: 'ai_research',
+                  hs_code_used: normalizedHsCode,
+                  needs_research: false
+                };
+                console.log(`✅ [SECTION-301-AI] Got ${(aiResult.section_301 * 100).toFixed(1)}% from AI`);
+              } catch (error) {
+                console.error(`❌ [SECTION-301-AI] AI research failed:`, error.message);
+              }
+            }
+
+            if (section232Result.needs_research) {
+              // Check if this is a steel/aluminum component (Chapter 72, 73, 76, 83, 84, 85, 87, 94)
+              const chapter = normalizedHsCode.substring(0, 2);
+              const section232Chapters = ['72', '73', '76', '83', '84', '85', '87', '94'];
+
+              if (section232Chapters.includes(chapter)) {
+                console.log(`🤖 [SECTION-232-AI] Database miss, calling Section 232 agent for ${normalizedHsCode}...`);
+                try {
+                  const { section232Agent } = await import('../../lib/agents/section-232-research-agent.js');
+                  const aiResult = await section232Agent.researchRate(normalizedHsCode, {
+                    originCountry: component.origin_country,
+                    aluminumSource: component.material_origin === 'us' ? 'us_smelted' : 'unknown'
+                  });
+
+                  section232Result = {
+                    rate: aiResult.section_232,
+                    confidence: aiResult.confidence === 'high' ? 85 : aiResult.confidence === 'medium' ? 70 : 50,
+                    source: 'ai_research',
+                    hs_code_used: normalizedHsCode,
+                    needs_research: false
+                  };
+                  console.log(`✅ [SECTION-232-AI] Got ${(aiResult.section_232 * 100).toFixed(1)}% from AI`);
+                } catch (error) {
+                  console.error(`❌ [SECTION-232-AI] AI research failed:`, error.message);
+                }
+              }
+            }
 
             // Combine results
             if (section301Result.rate !== null || section232Result.rate !== null) {
