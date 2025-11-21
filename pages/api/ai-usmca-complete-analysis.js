@@ -741,12 +741,14 @@ export default protectedApiHandler({
           description: component.description || component.component_type || '',
           origin_country: component.origin_country || component.country || '',
           value_percentage: component.value_percentage || component.percentage || 0,
-          // Ensure tariff fields have defaults (will be overwritten if HS code matches in DB)
-          mfn_rate: component.mfn_rate || 0,
-          base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
-          section_301: component.section_301 || 0,
-          section_232: component.section_232 || 0,
-          usmca_rate: component.usmca_rate || 0,
+          // ✅ FIX (Nov 20, 2025): Use null for missing rates (not 0)
+          // - null = needs research
+          // - 0 = confirmed duty-free (misleading if not researched)
+          mfn_rate: component.mfn_rate ?? null,
+          base_mfn_rate: component.base_mfn_rate ?? component.mfn_rate ?? null,
+          section_301: component.section_301 ?? null,
+          section_232: component.section_232 ?? null,
+          usmca_rate: component.usmca_rate ?? null,
           rate_source: 'component_input',  // Track data source
           stale: false,  // User input is always fresh
           data_source: 'user_input'
@@ -936,13 +938,16 @@ export default protectedApiHandler({
 
               console.log(`✅ [CACHE HIT] Found fresh cached AI rate for ${component.hs_code} (expires: ${cachedRate.expires_at})`);
               // Use cached rate instead of making AI call
+              // ✅ FIX (Nov 20, 2025): Preserve null from database
+              // - Database null = not researched yet
+              // - Don't convert to 0 (hides missing data)
               enriched.push({
                 ...baseComponent,
-                mfn_rate: parseFloat(cachedRate.mfn_rate) || 0,
-                base_mfn_rate: parseFloat(cachedRate.mfn_rate) || 0,
-                section_301: parseFloat(cachedRate.section_301) || 0,
-                section_232: parseFloat(cachedRate.section_232) || 0,
-                usmca_rate: parseFloat(cachedRate.usmca_rate) || 0,
+                mfn_rate: cachedRate.mfn_rate ? parseFloat(cachedRate.mfn_rate) : null,
+                base_mfn_rate: cachedRate.mfn_rate ? parseFloat(cachedRate.mfn_rate) : null,
+                section_301: cachedRate.section_301 ? parseFloat(cachedRate.section_301) : null,
+                section_232: cachedRate.section_232 ? parseFloat(cachedRate.section_232) : null,
+                usmca_rate: cachedRate.usmca_rate ? parseFloat(cachedRate.usmca_rate) : null,
                 rate_source: 'tariff_rates_cache',
                 stale: false,  // Cache hit - no AI call needed
                 data_source: 'tariff_rates_cache',
@@ -1030,9 +1035,10 @@ export default protectedApiHandler({
           try {
 
             if (policyCache && !policyCache.is_stale) {
+              // ✅ FIX (Nov 20, 2025): Keep null if database has null
               // Use cached policy rates (fresher than master table)
-              policyRates.section_301 = policyCache.section_301 || 0;
-              policyRates.section_232 = policyCache.section_232 || 0;
+              policyRates.section_301 = policyCache.section_301 ?? null;
+              policyRates.section_232 = policyCache.section_232 ?? null;
               console.log(`✅ [POLICY-CACHE] Using fresh policy rates for ${component.hs_code} (verified ${policyCache.verified_date})`);
             } else if (policyCache?.is_stale) {
               console.log(`⚠️ [POLICY-CACHE] Stale policy rates for ${component.hs_code}, using master table fallback`);
@@ -1340,14 +1346,15 @@ export default protectedApiHandler({
           // DEBUG: Tariff rates loaded from database or component input
         } catch (dbError) {
           console.error(`❌ [TARIFF-INTEGRATION] Database lookup error for ${component.hs_code}:`, dbError.message);
+          // ✅ FIX (Nov 20, 2025): Preserve null for missing rates
           // On error: still return consistent structure with original fields preserved
           enriched.push({
             ...baseComponent,
-            mfn_rate: component.mfn_rate || 0,
-            base_mfn_rate: component.base_mfn_rate || component.mfn_rate || 0,
-            section_301: component.section_301 || 0,
-            section_232: component.section_232 || 0,
-            usmca_rate: component.usmca_rate || 0,
+            mfn_rate: component.mfn_rate ?? null,
+            base_mfn_rate: component.base_mfn_rate ?? component.mfn_rate ?? null,
+            section_301: component.section_301 ?? null,
+            section_232: component.section_232 ?? null,
+            usmca_rate: component.usmca_rate ?? null,
             rate_source: 'database_fallback',
             stale: true,
             data_source: 'error'
@@ -1414,14 +1421,11 @@ export default protectedApiHandler({
             const verifiedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
             const verifiedTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // e.g., "02:30 PM"
 
-            // ✅ FIX (Nov 12): USMCA-origin components ALWAYS get 0% USMCA rate (duty-free under USMCA)
-            const originCountry = (comp.origin_country || '').toUpperCase();
-            const isUSMCAOrigin = ['US', 'CA', 'MX'].includes(originCountry);
-            const usmcaRate = isUSMCAOrigin ? 0 : (aiResult.usmca_rate || 0);
-
-            if (isUSMCAOrigin && aiResult.usmca_rate !== 0) {
-              console.log(`   ⚠️ [USMCA-CORRECTION] Component from ${originCountry} - forcing USMCA rate to 0% (was ${aiResult.usmca_rate})`);
-            }
+            // ✅ FIX (Nov 20, 2025): NEVER assume USMCA rate = 0%
+            // - USMCA rates vary by product (0%, 2.5%, 5%, etc - query database)
+            // - Origin ≠ Qualification (Mexico product may not qualify if RVC < threshold)
+            // - Qualification checked separately by USMCA engine (don't mix with rate lookup)
+            const usmcaRate = aiResult.usmca_rate ?? null;
 
             return {
               ...comp,
