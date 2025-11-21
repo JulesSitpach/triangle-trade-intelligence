@@ -27,6 +27,53 @@ const formatTariffRate = (rate) => {
   return { text: `${(rate * 100).toFixed(1)}%`, color: '#dc2626', title: `${(rate * 100).toFixed(1)}% tariff rate` };
 };
 
+// Confidence badge for tariff lookup quality (inline styles to match component pattern)
+const ConfidenceBadge = ({ confidence, source, size = 'sm' }) => {
+  if (!confidence || confidence === undefined) return null;
+
+  const getStyle = () => {
+    if (confidence >= 95) {
+      return { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7', label: 'Verified', icon: '✓' };
+    }
+    if (confidence >= 80) {
+      return { bg: '#dbeafe', text: '#1e40af', border: '#93c5fd', label: 'Category', icon: '≈' };
+    }
+    if (confidence >= 65) {
+      return { bg: '#fef3c7', text: '#92400e', border: '#fcd34d', label: 'Heading', icon: '~' };
+    }
+    if (confidence >= 40) {
+      return { bg: '#fed7aa', text: '#9a3412', border: '#fdba74', label: 'Estimate', icon: '?' };
+    }
+    return { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5', label: 'Low', icon: '!' };
+  };
+
+  const style = getStyle();
+  const padding = size === 'sm' ? '0.125rem 0.375rem' : '0.25rem 0.5rem';
+  const fontSize = size === 'sm' ? '0.6875rem' : '0.75rem';
+
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.25rem',
+        padding,
+        fontSize,
+        fontWeight: '600',
+        borderRadius: '9999px',
+        backgroundColor: style.bg,
+        color: style.text,
+        border: `1px solid ${style.border}`,
+        whiteSpace: 'nowrap'
+      }}
+      title={`${confidence}% confidence - ${source || 'AI lookup'}`}
+    >
+      <span style={{ fontWeight: 'bold', fontSize: size === 'sm' ? '0.625rem' : '0.6875rem' }}>{style.icon}</span>
+      <span>{confidence}%</span>
+    </span>
+  );
+};
+
 // EDUCATIONAL: Simple tooltip component for trade terminology
 const Tooltip = ({ text, children }) => {
   const [show, setShow] = useState(false);
@@ -410,6 +457,16 @@ export default function USMCAQualification({ results }) {
                         <div style={{ fontWeight: '600', color: '#1f2937' }}>
                           {totalAppliedRate !== null ? `${(totalAppliedRate * 100).toFixed(1)}%` : 'N/A'}
                         </div>
+                        {/* ✅ NEW (Nov 20, 2025): Confidence badge for tariff lookup quality */}
+                        {component.lookup_confidence && (
+                          <div style={{ marginTop: '0.25rem' }}>
+                            <ConfidenceBadge
+                              confidence={component.lookup_confidence}
+                              source={component.lookup_source}
+                              size="sm"
+                            />
+                          </div>
+                        )}
                       </div>
                       <div>
                         <div style={{ color: '#6b7280', fontSize: '0.75rem' }}>
@@ -664,21 +721,31 @@ export default function USMCAQualification({ results }) {
 
                       {/* Column 6: Additional Tariffs (Section 301 + Section 232) */}
                       <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                        {section301 > 0 || section232 > 0 ? (
-                          <span
-                            style={{ fontWeight: '600', color: '#991b1b', cursor: 'help' }}
-                            title={`Policy tariffs: ${section301 > 0 ? `Section 301 ${(section301 * 100).toFixed(1)}%` : ''}${section301 > 0 && section232 > 0 ? ' + ' : ''}${section232 > 0 ? `Section 232 ${(section232 * 100).toFixed(1)}%` : ''}`}
-                          >
-                            {((section301 + section232) * 100).toFixed(1)}%
-                          </span>
-                        ) : (
-                          <span
-                            style={{ color: '#059669', cursor: 'help' }}
-                            title={component.origin_country === 'CN' ? 'No Section 301/232 tariffs apply to this HS code' : 'No additional policy tariffs for this component'}
-                          >
-                            0.0%
-                          </span>
-                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                          {section301 > 0 || section232 > 0 ? (
+                            <span
+                              style={{ fontWeight: '600', color: '#991b1b', cursor: 'help' }}
+                              title={`Policy tariffs: ${section301 > 0 ? `Section 301 ${(section301 * 100).toFixed(1)}%` : ''}${section301 > 0 && section232 > 0 ? ' + ' : ''}${section232 > 0 ? `Section 232 ${(section232 * 100).toFixed(1)}%` : ''}`}
+                            >
+                              {((section301 + section232) * 100).toFixed(1)}%
+                            </span>
+                          ) : (
+                            <span
+                              style={{ color: '#059669', cursor: 'help' }}
+                              title={component.origin_country === 'CN' ? 'No Section 301/232 tariffs apply to this HS code' : 'No additional policy tariffs for this component'}
+                            >
+                              0.0%
+                            </span>
+                          )}
+                          {/* ✅ NEW (Nov 20, 2025): Confidence badge for tariff lookup quality */}
+                          {component.lookup_confidence && (
+                            <ConfidenceBadge
+                              confidence={component.lookup_confidence}
+                              source={component.lookup_source}
+                              size="sm"
+                            />
+                          )}
+                        </div>
                       </td>
 
                       {/* Column 7: Total Rate (MFN + Additional) */}
