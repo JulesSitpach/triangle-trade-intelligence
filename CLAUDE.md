@@ -1,40 +1,8 @@
 # CLAUDE.md - Triangle Intelligence Platform (HONEST STATUS)
 
-**Last Updated:** November 10, 2025 - PROJECT LOCKDOWN (Production Freeze)
-**Status:** 🔒 PRODUCTION LOCKED - UI-only changes permitted, all other changes require owner approval
-**All files editable - Manual deployment control
-**Owner Declaration:** "For me it's perfect" - Mac
-
----
-
-## 🔒 PROJECT LOCKDOWN NOTICE
-
-**CRITICAL: READ THIS FIRST BEFORE ANY CODE CHANGES**
-
-This project is now in **PRODUCTION LOCKDOWN** as of November 10, 2025.
-
-### What This Means:
-
-1. **26+ critical files are FROZEN** - Cannot be modified without owner approval
-2. **Pre-commit hooks will BLOCK** forbidden changes automatically
-3. **Only UI styling changes are allowed** without approval
-4. **Database schema is FROZEN** - No migrations, no schema changes
-5. **API endpoints are FROZEN** - No logic changes, no new endpoints
-6. **All calculations are FROZEN** - Working perfectly, do not modify
-
-### Required Reading Before Any Change:
-
-- 📖 **PROJECT_LOCKDOWN.md** - Comprehensive lockdown policy (200+ lines)
-- 📖 **UI_CHANGE_GUIDE.md** - What UI changes are safe (300+ lines)
-- 📖 **FROZEN_FILES_LIST.md** - Complete list of frozen files (26+ files)
-- 📖 **CSS_RULES.md** - NO INLINE STYLES (335 classes available, 2 documented exceptions only)
-
-### Quick Rules:
-
-✅ **Allowed**: CSS styling, display text, layout (no data flow changes), accessibility
-❌ **Forbidden**: API changes, database changes, calculations, state management, validation logic
-
-**If unsure whether your change is safe, the answer is NO. Ask the owner first.**
+**Last Updated:** November 20, 2025 - Active Development
+**Status:** ✅ OPEN FOR DEVELOPMENT - All changes permitted
+**Deployment:** Auto-deploy to Vercel on git push
 
 ---
 
@@ -46,11 +14,11 @@ This project is now in **PRODUCTION LOCKDOWN** as of November 10, 2025.
 - ⚠️ **BLOCKED**: USITC API currently down + token expired (May 3, 2025)
 - 📋 **TODO**: When USITC returns online → Get new token → Enable government verification (95-98% confidence)
 
-**Recent Changes** (Nov 10):
-- 🔒 **PROJECT LOCKDOWN**: Created protection system (pre-commit hooks, documentation, frozen files list)
-- 🔒 Froze 26+ critical files (APIs, agents, config, database schema)
-- 🔒 Created UI_CHANGE_GUIDE.md for safe styling changes
-- 🔒 Updated pre-commit hook to enforce lockdown
+**Recent Changes** (Nov 20):
+- ✅ **PROJECT LOCKDOWN REMOVED**: All development restrictions lifted
+- ✅ Fixed Vercel deployment: Added serverDatabaseService direct export
+- ✅ Completed P1 audit fixes: Database constraints, query fallback, confidence levels, HS normalization
+- ✅ Completed P2 audit fixes: User-friendly errors, enhanced freshness monitoring
 
 **Recent Changes** (Nov 9):
 - ✅ **CRITICAL FIX**: Database miss now triggers AI research (`stale: true` instead of `false`)
