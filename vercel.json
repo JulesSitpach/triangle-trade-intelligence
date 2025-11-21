@@ -7,6 +7,9 @@
     },
     "pages/api/cron/apply-policy-tariff-changes.js": {
       "maxDuration": 60
+    },
+    "pages/api/cron/validate-tariff-health.js": {
+      "maxDuration": 60
     }
   },
   "env": {
@@ -43,6 +46,10 @@
     {
       "path": "/api/cron/apply-policy-tariff-changes",
       "schedule": "0 2 * * 0"
+    },
+    {
+      "path": "/api/cron/validate-tariff-health",
+      "schedule": "0 9 * * *"
     }
   ]
 }
