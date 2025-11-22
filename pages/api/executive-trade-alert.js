@@ -819,7 +819,16 @@ TOTAL (current + potential): $${((workflow.current_annual_savings || 0) + (workf
 ────────────────────────────────────────────────────────────
 
 COMPONENTS (${components.length} total):
-${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) - ${c.value_percentage}% | HS: ${c.hs_code} | MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}% | Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}%`).join('\n')}
+${components.map(c => `• ${c.description || c.hs_code} (${c.origin_country}) - ${c.value_percentage}% | HS: ${c.hs_code} | MFN: ${((c.mfn_rate || 0) * 100).toFixed(1)}% | Section 301: ${((c.section_301 || 0) * 100).toFixed(1)}% | Section 232: ${((c.section_232 || 0) * 100).toFixed(1)}% | TOTAL: ${((c.total_rate || 0) * 100).toFixed(1)}%`).join('\n')}
+
+🚨 CRITICAL - TARIFF BREAKDOWN EXPLANATION:
+For NON-USMCA components, explain WHERE the potential savings come from:
+- Show the FULL tariff stack: Base MFN + Section 301 + Section 232 = Total
+- Example: "Anti-rattle shims from China carry 2.5% base MFN + 25% Section 301 + 50% Section 232 = 77.5% total tariff, creating $775,000 annual burden"
+- Example: "Vietnam components pay 4.5% MFN + 0% Section 301 (not on list) = 4.5% total, creating $45,000 annual burden"
+- Example: "India electronics pay 0% MFN (duty-free) + 0% Section 301 = 0% total - no savings opportunity"
+
+DO NOT assume all non-USMCA = China. Check origin_country for each component and explain their specific tariff stack.
 
 CURRENT STATUS:
 • Trade Volume: $${tradeVolume.toLocaleString()} | USMCA: ${workflow.usmca_qualified ? `✅ Qualified (RVC ${workflow.north_american_content}%)` : '❌ Not Qualified'}
@@ -834,14 +843,26 @@ Write an expressive, narrative briefing - tell their supply chain STORY with per
 # Business Impact Summary: ${profile.company_name}
 
 ## Certification Status & Immediate Risks
-${matchedAlerts.length > 0 ? `Write 2-3 bullets about active policy threats affecting their certification/tariffs. Use emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM). Example: "🔴 Section 301 escalation threatens ${section301BurdenFormatted} annual burden on Chinese components"` : `Write 2-3 bullets about certification status and tariff exposure. Example: "✅ USMCA qualified - CURRENTLY saving $${workflow.current_annual_savings?.toLocaleString()}/year from Mexico/Canada components, with $${workflow.potential_annual_savings?.toLocaleString()}/year POTENTIAL if China components nearshored" or "⚠️ ${section301BurdenFormatted} Section 301 burden on ${chineseComponents.length} Chinese components limits current savings"`}
+Write 2-3 bullets about certification status and tariff exposure. For NON-USMCA components, EXPLAIN the full tariff breakdown (MFN + Section 301 + Section 232 = Total).
+
+Examples:
+- ✅ USMCA qualified - CURRENTLY saving $${workflow.current_annual_savings?.toLocaleString()}/year from Mexico/Canada components, with $${workflow.potential_annual_savings?.toLocaleString()}/year POTENTIAL if non-USMCA components nearshored
+- 🚨 **Tariff Burden on [Country] Components** – [Component name] ([value_percentage]% of product, HS [hs_code]) sourced from [origin_country] carry [MFN]% base MFN + [Section 301]% Section 301 + [Section 232]% Section 232 = [total_rate]% total tariff, creating $[potential_annual_savings] annual cost headwind
+- ⚠️ **Policy Uncertainty** – [Describe specific policy risks affecting their components]
+
+${matchedAlerts.length > 0 ? 'Include active policy threats with emoji (🔴 CRITICAL, 🟠 HIGH, 🟡 MEDIUM)' : ''}
 
 ## Your Certification Situation
-Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts from CURRENT vs POTENTIAL fields (don't calculate totals yourself - use provided split!). ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
+Write 2-3 **narrative paragraphs** painting their certification picture. Use exact percentages and dollar amounts from CURRENT vs POTENTIAL fields (don't calculate totals yourself - use provided split!).
 
-Example: "${profile.company_name}'s ${workflow.product_description} operates a beautifully balanced supply chain that ${workflow.usmca_qualified ? `currently achieves USMCA qualification, generating $${workflow.current_annual_savings?.toLocaleString()}/year in CURRENT savings` : 'currently misses USMCA qualification, leaving money on the table'}. ${chineseComponents.length > 0 ? `However, ${chineseComponents.length} Chinese components (${totalChineseValue}% of value) introduce ${section301BurdenFormatted} Section 301 burden that nearly offsets your USMCA benefits. The POTENTIAL here is significant: nearshoring these components to Mexico would unlock an additional $${workflow.potential_annual_savings?.toLocaleString()}/year in tariff elimination` : 'Your geographic sourcing creates policy vulnerabilities that merit attention'}. The question isn't whether USMCA is worth pursuing - it clearly is. The question is whether accepting the current Section 301 costs is a calculated business decision or an unexamined default."
+CRITICAL INSTRUCTIONS:
+- Use $${workflow.current_annual_savings?.toLocaleString()} for CURRENT savings (what they're saving NOW)
+- Use $${workflow.potential_annual_savings?.toLocaleString()} for POTENTIAL savings (what they COULD save)
+- For non-USMCA components, EXPLAIN the tariff stack: "Component X from [country] carries [MFN]% base + [301]% Section 301 + [232]% Section 232 = [total]% total, creating $[amount] annual burden"
+- DO NOT assume all non-USMCA = China. Check each component's origin_country and explain their specific situation
+- Show the math so users understand WHERE the potential savings come from
 
-CRITICAL: Use $${workflow.current_annual_savings?.toLocaleString()} for CURRENT savings and $${workflow.potential_annual_savings?.toLocaleString()} for POTENTIAL savings. DO NOT add up component rates to calculate totals - use these pre-calculated fields!
+${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
 
 ## Critical Risks & Opportunities
 Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "**Path A: Accept the Section 301 Burden, Optimize Within Current Structure** involves maintaining your Chinese PCB supplier while continuing to capture $${workflow.current_annual_savings?.toLocaleString()}/year CURRENT USMCA savings from Mexican/Canadian components. You keep absorbing ${section301BurdenFormatted} Section 301 costs, but avoid supply chain disruption. The risk: if Section 301 escalates, your net position deteriorates further. **Path B: Nearshore PCB Assembly to Mexico, Eliminate Section 301 Exposure** means qualifying a Mexican supplier over 12-18 months. This path offers structural advantage: moving to Mexico eliminates the ${section301BurdenFormatted} burden entirely, unlocking the full $${workflow.potential_annual_savings?.toLocaleString()}/year potential. However, transition carries qualification risk for HS ${chineseComponents[0]?.hs_code} specifications."` : 'Focus on qualification improvement vs maintaining status quo.'}
