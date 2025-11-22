@@ -357,24 +357,25 @@ export default function ExecutiveSummaryDisplay({ data, onClose }) {
       {mainExpanded && (
         <div style={{ padding: isMobile ? '0.75rem' : '2rem' }}>
           {sections.map((section, index) => {
-            // Skip rendering the first section entirely if it matches the main header (avoid duplicate)
-            const isDuplicateTitle = index === 0 &&
-              (section.title.includes('USMCA Certification Status') ||
-               section.title.includes('Tariff Exposure Analysis'));
-
-            // Don't render duplicate section at all
-            if (isDuplicateTitle) return null;
-
             const isExpanded = expandedSections[index] !== false; // Default to expanded
+
+            // Check if this is a duplicate of the main header - render without collapse triangle
+            const isDuplicateTitle =
+              section.title.includes('USMCA Certification Status') ||
+              section.title.includes('USMCA Certification & Section 301') ||
+              section.title.includes('Tariff Exposure Analysis');
 
             // Check if this is a company/product title (contains pipe | or has no real content beyond company name)
             const isCompanyTitle = section.title.includes('|') ||
               (index === 0 && !section.content.trim() && section.title.match(/^[A-Z].*(?:SA de CV|LLC|Inc|Corp|Ltd)/i));
 
+            // Render duplicate title and company titles without collapse triangles
+            const isStaticHeader = isDuplicateTitle || isCompanyTitle;
+
             return (
               <div key={index} className="executive-section" style={{ marginBottom: isMobile ? '0.75rem' : '1.5rem' }}>
-                {/* Section Header - No arrow for company/product title, collapsible for others */}
-                {isCompanyTitle ? (
+                {/* Section Header - No arrow for static headers (duplicate title, company titles), collapsible for others */}
+                {isStaticHeader ? (
                   <h3
                     style={{
                       fontSize: isMobile ? '1rem' : '1.25rem',
