@@ -131,6 +131,7 @@ export default function USMCAQualification({ results }) {
   }
   const [expandedComponents, setExpandedComponents] = useState({});
   const [showTariffExplanation, setShowTariffExplanation] = useState(false);
+  const [showSection232Explanation, setShowSection232Explanation] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile screen size
@@ -165,6 +166,10 @@ export default function USMCAQualification({ results }) {
         }
       }, 100);
     }
+  };
+
+  const handleToggleSection232Explanation = () => {
+    setShowSection232Explanation(!showSection232Explanation);
   };
 
   if (!results?.usmca) return null;
@@ -237,45 +242,59 @@ export default function USMCAQualification({ results }) {
 
   const gapAnalysis = extractGapAnalysis();
 
-  // Check if we should show tariff explanation
-  const hasChineseComponents = results.usmca.component_breakdown?.some(c =>
-    (c.origin_country === 'CN' || c.origin_country === 'China') &&
-    (c.total_rate > 0.20 || c.section_301 > 0) // 20%+ or has Section 301
+  // Check if we should show tariff explanation (ANY component with significant tariffs)
+  const hasHighTariffComponents = results.usmca.component_breakdown?.some(c =>
+    c.total_rate > 0.10 || c.section_301 > 0 || c.section_232 > 0 // 10%+ or has policy tariffs
+  );
+
+  // ✅ NEW (Nov 21, 2025): Separate check for Section 232 (applies to ALL countries)
+  const hasSection232Components = (results.component_origins || results.components || []).some(c =>
+    c.section_232 !== null && c.section_232 !== undefined && c.section_232 > 0
   );
 
   return (
     <div className="card-content">
-      {/* Tariff Explanation for Chinese Components */}
-      {hasChineseComponents && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <button
-            onClick={handleToggleTariffExplanation}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#fef3c7',
-              border: '1px solid #f59e0b',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: '#92400e',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            <span style={{
-              display: 'inline-block',
-              transition: 'transform 0.2s',
-              transform: showTariffExplanation ? 'rotate(90deg)' : 'rotate(0deg)',
-              fontSize: '0.75rem'
-            }}>
-              ▶
-            </span>
-            <span>💡 Understanding China Tariff Rates</span>
-          </button>
+      {/* Tariff Explanation for Components with Policy Tariffs */}
+      {hasHighTariffComponents && (() => {
+        // Find component with highest tariff for title
+        const highTariffComponent = (results.component_origins || results.components || [])
+          .filter(c => c.total_rate > 0.10 || c.section_301 > 0 || c.section_232 > 0)
+          .sort((a, b) => (b.total_rate || 0) - (a.total_rate || 0))[0];
+
+        const componentCountry = highTariffComponent?.origin_country || 'CN';
+        const countryNames = { 'CN': 'China', 'CA': 'Canada', 'MX': 'Mexico', 'US': 'United States' };
+        const countryName = countryNames[componentCountry] || componentCountry;
+
+        return (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <button
+              onClick={handleToggleTariffExplanation}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                backgroundColor: '#fef3c7',
+                border: '1px solid #f59e0b',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: '#92400e',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span style={{
+                display: 'inline-block',
+                transition: 'transform 0.2s',
+                transform: showTariffExplanation ? 'rotate(90deg)' : 'rotate(0deg)',
+                fontSize: '0.75rem'
+              }}>
+                ▶
+              </span>
+              <span>💡 Understanding {countryName} Tariff Rates</span>
+            </button>
 
           {showTariffExplanation && (
             <div style={{
@@ -287,53 +306,64 @@ export default function USMCAQualification({ results }) {
               fontSize: '0.875rem',
               lineHeight: '1.7'
             }}>
-              <div style={{ marginBottom: '1rem' }}>
-                <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
-                  Base Rate: 0%
-                </strong>
-                <p style={{ margin: 0, color: '#78350f' }}>
-                  China is a WTO member (since 2001), so electronics pay the standard 0% base tariff rate, same as other countries.
-                </p>
-              </div>
-
-              {/* ✅ DYNAMIC: Show actual AI-calculated rates instead of hardcoded ranges */}
+              {/* ✅ DYNAMIC: Show actual AI-calculated rates for any high-tariff component */}
               {(() => {
-                // Find first China component to get actual rates
-                const chinaComponent = (results.component_origins || results.components || []).find(c =>
-                  c.origin_country === 'CN' || c.origin_country === 'China'
-                );
+                // Use the same high-tariff component from title
+                const targetComponent = highTariffComponent;
 
-                if (!chinaComponent) return null;
+                if (!targetComponent) return null;
 
                 // ✅ CRITICAL FIX (Nov 14): Preserve null vs 0 distinction for Section 301
-                const section301 = chinaComponent.section_301 !== null && chinaComponent.section_301 !== undefined
-                  ? parseFloat(chinaComponent.section_301)
+                const section301 = targetComponent.section_301 !== null && targetComponent.section_301 !== undefined
+                  ? parseFloat(targetComponent.section_301)
                   : null;
-                const reciprocal = chinaComponent.ieepa_reciprocal !== null && chinaComponent.ieepa_reciprocal !== undefined
-                  ? parseFloat(chinaComponent.ieepa_reciprocal)
+                // ✅ FIX (Nov 21, 2025): Add Section 232 to tariff breakdown
+                const section232 = targetComponent.section_232 !== null && targetComponent.section_232 !== undefined
+                  ? parseFloat(targetComponent.section_232)
                   : null;
-                const baseMfn = chinaComponent.base_mfn_rate !== null && chinaComponent.base_mfn_rate !== undefined
-                  ? parseFloat(chinaComponent.base_mfn_rate)
-                  : (chinaComponent.mfn_rate !== null && chinaComponent.mfn_rate !== undefined ? parseFloat(chinaComponent.mfn_rate) : null);
-                const totalRate = chinaComponent.total_rate !== null && chinaComponent.total_rate !== undefined
-                  ? parseFloat(chinaComponent.total_rate)
-                  : (baseMfn !== null && section301 !== null && reciprocal !== null ? baseMfn + section301 + reciprocal : null);
-                const verifiedDate = chinaComponent.verified_date || chinaComponent.last_verified;
-                const expiresAt = chinaComponent.expires_at || chinaComponent.cache_expires_at;
+                const reciprocal = targetComponent.ieepa_reciprocal !== null && targetComponent.ieepa_reciprocal !== undefined
+                  ? parseFloat(targetComponent.ieepa_reciprocal)
+                  : null;
+                const baseMfn = targetComponent.base_mfn_rate !== null && targetComponent.base_mfn_rate !== undefined
+                  ? parseFloat(targetComponent.base_mfn_rate)
+                  : (targetComponent.mfn_rate !== null && targetComponent.mfn_rate !== undefined ? parseFloat(targetComponent.mfn_rate) : null);
+                // ✅ FIX (Nov 21, 2025): Include Section 232 in total rate calculation
+                const totalRate = targetComponent.total_rate !== null && targetComponent.total_rate !== undefined
+                  ? parseFloat(targetComponent.total_rate)
+                  : (baseMfn !== null && section301 !== null && reciprocal !== null && section232 !== null
+                      ? baseMfn + section301 + section232 + reciprocal
+                      : null);
+                const verifiedDate = targetComponent.verified_date || targetComponent.last_verified;
+                const expiresAt = targetComponent.expires_at || targetComponent.cache_expires_at;
+                const hsCode = targetComponent.hs_code || 'pending';
 
                 return (
                   <>
+                    {/* ✅ FIXED (Nov 21): Dynamic Base Rate */}
                     <div style={{ marginBottom: '1rem' }}>
-                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: section301 === null ? '#f59e0b' : '#92400e', fontSize: '0.9375rem' }}>
-                        Section 301 Tariff: {section301 !== null ? `+${(section301 * 100).toFixed(1)}%` : '⏳ Pending verification'}
-                        {section301 !== null && verifiedDate && <span style={{ color: '#78350f', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(verified {new Date(verifiedDate).toLocaleDateString()})</span>}
+                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#92400e', fontSize: '0.9375rem' }}>
+                        Base Rate: {baseMfn !== null ? `${(baseMfn * 100).toFixed(1)}%` : '⏳ Pending verification'}
                       </strong>
-                      <p style={{ margin: 0, color: section301 === null ? '#f59e0b' : '#78350f' }}>
-                        {section301 !== null
-                          ? 'Additional tariffs on Chinese imports for your specific HS code. This rate is AI-calculated based on current USTR lists.'
-                          : 'Section 301 rate verification in progress - database lookup required.'}
+                      <p style={{ margin: 0, color: '#78350f' }}>
+                        {componentCountry === 'CN'
+                          ? `China is a WTO member (since 2001), so your product (HS code ${hsCode}) pays the standard MFN base tariff rate under normal trade relations.`
+                          : `${countryName} exports (HS code ${hsCode}) pay the standard MFN base tariff rate under normal trade relations.`}
                       </p>
                     </div>
+
+                    {section301 > 0 && (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <strong style={{ display: 'block', marginBottom: '0.5rem', color: section301 === null ? '#f59e0b' : '#92400e', fontSize: '0.9375rem' }}>
+                          Section 301 Tariff: {section301 !== null ? `+${(section301 * 100).toFixed(1)}%` : '⏳ Pending verification'}
+                          {section301 !== null && verifiedDate && <span style={{ color: '#78350f', fontSize: '0.75rem', marginLeft: '0.5rem' }}>(verified {new Date(verifiedDate).toLocaleDateString()})</span>}
+                        </strong>
+                        <p style={{ margin: 0, color: section301 === null ? '#f59e0b' : '#78350f' }}>
+                          {section301 !== null
+                            ? `Additional tariffs on ${countryName} imports for your specific HS code. This rate is AI-calculated based on current USTR lists.`
+                            : 'Section 301 rate verification in progress - database lookup required.'}
+                        </p>
+                      </div>
+                    )}
 
                     {reciprocal !== null && reciprocal > 0 && (
                       <div style={{ marginBottom: '1rem' }}>
@@ -341,7 +371,7 @@ export default function USMCAQualification({ results }) {
                           Reciprocal Tariffs: +{(reciprocal * 100).toFixed(1)}%
                         </strong>
                         <p style={{ margin: 0, color: '#78350f' }}>
-                          Additional tariffs on specific Chinese products. Can change with 30-day notice.
+                          Additional tariffs on specific {countryName} products. Can change with 30-day notice.
                         </p>
                       </div>
                     )}
@@ -357,7 +387,7 @@ export default function USMCAQualification({ results }) {
                         Total Current Rate: {(totalRate * 100).toFixed(1)}%
                       </strong>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#78350f', fontSize: '0.8125rem' }}>
-                        Rates stack: Base ({(baseMfn * 100).toFixed(1)}%) + Section 301 ({(section301 * 100).toFixed(1)}%) {reciprocal > 0 ? `+ Reciprocal (${(reciprocal * 100).toFixed(1)}%)` : ''} = {(totalRate * 100).toFixed(1)}% total
+                        Rates stack: Base ({(baseMfn * 100).toFixed(1)}%) + Section 301 ({(section301 * 100).toFixed(1)}%) {section232 > 0 ? `+ Section 232 (${(section232 * 100).toFixed(1)}%)` : ''} {reciprocal > 0 ? `+ Reciprocal (${(reciprocal * 100).toFixed(1)}%)` : ''} = {(totalRate * 100).toFixed(1)}% total
                       </p>
                       {expiresAt && new Date(expiresAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
                         <p style={{ margin: '0.5rem 0 0 0', color: '#dc2626', fontSize: '0.75rem', fontWeight: 'bold' }}>
@@ -366,18 +396,22 @@ export default function USMCAQualification({ results }) {
                       )}
                     </div>
 
-                    <div style={{
-                      padding: '0.75rem',
-                      backgroundColor: '#fef3c7',
-                      borderRadius: '4px',
-                      border: '1px solid #dc2626',
-                      marginBottom: '1rem'
-                    }}>
-                      <strong style={{ color: '#7f1d1d' }}>⚠️ Rates Change Frequently</strong>
-                      <p style={{ margin: '0.5rem 0 0 0', color: '#991b1b', fontSize: '0.8125rem' }}>
-                        China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements. Always verify current rates before shipment.
-                      </p>
-                    </div>
+                    {(section301 > 0 || reciprocal > 0) && (
+                      <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#fef3c7',
+                        borderRadius: '4px',
+                        border: '1px solid #dc2626',
+                        marginBottom: '1rem'
+                      }}>
+                        <strong style={{ color: '#7f1d1d' }}>⚠️ Rates Change Frequently</strong>
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#991b1b', fontSize: '0.8125rem' }}>
+                          {componentCountry === 'CN'
+                            ? 'China tariffs are volatile. Section 301 and reciprocal rates can change monthly with policy announcements.'
+                            : `Tariffs on ${countryName} imports can change with policy announcements.`} Always verify current rates before shipment.
+                        </p>
+                      </div>
+                    )}
 
                     <div style={{
                       padding: '0.75rem',
@@ -385,12 +419,190 @@ export default function USMCAQualification({ results }) {
                       borderRadius: '4px',
                       border: '1px solid #059669'
                     }}>
-                      <strong style={{ color: '#065f46' }}>💰 Nearshoring to USMCA WOULD Eliminate ALL Tariffs</strong>
+                      <strong style={{ color: '#065f46' }}>
+                        {['MX', 'CA'].includes(results.company?.manufacturing_location)
+                          ? `💰 Your ${results.company?.manufacturing_location === 'MX' ? 'Mexico' : 'Canada'} Assembly ELIMINATES ${(totalRate * 100).toFixed(1)}% Tariffs on ${countryName} Components`
+                          : `💰 Nearshoring to USMCA WOULD Eliminate ${(totalRate * 100).toFixed(1)}% Tariffs on ${countryName} Components`}
+                      </strong>
                       <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
-                        <strong>Currently:</strong> Paying {((baseMfn || 0) * 100).toFixed(1)}% base + {((section301 || 0) * 100).toFixed(1)}% Section 301 = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
-                        <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates base rate, Section 301, AND reciprocal tariffs. See &ldquo;Potential&rdquo; in Annual Savings column.
+                        {(() => {
+                          // Build dynamic tariff breakdown (matches line 379 formula)
+                          const parts = [];
+                          if (baseMfn > 0) parts.push(`${(baseMfn * 100).toFixed(1)}% base`);
+                          if (section301 > 0) parts.push(`${(section301 * 100).toFixed(1)}% Section 301`);
+                          if (section232 > 0) parts.push(`${(section232 * 100).toFixed(1)}% Section 232`);
+                          if (reciprocal > 0) parts.push(`${(reciprocal * 100).toFixed(1)}% reciprocal`);
+                          const tariffBreakdown = parts.join(' + ');
+
+                          // Build list of eliminated tariffs
+                          const eliminated = [];
+                          if (baseMfn > 0) eliminated.push('base rate');
+                          if (section301 > 0) eliminated.push('Section 301');
+                          if (section232 > 0) eliminated.push('Section 232');
+                          if (reciprocal > 0) eliminated.push('reciprocal tariffs');
+                          const eliminatedList = eliminated.join(', ').replace(/, ([^,]*)$/, ', AND $1');
+
+                          return ['MX', 'CA'].includes(results.company?.manufacturing_location) ? (
+                            <>
+                              <strong>Before assembly in {results.company?.manufacturing_location}:</strong> Would pay {tariffBreakdown} = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
+                              <strong>Your current strategy:</strong> Assembling in {results.company?.manufacturing_location} = 0% total duty on finished product. Your strategy ELIMINATES {eliminatedList}.
+                            </>
+                          ) : (
+                            <>
+                              <strong>Currently:</strong> Paying {tariffBreakdown} = {((totalRate || 0) * 100).toFixed(1)}% total<br/>
+                              <strong>If switched to Mexico/Canada:</strong> Would pay 0% total - eliminates {eliminatedList}. See &ldquo;Potential&rdquo; in Annual Savings column.
+                            </>
+                          );
+                        })()}
                       </p>
                     </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+      );
+    })()}
+
+      {/* ✅ NEW (Nov 21, 2025): Section 232 Steel/Aluminum Tariff Explanation (Separate from China) */}
+      {hasSection232Components && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <button
+            onClick={handleToggleSection232Explanation}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1rem',
+              backgroundColor: '#fee2e2',
+              border: '1px solid #dc2626',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              color: '#991b1b',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span style={{
+              display: 'inline-block',
+              transition: 'transform 0.2s',
+              transform: showSection232Explanation ? 'rotate(90deg)' : 'rotate(0deg)',
+              fontSize: '0.75rem'
+            }}>
+              ▶
+            </span>
+            <span>💡 Understanding Section 232 Steel/Aluminum Tariff</span>
+          </button>
+
+          {showSection232Explanation && (
+            <div style={{
+              marginTop: '0.75rem',
+              padding: '1.25rem',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fca5a5',
+              borderRadius: '6px',
+              fontSize: '0.875rem',
+              lineHeight: '1.7'
+            }}>
+              {(() => {
+                // Find ALL components with Section 232 (ANY country)
+                const section232Components = (results.component_origins || results.components || []).filter(c =>
+                  c.section_232 !== null && c.section_232 !== undefined && c.section_232 > 0
+                );
+
+                if (section232Components.length === 0) return null;
+
+                // Separate US vs non-US components
+                const usComponents = section232Components.filter(c => c.origin_country === 'US');
+                const nonUSComponents = section232Components.filter(c => c.origin_country !== 'US');
+
+                return (
+                  <>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: '#991b1b', fontSize: '0.9375rem' }}>
+                        Section 232 Steel/Aluminum Tariff Overview
+                      </strong>
+                      <p style={{ margin: 0, color: '#7f1d1d' }}>
+                        Additional tariffs on steel and aluminum products from <strong>ALL countries</strong> (including China, Mexico, Canada, US). Applies to HS codes in chapters 72, 73, 76, 83, 84, 85, 87, 94.
+                      </p>
+                    </div>
+
+                    {/* US Components - Can be exempt if properly documented */}
+                    {usComponents.length > 0 && (
+                      <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#fef3c7',
+                        borderRadius: '4px',
+                        border: '1px solid #fcd34d',
+                        marginBottom: '1rem'
+                      }}>
+                        <strong style={{ color: '#78350f', fontSize: '0.9375rem' }}>
+                          ✅ US Components - Can Be EXEMPT (0% tariff)
+                        </strong>
+                        {usComponents.map((comp, idx) => (
+                          <div key={idx} style={{ marginTop: '0.5rem' }}>
+                            <p style={{ margin: '0.25rem 0', color: '#78350f', fontSize: '0.8125rem' }}>
+                              • <strong>{comp.description || comp.component_name}</strong> from {comp.origin_country}
+                            </p>
+                            <p style={{ margin: '0.25rem 0 0 0.75rem', color: '#78350f', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                              If made from <strong>aluminum exclusively smelted and cast in the United States</strong>, or <strong>steel exclusively melted and poured in the United States</strong>, it is EXEMPT from Section 232.
+                            </p>
+                            <p style={{ margin: '0.25rem 0 0 0.75rem', color: '#78350f', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                              ✅ ACTION: Verify with your supplier{comp.material_notes ? ` (${comp.material_notes})` : ''} whether the steel/aluminum is US-smelted/melted. If yes, provide documentation to claim 0% tariff.
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Non-US Components - Cannot be exempt */}
+                    {nonUSComponents.length > 0 && (
+                      <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#fee2e2',
+                        borderRadius: '4px',
+                        border: '1px solid #fca5a5',
+                        marginBottom: '1rem'
+                      }}>
+                        <strong style={{ color: '#991b1b', fontSize: '0.9375rem' }}>
+                          ❌ Non-US Components - NO Exemption Available
+                        </strong>
+                        {nonUSComponents.map((comp, idx) => {
+                          const section232 = parseFloat(comp.section_232);
+                          return (
+                            <div key={idx} style={{ marginTop: '0.5rem' }}>
+                              <p style={{ margin: '0.25rem 0', color: '#7f1d1d', fontSize: '0.8125rem' }}>
+                                • <strong>{comp.description || comp.component_name}</strong> from {comp.origin_country}: <strong>{(section232 * 100).toFixed(1)}% tariff</strong>
+                              </p>
+                              <p style={{ margin: '0.25rem 0 0 0.75rem', color: '#7f1d1d', fontSize: '0.75rem' }}>
+                                Section 232 applies to all steel/aluminum imports from {comp.origin_country}. No exemption available for non-US sourcing.
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {results.company?.manufacturing_location === 'MX' && results.company?.destination_country === 'US' && (
+                      <div style={{
+                        padding: '0.75rem',
+                        backgroundColor: '#d1fae5',
+                        borderRadius: '4px',
+                        border: '1px solid #059669',
+                        marginBottom: '1rem'
+                      }}>
+                        <strong style={{ color: '#065f46', fontSize: '0.9375rem' }}>
+                          ✅ Your Mexico Assembly Strategy BYPASSES Section 232 on Finished Product
+                        </strong>
+                        <p style={{ margin: '0.5rem 0 0 0', color: '#047857', fontSize: '0.8125rem' }}>
+                          • <strong>Components imported TO Mexico:</strong> Section 232 cost incurred in Mexico<br/>
+                          • <strong>Finished product FROM Mexico TO US:</strong> 0% USMCA (Section 232 bypassed on finished assembly)
+                        </p>
+                      </div>
+                    )}
                   </>
                 );
               })()}
@@ -696,8 +908,15 @@ export default function USMCAQualification({ results }) {
                       </td>
 
                       {/* Column 4: MFN Rate */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: baseMfnRate !== null ? '#1f2937' : '#9ca3af' }}>
-                        {baseMfnRate !== null ? (
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: component.origin_country === results.company?.destination_country ? '#6b7280' : (baseMfnRate !== null ? '#1f2937' : '#9ca3af') }}>
+                        {component.origin_country === results.company?.destination_country ? (
+                          <span
+                            style={{ fontWeight: '500', whiteSpace: 'nowrap', cursor: 'help', color: '#6b7280' }}
+                            title="Domestic production - no import tariffs apply"
+                          >
+                            N/A
+                          </span>
+                        ) : baseMfnRate !== null ? (
                           <span
                             style={{ fontWeight: '500', whiteSpace: 'nowrap', cursor: 'help' }}
                             title={`Most Favored Nation base rate from US tariff schedule (HTS ${component.hs_code || 'TBD'})`}
@@ -710,12 +929,12 @@ export default function USMCAQualification({ results }) {
                       </td>
 
                       {/* Column 5: USMCA Rate */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', color: usmcaRate !== null ? '#059669' : '#9ca3af', fontWeight: '500', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '0.75rem', textAlign: 'right', color: component.origin_country === results.company?.destination_country ? '#6b7280' : (usmcaRate !== null ? '#059669' : '#9ca3af'), fontWeight: '500', whiteSpace: 'nowrap' }}>
                         <span
-                          title={usmcaRate === 0 ? 'USMCA eliminates tariffs for qualified products from US/Mexico/Canada' : `USMCA preferential rate for this product`}
+                          title={component.origin_country === results.company?.destination_country ? 'Domestic production - no import tariffs apply' : (usmcaRate === 0 ? 'USMCA eliminates tariffs for qualified products from US/Mexico/Canada' : `USMCA preferential rate for this product`)}
                           style={{ cursor: 'help' }}
                         >
-                          {usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A'}
+                          {component.origin_country === results.company?.destination_country ? 'N/A' : (usmcaRate !== null ? `${(usmcaRate * 100).toFixed(1)}%` : 'N/A')}
                         </span>
                       </td>
 
@@ -749,8 +968,15 @@ export default function USMCAQualification({ results }) {
                       </td>
 
                       {/* Column 7: Total Rate (MFN + Additional) */}
-                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#1f2937', whiteSpace: 'nowrap' }}>
-                        {totalAppliedRate !== null ? (
+                      <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: component.origin_country === results.company?.destination_country ? '#6b7280' : '#1f2937', whiteSpace: 'nowrap' }}>
+                        {component.origin_country === results.company?.destination_country ? (
+                          <span
+                            style={{ cursor: 'help', color: '#6b7280' }}
+                            title="Domestic production - no import tariffs apply"
+                          >
+                            N/A
+                          </span>
+                        ) : totalAppliedRate !== null ? (
                           <span
                             style={{ cursor: 'help' }}
                             title={`Total: ${(baseMfnRate * 100).toFixed(1)}% MFN + ${((section301 + section232) * 100).toFixed(1)}% Additional = ${(totalAppliedRate * 100).toFixed(1)}%`}
@@ -788,12 +1014,12 @@ export default function USMCAQualification({ results }) {
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
                               <span
                                 style={{ whiteSpace: 'nowrap', cursor: 'help', color: '#6b7280', fontWeight: '600' }}
-                                title="Component already has 0% tariff - no savings opportunity"
+                                title={component.origin_country === results.company?.destination_country ? "Domestic production - no import tariffs apply" : "Component already has 0% tariff - no savings opportunity"}
                               >
                                 $0
                               </span>
                               <span style={{ fontSize: '0.65rem', color: '#6b7280', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                                Duty-Free
+                                {component.origin_country === results.company?.destination_country ? 'Domestic' : 'Duty-Free'}
                               </span>
                             </div>
                           );
@@ -899,11 +1125,17 @@ export default function USMCAQualification({ results }) {
                                     </div>
                                   </div>
                                   <div>
-                                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>Savings</div>
-                                    <div style={{ fontWeight: '600', color: '#059669' }}>
-                                      {component.mfn_rate !== null && component.usmca_rate !== null
-                                        ? `${((component.mfn_rate - component.usmca_rate) * 100).toFixed(1)}%`
-                                        : 'Pending'}
+                                    <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                                      {component.origin_country === results.company?.destination_country ? 'Status' : 'Savings'}
+                                    </div>
+                                    <div style={{ fontWeight: '600', color: component.origin_country === results.company?.destination_country ? '#6b7280' : '#059669' }}>
+                                      {component.origin_country === results.company?.destination_country ? (
+                                        <span title="Component produced domestically - no import tariffs apply">Domestic (no import)</span>
+                                      ) : component.mfn_rate !== null && component.usmca_rate !== null ? (
+                                        `${((component.mfn_rate - component.usmca_rate) * 100).toFixed(1)}%`
+                                      ) : (
+                                        'Pending'
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -1028,14 +1260,26 @@ export default function USMCAQualification({ results }) {
                                 <div style={{ fontSize: '0.8125rem', color: '#7f1d1d', lineHeight: '1.5', marginBottom: '0.5rem' }}>
                                   <strong>Your {component.description || 'component'} from {component.origin_country}</strong> is subject to <strong>{(section232 * 100).toFixed(1)}%</strong> Section 232 tariffs on steel/aluminum, costing approximately <strong>${(component.value_percentage / 100 * (results.company?.trade_volume || 0) * (section232) / 12).toFixed(0)}/month</strong>.
                                 </div>
-                                <div style={{ padding: '0.5rem', backgroundColor: '#fee2e2', borderRadius: '3px', marginBottom: '0.5rem', border: '1px solid #fca5a5' }}>
-                                  <div style={{ fontSize: '0.75rem', color: '#7f1d1d', fontWeight: '600', marginBottom: '0.25rem' }}>
-                                    ⚠️ Section 232 applies to ALL countries including USMCA members
+                                {results.company?.manufacturing_location === 'MX' && results.company?.destination_country === 'US' ? (
+                                  <div style={{ padding: '0.5rem', backgroundColor: '#d1fae5', borderRadius: '3px', marginBottom: '0.5rem', border: '1px solid #6ee7b7' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#065f46', fontWeight: '600', marginBottom: '0.25rem' }}>
+                                      ✅ Your Mexico Assembly Strategy BYPASSES Section 232 on Finished Product
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#047857' }}>
+                                      • Component imported TO Mexico: Subject to Mexican Section 232 (cost incurred in Mexico)<br/>
+                                      • Finished product FROM Mexico TO US: 0% USMCA (Section 232 bypassed)
+                                    </div>
                                   </div>
-                                  <div style={{ fontSize: '0.75rem', color: '#7f1d1d' }}>
-                                    There is NO USMCA exemption. Mexico and Canada pay the same 50% tariff as China. Switching to USMCA suppliers does NOT eliminate Section 232.
+                                ) : (
+                                  <div style={{ padding: '0.5rem', backgroundColor: '#fee2e2', borderRadius: '3px', marginBottom: '0.5rem', border: '1px solid #fca5a5' }}>
+                                    <div style={{ fontSize: '0.75rem', color: '#7f1d1d', fontWeight: '600', marginBottom: '0.25rem' }}>
+                                      ⚠️ Section 232 applies to ALL countries including USMCA members
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#7f1d1d' }}>
+                                      There is NO USMCA exemption. Mexico and Canada pay the same 50% tariff as China. Switching to USMCA suppliers does NOT eliminate Section 232.
+                                    </div>
                                   </div>
-                                </div>
+                                )}
                                 <div style={{ padding: '0.5rem', backgroundColor: '#fef3c7', borderRadius: '3px', border: '1px solid #fcd34d' }}>
                                   <div style={{ fontSize: '0.75rem', color: '#78350f', fontWeight: '600', marginBottom: '0.25rem' }}>
                                     💡 ONLY EXEMPTION: US-Smelted Aluminum or US-Melted Steel

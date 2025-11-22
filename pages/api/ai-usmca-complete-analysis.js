@@ -844,9 +844,11 @@ export default protectedApiHandler({
                                      normalizedHsCode.substring(6, 8);
 
           // Try exact match first (try both formats)
+          // ✅ FIX (Nov 21, 2025): REMOVED section_301, section_232 from master table
+          // Master table has STALE policy rates (all zeros/25%), use policy_tariffs_cache instead
           const { data: exactMatch } = await supabase
             .from('tariff_intelligence_master')
-            .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
+            .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
             .or(`hts8.eq.${normalizedHsCode},hts8.eq.${hsCodeWithPeriods}`)
             .limit(1)
             .single();
@@ -866,9 +868,10 @@ export default protectedApiHandler({
             const sevenDigitPrefix = normalizedHsCode.substring(0, 7);
             console.log(`🔍 [FUZZY-LOOKUP] Trying 7-digit fuzzy match: ${sevenDigitPrefix}X (statistical suffix variation)`);
 
+            // ✅ FIX (Nov 21, 2025): REMOVED section_301, section_232 (stale in master table)
             const { data: fuzzyMatches } = await supabase
               .from('tariff_intelligence_master')
-              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
+              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
               .ilike('hts8', `${sevenDigitPrefix}%`)
               .order('hts8', { ascending: true })
               .limit(3);
@@ -888,9 +891,10 @@ export default protectedApiHandler({
             const fiveDigitPrefix = normalizedHsCode.substring(0, 5);
             console.log(`🔍 [PREFIX-LOOKUP] Searching for 5-digit chapter family: ${fiveDigitPrefix}XXX`);
 
+            // ✅ FIX (Nov 21, 2025): REMOVED section_301, section_232 (stale in master table)
             const { data: prefixMatches } = await supabase
               .from('tariff_intelligence_master')
-              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate, section_301, section_232')
+              .select('hts8, brief_description, mfn_text_rate, mfn_rate_type_code, mfn_ad_val_rate, mfn_specific_rate, usmca_rate_type_code, usmca_ad_val_rate, usmca_specific_rate, mexico_rate_type_code, mexico_ad_val_rate, mexico_specific_rate, nafta_mexico_ind, nafta_canada_ind, column_2_ad_val_rate')
               .ilike('hts8', `${fiveDigitPrefix}%`)
               .order('hts8', { ascending: true }) // Get general category first (e.g., 8504.40.00 before 8504.40.95)
               .limit(5); // Get multiple to find best description match
@@ -978,9 +982,10 @@ export default protectedApiHandler({
             continue;  // Let Phase 3 AI research handle this component
           }
 
-          // ✅ HYBRID (Oct 30): Check policy_tariffs_cache for volatile rates
-          // Overwrite Section 301/232 from master table with fresh cache values
-          let policyRates = { section_301: rateData?.section_301 || 0, section_232: rateData?.section_232 || 0 };
+          // ✅ FIX (Nov 21, 2025): Initialize policy rates to NULL (not from stale master table)
+          // Master table has all zeros/25% for Section 232 (stale Jan 2025 data)
+          // ONLY use policy_tariffs_cache (fresh cron-updated rates) for Section 301/232
+          let policyRates = { section_301: null, section_232: null };
 
           console.log(`🔍 [POLICY-CACHE-DEBUG] About to start multi-level lookup for ${component.hs_code} (normalized: ${normalizedHsCode})`);
           console.log(`🔍 [POLICY-CACHE-DEBUG] rateData exists: ${!!rateData}, rateData.hts8: ${rateData?.hts8}`);
@@ -1115,11 +1120,16 @@ export default protectedApiHandler({
               policyRates.section_232 = policyCache.section_232 ?? null;
               console.log(`✅ [POLICY-CACHE] Using fresh policy rates for ${component.hs_code} (verified ${policyCache.verified_date})`);
             } else if (policyCache?.is_stale) {
-              console.log(`⚠️ [POLICY-CACHE] Stale policy rates for ${component.hs_code}, using master table fallback`);
+              // ✅ FIX (Nov 21, 2025): If cache is stale, keep null (triggers AI research)
+              // Master table NO LONGER has Section 301/232 (removed - all stale Jan 2025 data)
+              console.log(`⚠️ [POLICY-CACHE] Stale policy rates for ${component.hs_code}, keeping null (will trigger AI research)`);
+              policyRates.section_301 = null;
+              policyRates.section_232 = null;
             }
           } catch (policyCacheError) {
-            // No policy cache entry - use master table values
-            // Not an error, just means no volatile rates have been cached yet
+            // ✅ FIX (Nov 21, 2025): No policy cache entry - keep policyRates as null
+            // Master table NO LONGER has Section 301/232 (removed - stale data)
+            // Null values will trigger AI research later if needed
           }
 
           // Map USITC columns to our standard format
@@ -1184,8 +1194,19 @@ export default protectedApiHandler({
               return 0;
             }
 
-            // Check policy_tariffs_cache for Section 301 rate (ANY origin)
-            // The cache query already filtered by origin_country, so trust the result
+            // ✅ CRITICAL FIX (Nov 21, 2025): Apply origin logic BEFORE using cached rate
+            // Section 301 only applies to high-risk origins (China, Vietnam, Russia)
+            // Cache stores rate by HS code, but application logic must check origin
+            const highRiskOrigins = ['CN', 'China', 'VN', 'Vietnam', 'RU', 'Russia'];
+            const isHighRiskOrigin = highRiskOrigins.includes(component.origin_country);
+
+            if (!isHighRiskOrigin) {
+              // Component from safe origin (MX, US, CA, etc.) - no Section 301
+              console.log(`✅ [SECTION-301] HS ${component.hs_code} (${component.origin_country}): 0% (safe origin, no Section 301)`);
+              return 0;
+            }
+
+            // High-risk origin - check cache for Section 301 rate
             const section301Rate = parseFloat(policyRates.section_301);
 
             if (!isNaN(section301Rate) && section301Rate > 0) {
@@ -1193,14 +1214,8 @@ export default protectedApiHandler({
               return section301Rate;  // Return decimal format (0-1)
             }
 
-            // If no Section 301 in cache, check if we should trigger AI research
-            // Only trigger if this is a high-risk origin (China, Vietnam, Russia)
-            const highRiskOrigins = ['CN', 'China', 'VN', 'Vietnam', 'RU', 'Russia'];
-            if (highRiskOrigins.includes(component.origin_country)) {
-              console.log(`⚠️ [SECTION-301] HS ${component.hs_code} (${component.origin_country}): Not in policy cache, may need AI research`);
-              // Note: Don't set stale=true here, as Section 301 is checked separately in tariff research agent
-            }
-
+            // No cached rate for this HS code - may need AI research
+            console.log(`⚠️ [SECTION-301] HS ${component.hs_code} (${component.origin_country}): Not in policy cache, may need AI research`);
             return 0;  // No Section 301 for this HS code + origin combination
           };
 
@@ -1287,7 +1302,7 @@ export default protectedApiHandler({
             0;
 
           // ✅ NEW (Nov 14, 2025): Section 232 Detection + Material Origin Exemption
-          // Section 232 Rules: Steel/aluminum/copper from ALL countries face 50% tariff
+          // Section 232 Rules: Steel/aluminum from ALL countries face 50% tariff
           // ONLY exemption: Material smelted/melted in the United States
           // USMCA membership does NOT exempt from Section 232 (Mexico/Canada still pay 50%)
 
@@ -1731,7 +1746,12 @@ export default protectedApiHandler({
 
       // ✅ FIX (Oct 28): Calculate is_usmca_member flag here for savings calculation
       const originCountry = (comp.origin_country || '').toUpperCase();
+      const destinationCountry = (formData.destination_country || '').toUpperCase();
       const isUSMCAMember = usmcaCountries.includes(originCountry);
+
+      // ✅ FIX (Nov 21, 2025): Domestic components don't pay import tariffs
+      // US → US, MX → MX, CA → CA = no border crossing = no tariff = no savings
+      const isDomestic = originCountry === destinationCountry;
 
       // ✅ DEBUG (Nov 1): Trace data types through calculation chain for ALL components
       console.log(`\n🔍 [COMPONENT-${idx}] ${comp.description || 'Unknown'} (${originCountry})`);
@@ -1743,6 +1763,7 @@ export default protectedApiHandler({
       console.log('   MFN Cost:', mfnCost);
       console.log('   USMCA Cost:', usmcaCost);
       console.log('   Is USMCA Member:', isUSMCAMember);
+      console.log('   Is Domestic:', isDomestic);
       console.log('   Condition (isUSMCAMember && usmca < mfn):', (isUSMCAMember && usmca < mfn));
 
       // ✅ FIX (Oct 29): Calculate FULL nearshoring potential for non-USMCA components
@@ -1757,8 +1778,10 @@ export default protectedApiHandler({
       // CORRECT: Only components ALREADY from USMCA countries (MX, CA, US) get preferential treatment
       // China components are NOT USMCA-eligible - the $1.68M is POTENTIAL savings IF you nearshore
 
+      // ✅ FIX (Nov 21, 2025): Domestic components have ZERO savings
+      // Domestic = no import = no tariff = no savings (even if USMCA member)
       // CURRENT = Savings you're ALREADY getting from USMCA-member components (MX, CA, US)
-      const currentSavings = isUSMCAMember
+      const currentSavings = (isUSMCAMember && !isDomestic)
         ? (mfnCost + (componentValue * (section301 + section232))) - usmcaCost
         : 0;
 

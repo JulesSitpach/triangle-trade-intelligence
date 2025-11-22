@@ -425,6 +425,17 @@ export default function ComponentOriginsStepEnhanced({
             substantialTransformation: formData.substantial_transformation || false, // ✅ NEW (Nov 10): Critical for material-based classification
             manufacturingProcess: formData.manufacturing_process || null, // ✅ NEW (Nov 10): Process details for transformation context
 
+            // ✅ NEW (Nov 21): Send ALL other components for BOM pattern recognition (Pattern A vs Pattern B)
+            // This helps AI determine if components are integral parts of a machine (Pattern A) or generic hardware (Pattern B)
+            otherComponents: components
+              .filter((c, i) => i !== index && c.description) // All components except current one
+              .map(c => ({
+                description: c.description,
+                origin_country: c.origin_country || 'Unknown',
+                value_percentage: c.value_percentage || 0,
+                hs_code: c.hs_code || null
+              })),
+
             // PROGRESSIVE CONTEXT: Send previously classified components (before this index)
             // This prevents duplicate HS codes - AI knows what codes it already assigned
             previouslyClassifiedComponents: components.slice(0, index)
@@ -628,6 +639,17 @@ export default function ComponentOriginsStepEnhanced({
             primarySupplier: formData.primary_supplier_country,
             substantialTransformation: formData.substantial_transformation || false, // ✅ FIX (Nov 8): Critical for HS classification - transformed vs raw material
             manufacturingProcess: formData.manufacturing_process || null, // ✅ NEW (Nov 10): Process details for transformation context
+
+            // ✅ NEW (Nov 21): Send ALL other components for BOM pattern recognition (Pattern A vs Pattern B)
+            otherComponents: components
+              .filter((c, i) => i !== index && c.description)
+              .map(c => ({
+                description: c.description,
+                origin_country: c.origin_country || 'Unknown',
+                value_percentage: c.value_percentage || 0,
+                hs_code: c.hs_code || null
+              })),
+
             previouslyClassifiedComponents: components.slice(0, index)
               .filter(c => c.description && c.hs_code)
               .map(c => ({
@@ -1056,7 +1078,7 @@ export default function ComponentOriginsStepEnhanced({
         )}
 
         <div className="form-grid-2">
-          {/* LEFT COLUMN: Substantial Transformation */}
+          {/* LEFT COLUMN: Manufacturing/Assembly Details */}
           <div className="form-group">
             <label className="form-label">
               <input
@@ -1065,29 +1087,110 @@ export default function ComponentOriginsStepEnhanced({
                 onChange={(e) => updateFormData('substantial_transformation', e.target.checked)}
               />
               {' '}
-              <strong>Manufacturing involves substantial transformation</strong> (not just simple assembly)
+              <strong>I manufacture/assemble this product in US/Canada/Mexico</strong>
             </label>
             <div className="form-help">
-              Check this if your manufacturing process in US/Canada/Mexico creates significant value beyond basic assembly (welding, forming, heat treatment, etc.). Leave unchecked if you only import/distribute or manufacture elsewhere.
+              Check this if you do actual manufacturing (welding, forming, heat treatment, assembly, etc.) in USMCA territory. Leave unchecked if you only import/distribute with no manufacturing operations.
             </div>
 
-            {/* Manufacturing Process Details - Show when substantial transformation is checked */}
+            {/* Manufacturing Details - Show when checkbox is checked */}
             {formData.substantial_transformation && (
-              <div style={{ marginTop: '0.75rem' }}>
-                <label className="form-label">
-                  Describe Your Manufacturing Process
-                </label>
-                <input
-                  type="text"
-                  value={formData.manufacturing_process || ''}
-                  onChange={(e) => updateFormData('manufacturing_process', e.target.value)}
-                  placeholder="Example: PCB assembly, firmware integration, enclosure molding"
-                  className="form-input"
-                />
-                <div className="form-help">
-                  What processes create substantial transformation? (e.g., welding, heat treatment, chemical processing, assembly with value-add)
+              <>
+                {/* Labor Cost Input - SIMPLIFIED (Nov 21, 2025) */}
+                <div className="form-group">
+                  <label className="form-label">
+                    Annual Direct Manufacturing Labor Cost <span style={{ fontWeight: 'normal', color: '#6b7280' }}>(Optional - for RVC calculation)</span>
+                  </label>
+                  <div className="form-help">
+                    <strong>Include:</strong> Production wages, assembly labor, quality control<br />
+                    <strong>Exclude:</strong> Management, sales, overhead, material costs
+                  </div>
                 </div>
-              </div>
+
+                <div className="form-group">
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9375rem' }}>
+                      <input
+                        type="radio"
+                        name="has_labor_cost_data"
+                        value="yes"
+                        checked={formData.has_labor_cost_data === true}
+                        onChange={(e) => {
+                          updateFormData('has_labor_cost_data', true);
+                          if (!formData.labor_cost_annual) {
+                            updateFormData('labor_cost_annual', null);
+                          }
+                        }}
+                      />
+                      {' '}
+                      I have exact labor cost data
+                    </label>
+                    <label style={{ display: 'block', fontSize: '0.9375rem' }}>
+                      <input
+                        type="radio"
+                        name="has_labor_cost_data"
+                        value="no"
+                        checked={formData.has_labor_cost_data === false || !formData.has_labor_cost_data}
+                        onChange={(e) => {
+                          updateFormData('has_labor_cost_data', false);
+                          updateFormData('labor_cost_annual', null);
+                        }}
+                      />
+                      {' '}
+                      I don't have labor cost data (RVC will use components only)
+                    </label>
+                  </div>
+                </div>
+
+                {formData.has_labor_cost_data && (
+                  <div className="form-group">
+                    <label className="form-label">
+                      Annual Direct Labor Cost (US $)
+                    </label>
+                    <div className="professional-input-group">
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formData.labor_cost_annual ? formData.labor_cost_annual.toLocaleString('en-US') : ''}
+                        onChange={(e) => {
+                          const numericValue = parseInt(e.target.value.replace(/[^0-9]/g, ''), 10);
+                          updateFormData('labor_cost_annual', isNaN(numericValue) ? null : numericValue);
+                        }}
+                        placeholder="900,000"
+                        min="0"
+                      />
+                    </div>
+                    <div className="form-help">
+                      Total annual wages for direct manufacturing labor (production workers, assembly, QC)
+                    </div>
+
+                    {/* RVC Impact Preview */}
+                    {formData.labor_cost_annual > 0 && formData.trade_volume > 0 && (
+                      <div style={{ marginTop: '0.75rem', padding: '0.75rem', backgroundColor: '#fff', borderLeft: '3px solid #10b981', borderRadius: '4px' }}>
+                        <strong>💡 RVC Impact Preview:</strong>
+                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#059669' }}>
+                          <strong>{((formData.labor_cost_annual / formData.trade_volume) * 100).toFixed(1)}% labor credit</strong> will be added to your component RVC
+                          <br />
+                          <span style={{ color: '#6b7280' }}>
+                            (${formData.labor_cost_annual.toLocaleString()} ÷ ${formData.trade_volume.toLocaleString()} trade volume)
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!formData.has_labor_cost_data && formData.has_labor_cost_data !== undefined && (
+                  <div className="form-group">
+                    <div style={{ padding: '0.75rem', backgroundColor: '#fef3c7', borderLeft: '3px solid #f59e0b', borderRadius: '4px' }}>
+                      <strong style={{ fontSize: '0.9375rem' }}>⚠️ No Labor Credit</strong>
+                      <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9375rem', color: '#92400e' }}>
+                        RVC will be calculated using component origins only. You can add labor cost data later to improve your RVC percentage.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -1169,6 +1272,20 @@ export default function ComponentOriginsStepEnhanced({
         <p className="text-body">
           Break down your product into its major components. Each component should represent a significant portion of the product&apos;s value.
         </p>
+
+        {/* 💡 Pro Tip: Order components by value percentage for better AI accuracy */}
+        <div className="alert alert-info">
+          <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>💡</span>
+          <div className="alert-content">
+            <div className="alert-title">
+              Pro Tip: Order by Value Percentage
+            </div>
+            <p className="text-body" style={{ margin: 0, fontSize: '0.875rem' }}>
+              For best classification accuracy, add components starting with the <strong>highest value percentage first</strong> (e.g., 50%, then 30%, then 20%).
+              This helps our AI understand which component defines your product&apos;s primary classification.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="element-spacing">
@@ -1245,9 +1362,9 @@ export default function ComponentOriginsStepEnhanced({
                       style={{ marginRight: '0.5rem', marginTop: '0.125rem', cursor: component.is_locked ? 'not-allowed' : 'pointer' }}
                     />
                     <span style={{ color: component.is_locked ? '#9ca3af' : '#374151', lineHeight: '1.5' }}>
-                      This component contains steel, aluminum, or copper
+                      This component contains steel or aluminum
                       <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.125rem' }}>
-                        Check this if your component is subject to Section 232 tariffs (50% on steel/aluminum/copper materials)
+                        Check this if your component is subject to Section 232 tariffs (50% on steel/aluminum materials)
                       </div>
                     </span>
                   </label>
@@ -1513,6 +1630,14 @@ export default function ComponentOriginsStepEnhanced({
                   updateComponent(index, 'alternative_codes', suggestion.alternative_codes || []);
                   updateComponent(index, 'required_documentation', suggestion.requiredDocumentation || []);
                   updateComponent(index, 'classification_source', 'ai_agent');
+
+                  // ✅ FIX (Nov 21, 2025): AUTO-DETECT Section 232 material based on AI classification
+                  // Classification agent returns primary_material: "steel" | "aluminum" | "ceramic" | "plastic"
+                  // If material is steel or aluminum, automatically check Section 232 checkbox
+                  if (suggestion.primary_material === 'steel' || suggestion.primary_material === 'aluminum') {
+                    updateComponent(index, 'contains_section_232_material', true);
+                    console.log(`✅ [SECTION-232-AUTO] Component "${suggestion.description}" contains ${suggestion.primary_material} - auto-enabling Section 232`);
+                  }
 
                   // NOTE: Component already locked when AI was called (line 339)
                   // No need to lock again here - user accepting suggestion is free

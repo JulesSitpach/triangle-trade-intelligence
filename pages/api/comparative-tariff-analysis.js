@@ -174,21 +174,21 @@ async function getUSTariffRates(hsCode, originCountry) {
 
   if (policyData && policyData.length > 0) {
     for (const policy of policyData) {
-      policyAdjustments += policy.section_301_rate || 0;
-      policyAdjustments += policy.section_232_rate || 0;
+      policyAdjustments += policy.section_301 || 0;
+      policyAdjustments += policy.section_232 || 0;
 
-      if (policy.section_301_rate > 0) {
+      if (policy.section_301 > 0) {
         policyDetails.push({
           type: 'Section 301',
-          rate: policy.section_301_rate,
+          rate: policy.section_301,
           origin: originCountry
         });
       }
 
-      if (policy.section_232_rate > 0) {
+      if (policy.section_232 > 0) {
         policyDetails.push({
           type: 'Section 232',
-          rate: policy.section_232_rate,
+          rate: policy.section_232,
           origin: originCountry
         });
       }

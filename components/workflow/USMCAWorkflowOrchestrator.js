@@ -310,16 +310,18 @@ NOTE: Complete all fields and obtain proper signatures before submission.
     updateFormData('product_description', demoData.product_description);
     updateFormData('manufacturing_location', demoData.manufacturing_location);
 
-    // ✅ NEW: Add substantial transformation checkbox (automotive manufacturing involves transformation)
-    updateFormData('substantial_transformation', true);
-    updateFormData('manufacturing_process', 'Complete brake pad assembly including friction material mixing, steel backing plate stamping, adhesive bonding, heat treatment, and quality inspection. Final assembly transforms raw components into certified automotive brake systems meeting FMVSS-135 standards.');
+    // ✅ Manufacturing & Labor Cost (SIMPLIFIED - Nov 21, 2025)
+    updateFormData('substantial_transformation', demoData.substantial_transformation);
+    updateFormData('has_labor_cost_data', demoData.has_labor_cost_data);
+    updateFormData('labor_cost_annual', demoData.labor_cost_annual);
 
     // Mark as demo mode
     updateFormData('is_demo', true);
 
     // ✅ FIX: Build complete component_origins array and set it directly (avoid state timing issues)
     const demoComponents = demoData.components.map(comp => {
-      const hasSection232Material = (comp.name.includes('Steel') || comp.name.includes('Hardware'));
+      // ✅ FIXED (Nov 21): Use demo data field instead of calculating
+      const hasSection232Material = comp.contains_section_232_material || false;
 
       // ✅ Material Origin radio button values (not country codes!)
       // Steel Backing Plate (US) → 'us' (United States - may be exempt)
@@ -343,11 +345,12 @@ NOTE: Complete all fields and obtain proper signatures before submission.
         // ❌ REMOVED: HS codes - let users test search functionality
         hs_code: '',
         suggested_hs_code: '',
-        // ✅ Steel/Aluminum/Copper checkbox - Steel Backing Plate and Hardware Kit
+        // ✅ Steel/Aluminum/Copper checkbox - Use demo data field
         contains_section_232_material: hasSection232Material,
         // ✅ Material Origin for Section 232 exemption (radio button values)
         material_origin: materialOrigin,
-        material_notes: hasSection232Material ? (comp.origin === 'US' ? 'Domestic steel from Ohio supplier' : 'Imported steel hardware from China') : '',
+        // ✅ FIXED (Nov 21): Use demo data material_notes if provided
+        material_notes: comp.material_notes || '',
         manufacturing_location: demoData.manufacturing_location,  // ✅ Manufacturing Location (Mexico)
         is_locked: false,  // NOT locked - user can test "Search for HS code"
         is_demo: true,

@@ -164,20 +164,20 @@ export default function CompanyInformationStep({
     setIsDemoMode(true);
     updateFormData('is_demo', true);
 
-    // Populate Step 1 fields
+    // ✅ Populate Step 1 fields from DEMO_COMPANY_DATA (acts like copy/paste)
     updateFormData('company_name', DEMO_COMPANY_DATA.company_name);
-    updateFormData('business_type', 'Manufacturer'); // ✅ FIX: Use actual BUSINESS_TYPES value
-    updateFormData('certifier_type', 'PRODUCER'); // ✅ FIX: Use actual CERTIFIER_TYPES value
-    updateFormData('industry_sector', 'automotive'); // ✅ FIX: Use lowercase dropdown value
-    updateFormData('tax_id', 'MX-RFC-123456789');
-    updateFormData('company_address', 'Av. Industria 1000, Monterrey, Nuevo León');
-    updateFormData('company_country', 'MX'); // ✅ FIX: Use country CODE, not name
-    updateFormData('contact_person', 'José García');
-    updateFormData('contact_email', 'demo@industriasdelnorte.mx');
-    updateFormData('contact_phone', '+52-81-1234-5678');
-    updateFormData('trade_volume', '5000000'); // $5M annual
-    updateFormData('supplier_country', 'MX'); // ✅ FIX: Use country CODE, not name
-    updateFormData('destination_country', 'US'); // ✅ FIX: Use country CODE, not name
+    updateFormData('business_type', DEMO_COMPANY_DATA.business_type);
+    updateFormData('certifier_type', DEMO_COMPANY_DATA.certifier_type);
+    updateFormData('industry_sector', DEMO_COMPANY_DATA.industry_sector);
+    updateFormData('tax_id', DEMO_COMPANY_DATA.tax_id);
+    updateFormData('company_address', DEMO_COMPANY_DATA.company_address);
+    updateFormData('company_country', DEMO_COMPANY_DATA.company_country);
+    updateFormData('contact_person', DEMO_COMPANY_DATA.contact_person);
+    updateFormData('contact_email', DEMO_COMPANY_DATA.contact_email);
+    updateFormData('contact_phone', DEMO_COMPANY_DATA.contact_phone);
+    updateFormData('trade_volume', DEMO_COMPANY_DATA.trade_volume);
+    updateFormData('supplier_country', DEMO_COMPANY_DATA.supplier_country);
+    updateFormData('destination_country', DEMO_COMPANY_DATA.destination_country)
 
     // Store demo data in localStorage for step 2 to pick up
     if (typeof window !== 'undefined') {
