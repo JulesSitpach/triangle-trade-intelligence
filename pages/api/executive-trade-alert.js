@@ -26,6 +26,7 @@
  */
 
 import MEXICO_SOURCING_CONFIG from '../../config/mexico-sourcing-config.js';  // ✅ REPLACES MexicoSourcingAgent
+import CANADA_SOURCING_CONFIG from '../../config/canada-sourcing-config.js';  // ✅ NEW (Nov 22): Canada nearshoring intelligence
 import { getIndustryThreshold } from '../../lib/services/industry-thresholds-service.js';
 import { BaseAgent } from '../../lib/agents/base-agent.js';
 import { applyRateLimit, strictLimiter } from '../../lib/security/rateLimiter.js';
@@ -363,7 +364,7 @@ export default async function handler(req, res) {
         impact: 'Additional tariff on Chinese-origin components (rate varies by HS code)',
         annual_cost_impact: section301Impact,
         description: 'China-origin goods entering the US remain subject to Section 301 tariffs despite USMCA qualification.',
-        strategic_options: await generateMexicoNearshoringOptions(
+        strategic_options: await generateNearshoringOptions(
           user_profile,
           workflow_intelligence,
           section301Impact
@@ -629,42 +630,130 @@ function sanitizeForPDFRendering(text) {
 }
 
 /**
- * Generate Mexico nearshoring strategic options with dynamic cost/payback
- * REPLACES hardcoded +2%, 4-6 weeks, 3 months
+ * ✅ NEW (Nov 22): Generate intelligent nearshoring strategic options comparing Mexico vs Canada
+ * Recommends best country based on component characteristics (Section 301/232, industry, complexity)
+ * REPLACES Mexico-only recommendations with balanced USMCA analysis
  */
-function generateMexicoNearshoringOptions(userProfile, workflow, section301Impact) {
+function generateNearshoringOptions(userProfile, workflow, section301Impact) {
   try {
-    // ✅ Get metrics from config lookup (instant, no AI calls)
-    const metrics = MEXICO_SOURCING_CONFIG.calculateMetrics(
-      userProfile.industry_sector || 'electronics',
-      workflow.product_complexity || 'medium',
-      userProfile.trade_volume || 0
-    );
+    const industry = userProfile.industry_sector || 'Electronics';
+    const complexity = workflow.product_complexity || 'medium';
+    const tradeVolume = userProfile.trade_volume || 0;
 
-    return [
-      {
-        option: 'Nearshoring to Mexico',
-        benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
-        timeline: `${metrics.implementation_weeks} weeks for supplier qualification`,
-        cost_impact: `+${metrics.cost_premium_percent}% unit cost (offset within ${metrics.payback_months || 'N/A'} months)`
-      },
-      {
-        option: 'Request tariff exemption',
-        benefit: 'Potential tariff elimination for specific HS codes',
-        timeline: 'Varies by product category',
-        cost_impact: 'Application processing fees apply'
+    // Get metrics for BOTH Mexico and Canada
+    const mexicoMetrics = MEXICO_SOURCING_CONFIG.calculateMetrics(industry, complexity, tradeVolume);
+    const canadaMetrics = CANADA_SOURCING_CONFIG.calculateMetrics(industry, complexity, tradeVolume);
+
+    // Analyze components to determine best recommendation
+    const components = workflow.components || [];
+
+    // Find component with highest tariff burden (what's costing the most)
+    let highestBurdenComponent = null;
+    let highestBurden = 0;
+
+    for (const comp of components) {
+      // Skip USMCA components (MX, CA, US)
+      if (['MX', 'CA', 'US', 'Mexico', 'Canada'].includes(comp.origin_country)) continue;
+
+      const burden = (comp.value_percentage || 0) * (comp.total_rate || 0);
+      if (burden > highestBurden) {
+        highestBurden = burden;
+        highestBurdenComponent = comp;
       }
-    ];
+    }
+
+    // Determine recommendation based on component characteristics
+    let recommendation = 'MEXICO'; // Default
+    let reasoning = 'Lower cost premium for general manufacturing';
+
+    if (highestBurdenComponent) {
+      const hsCode = highestBurdenComponent.hs_code || '';
+      const hasSection232 = (highestBurdenComponent.section_232 || 0) > 0;
+      const hasSection301 = (highestBurdenComponent.section_301 || 0) > 0;
+
+      // Critical Minerals → Canada
+      if (['2530', '2804', '2805', '2846', '7403', '7502', '7601', '8105'].some(prefix => hsCode.startsWith(prefix))) {
+        recommendation = 'CANADA';
+        reasoning = 'Canada dominates critical minerals (lithium, cobalt, nickel) - 2% cost premium with 3-month payback';
+      }
+      // Aerospace (HS 88) → Canada
+      else if (hsCode.startsWith('88')) {
+        recommendation = 'CANADA';
+        reasoning = 'Montreal aerospace cluster competitive globally - 3% premium but world-class precision';
+      }
+      // Electronics with Section 232 → Compare both
+      else if (hasSection232 && ['84', '85'].some(ch => hsCode.startsWith(ch))) {
+        recommendation = 'COMPARE_BOTH';
+        reasoning = 'Section 232 applies to BOTH countries (50% steel/aluminum) - compare advanced tech (Canada) vs assembly (Mexico)';
+      }
+      // Textiles → Mexico
+      else if (['61', '62', '63'].some(ch => hsCode.startsWith(ch))) {
+        recommendation = 'MEXICO';
+        reasoning = 'Mexico textile sector well-established - Canada NOT competitive (8% premium vs 1.5%)';
+      }
+      // Advanced manufacturing/High complexity → Consider Canada
+      else if (complexity === 'advanced' || complexity === 'complex') {
+        recommendation = 'COMPARE_BOTH';
+        reasoning = 'Canada excels at advanced manufacturing - compare cost premium vs engineering capabilities';
+      }
+    }
+
+    // Build strategic options based on recommendation
+    const options = [];
+
+    if (recommendation === 'MEXICO' || recommendation === 'COMPARE_BOTH') {
+      options.push({
+        option: 'Nearshoring to Mexico',
+        benefit: `Eliminates Section 301 exposure, increases USMCA RVC buffer. ${mexicoMetrics.strengths?.join(', ') || 'Strong manufacturing base'}`,
+        timeline: `${mexicoMetrics.implementation_weeks} weeks for supplier qualification`,
+        cost_impact: `+${mexicoMetrics.cost_premium_percent.toFixed(1)}% unit cost (payback: ${mexicoMetrics.payback_months} months)`,
+        strengths: mexicoMetrics.strengths || [],
+        why_this_country: recommendation === 'MEXICO' ? reasoning : 'Lower cost alternative with established supply chains'
+      });
+    }
+
+    if (recommendation === 'CANADA' || recommendation === 'COMPARE_BOTH') {
+      options.push({
+        option: 'Nearshoring to Canada',
+        benefit: `Eliminates Section 301 exposure, increases USMCA RVC buffer. ${canadaMetrics.strengths?.join(', ') || 'Advanced manufacturing expertise'}`,
+        timeline: `${canadaMetrics.implementation_weeks} weeks for supplier qualification`,
+        cost_impact: `+${canadaMetrics.cost_premium_percent.toFixed(1)}% unit cost (payback: ${canadaMetrics.payback_months} months)`,
+        strengths: canadaMetrics.strengths || [],
+        why_this_country: recommendation === 'CANADA' ? reasoning : 'Higher cost but advanced engineering capabilities'
+      });
+    }
+
+    // Add Canada-Mexico collaboration option
+    if (recommendation === 'COMPARE_BOTH' || (mexicoMetrics.cost_premium_percent < canadaMetrics.cost_premium_percent - 2)) {
+      options.push({
+        option: '🤝 Canada-Mexico Collaboration Strategy',
+        benefit: 'Combine Canadian raw materials/components with Mexican assembly - optimize cost and capability',
+        timeline: `${Math.max(mexicoMetrics.implementation_weeks, canadaMetrics.implementation_weeks)} weeks (dual-country coordination)`,
+        cost_impact: `Blended premium: +${((mexicoMetrics.cost_premium_percent + canadaMetrics.cost_premium_percent) / 2).toFixed(1)}%`,
+        example: 'Canadian critical minerals → Mexican electronics assembly → Maximum USMCA content',
+        why_this_country: 'Leverages complementary strengths of both USMCA partners'
+      });
+    }
+
+    // Always include tariff exemption fallback
+    options.push({
+      option: 'Request tariff exemption',
+      benefit: 'Potential tariff elimination for specific HS codes',
+      timeline: 'Varies by product category',
+      cost_impact: 'Application processing fees apply'
+    });
+
+    return options;
 
   } catch (error) {
-    console.error('[generateMexicoNearshoringOptions] Error:', error);
+    console.error('[generateNearshoringOptions] Error:', error);
 
     // Fallback to generic options
     return [
       {
-        option: 'Nearshoring to Mexico',
+        option: 'Nearshoring to Mexico or Canada',
         benefit: 'Eliminates Section 301 exposure, increases USMCA RVC buffer',
-        timeline: 'Supplier qualification required',
+        timeline: 'Supplier qualification required (12-20 weeks typical)',
         cost_impact: 'Unit cost increase offset by tariff savings'
       },
       {
@@ -801,8 +890,8 @@ async function generateExecutiveAdvisoryAI(policies, workflow, profile, matchedA
       ).join('\n')
     : 'No active policy alerts';
 
-  // ✅ OPTIMIZED (Nov 7): Match portfolio briefing narrative style
-  const prompt = `You are a Trade Compliance Director writing a strategic briefing for ${profile.company_name}'s operations team about tariff impacts and IMMEDIATE certification issues.
+  // ✅ OPTIMIZED (Nov 22): Added Canada-Mexico balanced USMCA intelligence
+  const prompt = `You are a Trade Compliance Director writing a strategic briefing for ${profile.company_name}'s operations team about tariff impacts and USMCA nearshoring opportunities (Mexico AND Canada).
 
 🚨 CRITICAL DATA VALUES - READ CAREFULLY BEFORE WRITING:
 ────────────────────────────────────────────────────────────
@@ -829,6 +918,17 @@ For NON-USMCA components, explain WHERE the potential savings come from:
 - Example: "India electronics pay 0% MFN (duty-free) + 0% Section 301 = 0% total - no savings opportunity"
 
 DO NOT assume all non-USMCA = China. Check origin_country for each component and explain their specific tariff stack.
+
+🍁🇲🇽 USMCA NEARSHORING INTELLIGENCE (Mexico AND Canada):
+When recommending nearshoring alternatives, consider BOTH Mexico and Canada based on component characteristics:
+- **Critical Minerals** (HS 25, 28, 74, 75, 76, 81): Canada dominates (lithium, cobalt, nickel) - recommend Canada
+- **Aerospace** (HS 88): Montreal cluster world-class - recommend Canada
+- **Electronics with Section 232** (HS 84, 85 + steel/aluminum): Compare both (Section 232 applies to BOTH)
+- **Textiles** (HS 61, 62, 63): Mexico established, Canada NOT competitive - recommend Mexico
+- **Advanced Manufacturing** (complex/advanced): Canada engineering capabilities vs Mexico cost advantage
+- **🤝 Canada-Mexico Collaboration**: Mention Canadian raw materials → Mexican assembly (maximizes USMCA content)
+
+Example narrative: "For your [critical minerals/aerospace/etc.] components, Canada offers strategic advantage despite higher cost premium. Alternatively, Canadian materials processed in Mexican facilities combines both countries' strengths."
 
 CURRENT STATUS:
 • Trade Volume: $${tradeVolume.toLocaleString()} | USMCA: ${workflow.usmca_qualified ? `✅ Qualified (RVC ${workflow.north_american_content}%)` : '❌ Not Qualified'}
@@ -865,15 +965,15 @@ CRITICAL INSTRUCTIONS:
 ${matchedAlerts.length > 0 ? 'Weave policy threats naturally.' : 'Focus on current status and immediate risks.'}
 
 ## Critical Risks & Opportunities
-Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "**Path A: Accept the Section 301 Burden, Optimize Within Current Structure** involves maintaining your Chinese PCB supplier while continuing to capture $${workflow.current_annual_savings?.toLocaleString()}/year CURRENT USMCA savings from Mexican/Canadian components. You keep absorbing ${section301BurdenFormatted} Section 301 costs, but avoid supply chain disruption. The risk: if Section 301 escalates, your net position deteriorates further. **Path B: Nearshore PCB Assembly to Mexico, Eliminate Section 301 Exposure** means qualifying a Mexican supplier over 12-18 months. This path offers structural advantage: moving to Mexico eliminates the ${section301BurdenFormatted} burden entirely, unlocking the full $${workflow.potential_annual_savings?.toLocaleString()}/year potential. However, transition carries qualification risk for HS ${chineseComponents[0]?.hs_code} specifications."` : 'Focus on qualification improvement vs maintaining status quo.'}
+Write 2-3 paragraphs presenting genuine strategic CHOICES. Frame as "choosing between paths" - show trade-offs, not recommendations. ${chineseComponents.length > 0 ? `Example: "**Path A: Accept the Section 301 Burden, Optimize Within Current Structure** involves maintaining your Chinese supplier while continuing to capture $${workflow.current_annual_savings?.toLocaleString()}/year CURRENT USMCA savings from Mexican/Canadian components. You keep absorbing ${section301BurdenFormatted} Section 301 costs, but avoid supply chain disruption. The risk: if Section 301 escalates, your net position deteriorates further. **Path B: Nearshore to Mexico or Canada, Eliminate Section 301 Exposure** means qualifying a USMCA supplier over 12-20 weeks. Determine best country based on component type: Critical minerals/aerospace → Canada advantage. Textiles/assembly → Mexico advantage. Electronics/advanced → Compare both. This eliminates the ${section301BurdenFormatted} burden entirely, unlocking the full $${workflow.potential_annual_savings?.toLocaleString()}/year potential. **Path C: Canada-Mexico Collaboration** combines Canadian raw materials with Mexican processing - maximizes USMCA content while balancing cost and capability."` : 'Focus on qualification improvement vs maintaining status quo. Mention both Mexico and Canada as USMCA alternatives based on component characteristics.'}
 
 ## 90-Day Action Timeline
 Write 2-3 paragraphs describing action path with specific milestones:
-- **Week 1-2**: Assessment phase - what data to gather, who to contact
-- **Week 3-4**: Trial phase - initial supplier contacts or qualification testing
-- **Week 5-12**: Migration phase - full implementation with ROI tracking
+- **Week 1-2**: Assessment phase - gather Section 301/232 exposure data, contact BOTH Mexico AND Canada suppliers for component type
+- **Week 3-4**: Trial phase - compare Mexico vs Canada quotes/capabilities, test samples, evaluate cost premiums vs tariff elimination
+- **Week 5-12**: Migration phase - full implementation with ROI tracking, consider Canada-Mexico collaboration if applicable
 
-Structure around decision gates: "Week 2 is the go/no-go decision point. If data shows viable alternatives, Week 4 begins supplier qualification..."
+Structure around decision gates: "Week 2 is the go/no-go decision point. If data shows viable alternatives in Mexico OR Canada (or both), Week 4 begins supplier qualification. For critical minerals/aerospace, prioritize Canadian suppliers. For textiles/assembly, prioritize Mexican suppliers. For electronics/advanced, compare both..."
 
 ## What This Means For You
 Write 2-3 paragraphs of professional perspective. ${matchedAlerts.length > 0 ? 'Reference policy landscape.' : 'Focus on certification strategy.'} Use informational tone ("data shows", "may help validate" NOT "you must"). Be specific with HS codes and dollar amounts.
