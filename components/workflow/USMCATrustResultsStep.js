@@ -148,9 +148,26 @@ export default function USMCATrustResultsStep({ certificateData }) {
               <div className="status-value">{workflowData.savings.usmca_rate}%</div>
             </div>
             <div className="status-card success">
-              <div className="status-label">Annual Savings</div>
-              <div className="status-value">${(workflowData.savings.total_savings || workflowData.savings.annual_savings)?.toLocaleString()}</div>
+              <div className="status-label">Current Annual Savings</div>
+              <div className="status-value">${(workflowData.savings.current_annual_savings || 0)?.toLocaleString()}</div>
+              <div className="text-body">From USMCA components (MX, CA, US)</div>
             </div>
+            {workflowData.savings.potential_annual_savings > 0 && (
+              <div className="status-card info">
+                <div className="status-label">Potential Annual Savings</div>
+                <div className="status-value">${workflowData.savings.potential_annual_savings?.toLocaleString()}</div>
+                <div className="text-body">If nearshoring non-USMCA components</div>
+              </div>
+            )}
+            {workflowData.savings.potential_annual_savings > 0 && (
+              <div className="status-card success">
+                <div className="status-label">Total Potential Savings</div>
+                <div className="status-value">
+                  ${((workflowData.savings.current_annual_savings || 0) + (workflowData.savings.potential_annual_savings || 0))?.toLocaleString()}
+                </div>
+                <div className="text-body">Current + Nearshoring Potential</div>
+              </div>
+            )}
           </div>
         </div>
       )}
