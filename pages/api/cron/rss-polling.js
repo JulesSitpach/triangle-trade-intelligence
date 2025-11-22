@@ -170,7 +170,7 @@ export default async function handler(req, res) {
 
 // Vercel Cron specific configuration
 export const config = {
-  maxDuration: 60, // Max 60 seconds execution time
+  maxDuration: 300, // Max 300 seconds execution time (5 min - Vercel Pro Plan limit)
   api: {
     bodyParser: false,
     externalResolver: true
